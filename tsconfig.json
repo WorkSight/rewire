@@ -1,0 +1,52 @@
+{
+  "compileOnSave": false,
+  "compilerOptions": {
+    "allowJs": true,
+    "allowSyntheticDefaultImports": true,
+    "allowUnreachableCode": false,
+    "allowUnusedLabels": false,
+    "declaration": true,
+    "diagnostics": false,
+    "esModuleInterop": true,
+    "emitDecoratorMetadata": true,
+    "experimentalDecorators": true,
+    "forceConsistentCasingInFileNames": false,
+    "inlineSourceMap": false,
+    "inlineSources": false,
+    "noUnusedLocals": true,
+    "isolatedModules": false,
+    "listFiles": true,
+    "locale": "en-us",
+    "module": "commonjs",
+    "moduleResolution": "node",
+    "traceResolution": false,
+    "noEmitHelpers": false,
+    "noImplicitUseStrict": false,
+    "noImplicitAny": true,
+    "noLib": false,
+    "strictNullChecks": true,
+    "outDir": "dist",
+    "preserveConstEnums": true,
+    "removeComments": true,
+    "sourceMap": true,
+    "skipLibCheck": true,
+    "noStrictGenericChecks": true,
+    "target": "esnext",
+    "jsx": "react",
+    "rootDir": ".",
+    "baseUrl": ".",
+    "paths": {
+      "rewire-ui/*": ["./packages/rewire-ui/src/*"],
+      "rewire-core/*": ["./packages/rewire-core/src/*"],
+      "rewire-common/*": ["./packages/rewire-common/src/*"],
+      "rewire-grid/*": ["./packages/rewire-grid/src/*"],
+      "rewire-graphql/*": ["./packages/rewire-graphql/src/*"],
+    },
+    "plugins": [
+      { "name": "tslint-language-service" }
+    ]
+  },
+  "exclude": [
+    "node_modules", "test", "tests", "dist", "lib", "build"
+  ]
+}

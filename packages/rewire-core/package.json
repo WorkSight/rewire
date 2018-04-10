@@ -1,0 +1,27 @@
+{
+  "name": "rewire-core",
+  "version": "1.0.0",
+  "description": "WorkSight .NEXT Core",
+  "private": true,
+  "repository": {
+    "type": "git",
+    "url": "https://github.com/worksight/rewire"
+  },
+  "keywords": [
+    "rewire",
+    "core"
+  ],
+  "scripts": {
+    "prepare": "tsc -p tsconfig.build.json"
+  },
+  "author": "Sandy Place",
+  "license": "Commercial",
+  "bugs": {
+    "url": "https://github.com/worksight/rewire/issues"
+  },
+  "homepage": "https://github.com/worksight/rewire",
+  "dependencies": {
+    "react": "^16.3.0",
+    "s-js": "^0.4.8"
+  }
+}

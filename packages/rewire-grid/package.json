@@ -1,0 +1,28 @@
+{
+  "name": "rewire-grid",
+  "version": "1.0.0",
+  "description": "WorkSight .NEXT Core",
+  "private": true,
+  "repository": {
+    "type": "git",
+    "url": "https://github.com/worksight/rewire"
+  },
+  "keywords": [
+    "rewire",
+    "grid"
+  ],
+  "author": "Sandy Place",
+  "license": "Commercial",
+  "bugs": {
+    "url": "https://github.com/worksight/rewire/issues"
+  },
+  "homepage": "https://github.com/worksight/rewire",
+  "dependencies": {
+    "classcat": "^3.0.2",
+    "is": "^3.2.1",
+    "react": "^16.3.0",
+    "rewire-common": "^1.0.0",
+    "rewire-core": "^1.0.0",
+    "rewire-ui": "^1.0.0"
+  }
+}
