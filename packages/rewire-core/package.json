@@ -11,9 +11,6 @@
     "rewire",
     "core"
   ],
-  "scripts": {
-    "prepare": "tsc -p tsconfig.build.json"
-  },
   "author": "Sandy Place",
   "license": "Commercial",
   "bugs": {

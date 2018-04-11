@@ -43,12 +43,13 @@ Sparky.task('clean', () => {
 let pkg = '';
 Sparky.task('copy-src', () => Sparky.src('./**', { base: `./packages/${pkg}/src` }).dest(`dist/${pkg}/`));
 Sparky.task('copy-pkg', () => Sparky.src(`./${pkg}/package.json`, { base: './packages' }).dest('dist/'));
+Sparky.task('copy-md',  () => Sparky.src(`./${pkg}/*.md`, { base: './packages' }).dest('dist/'));
 
 Sparky.task('copy', async() => {
   pkg = 'rewire-common';
   await Sparky.exec('copy-src', 'copy-pkg');
   pkg = 'rewire-core';
-  await Sparky.exec('copy-src', 'copy-pkg');
+  await Sparky.exec('copy-src', 'copy-pkg', 'copy-md');
   pkg = 'rewire-ui';
   await Sparky.exec('copy-src', 'copy-pkg');
   pkg = 'rewire-grid';
