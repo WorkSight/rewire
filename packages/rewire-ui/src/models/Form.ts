@@ -1,6 +1,5 @@
 import observable, { replace, defaultEquals, computed, root, observe } from 'rewire-core/observable';
-import Validator, { ValidationResult, IValidateFn }                                        from './Validator';
-import is                                               from 'is';
+import Validator, { ValidationResult, IValidateFn } from './Validator';
 import editor, {
   EditorType,
   IField as IFieldNew

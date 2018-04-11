@@ -1,6 +1,6 @@
 {
   "name": "rewire-grid",
-  "version": "1.0.0",
+  "version": "1.0.0-beta.1",
   "description": "WorkSight .NEXT Core",
   "private": true,
   "repository": {
@@ -20,9 +20,9 @@
   "dependencies": {
     "classcat": "^3.0.2",
     "is": "^3.2.1",
-    "react": "^16.3.0",
-    "rewire-common": "^1.0.0",
-    "rewire-core": "^1.0.0",
-    "rewire-ui": "^1.0.0"
+    "react": "^16.3.1",
+    "rewire-common": "1.0.0-beta.1",
+    "rewire-core": "1.0.0-beta.1",
+    "rewire-ui": "1.0.0-beta.1"
   }
 }

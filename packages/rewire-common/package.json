@@ -1,8 +1,8 @@
 {
   "name": "rewire-common",
-  "version": "1.0.0",
+  "version": "1.0.0-beta.1",
   "description": "WorkSight .NEXT Core",
-  "private": true,
+  "main": "./es6-lib.js",
   "repository": {
     "type": "git",
     "url": "https://github.com/worksight/rewire"
