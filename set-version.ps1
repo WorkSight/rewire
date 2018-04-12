@@ -29,10 +29,12 @@ function setVersion($packageFile) {
 }
 
 function updateAllVersions() {
+  setVersion './package.json'
   dir packages/**/*.json | foreach {
     setVersion $_
   }
   git add -A
+  git commit -m $version
   git tag -a $version -m $version
 }
 
