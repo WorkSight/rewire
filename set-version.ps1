@@ -7,6 +7,13 @@ param(
   $version
 )
 
+Add-Type -AssemblyName 'Newtonsoft.Json, Version=10.0.0.0, Culture=neutral, PublicKeyToken=30ad4fe6b2a6aeed'
+
+if ([String]::IsNullOrEmpty($version)) {
+  echo "you must specify a version"
+  return -1;
+}
+
 function hasChanges() {
   $ooga = git status --porcelain
   if ($ooga.length -gt 0) {
@@ -41,8 +48,8 @@ function setVersion($packageFile) {
   updateDependencies $package
   $package.version = $version
   $j =  $package | ConvertTo-Json
-  $jobj = [Newtonsoft.Json.Linq.JObject]::Parse($j)
-  $jobj.toString() | Set-Content $packageFile
+  $jobj = [Newtonsoft.Json.Linq.JObject]::Parse($j.ToString())
+  $jobj.ToString() | Set-Content $packageFile
 }
 
 function updateAllVersions() {
