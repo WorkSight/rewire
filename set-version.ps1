@@ -21,11 +21,28 @@ if(hasChanges) {
   exit -1
 }
 
+$packages = "rewire-common", "rewire-core", "rewire-ui", "rewire-graphql", "rewire-grid"
+
+function updateDependencies($package) {
+  $d = $package.dependencies;
+  if (!$d) {
+    return;
+  }
+
+  foreach ($p in $packages) {
+    if (![String]::IsNullOrEmpty($d.$p)) {
+      $d.$p = $version
+    }
+  }
+}
+
 function setVersion($packageFile) {
-  $fileContents = Get-Content -Raw $packageFile
-  $package =  [Newtonsoft.Json.Linq.JObject]::Parse($fileContents)
+  $package = Get-Content -Raw $packageFile | ConvertFrom-Json
+  updateDependencies $package
   $package.version = $version
-  $package.toString() | Set-Content $packageFile
+  $j =  $package | ConvertTo-Json
+  $jobj = [Newtonsoft.Json.Linq.JObject]::Parse($j)
+  $jobj.toString() | Set-Content $packageFile
 }
 
 function updateAllVersions() {
