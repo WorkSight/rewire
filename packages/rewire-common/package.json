@@ -1,6 +1,6 @@
 {
   "name": "rewire-common",
-  "version": "1.0.0-beta.1",
+  "version": "1.0.0-beta.2",
   "description": "WorkSight .NEXT Core",
   "main": "./es6-lib.js",
   "repository": {

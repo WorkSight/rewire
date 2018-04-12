@@ -1,6 +1,6 @@
 {
   "name": "rewire-ui",
-  "version": "1.0.0-beta.1",
+  "version": "1.0.0-beta.2",
   "description": "WorkSight .NEXT Core",
   "private": true,
   "repository": {
@@ -30,7 +30,7 @@
     "react": "^16.3.1",
     "react-beautiful-dnd": "^7.0.0",
     "react-number-format": "^3.3.0",
-    "rewire-common": "^1.0.0-beta.1",
-    "rewire-core": "1.0.0-beta.1"
+    "rewire-common": "1.0.0-beta.2",
+    "rewire-core": "1.0.0-beta.2"
   }
 }
