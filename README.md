@@ -37,6 +37,10 @@ ReactDOM.render(<div>
 </div>, document.getElementById('root'));
 ```
 
+A screenshot of the reactive grid component
+
+![grid sample](resources/grid-sample.png)
+
 Libraries
 ---------
 * **[rewire-core](https://github.com/WorkSight/rewire/tree/master/packages/rewire-core)**
