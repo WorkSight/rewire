@@ -10,7 +10,7 @@ Features
 * Just use existing built-in react components or libraries like material-ui and give them reactive superpowers.
 * Fast (Blazingly?) & Efficient! Properties and nested object proxies are created lazily and only the properties that change will cause re-renders. Lots of goodies out-of-the-box computed properties, watchers and utilities to make react updates as optimal as possible. In fact see rewire-grid as an example. 
 * [rewire-grid](https://github.com/WorkSight/rewire/tree/master/packages/rewire-grid) (in beta) is a very lightweight grid implementation that utilizes react-core. It supports most features of large grid projects, Fixed Columns and Rows, Sorting, Virtual Mode, Grouping, inline editing. with a reduced footprint and pretty great performance. The project total project is maybe 10 files with most files having about a page of code.
-* [rewire-graphql](https://github.com/WorkSight/rewire/tree/master/packages/rewire-graphql) (in beta) a reactive cache for graphql queries. Issue graphql queries and the results are returned as observable proxies. These proxies and graphql queries are cached so object identity is maintained. Any cache or mutations are immediately reflected in the UI. Inpsired by [urql](https://github.com/FormidableLabs/urql(https://github.com/FormidableLabs/urql), however it doesn't require any special react components to connect your reactive queries to your components just use react-core Observe.
+* [rewire-graphql](https://github.com/WorkSight/rewire/tree/master/packages/rewire-graphql) (in beta) a reactive cache for graphql queries. Issue graphql queries and the results are returned as observable proxies. These proxies and graphql queries are cached so object identity is maintained. Any cache or mutations are immediately reflected in the UI. Inpsired by [urql](https://github.com/FormidableLabs/urql), however it doesn't require any special react components to connect your reactive queries to your components just use react-core Observe.
 * [rewire-ui](https://github.com/WorkSight/rewire/tree/master/packages/rewire-ui) (in beta) a collection of observable [material-ui](https://github.com/mui-org/material-ui) components for use in your projects. A nice Auto-Complete component based on [downshift](https://github.com/paypal/downshift). Form component with a simple functional validation framework. Drag and drop using [react-beautiful-dnd](https://github.com/atlassian/react-beautiful-dnd). These components are used in our WorkSight.Next project and thought we would make them available as a starter or as an example for anyone else in there projects.
 
 Typescript
@@ -35,7 +35,7 @@ import observable, { watch } from 'rewire-core/observable';
 
 const employee = observable({name: 'Some Guy', email: 'someone@gmail.com'});
 setTimeout(() => employee.name = 'dude', 5000); // update the name property asynchronously 
-watch(() => employee.name, () => console.log(employee.name)); // watch any changes to name and log them to the conloe.
+watch(() => employee.name, () => console.log(employee.name)); // watch any changes to name and log them to the console.
 
 // use plain ole react components. Observe will take a dependency on all properties accessed during render and only re-render the input when those dependencies change. 
 ReactDOM.render(<div>
