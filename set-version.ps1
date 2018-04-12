@@ -32,7 +32,7 @@ function updateAllVersions() {
   dir packages/**/*.json | foreach {
     setVersion $_
   }
-  get add -A
+  git add -A
   git tag -a $version -m $version
 }
 
