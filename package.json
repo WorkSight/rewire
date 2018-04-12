@@ -16,7 +16,7 @@
     "start": "node fuse.js"
   },
   "author": "Sandy Place",
-  "license": "Commercial",
+  "license": "MIT",
   "bugs": {
     "url": "https://github.com/worksight/rewire/issues"
   },
