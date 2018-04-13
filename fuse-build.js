@@ -8,77 +8,70 @@ const {
   Sparky,
   ImageBase64Plugin
 } = require('fuse-box');
-let isProduction   = false;
-let target         = '';
-let home           = '';
-let instructions   = '> **/**.{ts,tsx}';
+const instructions = '> **/**.{ts,tsx}';
 let fuse;
-
-Sparky.task('config', () => {
+Sparky.task('config', (context) => {
   fuse = FuseBox.init({
-    target:               target,
-    homeDir:              home,
+    target:               context.target,
+    homeDir:              context.home,
     useTypescriptCompiler:true,
     cache:                false,
     hash:                 false,
     sourceMaps:           {app: true, vendor: false},
-    output:               `${home}/$name.js`,
+    output:               `${context.home}/$name.js`,
     plugins:                         [
       JSONPlugin(),
-      EnvPlugin({ NODE_ENV: isProduction ? 'production' : 'development' }),
+      EnvPlugin({ NODE_ENV: context.isProduction ? 'production' : 'development' }),
       CSSPlugin(),
       [SassPlugin(), CSSPlugin()],
       ImageBase64Plugin(),
-      isProduction && QuantumPlugin({target: 'browser', uglify: {keep_fnames: true}, treeshake: true})
+      context.isProduction && QuantumPlugin({target: 'browser', uglify: {keep_fnames: true}, treeshake: true})
     ],
     experimentalFeatures:true
   });
-  fuse.bundle(bundleName).instructions(instructions);
+  fuse.bundle(context.bundleName).instructions(instructions);
 });
 
-Sparky.task('clean', () => {
-  return Sparky.src('dist/').clean('dist/');
-});
+Sparky.task('copy-src', (context) => Sparky.src(`./**`, { base: `./packages/${context.pkg}/src`}).dest(`./packages/${context.pkg}/dist/`));
+Sparky.task('copy-pkg', (context) => Sparky.src(`./package.json`, { base: `./packages/${context.pkg}` }).dest(`./packages/${context.pkg}/dist/`));
+Sparky.task('copy-md',  (context) => Sparky.src(`./*.md`, { base: `./packages/${context.pkg}` }).dest(`./packages/${context.pkg}/dist/`));
 
-let pkg = '';
-Sparky.task('copy-src', () => Sparky.src('./**', { base: `./packages/${pkg}/src` }).dest(`dist/${pkg}/`));
-Sparky.task('copy-pkg', () => Sparky.src(`./${pkg}/package.json`, { base: './packages' }).dest('dist/'));
-Sparky.task('copy-md',  () => Sparky.src(`./${pkg}/*.md`, { base: './packages' }).dest('dist/'));
-
-Sparky.task('copy', async() => {
-  pkg = 'rewire-common';
-  await Sparky.exec('copy-src', 'copy-pkg');
-  pkg = 'rewire-core';
+async function build(context, pkg, targets) {
+  context.pkg        = pkg;
   await Sparky.exec('copy-src', 'copy-pkg', 'copy-md');
-  pkg = 'rewire-ui';
-  await Sparky.exec('copy-src', 'copy-pkg');
-  pkg = 'rewire-grid';
-  await Sparky.exec('copy-src', 'copy-pkg');
-  pkg = 'rewire-graphql';
-  await Sparky.exec('copy-src', 'copy-pkg');
-});
-
-async function build(_pkg, _target, _isProduction = true) {
-  isProduction = _isProduction;
-  bundleName   = `${_target}-lib`;
-  pkg          = _pkg;
-  home         = `./dist/${pkg}`;
-  target       = `browser@${_target}`;
-  await Sparky.resolve('config');
-  await fuse.run();
+  for (const target of targets) {
+    context.bundleName = `${target}-lib`;
+    context.home       = `./packages/${pkg}/dist/`;
+    context.target     = `browser@${target}`;
+    await Sparky.resolve('config');
+    await fuse.run();
+  }
 }
 
-Sparky.task('dist', async() => {
-  await build('rewire-common', 'es6');
-  await build('rewire-common', 'esnext');
-  await build('rewire-core', 'es6');
-  await build('rewire-core', 'esnext');
-  await build('rewire-ui', 'es6');
-  await build('rewire-ui', 'esnext');
-  await build('rewire-grid', 'es6');
-  await build('rewire-grid', 'esnext');
-  await build('rewire-graphql', 'es6');
-  await build('rewire-graphql', 'esnext');
+Sparky.task('clean-package', (context) => {
+  return Sparky.src(`./packages/${context.pkg}/dist`).clean(`./packages/${context.pkg}/dist`);
 });
 
-Sparky.task('default', ['clean', 'copy', 'dist'], () => { });
+async function clean(context, pkg) {
+  context.pkg = pkg;
+  await Sparky.exec('clean-package');
+}
+
+Sparky.task('dist', async(context) => {
+  context.isProduction = true;
+  await build(context, 'rewire-common', ['es6', 'esnext']);
+  await build(context, 'rewire-core', ['es6', 'esnext']);
+  await build(context, 'rewire-ui', ['es6', 'esnext']);
+  await build(context, 'rewire-grid', ['es6', 'esnext']);
+  await build(context, 'rewire-graphql', ['es6', 'esnext']);
+});
+
+Sparky.task('clean', async(context) => {
+  await clean(context, 'rewire-common');
+  await clean(context, 'rewire-core');
+  await clean(context, 'rewire-ui');
+  await clean(context, 'rewire-grid');
+  await clean(context, 'rewire-graphql');
+});
+
+Sparky.task('default', ['clean', 'dist'], () => { });
