@@ -8,7 +8,7 @@ const {
   Sparky,
   ImageBase64Plugin
 } = require('fuse-box');
-const instructions = '> **/**.{ts,tsx}';
+const instructions = '[**/**.{ts,tsx}]';
 let fuse;
 Sparky.task('config', (context) => {
   fuse = FuseBox.init({
@@ -25,7 +25,7 @@ Sparky.task('config', (context) => {
       CSSPlugin(),
       [SassPlugin(), CSSPlugin()],
       ImageBase64Plugin(),
-      context.isProduction && QuantumPlugin({target: 'browser', uglify: {keep_fnames: true}, treeshake: true})
+      context.isProduction && QuantumPlugin({target: 'browser', uglify: {keep_fnames: true}, treeshake: true, bakeApiIntoBundle: true})
     ],
     experimentalFeatures:true
   });
