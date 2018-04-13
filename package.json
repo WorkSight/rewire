@@ -3,7 +3,6 @@
   "version": "1.0.0-beta.2",
   "description": "WorkSight .NEXT core",
   "main": "src/index.js",
-  "private": true,
   "repository": {
     "type": "git",
     "url": "https://github.com/worksight/client"
@@ -13,6 +12,7 @@
     "client"
   ],
   "scripts": {
+    "beta:version": "lerna publish --cd-version=prerelease --preid=beta --skip-git --skip-npm",
     "start": "node fuse.js"
   },
   "author": "Sandy Place",
@@ -22,13 +22,10 @@
   },
   "homepage": "https://github.com/worksight/rewire",
   "devDependencies": {
-    "@types/graphql": "^0.13.0",
-    "@types/react": "^16.3.8",
-    "@types/react-dom": "^16.0.5",
-    "@types/react-router-dom": "^4.2.6",
     "@types/chai": "^4.1.1",
     "@types/chai-as-promised": "^7.1.0",
     "@types/compression": "0.0.36",
+    "@types/graphql": "^0.13.0",
     "@types/is": "^0.0.19",
     "@types/minimist": "^1.2.0",
     "@types/mocha": "^5.0.0",
@@ -36,20 +33,24 @@
     "@types/node": "^9.4.7",
     "@types/node-sass": "^3.10.32",
     "@types/query-string": "^5.1.0",
+    "@types/react": "^16.3.8",
     "@types/react-beautiful-dnd": "^6.0.0",
+    "@types/react-dom": "^16.0.5",
+    "@types/react-router-dom": "^4.2.6",
     "@types/rimraf": "^2.0.2",
     "@types/typescript": "^2.0.0",
     "chai": "^4.1.2",
     "chai-as-promised": "^7.1.1",
     "compression": "^1.7.2",
     "fuse-box": "^3.2.0",
+    "graphql-tag": "^2.8.0",
+    "lerna": "^2.10.1",
     "minimist": "^1.2.0",
     "mocha": "^5.0.0",
     "node-sass": "^4.8.3",
     "rimraf": "^2.6.2",
     "typescript": "^2.8.1",
-    "uglify-es": "^3.3.9",
-    "graphql-tag": "^2.8.0"
+    "uglify-es": "^3.3.9"
   },
   "workspaces": [
     "packages/*"
