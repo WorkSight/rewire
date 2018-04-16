@@ -3,13 +3,13 @@
 
 Features
 --------
-* Fixed columns and rows
+* Fixed columns and rows.
 * Inline editing.
 * Custom cell types and editors.
 * Enhanced keyboard support.
 * Sorting and grouping.
 * Flexible proportional column sizing.
-* Colum resizing.
+* Column resizing.
 * Virtual mode.
 * Cell Merging, Column and Row.
 * Styling is a simple SASS stylesheet that you can alter for your own look and feel.
