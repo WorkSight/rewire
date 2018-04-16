@@ -37,8 +37,8 @@ import Modal          from 'rewire-ui/models/Modal';
 import DialogView     from 'rewire-ui/components/Dialog';
 import FormView       from 'rewire-ui/components/FormView';
 // import column         from './models/Grid';
-import create         from 'rewire-grid/models/GridModel';
-import column         from 'rewire-grid/models/ColumnModel';
+import createGrid         from 'rewire-grid/models/GridModel';
+import createColumn         from 'rewire-grid/models/ColumnModel';
 import Grid           from 'rewire-grid/components/Grid';
 // import { ICell, collapseAll, expandAll } from 'rewire-grid/models/GridTypes';
 import editor         from 'rewire-ui/components/editors';
@@ -306,26 +306,33 @@ const confirmation = new Modal('Delete entire hard drive?')
   .action('yes', () => (console.log('no way you chose that'), true), {color: 'primary'})
   .action('no');
 
-function createGrid(rows: number, columns: number) {
+function createTestGrid(nRows: number, nColumns: number) {
   console.time('start tester');
+  // make sure we have enough columns passed.
+  if (nColumns < 10) throw new Error('add some more columns!');
+
+  // create some random sized columns!
   let cols = [];
-  for (let col = 0; col < columns; col++) {
-    cols.push(column('column' + col, 'Header# ' + col, 'text', Math.trunc(Math.random() * 250 + 50) + 'px'));
+  for (let col = 0; col < nColumns; col++) {
+    cols.push(createColumn('column' + col, 'Header# ' + col, 'text', Math.trunc(Math.random() * 250 + 50) + 'px'));
   }
 
+  // Override and set some columns to be number!
   cols[5].setEditor({type: 'number', options: {decimals: 2, thousandSeparator: true}});
   cols[6].setEditor({type: 'number', options: {decimals: 3, thousandSeparator: true}});
 
-  let rs = [];
-  for (let row = 0; row < rows; row++) {
+  // add some cell data!
+  let rows = [];
+  for (let row = 0; row < nRows; row++) {
     let r: any = {};
-    for (let column = 0; column < columns; column++) {
+    for (let column = 0; column < nColumns; column++) {
       let v: any = `RC ${column}-${row % 5}`;
       if ((column >= 5) && (column <= 6)) v = Math.random() * 10000;
       r['column' + column] = v;
     }
-    rs.push(r);
+    rows.push(r);
   }
+  // Some fixed columns to the left
   cols[0].fixed = true;
   cols[0].width = '128px';
   cols[0].align = 'right';
@@ -333,17 +340,19 @@ function createGrid(rows: number, columns: number) {
   cols[1].width = '65px';
   cols[1].align = 'right';
 
-  // let grid = create(rs, cols);
-  let grid = create(rs, cols, ['column2', 'column3']);
+  // create the grid model and group by 'column2' and 'column3'
+  let grid = createGrid(rows, cols, ['column2', 'column3']);
+
+  // sort first by  column7 then by column6
   grid.addSort(cols[7], 'ascending')
       .addSort(cols[6], 'descending');
-  console.timeEnd('start tester');
-  // grid.fixedWidth = '250px';
-  // grid.fixedWidth = '400px';
+
+  console.timeEnd('start tester'); // how long did it take to create the reactive model?
   return grid;
 }
 
-let grid = createGrid(40, 14);
+let grid = createTestGrid(40, 14);
+
 let rrr = {column0: 'booga'};
 // setTimeout(() => collapseAll(grid), 4000);
 // setTimeout(() => expandAll(grid), 6000);
