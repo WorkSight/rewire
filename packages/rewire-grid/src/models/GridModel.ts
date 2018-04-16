@@ -154,7 +154,7 @@ class GridModel implements IGrid {
   }
 
   addFixedRow(row: any): IRow {
-    return createRow(this, this.fixedRows, row);
+    return createRow(this, this.fixedRows, row, true);
   }
 
   addRows(rows: any[]): void {
@@ -255,14 +255,8 @@ export default function create(rows: any[], columns: IColumn[], groupBy?: string
     }
   });
   freeze(() => {
-    let fixedRow = columns.reduce((previous: any, current: any) => (previous[current.name] = current.title, previous), {});
-    fixedRow.column5 = 'Sales';
-    fixedRow.column6 = 'Sales';
-    grid.addFixedRow(fixedRow);
-    let ooga = {...fixedRow};
-    ooga.column5 = '2017';
-    ooga.column6 = '2018';
-    grid.addFixedRow(ooga);
+    let headerRow = columns.reduce((previous: any, current: any) => (previous[current.name] = current.title, previous), {});
+    grid.addFixedRow(headerRow);
     if (groupBy) grid.groupBy = groupBy.map(name => findColumn(grid.columns, name)!);
     grid.addRows(rows);
   });

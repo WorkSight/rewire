@@ -39,12 +39,18 @@ class RowModel implements IRow {
     let previousCell: ICell | undefined;
     let colSpan = 1;
     for (const column of this.grid.dataColumns) {
+      if (!column.visible) {
+        continue;
+      }
+
       let cell = this.cells[column.name];
       if (previousCell && cell && (previousValue === cell.value)) {
         previousCell.colSpan = ++colSpan;
         cell.colSpan = 0;
         continue;
       }
+
+      colSpan       = 1;
       previousCell  = cell;
       previousValue = cell.value;
     }
@@ -70,8 +76,8 @@ function find(rows: IRows, column: IColumn, row: any): IGroupRow | undefined {
   return undefined;
 }
 
-export default function create(grid: IGrid, rows: IRow[], row: any): IRow {
-  if (grid.groupBy.length > 0) {
+export default function create(grid: IGrid, rows: IRow[], row: any, fixed: boolean = false): IRow {
+  if (grid.groupBy.length > 0 && !fixed) {
     let root:   IGroupRow;
     let parent: IRows = grid;
     let level = 0;

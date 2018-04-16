@@ -226,7 +226,9 @@ export default class Grid extends React.PureComponent<IGridProps> {
         <table role='grid' style={{width: this.props.grid.fixedWidth}}>
           {this.renderColumnGroups(true)}
           <thead role='rowgroup'>
-            {this.props.grid.fixedRows.map((row, index) => <Row key={row.id} Cell={Column} columns={this.props.grid.fixedColumns} index={index} visibleColumns={this.props.grid.fixedColumns.length} row={row} />)}
+            <Observe render={() => (
+              this.props.grid.fixedRows.map((row, index) => <Row key={row.id} Cell={Column} columns={this.props.grid.fixedColumns} index={index} visibleColumns={this.props.grid.fixedColumns.length} row={row} />)
+            )} />
           </thead>
         </table>
       </div>
@@ -283,7 +285,9 @@ export default class Grid extends React.PureComponent<IGridProps> {
           <table role='grid' ref={(c) => this._columnTable = c as HTMLTableElement} style={{width: this.props.grid.width}}>
             {this.renderColumnGroups(false)}
             <thead role='rowgroup'>
-              {this.props.grid.fixedRows.map((row, index) => <Row key={row.id} Cell={Column} columns={this.props.grid.dataColumns} index={index} visibleColumns={this.props.grid.dataColumns.length} row={row} />)}
+              <Observe render={() => (
+                this.props.grid.fixedRows.map((row, index) => <Row key={row.id} Cell={Column} columns={this.props.grid.dataColumns} index={index} visibleColumns={this.props.grid.dataColumns.length} row={row} />)
+              )} />
             </thead>
           </table>
         </div>

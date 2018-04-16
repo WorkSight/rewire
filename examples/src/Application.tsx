@@ -339,6 +339,7 @@ function createTestGrid(nRows: number, nColumns: number) {
 
   // create the grid model and group by 'column2' and 'column3'
   let grid = createGrid(rows, cols, ['column2', 'column3']);
+  grid.addFixedRow({column5: 'Sales', column6: 'Sales'});
 
   // sort first by  column7 then by column6
   grid.addSort(cols[7], 'ascending')
