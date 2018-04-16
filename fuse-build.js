@@ -8,10 +8,13 @@ const {
   Sparky,
   ImageBase64Plugin
 } = require('fuse-box');
-const instructions = '[**/**.{ts,tsx}]';
+
+const instructions = '> [index.ts]';
 let fuse;
+
 Sparky.task('config', (context) => {
   fuse = FuseBox.init({
+    globals:              { 'default': '*' }, // we need to expore index in our bundles
     target:               context.target,
     homeDir:              context.home,
     useTypescriptCompiler:true,
@@ -25,7 +28,16 @@ Sparky.task('config', (context) => {
       CSSPlugin(),
       [SassPlugin(), CSSPlugin()],
       ImageBase64Plugin(),
-      context.isProduction && QuantumPlugin({target: 'browser', uglify: {keep_fnames: true}, treeshake: true, bakeApiIntoBundle: true})
+      context.isProduction && QuantumPlugin({
+        target: 'npm',
+        containedAPI: true,
+        ensureES5: false,
+        removeExportsInterop: true,
+        uglify: {keep_fnames: true}, 
+        treeshake: true,
+        bakeApiIntoBundle: context.bundleName
+      })
+      // context.isProduction && QuantumPlugin({target: 'browser', uglify: {keep_fnames: true}, treeshake: true, bakeApiIntoBundle: true})
     ],
     experimentalFeatures:true
   });
@@ -59,19 +71,19 @@ async function clean(context, pkg) {
 
 Sparky.task('dist', async(context) => {
   context.isProduction = true;
-  await build(context, 'rewire-common', ['es6', 'esnext']);
+  // await build(context, 'rewire-common', ['es6', 'esnext']);
   await build(context, 'rewire-core', ['es6', 'esnext']);
-  await build(context, 'rewire-ui', ['es6', 'esnext']);
-  await build(context, 'rewire-grid', ['es6', 'esnext']);
-  await build(context, 'rewire-graphql', ['es6', 'esnext']);
+  // await build(context, 'rewire-ui', ['es6', 'esnext']);
+  // await build(context, 'rewire-grid', ['es6', 'esnext']);
+  // await build(context, 'rewire-graphql', ['es6', 'esnext']);
 });
 
 Sparky.task('clean', async(context) => {
-  await clean(context, 'rewire-common');
+  // await clean(context, 'rewire-common');
   await clean(context, 'rewire-core');
-  await clean(context, 'rewire-ui');
-  await clean(context, 'rewire-grid');
-  await clean(context, 'rewire-graphql');
+  // await clean(context, 'rewire-ui');
+  // await clean(context, 'rewire-grid');
+  // await clean(context, 'rewire-graphql');
 });
 
 Sparky.task('default', ['clean', 'dist'], () => { });
