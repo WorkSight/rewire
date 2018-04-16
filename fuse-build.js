@@ -14,13 +14,14 @@ let fuse;
 
 Sparky.task('config', (context) => {
   fuse = FuseBox.init({
-    globals:              { 'default': '*' }, // we need to expore index in our bundles
+    globals:              { default: '*' }, // we need to expore index in our bundles
     target:               context.target,
     homeDir:              context.home,
     useTypescriptCompiler:true,
     cache:                false,
     hash:                 false,
-    sourceMaps:           {app: true, vendor: false},
+    // sourceMaps:           {[context.bundleName]: true},
+    tsConfig:             'tsconfig-build.json',
     output:               `${context.home}/$name.js`,
     plugins:                         [
       JSONPlugin(),
@@ -33,20 +34,19 @@ Sparky.task('config', (context) => {
         containedAPI: true,
         ensureES5: false,
         removeExportsInterop: true,
-        uglify: {keep_fnames: true}, 
+        uglify: {keep_fnames: true},
         treeshake: true,
         bakeApiIntoBundle: context.bundleName
       })
-      // context.isProduction && QuantumPlugin({target: 'browser', uglify: {keep_fnames: true}, treeshake: true, bakeApiIntoBundle: true})
     ],
     experimentalFeatures:true
   });
   fuse.bundle(context.bundleName).instructions(instructions);
 });
 
-Sparky.task('copy-src', (context) => Sparky.src(`./**`, { base: `./packages/${context.pkg}/src`}).dest(`./packages/${context.pkg}/dist/`));
-Sparky.task('copy-pkg', (context) => Sparky.src(`./package.json`, { base: `./packages/${context.pkg}` }).dest(`./packages/${context.pkg}/dist/`));
-Sparky.task('copy-md',  (context) => Sparky.src(`./*.md`, { base: `./packages/${context.pkg}` }).dest(`./packages/${context.pkg}/dist/`));
+Sparky.task('copy-src', (context) => Sparky.src('./**', { base: `./packages/${context.pkg}/src`}).dest(`./packages/${context.pkg}/dist/`));
+Sparky.task('copy-pkg', (context) => Sparky.src('./package.json', { base: `./packages/${context.pkg}` }).dest(`./packages/${context.pkg}/dist/`));
+Sparky.task('copy-md',  (context) => Sparky.src('./*.md', { base: `./packages/${context.pkg}` }).dest(`./packages/${context.pkg}/dist/`));
 
 async function build(context, pkg, targets) {
   context.pkg        = pkg;

@@ -1,5 +1,4 @@
-import * as observable from './observable';
-import * as Observe from './Observe';
-
-export {observable};
-export {Observe};
+export * from './observable';
+export * from './Observe';
+export {default as observable} from './observable';
+export {default as Observe} from './Observe';

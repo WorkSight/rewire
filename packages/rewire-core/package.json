@@ -3,6 +3,7 @@
   "version": "1.0.0-beta.3",
   "description": "WorkSight .NEXT Core",
   "main": "./es6-lib.js",
+  "typings": "./index.ts",
   "repository": {
     "type": "git",
     "url": "https://github.com/worksight/rewire"
