@@ -1,6 +1,6 @@
 {
   "name": "rewire-graphql",
-  "version": "1.0.0-beta.3",
+  "version": "1.0.0-beta.4",
   "description": "WorkSight .NEXT Core",
   "main": "./es6-lib.js",
   "repository": {
@@ -19,6 +19,6 @@
   "homepage": "https://github.com/worksight/rewire",
   "dependencies": {
     "is": "^3.2.1",
-    "rewire-core": "^1.0.0-beta.3"
+    "rewire-core": "^1.0.0-beta.4"
   }
 }
