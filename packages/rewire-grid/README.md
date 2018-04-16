@@ -96,7 +96,7 @@ ReactDOM.render(<div>
 ```
 The rendered grid view: 
 
-![grid sample](../../resources/grid-sample.png)
+![grid sample](https://github.com/WorkSight/rewire/raw/master/resources/grid-sample.png)
 
 Documentation
 -------------
