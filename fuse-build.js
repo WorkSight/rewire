@@ -53,7 +53,6 @@ async function build(context, pkg, targets) {
   await Sparky.exec('copy-src', 'copy-pkg', 'copy-md');
   await Sparky.src(`./packages/${context.pkg}/dist/*.json`).file('package.json', (file) => {
     file.json(json => {
-      json['ts:main'] = './index.ts';
       json.typings    = './index.ts';
     });
     file.save();

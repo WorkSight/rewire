@@ -4,7 +4,6 @@
   "description": "Common utilities used by the rewire suite of reactive components",
   "main": "./es6-lib.js",
   "typings": "./src/index.ts",
-  "ts:main": "./src/index.ts",
   "repository": {
     "type": "git",
     "url": "https://github.com/worksight/rewire"
