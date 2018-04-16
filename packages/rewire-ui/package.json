@@ -1,7 +1,7 @@
 {
   "name": "rewire-ui",
   "version": "1.0.0-beta.5",
-  "description": "WorkSight .NEXT Core",
+  "description": "A lightweight set of material-ui-next components built using the reactive library rewire-core.",
   "repository": {
     "type": "git",
     "url": "https://github.com/worksight/rewire"
