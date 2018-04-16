@@ -1,12 +1,12 @@
 import * as React     from 'react';
 import AutoComplete   from './AutoComplete';
 import Select         from './Select';
-import Observe        from 'rewire-core/Observe';
+import {Observe}      from 'rewire-core';
 import TextField      from './TextField';
 import NumberField    from './NumberField';
 import TimeInputField from '../components/TimeInputField';
-import utc            from 'rewire-common/utc';
-import is             from 'is';
+import {utc}          from 'rewire-common';
+import * as is        from 'is';
 
 export interface IField {
   name        : string;

@@ -1,6 +1,6 @@
-import { EditorType }      from 'rewire-ui/components/editors';
-import { SearchFn, MapFn } from 'rewire-ui/models/search';
-import { defaultEquals }   from 'rewire-core/observable';
+import { EditorType }      from 'rewire-ui';
+import { SearchFn, MapFn } from 'rewire-ui';
+import { defaultEquals }   from 'rewire-core';
 export { EditorType };
 
 export interface IRows {

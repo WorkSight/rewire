@@ -1,5 +1,5 @@
 import * as React from 'react';
-import cc         from 'classcat';
+import * as cc    from 'classcat';
 import {
   Droppable,
   Draggable,
@@ -12,9 +12,9 @@ import {
   DraggableStateSnapshot,
 }                 from 'react-beautiful-dnd';
 import decorate, { StyleProps, WithStyle }  from './styles';
-import Observe    from 'rewire-core/Observe';
+import {Observe}  from 'rewire-core';
 import Icon       from 'material-ui/Icon';
-import omit       from 'rewire-common/omit';
+import {omit}     from 'rewire-common';
 
 // function shadeColor(color: string, percent: number) {
 //   const f = parseInt(color.slice(1) , 16);

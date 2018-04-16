@@ -1,6 +1,6 @@
 import { IColumn, EditorType, IColumnEditor, SortDirection, IGrid, TextAlignment } from './GridTypes';
-import editor, {compare} from 'rewire-ui/components/editors';
-import is from 'is';
+import {editor, compare} from 'rewire-ui';
+import * as is from 'is';
 
 let id = 0;
 const toLowerCase = (value: string) => String(value).toLowerCase();

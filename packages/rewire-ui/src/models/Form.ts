@@ -1,10 +1,17 @@
-import observable, { replace, defaultEquals, computed, root, observe } from 'rewire-core/observable';
+import {
+  observable,
+  replace,
+  defaultEquals,
+  computed,
+  root,
+  observe
+} from 'rewire-core';
 import Validator, { ValidationResult, IValidateFn } from './Validator';
 import editor, {
   EditorType,
   IField
-}                                                       from '../components/editors';
-import { createElement }                                from 'react';
+} from '../components/editors';
+import { createElement } from 'react';
 
 export type IFieldTypes = 'string' | 'reference' | 'number' | 'boolean' | 'date' | 'time';
 

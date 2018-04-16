@@ -4,8 +4,8 @@ import {
   ICell
 }                    from '../models/GridTypes';
 import * as React    from 'react';
-import cc            from 'classcat';
-import Observe       from 'rewire-core/Observe';
+import * as cc       from 'classcat';
+import {Observe}     from 'rewire-core';
 
 export interface ICellProps {
   cell: ICell;

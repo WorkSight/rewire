@@ -3,4 +3,4 @@ export * from './hash';
 export * from './ObservableCache';
 export * from './types';
 
-export {default as create} from './client';
+export {default as client} from './client';

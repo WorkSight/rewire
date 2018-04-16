@@ -1,6 +1,6 @@
 import * as React                    from 'react';
 import NumberFormat                  from 'react-number-format';
-import is                            from 'is';
+import * as is                       from 'is';
 import TextField, { TextFieldProps } from 'material-ui/TextField';
 import BlurInputHOC                  from './BlurInputHOC';
 

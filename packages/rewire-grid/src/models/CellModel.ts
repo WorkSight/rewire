@@ -1,5 +1,5 @@
 import {IGrid, IColumn, ICell, IRow, IError, EditorType, TextAlignment} from './GridTypes';
-import observable, { defaultEquals } from 'rewire-core/observable';
+import { observable, defaultEquals } from 'rewire-core';
 
 let id = 0;
 class CellModel implements ICell {

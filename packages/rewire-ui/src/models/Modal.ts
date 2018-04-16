@@ -1,4 +1,4 @@
-import observable from 'rewire-core/observable';
+import {observable} from 'rewire-core';
 
 export interface ActionOptions {
   type?    : 'submit';

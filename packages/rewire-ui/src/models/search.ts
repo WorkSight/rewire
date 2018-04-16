@@ -1,5 +1,4 @@
-import fetch from 'rewire-common/fetch';
-import match from 'rewire-common/regExMatch';
+import {fetch, match} from 'rewire-common';
 
 export interface ISearchOptions {
   parentId?: string;

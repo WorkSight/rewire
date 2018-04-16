@@ -91,7 +91,7 @@ class Client implements IClient {
   }
 }
 
-export default function create(url: string) {
+export default function client(url: string) {
   return new Client({
     url,
   }) as IClient;

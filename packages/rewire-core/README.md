@@ -28,10 +28,9 @@ Using [npm](https://www.npmjs.com/package/rewire-core):
 Then, using a module bundler that supports either CommonJS or ES2015 modules, such as [fuse-box](https://fuse-box.org):
 
 ```js
-import * as React            from 'react';
-import * as ReactDOM         from 'react-dom';
-import Observe               from 'rewire-core/Observe';
-import observable, { watch } from 'rewire-core/observable';
+import * as React                   from 'react';
+import * as ReactDOM                from 'react-dom';
+import {Observe, observable, watch} from 'rewire-core/Observe';
 
 const employee = observable({name: 'Some Guy', email: 'someone@gmail.com'});
 setTimeout(() => employee.name = 'dude', 5000); // update the name property asynchronously 

@@ -1,19 +1,17 @@
 import * as React            from 'react';
 import * as ReactDOM         from 'react-dom';
-import Row                   from 'rewire-ui/layout/Row';
-import AutoComplete          from 'rewire-ui/components/AutoComplete';
+import {AutoComplete}        from 'rewire-ui';
 import {
   arraySearch,
   documentSearch
-}                            from 'rewire-ui/models/search';
-import Select                from 'rewire-ui/components/Select';
-import Col                   from 'rewire-ui/layout/Col';
-import observable, { watch } from 'rewire-core/observable';
-import Observe               from 'rewire-core/Observe';
-import fetch                 from 'rewire-common/fetch';
+}                            from 'rewire-ui';
+import {Select}              from 'rewire-ui';
+import { observable, watch } from 'rewire-core';
+import {Observe}             from 'rewire-core';
+import {fetch}               from 'rewire-common';
 // import TextField          from 'material-ui/TextField';
-import TextField             from 'rewire-ui/components/TextField';
-import NumberField           from 'rewire-ui/components/NumberField';
+import {TextField}           from 'rewire-ui';
+import {NumberField}         from 'rewire-ui';
 import Button                from 'material-ui/Button';
 import Typography            from 'material-ui/Typography';
 import { withStyles }        from 'material-ui/styles';
@@ -23,26 +21,25 @@ import {
   Route,
   Link
 } from 'react-router-dom';
-import TimeInputField from 'rewire-ui/components/TimeInputField';
-import utc            from 'rewire-common/utc';
+// import {TimeInputField} from 'rewire-ui';
+import {utc}            from 'rewire-common';
 // import Grid           from './components/Grid';
 import Paper          from 'material-ui/Paper';
 import Dialog         from 'material-ui/Dialog';
-import delay          from 'rewire-common/delay';
-import Loader         from 'rewire-ui/components/Loader';
-import is             from 'is';
-import Form           from 'rewire-ui/models/Form';
-import { IObject }    from 'rewire-common/omit';
-import Modal          from 'rewire-ui/models/Modal';
-import DialogView     from 'rewire-ui/components/Dialog';
-import FormView       from 'rewire-ui/components/FormView';
+import {delay}        from 'rewire-common';
+import {Loader}       from 'rewire-ui';
+import * as is        from 'is';
+import {Form}         from 'rewire-ui';
+import { IObject }    from 'rewire-common';
+import {Modal}        from 'rewire-ui';
+import {Dialog as DialogView}   from 'rewire-ui';
+import {FormView}     from 'rewire-ui';
 // import column         from './models/Grid';
-import createGrid         from 'rewire-grid/models/GridModel';
-import createColumn         from 'rewire-grid/models/ColumnModel';
-import Grid           from 'rewire-grid/components/Grid';
+import {createGrid, createColumn}   from 'rewire-grid';
+import {Grid}         from 'rewire-grid';
 // import { ICell, collapseAll, expandAll } from 'rewire-grid/models/GridTypes';
-import editor         from 'rewire-ui/components/editors';
-import {isRequired, isEmail, and, isSameAsOther} from 'rewire-ui/models/Validator';
+import {editor}       from 'rewire-ui';
+import {isRequired, isEmail, and, isSameAsOther} from 'rewire-ui';
 import './graphqltest';
 
 const suggestions = [
@@ -380,23 +377,6 @@ const _Home = (props: any) => (
         </Paper>
       </div>
     </div>
-
-  <Row gutter={false}>
-    <Col grow='2' style={{minWidth: '200px'}}>
-      <h2>Home 1</h2>
-    </Col>
-    <Col grow='10'>
-      <h2>Home 1</h2>
-    </Col>
-  </Row>
-  <Row>
-    <Col grow='2'>
-      <h2>Home 1</h2>
-    </Col>
-    <Col grow='10'>
-      <h2>Home 1</h2>
-    </Col>
-  </Row>
   </div>
 );
 

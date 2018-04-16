@@ -3,11 +3,15 @@ import Column                        from './Column';
 import Cell                          from './Cell';
 import Row                           from './Row';
 import * as React                    from 'react';
-import { watch, property, DataSignal } from 'rewire-core/observable';
-// import './data-grid.css';
-import Observe, { disposeOnUnmount } from 'rewire-core/Observe';
-import {KeyHandler}                  from 'rewire-ui/components/KeyboardNavigation';
-import debounce                      from 'rewire-common/debounce';
+import {
+  Observe,
+  disposeOnUnmount,
+  watch,
+  property,
+  DataSignal
+} from 'rewire-core';
+import {KeyHandler}                  from 'rewire-ui';
+import {debounce}                    from 'rewire-common';
 import './data-grid.scss';
 
 interface IColumnProps {

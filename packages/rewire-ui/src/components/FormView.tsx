@@ -1,6 +1,6 @@
-import React    from 'react';
-import Form     from '../models/Form';
-import decorate from './styles';
+import * as React from 'react';
+import Form       from '../models/Form';
+import decorate   from './styles';
 
 const styles = {
   form: {

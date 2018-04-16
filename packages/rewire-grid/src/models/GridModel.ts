@@ -9,13 +9,14 @@ import {
   findColumn
 }                  from './GridTypes';
 import createRow   from './RowModel';
-import observable, {
+import {
+  observable,
   computed,
   observe,
   freeze,
   root
-}                  from 'rewire-core/observable';
-import { compare } from 'rewire-ui/components/editors';
+}                  from 'rewire-core';
+import { compare } from 'rewire-ui';
 
 let id = 0;
 class GridModel implements IGrid {

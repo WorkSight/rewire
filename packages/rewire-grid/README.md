@@ -36,9 +36,7 @@ The grid like most of rewire components consists of a model and associated view 
 ```js
 import * as React    from 'react';
 import * as ReactDOM from 'react-dom';
-import createGrid    from 'rewire-grid/models/GridModel';
-import createColumn  from 'rewire-grid/models/ColumnModel';
-import Grid          from 'rewire-grid/components/Grid';
+import {createGrid, createColumn, Grid} from 'rewire-grid';
 
 function createTestGrid(nRows: number, nColumns: number) {
   console.time('start tester');

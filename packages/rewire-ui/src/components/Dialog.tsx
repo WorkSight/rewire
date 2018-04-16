@@ -1,6 +1,6 @@
-import React                 from 'react';
+import * as React            from 'react';
 import Modal, { ActionType } from '../models/Modal';
-import Observe               from 'rewire-core/Observe';
+import {Observe}             from 'rewire-core';
 import Typography            from 'material-ui/Typography';
 import Dialog                from 'material-ui/Dialog';
 import Button                from 'material-ui/Button';

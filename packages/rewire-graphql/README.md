@@ -26,11 +26,11 @@ Then, using a module bundler that supports either CommonJS or ES2015 modules, su
 Getting Started
 ---------------
 ```js
-import gql       from 'graphql-tag';
-import { watch } from 'rewire-core/observable';
-import create    from 'rewire-graphql/client';
+import gql        from 'graphql-tag';
+import { watch }  from 'rewire-core';
+import { client } from 'rewire-graphql';
 
-const client = create('https://someurlhere.lp.gql.zone/graphql');
+const client = client('https://someurlhere.lp.gql.zone/graphql');
 
 const query = gql`
   query($size: Int!) {

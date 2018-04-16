@@ -2,12 +2,12 @@
   "compileOnSave": false,
   "compilerOptions": {
     "allowJs": true,
-    "allowSyntheticDefaultImports": true,
+    "allowSyntheticDefaultImports": false,
     "allowUnreachableCode": false,
     "allowUnusedLabels": false,
     "declaration": true,
     "diagnostics": false,
-    "esModuleInterop": true,
+    "esModuleInterop": false,
     "emitDecoratorMetadata": true,
     "experimentalDecorators": true,
     "forceConsistentCasingInFileNames": false,
@@ -33,15 +33,6 @@
     "noStrictGenericChecks": true,
     "target": "esnext",
     "jsx": "react",
-    "rootDir": ".",
-    "baseUrl": ".",
-    "paths": {
-      "rewire-ui/*": ["./packages/rewire-ui/src/*"],
-      "rewire-core/*": ["./packages/rewire-core/src/*"],
-      "rewire-common/*": ["./packages/rewire-common/src/*"],
-      "rewire-grid/*": ["./packages/rewire-grid/src/*"],
-      "rewire-graphql/*": ["./packages/rewire-graphql/src/*"],
-    },
     "plugins": [
       { "name": "tslint-language-service" }
     ]

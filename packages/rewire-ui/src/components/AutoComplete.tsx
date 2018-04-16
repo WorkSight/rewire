@@ -11,8 +11,8 @@ import {
   WithStyles,
   Theme,
   StyledComponentProps } from 'material-ui/styles';
-import debounce          from 'rewire-common/debounce';
-import match             from 'rewire-common/regExMatch';
+import {debounce}          from 'rewire-common';
+import {match}             from 'rewire-common';
 import {
   ICustomProps,
   SearchFn,

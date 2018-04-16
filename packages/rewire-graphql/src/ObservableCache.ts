@@ -1,6 +1,6 @@
-import { ICache } from './types';
-import is         from 'is';
-import observable from 'rewire-core/observable';
+import {ICache}     from './types';
+import * as is      from 'is';
+import {observable} from 'rewire-core';
 
 export class ObservableCache implements ICache {
   store: ObjectType = {};

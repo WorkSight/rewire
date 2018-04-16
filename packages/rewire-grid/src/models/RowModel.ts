@@ -7,9 +7,9 @@ import {
   IGroupRow,
   IRows,
   getValue,
-}                 from './GridTypes';
-import createCell from './CellModel';
-import observable from 'rewire-core/observable';
+}                   from './GridTypes';
+import createCell   from './CellModel';
+import {observable} from 'rewire-core';
 
 let id = 0;
 

@@ -10,6 +10,9 @@
     "rewire",
     "grid"
   ],
+  "main": "./es6-lib.js",
+  "typings": "./src/index.ts",
+  "ts:main": "./src/index.ts",
   "author": "Sandy Place",
   "license": "MIT",
   "bugs": {
@@ -19,7 +22,7 @@
   "dependencies": {
     "classcat": "^3.0.2",
     "is": "^3.2.1",
-    "react": "^16.3.1",
+    "react": "^16.3.2",
     "rewire-common": "^1.0.0-beta.7",
     "rewire-core": "^1.0.0-beta.7",
     "rewire-ui": "^1.0.0-beta.7"

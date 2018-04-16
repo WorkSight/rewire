@@ -1,6 +1,6 @@
 import {IColumn, ICell} from '../models/GridTypes';
 import * as React       from 'react';
-import Observe          from 'rewire-core/Observe';
+import {Observe}        from 'rewire-core';
 
 export interface IColumnCellProps {
   cell: ICell;

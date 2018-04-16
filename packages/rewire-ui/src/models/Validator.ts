@@ -1,4 +1,4 @@
-import {defaultEquals} from 'rewire-core/observable';
+import {defaultEquals} from 'rewire-core';
 
 export function isNull(value?: any) {
   if ((value === undefined) || (value === null)) return true;

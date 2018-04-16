@@ -51,6 +51,13 @@ Sparky.task('copy-md',  (context) => Sparky.src('./*.md', { base: `./packages/${
 async function build(context, pkg, targets) {
   context.pkg        = pkg;
   await Sparky.exec('copy-src', 'copy-pkg', 'copy-md');
+  await Sparky.src(`./packages/${context.pkg}/dist/*.json`).file('package.json', (file) => {
+    file.json(json => {
+      json['ts:main'] = './index.ts';
+      json.typings    = './index.ts';
+    });
+    file.save();
+  }).exec();
   for (const target of targets) {
     context.bundleName = `${target}-lib`;
     context.home       = `./packages/${pkg}/dist/`;
