@@ -13,7 +13,7 @@
     "client"
   ],
   "scripts": {
-    "beta:version": "lerna publish --cd-version=prerelease --preid=beta --skip-git --skip-npm",
+    "beta:version": "lerna publish --cd-version=prerelease --preid=beta --skip-npm",
     "start": "node fuse.js"
   },
   "author": "Sandy Place",
