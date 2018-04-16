@@ -10,7 +10,10 @@
   },
   "keywords": [
     "rewire",
-    "core"
+    "core",
+    "observable",
+    "reactive",
+    "react"
   ],
   "author": "Sandy Place",
   "license": "MIT",

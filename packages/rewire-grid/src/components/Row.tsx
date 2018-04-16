@@ -5,7 +5,7 @@ import {
   IGroupRow,
   getValue,
   isGroupRow
-}                      from '../model/GridTypes';
+}                      from '../models/GridTypes';
 import * as React      from 'react';
 import cc              from 'classcat';
 import Observe         from 'rewire-core/Observe';

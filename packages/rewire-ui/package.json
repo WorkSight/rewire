@@ -8,9 +8,14 @@
   },
   "keywords": [
     "rewire",
-    "core"
+    "ui",
+    "material-ui",
+    "react",
+    "reactive",
+    "observable"
   ],
   "main": "./es6-lib.js",
+  "typings": "./index.ts",
   "author": "Sandy Place",
   "license": "MIT",
   "bugs": {

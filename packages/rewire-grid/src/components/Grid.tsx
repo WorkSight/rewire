@@ -1,4 +1,4 @@
-import {IGrid, IColumn}              from '../model/GridTypes';
+import {IGrid, IColumn}              from '../models/GridTypes';
 import Column                        from './Column';
 import Cell                          from './Cell';
 import Row                           from './Row';

@@ -1,5 +1,5 @@
-import editor, { compare, EditorType } from '../components/editors';
-import { SearchFn, MapFn }             from '../models/search';
+import editor, { compare, EditorType } from 'rewire-ui/components/editors';
+import { SearchFn, MapFn }             from 'rewire-ui/models/search';
 
 export type Size = 'icon' | 'tiny' | 'small' | 'medium' | 'large' | 'full';
 const sizeToPixels: {[P in Size]: number | undefined} = {

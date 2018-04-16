@@ -71,19 +71,19 @@ async function clean(context, pkg) {
 
 Sparky.task('dist', async(context) => {
   context.isProduction = true;
-  // await build(context, 'rewire-common', ['es6', 'esnext']);
+  await build(context, 'rewire-common', ['es6', 'esnext']);
   await build(context, 'rewire-core', ['es6', 'esnext']);
-  // await build(context, 'rewire-ui', ['es6', 'esnext']);
-  // await build(context, 'rewire-grid', ['es6', 'esnext']);
-  // await build(context, 'rewire-graphql', ['es6', 'esnext']);
+  await build(context, 'rewire-ui', ['es6', 'esnext']);
+  await build(context, 'rewire-grid', ['es6', 'esnext']);
+  await build(context, 'rewire-graphql', ['es6', 'esnext']);
 });
 
 Sparky.task('clean', async(context) => {
-  // await clean(context, 'rewire-common');
+  await clean(context, 'rewire-common');
   await clean(context, 'rewire-core');
-  // await clean(context, 'rewire-ui');
-  // await clean(context, 'rewire-grid');
-  // await clean(context, 'rewire-graphql');
+  await clean(context, 'rewire-ui');
+  await clean(context, 'rewire-grid');
+  await clean(context, 'rewire-graphql');
 });
 
 Sparky.task('default', ['clean', 'dist'], () => { });

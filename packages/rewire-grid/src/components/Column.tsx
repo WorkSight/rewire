@@ -1,18 +1,18 @@
-import {IColumn, ICell} from '../model/GridTypes';
+import {IColumn, ICell} from '../models/GridTypes';
 import * as React       from 'react';
 import Observe          from 'rewire-core/Observe';
 
-export interface ICellProps {
+export interface IColumnCellProps {
   cell: ICell;
 }
 
-export default class Column extends React.PureComponent<ICellProps> {
+export default class Column extends React.PureComponent<IColumnCellProps> {
   startOffset : number;
   isResizing  : boolean;
   column      : IColumn;
   node        : HTMLTableHeaderCellElement;
 
-  constructor(props: ICellProps) {
+  constructor(props: IColumnCellProps) {
     super(props);
     this.startOffset  = 0;
     this.isResizing   = false;

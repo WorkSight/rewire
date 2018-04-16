@@ -1,4 +1,3 @@
-// import * as messages from './messages.jsx';
 import * as qs from 'query-string';
 
 const _timeout: number = 30 * 1000;
@@ -23,9 +22,8 @@ export class Fetch {
   server: IServerInfo;
   url:    string;
 
-  constructor() {
-    this.server = {ssl: '', domain: 'localhost', port: ':44320', vdir: '', cors: true, api: 'ws'};
-    // this.server = env.server;
+  constructor(server?: IServerInfo) {
+    this.server = server || {ssl: '', domain: 'localhost', port: ':44320', vdir: '', cors: true, api: 'ws'};
     this.url    = `http${this.server.ssl}://${this.server.domain}${this.server.port}/${this.server.vdir}${this.server.api}/`;
   }
 

@@ -2,7 +2,7 @@ import observable, { replace, defaultEquals, computed, root, observe } from 'rew
 import Validator, { ValidationResult, IValidateFn } from './Validator';
 import editor, {
   EditorType,
-  IField as IFieldNew
+  IField
 }                                                       from '../components/editors';
 import { createElement }                                from 'react';
 
@@ -12,12 +12,12 @@ export interface IFieldDefn {
   label(text: string): IFieldDefn;
   placeholder(text: string): IFieldDefn;
   autoFocus(): IFieldDefn;
-  disabled(action: (field: IFieldNew) => boolean): IFieldDefn;
+  disabled(action: (field: IEditorField) => boolean): IFieldDefn;
   editor(editorType: EditorType): IFieldDefn;
   validators(fn: IValidateFn): IFieldDefn;
 }
 
-export interface IField extends IFieldNew {
+export interface IEditorField extends IField {
   Editor: React.SFC<any>;
   type:   IFieldTypes;
 }
@@ -35,7 +35,7 @@ interface IBaseFieldDefn {
   placeholder?: string;
   error?      : string;
   value?      : any;
-  disabled?   : (field: IFieldNew) => boolean;
+  disabled?   : (field: IEditorField) => boolean;
   visible?    : boolean;
   validators? : IValidateFn;
 }
@@ -61,7 +61,7 @@ class BaseField implements IFieldDefn {
     return this;
   }
 
-  disabled(action: (field: IFieldNew) => boolean): IFieldDefn {
+  disabled(action: (field: IEditorField) => boolean): IFieldDefn {
     this.typeDefn.disabled = action;
     return this;
   }
@@ -82,9 +82,9 @@ export default class Form {
   private dispose    : () => void;
   private _hasChanges: () => boolean;
   private _hasErrors : () => boolean;
-  fields             : IField[];
-  validator         : Validator;
-  field              : {[index: string]: IField};
+  fields             : IEditorField[];
+  validator          : Validator;
+  field              : {[index: string]: IEditorField};
 
   private constructor(fields: IFieldDefns, initial?: ObjectType) {
     this.field              = observable({});
@@ -151,13 +151,13 @@ export default class Form {
     'number'   : 'number'
   };
 
-  private createEditor(editorType: EditorType | undefined, field: IField, editProps?: any): React.SFC<any> {
+  private createEditor(editorType: EditorType | undefined, field: IEditorField, editProps?: any): React.SFC<any> {
     if (!editorType) editorType = Form.editorDefaults[field.type];
     const onValueChange = (v: any) => field.value = v;
     return (props) => createElement(editor(editorType!, editProps), {...props, field: field, onValueChange});
   }
 
-  private createField(name: string, fieldDefn: BaseField): IField {
+  private createField(name: string, fieldDefn: BaseField): IEditorField {
     this.field[name] = {
       name,
       autoFocus: fieldDefn.typeDefn.autoFocus,
@@ -166,7 +166,7 @@ export default class Form {
       label: fieldDefn.typeDefn.label,
       disabled: fieldDefn.typeDefn.disabled,
       visible: true,
-    } as IField;
+    } as IEditorField;
 
     this.field[name].Editor = this.createEditor(fieldDefn.typeDefn.editorType, this.field[name], fieldDefn.typeDefn.editProps);
     if (fieldDefn.typeDefn.validators) {
@@ -199,8 +199,8 @@ export default class Form {
 
   static create<T>(fields: T, initial?: ObjectType) {
     type FormType = {
-      field     : Record<keyof typeof fields, IField>,
-      fields    : IField[],
+      field     : Record<keyof typeof fields, IEditorField>,
+      fields    : IEditorField[],
       value     : ObjectType,
       validation: Validator,
       isOpen    : boolean;

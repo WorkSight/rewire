@@ -2,21 +2,10 @@ import {
   IGrid,
   IColumn,
   ICell
-}                    from '../model/GridTypes';
+}                    from '../models/GridTypes';
 import * as React    from 'react';
 import cc            from 'classcat';
 import Observe       from 'rewire-core/Observe';
-
-// var InputCell        = require('ui/grid/InputCell.jsx');
-// var ExpressionCell   = require('ui/grid/ExpressionCell.jsx');
-// var MaskInputCell    = require('ui/grid/MaskInputCell.jsx');
-// var AutoCompleteCell = require('ui/grid/AutoCompleteCell.jsx');
-// var SpanCell         = require('ui/grid/SpanCell.jsx');
-// var CheckboxCell     = require('ui/grid/CheckboxCell.jsx');
-// var MultiSelectCell  = require('ui/grid/MultiSelectCell.jsx');
-// var TimeInputCell    = require('ui/grid/TimeInputCell.jsx');
-// var DateInputCell    = require('ui/grid/DateInputCell.jsx');
-// var DocumentCell     = require('ui/grid/DocumentCell.jsx');
 
 export interface ICellProps {
   cell: ICell;
