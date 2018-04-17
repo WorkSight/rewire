@@ -3,10 +3,14 @@ import {
   ICell,
   IRow,
   IColumn,
-  allRows,
   SortDirection,
-  groupRowIterator,
-  findColumn
+  groupRows,
+  findColumn,
+  fixedRows,
+  find,
+  allDataRows,
+  IRowIteratorResult,
+  expandAll
 }                  from './GridTypes';
 import createRow   from './RowModel';
 import {
@@ -25,6 +29,7 @@ class GridModel implements IGrid {
   _sort         : IColumn[] = [];
   id            : number    = id++;
   enabled       : boolean   = true;
+  removedRows   : IRowIteratorResult[] = [];
   rows          : IRow[]    = observable([]);
   fixedRows     : IRow[]    = observable([]);
   columns       : IColumn[] = [];
@@ -62,6 +67,62 @@ class GridModel implements IGrid {
     this.clipboard = selectedCell.clone(this.selectedRow!);
   }
 
+  get(): any[] {
+    const data: any[] = [];
+    for (const row of allDataRows(this.rows)) {
+      let rowData: any = {};
+      data.push(rowData);
+      for (const column of this.columns) {
+        rowData[column.name] = row.row.cells[column.name].value;
+      }
+    }
+    return data;
+  }
+
+  set(data: any[]): void {
+    root((dispose) => {
+      freeze(() => {
+        this.removedRows.length = 0;
+        this.rows.length = 0;
+        this.addRows(data);
+        expandAll(this.rows);
+      });
+    });
+  }
+
+  revert(): void {
+    freeze(() => {
+      if (this.removedRows) {
+        for (const removedRow of this.removedRows) {
+          removedRow.rows.splice(removedRow.idx, 0, removedRow.row);
+        }
+        this.removedRows.length = 0;
+      }
+
+      for (const row of allDataRows(this.rows)) {
+        for (const column of this.columns) {
+          row.row.cells[column.name].value = row.row.data[column.name];
+        }
+      }
+    });
+  }
+
+  _removeRow(iterator: IterableIterator<IRowIteratorResult>, id: number): void {
+    const row = find(iterator, (row) => row.row.id === id);
+    if (!row) return;
+
+    this.removedRows.push(row);
+    row.rows.splice(row.idx, 1);
+  }
+
+  removeFixedRow(id: number): void {
+    this._removeRow(fixedRows(this), id);
+  }
+
+  removeRow(id: number): void {
+    this._removeRow(allDataRows(this.rows), id);
+  }
+
   addSort(column: IColumn, sort?: SortDirection, insert?: boolean): IGrid {
     let sortColumn = this._sort.indexOf(column);
     if (sortColumn >= 0) {
@@ -88,7 +149,7 @@ class GridModel implements IGrid {
   }
 
   sort() {
-    for (const rows of groupRowIterator(this.rows)) {
+    for (const rows of groupRows(this.rows)) {
       rows.rows.sort((r1, r2) => {
         for (const column of this._sort) {
           let compareFn = column.compare;
@@ -164,6 +225,7 @@ class GridModel implements IGrid {
   }
 
   hasChanges() {
+    if (this.removedRows.length > 0) return true;
     for (const row of this.rows) {
       if (!row) continue;
       if (row.hasChanges()) return true;
@@ -233,8 +295,8 @@ function mergeRows(rows: IRow[], columns: IColumn[]): void {
     let previousValue: any;
     let previousCell: ICell | undefined;
     let rowSpan = 1;
-    for (const r of allRows(rows)) {
-      let cell = r.cells[column.name];
+    for (const r of allDataRows(rows)) {
+      let cell = r.row.cells[column.name];
       if (previousCell && cell && (previousValue === cell.value)) {
         previousCell.rowSpan = ++rowSpan;
         cell.rowSpan = 0;
@@ -247,21 +309,23 @@ function mergeRows(rows: IRow[], columns: IColumn[]): void {
 }
 
 export default function create(rows: any[], columns: IColumn[], groupBy?: string[]): IGrid {
-  let grid = observable(new GridModel());
-  grid.initialize();
-  freeze(() => {
-    for (const column of columns) {
-      grid.addColumn(column);
-    }
+  return root((dispose) => {
+    let grid = observable(new GridModel());
+    grid.initialize();
+    freeze(() => {
+      for (const column of columns) {
+        grid.addColumn(column);
+      }
+    });
+    freeze(() => {
+      let headerRow = columns.reduce((previous: any, current: any) => (previous[current.name] = current.title, previous), {});
+      grid.addFixedRow(headerRow);
+      if (groupBy) grid.groupBy = groupBy.map(name => findColumn(grid.columns, name)!);
+      grid.addRows(rows);
+    });
+    mergeRows(grid.fixedRows, grid.fixedColumns);
+    mergeRows(grid.fixedRows, grid.dataColumns);
+    // mergeRows(grid.rows, grid.dataColumns);
+    return grid;
   });
-  freeze(() => {
-    let headerRow = columns.reduce((previous: any, current: any) => (previous[current.name] = current.title, previous), {});
-    grid.addFixedRow(headerRow);
-    if (groupBy) grid.groupBy = groupBy.map(name => findColumn(grid.columns, name)!);
-    grid.addRows(rows);
-  });
-  mergeRows(grid.fixedRows, grid.fixedColumns);
-  mergeRows(grid.fixedRows, grid.dataColumns);
-  // mergeRows(grid.rows, grid.dataColumns);
-  return grid;
 }

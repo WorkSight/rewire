@@ -68,16 +68,8 @@ async function build(context, pkg, targets) {
   }
 }
 
-async function clean(context, pkg) {
+async function clean(pkg) {
   await Sparky.src(`./packages/${pkg}/dist`).clean(`./packages/${pkg}/dist`).exec();
-}
-
-async function _prepublish(context, pkg) {
-  return await bumpVersion(`./packages/${pkg}/package.json`, {type: 'beta'});
-}
-
-async function _publish(context, pkg) {
-  await npmPublish({path: `./packages/${pkg}/dist`});
 }
 
 const modules = ['rewire-common', 'rewire-core', 'rewire-ui', 'rewire-grid', 'rewire-graphql'];
@@ -89,9 +81,9 @@ Sparky.task('dist', async(context) => {
   }
 });
 
-Sparky.task('npmpublish', async(context) => {
+Sparky.task('npmpublish', async() => {
   for (const module of modules) {
-    await _publish(context, module);
+    await npmPublish({path: `./packages/${module}/dist`});
   }
 });
 
@@ -110,19 +102,19 @@ async function run(cmd, args) {
   });
 }
 
-Sparky.task('prepublish', async(context) => {
+Sparky.task('prepublish', async() => {
   let json;
   for (const module of modules) {
-    json = await _prepublish(context, module, ['es6', 'esnext']);
+    json = await bumpVersion(`./packages/${module}/package.json`, {type: 'beta'});
   }
   let version = `v${json.version}`;
   await run('git', ['commit', '-a', '-m', version]);
   await run('git', ['tag', '-a', version, '-m', version]);
 });
 
-Sparky.task('clean', async(context) => {
+Sparky.task('clean', async() => {
   for (const module of modules) {
-    await clean(context, module);
+    await clean(module);
   }
 });
 

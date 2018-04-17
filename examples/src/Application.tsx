@@ -354,7 +354,9 @@ function createTestGrid(nRows: number, nColumns: number) {
 let grid = createTestGrid(40, 14);
 
 let rrr = {column0: 'booga'};
-// setTimeout(() => collapseAll(grid), 4000);
+let r = grid.get();
+setTimeout(() => grid.rows.length = 0, 4000);
+setTimeout(() => grid.set(r), 8000);
 // setTimeout(() => expandAll(grid), 6000);
 // setTimeout(() => S.freeze(() => grid.addRow(rrr)), 5000);
 // setTimeout(() => grid.rows[0].cells['column0'].value = 'booga', 6000);

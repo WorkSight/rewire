@@ -36,8 +36,16 @@ export interface IGrid extends IRows {
   selectCell(cell?: ICell): void;
   editCell(cell?: ICell): void;
 
+  revert(): void;
+  get(): any[];
+  set(data: any[]): void;
+
   addColumn(column: IColumn): IColumn;
+
   addFixedRow(row: any): IRow;
+  removeFixedRow(id: number): void;
+
+  removeRow(id: number): void;
   addRow(row: any): IRow;
   addRows(rows: any[]): void;
 }
@@ -142,48 +150,89 @@ export function getValue(row: IRow | ObjectType, column: IColumn): string | unde
   return value;
 }
 
-export function *groupRowIterator(rows: IRow[]): IterableIterator<IGroupRow> {
+export interface IRowIteratorResult {
+  rows: IRow[];
+  row: IRow;
+  idx: number;
+}
+
+export interface IGroupRowIteratorResult {
+  rows: IRow[];
+  row: IGroupRow;
+  idx: number;
+}
+
+export function *groupRows(rows: IRow[]): IterableIterator<IGroupRowIteratorResult> {
+  let result: any = {rows: rows, row: undefined, idx: 0};
   for (const row of rows) {
     if (isGroupRow(row)) {
-      yield row;
-      yield *groupRowIterator(row.rows);
+      result.row = row;
+      yield result;
+      result.idx++;
+      yield *groupRows(row.rows);
     }
   }
 }
 
-export function findRow(rows: IRow[], row: any): IRow | undefined {
-  if (!row) return undefined;
+export function *allRows(rows: IRow[]): IterableIterator<IRowIteratorResult> {
+  let result: any = {rows: rows, row: undefined, idx: 0};
+  for (const row of rows) {
+    result.row = row;
+    yield result;
+    result.idx++;
+    if (isGroupRow(row)) {
+      yield *allRows(row.rows);
+    }
+  }
+}
+
+export function *fixedRows(grid: IGrid): IterableIterator<IRowIteratorResult> {
+  let result: any = {rows: grid.fixedRows, row: undefined, idx: 0};
+  for (const row of grid.fixedRows) {
+    result.row = row;
+    yield result;
+    result.idx++;
+  }
+}
+
+export function *allDataRows(rows: IRow[]): IterableIterator<IRowIteratorResult> {
+  let result: any = {rows: rows, row: undefined, idx: 0};
   for (const row of rows) {
     if (isGroupRow(row)) {
-      return findRow(row.rows, row);
+      yield *allDataRows(row.rows);
+    } else {
+      result.row = row;
+      yield result;
+      result.idx++;
     }
+  }
+}
 
-    if (defaultEquals(row.data, row)) return row;
+export function find<T>(rows: IterableIterator<T>, predicate: (row: T) => boolean): T | undefined {
+  if (!predicate) return undefined;
+
+  for (const row of rows) {
+    if (predicate(row)) return row;
   }
   return undefined;
+}
+
+export function findRowByData(rows: IRow[], row: any): IRowIteratorResult | undefined {
+  return find(allDataRows(rows), (row) => defaultEquals(row.row.data, row));
 }
 
 export function findColumn(columns: IColumn[], name: string): IColumn | undefined {
   return columns.find((column) => column.name === name);
 }
 
-export function *allRows(rows: IRow[]): IterableIterator<IRow> {
-  for (const row of rows) {
-    yield row;
-    if (isGroupRow(row)) {
-      yield *groupRowIterator(row.rows);
-    }
-  }
-}
-
 export function collapseAll(rows: IRow[]) {
-  for (const groupRow of groupRowIterator(rows)) {
-    groupRow.expanded = false;
+  for (const groupRow of groupRows(rows)) {
+    groupRow.row.expanded = false;
   }
 }
 
 export function expandAll(rows: IRow[]) {
-  for (const groupRow of groupRowIterator(rows)) {
-    groupRow.expanded = true;
+  for (const groupRow of groupRows(rows)) {
+    groupRow.row.expanded = true;
   }
 }
