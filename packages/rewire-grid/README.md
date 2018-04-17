@@ -76,6 +76,11 @@ function createTestGrid(nRows: number, nColumns: number) {
   // create the grid model and group by 'column2' and 'column3'
   let grid = createGrid(rows, cols, ['column2', 'column3']);
 
+  // change some of the cell header labels and add another second fixed row.
+  grid.fixedRows[0].cells['column5'].value = 'Sales';
+  grid.fixedRows[0].cells['column6'].value = 'Sales';
+  grid.addFixedRow({column5: '2017', column6: '2018'});
+
   // sort first by  column7 then by column6
   grid.addSort(cols[7], 'ascending')
       .addSort(cols[6], 'descending');

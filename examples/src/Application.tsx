@@ -6,7 +6,7 @@ import {
   documentSearch
 }                            from 'rewire-ui';
 import {Select}              from 'rewire-ui';
-import { observable, watch } from 'rewire-core';
+import { observable, watch, root } from 'rewire-core';
 import {Observe}             from 'rewire-core';
 import {fetch}               from 'rewire-common';
 // import TextField          from 'material-ui/TextField';
@@ -339,7 +339,9 @@ function createTestGrid(nRows: number, nColumns: number) {
 
   // create the grid model and group by 'column2' and 'column3'
   let grid = createGrid(rows, cols, ['column2', 'column3']);
-  grid.addFixedRow({column5: 'Sales', column6: 'Sales'});
+  grid.fixedRows[0].cells['column5'].value = 'Sales';
+  grid.fixedRows[0].cells['column6'].value = 'Sales';
+  grid.addFixedRow({column5: '2017', column6: '2018'});
 
   // sort first by  column7 then by column6
   grid.addSort(cols[7], 'ascending')

@@ -9,7 +9,7 @@ import {
   getValue,
 }                   from './GridTypes';
 import createCell   from './CellModel';
-import {observable} from 'rewire-core';
+import {observable, observe } from 'rewire-core';
 
 let id = 0;
 
@@ -27,14 +27,14 @@ class RowModel implements IRow {
     for (const column of this.grid.columns) {
       this.createCell(column, this.data[column.name]);
     }
-    this.mergeColumns();
+    observe(this.mergeColumns);
   }
 
   createCell(column: IColumn, value: any): ICell {
     return this.cells[column.name] = createCell(this, column, value);
   }
 
-  mergeColumns() {
+  mergeColumns = () => {
     let previousValue: any;
     let previousCell: ICell | undefined;
     let colSpan = 1;
@@ -45,14 +45,21 @@ class RowModel implements IRow {
 
       let cell = this.cells[column.name];
       if (previousCell && cell && (previousValue === cell.value)) {
-        previousCell.colSpan = ++colSpan;
+        colSpan++;
         cell.colSpan = 0;
         continue;
+      }
+      if (previousCell) {
+        previousCell.colSpan = colSpan;
       }
 
       colSpan       = 1;
       previousCell  = cell;
       previousValue = cell.value;
+    }
+
+    if (previousCell) {
+      previousCell.colSpan = colSpan;
     }
   }
 
