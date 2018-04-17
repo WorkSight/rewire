@@ -9,6 +9,8 @@ const {
   ImageBase64Plugin
 } = require('fuse-box');
 
+const {bumpVersion, npmPublish} = require('fuse-box/sparky');
+
 const instructions = '> [index.ts]';
 let fuse;
 
@@ -66,30 +68,45 @@ async function build(context, pkg, targets) {
   }
 }
 
-Sparky.task('clean-package', (context) => {
-  return Sparky.src(`./packages/${context.pkg}/dist`).clean(`./packages/${context.pkg}/dist`);
-});
-
 async function clean(context, pkg) {
-  context.pkg = pkg;
-  await Sparky.exec('clean-package');
+  await Sparky.src(`./packages/${pkg}/dist`).clean(`./packages/${pkg}/dist`).exec();
 }
+
+async function _prepublish(context, pkg) {
+  await bumpVersion(`./packages/${pkg}/package.json`, {type: 'beta'});
+}
+
+async function _publish(context, pkg) {
+  await npmPublish({path: `./packages/${pkg}/dist`});
+}
+
+const modules = ['rewire-common', 'rewire-core', 'rewire-ui', 'rewire-grid', 'rewire-graphql'];
 
 Sparky.task('dist', async(context) => {
   context.isProduction = true;
-  await build(context, 'rewire-common', ['es6', 'esnext']);
-  await build(context, 'rewire-core', ['es6', 'esnext']);
-  await build(context, 'rewire-ui', ['es6', 'esnext']);
-  await build(context, 'rewire-grid', ['es6', 'esnext']);
-  await build(context, 'rewire-graphql', ['es6', 'esnext']);
+  for (const module of modules) {
+    await build(context, module, ['es6', 'esnext']);
+  }
+});
+
+Sparky.task('npmpublish', async(context) => {
+  for (const module of modules) {
+    await _publish(context, module);
+  }
+});
+
+Sparky.task('prepublish', async(context) => {
+  for (const module of modules) {
+    await _prepublish(context, module, ['es6', 'esnext']);
+  }
 });
 
 Sparky.task('clean', async(context) => {
-  await clean(context, 'rewire-common');
-  await clean(context, 'rewire-core');
-  await clean(context, 'rewire-ui');
-  await clean(context, 'rewire-grid');
-  await clean(context, 'rewire-graphql');
+  for (const module of modules) {
+    await clean(context, module);
+  }
 });
 
 Sparky.task('default', ['clean', 'dist'], () => { });
+
+Sparky.task('publish', ['clean', 'prepublish', 'dist', 'npmpublish'], () => { });
