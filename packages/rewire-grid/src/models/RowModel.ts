@@ -14,7 +14,7 @@ import {observable, observe } from 'rewire-core';
 let id = 0;
 
 class RowModel implements IRow {
-  id      : number    = id++;
+  id      : number   = id++;
   grid    : IGrid;
   cells   : ICellMap = observable({});
   selected: boolean  = false;

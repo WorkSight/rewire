@@ -8,7 +8,7 @@ const {
   Sparky,
   ImageBase64Plugin
 } = require('fuse-box');
-
+const { spawn } = require('child_process');
 const {bumpVersion, npmPublish} = require('fuse-box/sparky');
 
 const instructions = '> [index.ts]';
@@ -73,7 +73,7 @@ async function clean(context, pkg) {
 }
 
 async function _prepublish(context, pkg) {
-  await bumpVersion(`./packages/${pkg}/package.json`, {type: 'beta'});
+  return await bumpVersion(`./packages/${pkg}/package.json`, {type: 'beta'});
 }
 
 async function _publish(context, pkg) {
@@ -95,10 +95,29 @@ Sparky.task('npmpublish', async(context) => {
   }
 });
 
+async function run(cmd, args) {
+  return new Promise((resolve, reject) => {
+    const publish = spawn(cmd, args, {
+      stdio: 'inherit',
+      cwd: __dirname
+    });
+    publish.on('close', function(code) {
+      if (code !== 0) {
+        return reject('Error detected running command...');
+      }
+      return resolve();
+    });
+  });
+}
+
 Sparky.task('prepublish', async(context) => {
+  let json;
   for (const module of modules) {
-    await _prepublish(context, module, ['es6', 'esnext']);
+    json = await _prepublish(context, module, ['es6', 'esnext']);
   }
+  let version = `v${json.version}`;
+  await run('git', ['commit', '-a', '-m', version]);
+  await run('git', ['tag', '-a', version, '-m', version]);
 });
 
 Sparky.task('clean', async(context) => {
@@ -110,3 +129,4 @@ Sparky.task('clean', async(context) => {
 Sparky.task('default', ['clean', 'dist'], () => { });
 
 Sparky.task('publish', ['clean', 'prepublish', 'dist', 'npmpublish'], () => { });
+Sparky.task('version', ['clean', 'prepublish'], () => { });
