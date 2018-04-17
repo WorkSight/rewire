@@ -25,7 +25,8 @@ $group-row-bk-color: #8AC0CE;
   font-weight: normal;
   letter-spacing: normal;
   text-transform: none;
-  white-space: nowrap;
+  white-space: nowrap;        
+  cursor: pointer;
   word-wrap: normal;
   -webkit-font-smoothing: antialiased;      
 }
@@ -64,7 +65,9 @@ $group-row-bk-color: #8AC0CE;
     border-width: 0 1px 1px 0;
     font-weight: normal;
     white-space: nowrap;
-    outline-color: $cell-outline;
+    &.selected {
+      outline: 1px solid $cell-outline;
+    }
   }
 
   input[type="radio"],
@@ -108,13 +111,15 @@ $group-row-bk-color: #8AC0CE;
 
     &.collapsed {
       &:before {
-        content: 'add_circle_outline';
+        content: '\e148';
+        // content: 'add_circle_outline';
       }
     }
 
     &.expanded {
       &:before {
-        content: 'remove_circle_outline';
+        content: '\e15d';
+        // content: 'remove_circle_outline';
       }
     }
   }
@@ -180,7 +185,8 @@ $group-row-bk-color: #8AC0CE;
         margin: 0;
         margin-left: 4px;
         transition: 0.2s ease-in-out;
-        content: 'arrow_upward';
+        content: '\e5d8';
+        // content: 'arrow_upward';
       }
   
       &.descending {
