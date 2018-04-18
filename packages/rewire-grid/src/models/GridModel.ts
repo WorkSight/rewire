@@ -10,7 +10,8 @@ import {
   find,
   allDataRows,
   IRowIteratorResult,
-  expandAll
+  expandAll,
+  IDisposable
 }                  from './GridTypes';
 import createRow   from './RowModel';
 import {
@@ -23,7 +24,7 @@ import {
 import { compare } from 'rewire-ui';
 
 let id = 0;
-class GridModel implements IGrid {
+class GridModel implements IGrid, IDisposable {
   _dataColumns  : () => IColumn[];
   _fixedColumns : () => IColumn[];
   _sort         : IColumn[] = [];
@@ -42,20 +43,36 @@ class GridModel implements IGrid {
   height        : string = '1600px';
   isDraggable   : boolean = false;
   clipboard     : ICell;
+  private _dispose: () => void;
 
   constructor() {
     this.fixedWidth = '1px';
   }
 
-  initialize() {
+  initialize(dispose: () => void) {
     if (this.rows && (this.rows.length > 0)) {
       this.selectedRow = this.rows[0];
     }
-    root((dispose) => {
-      const columns      = observe(() => this.columns.length);
-      this._fixedColumns = computed(columns, () => this.columns.filter((h) => h.fixed), []);
-      this._dataColumns  = computed(columns, () => this.columns.filter((h) => !h.fixed), []);
-    });
+
+    this._dispose      = dispose;
+    const columns      = observe(() => this.columns.length);
+    this._fixedColumns = computed(columns, () => this.columns.filter((h) => h.fixed), []);
+    this._dataColumns  = computed(columns, () => this.columns.filter((h) => !h.fixed), []);
+  }
+
+  private disposeRows() {
+    for (const row of this.rows) {
+      row.dispose();
+    }
+
+    for (const row of this.removedRows) {
+      row.row.dispose();
+    }
+  }
+
+  dispose() {
+    this.disposeRows();
+    if (this._dispose) this._dispose();
   }
 
   copy() {
@@ -80,13 +97,11 @@ class GridModel implements IGrid {
   }
 
   set(data: any[]): void {
-    root((dispose) => {
-      freeze(() => {
-        this.removedRows.length = 0;
-        this.rows.length = 0;
-        this.addRows(data);
-        expandAll(this.rows);
-      });
+    this.disposeRows();
+    freeze(() => {
+      this.removedRows.length = 0;
+      this.rows.length = 0;
+      this.addRows(data);
     });
   }
 
@@ -110,7 +125,6 @@ class GridModel implements IGrid {
   _removeRow(iterator: IterableIterator<IRowIteratorResult>, id: number): void {
     const row = find(iterator, (row) => row.row.id === id);
     if (!row) return;
-
     this.removedRows.push(row);
     row.rows.splice(row.idx, 1);
   }
@@ -311,7 +325,7 @@ function mergeRows(rows: IRow[], columns: IColumn[]): void {
 export default function create(rows: any[], columns: IColumn[], groupBy?: string[]): IGrid {
   return root((dispose) => {
     let grid = observable(new GridModel());
-    grid.initialize();
+    grid.initialize(dispose);
     freeze(() => {
       for (const column of columns) {
         grid.addColumn(column);

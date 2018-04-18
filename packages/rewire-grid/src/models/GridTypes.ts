@@ -7,10 +7,14 @@ export interface IRows {
   rows: IRow[];
 }
 
+export interface IDisposable {
+  dispose(): void;
+}
+
 export type SortDirection = 'ascending' | 'descending';
 export type TextAlignment = 'left' | 'right' | 'center';
 
-export interface IGrid extends IRows {
+export interface IGrid extends IRows, IDisposable {
   id                      : number;
   enabled                 : boolean;
   rows                    : IRow[];
@@ -50,7 +54,7 @@ export interface IGrid extends IRows {
   addRows(rows: any[]): void;
 }
 
-export interface IRow {
+export interface IRow extends IDisposable {
   id           : number;
   grid         : IGrid;
   cells        : ICellMap;

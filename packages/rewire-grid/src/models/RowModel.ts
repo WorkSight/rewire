@@ -7,18 +7,21 @@ import {
   IGroupRow,
   IRows,
   getValue,
+  IDisposable,
 }                   from './GridTypes';
 import createCell   from './CellModel';
-import {observable, observe } from 'rewire-core';
+import {observable, observe, root } from 'rewire-core';
 
-let id = 0;
+let id        = 0;
+const EmptyFn = () => {};
 
-class RowModel implements IRow {
+class RowModel implements IRow, IDisposable {
   id      : number   = id++;
   grid    : IGrid;
   cells   : ICellMap = observable({});
   selected: boolean  = false;
   cls     : string   = '';
+  dispose : () => void = EmptyFn;
 
   constructor(grid: IGrid, public data: any) {
     this.grid = grid;
@@ -27,7 +30,10 @@ class RowModel implements IRow {
     for (const column of this.grid.columns) {
       this.createCell(column, this.data[column.name]);
     }
-    observe(this.mergeColumns);
+    root((dispose) => {
+      this.dispose = dispose;
+      observe(this.mergeColumns);
+    });
   }
 
   createCell(column: IColumn, value: any): ICell {

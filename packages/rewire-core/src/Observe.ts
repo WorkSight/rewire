@@ -57,7 +57,7 @@ export default class Observe extends React.Component<{render: (observableChanged
 
 export function disposeOnUnmount(context: any, fn: Function) {
   S.root((dispose) => {
-    let oldCWM = context.componentWillUnmount;
+    const oldCWM = context.componentWillUnmount;
     context.componentWillUnmount = () => {
       if (oldCWM) oldCWM.call(context);
       dispose();

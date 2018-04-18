@@ -138,7 +138,7 @@ const ooga: IOoga = observable({
   loading   : false
 });
 
-watch(() => ooga.date, () => console.log(ooga.date, utc(ooga.date).toTimestampString()));
+// watch(() => ooga.date, () => console.log(ooga.date, utc(ooga.date).toTimestampString()));
 
 const uistate: IUIState = observable({});
 
@@ -223,8 +223,8 @@ const LoginFormView = ({form}: {form: typeof loginDialog.form}) => (
   </FormView>
 );
 
-watch(() => loginDialog.form.hasChanges, () => console.log('has changes =', loginDialog.form.hasChanges));
-watch(() => loginDialog.form.hasErrors, () => console.log('has errors =', loginDialog.form.hasErrors));
+// watch(() => loginDialog.form.hasChanges, () => console.log('has changes =', loginDialog.form.hasChanges));
+// watch(() => loginDialog.form.hasErrors, () => console.log('has errors =', loginDialog.form.hasErrors));
 
 const DialogLoginForm = () => (
   <DialogView dialog={loginDialog} maxWidth='md'>
@@ -297,7 +297,7 @@ createItems(items3.items, 15, 90);
 
 const items4 = observable([items1, items2, items3]);
 
-watch(() => items1.items.length, () => console.log('test has changed'));
+// watch(() => items1.items.length, () => console.log('test has changed'));
 
 const confirmation = new Modal('Delete entire hard drive?')
   .action('yes', () => (console.log('no way you chose that'), true), {color: 'primary'})
@@ -363,9 +363,9 @@ setTimeout(() => grid.set(r), 8000);
 // setTimeout(() => grid.columns[3].visible = false, 7000);
 // setTimeout(() => grid.columns[3].visible = true, 8000);
 
-watch(() => {
-  let r = grid.hasChanges();
-}, () => console.log('has changes', grid.hasChanges()));
+// watch(() => {
+//   let r = grid.hasChanges();
+// }, () => console.log('has changes', grid.hasChanges()));
 
 const _Home = (props: any) => (
   <div>
