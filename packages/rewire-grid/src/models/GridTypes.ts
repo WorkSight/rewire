@@ -40,6 +40,8 @@ export interface IGrid extends IRows, IDisposable {
   selectCell(cell?: ICell): void;
   editCell(cell?: ICell): void;
 
+  cell(rowId: string, column: string): ICell | undefined;
+
   revert(): void;
   get(): any[];
   set(data: any[]): void;
@@ -47,15 +49,15 @@ export interface IGrid extends IRows, IDisposable {
   addColumn(column: IColumn): IColumn;
 
   addFixedRow(row: any): IRow;
-  removeFixedRow(id: number): void;
+  removeFixedRow(id: string): void;
 
-  removeRow(id: number): void;
+  removeRow(id: string): void;
   addRow(row: any): IRow;
   addRows(rows: any[]): void;
 }
 
 export interface IRow extends IDisposable {
-  id           : number;
+  id           : string;
   grid         : IGrid;
   cells        : ICellMap;
   selected     : boolean;
@@ -223,6 +225,10 @@ export function find<T>(rows: IterableIterator<T>, predicate: (row: T) => boolea
 
 export function findRowByData(rows: IRow[], row: any): IRowIteratorResult | undefined {
   return find(allDataRows(rows), (row) => defaultEquals(row.row.data, row));
+}
+
+export function findRowById(iterator: IterableIterator<IRowIteratorResult>, id: string): IRowIteratorResult | undefined {
+  return find(iterator, (r) => r.row.id === id);
 }
 
 export function findColumn(columns: IColumn[], name: string): IColumn | undefined {

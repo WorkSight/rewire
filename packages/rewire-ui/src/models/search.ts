@@ -22,7 +22,7 @@ export function arraySearch<T>(suggestions: T[], map?: (item?: T) => string, val
       ? suggestions
       : suggestions.filter(suggestion => {
           const keep =
-            count < 8 && regex.test(_map(suggestion));
+            count < 8 && regex.test(_map(suggestion as any));
 
           if (keep) {
             count += 1;

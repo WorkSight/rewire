@@ -224,6 +224,17 @@ export function replace(obs: any, ...obj: any[]) {
   });
 }
 
+/**
+ * The computed method creates a computed property. The function takes a dependency on a signal or a watched function and will run the action returning a computed result.
+ * The action result is cached and will only be recalculated when the dependency changes so getting the value of the comptued property is fast.
+ * @export
+ * @template T the return type
+ * @param {() => void} fn another signal or dependency function
+ * @param {() => T} action the computed property function
+ * @param {T} [seed] initial value of the property
+ * @param {boolean} [doAction=false] run the action right on declaration
+ * @returns {() => T} a function that when invoked returns the current value of the property
+ */
 export function computed<T = any>(fn: () => void, action: () => T, seed?: T, doAction: boolean = false): () => T {
   return S.on<T>(fn, action, seed as any, !doAction) as () => T;
 }

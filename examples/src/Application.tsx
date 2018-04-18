@@ -321,7 +321,7 @@ function createTestGrid(nRows: number, nColumns: number) {
   // add some cell data!
   let rows = [];
   for (let row = 0; row < nRows; row++) {
-    let r: any = {};
+    let r: any = {id: row};
     for (let column = 0; column < nColumns; column++) {
       let v: any = `RC ${column}-${row % 5}`;
       if ((column >= 5) && (column <= 6)) v = Math.random() * 10000;
@@ -354,7 +354,9 @@ function createTestGrid(nRows: number, nColumns: number) {
 let grid = createTestGrid(40, 14);
 
 let rrr = {column0: 'booga'};
+grid.cell(3, 'column8')!.value = 'oga booga boa';
 let r = grid.get();
+console.log(r);
 setTimeout(() => grid.rows.length = 0, 4000);
 setTimeout(() => grid.set(r), 8000);
 // setTimeout(() => expandAll(grid), 6000);

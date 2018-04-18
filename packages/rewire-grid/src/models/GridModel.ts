@@ -7,11 +7,10 @@ import {
   groupRows,
   findColumn,
   fixedRows,
-  find,
   allDataRows,
   IRowIteratorResult,
-  expandAll,
-  IDisposable
+  IDisposable,
+  findRowById
 }                  from './GridTypes';
 import createRow   from './RowModel';
 import {
@@ -105,6 +104,12 @@ class GridModel implements IGrid, IDisposable {
     });
   }
 
+  cell(rowId: string, columnName: string): ICell | undefined {
+    const row = findRowById(allDataRows(this.rows), rowId);
+    if (!row) return undefined;
+    return row.row.cells[columnName];
+  }
+
   revert(): void {
     freeze(() => {
       if (this.removedRows) {
@@ -122,18 +127,18 @@ class GridModel implements IGrid, IDisposable {
     });
   }
 
-  _removeRow(iterator: IterableIterator<IRowIteratorResult>, id: number): void {
-    const row = find(iterator, (row) => row.row.id === id);
+  _removeRow(iterator: IterableIterator<IRowIteratorResult>, id: string): void {
+    const row = findRowById(iterator, id);
     if (!row) return;
     this.removedRows.push(row);
     row.rows.splice(row.idx, 1);
   }
 
-  removeFixedRow(id: number): void {
+  removeFixedRow(id: string): void {
     this._removeRow(fixedRows(this), id);
   }
 
-  removeRow(id: number): void {
+  removeRow(id: string): void {
     this._removeRow(allDataRows(this.rows), id);
   }
 

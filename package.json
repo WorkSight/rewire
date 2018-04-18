@@ -30,7 +30,6 @@
     "@types/is": "^0.0.19",
     "@types/minimist": "^1.2.0",
     "@types/mocha": "^5.0.0",
-    "@types/nanoid": "^1.0.0",
     "@types/node": "^9.4.7",
     "@types/node-sass": "^3.10.32",
     "@types/query-string": "^5.1.0",

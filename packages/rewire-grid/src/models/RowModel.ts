@@ -10,13 +10,16 @@ import {
   IDisposable,
 }                   from './GridTypes';
 import createCell   from './CellModel';
-import {observable, observe, root } from 'rewire-core';
+import {observable,
+  observe,
+  root
+} from 'rewire-core';
+import * as nanoid  from 'nanoid';
 
-let id        = 0;
 const EmptyFn = () => {};
 
 class RowModel implements IRow, IDisposable {
-  id      : number   = id++;
+  id      : string;
   grid    : IGrid;
   cells   : ICellMap = observable({});
   selected: boolean  = false;
@@ -26,6 +29,11 @@ class RowModel implements IRow, IDisposable {
   constructor(grid: IGrid, public data: any) {
     this.grid = grid;
     if (!this.data) return;
+    if (data.id) {
+      this.id = data.id;
+    } else {
+      this.id = nanoid(10);
+    }
 
     for (const column of this.grid.columns) {
       this.createCell(column, this.data[column.name]);
