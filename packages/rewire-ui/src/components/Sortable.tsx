@@ -1,5 +1,5 @@
 import * as React from 'react';
-import * as cc    from 'classcat';
+import cc         from 'classcat';
 import {
   Droppable,
   Draggable,

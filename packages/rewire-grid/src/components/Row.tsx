@@ -7,7 +7,7 @@ import {
   isGroupRow
 }                      from '../models/GridTypes';
 import * as React      from 'react';
-import * as cc         from 'classcat';
+import cc              from 'classcat';
 import {Observe}       from 'rewire-core';
 
 export interface IRowProps {

@@ -354,7 +354,7 @@ function createTestGrid(nRows: number, nColumns: number) {
 let grid = createTestGrid(40, 14);
 
 let rrr = {column0: 'booga'};
-grid.cell(3, 'column8')!.value = 'oga booga boa';
+grid.cell('3', 'column8')!.value = 'oga booga boa';
 let r = grid.get();
 console.log(r);
 setTimeout(() => grid.rows.length = 0, 4000);

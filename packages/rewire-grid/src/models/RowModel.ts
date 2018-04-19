@@ -30,7 +30,7 @@ class RowModel implements IRow, IDisposable {
     this.grid = grid;
     if (!this.data) return;
     if (data.id) {
-      this.id = data.id;
+      this.id = String(data.id);
     } else {
       this.id = nanoid(10);
     }

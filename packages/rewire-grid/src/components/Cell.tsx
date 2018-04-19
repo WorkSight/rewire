@@ -4,7 +4,7 @@ import {
   ICell
 }                    from '../models/GridTypes';
 import * as React    from 'react';
-import * as cc       from 'classcat';
+import cc            from 'classcat';
 import {Observe}     from 'rewire-core';
 
 export interface ICellProps {
@@ -170,6 +170,11 @@ export default class Cell extends React.PureComponent<ICellProps, {}> {
 
   onValueChange = (value: any) => { this.cell.value = value; this.grid.editCell(undefined); };
 
+  handleTooltip = (evt: React.MouseEvent<HTMLSpanElement>) => {
+    const node = evt.target as HTMLSpanElement;
+    node.setAttribute('title', (node.offsetWidth < node.scrollWidth) ? this.cell.value : '');
+  }
+
   renderCell() {
     let cell = this.cell;
     if (cell.editing) {
@@ -195,7 +200,7 @@ export default class Cell extends React.PureComponent<ICellProps, {}> {
 
         return (
         <>
-          {cell.renderer || <span style={{width: '100%', textAlign: align}}>{this.value}</span>}
+          {cell.renderer || <span onMouseEnter={this.handleTooltip} style={{width: '100%', textAlign: align}}>{this.value}</span>}
           {hasError && <i className={errorCls} title={cell.error && cell.error.messageText} style={{flexBasis: '12px', lineHeight: '28px', height: '100%', fontSize: 10, color: '#AA0000', marginLeft: '4px', alignSelf: 'center'}} />}
         </>
       );

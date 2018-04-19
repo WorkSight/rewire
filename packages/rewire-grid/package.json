@@ -12,6 +12,7 @@
   ],
   "main": "./es6-lib.js",
   "typings": "./src/index.ts",
+  "ts:main": "./src/index.ts",
   "author": "Sandy Place",
   "license": "MIT",
   "bugs": {
