@@ -2,6 +2,7 @@ import {
   withStyles as withStylesMUI,
   Theme
 } from 'material-ui/styles';
+import * as React from 'react';
 
 export {Theme as Theme};
 
@@ -18,24 +19,19 @@ export interface Func<T> {
   ([...args]: any, args2?: any): T;
 }
 
-export function returnType<T>(func: Func<T>) {
-  return {} as T;
-}
-
 export type WithStyle<T, P = {}> = {style?: React.CSSProperties, children?: React.ReactNode} & StyleProps<T> & P;
-
 export type ComponentProps<T> = <P>(component: React.ComponentType<WithStyle<T, P>>) => React.ComponentType<P>;
-
+export type ComponentPropType<T> = T extends ComponentProps<infer U> ? U : T;
+export type WithDecorator<T, P = {}> = WithStyle<ComponentPropType<T>, P>;
 
 export type ThemeFn<T> = (theme: Theme) => T;
 export default function decorate<T>(styles: T | ThemeFn<T>): ComponentProps<T> {
   if (typeof styles === 'function') {
-    const stylesType = returnType(styles as ThemeFn<T>);
-    return withStylesMUI(styles as any, {withTheme: true}) as ComponentProps<typeof stylesType>;
+    return withStylesMUI(styles as any, {withTheme: true}) as ComponentProps<ReturnType<ThemeFn<T>>>;
   }
   return withStylesMUI(styles as any, {withTheme: true}) as ComponentProps<T>;
 }
 
-export function withStyles<P, T>(styles: T, component: React.ComponentType<WithStyle<T, P>>): React.ComponentType<P> {
+export function withStyles<P, T>(styles: T | ThemeFn<T>, component: React.ComponentType<WithStyle<T, P>>) {
   return decorate(styles)<P>(component);
 }
