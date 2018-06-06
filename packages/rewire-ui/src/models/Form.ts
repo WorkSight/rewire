@@ -13,7 +13,7 @@ import editor, {
 } from '../components/editors';
 import { createElement } from 'react';
 
-export type IFieldTypes = 'string' | 'reference' | 'number' | 'boolean' | 'date' | 'time';
+export type IFieldTypes = 'string' | 'reference' | 'select' | 'number' | 'boolean' | 'date' | 'time';
 
 export interface IFieldDefn {
   label(text: string): IFieldDefn;
@@ -95,7 +95,7 @@ export default class Form {
 
   private constructor(fields: IFieldDefns, initial?: ObjectType) {
     this.field              = observable({});
-    this.validator         = new Validator();
+    this.validator          = new Validator();
     this.initializeFields(fields);
     if (initial) this.value = initial;
   }
@@ -105,11 +105,11 @@ export default class Form {
 
     this._value = value;
     this.fields.forEach(field => {
-      field.value = value[field.name];
+      field.value = field.type === 'boolean' ? value[field.name] || false : value[field.name];
     });
 
     root((dispose) => {
-      this.dispose = dispose;
+      this.dispose        = dispose;
       const result        = this.validator.validate(this.toObject);
       const fieldsChanged = observe(() => this.fields.map(f => f.value));
       this._hasChanges    = computed(fieldsChanged, () => {
@@ -151,6 +151,7 @@ export default class Form {
 
   private static editorDefaults: {[K in IFieldTypes]: EditorType} = {
     'string'   : 'text',
+    'select'   : 'select',
     'reference': 'auto-complete',
     'boolean'  : 'checked',
     'date'     : 'date',
@@ -184,7 +185,7 @@ export default class Form {
 
   private toObject() {
     return this.fields.reduce((prev: ObjectType, current) => {
-      if (current.value) prev[current.name] = current.value;
+      if (current.value !== undefined) prev[current.name] = current.value;
       return prev;
     }, {});
   }
@@ -220,6 +221,26 @@ export default class Form {
 
   static string(): IFieldDefn {
     return new BaseField('string');
+  }
+
+  static number(): IFieldDefn {
+    return new BaseField('number');
+  }
+
+  static boolean(): IFieldDefn {
+    return new BaseField('boolean');
+  }
+
+  static date(): IFieldDefn {
+    return new BaseField('date');
+  }
+
+  static time(): IFieldDefn {
+    return new BaseField('time');
+  }
+
+  static select(searcher: any): IFieldDefn {
+    return new BaseField('select', searcher);
   }
 
   static reference(searcher: any): IFieldDefn {
