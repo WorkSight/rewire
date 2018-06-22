@@ -90,7 +90,7 @@ interface IName {
   name: string;
 }
 
-const searcher = arraySearch(['Yes', 'No', 'Maybe', 'Uncertain', 'Definitely Not']);
+const searcher = arraySearch(['Yes', 'No', 'Maybe', 'Uncertain', 'Definitely Not'], (item?) => item || '');
 const countries = arraySearch(suggestions, (item?) => (item && item.name) || '');
 const state = documentSearch('state');
 const city = documentSearch('city');
@@ -389,10 +389,67 @@ const _Home = (props: any) => (
 
 const Home = _Home;
 
+class TestDialog extends Modal {
+  form = Form.create({
+    date                 : Form.date().label('Date').validators(isRequired).placeholder(utc().toDateString()).autoFocus(),
+    age                  : Form.number().label('Age').placeholder(''),
+    shouldI              : Form.select(searcher).label('Should I?').validators(isRequired),
+    isGreat              : Form.boolean().label('Is Great'),
+    noLabel              : Form.boolean(),
+    disabled             : Form.boolean().label('Disabled').disabled(() => true),
+    email                : Form.string().label('Email').validators(and(isRequired, isEmail)).placeholder('enter a valid email'),
+    password             : Form.string().label('Password').validators(and(isRequired, isSameAsOther('password_confirmation', 'passwords are not the same'))).placeholder('enter a password').editor('password'),
+    password_confirmation: Form.string().label('Confirm Password').placeholder('confirm your password').editor('password'),
+    country              : Form.reference(countries).label('Country').validators(isRequired).placeholder('ooga')
+  }, {email: 'splace@worksight.net', isGreat: true});
 
-const About = () => (
+  constructor() {
+    super('Test Form');
+    this.action('login', this.submit, {type: 'submit', disabled: () => this.form.hasErrors})
+        .action('cancel', {color: 'secondary', icon: 'cancel'});
+  }
+
+  submit = async () => {
+    if (!this.form.submit()) return false;
+    console.log(this.form.value);
+    await delay(2000);
+    setTimeout(() => confirmation.open(), 0);
+    // await perform login from server
+    return true;
+  }
+}
+
+const testDialog = new TestDialog();
+const TestFormView = ({form}: {form: typeof testDialog.form}) => (
+  <FormView form={form} onSubmit={testDialog.actionFn('login')}>
+    <div className='content'>
+      <form.field.date.Editor className='span4' />
+      <form.field.age.Editor className='span4' />
+      <form.field.shouldI.Editor className='span4' />
+      <form.field.isGreat.Editor className='span4' />
+    </div>
+    <div className='content'>
+      <form.field.noLabel.Editor className='span4' />
+      <form.field.disabled.Editor className='span4' />
+      <form.field.email.Editor className='span4' />
+      <form.field.country.Editor className='span4' />
+    </div>
+    <div className='content'>
+      <form.field.password.Editor />
+      <form.field.password_confirmation.Editor />
+    </div>
+    <div className='content'>
+      <button style={{height: '30px'}}  value='Submit' onClick={testDialog.actionFn('login')}>Submit</button>
+      <button style={{height: '30px'}}  value='Cancel' onClick={testDialog.actionFn('cancel')}>Cancel</button>
+    </div>
+  </FormView>
+);
+
+
+const About = (props: any) => (
   <div>
     <h2>About</h2>
+    <TestFormView form={testDialog.form} />
   </div>
 );
 

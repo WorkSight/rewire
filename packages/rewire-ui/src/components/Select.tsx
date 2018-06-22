@@ -81,7 +81,7 @@ export default class SelectInternal<T> extends React.Component<ISelectProps<T>, 
   renderSelect(disabled: boolean, cls: string, value?: T, autoFocus?: boolean) {
     const v   = this.map(value);
     return (
-    <Select disabled={disabled} value={(v || '(none)') as any} onChange={this.handleChanged} className={cls} style={this.props.style} renderValue={(p) => <span>{v}</span>}>{
+    <Select disabled={disabled} value={v as any} onChange={this.handleChanged} className={cls} style={this.props.style} renderValue={(p) => <span>{v}</span>}>{
         this.state.suggestions.map((suggestion: any, index: number) => {
           const displayName = this.map(suggestion);
           return this.renderSuggestion({

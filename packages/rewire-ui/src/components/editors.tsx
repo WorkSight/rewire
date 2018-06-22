@@ -4,7 +4,9 @@ import Select         from './Select';
 import {Observe}      from 'rewire-core';
 import TextField      from './TextField';
 import NumberField    from './NumberField';
-import TimeInputField from '../components/TimeInputField';
+import CheckField     from './CheckField';
+import SwitchField    from './SwitchField';
+import TimeInputField from './TimeInputField';
 import {utc}          from 'rewire-common';
 import * as is        from 'is';
 
@@ -19,7 +21,7 @@ export interface IField {
   visible?    : boolean;
 }
 
-export type EditorType = 'text' | 'auto-complete' | 'select' | 'date' | 'time' | 'number' | 'checked' | 'password';
+export type EditorType = 'text' | 'auto-complete' | 'select' | 'date' | 'time' | 'number' | 'checked' | 'switch' | 'password';
 
 export function compare<T>(x?: T, y?: T) {
   if (x && !y) {
@@ -63,7 +65,6 @@ export default function editor(type: EditorType, propsForEdit?: any): React.SFC<
       return ({field, className, onValueChange}: {field: IField, className: string, onValueChange: (v: any) => void}) => (
         <Observe render={() => (
           <Select
-            placeholder={field.placeholder}
             label={field.label}
             onValueChange={onValueChange}
             autoFocus={field.autoFocus}
@@ -102,7 +103,7 @@ export default function editor(type: EditorType, propsForEdit?: any): React.SFC<
 
     case 'text':
       return ({field, className, onValueChange, endOfTextOnFocus, selectOnFocus}: TextEditorProps) => (
-        <Observe render={(props) => (
+        <Observe render={() => (
           <TextField
             placeholder={field.placeholder}
             label={field.label}
@@ -182,6 +183,38 @@ export default function editor(type: EditorType, propsForEdit?: any): React.SFC<
           />
         )} />
       );
+
+    case 'checked':
+    return ({field, className, onValueChange, endOfTextOnFocus, selectOnFocus}: TextEditorProps) => (
+      <Observe render={() => (
+        <CheckField
+          label={field.label}
+          value={field.value}
+          onValueChange={onValueChange}
+          autoFocus={field.autoFocus}
+          disabled={field.disabled && field.disabled(field)}
+          visible={field.visible}
+          className={className}
+          {...propsForEdit}
+        />
+      )} />
+    );
+
+    case 'switch':
+    return ({field, className, onValueChange, endOfTextOnFocus, selectOnFocus}: TextEditorProps) => (
+      <Observe render={() => (
+        <SwitchField
+          label={field.label}
+          value={field.value}
+          onValueChange={onValueChange}
+          autoFocus={field.autoFocus}
+          disabled={field.disabled && field.disabled(field)}
+          visible={field.visible}
+          className={className}
+          {...propsForEdit}
+        />
+      )} />
+    );
 
     case 'auto-complete':
       return ({field, className, onValueChange}: {field: IField, className: string, onValueChange: (v: any) => void}) => (

@@ -38,7 +38,7 @@ class CellModel implements ICell {
   }
 
   clear() {
-    if (this.readOnly && this.readOnly) {
+    if (this.readOnly || !this.enabled) {
       return;
     }
 
