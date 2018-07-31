@@ -14,6 +14,7 @@ export * from './components/Select';
 export * from './components/Sortable';
 export * from './components/styles';
 export * from './components/TextField';
+export * from './components/StaticField';
 
 export {default as Form}               from './models/Form';
 export {default as Modal}              from './models/Modal';
@@ -28,5 +29,6 @@ export {default as Loader}             from './components/Loader';
 export {default as NumberField}        from './components/NumberField';
 export {default as Select}             from './components/Select';
 export {default as Sortable}           from './components/Sortable';
-export {default as styles}             from './components/styles';
+export {default as decorate}           from './components/styles';
 export {default as TextField}          from './components/TextField';
+export {default as StaticField}        from './components/StaticField';

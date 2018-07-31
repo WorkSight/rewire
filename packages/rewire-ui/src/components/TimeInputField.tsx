@@ -1,5 +1,6 @@
 import * as React from 'react';
 import TextField, { TextFieldProps } from 'material-ui/TextField';
+import {TextAlignment}               from './editors';
 
 export class TimeValidator {
   rounding: number;
@@ -115,6 +116,7 @@ export interface ITimeFieldProps {
   error?       : string;
   value?       : number;
   label?       : string;
+  align?       : TextAlignment;
   placeholder? : string;
   rounding?    : number;
   onValueChange: (value?: number) => void;
@@ -173,6 +175,7 @@ export default class TimeInputField extends React.Component<TextFieldProps & ITi
         onChange={this.handleChange}
         onBlur={this.handleBlur}
         placeholder={placeholder}
+        inputProps={{autoFocus: this.props.autoFocus, style: {textAlign: this.props.align || 'left'}}}
       />);
   }
 }

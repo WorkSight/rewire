@@ -1,5 +1,6 @@
 import {IGrid, IColumn}              from '../models/GridTypes';
 import Column                        from './Column';
+import classNames                    from 'classnames';
 import Cell                          from './Cell';
 import Row                           from './Row';
 import * as React                    from 'react';
@@ -50,6 +51,7 @@ window.onresize = (evt) => {
 export interface IGridProps {
   grid: IGrid;
   virtual?: boolean;
+  className?: string;
   style?: React.CSSProperties;
 }
 
@@ -326,7 +328,7 @@ export default class Grid extends React.PureComponent<IGridProps> {
 
   render() {
     return (
-      <div className='ws-grid' style={this.props.style}>
+      <div className={classNames('ws-grid', this.props.className)} style={this.props.style}>
         {this.renderHeaders()}
         {this.renderData()}
       </div>

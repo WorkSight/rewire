@@ -11,7 +11,7 @@ import decorate, { WithStyle } from './styles';
 
 let styles = {
   root: {
-    width: '100%'
+    width: '100%',
   },
   buttons: {
     alignSelf: 'flex-end',
@@ -30,8 +30,8 @@ let styles = {
       marginTop: 16,
       width: '85%',
       border: '1px solid #eee'
-    }
-  }
+    },
+  },
 };
 
 export type ActionRenderType = (props: {label: string, action: ActionType, isDisabled: boolean}) => JSX.Element;
@@ -47,27 +47,38 @@ export const DefaultActionRenderer: ActionRenderType = ({label, action, isDisabl
 const TRANSITION_TIMEOUT = 220;
 const Transition = (props: any) => <Grow {...props} timeout={TRANSITION_TIMEOUT} onEntered={(node => node.style.transform = 'none')} />;
 
-export interface DialogProps {
-  dialog         : Modal;
-  fullScreen?    : boolean;
-  title?         : (dialog: Modal) => JSX.Element;
-  maxWidth?      : 'xs' | 'sm' | 'md' | false;
-  ButtonRenderer?: ActionRenderType;
+export interface IDialogProps {
+  dialog                : Modal;
+  fullScreen?           : boolean;
+  disableEscapeKeyDown? : boolean;
+  hideBackdrop?         : boolean;
+  disableTransition?    : boolean;
+  transition?           : (props: any) => JSX.Element;
+  transitionDuration?   : number;
+  title?                : (dialog: Modal) => JSX.Element;
+  maxWidth?             : 'xs' | 'sm' | 'md' | false;
+  ButtonRenderer?       : ActionRenderType;
 }
 
-class DialogInternal extends React.Component<WithStyle<typeof styles, DialogProps>> {
+class DialogInternal extends React.Component<WithStyle<typeof styles, IDialogProps>> {
   render() {
-    const {classes, children, dialog, ButtonRenderer, fullScreen, maxWidth, title} = this.props;
+    const {classes, children, dialog, ButtonRenderer, fullScreen, maxWidth, title, disableEscapeKeyDown, hideBackdrop, transition, transitionDuration, disableTransition} = this.props;
+    const escapeAction            = disableEscapeKeyDown ? undefined : () => dialog.close();
+    const transitionToUse         = transition ? transition : Transition;
+    const transitionDurationToUse = transitionDuration !== undefined ? transitionDuration : TRANSITION_TIMEOUT;
+    const transitionAction        = disableTransition ? undefined : transitionToUse;
+    const transitionTime          = disableTransition ? 0 : transitionDurationToUse;
+
     return (
       <Observe render={() => (
-        <Dialog open={dialog.isOpen} fullWidth maxWidth={maxWidth} transition={Transition} fullScreen={fullScreen} onEscapeKeyDown={(evt) => dialog.close()}>
+        <Dialog classes={{paper: classes.root}} open={dialog.isOpen} fullWidth maxWidth={maxWidth} hideBackdrop={hideBackdrop} transitionDuration={transitionTime} transition={transitionAction} fullScreen={fullScreen} disableEscapeKeyDown={disableEscapeKeyDown} onEscapeKeyDown={escapeAction}>
           {dialog.title &&
             <div className={classes.heading}>
               <Typography variant='title'>{(title && title(dialog)) || dialog.title}</Typography>
-              <hr />
+              <hr/>
             </div>}
             {children}
-          {(Object.keys(dialog.actions).length > 0) && <div className={classes.buttons}>{
+          {(dialog.actions && Object.keys(dialog.actions).length > 0) && <div className={classes.buttons}>{
             Object.keys(dialog.actions).map(label => ((ButtonRenderer && <ButtonRenderer key={label} label={label} action={dialog.actions[label]} isDisabled={dialog.isDisabled} />) || <DefaultActionRenderer key={label} label={label} action={dialog.actions[label]} isDisabled={dialog.isDisabled} />))
           }</div>}
         </Dialog>
@@ -76,4 +87,4 @@ class DialogInternal extends React.Component<WithStyle<typeof styles, DialogProp
   }
 }
 
-export default decorate(styles)<DialogProps>(DialogInternal);
+export default decorate(styles)<IDialogProps>(DialogInternal);

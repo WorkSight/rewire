@@ -213,7 +213,7 @@ export default class Cell extends React.PureComponent<ICellProps, {}> {
       if (!cell) {
         return <div></div>;
       }
-      let style: React.CSSProperties = {overflow: 'hidden', flex: '1', height: '100%', padding: 0, margin: 0, display: 'flex', width: '100%'};
+      let style: React.CSSProperties = {overflow: 'hidden', flex: '1', height: '100%', alignItems: 'center', padding: 0, margin: 0, display: 'flex', width: '100%'};
       let clazz      = cc([{
         selected    : this.cell.selected,
         edit        : this.cell.editing,

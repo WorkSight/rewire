@@ -9,15 +9,17 @@ import {
 import Validator, { ValidationResult, IValidateFn } from './Validator';
 import editor, {
   EditorType,
-  IField
+  TextAlignment,
+  IField,
 } from '../components/editors';
 import { createElement } from 'react';
 
-export type IFieldTypes = 'string' | 'reference' | 'select' | 'number' | 'boolean' | 'date' | 'time';
+export type IFieldTypes = 'string' | 'static' | 'reference' | 'select' | 'number' | 'boolean' | 'date' | 'time' | 'avatar';
 
 export interface IFieldDefn {
   label(text: string): IFieldDefn;
   placeholder(text: string): IFieldDefn;
+  align(text: TextAlignment): IFieldDefn;
   autoFocus(): IFieldDefn;
   disabled(action: (field: IEditorField) => boolean): IFieldDefn;
   editor(editorType: EditorType): IFieldDefn;
@@ -40,6 +42,7 @@ interface IBaseFieldDefn {
   editProps?  : any;
   label?      : string;
   placeholder?: string;
+  align?      : TextAlignment;
   error?      : string;
   value?      : any;
   disabled?   : (field: IEditorField) => boolean;
@@ -60,6 +63,11 @@ class BaseField implements IFieldDefn {
 
   placeholder(text: string): IFieldDefn {
     this.typeDefn.placeholder = text;
+    return this;
+  }
+
+  align(text: TextAlignment): IFieldDefn {
+    this.typeDefn.align = text;
     return this;
   }
 
@@ -151,12 +159,14 @@ export default class Form {
 
   private static editorDefaults: {[K in IFieldTypes]: EditorType} = {
     'string'   : 'text',
+    'static'   : 'static',
     'select'   : 'select',
     'reference': 'auto-complete',
     'boolean'  : 'checked',
     'date'     : 'date',
     'time'     : 'time',
-    'number'   : 'number'
+    'number'   : 'number',
+    'avatar'   : 'avatar'
   };
 
   private createEditor(editorType: EditorType | undefined, field: IEditorField, editProps?: any): React.SFC<any> {
@@ -171,6 +181,7 @@ export default class Form {
       autoFocus: fieldDefn.typeDefn.autoFocus,
       type: fieldDefn.typeDefn.type,
       placeholder: fieldDefn.typeDefn.placeholder,
+      align: fieldDefn.typeDefn.align,
       label: fieldDefn.typeDefn.label,
       disabled: fieldDefn.typeDefn.disabled,
       visible: true,
@@ -188,6 +199,12 @@ export default class Form {
       if (current.value !== undefined) prev[current.name] = current.value;
       return prev;
     }, {});
+  }
+
+  public clear() {
+    this.fields.forEach(field => {
+      field.value = undefined;
+    });
   }
 
   public submit = (enforceValidation: boolean = true) => {
@@ -223,6 +240,10 @@ export default class Form {
     return new BaseField('string');
   }
 
+  static static(): IFieldDefn {
+    return new BaseField('static');
+  }
+
   static number(): IFieldDefn {
     return new BaseField('number');
   }
@@ -245,5 +266,9 @@ export default class Form {
 
   static reference(searcher: any): IFieldDefn {
     return new BaseField('reference', searcher);
+  }
+
+  static avatar(): IFieldDefn {
+    return new BaseField('avatar');
   }
 }

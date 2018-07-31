@@ -3,6 +3,7 @@ import NumberFormat                  from 'react-number-format';
 import * as is                       from 'is';
 import TextField, { TextFieldProps } from 'material-ui/TextField';
 import BlurInputHOC                  from './BlurInputHOC';
+import {TextAlignment}               from './editors';
 
 export interface INumberFieldProps {
   visible?          : boolean;
@@ -13,7 +14,7 @@ export interface INumberFieldProps {
   placeholder?      : string;
   format?           : string;
   mask?             : string | string[];
-  align?            : 'left' | 'right';
+  align?            : TextAlignment;
   decimals?         : number;
   fixed?            : boolean;
   thousandSeparator?: boolean;
@@ -72,9 +73,12 @@ export default class NumberTextField extends React.Component<TextFieldProps & IN
           thousandSeparator={this.props.thousandSeparator}
           prefix='$'
           decimalScale={this.props.decimals}
+          inputProps={{style: {textAlign: this.props.align || 'left'}}}
+          InputLabelProps={{shrink: true}}
           fixedDecimalScale={this.props.fixed}
           customInput={TextField}
           placeholder={this.props.placeholder}
+          helperText={!this.props.disabled && this.props.error}
         />);
     }
 
@@ -96,9 +100,11 @@ export default class NumberTextField extends React.Component<TextFieldProps & IN
             thousandSeparator={props.thousandSeparator}
             decimalScale={props.decimals}
             inputProps={{style: {textAlign: props.align || 'left'}}}
+            InputLabelProps={{shrink: true}}
             fixedDecimalScale={props.fixed}
             customInput={TextField}
             placeholder={props.placeholder}
+            helperText={!props.disabled && props.error}
           />)
         }
       />);

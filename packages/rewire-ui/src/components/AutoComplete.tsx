@@ -67,7 +67,7 @@ class AutoComplete<T> extends React.Component<IAutoCompleteProps<T>, any> {
   }
 
   renderInput = (classes: Record<IStyleClasses, string>, error: string | undefined, inputProps: any) => {
-    const { label, disabled, autoFocus, value, ref, ...other } = inputProps;
+    const { label, disabled, autoFocus, value, ref, align, ...other } = inputProps;
 
     return (
       <TextField
@@ -79,6 +79,7 @@ class AutoComplete<T> extends React.Component<IAutoCompleteProps<T>, any> {
         helperText={error}
         inputRef={ref}
         disabled={disabled}
+        inputProps={{style: {textAlign: align || 'left'}}}
         {...other}
       />
     );
@@ -221,7 +222,7 @@ class AutoComplete<T> extends React.Component<IAutoCompleteProps<T>, any> {
   }
 
   render() {
-    const { classes, theme, disabled, visible, error, label, placeholder, autoFocus } = this.props;
+    const { classes, theme, disabled, visible, error, label, placeholder, autoFocus, align } = this.props;
     if (visible === false) {
       return null;
     }
@@ -250,6 +251,7 @@ class AutoComplete<T> extends React.Component<IAutoCompleteProps<T>, any> {
                 autoFocus: autoFocus,
                 label: label,
                 placeholder: placeholder,
+                align: align,
               }),
             )}
             {isOpen

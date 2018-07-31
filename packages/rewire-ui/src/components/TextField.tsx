@@ -1,6 +1,7 @@
 import * as React                    from 'react';
 import BlurInputHOC                  from './BlurInputHOC';
 import TextField, { TextFieldProps } from 'material-ui/TextField';
+import {TextAlignment}               from './editors';
 
 export interface ITextFieldProps {
   visible?         : boolean;
@@ -9,6 +10,7 @@ export interface ITextFieldProps {
   value?           : string;
   label?           : string;
   placeholder?     : string;
+  align?           : TextAlignment;
   selectOnFocus?   : boolean;
   endOfTextOnFocus?: boolean;
   updateOnChange?  : boolean;
@@ -49,7 +51,7 @@ export default class TextFieldInternal extends React.Component<TextFieldProps & 
         autoFocus={this.props.autoFocus}
         disabled={this.props.disabled}
         label={this.props.label}
-        inputProps={{autoFocus: this.props.autoFocus}}
+        inputProps={{autoFocus: this.props.autoFocus, style: {textAlign: this.props.align || 'left'}}}
         placeholder={this.props.placeholder}
         error={!this.props.disabled && !!this.props.error}
         helperText={!this.props.disabled && this.props.error}
@@ -80,7 +82,7 @@ export default class TextFieldInternal extends React.Component<TextFieldProps & 
           onBlur={props.onBlur}
           onKeyDown={props.onKeyDown}
           onChange={props.onChange}
-          inputProps={{autoFocus: props.autoFocus}}
+          inputProps={{autoFocus: props.autoFocus, style: {textAlign: props.align || 'left'}}}
           InputLabelProps={{shrink: true}}
         />
       }

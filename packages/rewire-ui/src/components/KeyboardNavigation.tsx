@@ -339,9 +339,9 @@ export default class KeyboardNavigation {
 export class KeyHandler extends React.Component<{children: (keyboard: KeyboardNavigation) => JSX.Element}> {
   private _keyboard = new KeyboardNavigation();
 
-  shouldComponentUpdate() {
-    return false;
-  }
+  // shouldComponentUpdate() {
+  //   return false;
+  // }
 
   componentWillUnmount() {
     this._keyboard.element = undefined;
