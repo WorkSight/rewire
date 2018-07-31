@@ -42,6 +42,15 @@ export const isSameAsOther = (field: string, text?: string) => (obj: ObjectType,
   return undefined;
 };
 
+export const isDifferentFromOther = (field: string, text?: string) => (obj: ObjectType, otherField: string, otherValue: any): string | undefined => {
+  let value = obj[field];
+  if (defaultEquals(otherValue, value)) {
+    if (text) return text;
+    return `the ${field} must be different from ${otherField}`;
+  }
+  return undefined;
+};
+
 export const and = (...args: IValidateFn[]) => (obj: Object, field: string, value: any): string | undefined => {
   for (const fn of args) {
     const result = fn(obj, field, value);

@@ -30,7 +30,7 @@ Sparky.task('config', (context) => {
       EnvPlugin({ NODE_ENV: context.isProduction ? 'production' : 'development' }),
       CSSPlugin(),
       [SassPlugin(), CSSPlugin()],
-      ImageBase64Plugin(),
+      ImageBase64Plugin({ useDefault: true }),
       context.isProduction && QuantumPlugin({
         target: 'npm',
         containedAPI: true,

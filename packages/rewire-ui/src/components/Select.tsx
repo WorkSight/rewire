@@ -46,7 +46,7 @@ export default class SelectInternal<T> extends React.Component<ISelectProps<T>, 
     }
     let s: any = {};
     if (isHighlighted) {
-      s.fontWeight = 'bold';
+      s.fontWeight = '500';
     }
 
     return (

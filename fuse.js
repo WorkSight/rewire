@@ -37,7 +37,7 @@ const fuse = FuseBox.init({
     CSSPlugin(),
     [SassPlugin(), CSSPlugin()],
     WebIndexPlugin({title: 'WorkSight .Next',  path: './', template: 'examples/src/index.html', target: 'index.html' }),
-    ImageBase64Plugin(),
+    ImageBase64Plugin({ useDefault: true }),
     isProduction && QuantumPlugin({target: 'browser', uglify: {keep_fnames: true}, treeshake: true})
   ],
   experimentalFeatures:            true

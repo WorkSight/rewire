@@ -3,6 +3,7 @@ import AutoComplete   from './AutoComplete';
 import Select         from './Select';
 import {Observe}      from 'rewire-core';
 import TextField      from './TextField';
+import StaticField    from './StaticField';
 import NumberField    from './NumberField';
 import CheckField     from './CheckField';
 import SwitchField    from './SwitchField';
@@ -14,6 +15,7 @@ export interface IField {
   name        : string;
   label?      : string;
   placeholder?: string;
+  align?      : TextAlignment;
   autoFocus?  : boolean;
   error?      : string;
   value?      : any;
@@ -21,7 +23,9 @@ export interface IField {
   visible?    : boolean;
 }
 
-export type EditorType = 'text' | 'auto-complete' | 'select' | 'date' | 'time' | 'number' | 'checked' | 'switch' | 'password';
+export type EditorType = 'text' | 'static' | 'auto-complete' | 'select' | 'date' | 'time' | 'number' | 'checked' | 'switch' | 'password' | 'avatar';
+
+export type TextAlignment = 'left' | 'right' | 'center';
 
 export function compare<T>(x?: T, y?: T) {
   if (x && !y) {
@@ -71,7 +75,8 @@ export default function editor(type: EditorType, propsForEdit?: any): React.SFC<
             error={field.error}
             disabled={field.disabled && field.disabled(field)}
             visible={field.visible}
-            style={{width: '100%', minWidth: '120px'}}
+            style={{width: '100%', minWidth: '120px', textAlign: field.align || 'left'}}
+            align={field.align || 'left'}
             selectedItem={field.value}
             onSelectItem={onValueChange}
             className={className}
@@ -93,6 +98,7 @@ export default function editor(type: EditorType, propsForEdit?: any): React.SFC<
             error={field.error}
             disabled={field.disabled && field.disabled(field)}
             visible={field.visible}
+            align={field.align || 'left'}
             value={utc(field.value).toDateString()}
             type='date'
             className={className}
@@ -115,11 +121,27 @@ export default function editor(type: EditorType, propsForEdit?: any): React.SFC<
             error={field.error}
             disabled={field.disabled && field.disabled(field)}
             visible={field.visible}
+            align={field.align || 'left'}
             className={className}
             {...propsForEdit}
           />
         )} />
       );
+
+    case 'static':
+    return ({field, className, onValueChange}: {field: IField, className: string, onValueChange: (v: any) => void}) => (
+      <Observe render={() => (
+        <StaticField
+          label={field.label}
+          value={field.value}
+          onValueChange={onValueChange}
+          visible={field.visible}
+          align={field.align || 'left'}
+          className={className}
+          {...propsForEdit}
+        />
+      )} />
+    );
 
     case 'password':
       return ({field, className, onValueChange, endOfTextOnFocus, selectOnFocus}: TextEditorProps) => (
@@ -135,6 +157,7 @@ export default function editor(type: EditorType, propsForEdit?: any): React.SFC<
             error={field.error}
             disabled={field.disabled && field.disabled(field)}
             visible={field.visible}
+            align={field.align || 'left'}
             type='password'
             className={className}
             {...propsForEdit}
@@ -156,8 +179,7 @@ export default function editor(type: EditorType, propsForEdit?: any): React.SFC<
             disabled={field.disabled && field.disabled(field)}
             autoFocus={field.autoFocus}
             visible={field.visible}
-            style={{textAlign: 'right'}}
-            align={'right'}
+            align={field.align || 'right'}
             className={className}
             {...propsForEdit}
           />
@@ -178,6 +200,7 @@ export default function editor(type: EditorType, propsForEdit?: any): React.SFC<
             autoFocus={field.autoFocus}
             disabled={field.disabled && field.disabled(field)}
             visible={field.visible}
+            align={field.align || 'left'}
             className={className}
             {...propsForEdit}
           />
@@ -227,8 +250,28 @@ export default function editor(type: EditorType, propsForEdit?: any): React.SFC<
             autoFocus={field.autoFocus}
             disabled={field.disabled && field.disabled(field)}
             visible={field.visible}
+            align={field.align || 'left'}
             selectedItem={field.value}
             onSelectItem={onValueChange}
+            className={className}
+            {...propsForEdit}
+          />
+        )} />
+      );
+    case 'avatar':
+      return ({field, className, onValueChange, endOfTextOnFocus, selectOnFocus}: TextEditorProps) => (
+        <Observe render={() => (
+          <TextField
+            placeholder={field.placeholder}
+            label={field.label}
+            value={field.value}
+            autoFocus={field.autoFocus}
+            endOfTextOnFocus={endOfTextOnFocus}
+            selectOnFocus={selectOnFocus}
+            onValueChange={onValueChange}
+            error={field.error}
+            disabled={field.disabled && field.disabled(field)}
+            visible={field.visible}
             className={className}
             {...propsForEdit}
           />
