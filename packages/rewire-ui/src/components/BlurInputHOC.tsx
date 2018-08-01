@@ -1,5 +1,5 @@
 import * as React       from 'react';
-import {TextFieldProps} from 'material-ui/TextField';
+import {TextFieldProps} from '@material-ui/core/TextField';
 
 export interface IBlurState {
   readonly value?: string | number | React.ReactText[];

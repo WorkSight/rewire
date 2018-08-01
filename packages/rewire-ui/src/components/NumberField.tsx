@@ -1,7 +1,7 @@
 import * as React                    from 'react';
 import NumberFormat                  from 'react-number-format';
 import * as is                       from 'is';
-import TextField, { TextFieldProps } from 'material-ui/TextField';
+import TextField, { TextFieldProps } from '@material-ui/core/TextField';
 import BlurInputHOC                  from './BlurInputHOC';
 import {TextAlignment}               from './editors';
 
