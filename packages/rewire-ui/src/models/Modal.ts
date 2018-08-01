@@ -11,8 +11,14 @@ const disabled         = () => false;
 export type ActionFn   = () => (Promise<boolean> | boolean);
 export type ActionType = {action: () => (Promise<void> | void), type?: 'submit', icon?: string, color?: 'primary' | 'secondary', disabled: () => boolean};
 
+export interface IModalState {
+  open: boolean;
+  title?: string;
+  enable: boolean;
+}
+
 export default class Modal {
-  private  state:   {open: boolean, title?: string, enable: boolean};
+  protected state:  IModalState;
   readonly actions: {[index: string]: ActionType};
 
   constructor(title?: string, open?: boolean) {

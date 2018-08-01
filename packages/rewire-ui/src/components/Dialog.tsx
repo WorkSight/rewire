@@ -1,12 +1,12 @@
 import * as React            from 'react';
 import Modal, { ActionType } from '../models/Modal';
 import {Observe}             from 'rewire-core';
-import Typography            from 'material-ui/Typography';
-import Dialog                from 'material-ui/Dialog';
-import Button                from 'material-ui/Button';
-import Icon                  from 'material-ui/Icon';
+import Typography            from '@material-ui/core/Typography';
+import Dialog                from '@material-ui/core/Dialog';
+import Button                from '@material-ui/core/Button';
+import Icon                  from '@material-ui/core/Icon';
+import Grow                  from '@material-ui/core/Grow';
 import './Dialog.css';
-import Grow                  from 'material-ui/transitions/Grow';
 import decorate, { WithStyle } from './styles';
 
 let styles = {
@@ -71,7 +71,7 @@ class DialogInternal extends React.Component<WithStyle<typeof styles, IDialogPro
 
     return (
       <Observe render={() => (
-        <Dialog classes={{paper: classes.root}} open={dialog.isOpen} fullWidth maxWidth={maxWidth} hideBackdrop={hideBackdrop} transitionDuration={transitionTime} transition={transitionAction} fullScreen={fullScreen} disableEscapeKeyDown={disableEscapeKeyDown} onEscapeKeyDown={escapeAction}>
+        <Dialog classes={{paper: classes.root}} open={dialog.isOpen} fullWidth maxWidth={maxWidth} hideBackdrop={hideBackdrop} transitionDuration={transitionTime} TransitionComponent={transitionAction} fullScreen={fullScreen} disableEscapeKeyDown={disableEscapeKeyDown} onEscapeKeyDown={escapeAction}>
           {dialog.title &&
             <div className={classes.heading}>
               <Typography variant='title'>{(title && title(dialog)) || dialog.title}</Typography>

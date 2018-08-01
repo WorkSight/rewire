@@ -1,6 +1,6 @@
 import * as React                    from 'react';
 import decorate, { WithStyle}        from './styles';
-import TextField, { TextFieldProps } from 'material-ui/TextField';
+import TextField, { TextFieldProps } from '@material-ui/core/TextField';
 import {TextAlignment}               from './editors';
 
 const styles = {

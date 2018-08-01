@@ -1,5 +1,5 @@
 import * as React from 'react';
-import TextField, { TextFieldProps } from 'material-ui/TextField';
+import TextField, { TextFieldProps } from '@material-ui/core/TextField';
 import {TextAlignment}               from './editors';
 
 export class TimeValidator {

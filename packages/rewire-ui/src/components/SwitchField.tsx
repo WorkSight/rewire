@@ -1,6 +1,6 @@
 import * as React            from 'react';
-import Switch, {SwitchProps} from 'material-ui/Switch';
-import {FormControlLabel}    from 'material-ui/Form';
+import Switch, {SwitchProps} from '@material-ui/core/Switch';
+import FormControlLabel      from '@material-ui/core/FormControlLabel';
 
 export interface ISwitchProps {
   visible?     : boolean;

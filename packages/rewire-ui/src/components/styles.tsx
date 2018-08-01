@@ -1,7 +1,7 @@
 import {
   withStyles as withStylesMUI,
   Theme
-} from 'material-ui/styles';
+} from '@material-ui/core/styles';
 import * as React from 'react';
 
 export {Theme as Theme};

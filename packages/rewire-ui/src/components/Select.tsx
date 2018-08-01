@@ -1,9 +1,10 @@
 import { ChangeEvent }                 from 'react';
-import { FormControl, FormHelperText } from 'material-ui/Form';
-import { InputLabel }                  from 'material-ui/Input';
-import { MenuItem }                    from 'material-ui/Menu';
+import FormControl                     from '@material-ui/core/FormControl';
+import FormHelperText                  from '@material-ui/core/FormHelperText';
+import InputLabel                      from '@material-ui/core/InputLabel';
+import MenuItem                        from '@material-ui/core/MenuItem';
 import * as React                      from 'react';
-import Select                          from 'material-ui/Select';
+import Select                          from '@material-ui/core/Select';
 import {
   ICustomProps,
   SearchFn,

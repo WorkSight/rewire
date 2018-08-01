@@ -1,6 +1,6 @@
 import * as React                    from 'react';
 import BlurInputHOC                  from './BlurInputHOC';
-import TextField, { TextFieldProps } from 'material-ui/TextField';
+import TextField, { TextFieldProps } from '@material-ui/core/TextField';
 import {TextAlignment}               from './editors';
 
 export interface ITextFieldProps {
@@ -82,7 +82,7 @@ export default class TextFieldInternal extends React.Component<TextFieldProps & 
           onBlur={props.onBlur}
           onKeyDown={props.onKeyDown}
           onChange={props.onChange}
-          inputProps={{autoFocus: props.autoFocus, style: {textAlign: props.align || 'left'}}}
+          inputProps={{autoFocus: props.autoFocus, style: {textAlign: this.props.align || 'left'}}}
           InputLabelProps={{shrink: true}}
         />
       }

@@ -13,7 +13,7 @@ import {
 }                 from 'react-beautiful-dnd';
 import decorate, { StyleProps, WithStyle }  from './styles';
 import {Observe}  from 'rewire-core';
-import Icon       from 'material-ui/Icon';
+import Icon       from '@material-ui/core/Icon';
 import {omit}     from 'rewire-common';
 
 // function shadeColor(color: string, percent: number) {

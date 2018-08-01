@@ -1,7 +1,7 @@
-import * as React           from 'react';
-import * as is              from 'is';
-import { CircularProgress } from 'material-ui/Progress';
-import Fade, {FadeProps}    from 'material-ui/transitions/Fade';
+import * as React        from 'react';
+import * as is           from 'is';
+import CircularProgress  from '@material-ui/core/CircularProgress';
+import Fade, {FadeProps} from '@material-ui/core/Fade';
 
 // patch fade to get rid of the error for passing the style.
 const F = Fade as React.ComponentType<FadeProps & {style?: React.CSSProperties}>;
