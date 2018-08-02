@@ -73,6 +73,7 @@ class ColumnModel implements IColumn {
 export default function create(name: string, title: string): IColumn;
 export default function create(name: string, title: string, type: IColumnEditor): IColumn;
 export default function create(name: string, title: string, type: IColumnEditor, width: string): IColumn;
-export default function create(name: string, title: string, type?: IColumnEditor, width?: string, align?: 'left' | 'right'): IColumn {
+export default function create(name: string, title: string, type: IColumnEditor, width: string, align: TextAlignment): IColumn;
+export default function create(name: string, title: string, type?: IColumnEditor, width?: string, align?: TextAlignment): IColumn {
   return new ColumnModel(name, title, type, width, align);
 }

@@ -98,6 +98,7 @@ export interface ICellProperties {
 
 export interface IColumn extends ICellProperties {
   name          : string;
+  title?        : string;
   width?        : string;
   fixed         : boolean;
   visible       : boolean;
