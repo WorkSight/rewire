@@ -11,6 +11,7 @@ const styles = {
 
 export interface IFormViewProps {
   form: Form;
+  classes?: React.CSSProperties;
   onSubmit: (form: Form) => void;
 }
 

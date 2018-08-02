@@ -78,6 +78,7 @@ export type Styles = StyleProps<typeof styles>;
 
 export type ListItemProps = {
   items          : IItem[];
+  classes?       : React.CSSProperties;
   showDragHandle?: boolean;
   listRenderer?  : React.SFC<any>;
   itemRenderer?  : (item: IItem) => JSX.Element;
@@ -86,6 +87,7 @@ export type ListItemProps = {
 
 export type ItemProps = {
   showDragHandle?: boolean;
+  classes?       : React.CSSProperties;
   autoFocus?     : boolean;
   dragProvided   : DraggableProvided;
   itemRenderer   : (item: IItem) => JSX.Element
@@ -143,8 +145,8 @@ export class ListItems extends React.PureComponent<ListItemProps> {
     const itemRenderer = this.props.itemRenderer || ((item: IItem) => (item as any).name);
     return (
       <Observe render={() =>
-        <>{
-          this.props.items.map((item: any, index: number) => (
+        < >
+        {this.props.items.map((item: any, index: number) => (
             <Draggable key={item.id} draggableId={item.id} index={index}>
               {(dragProvided: DraggableProvided, dragSnapshot: DraggableStateSnapshot) => (
                 <div>
@@ -154,7 +156,8 @@ export class ListItems extends React.PureComponent<ListItemProps> {
             )}
             </Draggable>
           ))
-        }</>
+        }
+        </>
       } />
     );
   }
@@ -169,6 +172,7 @@ export type SortableListProps = {
   listRenderer?  : React.SFC<any>;
   itemRenderer?  : (item: IItem) => JSX.Element;
   style?         : Object,
+  classes?       : React.CSSProperties;
   showDragHandle?: boolean,
   items          : IItem[],
 };
@@ -219,6 +223,7 @@ export const SortableList = decorate(styles)(SortableListInternal);
 
 export interface Props {
   direction?: 'row' | 'column';
+  classes?: React.CSSProperties;
   onDragStart?(initial: DragStart): void;
   onDragEnd?(result: DropResult): void;
 }
@@ -271,4 +276,3 @@ class SortableContainer extends React.PureComponent<WithStyle<typeof containerSt
 }
 
 export default decorate(containerStyles)(SortableContainer);
-

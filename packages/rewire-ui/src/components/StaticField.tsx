@@ -13,6 +13,7 @@ const styles = {
 
 export interface IStaticFieldProps {
   visible?      : boolean;
+  classes?      : React.CSSProperties;
   value?        : string;
   label?        : string;
   align?        : TextAlignment;

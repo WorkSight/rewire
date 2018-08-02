@@ -6,10 +6,11 @@ import Dialog                from '@material-ui/core/Dialog';
 import Button                from '@material-ui/core/Button';
 import Icon                  from '@material-ui/core/Icon';
 import Grow                  from '@material-ui/core/Grow';
+import {Theme}               from '@material-ui/core/styles';
 import './Dialog.css';
-import decorate, { WithStyle } from './styles';
+import {WithStyle, withStyles} from './styles';
 
-let styles = {
+let styles = (theme: Theme) => ({
   root: {
     width: '100%',
   },
@@ -32,7 +33,7 @@ let styles = {
       border: '1px solid #eee'
     },
   },
-};
+});
 
 export type ActionRenderType = (props: {label: string, action: ActionType, isDisabled: boolean}) => JSX.Element;
 export const DefaultActionRenderer: ActionRenderType = ({label, action, isDisabled}) => (
@@ -49,6 +50,7 @@ const Transition = (props: any) => <Grow {...props} timeout={TRANSITION_TIMEOUT}
 
 export interface IDialogProps {
   dialog                : Modal;
+  classes?              : React.CSSProperties;
   fullScreen?           : boolean;
   disableEscapeKeyDown? : boolean;
   hideBackdrop?         : boolean;
@@ -60,7 +62,9 @@ export interface IDialogProps {
   ButtonRenderer?       : ActionRenderType;
 }
 
-class DialogInternal extends React.Component<WithStyle<typeof styles, IDialogProps>> {
+type DialogProps = WithStyle<ReturnType<typeof styles>, IDialogProps>;
+
+class DialogInternal extends React.Component<DialogProps> {
   render() {
     const {classes, children, dialog, ButtonRenderer, fullScreen, maxWidth, title, disableEscapeKeyDown, hideBackdrop, transition, transitionDuration, disableTransition} = this.props;
     const escapeAction            = disableEscapeKeyDown ? undefined : () => dialog.close();
@@ -87,4 +91,4 @@ class DialogInternal extends React.Component<WithStyle<typeof styles, IDialogPro
   }
 }
 
-export default decorate(styles)<IDialogProps>(DialogInternal);
+export default withStyles(styles, DialogInternal);
