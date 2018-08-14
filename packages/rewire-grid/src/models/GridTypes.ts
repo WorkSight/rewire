@@ -56,12 +56,17 @@ export interface IGrid extends IRows, IDisposable {
   addRows(rows: any[]): void;
 }
 
+export interface IRowOptions {
+  allowMergeColumns: boolean;
+}
+
 export interface IRow extends IDisposable {
   id           : string;
   grid         : IGrid;
   cells        : ICellMap;
   selected     : boolean;
   cls          : string;
+  options      : IRowOptions;
   readonly data: any;
 
   hasChanges(): boolean;
@@ -88,6 +93,7 @@ export interface ICellProperties {
   tooltip? : string;
   cls      : any;
   enabled  : boolean;
+  readOnly : boolean;
   align?   : TextAlignment;
   type     : EditorType;
   editor?  : React.SFC<any>;
@@ -124,7 +130,6 @@ export interface ICell extends ICellProperties {
   error?          : IError;
   selected        : boolean;
   value           : any;
-  readOnly        : boolean;
   readonly editing: boolean;
   rowSpan?        : number;
   colSpan?        : number;

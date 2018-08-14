@@ -74,22 +74,23 @@ export default class Column extends React.PureComponent<IColumnCellProps> {
       }
 
       if (this.column.sort) {
-        cls = 'sort ' + this.column.sort;
+        cls += ' sort ' + this.column.sort;
       }
 
       return (
         <th
-          className={cls}
           onMouseDown={this.handleSort}
           colSpan={this.props.cell.colSpan}
           ref={(element) => this.node = element as HTMLTableHeaderCellElement}
           rowSpan={this.props.cell.rowSpan}
           style={style}
           title={this.column.tooltip || this.value}>
-          {this.value}
-          <div onMouseDown={this.handleMouseDown}
-            style={{top: 0, right: 0, bottom: 0, width: '5px', position: 'absolute', cursor: 'col-resize'}}>
-              &nbsp;
+          <div className={cls} style={{display: 'flex', justifyContent: 'center', alignItems: 'center'}}>
+            {this.value}
+            <div onMouseDown={this.handleMouseDown}
+              style={{top: 0, right: 0, bottom: 0, width: '5px', position: 'absolute', cursor: 'col-resize'}}>
+                &nbsp;
+            </div>
           </div>
         </th>
       );

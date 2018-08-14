@@ -133,6 +133,7 @@ export default class TimeInputField extends React.Component<TextFieldProps & ITi
   constructor(props: TextFieldProps & ITimeFieldProps) {
     super(props);
     this.validator = new TimeValidator(props.rounding);
+    this.state     = this._valueToSet(props.value);
   }
 
   componentWillReceiveProps (nextProps: ITimeFieldProps) {
@@ -140,16 +141,21 @@ export default class TimeInputField extends React.Component<TextFieldProps & ITi
   }
 
   shouldComponentUpdate(nextProps: ITimeFieldProps, nextState: ITimeState) {
-    return (nextState.text !== this.state.text);
+    return (
+      (nextState.text !== this.state.text) ||
+      (nextProps.disabled !== this.props.disabled) ||
+      (nextProps.visible !== this.props.visible) ||
+      (nextProps.error !== this.props.error)
+    );
   }
 
   setValue(value?: number | string) {
-    const state = this.validator.parse(value);
-    this.setState({...state, text: state.value ? state.value.toFixed(2) : ''});
+    this.setState(this._valueToSet(value));
   }
 
-  componentWillMount() {
-    this.setValue(this.props.value);
+  _valueToSet(value?: number | string): any {
+    const state = this.validator.parse(value);
+    return {...state, text: state.value ? state.value.toFixed(2) : ''};
   }
 
   handleChange = (evt: React.ChangeEvent<HTMLInputElement>) => {
@@ -169,13 +175,15 @@ export default class TimeInputField extends React.Component<TextFieldProps & ITi
     return (
       <TextField
         disabled={disabled}
-        error={error || !!(this.state.text && !this.state.isValid)}
+        error={!disabled && (!!error || (!!this.state.text && !this.state.isValid))}
         value={this.state.text}
         label={label}
+        helperText={!disabled && error}
         onChange={this.handleChange}
         onBlur={this.handleBlur}
         placeholder={placeholder}
         inputProps={{autoFocus: this.props.autoFocus, style: {textAlign: this.props.align || 'left'}}}
+        InputLabelProps={{shrink: true}}
       />);
   }
 }

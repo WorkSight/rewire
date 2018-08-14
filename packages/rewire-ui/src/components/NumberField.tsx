@@ -63,7 +63,7 @@ export default class NumberTextField extends React.Component<TextFieldProps & IN
       return (
         <NumberFormat
           disabled={this.props.disabled}
-          error={this.props.error}
+          error={!this.props.disabled && !!this.props.error}
           value={value}
           label={this.props.label}
           onValueChange={this.handleValueChanged}
@@ -90,7 +90,7 @@ export default class NumberTextField extends React.Component<TextFieldProps & IN
         render={(props: TextFieldProps & INumberFieldProps) => (
           <NumberFormat
             disabled={props.disabled}
-            error={props.error}
+            error={!props.disabled && !!props.error}
             value={props.value}
             label={props.label}
             onValueChange={(values: any) => props.onChange && props.onChange({target: {value: values.floatValue}} as any)}

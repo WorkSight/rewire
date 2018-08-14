@@ -66,21 +66,23 @@ export default class Cell extends React.PureComponent<ICellProps, {}> {
     }
   }
 
-  copyToClipboard() {
-    let text = this.cell.value;
-    if (this.cell.column.map) {
-      text = this.cell.column.map(text);
-    }
-  }
-
   handleKeyDown = (evt: React.KeyboardEvent<any>) => {
     if (evt.keyCode === 67) { evt.key = 'C'; }
+    if (evt.keyCode === 86) { evt.key = 'V'; }
     switch (evt.key) {
       case 'C':
         if (!evt.ctrlKey) {
           return;
         }
-        this.copyToClipboard();
+        this.grid.copy();
+        evt.stopPropagation;
+        evt.preventDefault;
+        break;
+      case 'V':
+        if (!evt.ctrlKey || !this.cell.enabled || this.cell.readOnly) {
+          return;
+        }
+        this.grid.paste();
         evt.stopPropagation;
         evt.preventDefault;
         break;
@@ -178,7 +180,7 @@ export default class Cell extends React.PureComponent<ICellProps, {}> {
   renderCell() {
     let cell = this.cell;
     if (cell.editing) {
-      let Editor =  cell.editor || cell.column.editor;
+      let Editor = cell.editor || cell.column.editor;
       if (!Editor) return;
       let endOfTextOnFocus = false;
       let selectOnFocus    = true;
@@ -195,15 +197,16 @@ export default class Cell extends React.PureComponent<ICellProps, {}> {
     () => {
         let align    = this.column.align;
         if (this.cell.align) align = align;
+        let renderer = cell.renderer || cell.column.renderer;
         let hasError = !!this.cell.error;
         let errorCls = cc([{hidden: !hasError || cell.editing}, 'fa fa-exclamation-circle']);
 
         return (
-        <>
-          {cell.renderer || <span onMouseEnter={this.handleTooltip} style={{width: '100%', textAlign: align}}>{this.value}</span>}
-          {hasError && <i className={errorCls} title={cell.error && cell.error.messageText} style={{flexBasis: '12px', lineHeight: '28px', height: '100%', fontSize: 10, color: '#AA0000', marginLeft: '4px', alignSelf: 'center'}} />}
-        </>
-      );
+          < >
+            {(renderer && renderer(cell)) || <span onMouseEnter={this.handleTooltip} style={{width: '100%', textAlign: align}}>{this.value}</span>}
+            {hasError && <i className={errorCls} title={cell.error && cell.error.messageText} style={{flexBasis: '12px', lineHeight: '28px', height: '100%', fontSize: 10, color: '#AA0000', marginLeft: '4px', alignSelf: 'center'}} />}
+          </>
+        );
     }} />;
   }
 
@@ -219,12 +222,12 @@ export default class Cell extends React.PureComponent<ICellProps, {}> {
         edit        : this.cell.editing,
       }, cell.cls]);
 
-      let tdStyle: any = {overflow: 'hidden', padding: '0 4px'};
+      let tdStyle: any = {position: 'relative', overflow: 'hidden', padding: '0 4px'};
       if (!this.column.visible) {
         tdStyle.display = 'none';
       }
 
-      if (this.cell.readOnly || !this.cell.enabled) {
+      if (!this.cell.enabled) {
         tdStyle.color     = 'gray';
         tdStyle.fontStyle = 'italic';
       }

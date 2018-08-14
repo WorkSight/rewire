@@ -14,7 +14,7 @@ import editor, {
 } from '../components/editors';
 import { createElement } from 'react';
 
-export type IFieldTypes = 'string' | 'static' | 'reference' | 'select' | 'number' | 'boolean' | 'date' | 'time' | 'avatar';
+export type IFieldTypes = 'string' | 'static' | 'reference' | 'select' | 'number' | 'boolean' | 'date' | 'time' | 'avatar' | 'password';
 
 export interface IFieldDefn {
   label(text: string): IFieldDefn;
@@ -22,7 +22,7 @@ export interface IFieldDefn {
   align(text: TextAlignment): IFieldDefn;
   autoFocus(): IFieldDefn;
   disabled(action: (field: IEditorField) => boolean): IFieldDefn;
-  editor(editorType: EditorType): IFieldDefn;
+  editor(editorType: EditorType, editProps?: any): IFieldDefn;
   validators(fn: IValidateFn): IFieldDefn;
 }
 
@@ -81,8 +81,11 @@ class BaseField implements IFieldDefn {
     return this;
   }
 
-  editor(editorType: EditorType): IFieldDefn {
+  editor(editorType: EditorType, editProps?: any): IFieldDefn {
     this.typeDefn.editorType = editorType;
+    if (editProps) {
+      this.typeDefn.editProps = editProps;
+    }
     return this;
   }
 
@@ -165,6 +168,7 @@ export default class Form {
     'boolean'  : 'checked',
     'date'     : 'date',
     'time'     : 'time',
+    'password' : 'password',
     'number'   : 'number',
     'avatar'   : 'avatar'
   };
@@ -244,8 +248,8 @@ export default class Form {
     return new BaseField('static');
   }
 
-  static number(): IFieldDefn {
-    return new BaseField('number');
+  static number(editProps?: any): IFieldDefn {
+    return new BaseField('number', editProps);
   }
 
   static boolean(): IFieldDefn {
@@ -256,8 +260,12 @@ export default class Form {
     return new BaseField('date');
   }
 
-  static time(): IFieldDefn {
-    return new BaseField('time');
+  static time(editProps?: any): IFieldDefn {
+    return new BaseField('time', editProps);
+  }
+
+  static password(): IFieldDefn {
+    return new BaseField('password');
   }
 
   static select(searcher: any): IFieldDefn {

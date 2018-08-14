@@ -3,6 +3,7 @@ import {
   IColumn,
   ICell,
   IRow,
+  IRowOptions,
   ICellMap,
   IGroupRow,
   IRows,
@@ -24,6 +25,7 @@ class RowModel implements IRow, IDisposable {
   cells   : ICellMap = observable({});
   selected: boolean  = false;
   cls     : string   = '';
+  options : IRowOptions;
   dispose : () => void = EmptyFn;
 
   constructor(grid: IGrid, public data: any) {
@@ -35,12 +37,16 @@ class RowModel implements IRow, IDisposable {
       this.id = nanoid(10);
     }
 
+    this.options = data.options;
+
     for (const column of this.grid.columns) {
       this.createCell(column, this.data[column.name]);
     }
     root((dispose) => {
       this.dispose = dispose;
-      observe(this.mergeColumns);
+      if (this.options && this.options.allowMergeColumns) {
+        observe(this.mergeColumns);
+      }
     });
   }
 
