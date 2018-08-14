@@ -11,13 +11,14 @@ import {
   MapFn,
   defaultMap
 } from '../models/search';
+import {disposeOnUnmount} from 'rewire-core';
 
 export type ISelectProps<T> = ICustomProps<T> & React.InputHTMLAttributes<any>;
 
 export default class SelectInternal<T> extends React.Component<ISelectProps<T>, any> {
-  // state = {suggestions: []};
-  search   : SearchFn<T>;
-  map      : MapFn<T>;
+  state : any;
+  search: SearchFn<T>;
+  map   : MapFn<T>;
 
   constructor(props: ISelectProps<T>) {
     super(props);
@@ -26,13 +27,13 @@ export default class SelectInternal<T> extends React.Component<ISelectProps<T>, 
     this.map    = props.map || defaultMap;
   }
 
-  performSearch = async (value: string) => {
-    const suggestions = await this.search(value, this.props.options);
-    this.setState({suggestions});
+  componentDidMount() {
+    disposeOnUnmount(this, () => this.performSearch(''));
   }
 
-  componentWillMount() {
-    this.performSearch('');
+  performSearch = async (value: string) => {
+    const suggestions = await this.search(value, this.props.options);
+    this.setState({suggestions: suggestions});
   }
 
   renderSuggestion = (params: any) => {

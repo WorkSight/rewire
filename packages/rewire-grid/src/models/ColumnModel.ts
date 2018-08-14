@@ -6,38 +6,41 @@ let id = 0;
 const toLowerCase = (value: string) => String(value).toLowerCase();
 
 class ColumnModel implements IColumn {
-  name    : string;
-  width?  : string;
-  fixed   : boolean;
-  visible : boolean;
-  sort?   : SortDirection;
-  id      : number;
-  grid    : IGrid;
-  tooltip?: string;
-  cls     : any;
-  enabled : boolean;
-  title   : string;
-  align?  : TextAlignment;
-  type    : EditorType;
-  editor? : React.StatelessComponent<any>;
-  colSpan?: number;
-  rowSpan?: number;
+  name     : string;
+  width?   : string;
+  fixed    : boolean;
+  visible  : boolean;
+  sort?    : SortDirection;
+  id       : number;
+  grid     : IGrid;
+  tooltip? : string;
+  cls      : any;
+  enabled  : boolean;
+  readOnly : boolean;
+  title    : string;
+  align?   : TextAlignment;
+  type     : EditorType;
+  editor?  : React.SFC<any>;
+  renderer?: React.SFC<any>;
+  colSpan? : number;
+  rowSpan? : number;
 
   map?(value: any): string;
   predicate?(value: any, filter: {value: any}): boolean;
   compare?(x: any, y: any): number;
 
   constructor(name: string, title: string, type?: IColumnEditor, width?: string, align?: TextAlignment) {
-    this.id      = id++;
-    this.name    = name;
-    this.title   = title;
-    this.enabled = true;
-    this.fixed   = false;
-    this.width   = width;
-    this.visible = true;
-    this.align   = align;
-    this.colSpan = 1;
-    this.rowSpan = 1;
+    this.id       = id++;
+    this.name     = name;
+    this.title    = title;
+    this.enabled  = true;
+    this.readOnly = false;
+    this.fixed    = false;
+    this.width    = width;
+    this.visible  = true;
+    this.align    = align;
+    this.colSpan  = 1;
+    this.rowSpan  = 1;
     this.setEditor(type);
   }
 
@@ -71,9 +74,9 @@ class ColumnModel implements IColumn {
 }
 
 export default function create(name: string, title: string): IColumn;
-export default function create(name: string, title: string, type: IColumnEditor): IColumn;
-export default function create(name: string, title: string, type: IColumnEditor, width: string): IColumn;
-export default function create(name: string, title: string, type: IColumnEditor, width: string, align: TextAlignment): IColumn;
+export default function create(name: string, title: string, type:  IColumnEditor): IColumn;
+export default function create(name: string, title: string, type:  IColumnEditor, width:  string): IColumn;
+export default function create(name: string, title: string, type:  IColumnEditor, width:  string, align: TextAlignment): IColumn;
 export default function create(name: string, title: string, type?: IColumnEditor, width?: string, align?: TextAlignment): IColumn {
   return new ColumnModel(name, title, type, width, align);
 }

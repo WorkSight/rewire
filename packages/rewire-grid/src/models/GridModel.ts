@@ -199,7 +199,7 @@ class GridModel implements IGrid, IDisposable {
       return;
     }
 
-    let v = this.clipboard.value.clone();
+    let v = this.clipboard.value.clone && this.clipboard.value.clone() || this.clipboard.value;
     selectedCell.value = v;
   }
 

@@ -59,9 +59,7 @@ $group-row-bk-color: #8AC0CE;
     overflow: hidden;
     text-overflow: ellipsis;
     border-style: solid;
-
     padding: 4px 3px;
-    line-height: 9px;
     border-width: 0 1px 1px 0;
     font-weight: normal;
     white-space: nowrap;
@@ -173,15 +171,14 @@ $group-row-bk-color: #8AC0CE;
       margin-bottom: -1px;
     }
     tr {
-      height: 32px;
+      min-height: 32px;
     }
 
-    th.sort {
+    div.sort {
       &:after {
         @extend .material-icons;
         color: $header-color;
         display: inline-block;
-        font-size: 14px;
         margin: 0;
         margin-left: 4px;
         transition: 0.2s ease-in-out;
@@ -199,7 +196,7 @@ $group-row-bk-color: #8AC0CE;
     th {
       vertical-align: middle;
       padding: 8px;
-      height: 32px;
+      min-height: 32px;
       border-color: $header-border-color;
     }
     th:first-child {
@@ -251,7 +248,7 @@ $group-row-bk-color: #8AC0CE;
   td {
     vertical-align: middle;
     border-color: $grid-border-color;
-    height: 28px;
+    min-height: 28px;
     /* font-size: 1.1rem; */
   }
   td.edit > div > div > :first-child {
@@ -267,6 +264,7 @@ $group-row-bk-color: #8AC0CE;
   table {
     table-layout: fixed;
     margin: 0;
+    padding: 1px;
     max-width: none;
     border-collapse: separate;
     border-spacing: 0;
