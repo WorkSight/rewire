@@ -1,9 +1,9 @@
-import {IGrid, IColumn}              from '../models/GridTypes';
-import Column                        from './Column';
-import classNames                    from 'classnames';
-import Cell                          from './Cell';
-import Row                           from './Row';
-import * as React                    from 'react';
+import {IGrid, IColumn, IGridColors, IGridCalculatedColors} from '../models/GridTypes';
+import Column                                               from './Column';
+import classNames                                           from 'classnames';
+import Cell                                                 from './Cell';
+import Row                                                  from './Row';
+import * as React                                           from 'react';
 import {
   Observe,
   disposeOnUnmount,
@@ -11,8 +11,12 @@ import {
   property,
   DataSignal
 } from 'rewire-core';
-import {KeyHandler}                  from 'rewire-ui';
-import {debounce}                    from 'rewire-common';
+import {KeyHandler}              from 'rewire-ui';
+import {debounce}                from 'rewire-common';
+import Color                     from 'color';
+import {MuiThemeProvider, Theme} from '@material-ui/core/styles';
+import {WithStyle, withStyles}   from 'rewire-ui';
+import createGridTheme           from './GridTheme';
 import './data-grid.scss';
 
 interface IColumnProps {
@@ -53,6 +57,7 @@ export interface IGridProps {
   virtual?: boolean;
   className?: string;
   style?: React.CSSProperties;
+  gridColors?: IGridColors;
 }
 
 type BodyType = {grid: IGrid, columns: IColumn[], gridContent: DataSignal<HTMLDivElement | undefined>, scrollY: DataSignal<number>, loadMoreRows?: (args: {start: number, end: number}) => Promise<any[]> };
@@ -161,7 +166,91 @@ class VirtualBody extends React.PureComponent<BodyType, {offset: number, loading
   }
 }
 
+const styles = (theme: Theme) => ({
+  leftLabels: {
+    '& tr, & tr.alt': {
+      backgroundColor: theme.palette.leftLabelBackground.main,
+    },
+  },
+  cornerLabels: {
+    borderColor: theme.palette.headerBorder.main,
+    backgroundColor: theme.palette.headerBackground.main,
+  },
+  topLabels: {
+    color: theme.palette.headerText.main,
+    borderColor: theme.palette.headerBorder.main,
+    backgroundColor: theme.palette.headerBackground.main,
+    '& div.sort': {
+      '&:after': {
+        color: theme.palette.headerText.main,
+      },
+    },
+    '& th': {
+      borderColor: theme.palette.headerBorder.main,
+    },
+  },
+  wsGrid: {
+    color: theme.palette.gridText.main,
+    borderColor: theme.palette.gridBorder.main,
+    backgroundColor: theme.palette.gridBackground.main,
+    '& td, & th': {
+      '&.selected': {
+        outlineColor: theme.palette.cellOutline.main,
+      },
+    },
+    '& td': {
+      borderColor: theme.palette.gridBorder.main,
+    },
+    '& th': {
+      borderColor: theme.palette.headerBorder.main,
+    },
+  },
+  gridContent: {
+    '& tr.selected': {
+      backgroundColor: theme.palette.rowSelectedBackground.main,
+      color: theme.palette.rowSelectedText.main,
+    },
+    '& tr.alt': {
+      backgroundColor: theme.palette.rowStripedBackground.main,
+    },
+    '& tr.alt.selected': {
+      backgroundColor: theme.palette.rowStripedBackgroundSelected.main,
+    },
+  },
+});
+
 export default class Grid extends React.PureComponent<IGridProps> {
+  private gridColors: IGridColors & IGridCalculatedColors;
+
+  constructor(props: IGridProps) {
+    super(props);
+
+    this.gridColors = props.gridColors || {};
+    if (this.gridColors.headerBackground) {
+      this.gridColors.headerBorder = Color(this.gridColors.headerBackground).lighten(0.15).string();
+    }
+    if (this.gridColors.rowStripedBackground) {
+      this.gridColors.rowStripedBackgroundSelected = Color(this.gridColors.rowStripedBackground).darken(0.15).string();
+    }
+  }
+
+  render() {
+    const gridColors = this.gridColors;
+    let paletteObj: any = {};
+    Object.keys(gridColors).forEach(colorName => {
+      paletteObj[colorName] = {main: gridColors[colorName]};
+    });
+    return (
+      <MuiThemeProvider theme={createGridTheme({palette: paletteObj})}>
+        <GridInternal {...this.props} />
+      </MuiThemeProvider>
+    );
+  }
+}
+
+type GridProps = WithStyle<ReturnType<typeof styles>, IGridProps>;
+
+const GridInternal = withStyles(styles, class extends React.PureComponent<GridProps> {
   private scrollX            : DataSignal<number>;
   private scrollY            : DataSignal<number>;
   private _gridContent       : DataSignal<HTMLDivElement | undefined>;
@@ -169,7 +258,7 @@ export default class Grid extends React.PureComponent<IGridProps> {
   private _columnTable       : HTMLTableElement;
   private _gridFixed         : HTMLTableElement;
 
-  constructor(props: IGridProps) {
+  constructor(props: GridProps) {
     super(props);
     // this.addShortcut({shortcutKey:'ctrl+c',  preventDefault:false, action:this.props.controller.copy.bind(this.props.controller)});
     // this.addShortcut({shortcutKey:'ctrl+v',  preventDefault:false, action:this.props.controller.paste.bind(this.props.controller)});
@@ -179,6 +268,7 @@ export default class Grid extends React.PureComponent<IGridProps> {
     // this.addShortcut({shortcutKey:'end',  preventDefault:false, action:() => {
     //   this.props.controller.selectCell(this.rows[this.rows.length - 1].cells[0]);
     // }});
+
     disposeOnUnmount(this, () => {
       this._gridContent = property(undefined);
       this.scrollX      = property(0);
@@ -224,7 +314,7 @@ export default class Grid extends React.PureComponent<IGridProps> {
     }
 
     return (
-      <div className='column-wrapper corner-labels'>
+      <div className={classNames('column-wrapper corner-labels', this.props.classes.cornerLabels)}>
         <table role='grid' style={{width: this.props.grid.fixedWidth}}>
           {this.renderColumnGroups(true)}
           <thead role='rowgroup'>
@@ -267,7 +357,7 @@ export default class Grid extends React.PureComponent<IGridProps> {
 
     let visibleColumns = this.props.grid.fixedColumns.reduce((prev, current) => prev = prev + (current.visible ? 1 : 0), 0);
     return (
-      <div className='left-labels'>
+      <div className={classNames('left-labels', this.props.classes.leftLabels)}>
         <table role='grid' ref={(c) => this._gridFixed = c as HTMLTableElement} style={{width: this.props.grid.fixedWidth}}>
           {this.renderColumnGroups(true)}
           <tbody role='rowgroup'>
@@ -281,7 +371,7 @@ export default class Grid extends React.PureComponent<IGridProps> {
   renderHeaders() {
     return (
       <Observe render={() => (
-        <div className='top-labels'>
+        <div className={classNames('top-labels', this.props.classes.topLabels)}>
         {this.renderFixedColumnHeaders()}
         <div className='column-wrapper' ref={(c) => this._columnTableWrapper = c as HTMLDivElement }>
           <table role='grid' ref={(c) => this._columnTable = c as HTMLTableElement} style={{width: this.props.grid.width}}>
@@ -304,7 +394,7 @@ export default class Grid extends React.PureComponent<IGridProps> {
 
   _body: HTMLTableSectionElement | null;
 
-  renderData() {
+  renderData(): JSX.Element {
     let BodyRenderer = (this.props.virtual) ? VirtualBody : Body;
 
     return (
@@ -313,7 +403,7 @@ export default class Grid extends React.PureComponent<IGridProps> {
           {this.renderFixedColumnData()}
           <KeyHandler>{
             (keyboard) => (
-              <div className='grid-content' onKeyDown={keyboard.handleKeyDown2} ref={(c: HTMLDivElement) => (keyboard.element = c, this._gridContent(c))}>
+              <div className={classNames('grid-content', this.props.classes.gridContent)} onKeyDown={keyboard.handleKeyDown2} ref={(c: HTMLDivElement) => (keyboard.element = c, this._gridContent(c))}>
               <table role='grid' style={{width: this.props.grid.width}}>
                 {this.renderColumnGroups(false)}
                 <BodyRenderer grid={this.props.grid} gridContent={this._gridContent} scrollY={this.scrollY} columns={this.props.grid.dataColumns} />
@@ -328,10 +418,10 @@ export default class Grid extends React.PureComponent<IGridProps> {
 
   render() {
     return (
-      <div className={classNames('ws-grid', this.props.className)} style={this.props.style}>
+      <div className={classNames('ws-grid', this.props.className, this.props.classes.wsGrid)} style={this.props.style}>
         {this.renderHeaders()}
         {this.renderData()}
       </div>
     );
   }
-}
+});

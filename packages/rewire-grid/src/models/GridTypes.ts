@@ -56,6 +56,25 @@ export interface IGrid extends IRows, IDisposable {
   addRows(rows: any[]): void;
 }
 
+export interface IGridColors {
+  headerBackground?: string;
+  headerText?: string;
+  gridBackground?: string;
+  gridText?: string;
+  gridBorder?: string;
+  groupRowBackground?: string;
+  rowSelectedBackground?: string;
+  rowSelectedText?: string;
+  rowStripedBackground?: string;
+  leftLabelBackground?: string;
+  cellOutline?: string;
+}
+
+export interface IGridCalculatedColors {
+  headerBorder?: string;
+  rowStripedBackgroundSelected?: string;
+}
+
 export interface IRowOptions {
   allowMergeColumns: boolean;
 }

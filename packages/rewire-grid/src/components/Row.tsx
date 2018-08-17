@@ -5,10 +5,14 @@ import {
   IGroupRow,
   getValue,
   isGroupRow
-}                      from '../models/GridTypes';
-import * as React      from 'react';
-import cc              from 'classcat';
-import {Observe}       from 'rewire-core';
+}                              from '../models/GridTypes';
+import * as React              from 'react';
+import cc                      from 'classcat';
+import classNames              from 'classnames';
+import Color                   from 'color';
+import {Observe}               from 'rewire-core';
+import {Theme}                 from '@material-ui/core/styles';
+import {WithStyle, withStyles} from 'rewire-ui';
 
 export interface IRowProps {
   row           : IRow;
@@ -19,7 +23,30 @@ export interface IRowProps {
   className?    : string;
 }
 
-export default class Row extends PureComponent<IRowProps, {}> {
+const styles = (theme: Theme) => {
+  let color = theme.palette.groupRowBackground.main;
+
+  let styleObj = {
+    group: {
+      '&:before': {
+        color: Color(color).darken(.45).string(),
+      },
+    },
+  };
+
+  for (let i = 0; i < 7; i++) {
+    styleObj[`groupLevel${i}`] = {
+      backgroundColor:   Color(color).lighten(i * 0.12).string(),
+      borderBottomColor: Color(color).lighten(i * 0.12).darken(.15).string(),
+    };
+  }
+
+  return styleObj;
+};
+
+type RowProps = WithStyle<ReturnType<typeof styles>, IRowProps>;
+
+class Row extends PureComponent<RowProps, {}> {
   handleRowClicked = () => {
     this.props.row.grid.selectRow(this.props.row);
   }
@@ -62,9 +89,9 @@ export default class Row extends PureComponent<IRowProps, {}> {
     }
 
     return (
-      <>
+      < >
         <tr>
-          <td colSpan={this.props.visibleColumns} className={cc(className)} onClick={() => groupRow.expanded = !groupRow.expanded}>
+          <td colSpan={this.props.visibleColumns} className={classNames(cc(className), this.props.classes.group, this.props.classes[`groupLevel${groupRow.level}`])} onClick={() => groupRow.expanded = !groupRow.expanded}>
             {value}
           </td>
         </tr>
@@ -77,3 +104,5 @@ export default class Row extends PureComponent<IRowProps, {}> {
     return <Observe render={() => isGroupRow(this.props.row) ? this.renderGroupRow(this.props.row) : this.renderRow()} />;
   }
 }
+
+export default withStyles(styles, Row);

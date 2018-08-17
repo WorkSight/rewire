@@ -5,6 +5,7 @@ import {
   IColumn,
   SortDirection,
   groupRows,
+  allRows,
   findColumn,
   fixedRows,
   allDataRows,
@@ -168,7 +169,7 @@ class GridModel implements IGrid, IDisposable {
   }
 
   sort() {
-    for (const rows of groupRows(this.rows)) {
+    for (const rows of allRows(this.rows)) {
       rows.rows.sort((r1, r2) => {
         for (const column of this._sort) {
           let compareFn = column.compare;
@@ -183,6 +184,22 @@ class GridModel implements IGrid, IDisposable {
         return 0;
       });
     }
+
+    // for (let rows of allGroupRows(this.rows)) {
+    //   rows.rows.sort((r1, r2) => {
+    //     for (const column of this._sort) {
+    //       let compareFn = column.compare;
+    //       let v1 = r1.cells[column.name].value;
+    //       let v2 = r2.cells[column.name].value;
+    //       let r  = compareFn ? compareFn(v1, v2) : compare(v1, v2);
+    //       if (r !== 0) {
+    //         if (column.sort === 'ascending') return r;
+    //         return -1 * r;
+    //       }
+    //     }
+    //     return 0;
+    //   });
+    // }
   }
 
   paste() {
@@ -302,10 +319,13 @@ class GridModel implements IGrid, IDisposable {
     }
 
     if (cell) {
-      this.selectedRow = cell.row;
       cell.selected = true;
-      this.selectedCell = cell;
+      this.selectedRow = cell.row;
+    } else {
+      this.selectedRow = undefined;
     }
+
+    this.selectedCell = cell;
   }
 }
 
