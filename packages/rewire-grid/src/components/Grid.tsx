@@ -1,9 +1,9 @@
-import {IGrid, IColumn, IGridColors, IGridCalculatedColors} from '../models/GridTypes';
-import Column                                               from './Column';
-import classNames                                           from 'classnames';
-import Cell                                                 from './Cell';
-import Row                                                  from './Row';
-import * as React                                           from 'react';
+import {IGrid, IColumn, IGridColors} from '../models/GridTypes';
+import Column                        from './Column';
+import classNames                    from 'classnames';
+import Cell                          from './Cell';
+import Row                           from './Row';
+import * as React                    from 'react';
 import {
   Observe,
   disposeOnUnmount,
@@ -220,16 +220,16 @@ const styles = (theme: Theme) => ({
 });
 
 export default class Grid extends React.PureComponent<IGridProps> {
-  private gridColors: IGridColors & IGridCalculatedColors;
+  private gridColors: IGridColors;
 
   constructor(props: IGridProps) {
     super(props);
 
     this.gridColors = props.gridColors || {};
-    if (this.gridColors.headerBackground) {
+    if (this.gridColors.headerBackground && !this.gridColors.headerBorder) {
       this.gridColors.headerBorder = Color(this.gridColors.headerBackground).lighten(0.15).string();
     }
-    if (this.gridColors.rowStripedBackground) {
+    if (this.gridColors.rowStripedBackground && !this.gridColors.rowStripedBackgroundSelected) {
       this.gridColors.rowStripedBackgroundSelected = Color(this.gridColors.rowStripedBackground).darken(0.15).string();
     }
   }

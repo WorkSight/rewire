@@ -1,8 +1,8 @@
-import {createMuiTheme, Theme}              from '@material-ui/core/styles';
-import {ThemeOptions}                       from '@material-ui/core/styles/createMuiTheme';
-import Color                                from 'color';
-import * as merge                           from 'deepmerge';
-import {IGridColors, IGridCalculatedColors} from '../models/GridTypes';
+import {createMuiTheme, Theme} from '@material-ui/core/styles';
+import {ThemeOptions}          from '@material-ui/core/styles/createMuiTheme';
+import Color                   from 'color';
+import * as merge              from 'deepmerge';
+import {IGridColors}           from '../models/GridTypes';
 
 declare module '@material-ui/core/styles/createPalette' {
   interface Palette {
@@ -141,7 +141,7 @@ declare module '@material-ui/core/styles/createPalette' {
   }
 }
 
-const defaultGridColors: IGridColors & IGridCalculatedColors = {
+const defaultGridColors: IGridColors = {
   headerBackground: '#607D8B',
   headerText: '#FFFFFF',
   headerBorder: Color('#607D8B').lighten(0.15).string(),

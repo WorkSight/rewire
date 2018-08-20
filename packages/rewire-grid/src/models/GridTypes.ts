@@ -59,6 +59,7 @@ export interface IGrid extends IRows, IDisposable {
 export interface IGridColors {
   headerBackground?: string;
   headerText?: string;
+  headerBorder?: string;
   gridBackground?: string;
   gridText?: string;
   gridBorder?: string;
@@ -66,13 +67,9 @@ export interface IGridColors {
   rowSelectedBackground?: string;
   rowSelectedText?: string;
   rowStripedBackground?: string;
+  rowStripedBackgroundSelected?: string;
   leftLabelBackground?: string;
   cellOutline?: string;
-}
-
-export interface IGridCalculatedColors {
-  headerBorder?: string;
-  rowStripedBackgroundSelected?: string;
 }
 
 export interface IRowOptions {
