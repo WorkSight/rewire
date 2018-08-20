@@ -28,7 +28,7 @@ class RowModel implements IRow, IDisposable {
   options : IRowOptions;
   dispose : () => void = EmptyFn;
 
-  constructor(grid: IGrid, public data: any) {
+  constructor(grid: IGrid, public data: any, fixed: boolean = false) {
     this.grid = grid;
     if (!this.data) return;
     if (data.id) {
@@ -44,7 +44,7 @@ class RowModel implements IRow, IDisposable {
     }
     root((dispose) => {
       this.dispose = dispose;
-      if (this.options && this.options.allowMergeColumns) {
+      if (fixed || (this.options && this.options.allowMergeColumns)) {
         observe(this.mergeColumns);
       }
     });
@@ -119,10 +119,10 @@ export default function create(grid: IGrid, rows: IRow[], row: any, fixed: boole
       level++;
       parent = r;
     }
-    parent.rows.push(new RowModel(grid, row));
+    parent.rows.push(new RowModel(grid, row, fixed));
     return root!;
   }
-  let r = new RowModel(grid, row);
+  let r = new RowModel(grid, row, fixed);
   rows.push(r);
   return r;
 }

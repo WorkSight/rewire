@@ -12,9 +12,9 @@ import {fetch}               from 'rewire-common';
 // import TextField          from 'material-ui/TextField';
 import {TextField}           from 'rewire-ui';
 import {NumberField}         from 'rewire-ui';
-import Button                from 'material-ui/Button';
-import Typography            from 'material-ui/Typography';
-import { withStyles }        from 'material-ui/styles';
+import Button                from '@material-ui/core/Button';
+import Typography            from '@material-ui/core/Typography';
+import { withStyles }        from '@material-ui/core/styles';
 // import SortableContainer, {SortableList} from 'ui/components/Sortable';
 import {
   BrowserRouter as Router,
@@ -24,8 +24,8 @@ import {
 // import {TimeInputField} from 'rewire-ui';
 import {utc}            from 'rewire-common';
 // import Grid           from './components/Grid';
-import Paper          from 'material-ui/Paper';
-import Dialog         from 'material-ui/Dialog';
+import Paper          from '@material-ui/core/Paper';
+import Dialog         from '@material-ui/core/Dialog';
 import {delay}        from 'rewire-common';
 import {Loader}       from 'rewire-ui';
 import * as is        from 'is';
@@ -355,10 +355,10 @@ let grid = createTestGrid(40, 14);
 
 let rrr = {column0: 'booga'};
 grid.cell('3', 'column8')!.value = 'oga booga boa';
-let r = grid.get();
+const r = grid.get();
 console.log(r);
-setTimeout(() => grid.rows.length = 0, 4000);
-setTimeout(() => grid.set(r), 8000);
+// setTimeout(() => grid.rows.length = 0, 4000);
+// setTimeout(() => grid.set(r), 3000);
 // setTimeout(() => expandAll(grid), 6000);
 // setTimeout(() => S.freeze(() => grid.addRow(rrr)), 5000);
 // setTimeout(() => grid.rows[0].cells['column0'].value = 'booga', 6000);
@@ -369,6 +369,62 @@ setTimeout(() => grid.set(r), 8000);
 //   let r = grid.hasChanges();
 // }, () => console.log('has changes', grid.hasChanges()));
 
+function createEmployeesGrid() {
+  let employees = [
+    {id: '1e',  name: 'Schrute, Dwight',         email: 'testEmail@test.com', isActive: true},
+    {id: '2e',  name: 'Scott, Michael',          email: 'testEmail@test.com', isActive: true},
+    {id: '3e',  name: 'Lannister, Jaime',        email: 'testEmail@test.com', isActive: true},
+    {id: '4e',  name: 'Dayne, Arthur',           email: 'testEmail@test.com', isActive: true},
+    {id: '5e',  name: 'Snow, Jon',               email: 'testEmail@test.com', isActive: true},
+    {id: '6e',  name: 'Stark, Ned',              email: 'testEmail@test.com', isActive: true},
+    {id: '7e',  name: 'Stark, Arya',             email: 'testEmail@test.com', isActive: true},
+    {id: '8e',  name: 'Biggus, Headus',          email: 'testEmail@test.com', isActive: true},
+    {id: '9e',  name: 'Drumpf, Donald',          email: 'testEmail@test.com', isActive: true},
+    {id: '7e',  name: 'Johnson, Ruin',           email: 'testEmail@test.com', isActive: true},
+    {id: '8e',  name: 'Ren, Emo',                email: 'testEmail@test.com', isActive: true},
+    {id: '9e',  name: 'Swolo, Ben',              email: 'testEmail@test.com', isActive: true},
+    {id: '10e', name: 'Sue, Mary',               email: 'testEmail@test.com', isActive: true},
+    {id: '11e', name: 'Poppins, Leia',           email: 'testEmail@test.com', isActive: true},
+    {id: '12e', name: 'Snoke, Nobody',           email: 'testEmail@test.com', isActive: true},
+    {id: '13e', name: 'Too tired to live, Luke', email: 'testEmail@test.com', isActive: true},
+  ];
+
+  let cols = [];
+
+  // add header columns
+  cols.push(createColumn('name',     'Employee', 'text'));
+  cols.push(createColumn('email',    'Email',    'text'));
+  cols.push(createColumn('isActive', 'IsActive', 'checked'));
+
+  cols.forEach(col => {
+    col.readOnly = true;
+  });
+
+  // add employee rows
+  let rows: any[] = [];
+  for (let row = 0; row < employees.length; row++) {
+    let r: any = {id: row};
+    for (let column = 0; column < cols.length; column++) {
+      let fieldName: string = cols[column].name;
+      if (fieldName === 'name') {
+        r[fieldName] = employees[row][fieldName]; // somehow make into a button that opens a dialog on click???
+      } else {
+        r[fieldName] = employees[row][fieldName];
+      }
+    }
+    rows.push(r);
+  }
+
+  // create the grid model
+  let grid = createGrid(rows, cols);
+  // sort by employee names
+  grid.addSort(cols[0], 'ascending');
+
+  return grid;
+}
+
+let employeesGrid = createEmployeesGrid();
+
 const _Home = (props: any) => (
   <div>
     <div>
@@ -378,9 +434,12 @@ const _Home = (props: any) => (
       <DialogView dialog={confirmation}>
         <Typography style={{margin: 16}}>Are you sure you want to do this crazy shit?</Typography>
       </DialogView>
-      <div style={{overflow: 'auto', padding: 10, display: 'flex', alignItems: 'center', justifyContent: 'center'}}>
+      <div style={{overflow: 'auto', padding: 10, display: 'flex', flexDirection: 'column', alignItems: 'center', justifyContent: 'center'}}>
         <Paper style={{width: '80%', padding: 20, display: 'flex', alignItems: 'center', justifyContent: 'center', height: 800}}>
           <Grid grid={grid} />
+        </Paper>
+        <Paper style={{width: '80%', padding: 20, display: 'flex', alignItems: 'center', justifyContent: 'center', height: 800}}>
+          <Grid grid={employeesGrid style={{fontSize: '0.85rem'}} />
         </Paper>
       </div>
     </div>

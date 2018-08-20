@@ -74,7 +74,11 @@ export default class Column extends React.PureComponent<IColumnCellProps> {
       }
 
       if (this.column.sort) {
-        cls += ' sort ' + this.column.sort;
+        if (cls) {
+          cls += ' sort ' + this.column.sort;
+        } else {
+          cls = 'sort ' + this.column.sort;
+        }
       }
 
       return (
