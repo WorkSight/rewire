@@ -23,6 +23,7 @@
     "noEmitHelpers": false,
     "noImplicitUseStrict": false,
     "noImplicitAny": true,
+    "suppressImplicitAnyIndexErrors": true,
     "noLib": false,
     "strictNullChecks": true,
     "outDir": "dist",

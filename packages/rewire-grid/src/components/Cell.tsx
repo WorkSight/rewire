@@ -87,10 +87,17 @@ export default class Cell extends React.PureComponent<ICellProps, {}> {
         evt.preventDefault;
         break;
       case 'Escape':
-        this.grid.editCell(undefined);
-        setTimeout(() => {
-          if (this.element) this.element.focus();
-        }, 0);
+        if (this.cell.editing) {
+          this.grid.editCell(undefined);
+          setTimeout(() => {
+            if (this.element) this.element.focus();
+          }, 0);
+        } else {
+          this.grid.selectCell(undefined);
+          setTimeout(() => {
+            if (this.element) this.element.blur();
+          }, 0);
+        }
         break;
 
       case 'Delete':
