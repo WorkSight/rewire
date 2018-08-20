@@ -108,8 +108,8 @@ Sparky.task('prepublish', async() => {
     json = await bumpVersion(`./packages/${module}/package.json`, {type: 'beta'});
   }
   let version = `v${json.version}`;
-  await run('git', ['commit', '-a', '-m', version]);
-  await run('git', ['tag', '-a', version, '-m', version]);
+  // await run('git', ['commit', '-a', '-m', version]);
+  // await run('git', ['tag', '-a', version, '-m', version]);
 });
 
 Sparky.task('clean', async() => {
@@ -121,4 +121,5 @@ Sparky.task('clean', async() => {
 Sparky.task('default', ['clean', 'dist'], () => { });
 
 Sparky.task('publish', ['clean', 'prepublish', 'dist', 'npmpublish'], () => { });
+Sparky.task('publish-only', ['npmpublish'], () => { });
 Sparky.task('version', ['clean', 'prepublish'], () => { });

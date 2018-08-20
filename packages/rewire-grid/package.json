@@ -1,6 +1,6 @@
 {
   "name": "rewire-grid",
-  "version": "1.0.0-beta.12",
+  "version": "1.0.0-beta.14",
   "description": "A lightweight reactive grid implementation built using rewire-core.",
   "repository": {
     "type": "git",
@@ -20,12 +20,12 @@
   },
   "homepage": "https://github.com/worksight/rewire",
   "dependencies": {
-    "classcat": "^3.0.2",
+    "classcat": "^3.2.1",
     "is": "^3.2.1",
-    "react": "^16.3.2",
-    "nanoid": "^1.0.2",
-    "rewire-common": "^1.0.0-beta.9",
-    "rewire-core": "^1.0.0-beta.9",
-    "rewire-ui": "^1.0.0-beta.9"
+    "react": "^16.4.2",
+    "nanoid": "^1.2.1",
+    "rewire-common": "^1.0.0-beta.*",
+    "rewire-core": "^1.0.0-beta.*",
+    "rewire-ui": "^1.0.0-beta.*"
   }
 }
