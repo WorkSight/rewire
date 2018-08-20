@@ -37,7 +37,7 @@ const styles = (theme: Theme) => {
   for (let i = 0; i < 7; i++) {
     styleObj[`groupLevel${i}`] = {
       backgroundColor:   Color(color).lighten(i * 0.12).string(),
-      borderBottomColor: Color(color).lighten(i * 0.12).darken(.15).string(),
+      borderBottomColor: `${Color(color).lighten(i * 0.12).darken(.15).string()} !important`,
     };
   }
 
@@ -46,7 +46,7 @@ const styles = (theme: Theme) => {
 
 type RowProps = WithStyle<ReturnType<typeof styles>, IRowProps>;
 
-class Row extends PureComponent<RowProps, {}> {
+const Row = withStyles(styles, class extends PureComponent<RowProps, {}> {
   handleRowClicked = () => {
     this.props.row.grid.selectRow(this.props.row);
   }
@@ -92,17 +92,17 @@ class Row extends PureComponent<RowProps, {}> {
       < >
         <tr>
           <td colSpan={this.props.visibleColumns} className={classNames(cc(className), this.props.classes.group, this.props.classes[`groupLevel${groupRow.level}`])} onClick={() => groupRow.expanded = !groupRow.expanded}>
-            {value}
+            <div><span>{value}</span></div>
           </td>
         </tr>
         {this.renderChildRows(groupRow)}
       </>
-      );
+    );
   }
 
   render() {
     return <Observe render={() => isGroupRow(this.props.row) ? this.renderGroupRow(this.props.row) : this.renderRow()} />;
   }
-}
+});
 
-export default withStyles(styles, Row);
+export default Row;

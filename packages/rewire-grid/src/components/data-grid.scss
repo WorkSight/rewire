@@ -76,28 +76,32 @@ html {
   }
 
   .group {
-    height: 24px;
+    min-height: 24px;
     font-size: 14px;
     border-right: 0;
     // display: inline-block;
 
-    &:before {
-      @extend .material-icons;
-      display: inline-block;
-      font-size: 14px;
-      margin: 0;
-      padding: 4px 8px 0 0;
+    div {
+      display: flex;
+
+      &:before {
+        @extend .material-icons;
+        display: inline-block;
+        font-size: 14px;
+        margin: 0;
+        padding: 0px 8px 0 0;
+      }
     }
 
     &.collapsed {
-      &:before {
+      div:before {
         content: '\e148';
         // content: 'add_circle_outline';
       }
     }
 
     &.expanded {
-      &:before {
+      div:before {
         content: '\e15d';
         // content: 'remove_circle_outline';
       }
@@ -150,7 +154,7 @@ html {
       margin-bottom: -1px;
     }
     tr {
-      min-height: 32px;
+      height: 36px;
     }
 
     div.sort {
@@ -227,7 +231,6 @@ html {
   table {
     table-layout: fixed;
     margin: 0;
-    padding: 1px;
     max-width: none;
     border-collapse: separate;
     border-spacing: 0;

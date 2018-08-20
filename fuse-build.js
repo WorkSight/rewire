@@ -56,6 +56,7 @@ async function build(context, pkg, targets) {
   await Sparky.src(`./packages/${context.pkg}/dist/*.json`).file('package.json', (file) => {
     file.json(json => {
       json.typings    = './index.ts';
+      json['ts:main'] = './index.ts';
     });
     file.save();
   }).exec();
@@ -102,15 +103,15 @@ async function run(cmd, args) {
   });
 }
 
-Sparky.task('prepublish', async() => {
-  let json;
-  for (const module of modules) {
-    json = await bumpVersion(`./packages/${module}/package.json`, {type: 'beta'});
-  }
-  let version = `v${json.version}`;
-  await run('git', ['commit', '-a', '-m', version]);
-  await run('git', ['tag', '-a', version, '-m', version]);
-});
+// Sparky.task('prepublish', async() => {
+//   let json;
+//   for (const module of modules) {
+//     json = await bumpVersion(`./packages/${module}/package.json`, {type: 'beta'});
+//   }
+//   let version = `v${json.version}`;
+//   await run('git', ['commit', '-a', '-m', version]);
+//   await run('git', ['tag', '-a', version, '-m', version]);
+// });
 
 Sparky.task('clean', async() => {
   for (const module of modules) {
@@ -120,5 +121,5 @@ Sparky.task('clean', async() => {
 
 Sparky.task('default', ['clean', 'dist'], () => { });
 
-Sparky.task('publish', ['clean', 'prepublish', 'dist', 'npmpublish'], () => { });
-Sparky.task('version', ['clean', 'prepublish'], () => { });
+Sparky.task('publish', ['clean', 'dist', 'npmpublish'], () => { });
+Sparky.task('version', ['clean'], () => { });
