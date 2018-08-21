@@ -14,6 +14,8 @@ export interface ITextFieldProps {
   selectOnFocus?   : boolean;
   endOfTextOnFocus?: boolean;
   updateOnChange?  : boolean;
+  startAdornment?  : JSX.Element;
+  endAdornment?    : JSX.Element;
   onValueChange    : (value?: string) => void;
 }
 
@@ -61,6 +63,7 @@ export default class TextFieldInternal extends React.Component<TextFieldProps & 
         onKeyDown={this.props.onKeyDown}
         type={this.props.type}
         onChange={(evt: React.ChangeEvent<HTMLInputElement>) => this.props.onValueChange(evt.target.value)}
+        InputProps={{startAdornment: this.props.startAdornment, endAdornment: this.props.endAdornment}}
         InputLabelProps={{shrink: true}}
       />);
     }
@@ -83,6 +86,7 @@ export default class TextFieldInternal extends React.Component<TextFieldProps & 
           onKeyDown={props.onKeyDown}
           onChange={props.onChange}
           inputProps={{autoFocus: props.autoFocus, style: {textAlign: this.props.align || 'left'}}}
+          InputProps={{startAdornment: props.startAdornment, endAdornment: props.endAdornment}}
           InputLabelProps={{shrink: true}}
         />
       }

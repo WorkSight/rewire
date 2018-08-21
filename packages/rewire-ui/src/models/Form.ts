@@ -12,9 +12,10 @@ import editor, {
   TextAlignment,
   IField,
 } from '../components/editors';
+import {and, isEmail} from './Validator';
 import { createElement } from 'react';
 
-export type IFieldTypes = 'string' | 'static' | 'reference' | 'select' | 'number' | 'boolean' | 'date' | 'time' | 'avatar' | 'password';
+export type IFieldTypes = 'string' | 'static' | 'reference' | 'select' | 'number' | 'boolean' | 'date' | 'time' | 'avatar' | 'password' | 'email';
 
 export interface IFieldDefn {
   label(text: string): IFieldDefn;
@@ -90,7 +91,11 @@ class BaseField implements IFieldDefn {
   }
 
   validators(text: IValidateFn): IFieldDefn {
-    this.typeDefn.validators = text;
+    if (this.typeDefn.validators) {
+      this.typeDefn.validators = and(text, this.typeDefn.validators);
+    } else {
+      this.typeDefn.validators = text;
+    }
     return this;
   }
 }
@@ -169,6 +174,7 @@ export default class Form {
     'date'     : 'date',
     'time'     : 'time',
     'password' : 'password',
+    'email'    : 'email',
     'number'   : 'number',
     'avatar'   : 'avatar'
   };
@@ -240,8 +246,8 @@ export default class Form {
     return new Form(fields as any, initial) as any as FormType & Form;
   }
 
-  static string(): IFieldDefn {
-    return new BaseField('string');
+  static string(editProps?: any): IFieldDefn {
+    return new BaseField('string', editProps);
   }
 
   static static(): IFieldDefn {
@@ -252,20 +258,26 @@ export default class Form {
     return new BaseField('number', editProps);
   }
 
-  static boolean(): IFieldDefn {
-    return new BaseField('boolean');
+  static boolean(editProps?: any): IFieldDefn {
+    return new BaseField('boolean', editProps);
   }
 
-  static date(): IFieldDefn {
-    return new BaseField('date');
+  static date(editProps?: any): IFieldDefn {
+    return new BaseField('date', editProps);
   }
 
   static time(editProps?: any): IFieldDefn {
     return new BaseField('time', editProps);
   }
 
-  static password(): IFieldDefn {
-    return new BaseField('password');
+  static password(editProps?: any): IFieldDefn {
+    return new BaseField('password', editProps);
+  }
+
+  static email(editProps?: any): IFieldDefn {
+    let field                 = new BaseField('email', editProps);
+    field.typeDefn.validators = isEmail;
+    return field;
   }
 
   static select(searcher: any): IFieldDefn {

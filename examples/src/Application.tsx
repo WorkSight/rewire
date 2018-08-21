@@ -187,9 +187,9 @@ setTimeout(() => { console.log('here'); suggestions2[0].name = 'error!!'; }, 500
 
 class LoginDialog extends Modal {
   form = Form.create({
-    email                : Form.string().label('Email').validators(and(isRequired, isEmail)).placeholder('enter a valid email').autoFocus(),
-    password             : Form.string().label('Password').validators(and(isRequired, isSameAsOther('password_confirmation', 'passwords are not the same'))).placeholder('enter a password').editor('password'),
-    password_confirmation: Form.string().label('Confirm Password').placeholder('confirm your password').editor('password'),
+    email                : Form.email({hasAdornment: true}).label('Email').validators(and(isRequired, isEmail)).placeholder('enter a valid email').autoFocus(),
+    password             : Form.password({hasAdornment: true}).label('Password').validators(and(isRequired, isSameAsOther('password_confirmation', 'passwords are not the same'))).placeholder('enter a password'),
+    password_confirmation: Form.password({hasAdornment: true}).label('Confirm Password').placeholder('confirm your password'),
     country              : Form.reference(countries).label('Country').validators(isRequired).placeholder('ooga')
   }, {email: 'splace@worksight.net'});
 
@@ -456,9 +456,9 @@ class TestDialog extends Modal {
     isGreat              : Form.boolean().label('Is Great'),
     noLabel              : Form.boolean(),
     disabled             : Form.boolean().label('Disabled').disabled(() => true),
-    email                : Form.string().label('Email').validators(and(isRequired, isEmail)).placeholder('enter a valid email'),
-    password             : Form.string().label('Password').validators(and(isRequired, isSameAsOther('password_confirmation', 'passwords are not the same'))).placeholder('enter a password').editor('password'),
-    password_confirmation: Form.string().label('Confirm Password').placeholder('confirm your password').editor('password'),
+    email                : Form.email({hasAdornment: true}).label('Email').validators(isRequired).placeholder('enter a valid email'),
+    password             : Form.password({hasAdornment: true}).label('Password').validators(and(isRequired, isSameAsOther('password_confirmation', 'passwords are not the same'))).placeholder('enter a password'),
+    password_confirmation: Form.password({hasAdornment: true}).label('Confirm Password').placeholder('confirm your password'),
     country              : Form.reference(countries).label('Country').validators(isRequired).placeholder('ooga')
   }, {email: 'splace@worksight.net', isGreat: true});
 
