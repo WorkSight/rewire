@@ -17,13 +17,14 @@ const options      = parseArgs(process.argv.slice(2));
 const isProduction = (!!options.production || !!options.p);
 
 const fuse = FuseBox.init({
-  target:               'browser@esnext',
-  homeDir:              './',
-  useTypescriptCompiler:true,
   cache:                true,
   hash:                 false,
-  sourceMaps:           {app: true, vendor: false},
+  homeDir:              './',
   output:               'build/$name.js',
+  sourceMaps:           {app: true, vendor: true},
+  target:               'browser@esnext',
+  useJsNext:            true,
+  useTypescriptCompiler:true,
   alias: {
     'rewire-core':      '~/packages/rewire-core/src',
     'rewire-ui':        '~/packages/rewire-ui/src',

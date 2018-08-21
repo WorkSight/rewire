@@ -1,7 +1,7 @@
 import {createMuiTheme, Theme} from '@material-ui/core/styles';
 import {ThemeOptions}          from '@material-ui/core/styles/createMuiTheme';
 import Color                   from 'color';
-import * as merge              from 'deepmerge';
+import merge                   from 'deepmerge';
 import {IGridColors}           from '../models/GridTypes';
 
 declare module '@material-ui/core/styles/createPalette' {
