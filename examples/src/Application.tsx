@@ -15,17 +15,19 @@ import {NumberField}         from 'rewire-ui';
 import Button                from '@material-ui/core/Button';
 import Typography            from '@material-ui/core/Typography';
 import { withStyles }        from '@material-ui/core/styles';
-// import SortableContainer, {SortableList} from 'ui/components/Sortable';
+import {Sortable, SortableList, IItem} from 'rewire-ui';
 import {
   BrowserRouter as Router,
   Route,
-  Link
+  Link,
+  NavLink,
 } from 'react-router-dom';
 // import {TimeInputField} from 'rewire-ui';
 import {utc}            from 'rewire-common';
 // import Grid           from './components/Grid';
 import Paper          from '@material-ui/core/Paper';
 import Dialog         from '@material-ui/core/Dialog';
+import ListItem       from '@material-ui/core/ListItem';
 import {delay}        from 'rewire-common';
 import {Loader}       from 'rewire-ui';
 import * as is        from 'is';
@@ -194,7 +196,7 @@ class LoginDialog extends Modal {
   }, {email: 'splace@worksight.net'});
 
   constructor() {
-    super('Login Form');
+    super('');
     this.action('login', this.submit, {type: 'submit', disabled: () => this.form.hasErrors})
         .action('cancel', {color: 'secondary', icon: 'cancel'});
   }
@@ -226,8 +228,12 @@ const LoginFormView = ({form}: {form: typeof loginDialog.form}) => (
 // watch(() => loginDialog.form.hasChanges, () => console.log('has changes =', loginDialog.form.hasChanges));
 // watch(() => loginDialog.form.hasErrors, () => console.log('has errors =', loginDialog.form.hasErrors));
 
+const getLoginTitle = (dialog: Modal): JSX.Element => {
+  return <div>Login</div>;
+};
+
 const DialogLoginForm = () => (
-  <DialogView dialog={loginDialog} maxWidth='md'>
+  <DialogView dialog={loginDialog} title={getLoginTitle} maxWidth='md'>
     <LoginFormView form={loginDialog.form} />
   </ DialogView>
 );
@@ -512,6 +518,21 @@ const About = (props: any) => (
   </div>
 );
 
+let sortableItems: IItem[] = observable([
+  {id: '1item', name: 'First Item'},
+  {id: '2item', name: 'Second Item'},
+  {id: '3item', name: 'Third Item'},
+  {id: '4item', name: 'Fourth Item'},
+]);
+
+const sortableItemRenderer = (item: IItem): JSX.Element => {
+  return (
+    <ListItem key={item.id} component={NavLink} to={`/topics/props-v-state`} activeClassName={'activeLink'}>
+      <Typography>{item.name}</Typography>
+    </ListItem>
+  );
+};
+
 const Topics = ({ match }: any) => (
   <div>
     <h2>Topics</h2>
@@ -532,6 +553,13 @@ const Topics = ({ match }: any) => (
         </Link>
       </li>
     </ul>
+
+
+    <Paper style={{width: '40%', padding: 20, display: 'flex', alignItems: 'center', justifyContent: 'center', height: 400}}>
+      <Sortable>
+        <SortableList listId='myList' items={sortableItems} itemRenderer={sortableItemRenderer} showDragHandle={false} disableTabbing={true} />
+      </Sortable>
+    </Paper>
 
     <Route path={`${match.url}/:topicId`} component={Topic}/>
     <Route exact path={match.url} render={() => (

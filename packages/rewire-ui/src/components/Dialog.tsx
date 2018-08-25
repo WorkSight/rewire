@@ -76,7 +76,7 @@ class DialogInternal extends React.Component<DialogProps> {
     return (
       <Observe render={() => (
         <Dialog classes={{paper: classes.root}} open={dialog.isOpen} fullWidth maxWidth={maxWidth} hideBackdrop={hideBackdrop} transitionDuration={transitionTime} TransitionComponent={transitionAction} fullScreen={fullScreen} disableEscapeKeyDown={disableEscapeKeyDown} onEscapeKeyDown={escapeAction}>
-          {dialog.title &&
+          {(dialog.title || title) &&
             <div className={classes.heading}>
               <Typography variant='title'>{(title && title(dialog)) || dialog.title}</Typography>
               <hr/>

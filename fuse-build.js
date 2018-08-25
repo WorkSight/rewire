@@ -9,7 +9,8 @@ const {
   ImageBase64Plugin
 } = require('fuse-box');
 const { spawn } = require('child_process');
-const {bumpVersion, npmPublish} = require('fuse-box/sparky');
+const {bumpVersion} = require('fuse-box/sparky');
+const {ensureAbsolutePath} = require('fuse-box/Utils');
 
 const instructions = '> [index.ts]';
 let fuse;
@@ -74,6 +75,24 @@ async function clean(pkg) {
 }
 
 const modules = ['rewire-common', 'rewire-core', 'rewire-ui', 'rewire-grid', 'rewire-graphql'];
+
+async function npmPublish(opts) {
+  opts.tag = opts.tag || 'latest';
+
+  return new Promise((resolve, reject) => {
+    const cmd     = /^win/.test(process.platform) ? 'npm.cmd' : 'npm';
+    const publish = spawn(cmd, ['publish', '--tag', opts.tag], {
+      stdio: 'inherit',
+      cwd: ensureAbsolutePath(opts.path),
+    });
+    publish.on('close', function(code) {
+      if (code === 8) {
+      	return reject('Error detected, waiting for changes...');
+      }
+      return resolve();
+    });
+  });
+}
 
 Sparky.task('dist', async(context) => {
   context.isProduction = true;

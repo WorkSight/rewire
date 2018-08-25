@@ -10,7 +10,7 @@
     "emitDecoratorMetadata": true,
     "esModuleInterop": false,
     "experimentalDecorators": true,
-    "forceConsistentCasingInFileNames": true,
+    "forceConsistentCasingInFileNames": false,
     "inlineSourceMap": false,
     "inlineSources": false,
     "isolatedModules": false,

@@ -1927,13 +1927,6 @@ dot-prop@^4.2.0:
   dependencies:
     is-obj "^1.0.0"
 
-downshift@^2.1.2:
-  version "2.1.2"
-  resolved "http://npm.ad.worksight.net:4873/downshift/-/downshift-2.1.2.tgz#41342bf7bb8b8d458ab81969adabaf3231b17ce0"
-  dependencies:
-    compute-scroll-into-view "^1.0.2"
-    prop-types "^15.6.0"
-
 downshift@^2.1.3:
   version "2.1.3"
   resolved "http://npm.ad.worksight.net:4873/downshift/-/downshift-2.1.3.tgz#5a60b2e26506f217702ca26e69a426a79204f659"
@@ -5050,37 +5043,41 @@ retry@^0.10.0:
   version "0.10.1"
   resolved "http://npm.ad.worksight.net:4873/retry/-/retry-0.10.1.tgz#e76388d217992c252750241d3d3956fed98d8ff4"
 
-rewire-common@^1.0.0-beta.*, rewire-common@^1.0.0-beta.14:
+rewire-common@^1.0.0-beta.*:
   version "1.0.0-beta.14"
   resolved "http://npm.ad.worksight.net:4873/rewire-common/-/rewire-common-1.0.0-beta.14.tgz#6f0ba82bd1d65beb6340bf85ed26ee2f8180cd7b"
   dependencies:
     query-string "^6.1.0"
 
-rewire-core@^1.0.0-beta.*, rewire-core@^1.0.0-beta.14:
+rewire-core@^1.0.0-beta.*:
   version "1.0.0-beta.14"
   resolved "http://npm.ad.worksight.net:4873/rewire-core/-/rewire-core-1.0.0-beta.14.tgz#f45ae6cb0de1a752d75127aed22107ea5b792312"
   dependencies:
     react "^16.4.2"
     s-js "^0.4.9"
 
-rewire-ui@^1.0.0-beta.14:
-  version "1.0.0-beta.14"
-  resolved "http://npm.ad.worksight.net:4873/rewire-ui/-/rewire-ui-1.0.0-beta.14.tgz#31d6f5be7d2ef6b0aea3118be6aa46211a75dde4"
+rewire-ui@^1.0.0-beta.*:
+  version "1.0.0-beta.18"
+  resolved "http://npm.ad.worksight.net:4873/rewire-ui/-/rewire-ui-1.0.0-beta.18.tgz#ea7bdd6999c8890693aff21a5ae9faf21074b9cd"
   dependencies:
     "@material-ui/core" "^1.5.1"
     "@material-ui/icons" "^2.0.3"
+    "@types/color" "^3.0.0"
+    "@types/deepmerge" "^2.1.0"
     "@types/material-ui" "^0.21.5"
     "@types/node" "^10.7.1"
     classcat "^3.2.1"
-    downshift "^2.1.2"
+    color "^3.0.0"
+    deepmerge "^2.1.1"
+    downshift "^2.1.3"
     fuse-box "^3.4.0"
     is "^3.2.1"
     prop-types "^15.6.2"
     react "^16.4.2"
     react-beautiful-dnd "^9.0.1"
     react-number-format "^3.5.1"
-    rewire-common "^1.0.0-beta.13"
-    rewire-core "^1.0.0-beta.13"
+    rewire-common "^1.0.0-beta.*"
+    rewire-core "^1.0.0-beta.*"
 
 right-align@^0.1.1:
   version "0.1.3"

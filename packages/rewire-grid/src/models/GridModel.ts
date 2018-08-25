@@ -327,9 +327,9 @@ class GridModel implements IGrid, IDisposable {
 
     if (cell) {
       cell.selected = true;
-      this.selectedRow = cell.row;
+      this.selectRow(cell.row);
     } else {
-      this.selectedRow = undefined;
+      this.selectRow(undefined);
     }
 
     this.selectedCell = cell;
