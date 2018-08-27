@@ -1,29 +1,33 @@
-import * as React     from 'react';
-import AutoComplete   from './AutoComplete';
-import Select         from './Select';
-import {Observe}      from 'rewire-core';
-import TextField      from './TextField';
-import StaticField    from './StaticField';
-import NumberField    from './NumberField';
-import CheckField     from './CheckField';
-import SwitchField    from './SwitchField';
-import TimeInputField from './TimeInputField';
-import {utc}          from 'rewire-common';
-import * as is        from 'is';
+import * as React      from 'react';
+import AutoComplete    from './AutoComplete';
+import Select          from './Select';
+import {Observe}       from 'rewire-core';
+import TextField       from './TextField';
+import StaticField     from './StaticField';
+import NumberField     from './NumberField';
+import CheckField      from './CheckField';
+import SwitchField     from './SwitchField';
+import TimeInputField  from './TimeInputField';
+import {utc}           from 'rewire-common';
+import InputAdornment  from '@material-ui/core/InputAdornment';
+import MailOutlineIcon from '@material-ui/icons/MailOutline';
+import LockOpenIcon    from '@material-ui/icons/LockOpen';
+import DateRangeIcon   from '@material-ui/icons/DateRange';
+import * as is         from 'is';
 
 export interface IField {
-  name        : string;
-  label?      : string;
-  placeholder?: string;
-  align?      : TextAlignment;
-  autoFocus?  : boolean;
-  error?      : string;
-  value?      : any;
-  disabled?   : (field: IField) => boolean;
-  visible?    : boolean;
+  name         : string;
+  label?       : string;
+  placeholder? : string;
+  align?       : TextAlignment;
+  autoFocus?   : boolean;
+  error?       : string;
+  value?       : any;
+  disabled?    : (field: IField) => boolean;
+  visible?     : boolean;
 }
 
-export type EditorType = 'text' | 'static' | 'auto-complete' | 'select' | 'date' | 'time' | 'number' | 'checked' | 'switch' | 'password' | 'avatar';
+export type EditorType = 'text' | 'static' | 'auto-complete' | 'select' | 'date' | 'time' | 'number' | 'checked' | 'switch' | 'password' | 'email' | 'avatar';
 
 export type TextAlignment = 'left' | 'right' | 'center';
 
@@ -102,6 +106,7 @@ export default function editor(type: EditorType, propsForEdit?: any): React.SFC<
             value={utc(field.value).toDateString()}
             type='date'
             className={className}
+            endAdornment={propsForEdit && propsForEdit.hasAdornment ? <InputAdornment position='end'><DateRangeIcon /></InputAdornment> : ''}
             {...propsForEdit}
           />
         )} />
@@ -143,6 +148,28 @@ export default function editor(type: EditorType, propsForEdit?: any): React.SFC<
       )} />
     );
 
+    case 'email':
+      return ({field, className, onValueChange, endOfTextOnFocus, selectOnFocus}: TextEditorProps) => (
+        <Observe render={() => (
+          <TextField
+            placeholder={field.placeholder}
+            label={field.label}
+            value={field.value}
+            autoFocus={field.autoFocus}
+            endOfTextOnFocus={endOfTextOnFocus}
+            selectOnFocus={selectOnFocus}
+            onValueChange={onValueChange}
+            error={field.error}
+            disabled={field.disabled && field.disabled(field)}
+            visible={field.visible}
+            align={field.align || 'left'}
+            className={className}
+            endAdornment={propsForEdit && propsForEdit.hasAdornment ? <InputAdornment position='end'><MailOutlineIcon /></InputAdornment> : ''}
+            {...propsForEdit}
+          />
+        )} />
+      );
+
     case 'password':
       return ({field, className, onValueChange, endOfTextOnFocus, selectOnFocus}: TextEditorProps) => (
         <Observe render={() => (
@@ -160,6 +187,7 @@ export default function editor(type: EditorType, propsForEdit?: any): React.SFC<
             align={field.align || 'left'}
             type='password'
             className={className}
+            endAdornment={propsForEdit && propsForEdit.hasAdornment ? <InputAdornment position='end'><LockOpenIcon /></InputAdornment> : ''}
             {...propsForEdit}
           />
         )} />

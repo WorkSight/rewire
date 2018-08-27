@@ -195,14 +195,20 @@ const styles = (theme: Theme) => ({
     backgroundColor: theme.palette.gridBackground.main,
     '& td, & th': {
       '&.selected': {
-        outlineColor: theme.palette.cellOutline.main,
+        borderColor: theme.palette.cellOutline.main,
       },
     },
-    '& td': {
-      borderColor: theme.palette.gridBorder.main,
+    '& td, & .left-labels td.selected': {
+      borderTopColor: 'transparent',
+      borderRightColor: theme.palette.gridBorder.main,
+      borderBottomColor: theme.palette.gridBorder.main,
+      borderLeftColor: 'transparent',
     },
     '& th': {
-      borderColor: theme.palette.headerBorder.main,
+      borderTopColor: 'transparent',
+      borderRightColor: theme.palette.headerBorder.main,
+      borderBottomColor: theme.palette.headerBorder.main,
+      borderLeftColor: 'transparent',
     },
   },
   gridContent: {
