@@ -42,12 +42,11 @@ html {
     text-overflow: ellipsis;
     border-style: solid;
     padding: 4px 3px;
-    border-width: 0 1px 1px 0;
+    border-width: 1px;
     font-weight: normal;
     white-space: nowrap;
     &.selected {
-      outline-width: 1px;
-      outline-style: solid;
+      outline: none;
     }
   }
 
@@ -177,7 +176,7 @@ html {
 
     th {
       vertical-align: middle;
-      padding: 8px;
+      padding: 7px;
       min-height: 32px;
     }
     th:first-child {
@@ -191,10 +190,6 @@ html {
       width: 10px;
       white-space: nowrap;
     }
-
-    td:first-child{
-      border-left-width: 0;
-    }
   }
 
   .left-labels {
@@ -202,7 +197,6 @@ html {
     height: 100%;
     flex: 0 0 auto;
     td {
-      outline: 0;
       font-weight: 500;
     }
   }
@@ -264,8 +258,6 @@ html {
     border-width: 0;
   }
   .corner-labels {
-    border-style: solid;
     flex: 0 0 auto;
-    border-width: 0 1px 0 0;
   }
 }

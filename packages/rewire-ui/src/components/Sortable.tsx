@@ -62,12 +62,15 @@ const styles = {
     '&.is-drop-disabled': {
       opacity: 0.5,
     },
- },
- 'scroll-container': {
-   position: 'relative',
-   overflowX: 'hidden',
-   overflowY: 'auto',
- },
+  },
+  'droppable-area': {
+    padding: '0px',
+  },
+  'scroll-container': {
+    position: 'relative',
+    overflowX: 'hidden',
+    overflowY: 'auto',
+  },
 };
 
 export interface IItem {
@@ -202,7 +205,7 @@ class SortableListInternal extends React.Component<SortableListProps & SortableS
             style={style}
             {...(dropProvided as any).droppableProps}
           >
-            <div ref={dropProvided.innerRef} style={{height: 'auto'}}>
+            <div ref={dropProvided.innerRef} className={classes['droppable-area']} style={{height: 'auto'}}>
               <ListItems
                 items={items}
                 showDragHandle={showDragHandle}

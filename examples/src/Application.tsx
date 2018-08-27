@@ -444,7 +444,7 @@ const _Home = (props: any) => (
         <Paper style={{width: '80%', padding: 20, display: 'flex', alignItems: 'center', justifyContent: 'center', height: 800}}>
           <Grid grid={grid} />
         </Paper>
-        <Paper style={{width: '80%', padding: 20, display: 'flex', alignItems: 'center', justifyContent: 'center', height: 800}}>
+        <Paper style={{width: '80%', padding: 20, display: 'flex', alignItems: 'center', justifyContent: 'center', height: 400}}>
           <Grid grid={employeesGrid style={{fontSize: '0.85rem'}} />
         </Paper>
       </div>
