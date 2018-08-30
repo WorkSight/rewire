@@ -332,10 +332,10 @@ class AvatarCropper extends React.Component<AvatarCropperProps, IAvatarCropperSt
       imgHeight = imgWidth * imgRatio;
     } else {
       if (imgRatio > 1) {
-        imgHeight = Math.min(this.height, originalHeight);
+        imgHeight = Math.min(this.props.height, originalHeight);
         imgWidth  = imgHeight / imgRatio;
       } else {
-        imgWidth  = Math.min(this.width, originalWidth);
+        imgWidth  = Math.min(this.props.width, originalWidth);
         imgHeight = imgWidth * imgRatio;
       }
     }

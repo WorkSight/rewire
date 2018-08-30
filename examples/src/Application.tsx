@@ -468,7 +468,7 @@ class TestDialog extends Modal {
     password_confirmation: Form.password({hasAdornment: true}).label('Confirm Password').placeholder('confirm your password'),
     country              : Form.reference(countries).label('Country').validators(isRequired).placeholder('ooga'),
     avatar               : Form.avatar({width: 1000, height: 1000, avatarDiameter: 150, cropRadius: 75}).label('Add Photo'),
-  }, {email: 'splace@worksight.net', isGreat: true});
+  }, {email: 'splace@worksight.net', isGreat: true, avatar: doucheSuitDude});
 
   constructor() {
     super('Test Form');
