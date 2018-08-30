@@ -8,6 +8,7 @@ import NumberField     from './NumberField';
 import CheckField      from './CheckField';
 import SwitchField     from './SwitchField';
 import TimeInputField  from './TimeInputField';
+import AvatarField     from './AvatarField';
 import {utc}           from 'rewire-common';
 import InputAdornment  from '@material-ui/core/InputAdornment';
 import MailOutlineIcon from '@material-ui/icons/MailOutline';
@@ -287,20 +288,14 @@ export default function editor(type: EditorType, propsForEdit?: any): React.SFC<
         )} />
       );
     case 'avatar':
-      return ({field, className, onValueChange, endOfTextOnFocus, selectOnFocus}: TextEditorProps) => (
+      return ({field, classes, onValueChange}: {field: IField, classes: React.CSSProperties, onValueChange: (v: any) => void}) => (
         <Observe render={() => (
-          <TextField
-            placeholder={field.placeholder}
+          <AvatarField
             label={field.label}
-            value={field.value}
-            autoFocus={field.autoFocus}
-            endOfTextOnFocus={endOfTextOnFocus}
-            selectOnFocus={selectOnFocus}
             onValueChange={onValueChange}
-            error={field.error}
-            disabled={field.disabled && field.disabled(field)}
+            value={field.value}
             visible={field.visible}
-            className={className}
+            classes={classes}
             {...propsForEdit}
           />
         )} />

@@ -43,6 +43,7 @@ import {Grid}         from 'rewire-grid';
 import {editor}       from 'rewire-ui';
 import {isRequired, isEmail, and, isSameAsOther} from 'rewire-ui';
 import './graphqltest';
+import doucheSuitDude from './images/doucheSuitDude.jpg';
 
 const suggestions = [
   {name: 'Afghanistan'},
@@ -465,7 +466,8 @@ class TestDialog extends Modal {
     email                : Form.email({hasAdornment: true}).label('Email').validators(isRequired).placeholder('enter a valid email'),
     password             : Form.password({hasAdornment: true}).label('Password').validators(and(isRequired, isSameAsOther('password_confirmation', 'passwords are not the same'))).placeholder('enter a password'),
     password_confirmation: Form.password({hasAdornment: true}).label('Confirm Password').placeholder('confirm your password'),
-    country              : Form.reference(countries).label('Country').validators(isRequired).placeholder('ooga')
+    country              : Form.reference(countries).label('Country').validators(isRequired).placeholder('ooga'),
+    avatar               : Form.avatar({width: 1000, height: 1000, avatarDiameter: 150, cropRadius: 75}).label('Add Photo'),
   }, {email: 'splace@worksight.net', isGreat: true});
 
   constructor() {
@@ -502,6 +504,9 @@ const TestFormView = ({form}: {form: typeof testDialog.form}) => (
     <div className='content'>
       <form.field.password.Editor />
       <form.field.password_confirmation.Editor />
+    </div>
+    <div className='content'>
+    <form.field.avatar.Editor />
     </div>
     <div className='content'>
       <button style={{height: '30px'}}  value='Submit' onClick={testDialog.actionFn('login')}>Submit</button>
