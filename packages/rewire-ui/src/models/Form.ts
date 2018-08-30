@@ -288,7 +288,7 @@ export default class Form {
     return new BaseField('reference', searcher);
   }
 
-  static avatar(): IFieldDefn {
-    return new BaseField('avatar');
+  static avatar(editProps?: any): IFieldDefn {
+    return new BaseField('avatar', editProps);
   }
 }

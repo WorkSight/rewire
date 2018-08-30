@@ -17,7 +17,7 @@ const options      = parseArgs(process.argv.slice(2));
 const isProduction = (!!options.production || !!options.p);
 
 const fuse = FuseBox.init({
-  cache:                true,
+  cache:                false,
   hash:                 false,
   homeDir:              './',
   output:               'build/$name.js',
