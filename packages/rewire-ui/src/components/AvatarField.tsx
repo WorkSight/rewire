@@ -2,7 +2,6 @@ import * as React from 'react';
 import classNames from 'classnames';
 import {default as MuiAvatar} from '@material-ui/core/Avatar';
 import Button from '@material-ui/core/Button';
-import Input from '@material-ui/core/Input';
 import {withStyles, WithStyle} from './styles';
 import AvatarCropper, {IAvatarCropperProps, generateHash} from './AvatarCropper';
 
@@ -40,20 +39,21 @@ const styles = () => ({
 });
 
 export interface IAvatarFieldProps {
-  visible?: boolean;
-  classes?: React.CSSProperties;
-  value?  : string;
+  visible?     : boolean;
+  classes?     : React.CSSProperties;
+  value?       : string;
+  onValueChange: (v: string) => void;
 }
 
 interface IAvatarFieldState {
-  value?: base64;
-  originalValue?: base64;
-  loadedValue?: base64;
+  value?: string;
+  originalValue?: string;
+  loadedValue?: string;
 }
 
 type AvatarFieldProps = WithStyle<ReturnType<typeof styles>, IAvatarFieldProps & IAvatarCropperProps>;
 
-export default class AvatarField extends React.Component<AvatarFieldProps, IAvatarFieldState> {
+class AvatarField extends React.Component<AvatarFieldProps, IAvatarFieldState> {
   state: IAvatarFieldState;
 
   constructor(props: AvatarFieldProps) {
@@ -78,7 +78,7 @@ export default class AvatarField extends React.Component<AvatarFieldProps, IAvat
     this.props.onFileLoad && this.props.onFileLoad(file);
   }
 
-  onCrop = (imageSrc: base64) => {
+  onCrop = (imageSrc: string) => {
     this.props.onCrop && this.props.onCrop(imageSrc);
   }
 
@@ -86,7 +86,7 @@ export default class AvatarField extends React.Component<AvatarFieldProps, IAvat
     this.props.onCrop && this.props.onCrop(image);
   }
 
-  onSave = (imageSrc: base64) => {
+  onSave = (imageSrc: string) => {
     this.props.onValueChange(imageSrc);
     this.setState({value: imageSrc, loadedValue: undefined, originalValue: imageSrc});
     this.props.onSave && this.props.onSave(imageSrc);
@@ -97,16 +97,16 @@ export default class AvatarField extends React.Component<AvatarFieldProps, IAvat
     this.props.onCancel && this.props.onCancel();
   }
 
-  handleFileLoad = (e: Event) => {
+  handleFileLoad = (e: any) => {
     e.preventDefault();
 
     let reader = new FileReader();
-    let file   = e.target.files[0];
+    let file   = e.target && e.target.files[0];
     this.onFileLoad(file);
 
-    let imageSrc: string | undefined = undefined;
+    let imageSrc: string;
     reader.onloadend = () => {
-      imageSrc = reader.result;
+      imageSrc = reader.result as string;
       this.setState({value: undefined, loadedValue: imageSrc});
     };
     reader.readAsDataURL(file);
@@ -117,7 +117,7 @@ export default class AvatarField extends React.Component<AvatarFieldProps, IAvat
       return null;
     }
 
-    const {classes, buttonSize, width, height, imageWidth, imageHeight, avatarDiameter, value, label, lineWidth, cropColor, backgroundColor, shadingColor, shadingOpacity, closeIconColor, labelStyle, borderStyle, cropRadius, minCropRadius, mimeTypes} = this.props;
+    const {classes, buttonSize, width, height, imageWidth, imageHeight, avatarDiameter, label, lineWidth, cropColor, backgroundColor, shadingColor, shadingOpacity, cropRadius, minCropRadius, mimeTypes} = this.props;
     const bSize    = buttonSize || 'small';
     const mTypes   = mimeTypes || 'image/jpeg,image/png';
     const diameter = (avatarDiameter || 150);
@@ -126,7 +126,7 @@ export default class AvatarField extends React.Component<AvatarFieldProps, IAvat
       const diameterStr = diameter + 'px';
       const fileInputId    = generateHash('changeImageButtonInnerInput');
       const fileInputProps = {
-        onChange: (e) => this.handleFileLoad(e),
+        onChange: (e: React.ChangeEvent<HTMLInputElement>) => this.handleFileLoad(e),
         name: fileInputId,
         type: 'file',
         id: fileInputId,
@@ -164,7 +164,6 @@ export default class AvatarField extends React.Component<AvatarFieldProps, IAvat
           backgroundColor={backgroundColor}
           shadingColor={shadingColor}
           shadingOpacity={shadingOpacity}
-          closeIconColor={closeIconColor}
           label={label || 'Upload Image'}
           cropRadius={cropRadius || 75}
           minCropRadius={minCropRadius || 40}

@@ -1,6 +1,6 @@
 {
   "name": "rewire-ui",
-  "version": "1.0.0-beta.34",
+  "version": "1.0.0-beta.35",
   "description": "A lightweight set of material-ui-next components built using the reactive library rewire-core.",
   "repository": {
     "type": "git",
@@ -26,6 +26,7 @@
   "dependencies": {
     "@material-ui/core": "^1.5.1",
     "@material-ui/icons": "^2.0.3",
+    "@types/classnames": "^2.2.6",
     "@types/color": "^3.0.0",
     "@types/deepmerge": "^2.1.0",
     "@types/material-ui": "^0.21.5",

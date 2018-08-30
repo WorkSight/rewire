@@ -31,17 +31,17 @@ const styles = () => ({
   },
   cropperOuterContainer: {
     overflow: 'auto',
-  }
+  },
   cropperContainer: {
     display: 'flex',
-    flex: '0 0 auto'
+    flex: '0 0 auto',
     justifyContent: 'center',
     alignItems: 'center',
     position: 'relative',
     borderRadius: '4px',
     minWidth: '200px',
     minHeight: '200px',
-  }
+  },
   buttonsContainer: {
     display: 'flex',
     alignItems: 'center',
@@ -81,6 +81,8 @@ export interface IAvatarCropperProps {
   src?: string;
   width: number;
   height: number;
+  imageWidth: number;
+  imageHeight: number;
   cropRadius?: number;
   cropColor?: string;
   lineWidth?: number;
@@ -90,10 +92,11 @@ export interface IAvatarCropperProps {
   shadingOpacity?: number;
   mimeTypes?: string;
   label?: string;
+  mobileScaleSpeed?: number;
   onImageLoad?: (data: HTMLImageElement) => void;
-  onCrop?: (data: base64) => void;
+  onCrop?: (data: string) => void;
   onFileLoad?: (data: any) => void;
-  onSave?: (data: base64) => void;
+  onSave?: (data: string) => void;
   onCancel?: () => void;
 }
 
@@ -105,16 +108,17 @@ interface IAvatarCropperState {
   loaderId: string;
   lastMouseY: number;
   showLoader: boolean;
-  image: Image;
+  image?: HTMLImageElement;
   crop: Konva.Circle;
+  cropRadius: number;
 }
 
-type AvatarCropperProps = withStyle<ReturnType<typeof styles>, IAvatarCropperProps>;
+type AvatarCropperProps = WithStyle<ReturnType<typeof styles>, IAvatarCropperProps>;
 
 class AvatarCropper extends React.Component<AvatarCropperProps, IAvatarCropperState> {
   state: IAvatarCropperState;
 
-  static defaultProps: IAvatarCropperProps = {
+  static defaultProps = {
     avatarDiameter: 150,
     buttonSize: 'small',
     shadingColor: 'grey',
@@ -152,10 +156,12 @@ class AvatarCropper extends React.Component<AvatarCropperProps, IAvatarCropperSt
       lastMouseY: 0,
       showLoader: !(this.props.src || this.props.img),
       crop: undefined,
+      cropRadius: 0,
+      image: undefined,
     };
   }
 
-  get lineWidth(): number {
+  get lineWidth(): number | undefined {
     return this.props.lineWidth;
   }
 
@@ -163,7 +169,7 @@ class AvatarCropper extends React.Component<AvatarCropperProps, IAvatarCropperSt
     return this.state.containerId;
   }
 
-  get cropColor(): string {
+  get cropColor(): string | undefined {
     return this.props.cropColor;
   }
 
@@ -171,23 +177,23 @@ class AvatarCropper extends React.Component<AvatarCropperProps, IAvatarCropperSt
     return this.state.loaderId;
   }
 
-  get mimeTypes(): string {
+  get mimeTypes(): string | undefined {
     return this.props.mimeTypes;
   }
 
-  get backgroundColor(): string {
+  get backgroundColor(): string | undefined {
     return this.props.backgroundColor;
   }
 
-  get shadingColor(): string {
+  get shadingColor(): string | undefined {
     return this.props.shadingColor;
   }
 
-  get shadingOpacity(): number {
+  get shadingOpacity(): number | undefined {
     return this.props.shadingOpacity;
   }
 
-  get mobileScaleSpeed(): number {
+  get mobileScaleSpeed(): number | undefined {
     return this.props.mobileScaleSpeed;
   }
 
@@ -195,7 +201,7 @@ class AvatarCropper extends React.Component<AvatarCropperProps, IAvatarCropperSt
     return this.state.cropRadius;
   }
 
-  get minCropRadius(): number {
+  get minCropRadius(): number | undefined {
     return this.props.minCropRadius;
   }
 
@@ -219,28 +225,28 @@ class AvatarCropper extends React.Component<AvatarCropperProps, IAvatarCropperSt
     return this.state.imgHeight / 2;
   }
 
-  get image(): Image {
+  get image(): HTMLImageElement | undefined {
     return this.state.image;
   }
 
   onCancelCallback() {
-    this.props.onCancel();
+    this.props.onCancel && this.props.onCancel();
   }
 
-  onSaveCallback(img: base64) {
-    this.props.onSave(img);
+  onSaveCallback(img: string) {
+    this.props.onSave && this.props.onSave(img);
   }
 
-  onCropCallback(img: base64) {
-    this.props.onCrop(img);
+  onCropCallback(img: string) {
+    this.props.onCrop && this.props.onCrop(img);
   }
 
   onFileLoadCallback(file: any) {
-    this.props.onFileLoad(file);
+    this.props.onFileLoad && this.props.onFileLoad(file);
   }
 
-  onImageLoadCallback(image: Image) {
-    this.props.onImageLoad(image);
+  onImageLoadCallback(image: HTMLImageElement) {
+    this.props.onImageLoad && this.props.onImageLoad(image);
   }
 
   componentDidMount() {
@@ -249,15 +255,19 @@ class AvatarCropper extends React.Component<AvatarCropperProps, IAvatarCropperSt
     const image = this.props.img || new Image();
     if (!this.props.img && this.props.src) image.src = this.props.src;
     this.setState({ image }, () => {
-      if (this.image.complete) return this.init();
-      this.image.onload = () => {
-        this.onImageLoadCallback(this.image);
-        this.init();
-      };
+      if (this.image) {
+        if (this.image.complete) {
+          return this.init();
+        }
+        this.image.onload = () => {
+          this.onImageLoadCallback(this.image!);
+          this.init();
+        };
+      }
     });
   }
 
-  onFileLoad = (e: Event) => {
+  onFileLoad = (e: any) => {
     e.preventDefault();
 
     let reader = new FileReader();
@@ -267,11 +277,15 @@ class AvatarCropper extends React.Component<AvatarCropperProps, IAvatarCropperSt
     const image = new Image();
     const ref   = this;
     reader.onloadend = () => {
-      image.src = reader.result;
+      image.src = reader.result as string;
 
-      ref.setState({ image, file, showLoader: false }, () => {
-        if (ref.image.complete) return ref.init();
-        ref.image.onload = () => ref.init();
+      ref.setState({ image, showLoader: false }, () => {
+        if (ref.image) {
+          if (ref.image.complete) {
+            return ref.init();
+          }
+          ref.image.onload = () => ref.init();
+        }
       });
     };
     reader.readAsDataURL(file);
@@ -299,9 +313,9 @@ class AvatarCropper extends React.Component<AvatarCropperProps, IAvatarCropperSt
   }
 
   init() {
-    const originalWidth  = this.image.width;
-    const originalHeight = this.image.height;
-    const imgRatio       = originalHeight / originalWidth;
+    const originalWidth  = this.image && this.image.width || 0;
+    const originalHeight = this.image && this.image.height || 0;
+    const imgRatio       = originalHeight ? originalHeight / originalWidth : 0;
     const { imageWidth, imageHeight } = this.props;
     let imgHeight;
     let imgWidth;
@@ -318,10 +332,10 @@ class AvatarCropper extends React.Component<AvatarCropperProps, IAvatarCropperSt
       imgHeight = imgWidth * imgRatio;
     } else {
       if (imgRatio > 1) {
-        imgHeight = Math.min(this.props.height, originalHeight);
+        imgHeight = Math.min(this.height, originalHeight);
         imgWidth  = imgHeight / imgRatio;
       } else {
-        imgWidth  = Math.min(this.props.width, originalWidth);
+        imgWidth  = Math.min(this.width, originalWidth);
         imgHeight = imgWidth * imgRatio;
       }
     }
@@ -382,27 +396,27 @@ class AvatarCropper extends React.Component<AvatarCropperProps, IAvatarCropperSt
 
     stage.add(layer);
 
-    const scaledRadius    = (scale = 0) => crop.radius() - scale;
-    const isLeftCorner    = scale => crop.x() - scaledRadius(scale) < 0;
+    const scaledRadius    = (scale: number = 0) => crop.radius() - scale;
+    const isLeftCorner    = (scale?: number) => crop.x() - scaledRadius(scale) < 0;
     const calcLeft        = () => crop.radius() + 1;
-    const isTopCorner     = scale => crop.y() - scaledRadius(scale) < 0;
+    const isTopCorner     = (scale?: number) => crop.y() - scaledRadius(scale) < 0;
     const calcTop         = () => crop.radius() + 1;
-    const isRightCorner   = scale => crop.x() + scaledRadius(scale) > stage.width();
+    const isRightCorner   = (scale?: number) => crop.x() + scaledRadius(scale) > stage.width();
     const calcRight       = () => stage.width() - crop.radius() - 1;
-    const isBottomCorner  = scale => crop.y() + scaledRadius(scale) > stage.height();
+    const isBottomCorner  = (scale?: number) => crop.y() + scaledRadius(scale) > stage.height();
     const calcBottom      = () => stage.height() - crop.radius() - 1;
-    const isNotOutOfScale = scale => !isLeftCorner(scale) && !isRightCorner(scale) && !isBottomCorner(scale) && !isTopCorner(scale);
-    const calcScaleRadius = scale => scaledRadius(scale) >= this.minCropRadius ? scale : crop.radius() - Math.min(this.minCropRadius, (Math.min(this.state.imgWidth, this.state.imgHeight) / 2));
-    const calcResizerX    = x => x + (crop.radius() * 0.86);
-    const calcResizerY    = y => y - (crop.radius() * 0.5);
-    const moveResizer     = (x, y) => {
+    const isNotOutOfScale = (scale?: number) => !isLeftCorner(scale) && !isRightCorner(scale) && !isBottomCorner(scale) && !isTopCorner(scale);
+    const calcScaleRadius = (scale: number) => scaledRadius(scale) >= (this.minCropRadius || 0) ? scale : crop.radius() - Math.min((this.minCropRadius || 0), (Math.min(this.state.imgWidth, this.state.imgHeight) / 2));
+    const calcResizerX    = (x: number) => x + (crop.radius() * 0.86);
+    const calcResizerY    = (y: number) => y - (crop.radius() * 0.5);
+    const moveResizer     = (x: number, y: number) => {
       resize.x(calcResizerX(x) - 8);
       resize.y(calcResizerY(y) - 8);
       resizeIcon.x(calcResizerX(x) - 8);
       resizeIcon.y(calcResizerY(y) - 10);
     };
 
-    const onScaleCallback = (scaleY) => {
+    const onScaleCallback = (scaleY: number) => {
       const scale = scaleY > 0 || isNotOutOfScale(scaleY) ? scaleY : 0;
       cropStroke.radius(cropStroke.radius() - calcScaleRadius(scale));
       crop.radius(crop.radius() - calcScaleRadius(scale));
@@ -430,15 +444,15 @@ class AvatarCropper extends React.Component<AvatarCropperProps, IAvatarCropperSt
     crop.on('dragstart', () => stage.container().style.cursor = 'move');
     crop.on('dragend', () => stage.container().style.cursor = 'default');
 
-    resize.on('touchstart', (evt) => {
-      resize.on('dragmove', (dragEvt) => {
+    resize.on('touchstart', (evt: any) => {
+      resize.on('dragmove', (dragEvt: any) => {
         if (dragEvt.evt.type !== 'touchmove') return;
         const scaleY = (dragEvt.evt.changedTouches['0'].pageY - evt.evt.changedTouches['0'].pageY) || 0;
-        onScaleCallback(scaleY * this.mobileScaleSpeed);
+        onScaleCallback(scaleY * (this.mobileScaleSpeed || 0));
       });
     });
 
-    resize.on('dragmove', (evt) => {
+    resize.on('dragmove', (evt: any) => {
       if (evt.evt.type === 'touchmove') return;
       const newMouseY     = evt.evt.y;
       const ieScaleFactor = newMouseY ? (newMouseY - this.state.lastMouseY) : undefined;
@@ -454,7 +468,7 @@ class AvatarCropper extends React.Component<AvatarCropperProps, IAvatarCropperSt
 
     resize.on('mouseenter', () => stage.container().style.cursor = 'nesw-resize');
     resize.on('mouseleave', () => stage.container().style.cursor = 'default');
-    resize.on('dragstart', (evt) => {
+    resize.on('dragstart', (evt: any) => {
       this.setState({
         lastMouseY: evt.evt.y,
       });
@@ -513,7 +527,7 @@ class AvatarCropper extends React.Component<AvatarCropperProps, IAvatarCropperSt
       width: 16,
       height: 16,
       draggable: true,
-      dragBoundFunc: function (pos) {
+      dragBoundFunc: function (pos: any) {
         return {
           x: this.getAbsolutePosition().x,
           y: pos.y
@@ -584,7 +598,7 @@ class AvatarCropper extends React.Component<AvatarCropperProps, IAvatarCropperSt
                 </div>
                 <div className={classes.buttonsContainer}>
                   <Button className={classes.button} variant='contained' size={buttonSize} onClick={this.onCancelClick}>Cancel</Button>
-                  <Button className={classes.button} variant='contained' size={buttonSize} onClick={this.onSaveClick}>Save</Button>
+                  <Button className={classes.button} variant='contained' size={buttonSize} onClick={this.onSaveClick}>Crop</Button>
                 </div>
               </Dialog>
         }
@@ -593,7 +607,7 @@ class AvatarCropper extends React.Component<AvatarCropperProps, IAvatarCropperSt
   }
 }
 
-export function generateHash(prefix): string {
+export function generateHash(prefix: string): string {
   const s4 = () => Math.floor((1 + Math.random()) * 0x10000).toString(16).substring(1);
   return prefix + '-' + s4() + '-' + s4() + '-' + s4();
 }
