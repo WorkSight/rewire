@@ -1,26 +1,20 @@
 
 import * as React from 'react';
-import Konva from 'konva/src/Core';
+import Konva      from 'konva/src/Core';
 import 'konva/src/shapes/Image';
 import 'konva/src/shapes/Circle';
 import 'konva/src/shapes/Rect';
 import 'konva/src/shapes/Path';
 import 'konva/src/Animation';
 import 'konva/src/DragAndDrop';
-import Button from '@material-ui/core/Button';
-import Dialog from '@material-ui/core/Dialog';
+import Button                  from '@material-ui/core/Button';
+import Dialog                  from '@material-ui/core/Dialog';
 import {withStyles, WithStyle} from './styles';
 
 const styles = () => ({
   root: {
     display: 'flex',
     flexDirection: 'column',
-  },
-  loaderContainer: {
-    border: '2px solid #979797',
-    borderStyle: 'dashed',
-    borderRadius: '8px',
-    textAlign: 'center',
   },
   cropperDialogPaper: {
     border: '15px solid #fff',
@@ -54,29 +48,12 @@ const styles = () => ({
     },
   },
   button: {
-
-  },
-  input: {
-    width: 0.1,
-    height: 0.1,
-    opacity: 0,
-    overflow: 'hidden',
-    position: 'absolute',
-    zIndex: -1,
-  },
-  label: {
-    fontSize: '1.2em',
-    fontWeight: '600',
-    display: 'inline-block',
-    cursor: 'pointer',
-    width: '100%',
   },
 });
 
 export interface IAvatarCropperProps {
   classes?: React.CSSProperties;
   buttonSize?: 'small' | 'medium' | 'large';
-  avatarDiameter?: number;
   img?: HTMLImageElement;
   src?: string;
   width: number;
@@ -90,12 +67,9 @@ export interface IAvatarCropperProps {
   backgroundColor?: string;
   shadingColor?: string;
   shadingOpacity?: number;
-  mimeTypes?: string;
-  label?: string;
   mobileScaleSpeed?: number;
-  onImageLoad?: (data: HTMLImageElement) => void;
+  onLoad?: (data: HTMLImageElement) => void;
   onCrop?: (data: string) => void;
-  onFileLoad?: (data: any) => void;
   onSave?: (data: string) => void;
   onCancel?: () => void;
 }
@@ -107,7 +81,6 @@ interface IAvatarCropperState {
   containerId: string;
   loaderId: string;
   lastMouseY: number;
-  showLoader: boolean;
   image?: HTMLImageElement;
   crop: Konva.Circle;
   cropRadius: number;
@@ -119,7 +92,6 @@ class AvatarCropper extends React.Component<AvatarCropperProps, IAvatarCropperSt
   state: IAvatarCropperState;
 
   static defaultProps = {
-    avatarDiameter: 150,
     buttonSize: 'small',
     shadingColor: 'grey',
     shadingOpacity: 0.6,
@@ -128,7 +100,6 @@ class AvatarCropper extends React.Component<AvatarCropperProps, IAvatarCropperSt
     lineWidth: 4,
     minCropRadius: 20,
     backgroundColor: '#444',
-    mimeTypes: 'image/jpeg,image/png',
     mobileScaleSpeed: 0.5, // experimental
     onCancel: () => {
     },
@@ -136,11 +107,8 @@ class AvatarCropper extends React.Component<AvatarCropperProps, IAvatarCropperSt
     },
     onCrop: () => {
     },
-    onFileLoad: () => {
+    onLoad: () => {
     },
-    onImageLoad: () => {
-    },
-    label: 'Choose a file',
   };
 
   constructor(props: AvatarCropperProps) {
@@ -154,7 +122,6 @@ class AvatarCropper extends React.Component<AvatarCropperProps, IAvatarCropperSt
       containerId,
       loaderId,
       lastMouseY: 0,
-      showLoader: !(this.props.src || this.props.img),
       crop: undefined,
       cropRadius: 0,
       image: undefined,
@@ -175,10 +142,6 @@ class AvatarCropper extends React.Component<AvatarCropperProps, IAvatarCropperSt
 
   get loaderId(): string {
     return this.state.loaderId;
-  }
-
-  get mimeTypes(): string | undefined {
-    return this.props.mimeTypes;
   }
 
   get backgroundColor(): string | undefined {
@@ -241,17 +204,11 @@ class AvatarCropper extends React.Component<AvatarCropperProps, IAvatarCropperSt
     this.props.onCrop && this.props.onCrop(img);
   }
 
-  onFileLoadCallback(file: any) {
-    this.props.onFileLoad && this.props.onFileLoad(file);
-  }
-
-  onImageLoadCallback(image: HTMLImageElement) {
-    this.props.onImageLoad && this.props.onImageLoad(image);
+  onLoadCallback(image: HTMLImageElement) {
+    this.props.onLoad && this.props.onLoad(image);
   }
 
   componentDidMount() {
-    if (this.state.showLoader) return;
-
     const image = this.props.img || new Image();
     if (!this.props.img && this.props.src) image.src = this.props.src;
     this.setState({ image }, () => {
@@ -260,43 +217,19 @@ class AvatarCropper extends React.Component<AvatarCropperProps, IAvatarCropperSt
           return this.init();
         }
         this.image.onload = () => {
-          this.onImageLoadCallback(this.image!);
+          this.onLoadCallback(this.image!);
           this.init();
         };
       }
     });
   }
 
-  onFileLoad = (e: any) => {
-    e.preventDefault();
-
-    let reader = new FileReader();
-    let file   = e.target.files[0];
-    this.onFileLoadCallback(file);
-
-    const image = new Image();
-    const ref   = this;
-    reader.onloadend = () => {
-      image.src = reader.result as string;
-
-      ref.setState({ image, showLoader: false }, () => {
-        if (ref.image) {
-          if (ref.image.complete) {
-            return ref.init();
-          }
-          ref.image.onload = () => ref.init();
-        }
-      });
-    };
-    reader.readAsDataURL(file);
-  }
-
   onCancelClick = () => {
-    this.setState({ showLoader: true }, () => this.onCancelCallback());
+    this.onCancelCallback();
   }
 
   onSaveClick = () => {
-    this.setState({ showLoader: true }, () => this.onSaveCallback(this.getPreview()));
+    this.onSaveCallback(this.getPreview());
   }
 
   getPreview() {
@@ -550,14 +483,7 @@ class AvatarCropper extends React.Component<AvatarCropperProps, IAvatarCropperSt
   }
 
   render() {
-    const {classes, buttonSize, label, avatarDiameter, width, height} = this.props;
-    const labelStyle               = {lineHeight: (avatarDiameter || 200) + 'px'};
-    const loaderContainerDimension = (avatarDiameter || 200) + 'px';
-    const loaderContainerStyle     = {
-      width: loaderContainerDimension,
-      height: loaderContainerDimension,
-      borderRadius: loaderContainerDimension,
-    };
+    const {classes, buttonSize, width, height} = this.props;
 
     let cropperContainerWidth;
     let cropperContainerHeight;
@@ -578,30 +504,17 @@ class AvatarCropper extends React.Component<AvatarCropperProps, IAvatarCropperSt
 
     return (
       <div className={classes.root}>
-        {
-          this.state.showLoader
-            ? <div className={classes.loaderContainer} style={loaderContainerStyle}>
-                <input
-                  onChange={(e) => this.onFileLoad(e)}
-                  name={this.loaderId} type='file'
-                  id={this.loaderId}
-                  className={classes.input}
-                  accept={this.mimeTypes}
-                />
-                <label htmlFor={this.loaderId} className={classes.label} style={labelStyle}>{label}</label>
-              </div>
-            : <Dialog classes={{paper: classes.cropperDialogPaper}} open={true} disableBackdropClick={true} onEscapeKeyDown={this.onCancelClick}>
-                <div className={classes.cropperOuterContainer}>
-                  <div className={classes.cropperContainer} style={cropperContainerStyle}>
-                    <div id={this.containerId} />
-                  </div>
-                </div>
-                <div className={classes.buttonsContainer}>
-                  <Button className={classes.button} variant='contained' size={buttonSize} onClick={this.onCancelClick}>Cancel</Button>
-                  <Button className={classes.button} variant='contained' size={buttonSize} onClick={this.onSaveClick}>Crop</Button>
-                </div>
-              </Dialog>
-        }
+        <Dialog classes={{paper: classes.cropperDialogPaper}} open={true} disableBackdropClick={true} onEscapeKeyDown={this.onCancelClick}>
+          <div className={classes.cropperOuterContainer}>
+            <div className={classes.cropperContainer} style={cropperContainerStyle}>
+              <div id={this.containerId} />
+            </div>
+          </div>
+          <div className={classes.buttonsContainer}>
+            <Button className={classes.button} variant='contained' size={buttonSize} onClick={this.onCancelClick}>Cancel</Button>
+            <Button className={classes.button} variant='contained' size={buttonSize} onClick={this.onSaveClick}>Crop</Button>
+          </div>
+        </Dialog>
       </div>
     );
   }
