@@ -45,7 +45,7 @@ html {
     border-width: 1px;
     font-weight: normal;
     white-space: nowrap;
-    &.selected {
+    &.selected, &:focus {
       outline: none;
     }
   }
@@ -76,7 +76,6 @@ html {
 
   .group {
     min-height: 24px;
-    font-size: 14px;
     border-right: 0;
     // display: inline-block;
 
@@ -86,7 +85,7 @@ html {
       &:before {
         @extend .material-icons;
         display: inline-block;
-        font-size: 14px;
+        font-size: inherit;
         margin: 0;
         padding: 0px 8px 0 0;
       }
@@ -164,6 +163,7 @@ html {
         margin-left: 4px;
         transition: 0.2s ease-in-out;
         content: '\e5d8';
+        color: inherit;
         // content: 'arrow_upward';
       }
   

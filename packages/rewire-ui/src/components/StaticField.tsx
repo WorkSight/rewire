@@ -5,6 +5,7 @@ import {TextAlignment}               from './editors';
 
 const styles = {
   inputRoot: {
+    lineHeight: 'inherit',
     '&::before': {
       display: 'none',
     },

@@ -1,4 +1,4 @@
-import { IColumn, EditorType, IColumnEditor, SortDirection, IGrid, TextAlignment } from './GridTypes';
+import { IColumn, EditorType, IColumnEditor, SortDirection, IGrid, TextAlignment, IError } from './GridTypes';
 import {editor, compare} from 'rewire-ui';
 import * as is from 'is';
 
@@ -24,7 +24,10 @@ class ColumnModel implements IColumn {
   renderer?: React.SFC<any>;
   colSpan? : number;
   rowSpan? : number;
+  position : number;
+  canSort? : boolean;
 
+  validator?: (value: any) => IError | undefined;
   map?(value: any): string;
   predicate?(value: any, filter: {value: any}): boolean;
   compare?(x: any, y: any): number;
@@ -41,6 +44,8 @@ class ColumnModel implements IColumn {
     this.align    = align;
     this.colSpan  = 1;
     this.rowSpan  = 1;
+    this.position = 0;
+    this.canSort  = true;
     this.setEditor(type);
   }
 
@@ -63,6 +68,8 @@ class ColumnModel implements IColumn {
     if (t === 'number') {
       this.map   = (value: any) => (options.decimals && is.number(value)) ? value.toFixed(options.decimals) : value;
       this.align = this.align || 'right';
+    } else if (t === 'checked') {
+      this.map = (value: boolean) => value ? 'True' : 'False';
     }
 
     if (options && options.map) {

@@ -1,7 +1,16 @@
 import * as React                    from 'react';
 import BlurInputHOC                  from './BlurInputHOC';
 import TextField, { TextFieldProps } from '@material-ui/core/TextField';
+import {Theme}                       from '@material-ui/core/styles';
 import {TextAlignment}               from './editors';
+import {withStyles, WithStyle}       from './styles';
+
+const styles = (theme: Theme) => ({
+  inputRoot: {
+    lineHeight: 'inherit',
+    fontSize: 'inherit',
+  },
+});
 
 export interface ITextFieldProps {
   visible?         : boolean;
@@ -19,12 +28,14 @@ export interface ITextFieldProps {
   onValueChange    : (value?: string) => void;
 }
 
-export default class TextFieldInternal extends React.Component<TextFieldProps & ITextFieldProps> {
-  constructor(props: TextFieldProps & ITextFieldProps) {
+type TextFieldPropsStyled = WithStyle<ReturnType<typeof styles>, TextFieldProps & ITextFieldProps>;
+
+class TextFieldInternal extends React.Component<TextFieldPropsStyled> {
+  constructor(props: TextFieldPropsStyled) {
     super(props);
   }
 
-  shouldComponentUpdate(nextProps: ITextFieldProps) {
+  shouldComponentUpdate(nextProps: TextFieldPropsStyled) {
     return (
       (nextProps.value !== this.props.value) ||
       (nextProps.disabled !== this.props.disabled) ||
@@ -63,14 +74,14 @@ export default class TextFieldInternal extends React.Component<TextFieldProps & 
         onKeyDown={this.props.onKeyDown}
         type={this.props.type}
         onChange={(evt: React.ChangeEvent<HTMLInputElement>) => this.props.onValueChange(evt.target.value)}
-        InputProps={{startAdornment: this.props.startAdornment, endAdornment: this.props.endAdornment}}
+        InputProps={{startAdornment: this.props.startAdornment, endAdornment: this.props.endAdornment, classes: {root: this.props.classes.inputRoot}}}
         InputLabelProps={{shrink: true}}
       />);
     }
 
     return (
     <BlurInputHOC {...this.props} onValueChange={this.props.onValueChange}
-      render={(props) =>
+      render={(props: TextFieldPropsStyled) =>
         <TextField
           className={this.props.className}
           type={this.props.type}
@@ -86,7 +97,7 @@ export default class TextFieldInternal extends React.Component<TextFieldProps & 
           onKeyDown={props.onKeyDown}
           onChange={props.onChange}
           inputProps={{autoFocus: props.autoFocus, style: {textAlign: this.props.align || 'left'}}}
-          InputProps={{startAdornment: props.startAdornment, endAdornment: props.endAdornment}}
+          InputProps={{startAdornment: props.startAdornment, endAdornment: props.endAdornment, classes: {root: props.classes.inputRoot}}}
           InputLabelProps={{shrink: true}}
         />
       }
@@ -94,4 +105,4 @@ export default class TextFieldInternal extends React.Component<TextFieldProps & 
   }
 }
 
-
+export default withStyles(styles, TextFieldInternal);

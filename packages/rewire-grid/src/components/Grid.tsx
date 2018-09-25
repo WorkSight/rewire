@@ -1,9 +1,9 @@
-import {IGrid, IColumn, IGridColors} from '../models/GridTypes';
-import Column                        from './Column';
-import classNames                    from 'classnames';
-import Cell                          from './Cell';
-import Row                           from './Row';
-import * as React                    from 'react';
+import {IGrid, IColumn, IGridColors, IGridFontSizes} from '../models/GridTypes';
+import Column                                        from './Column';
+import classNames                                    from 'classnames';
+import Cell                                          from './Cell';
+import Row                                           from './Row';
+import * as React                                    from 'react';
 import {
   Observe,
   disposeOnUnmount,
@@ -58,6 +58,7 @@ export interface IGridProps {
   className?: string;
   style?: React.CSSProperties;
   gridColors?: IGridColors;
+  gridFontSizes?: IGridFontSizes;
 }
 
 type BodyType = {grid: IGrid, columns: IColumn[], gridContent: DataSignal<HTMLDivElement | undefined>, scrollY: DataSignal<number>, loadMoreRows?: (args: {start: number, end: number}) => Promise<any[]> };
@@ -177,6 +178,7 @@ const styles = (theme: Theme) => ({
     backgroundColor: theme.palette.headerBackground.main,
   },
   topLabels: {
+    fontSize: theme.fontSizes.header,
     color: theme.palette.headerText.main,
     borderColor: theme.palette.headerBorder.main,
     backgroundColor: theme.palette.headerBackground.main,
@@ -194,8 +196,25 @@ const styles = (theme: Theme) => ({
     borderColor: theme.palette.gridBorder.main,
     backgroundColor: theme.palette.gridBackground.main,
     '& td, & th': {
+      // '&.selected': {
+      //   borderColor: theme.palette.cellOutline.main,
+      // },
       '&.selected': {
-        borderColor: theme.palette.cellOutline.main,
+        borderRightColor: theme.palette.cellOutline.main,
+        borderBottomColor: theme.palette.cellOutline.main,
+        backgroundColor: theme.palette.cellSelectedBackground.main,
+      },
+      '&.selectedTopMost': {
+        borderTopColor: theme.palette.cellOutline.main,
+      },
+      '&.selectedLeftMost': {
+        borderLeftColor: theme.palette.cellOutline.main,
+      },
+      '&.adjacentToSelectedTop': {
+        borderBottomColor: theme.palette.cellOutline.main,
+      },
+      '&.adjacentToSelectedLeft': {
+        borderRightColor: theme.palette.cellOutline.main,
       },
     },
     '& td, & .left-labels td.selected': {
@@ -220,34 +239,41 @@ const styles = (theme: Theme) => ({
       backgroundColor: theme.palette.rowStripedBackground.main,
     },
     '& tr.alt.selected': {
-      backgroundColor: theme.palette.rowStripedBackgroundSelected.main,
+      backgroundColor: theme.palette.rowStripedSelectedBackground.main,
     },
+  },
+  gridScroll: {
+    fontSize: theme.fontSizes.body,
   },
 });
 
 export default class Grid extends React.PureComponent<IGridProps> {
   private gridColors: IGridColors;
+  private gridFontSizes: IGridFontSizes;
 
   constructor(props: IGridProps) {
     super(props);
 
-    this.gridColors = props.gridColors || {};
+    this.gridColors    = props.gridColors    || {};
+    this.gridFontSizes = props.gridFontSizes || {};
     if (this.gridColors.headerBackground && !this.gridColors.headerBorder) {
       this.gridColors.headerBorder = Color(this.gridColors.headerBackground).lighten(0.15).string();
     }
-    if (this.gridColors.rowStripedBackground && !this.gridColors.rowStripedBackgroundSelected) {
-      this.gridColors.rowStripedBackgroundSelected = Color(this.gridColors.rowStripedBackground).darken(0.15).string();
+    if (this.gridColors.rowSelectedBackground && !this.gridColors.cellSelectedBackground) {
+      this.gridColors.cellSelectedBackground = Color(this.gridColors.rowSelectedBackground).lighten(0.07).string();
     }
   }
 
   render() {
-    const gridColors = this.gridColors;
+    const gridColors    = this.gridColors;
+    const gridFontSizes = this.gridFontSizes;
     let paletteObj: any = {};
     Object.keys(gridColors).forEach(colorName => {
       paletteObj[colorName] = {main: gridColors[colorName]};
     });
+
     return (
-      <MuiThemeProvider theme={createGridTheme({palette: paletteObj})}>
+      <MuiThemeProvider theme={createGridTheme({palette: paletteObj, fontSizes: gridFontSizes})}>
         <GridInternal {...this.props} />
       </MuiThemeProvider>
     );
@@ -263,6 +289,7 @@ const GridInternal = withStyles(styles, class extends React.PureComponent<GridPr
   private _columnTableWrapper: HTMLDivElement;
   private _columnTable       : HTMLTableElement;
   private _gridFixed         : HTMLTableElement;
+  grid                       : IGrid;
 
   constructor(props: GridProps) {
     super(props);
@@ -274,6 +301,7 @@ const GridInternal = withStyles(styles, class extends React.PureComponent<GridPr
     // this.addShortcut({shortcutKey:'end',  preventDefault:false, action:() => {
     //   this.props.controller.selectCell(this.rows[this.rows.length - 1].cells[0]);
     // }});
+    this.grid = props.grid;
 
     disposeOnUnmount(this, () => {
       this._gridContent = property(undefined);
@@ -293,14 +321,31 @@ const GridInternal = withStyles(styles, class extends React.PureComponent<GridPr
     });
   }
 
+  handleMouseUp = (evt: Event) => {
+    this.grid.isMouseDown = false;
+    this.grid.startCell   = undefined;
+  }
+
   handleScroll = (evt: React.UIEvent<any>) => {
     let target: Element = evt.target as Element;
+    if (target !== this._gridContent()) {
+      return;
+    }
     this.scrollX(target.scrollLeft);
     this.scrollY(target.scrollTop);
   }
 
   componentDidMount() {
     this.updateForScrollbars();
+    if (this.grid.multiSelect) {
+      document.addEventListener('mouseup', this.handleMouseUp);
+    }
+  }
+
+  componentWillUnmount() {
+    if (this.grid.multiSelect) {
+      document.removeEventListener('mouseup', this.handleMouseUp);
+    }
   }
 
   updateForScrollbars() {
@@ -405,7 +450,7 @@ const GridInternal = withStyles(styles, class extends React.PureComponent<GridPr
 
     return (
       <Observe render={() => (
-        <div className='grid-scroll' onScroll={this.handleScroll}>
+        <div className={classNames('grid-scroll', this.props.classes.gridScroll)} onScroll={this.handleScroll}>
           {this.renderFixedColumnData()}
           <KeyHandler>{
             (keyboard) => (

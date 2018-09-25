@@ -71,7 +71,7 @@ export type TextEditorProps = {
 export default function editor(type: EditorType, propsForEdit?: any): React.SFC<any> {
   switch (type) {
     case 'select':
-      return ({field, className, onValueChange}: {field: IField, className: string, onValueChange: (v: any) => void}) => (
+      return ({field, className, classes, onValueChange}: {field: IField, className: string, classes: React.CSSProperties, onValueChange: (v: any) => void}) => (
         <Observe render={() => (
           <Select
             label={field.label}
@@ -85,6 +85,7 @@ export default function editor(type: EditorType, propsForEdit?: any): React.SFC<
             selectedItem={field.value}
             onSelectItem={onValueChange}
             className={className}
+            classes={classes}
             {...propsForEdit}
           />
         )} />
@@ -269,7 +270,7 @@ export default function editor(type: EditorType, propsForEdit?: any): React.SFC<
     );
 
     case 'auto-complete':
-      return ({field, className, onValueChange}: {field: IField, className: string, onValueChange: (v: any) => void}) => (
+      return ({field, className, onValueChange, classes}: {field: IField, className: string, onValueChange: (v: any) => void, classes: React.CSSProperties}) => (
         <Observe render={() => (
           <AutoComplete
             placeholder={field.placeholder}
@@ -283,6 +284,7 @@ export default function editor(type: EditorType, propsForEdit?: any): React.SFC<
             selectedItem={field.value}
             onSelectItem={onValueChange}
             className={className}
+            classes={classes}
             {...propsForEdit}
           />
         )} />

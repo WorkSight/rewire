@@ -37,7 +37,7 @@ import {Modal}        from 'rewire-ui';
 import {Dialog as DialogView}   from 'rewire-ui';
 import {FormView}     from 'rewire-ui';
 // import column         from './models/Grid';
-import {createGrid, createColumn}   from 'rewire-grid';
+import {createGrid, createColumn, IError, ErrorSeverity}   from 'rewire-grid';
 import {Grid}         from 'rewire-grid';
 // import { ICell, collapseAll, expandAll } from 'rewire-grid/models/GridTypes';
 import {editor}       from 'rewire-ui';
@@ -186,7 +186,7 @@ const asText  = (value: (v: string) => void) => (evt: React.ChangeEvent<HTMLInpu
 
 let updateName = (v?: string) => ooga.name = v;
 const suggestions2 = observable(suggestions);
-setTimeout(() => { console.log('here'); suggestions2[0].name = 'error!!'; }, 5000);
+// setTimeout(() => { console.log('here'); suggestions2[0].name = 'error!!'; }, 5000);
 
 class LoginDialog extends Modal {
   form = Form.create({
@@ -320,35 +320,72 @@ function createTestGrid(nRows: number, nColumns: number) {
   for (let col = 0; col < nColumns; col++) {
     cols.push(createColumn('column' + col, 'Header# ' + col, 'text', Math.trunc(Math.random() * 250 + 50) + 'px'));
   }
+  cols.push(createColumn('numberColumn', 'Number', {type: 'number', options: {decimals: 2, thousandSeparator: false}}, Math.trunc(Math.random() * 250 + 50) + 'px'));
+  cols.push(createColumn('timeColumn', 'Time', 'time', Math.trunc(Math.random() * 250 + 50) + 'px'));
+  cols.push(createColumn('autoCompleteColumn', 'Auto Complete', {type: 'auto-complete', options: countries}, Math.trunc(Math.random() * 250 + 50) + 'px'));
+  cols.push(createColumn('selectColumn', 'Select', {type: 'select', options: countries}, Math.trunc(Math.random() * 250 + 50) + 'px'));
+  cols.push(createColumn('checkedColumn', 'Checked', 'checked', Math.trunc(Math.random() * 250 + 50) + 'px'));
 
   // Override and set some columns to be number!
   cols[5].setEditor({type: 'number', options: {decimals: 2, thousandSeparator: true}});
+  cols[5].validator = (value: any): IError | undefined => {
+    if (value === undefined) {
+      return undefined;
+    }
+
+    let error: IError | undefined;
+    let errorMsg: string             = '';
+    let errorSeverity: ErrorSeverity = ErrorSeverity.error;
+    if (value < 2000) {
+      errorMsg      = 'Less than 2000';
+      errorSeverity = ErrorSeverity.warning;
+    } else if (value > 7000) {
+      errorMsg      = 'Greater than 7000';
+      errorSeverity = ErrorSeverity.critical;
+    } else if (value > 4000) {
+      errorMsg      = 'Greater than 4000';
+      errorSeverity = ErrorSeverity.error;
+    } else if (value >= 2000 && value <= 4000) {
+      errorMsg      = 'Between 2000 and 4000';
+      errorSeverity = ErrorSeverity.info;
+    }
+
+    error = errorMsg ? {messageText: errorMsg, severity: errorSeverity} : undefined;
+
+    return error;
+  };
   cols[6].setEditor({type: 'number', options: {decimals: 3, thousandSeparator: true}});
 
   // add some cell data!
   let rows = [];
   for (let row = 0; row < nRows; row++) {
-    let r: any = {id: row};
-    for (let column = 0; column < nColumns; column++) {
-      let v: any = `RC ${column}-${row % 5}`;
-      if ((column >= 5) && (column <= 6)) v = Math.random() * 10000;
-      r['column' + column] = v;
+    let r: any = {id: row, options: {allowMergeColumns: true}};
+    for (let column = 0; column < cols.length; column++) {
+      let v: any  = `RC ${column}-${row % 5}`;
+      let colName = cols[column].name;
+      if ((colName === 'autoCompleteColumn') || (colName === 'selectColumn')) v = {name: 'Austria'};
+      else if (colName === 'checkedColumn') v = true;
+      else if (colName === 'timeColumn') v = '7:30';
+      else if (((column >= 5) && (column <= 6)) || colName === 'numberColumn') v = Math.random() * 10000;
+      r[colName] = v;
     }
     rows.push(r);
   }
   // Some fixed columns to the left
-  cols[0].fixed = true;
-  cols[0].width = '128px';
-  cols[0].align = 'right';
-  cols[1].fixed = true;
-  cols[1].width = '65px';
-  cols[1].align = 'right';
+  cols[0].fixed   = true;
+  cols[0].width   = '128px';
+  cols[0].align   = 'right';
+  cols[1].fixed   = true;
+  cols[1].width   = '65px';
+  cols[1].align   = 'right';
+  cols[4].canSort = false;
 
   // create the grid model and group by 'column2' and 'column3'
   let grid = createGrid(rows, cols, ['column2', 'column3']);
   grid.fixedRows[0].cells['column5'].value = 'Sales';
   grid.fixedRows[0].cells['column6'].value = 'Sales';
   grid.addFixedRow({column5: '2017', column6: '2018'});
+  grid.multiSelect = true;
 
   // sort first by  column7 then by column6
   grid.addSort(cols[7], 'ascending')
@@ -378,22 +415,22 @@ console.log(r);
 
 function createEmployeesGrid() {
   let employees = [
-    {id: '1e',  name: 'Schrute, Dwight',         email: 'testEmail@test.com', isActive: true},
-    {id: '2e',  name: 'Scott, Michael',          email: 'testEmail@test.com', isActive: true},
-    {id: '3e',  name: 'Lannister, Jaime',        email: 'testEmail@test.com', isActive: true},
-    {id: '4e',  name: 'Dayne, Arthur',           email: 'testEmail@test.com', isActive: true},
-    {id: '5e',  name: 'Snow, Jon',               email: 'testEmail@test.com', isActive: true},
-    {id: '6e',  name: 'Stark, Ned',              email: 'testEmail@test.com', isActive: true},
-    {id: '7e',  name: 'Stark, Arya',             email: 'testEmail@test.com', isActive: true},
-    {id: '8e',  name: 'Biggus, Headus',          email: 'testEmail@test.com', isActive: true},
-    {id: '9e',  name: 'Drumpf, Donald',          email: 'testEmail@test.com', isActive: true},
-    {id: '7e',  name: 'Johnson, Ruin',           email: 'testEmail@test.com', isActive: true},
-    {id: '8e',  name: 'Ren, Emo',                email: 'testEmail@test.com', isActive: true},
-    {id: '9e',  name: 'Swolo, Ben',              email: 'testEmail@test.com', isActive: true},
-    {id: '10e', name: 'Sue, Mary',               email: 'testEmail@test.com', isActive: true},
-    {id: '11e', name: 'Poppins, Leia',           email: 'testEmail@test.com', isActive: true},
-    {id: '12e', name: 'Snoke, Nobody',           email: 'testEmail@test.com', isActive: true},
-    {id: '13e', name: 'Too tired to live, Luke', email: 'testEmail@test.com', isActive: true},
+    {id: '1e',  name: 'Schrute, Dwight',         email: 'testEmail11@test.com',       isActive: true, timeColumn: '7:30', autoCompleteColumn: undefined        , selectColumn: {name: 'Bermuda'}},
+    {id: '2e',  name: 'Scott, Michael',          email: 'testEmail22@test.com',       isActive: true, timeColumn: '7:30', autoCompleteColumn: {name: 'Bermuda'}, selectColumn: {name: 'Bermuda'}},
+    {id: '3e',  name: 'Lannister, Jaime',        email: 'testEmail33@test.com',       isActive: true, timeColumn: '7:30', autoCompleteColumn: {name: 'Bermuda'}, selectColumn: {name: 'Bermuda'}},
+    {id: '4e',  name: 'Dayne, Arthur',           email: 'testEmail44@test.com',       isActive: true, timeColumn: '7:30', autoCompleteColumn: {name: 'Bermuda'}, selectColumn: {name: 'Bermuda'}},
+    {id: '5e',  name: 'Snow, Jon',               email: 'testEmail55@test.com',       isActive: true, timeColumn: '7:30', autoCompleteColumn: {name: 'Bermuda'}, selectColumn: {name: 'Bermuda'}},
+    {id: '6e',  name: 'Stark, Ned',              email: 'testEmail66@test.com',       isActive: true, timeColumn: '7:30', autoCompleteColumn: {name: 'Bermuda'}, selectColumn: {name: 'Bermuda'}},
+    {id: '7e',  name: 'Stark, Arya',             email: 'testEmail77@test.com',       isActive: true, timeColumn: '7:30', autoCompleteColumn: {name: 'Bermuda'}, selectColumn: {name: 'Bermuda'}},
+    {id: '8e',  name: 'Biggus, Headus',          email: 'testEmail88@test.com',       isActive: true, timeColumn: '7:30', autoCompleteColumn: {name: 'Bermuda'}, selectColumn: {name: 'Bermuda'}},
+    {id: '9e',  name: 'Drumpf, Donald',          email: 'testEmail99@test.com',       isActive: true, timeColumn: '7:30', autoCompleteColumn: {name: 'Bermuda'}, selectColumn: {name: 'Bermuda'}},
+    {id: '7e',  name: 'Johnson, Ruin',           email: 'testEmail00@test.com',       isActive: true, timeColumn: '7:30', autoCompleteColumn: {name: 'Bermuda'}, selectColumn: {name: 'Bermuda'}},
+    {id: '8e',  name: 'Ren, Emo',                email: 'testEmail1234@test.com',     isActive: true, timeColumn: '7:30', autoCompleteColumn: {name: 'Bermuda'}, selectColumn: {name: 'Bermuda'}},
+    {id: '9e',  name: 'Swolo, Ben',              email: 'testEmail5678@test.com',     isActive: true, timeColumn: '7:30', autoCompleteColumn: {name: 'Bermuda'}, selectColumn: {name: 'Bermuda'}},
+    {id: '10e', name: 'Sue, Mary',               email: 'testEmail90210@test.com',    isActive: true, timeColumn: '7:30', autoCompleteColumn: {name: 'Bermuda'}, selectColumn: {name: 'Bermuda'}},
+    {id: '11e', name: 'Poppins, Leia',           email: 'testEmail6274309@test.com',  isActive: true, timeColumn: '7:30', autoCompleteColumn: {name: 'Bermuda'}, selectColumn: {name: 'Bermuda'}},
+    {id: '12e', name: 'Snoke, Nobody',           email: 'testEmail13371337@test.com', isActive: true, timeColumn: '7:30', autoCompleteColumn: {name: 'Bermuda'}, selectColumn: {name: 'Bermuda'}},
+    {id: '13e', name: 'Too tired to live, Luke', email: 'testEmail253545@test.com',   isActive: true, timeColumn: '7:30', autoCompleteColumn: {name: 'Bermuda'}, selectColumn: {name: 'Bermuda'}},
   ];
 
   let cols = [];
@@ -402,10 +439,11 @@ function createEmployeesGrid() {
   cols.push(createColumn('name',     'Employee', 'text'));
   cols.push(createColumn('email',    'Email',    'text'));
   cols.push(createColumn('isActive', 'IsActive', 'checked'));
+  cols.push(createColumn('timeColumn', 'Time', 'time'));
+  cols.push(createColumn('autoCompleteColumn', 'Auto Complete', {type: 'auto-complete', options: countries}));
+  cols.push(createColumn('selectColumn', 'Select', {type: 'select', options: countries}));
 
-  cols.forEach(col => {
-    col.readOnly = true;
-  });
+  cols[1].readOnly = true;
 
   // add employee rows
   let rows: any[] = [];
@@ -425,6 +463,7 @@ function createEmployeesGrid() {
   // create the grid model
   let grid = createGrid(rows, cols);
   // sort by employee names
+  grid.multiSelect = true;
   grid.addSort(cols[0], 'ascending');
 
   return grid;
@@ -443,10 +482,10 @@ const _Home = (props: any) => (
       </DialogView>
       <div style={{overflow: 'auto', padding: 10, display: 'flex', flexDirection: 'column', alignItems: 'center', justifyContent: 'center'}}>
         <Paper style={{width: '80%', padding: 20, display: 'flex', alignItems: 'center', justifyContent: 'center', height: 800}}>
-          <Grid grid={grid} />
+          <Grid grid={grid} gridFontSizes={{header: '0.9rem', body: '0.9rem', groupRow: '0.8rem'}} />
         </Paper>
         <Paper style={{width: '80%', padding: 20, display: 'flex', alignItems: 'center', justifyContent: 'center', height: 400}}>
-          <Grid grid={employeesGrid style={{fontSize: '0.85rem'}} />
+          <Grid grid={employeesGrid} gridFontSizes={{header: '0.95rem', body: '0.9rem', groupRow: '0.8rem'}} />
         </Paper>
       </div>
     </div>
@@ -466,7 +505,7 @@ class TestDialog extends Modal {
     email                : Form.email({hasAdornment: true}).label('Email').validators(isRequired).placeholder('enter a valid email'),
     password             : Form.password({hasAdornment: true}).label('Password').validators(and(isRequired, isSameAsOther('password_confirmation', 'passwords are not the same'))).placeholder('enter a password'),
     password_confirmation: Form.password({hasAdornment: true}).label('Confirm Password').placeholder('confirm your password'),
-    country              : Form.reference(countries).label('Country').validators(isRequired).placeholder('ooga'),
+    country              : Form.reference(countries).label('Country').validators(isRequired),
     avatar               : Form.avatar({width: 1000, height: 1000, avatarDiameter: 150, cropRadius: 75}).label('Add Photo'),
   }, {email: 'splace@worksight.net', isGreat: true, avatar: doucheSuitDude});
 
@@ -499,11 +538,13 @@ const TestFormView = ({form}: {form: typeof testDialog.form}) => (
       <form.field.noLabel.Editor className='span4' />
       <form.field.disabled.Editor className='span4' />
       <form.field.email.Editor className='span4' />
-      <form.field.country.Editor className='span4' />
     </div>
     <div className='content'>
       <form.field.password.Editor />
       <form.field.password_confirmation.Editor />
+    </div>
+    <div className='content'>
+      <form.field.country.Editor className='span4' />
     </div>
     <div className='content'>
     <form.field.avatar.Editor />

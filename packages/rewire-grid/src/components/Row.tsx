@@ -28,6 +28,7 @@ const styles = (theme: Theme) => {
 
   let styleObj = {
     group: {
+      fontSize: theme.fontSizes.groupRow,
       '&:before': {
         color: Color(color).darken(.45).string(),
       },
@@ -48,7 +49,7 @@ type RowProps = WithStyle<ReturnType<typeof styles>, IRowProps>;
 
 const Row = withStyles(styles, class extends PureComponent<RowProps, {}> {
   handleRowClicked = () => {
-    this.props.row.grid.selectRow(this.props.row);
+    // this.props.row.grid.selectRows([this.props.row]);
   }
 
   renderCells = () => {

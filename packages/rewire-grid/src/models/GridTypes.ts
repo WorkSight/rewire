@@ -20,15 +20,19 @@ export interface IGrid extends IRows, IDisposable {
   rows                    : IRow[];
   fixedRows               : IRow[];
   columns                 : IColumn[];
-  readonly selectedRow?   : IRow;
-  readonly selectedCell?  : ICell;
   readonly editingCell?   : ICell;
+  readonly selectedRows   : IRow[];
+  readonly selectedCells  : ICell[];
   width                   : string;
   height                  : string;
   fixedWidth              : string;
   readonly fixedColumns   : IColumn[];
   readonly dataColumns    : IColumn[];
   groupBy                 : IColumn[];
+  clipboard               : ICell[];
+  isMouseDown             : boolean;
+  multiSelect             : boolean;
+  startCell?              : ICell;
 
   hasChanges(): boolean;
   copy(): void;
@@ -36,11 +40,23 @@ export interface IGrid extends IRows, IDisposable {
   addSort(column: IColumn, sort?: SortDirection, insert?: boolean): IGrid;
   setSort(column: IColumn, sort?: SortDirection): IGrid;
 
-  selectRow(row?: IRow): void;
-  selectCell(cell?: ICell): void;
+  selectRows(rows: IRow[]): void;
+  selectCells(cells: ICell[], multiSelect?: boolean, append?: boolean): void;
+  unselectCells(cells: ICell[]): void;
   editCell(cell?: ICell): void;
+  selectCellsTo(cell: ICell, append?: boolean): void;
 
   cell(rowId: string, column: string): ICell | undefined;
+  cellByPos(rowPosition: number, columnPosition: number): ICell | undefined;
+  cellByColPos(row: IRow, columnPosition: number): ICell | undefined;
+  getCellsByRange(colStart: number, rowStart: number, colEnd: number, rowEnd: number, allowCollapsed?: boolean): ICell[];
+  adjacentTopCell(cell: ICell): ICell | undefined;
+  adjacentLeftCell(cell: ICell): ICell | undefined;
+  row(rowId: string): IRow | undefined;
+  rowByPos(rowPosition: number): IRow | undefined;
+  getRowsByRange(rowStart: number, rowEnd: number, allowCollapsed?: boolean): IRow[];
+  column(columnName: string): IColumn | undefined;
+  columnByPos(columnPosition: number): IColumn | undefined;
 
   revert(): void;
   get(): any[];
@@ -65,11 +81,18 @@ export interface IGridColors {
   gridBorder?: string;
   groupRowBackground?: string;
   rowSelectedBackground?: string;
+  cellSelectedBackground?: string;
   rowSelectedText?: string;
   rowStripedBackground?: string;
-  rowStripedBackgroundSelected?: string;
+  rowStripedSelectedBackground?: string;
   leftLabelBackground?: string;
   cellOutline?: string;
+}
+
+export interface IGridFontSizes {
+  header?: string;
+  body?: string;
+  groupRow?: string;
 }
 
 export interface IRowOptions {
@@ -77,13 +100,16 @@ export interface IRowOptions {
 }
 
 export interface IRow extends IDisposable {
-  id           : string;
-  grid         : IGrid;
-  cells        : ICellMap;
-  selected     : boolean;
-  cls          : string;
-  options      : IRowOptions;
-  readonly data: any;
+  id                   : string;
+  grid                 : IGrid;
+  cells                : ICellMap;
+  selected             : boolean;
+  cls                  : string;
+  options              : IRowOptions;
+  position             : number;
+  readonly data        : any;
+  cellsByColumnPosition: ICell[];
+  parentRow?           : IGroupRow;
 
   hasChanges(): boolean;
   createCell(column: IColumn, value: any, type?: string): ICell;
@@ -104,18 +130,19 @@ export type IColumnEditor =
 
 
 export interface ICellProperties {
-  id       : number;
-  grid     : IGrid;
-  tooltip? : string;
-  cls      : any;
-  enabled  : boolean;
-  readOnly : boolean;
-  align?   : TextAlignment;
-  type     : EditorType;
-  editor?  : React.SFC<any>;
-  renderer?: React.SFC<any>;
-  colSpan? : number;
-  rowSpan? : number;
+  id        : number;
+  grid      : IGrid;
+  tooltip?  : string;
+  cls       : any;
+  enabled   : boolean;
+  readOnly  : boolean;
+  align?    : TextAlignment;
+  type      : EditorType;
+  editor?   : React.SFC<any>;
+  renderer? : React.SFC<any>;
+  colSpan?  : number;
+  rowSpan?  : number;
+  validator?: (value: any) => IError | undefined;
 }
 
 export interface IColumn extends ICellProperties {
@@ -124,7 +151,9 @@ export interface IColumn extends ICellProperties {
   width?        : string;
   fixed         : boolean;
   visible       : boolean;
+  position      : number;
   readonly sort?: SortDirection;
+  canSort?      : boolean;
 
   map?      (value: any): string;
   predicate?(value: any, filter: {value: any}): boolean;
@@ -141,14 +170,20 @@ export enum ErrorSeverity {
 export interface IError { messageText: string; severity: ErrorSeverity; }
 
 export interface ICell extends ICellProperties {
-  row             : IRow;
-  column          : IColumn;
-  error?          : IError;
-  selected        : boolean;
-  value           : any;
-  readonly editing: boolean;
-  rowSpan?        : number;
-  colSpan?        : number;
+  row                      : IRow;
+  column                   : IColumn;
+  error?                   : IError;
+  selected                 : boolean;
+  value                    : any;
+  readonly editing         : boolean;
+  rowSpan                  : number;
+  colSpan                  : number;
+  rowPosition              : number;
+  columnPosition           : number;
+  isTopMostSelection       : boolean;
+  isLeftMostSelection      : boolean;
+  isAdjacentToLeftSelection: boolean;
+  isAdjacentToTopSelection : boolean;
 
   hasChanges(): boolean;
   clone(row: IRow): ICell;
@@ -223,11 +258,11 @@ export function *fixedRows(grid: IGrid): IterableIterator<IRowIteratorResult> {
   }
 }
 
-export function *allDataRows(rows: IRow[]): IterableIterator<IRowIteratorResult> {
+export function *allDataRows(rows: IRow[], allowCollapsed: boolean = true): IterableIterator<IRowIteratorResult> {
   let result: any = {rows: rows, row: undefined, idx: 0};
   for (const row of rows) {
-    if (isGroupRow(row)) {
-      yield *allDataRows(row.rows);
+    if (isGroupRow(row) && (allowCollapsed || row.expanded)) {
+      yield *allDataRows(row.rows, allowCollapsed);
     } else {
       result.row = row;
       yield result;
@@ -253,8 +288,16 @@ export function findRowById(iterator: IterableIterator<IRowIteratorResult>, id: 
   return find(iterator, (r) => r.row.id === id);
 }
 
-export function findColumn(columns: IColumn[], name: string): IColumn | undefined {
+export function findRowByPosition(iterator: IterableIterator<IRowIteratorResult>, position: number): IRowIteratorResult | undefined {
+  return find(iterator, (r) => r.row.position === position);
+}
+
+export function findColumnByName(columns: IColumn[], name: string): IColumn | undefined {
   return columns.find((column) => column.name === name);
+}
+
+export function findColumnByPosition(columns: IColumn[], position: number): IColumn | undefined {
+  return columns.find((column) => column.position === position);
 }
 
 export function collapseAll(rows: IRow[]) {
@@ -267,4 +310,8 @@ export function expandAll(rows: IRow[]) {
   for (const groupRow of groupRows(rows)) {
     groupRow.row.expanded = true;
   }
+}
+
+export function cellPositionCompare(a: ICell, b: ICell): number {
+  return a.rowPosition < b.rowPosition ? -1 : a.rowPosition > b.rowPosition ? 1 : a.columnPosition < b.columnPosition ? -1 : a.columnPosition > b.columnPosition ? 1 : 0;
 }
