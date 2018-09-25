@@ -167,6 +167,39 @@ class VirtualBody extends React.PureComponent<BodyType, {offset: number, loading
   }
 }
 
+export default class Grid extends React.PureComponent<IGridProps> {
+  private gridColors: IGridColors;
+  private gridFontSizes: IGridFontSizes;
+
+  constructor(props: IGridProps) {
+    super(props);
+
+    this.gridColors    = props.gridColors    || {};
+    this.gridFontSizes = props.gridFontSizes || {};
+    if (this.gridColors.headerBackground && !this.gridColors.headerBorder) {
+      this.gridColors.headerBorder = Color(this.gridColors.headerBackground).lighten(0.15).string();
+    }
+    if (this.gridColors.rowSelectedBackground && !this.gridColors.cellSelectedBackground) {
+      this.gridColors.cellSelectedBackground = Color(this.gridColors.rowSelectedBackground).lighten(0.07).string();
+    }
+  }
+
+  render() {
+    const gridColors    = this.gridColors;
+    const gridFontSizes = this.gridFontSizes;
+    let paletteObj: any = {};
+    Object.keys(gridColors).forEach(colorName => {
+      paletteObj[colorName] = {main: gridColors[colorName]};
+    });
+
+    return (
+      <MuiThemeProvider theme={createGridTheme({palette: paletteObj, fontSizes: gridFontSizes})}>
+        <GridInternal {...this.props} />
+      </MuiThemeProvider>
+    );
+  }
+}
+
 const styles = (theme: Theme) => ({
   leftLabels: {
     '& tr, & tr.alt': {
@@ -187,8 +220,12 @@ const styles = (theme: Theme) => ({
         color: theme.palette.headerText.main,
       },
     },
+    '& tr': {
+      height: `calc(2.4 * ${theme.fontSizes.header})`,
+    },
     '& th': {
       borderColor: theme.palette.headerBorder.main,
+      padding: '0px 7px',
     },
   },
   wsGrid: {
@@ -196,9 +233,6 @@ const styles = (theme: Theme) => ({
     borderColor: theme.palette.gridBorder.main,
     backgroundColor: theme.palette.gridBackground.main,
     '& td, & th': {
-      // '&.selected': {
-      //   borderColor: theme.palette.cellOutline.main,
-      // },
       '&.selected': {
         borderRightColor: theme.palette.cellOutline.main,
         borderBottomColor: theme.palette.cellOutline.main,
@@ -246,39 +280,6 @@ const styles = (theme: Theme) => ({
     fontSize: theme.fontSizes.body,
   },
 });
-
-export default class Grid extends React.PureComponent<IGridProps> {
-  private gridColors: IGridColors;
-  private gridFontSizes: IGridFontSizes;
-
-  constructor(props: IGridProps) {
-    super(props);
-
-    this.gridColors    = props.gridColors    || {};
-    this.gridFontSizes = props.gridFontSizes || {};
-    if (this.gridColors.headerBackground && !this.gridColors.headerBorder) {
-      this.gridColors.headerBorder = Color(this.gridColors.headerBackground).lighten(0.15).string();
-    }
-    if (this.gridColors.rowSelectedBackground && !this.gridColors.cellSelectedBackground) {
-      this.gridColors.cellSelectedBackground = Color(this.gridColors.rowSelectedBackground).lighten(0.07).string();
-    }
-  }
-
-  render() {
-    const gridColors    = this.gridColors;
-    const gridFontSizes = this.gridFontSizes;
-    let paletteObj: any = {};
-    Object.keys(gridColors).forEach(colorName => {
-      paletteObj[colorName] = {main: gridColors[colorName]};
-    });
-
-    return (
-      <MuiThemeProvider theme={createGridTheme({palette: paletteObj, fontSizes: gridFontSizes})}>
-        <GridInternal {...this.props} />
-      </MuiThemeProvider>
-    );
-  }
-}
 
 type GridProps = WithStyle<ReturnType<typeof styles>, IGridProps>;
 

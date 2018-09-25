@@ -20,9 +20,9 @@ const styles = (theme: Theme) => ({
   cellContainer: {
     display: 'flex',
     alignItems: 'stretch',
-    lineHeight: '28px',
     height: '100%',
     width: '100%',
+    lineHeight: `calc(2 * ${theme.fontSizes.body})`,
   },
   tooltipPopper: {
     marginLeft: '-8px',
@@ -209,7 +209,7 @@ class Cell extends React.PureComponent<CellProps, {}> {
     evt.stopPropagation();
   }
 
-  handleMouseOver = (evt: React.MouseEvent<any>) => {
+  handleMouseEnter = (evt: React.MouseEvent<any>) => {
     if (this.cell.editing || !this.grid.isMouseDown) {
       return;
     }
@@ -356,10 +356,11 @@ class Cell extends React.PureComponent<CellProps, {}> {
         if (this.cell.align) align = align;
         let renderer = cell.renderer || cell.column.renderer;
         let hasError = !!cell.error;
+        let value    = this.value || <span>&nbsp;</span>;
 
         return (
           < >
-            {(renderer && renderer(cell)) || <span onMouseEnter={this.handleTooltip} style={{width: '100%', textAlign: align}}>{this.value}</span>}
+            {(renderer && renderer(cell)) || <span onMouseEnter={this.handleTooltip} style={{width: '100%', textAlign: align}}>{value}</span>}
             {hasError && this.renderErrorIcon()}
           </>
         );
@@ -445,7 +446,7 @@ class Cell extends React.PureComponent<CellProps, {}> {
           onDoubleClick={this.handleDoubleClick}
           onClick={this.handleClick}
           onMouseDown={this.grid.multiSelect ? this.handleMouseDown : undefined}
-          onMouseOver={this.grid.multiSelect ? this.handleMouseOver : undefined}
+          onMouseEnter={this.grid.multiSelect ? this.handleMouseEnter : undefined}
           className={clazz}>
             {cellContent}
         </td>

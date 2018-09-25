@@ -75,7 +75,6 @@ html {
   }
 
   .group {
-    min-height: 24px;
     border-right: 0;
     // display: inline-block;
 
@@ -151,9 +150,6 @@ html {
     table {
       margin-bottom: -1px;
     }
-    tr {
-      height: 36px;
-    }
 
     div.sort {
       &:after {
@@ -176,8 +172,6 @@ html {
 
     th {
       vertical-align: middle;
-      padding: 7px;
-      min-height: 32px;
     }
     th:first-child {
       border-left-width: 0px;
@@ -209,7 +203,6 @@ html {
 
   td {
     vertical-align: middle;
-    min-height: 28px;
     /* font-size: 1.1rem; */
   }
   td.edit > div > div > :first-child {

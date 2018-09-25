@@ -29,6 +29,7 @@ const styles = (theme: Theme) => {
   let styleObj = {
     group: {
       fontSize: theme.fontSizes.groupRow,
+      lineHeight: `calc(1.3 * ${theme.fontSizes.groupRow})`,
       '&:before': {
         color: Color(color).darken(.45).string(),
       },

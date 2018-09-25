@@ -363,7 +363,8 @@ function createTestGrid(nRows: number, nColumns: number) {
     for (let column = 0; column < cols.length; column++) {
       let v: any  = `RC ${column}-${row % 5}`;
       let colName = cols[column].name;
-      if ((colName === 'autoCompleteColumn') || (colName === 'selectColumn')) v = {name: 'Austria'};
+      if ((column <= 1 || column >= 4) && row === 1) v = undefined;
+      else if ((colName === 'autoCompleteColumn') || (colName === 'selectColumn')) v = {name: 'Austria'};
       else if (colName === 'checkedColumn') v = true;
       else if (colName === 'timeColumn') v = '7:30';
       else if (((column >= 5) && (column <= 6)) || colName === 'numberColumn') v = Math.random() * 10000;
@@ -396,6 +397,17 @@ function createTestGrid(nRows: number, nColumns: number) {
 }
 
 let grid = createTestGrid(40, 14);
+grid.removeRow(String(20));
+let newRow = {id: 'newRowxycdij', options: {allowMergeColumns: true}};
+newRow['column0']    = 'AHHH';
+newRow['column2']    = 'RC 2-3';
+newRow['column3']    = 'RC 3-3';
+newRow['timeColumn'] = '8:11';
+grid.addRow(newRow);
+newRow.id = 'newRow2kjkdf';
+newRow['column0'] = 'YARRR';
+newRow['column7'] = 'Testing';
+grid.addRow(newRow);
 
 let rrr = {column0: 'booga'};
 grid.cell('3', 'column8')!.value = 'oga booga boa';
