@@ -15,24 +15,25 @@ export type SortDirection = 'ascending' | 'descending';
 export type TextAlignment = 'left' | 'right' | 'center';
 
 export interface IGrid extends IRows, IDisposable {
-  id                      : number;
-  enabled                 : boolean;
-  rows                    : IRow[];
-  fixedRows               : IRow[];
-  columns                 : IColumn[];
-  readonly editingCell?   : ICell;
-  readonly selectedRows   : IRow[];
-  readonly selectedCells  : ICell[];
-  width                   : string;
-  height                  : string;
-  fixedWidth              : string;
-  readonly fixedColumns   : IColumn[];
-  readonly dataColumns    : IColumn[];
-  groupBy                 : IColumn[];
-  clipboard               : ICell[];
-  isMouseDown             : boolean;
-  multiSelect             : boolean;
-  startCell?              : ICell;
+  id                    : number;
+  enabled               : boolean;
+  rows                  : IRow[];
+  fixedRows             : IRow[];
+  columns               : IColumn[];
+  readonly editingCell? : ICell;
+  readonly selectedRows : IRow[];
+  readonly selectedCells: ICell[];
+  width                 : string;
+  height                : string;
+  fixedWidth            : string;
+  readonly fixedColumns : IColumn[];
+  readonly dataColumns  : IColumn[];
+  dataRowsByPosition    : IRow[];
+  groupBy               : IColumn[];
+  clipboard             : ICell[];
+  isMouseDown           : boolean;
+  multiSelect           : boolean;
+  startCell?            : ICell;
 
   hasChanges(): boolean;
   copy(): void;
@@ -48,7 +49,6 @@ export interface IGrid extends IRows, IDisposable {
 
   cell(rowId: string, column: string): ICell | undefined;
   cellByPos(rowPosition: number, columnPosition: number): ICell | undefined;
-  cellByColPos(row: IRow, columnPosition: number): ICell | undefined;
   getCellsByRange(colStart: number, rowStart: number, colEnd: number, rowEnd: number, allowCollapsed?: boolean): ICell[];
   adjacentTopCell(cell: ICell): ICell | undefined;
   adjacentLeftCell(cell: ICell): ICell | undefined;
@@ -69,6 +69,7 @@ export interface IGrid extends IRows, IDisposable {
 
   removeRow(id: string): void;
   addRow(row: any): IRow;
+  _addRow(row: any): IRow;
   addRows(rows: any[]): void;
 }
 
@@ -110,6 +111,7 @@ export interface IRow extends IDisposable {
   readonly data        : any;
   cellsByColumnPosition: ICell[];
   parentRow?           : IGroupRow;
+  visible              : boolean;
 
   hasChanges(): boolean;
   createCell(column: IColumn, value: any, type?: string): ICell;
@@ -314,4 +316,12 @@ export function expandAll(rows: IRow[]) {
 
 export function cellPositionCompare(a: ICell, b: ICell): number {
   return a.rowPosition < b.rowPosition ? -1 : a.rowPosition > b.rowPosition ? 1 : a.columnPosition < b.columnPosition ? -1 : a.columnPosition > b.columnPosition ? 1 : 0;
+}
+
+export function rowPositionCompare(a: IRow, b: IRow): number {
+  return a.position < b.position ? -1 : a.position > b.position ? 1 : 0;
+}
+
+export function columnPositionCompare(a: IColumn, b: IColumn): number {
+  return a.position < b.position ? -1 : a.position > b.position ? 1 : 0;
 }

@@ -9,6 +9,7 @@ import {
   IRows,
   getValue,
   IDisposable,
+  cellPositionCompare,
 }                   from './GridTypes';
 import createCell   from './CellModel';
 import {observable,
@@ -20,15 +21,16 @@ import * as nanoid  from 'nanoid';
 const EmptyFn = () => {};
 
 class RowModel implements IRow, IDisposable {
-  id       : string;
-  grid     : IGrid;
-  cells    : ICellMap = observable({});
-  selected : boolean  = false;
-  cls      : string   = '';
-  options  : IRowOptions;
-  position : number;
-  parentRow: IGroupRow;
-  dispose  : () => void = EmptyFn;
+  id                   : string;
+  grid                 : IGrid;
+  cells                : ICellMap = observable({});
+  cellsByColumnPosition: ICell[];
+  selected             : boolean  = false;
+  cls                  : string   = '';
+  options              : IRowOptions;
+  position             : number;
+  parentRow            : IGroupRow;
+  dispose              : () => void = EmptyFn;
 
   constructor(grid: IGrid, public data: any, position: number = 0, fixed: boolean = false) {
     this.grid = grid;
@@ -45,6 +47,10 @@ class RowModel implements IRow, IDisposable {
     for (const column of this.grid.columns) {
       this.createCell(column, this.data[column.name]);
     }
+
+    this.cellsByColumnPosition = Object.values(this.cells);
+    this.cellsByColumnPosition.sort(cellPositionCompare);
+
     root((dispose) => {
       this.dispose = dispose;
       if (fixed || (this.options && this.options.allowMergeColumns)) {
@@ -53,14 +59,18 @@ class RowModel implements IRow, IDisposable {
     });
   }
 
-  get cellsByColumnPosition(): ICell[] {
-    let rowCells = Object.values(this.cells);
+  get visible(): boolean {
+    let visible = true;
+    let pRow: IGroupRow | undefined = this.parentRow;
+    while (pRow !== undefined) {
+      if (!pRow.expanded) {
+        visible = false;
+        break;
+      }
+      pRow = pRow.parentRow;
+    }
 
-    rowCells.sort((a: ICell, b: ICell) => {
-      return a.columnPosition < b.columnPosition ? -1 : a.columnPosition > b.columnPosition ? 1 : 0;
-    });
-
-    return rowCells;
+    return visible;
   }
 
   createCell(column: IColumn, value: any): ICell {
@@ -141,11 +151,15 @@ export default function create(grid: IGrid, rows: IRow[], row: any, fixed: boole
     let newRow       = new RowModel(grid, row, undefined, fixed);
     newRow.parentRow = parent as IGroupRow;
     parent.rows.push(newRow);
+    grid.dataRowsByPosition.push(newRow);
     return root!;
   }
 
   let r = new RowModel(grid, row, position, fixed);
   rows.push(r);
+  if (!fixed) {
+    grid.dataRowsByPosition.push(r);
+  }
   return r;
 }
 
