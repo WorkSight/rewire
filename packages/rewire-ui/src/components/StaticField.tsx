@@ -1,27 +1,29 @@
 import * as React                    from 'react';
-import decorate, { WithStyle}        from './styles';
+import {Theme}                       from '@material-ui/core/styles';
 import TextField, { TextFieldProps } from '@material-ui/core/TextField';
+import {withStyles, WithStyle}       from './styles';
 import {TextAlignment}               from './editors';
 
-const styles = {
+const styles = (theme: Theme) => ({
   inputRoot: {
     lineHeight: 'inherit',
     '&::before': {
       display: 'none',
     },
   },
-};
+});
 
 export interface IStaticFieldProps {
-  visible?      : boolean;
-  classes?      : React.CSSProperties;
-  value?        : string;
-  label?        : string;
-  align?        : TextAlignment;
-  onValueChange : (value?: string) => void;
+  visible?: boolean;
+  classes?: React.CSSProperties;
+  value?  : string;
+  label?  : string;
+  align?  : TextAlignment;
+
+  onValueChange: (value?: string) => void;
 }
 
-type StaticFieldProps = WithStyle<typeof styles, IStaticFieldProps & TextFieldProps>;
+type StaticFieldProps = WithStyle<ReturnType<typeof styles>, IStaticFieldProps & TextFieldProps>;
 
 class StaticFieldInternal extends React.Component<StaticFieldProps> {
   constructor(props: StaticFieldProps) {
@@ -55,4 +57,4 @@ class StaticFieldInternal extends React.Component<StaticFieldProps> {
   }
 }
 
-export default decorate(styles)<TextFieldProps & IStaticFieldProps>(StaticFieldInternal);
+export default withStyles(styles, StaticFieldInternal);

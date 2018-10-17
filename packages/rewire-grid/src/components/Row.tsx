@@ -7,6 +7,7 @@ import {
   isGroupRow
 }                              from '../models/GridTypes';
 import * as React              from 'react';
+import ResizeObserver          from 'resize-observer-polyfill';
 import cc                      from 'classcat';
 import classNames              from 'classnames';
 import Color                   from 'color';
@@ -15,12 +16,15 @@ import {Theme}                 from '@material-ui/core/styles';
 import {WithStyle, withStyles} from 'rewire-ui';
 
 export interface IRowProps {
-  row           : IRow;
-  columns       : IColumn[];
-  Cell          : React.ComponentClass<any>;
-  index         : number;
-  visibleColumns: number;
-  className?    : string;
+  row              : IRow;
+  columns          : IColumn[];
+  Cell             : React.ComponentClass<any>;
+  rowElements?     : {[s: string]: HTMLTableRowElement};
+  fixedRowElements?: {[s: string]: HTMLTableRowElement};
+  isFixedRow?      : boolean;
+  index            : number;
+  visibleColumns   : number;
+  className?       : string;
 }
 
 const styles = (theme: Theme) => {
@@ -33,6 +37,13 @@ const styles = (theme: Theme) => {
       '&:before': {
         color: Color(color).darken(.45).string(),
       },
+    },
+    notVisible: {
+      visibility: 'collapse',
+
+    },
+    visible: {
+      visibility: 'visible',
     },
   };
 
@@ -49,14 +60,82 @@ const styles = (theme: Theme) => {
 type RowProps = WithStyle<ReturnType<typeof styles>, IRowProps>;
 
 const Row = withStyles(styles, class extends PureComponent<RowProps, {}> {
-  handleRowClicked = () => {
+  element: HTMLTableRowElement;
+  elementResizeObserver: any;
+
+  constructor(props: RowProps) {
+    super(props);
+    let row = props.row;
+    Object.keys(row.cells).forEach(columnName => {
+      let value = row.cells[columnName].value;
+      if (typeof value === 'object') {
+        row.data[columnName] = value.clone ? value.clone() : Object.assign({}, value);
+      } else {
+        row.data[columnName] = value;
+      }
+    });
+  }
+
+  componentWillUnmount() {
+    if (!this.element || isGroupRow(this.props.row)) {
+      return;
+    }
+
+    let rElements = this.props.isFixedRow ? this.props.fixedRowElements : this.props.rowElements;
+    if (rElements) {
+      delete rElements[this.props.row.id];
+    }
+
+    if (!this.props.isFixedRow && this.elementResizeObserver) {
+      this.elementResizeObserver.disconnect();
+      delete this.elementResizeObserver;
+    }
+  }
+
+  componentDidMount() {
+    if (!this.element || this.props.isFixedRow || isGroupRow(this.props.row)) {
+      return;
+    }
+
+    this.elementResizeObserver = new ResizeObserver(elements => {
+      for (let element of elements) {
+        let fixedRowElement = this.props.fixedRowElements && this.props.fixedRowElements[this.props.row.id];
+        if (fixedRowElement) {
+          fixedRowElement.style.height = element.contentRect.height + 'px';
+        }
+      }
+    });
+    this.elementResizeObserver.observe(this.element);
+  }
+
+  handleRowClick = () => {
     // this.props.row.grid.selectRows([this.props.row]);
   }
 
+  handleGroupRowClick = (groupRow: IGroupRow) => () => {
+    groupRow.expanded = !groupRow.expanded;
+    this.groupRowExpansion(groupRow, groupRow.expanded);
+  }
+
+  groupRowExpansion(groupRow: IGroupRow, expanded: boolean) {
+    groupRow.rows.forEach(row => {
+      row.visible = expanded;
+      if (isGroupRow(row)) {
+        this.groupRowExpansion(row, row.expanded && row.visible);
+      } else {
+        // while cell row bug exists, need to do this.
+        row.cellsByColumnPosition.forEach(cell => {
+          cell.row.visible = expanded;
+        });
+      }
+    });
+  }
+
   renderCells = () => {
+    if (!this.props.row.cells) return [];
+
     let cells: JSX.Element[] = [];
     this.props.columns.forEach((column) => {
-      // if (!this.props.row.cells) return;
       let cell = this.props.row.cells[column.name];
       let Cell = this.props.Cell;
       if ((cell.colSpan ===  0) || (cell.rowSpan === 0)) return;
@@ -67,17 +146,28 @@ const Row = withStyles(styles, class extends PureComponent<RowProps, {}> {
 
   renderRow() {
     let className = cc([this.props.className, {selected: this.props.row.selected}, this.props.row.cls, 'tabrow']);
+    className     = classNames(className, this.props.row.visible ? this.props.classes.visible : this.props.classes.notVisible);
+
+    let ref: ((node: any) => any) | undefined = undefined;
+    let rElements = this.props.isFixedRow ? this.props.fixedRowElements : this.props.rowElements;
+    if (rElements) {
+      ref = (rowElement: any) => {
+        this.element = rowElement;
+        rElements![this.props.row.id] = rowElement;
+      };
+    }
+
     return (
-      <tr className={className} onClick={this.handleRowClicked} >
+      <tr className={className} ref={ref} onClick={this.handleRowClick}>
         {this.renderCells()}
       </tr>
     );
   }
 
   renderChildRows(groupRow: IGroupRow): React.ReactNode[] | null {
-    if (!groupRow.expanded) return null;
+    // if (!groupRow.expanded) return null;
 
-    return groupRow.rows.map((r, idx) => <Row key={r.id} row={r} columns={this.props.columns} index={idx} Cell={this.props.Cell} className={((idx % 2) === 1) ? 'alt' : ''} visibleColumns={this.props.visibleColumns} />);
+    return groupRow.rows.map((r, idx) => <Row key={r.id} row={r} rowElements={this.props.rowElements} fixedRowElements={this.props.fixedRowElements} columns={this.props.columns} index={idx} Cell={this.props.Cell} isFixedRow={this.props.isFixedRow} className={((idx % 2) === 1) ? 'alt' : ''} visibleColumns={this.props.visibleColumns} />);
   }
 
   renderGroupRow(groupRow: IGroupRow) {
@@ -92,8 +182,8 @@ const Row = withStyles(styles, class extends PureComponent<RowProps, {}> {
 
     return (
       < >
-        <tr>
-          <td colSpan={this.props.visibleColumns} className={classNames(cc(className), this.props.classes.group, this.props.classes[`groupLevel${groupRow.level}`])} onClick={() => groupRow.expanded = !groupRow.expanded}>
+        <tr style={{visibility: groupRow.visible ? 'visible' : 'collapse'}}>
+          <td colSpan={this.props.visibleColumns} className={classNames(cc(className), this.props.classes.group, this.props.classes[`groupLevel${groupRow.level}`])} onClick={this.handleGroupRowClick(groupRow)}>
             <div><span>{value}</span></div>
           </td>
         </tr>

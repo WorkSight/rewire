@@ -50,33 +50,37 @@ html {
     }
   }
 
-  input[type="radio"],
-  input[type="checkbox"] {
-    margin: 0;
-    padding: 0;
-    height: 14px;
-  }
   input[type="file"] {
     display: block;
   }
   input[type="range"],
   input,
   input[type="text"] {
-    display: inline;
+    height: 100%;
     padding: 0 3px;
   }
   input[type="range"] {
-    display: block;
     width: 100%;
   }
-  select[multiple],
-  select[size] {
-    height: auto;
+  input[type="date"] {
+    height: initial;
+
+    &::-webkit-clear-button{
+      margin-right: 2px;
+    }
+    &::-webkit-inner-spin-button {
+      // -webkit-appearance:none;
+      margin-top: 5px;
+    }
+    &::-webkit-calendar-picker-indicator {
+      margin-top: 1px;
+      font-size: 1.1em;
+    }
   }
+
 
   .group {
     border-right: 0;
-    // display: inline-block;
 
     div {
       display: flex;
@@ -203,18 +207,8 @@ html {
 
   td {
     vertical-align: middle;
-    /* font-size: 1.1rem; */
   }
-  td.edit > div > div > :first-child {
-    flex: 1;
-  }
-  td.edit > div > div > div > :first-child {
-    flex: 1;
-  }
-  td.edit {
-    padding: 0;
-    border: 0;
-  }
+
   table {
     table-layout: fixed;
     margin: 0;

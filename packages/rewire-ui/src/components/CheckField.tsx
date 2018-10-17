@@ -14,23 +14,24 @@ const styles = (theme: Theme) => ({
   },
   formControlLabelRoot: {
     marginLeft: '0px',
-  }
+  },
   formControlLabelLabel: {
     paddingLeft: '8px',
   },
 });
 
 export interface ICheckboxProps {
-  visible?     : boolean;
-  disabled?    : boolean;
-  value?       : boolean;
-  label?       : string;
+  visible? : boolean;
+  disabled?: boolean;
+  value?   : boolean;
+  label?   : string;
+
   onValueChange: (value?: boolean) => void;
 }
 
-type CheckBoxPropsStyled = WithStyle<ReturnType<typeof styles>, CheckboxProps & ICheckboxProps>;
+type CheckboxPropsStyled = WithStyle<ReturnType<typeof styles>, CheckboxProps & ICheckboxProps>;
 
-export default class CheckboxInternal extends React.Component<CheckboxPropsStyled> {
+class CheckboxInternal extends React.Component<CheckboxPropsStyled> {
   constructor(props: CheckboxPropsStyled) {
     super(props);
   }

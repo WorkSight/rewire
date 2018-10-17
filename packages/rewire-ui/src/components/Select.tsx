@@ -7,6 +7,7 @@ import InputLabel              from '@material-ui/core/InputLabel';
 import MenuItem                from '@material-ui/core/MenuItem';
 import * as React              from 'react';
 import Select                  from '@material-ui/core/Select';
+import InputAdornment          from '@material-ui/core/InputAdornment';
 import {
   ICustomProps,
   SearchFn,
@@ -20,15 +21,25 @@ const styles = (theme: Theme) => ({
   inputRoot: {
     lineHeight: 'inherit',
     fontSize: 'inherit',
+    alignItems: 'stretch',
+  },
+  selectRoot: {
+    lineHeight: 'inherit',
+    fontSize: 'inherit',
+    display: 'inline-flex',
+    alignItems: 'stretch',
   },
   select: {
+    display: 'flex',
+    alignItems: 'center',
+    flex: 1,
   },
   selectMenuPaper: {
   },
   selectMenuItem: {
     fontSize: 'inherit',
-    // paddingTop: '8px',
-    // paddingBottom: '8px',
+    height: 'auto',
+    lineHeight: '1em',
   },
 });
 
@@ -101,9 +112,20 @@ class SelectInternal<T> extends React.Component<SelectProps<T>, any> {
   }
 
   renderSelect(disabled: boolean, cls: string, value?: T, autoFocus?: boolean) {
-    const v = this.map(value);
+    const v              = this.map(value);
+    const startAdornment = this.props.startAdornment ? <InputAdornment position='start'>{this.props.startAdornment}</InputAdornment> : undefined;
+    const endAdornment   = this.props.endAdornment ? <InputAdornment position='end'>{this.props.endAdornment}</InputAdornment> : undefined;
     return (
-    <Select disabled={disabled} value={v as any} onChange={this.handleChanged} className={cls} style={this.props.style} classes={{root: this.props.classes.inputRoot, select: this.props.classes.select}} MenuProps={{classes: {paper: this.props.classes.selectMenuPaper}}} input={<Input classes={{root: this.props.classes.inputRoot}}/>} renderValue={(p) => <span>{v}</span>}>{
+    <Select
+      disabled={disabled}
+      value={v as any}
+      onChange={this.handleChanged}
+      className={cls}
+      style={this.props.style}
+      classes={{root: this.props.classes.selectRoot, select: this.props.classes.select}}
+      MenuProps={{classes: {paper: this.props.classes.selectMenuPaper}}}
+      input={<Input startAdornment={startAdornment} endAdornment={endAdornment} classes={{root: this.props.classes.inputRoot}}/>}
+      renderValue={(p) => <span>{v}</span>}>{
         this.state.suggestions.map((suggestion: any, index: number) => {
           const displayName = this.map(suggestion);
           return this.renderSuggestion({

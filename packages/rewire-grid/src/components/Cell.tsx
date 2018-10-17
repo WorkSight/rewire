@@ -3,29 +3,61 @@ import {
   IColumn,
   ICell,
   ErrorSeverity,
-}                                         from '../models/GridTypes';
-import * as React                         from 'react';
-import cc                                 from 'classcat';
-import classNames                         from 'classnames';
-import {Observe, watch, disposeOnUnmount} from 'rewire-core';
-import {withStyles, WithStyle}            from 'rewire-ui';
-import {Theme}                            from '@material-ui/core/styles';
-import ErrorIcon                          from '@material-ui/icons/Error';
-import WarningIcon                        from '@material-ui/icons/Warning';
-import InfoIcon                           from '@material-ui/icons/Info';
-import Tooltip                            from '@material-ui/core/Tooltip';
-import Fade                               from '@material-ui/core/Fade';
+}                                                  from '../models/GridTypes';
+import * as React                                  from 'react';
+import cc                                          from 'classcat';
+import classNames                                  from 'classnames';
+import {Observe, watch, observe, disposeOnUnmount} from 'rewire-core';
+import {withStyles, WithStyle}                     from 'rewire-ui';
+import {Theme}                                     from '@material-ui/core/styles';
+import ErrorIcon                                   from '@material-ui/icons/Error';
+import WarningIcon                                 from '@material-ui/icons/Warning';
+import InfoIcon                                    from '@material-ui/icons/Info';
+import Tooltip                                     from '@material-ui/core/Tooltip';
+import Fade                                        from '@material-ui/core/Fade';
 
 const styles = (theme: Theme) => ({
+  tableCell: {
+    position: 'relative !important',
+    overflow: 'hidden !important',
+    padding: '0px !important',
+  },
+  tableCellNotVisible: {
+    display: 'none !important',
+  },
+  tableCellNotEnabled: {
+    color: 'gray !important',
+    fontStyle: 'italic !important',
+  },
+  tableCellEditing: {
+    borderTopColor: 'transparent !important',
+    borderRightColor: `${theme.palette.rowSelectedBorder.main} !important`,
+    borderBottomColor: `${theme.palette.rowSelectedBorder.main} !important`,
+    borderLeftColor: 'transparent !important',
+  },
   cellContainer: {
     display: 'flex',
+    flex: '1',
     alignItems: 'stretch',
     height: '100%',
     width: '100%',
     lineHeight: `calc(2 * ${theme.fontSizes.body})`,
   },
+  cellInnerContainer: {
+    overflow: 'hidden',
+    flex: '1',
+    height: '100%',
+    alignItems: 'center',
+    padding: '0px 4px',
+    margin: 0,
+    display: 'flex',
+    width: '100%',
+  },
+  cellInnerContainerEditing: {
+    padding: '0px 1px',
+  },
   tooltipPopper: {
-    marginLeft: '-8px',
+    // marginLeft: '-8px',
   },
   tooltip: {
   },
@@ -51,11 +83,29 @@ const styles = (theme: Theme) => ({
   critical: {
     color: '#AA0000',
   },
+  editorContainer: {
+    display: 'flex',
+    flex: '1',
+  },
   selectEditorSelect: {
     padding: '0px 3px',
   },
   editorPopupMenuItem: {
     fontSize: theme.fontSizes.body,
+  },
+  editorInputRoot: {
+    flex: '1',
+  },
+  editorFormControlRoot: {
+    flex: '1',
+    flexDirection: 'row',
+  },
+  editorAutoCompleteContainer: {
+    display: 'flex',
+  },
+  editorCheckboxRoot: {
+    height: '100%',
+    flex: '1',
   },
 });
 
@@ -77,17 +127,23 @@ class Cell extends React.PureComponent<CellProps, {}> {
     super(props);
     this.cell           = props.cell;
     this.column         = this.cell.column;
-    this.grid           = this.column.grid;
+    this.grid           = this.cell.grid;
     this.keyForEdit     = undefined;
     this.fromMouseEvent = false;
   }
 
   componentDidMount() {
     disposeOnUnmount(this, () => {
-      watch(() => this.cell.value, () => {
-        if (this.cell.validator) {
-          this.cell.error = this.cell.validator(this.cell.value);
+      const value = observe(() => {
+        if (typeof this.cell.value === 'object') {
+          Object.keys(this.cell.value).map(key => this.cell.value[key]);
         }
+      });
+      watch(value, () => {
+        if (this.column.validator) {
+          this.cell.error = this.column.validator(this.cell.value);
+        }
+        this.grid.changed = this.grid.hasChanges();
       });
     });
   }
@@ -130,10 +186,12 @@ class Cell extends React.PureComponent<CellProps, {}> {
   }
 
   handleDoubleClick = (evt: React.MouseEvent<any>) => {
-    if (this.cell.enabled && !this.cell.readOnly && !evt.ctrlKey && !evt.shiftKey) {
-      this.keyForEdit = undefined;
-      this.grid.editCell(this.cell);
+    if (!this.cell.enabled || this.cell.readOnly || !this.cell.editable || this.column.fixed || evt.ctrlKey || evt.shiftKey || !this.column.editor) {
+      return;
     }
+
+    this.keyForEdit = undefined;
+    this.grid.editCell(this.cell);
   }
 
   handleKeyDown = (evt: React.KeyboardEvent<any>) => {
@@ -145,16 +203,12 @@ class Cell extends React.PureComponent<CellProps, {}> {
           return;
         }
         this.grid.copy();
-        evt.stopPropagation;
-        evt.preventDefault;
         break;
       case 'V':
         if (!evt.ctrlKey) {
           return;
         }
         this.grid.paste();
-        evt.stopPropagation;
-        evt.preventDefault;
         break;
       case 'Escape':
         if (this.cell.editing) {
@@ -175,7 +229,8 @@ class Cell extends React.PureComponent<CellProps, {}> {
           return;
         }
         this.grid.selectedCells.forEach(cell => cell.clear());
-        return;
+        this.grid.updateCellSelectionProperties(this.grid.selectedCells);
+        break;
 
       case 'Enter':
         this.grid.editCell(undefined);
@@ -183,7 +238,7 @@ class Cell extends React.PureComponent<CellProps, {}> {
         break;
 
       case 'F2':
-        if (this.cell.enabled && !this.cell.readOnly) {
+        if (this.cell.enabled && !this.cell.readOnly && this.cell.editable && this.column.editor) {
           this.keyForEdit = undefined;
           this.grid.editCell(this.cell);
         }
@@ -219,7 +274,7 @@ class Cell extends React.PureComponent<CellProps, {}> {
   }
 
   handleClick = (evt: React.MouseEvent<any>) => {
-    if (this.cell.editing) {
+    if (this.cell.editing || !this.cell.enabled || this.column.fixed) {
       return;
     }
 
@@ -246,7 +301,7 @@ class Cell extends React.PureComponent<CellProps, {}> {
   }
 
   handleFocus = (evt: React.FocusEvent<any>) => {
-    if (this.cell.editing || this.fromMouseEvent) {
+    if (this.cell.editing || !this.cell.enabled || this.column.fixed || this.fromMouseEvent) {
       return;
     }
     this.grid.selectCells([this.cell]);
@@ -254,7 +309,7 @@ class Cell extends React.PureComponent<CellProps, {}> {
   }
 
   handleKeyDownToEnterEditMode = (evt: React.KeyboardEvent<any>) => {
-    if (this.cell.editing) {
+    if (this.cell.editing || !this.cell.enabled || this.cell.readOnly || !this.cell.editable || !this.column.editor) {
       return;
     }
 
@@ -299,23 +354,57 @@ class Cell extends React.PureComponent<CellProps, {}> {
         errorColorClass = this.props.classes.error;
         break;
     }
-    // return (
-    // <Tooltip
-    //   title={this.cell.error.messageText}
-    //   placement='right-start'
-    //   TransitionComponent={Fade}
-    //   PopperProps={{ style: {pointerEvents: 'none'} }}
-    //   classes={{popper: this.props.classes.tooltipPopper, tooltip: this.props.classes.tooltip}}
-    // >
-    //   <div className={this.props.classes.errorContainer}><ErrorIconToUse className={classNames(this.props.classes.errorIcon, errorColorClass, errorCls)} /></div>
-    // </Tooltip>
-    // );
+    if (this.cell.error && !this.cell.editing) {
+      return (
+        <Tooltip
+          title={this.cell.error.messageText}
+          placement='right-start'
+          TransitionComponent={Fade}
+          PopperProps={{ style: {pointerEvents: 'none'} }}
+          classes={{popper: this.props.classes.tooltipPopper, tooltip: this.props.classes.tooltip}}
+        >
+          <div className={this.props.classes.errorContainer}><ErrorIconToUse className={classNames(this.props.classes.errorIcon, errorColorClass, errorCls)} /></div>
+        </Tooltip>
+      );
+    }
     return <div className={this.props.classes.errorContainer}><ErrorIconToUse className={classNames(this.props.classes.errorIcon, errorColorClass, errorCls)} /></div>;
   }
 
+  splitDecimal(numStr: string) {
+    const hasNagation = numStr[0] === '-';
+    const addNegation = hasNagation;
+    numStr = numStr.replace('-', '');
+
+    const parts         = numStr.split('.');
+    const beforeDecimal = parts[0];
+    const afterDecimal  = parts[1] || '';
+
+    return {
+      beforeDecimal,
+      afterDecimal,
+      addNegation,
+    };
+  }
+
+  getThousandSeparatedNumberString(numStr: string): string {
+    let {beforeDecimal, afterDecimal, addNegation} = this.splitDecimal(numStr);
+    let hasDecimalSeparator = !!afterDecimal && afterDecimal.length > 0;
+
+    beforeDecimal = beforeDecimal.replace(/(\d)(?=(\d{3})+(?!\d))/g, '$1' + ',');
+
+    if (addNegation) beforeDecimal = '-' + beforeDecimal;
+
+    return beforeDecimal + (hasDecimalSeparator ? '.' : '') + afterDecimal;
+  }
+
   get value(): string {
-    if (this.cell.column.map) return this.cell.column.map(this.cell.value);
-    return this.cell.value;
+    let value = this.column.map ? this.column.map(this.cell.value) : this.cell.value;
+
+    if (value && this.column.type === 'number' && !this.cell.renderer && this.column.options && this.column.options.thousandSeparator) {
+      value = this.getThousandSeparatedNumberString(value);
+    }
+
+    return value;
   }
 
   onValueChange = (value: any) => {
@@ -331,7 +420,7 @@ class Cell extends React.PureComponent<CellProps, {}> {
   renderCell() {
     let cell = this.cell;
     if (cell.editing) {
-      let Editor = cell.editor || cell.column.editor;
+      let Editor = this.column.editor;
       if (!Editor) return;
       let endOfTextOnFocus = false;
       let selectOnFocus    = true;
@@ -341,26 +430,37 @@ class Cell extends React.PureComponent<CellProps, {}> {
         endOfTextOnFocus = true;
         selectOnFocus = false;
       }
-      let editorClasses = undefined;
-      if (cell.type === 'select') {
+      let editorClasses   = undefined;
+      let cellType        = this.column.type;
+      let additionalProps = {};
+      if (cellType === 'select') {
         editorClasses = {select: this.props.classes.selectEditorSelect, selectMenuItem: this.props.classes.editorPopupMenuItem};
-      } else if (cell.type === 'auto-complete') {
-        editorClasses = {menuItem: this.props.classes.editorPopupMenuItem};
+      } else if (cellType === 'checked') {
+        editorClasses = {checkboxRoot: this.props.classes.editorCheckboxRoot};
+      } else if (cellType === 'text' || cellType === 'date' || cellType === 'email' || cellType === 'password' || cellType === 'time' || cellType === 'number' || cellType === 'auto-complete') {
+        editorClasses = {formControlRoot: this.props.classes.editorFormControlRoot, inputRoot: this.props.classes.editorInputRoot};
       }
-      return <Editor field={{...cell, value: value, autoFocus: true, error: undefined}} endOfTextOnFocus={endOfTextOnFocus} selectOnFocus={selectOnFocus} className={cell.cls} onValueChange={this.onValueChange} classes={editorClasses} />;
+
+      if (cellType === 'auto-complete') {
+        additionalProps['usePopper'] = true;
+        Object.assign(editorClasses, {menuItem: this.props.classes.editorPopupMenuItem, container: this.props.classes.editorAutoCompleteContainer});
+      }
+
+      return (
+        <div className={this.props.classes.editorContainer} style={{height: this.element.clientHeight + 'px'}}>
+          <Editor field={{...cell, value: value, autoFocus: true, error: undefined}} endOfTextOnFocus={endOfTextOnFocus} selectOnFocus={selectOnFocus} className={cell.cls} onValueChange={this.onValueChange} classes={editorClasses} {...additionalProps}/>
+        </div>
+      );
     }
 
     return <Observe render={
       () => {
-        let align    = this.column.align;
-        if (this.cell.align) align = align;
-        let renderer = cell.renderer || cell.column.renderer;
         let hasError = !!cell.error;
         let value    = this.value || <span>&nbsp;</span>;
 
         return (
           < >
-            {(renderer && renderer(cell)) || <span onMouseEnter={this.handleTooltip} style={{width: '100%', textAlign: align}}>{value}</span>}
+            {(cell.renderer && cell.renderer(cell)) || <span onMouseEnter={this.handleTooltip} style={{width: '100%', textAlign: cell.align}}>{value}</span>}
             {hasError && this.renderErrorIcon()}
           </>
         );
@@ -376,40 +476,31 @@ class Cell extends React.PureComponent<CellProps, {}> {
       if (!cell) {
         return <div></div>;
       }
-      let cellInnerContainerStyle: React.CSSProperties = {overflow: 'hidden', flex: '1', height: '100%', alignItems: 'center', padding: '0px 4px', margin: 0, display: 'flex', width: '100%'};
+
       let clazz = cc([{
-        selected              : this.cell.selected,
-        selectedTopMost       : this.cell.isTopMostSelection,
-        selectedLeftMost      : this.cell.isLeftMostSelection,
-        adjacentToSelectedTop : this.cell.isAdjacentToTopSelection,
-        adjacentToSelectedLeft: this.cell.isAdjacentToLeftSelection,
-        edit                  : this.cell.editing,
+        selected           : this.cell.selected,
+        selectedTopMost    : this.cell.isTopMostSelection,
+        selectedRightMost  : this.cell.isRightMostSelection,
+        selectedBottomMost : this.cell.isBottomMostSelection,
+        selectedLeftMost   : this.cell.isLeftMostSelection,
+        edit               : this.cell.editing,
       }, cell.cls]);
 
-      let tdStyle: any = {position: 'relative', overflow: 'hidden', padding: '0px'};
+      let tdClasses = classNames(clazz, classes.tableCell);
+
       if (!this.column.visible) {
-        tdStyle.display = 'none';
+        tdClasses = classNames(tdClasses, classes.tableCellNotVisible);
       }
 
-      if (!this.cell.enabled) {
-        tdStyle.color     = 'gray';
-        tdStyle.fontStyle = 'italic';
+      if (!cell.enabled) {
+        tdClasses = classNames(tdClasses, classes.tableCellNotEnabled);
       }
+
+      let cellInnerContainerClasses = classes.cellInnerContainer;
 
       if (cell.editing) {
-        cellInnerContainerStyle.overflow = 'visible';
-        cellInnerContainerStyle.padding  = '0px 2px';
-        tdStyle.borderTopColor           = 'transparent';
-        tdStyle.borderRightColor         = 'transparent';
-        tdStyle.borderBottomColor        = 'transparent';
-        tdStyle.borderLeftColor          = 'transparent';
-      }
-
-      if (cell.isAdjacentToTopSelection && cell.grid.editingCell) {
-        tdStyle.borderBottomColor = this.props.theme.palette.gridBorder.main;
-      }
-      if (cell.isAdjacentToLeftSelection && cell.grid.editingCell) {
-        tdStyle.borderRightColor  = this.props.theme.palette.gridBorder.main;
+        cellInnerContainerClasses = classNames(cellInnerContainerClasses, classes.cellInnerContainerEditing);
+        tdClasses                 = classNames(tdClasses, classes.tableCellEditing);
       }
 
       let colSpan = cell.colSpan;
@@ -417,26 +508,25 @@ class Cell extends React.PureComponent<CellProps, {}> {
 
       let innerCell =
         <div className={classes.cellContainer}>
-          <div style={cellInnerContainerStyle}>
+          <div className={cellInnerContainerClasses}>
             {this.renderCell()}
           </div>
         </div>;
-
-      let cellContent = cell.error && !cell.editing
-        ? <Tooltip
-            title={cell.error.messageText}
-            placement='right-start'
-            TransitionComponent={Fade}
-            PopperProps={{ style: {pointerEvents: 'none'} }}
-            classes={{popper: classes.tooltipPopper, tooltip: classes.tooltip}}
-          >
-            {innerCell}
-          </Tooltip>
-        : innerCell;
+      let cellContent = innerCell;
+      // let cellContent = cell.error && !cell.editing
+      //   ? <Tooltip
+      //       title={cell.error.messageText}
+      //       placement='right-start'
+      //       TransitionComponent={Fade}
+      //       PopperProps={{ style: {pointerEvents: 'none'} }}
+      //       classes={{popper: classes.tooltipPopper, tooltip: classes.tooltip}}
+      //     >
+      //       {innerCell}
+      //     </Tooltip>
+      //   : innerCell;
 
       return (
         <td tabIndex={0}
-          style={tdStyle}
           colSpan={colSpan}
           rowSpan={rowSpan}
           onFocus={this.handleFocus}
@@ -447,7 +537,7 @@ class Cell extends React.PureComponent<CellProps, {}> {
           onClick={this.handleClick}
           onMouseDown={this.grid.multiSelect ? this.handleMouseDown : undefined}
           onMouseEnter={this.grid.multiSelect ? this.handleMouseEnter : undefined}
-          className={clazz}>
+          className={tdClasses}>
             {cellContent}
         </td>
       );

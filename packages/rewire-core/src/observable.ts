@@ -134,7 +134,18 @@ function createHandler(eq: EQType, parent?: () => void) {
       if (typeof(value) === 'function') {
         return value; // ? property
       }
+
+      if (!target.hasOwnProperty(property)) {
+        // for getters
+        let proto    = Object.getPrototypeOf(target);
+        let propDesc = Object.getOwnPropertyDescriptor(proto, property);
+        if (propDesc && propDesc.get && typeof propDesc.get === 'function') {
+          return value;
+        }
+      }
+
       // if (!target.hasOwnProperty(property)) {
+      //   // for getters
       //   return value;
       // }
 

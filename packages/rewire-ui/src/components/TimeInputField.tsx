@@ -1,6 +1,7 @@
 import * as React from 'react';
 import {Theme}                       from '@material-ui/core/styles';
 import TextField, { TextFieldProps } from '@material-ui/core/TextField';
+import InputAdornment                from '@material-ui/core/InputAdornment';
 import {TextAlignment}               from './editors';
 import {withStyles, WithStyle}       from './styles';
 
@@ -117,17 +118,22 @@ const styles = (theme: Theme) => ({
     lineHeight: 'inherit',
     fontSize: 'inherit',
   },
+  formControlRoot: {
+  },
 });
 
 export interface ITimeFieldProps {
-  visible?     : boolean;
-  disabled?    : boolean;
-  error?       : string;
-  value?       : number;
-  label?       : string;
-  align?       : TextAlignment;
-  placeholder? : string;
-  rounding?    : number;
+  visible?       : boolean;
+  disabled?      : boolean;
+  error?         : string;
+  value?         : number;
+  label?         : string;
+  align?         : TextAlignment;
+  placeholder?   : string;
+  rounding?      : number;
+  startAdornment?: JSX.Element;
+  endAdornment?  : JSX.Element;
+
   onValueChange: (value?: number) => void;
 }
 
@@ -183,8 +189,14 @@ class TimeInputField extends React.Component<TimeFieldProps, ITimeState> {
     if (visible === false) {
       return null;
     }
+
+    const startAdornment = this.props.startAdornment ? <InputAdornment position='start'>{this.props.startAdornment}</InputAdornment> : undefined;
+    const endAdornment   = this.props.endAdornment ? <InputAdornment position='end'>{this.props.endAdornment}</InputAdornment> : undefined;
+
     return (
       <TextField
+        className={this.props.className}
+        classes={{root: this.props.classes.formControlRoot}}
         disabled={disabled}
         error={!disabled && (!!error || (!!this.state.text && !this.state.isValid))}
         value={this.state.text}
@@ -194,7 +206,7 @@ class TimeInputField extends React.Component<TimeFieldProps, ITimeState> {
         onBlur={this.handleBlur}
         placeholder={placeholder}
         inputProps={{autoFocus: this.props.autoFocus, style: {textAlign: this.props.align || 'left'}}}
-        InputProps={{classes: {root: this.props.classes.inputRoot}}}
+        InputProps={{startAdornment: startAdornment, endAdornment: endAdornment, classes: {root: this.props.classes.inputRoot}}}
         InputLabelProps={{shrink: true}}
       />);
   }

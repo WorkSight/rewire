@@ -7,6 +7,7 @@ import TextField               from '@material-ui/core/TextField';
 import Paper                   from '@material-ui/core/Paper';
 import Popper                  from '@material-ui/core/Popper';
 import MenuItem                from '@material-ui/core/MenuItem';
+import InputAdornment          from '@material-ui/core/InputAdornment';
 import {Theme}                 from '@material-ui/core/styles';
 import {debounce}              from 'rewire-common';
 import {match}                 from 'rewire-common';
@@ -23,34 +24,41 @@ const styles = (theme: Theme) => ({
     flexGrow: 1,
     position: 'relative',
   },
-  popup: {
-    // position: 'fixed',
-    // width: 'auto',
-    // overflowY: 'auto',
-    // maxHeight: 'calc(100% - 96px)',
-    // minWidth: '255px',
-    // zIndex: 1500,
-  },
   popper: {
     width: 'auto',
     minWidth: '255px',
     overflowY: 'auto',
-    maxHeight: 'calc(100vh - 96px)',
+    maxHeight: 'calc(50vh - 20px)',
+    boxShadow: theme.shadows[7],
+    zIndex: 1300,
+  },
+  paperContainer: {
+    position: 'absolute',
+    zIndex: 1300,
+    width: '100%',
+  },
+  paper: {
+    minWidth: '255px',
+    overflowY: 'auto',
+    maxHeight: '50vh',
+    marginBottom: '10px',
     boxShadow: theme.shadows[7],
   },
   textField: {
-    width: '100%'
+    width: '100%',
   },
   inputRoot: {
     lineHeight: 'inherit',
     fontSize: 'inherit',
   },
+  formControlRoot: {
+  },
   menuItem: {
     fontSize: 'inherit',
-    // paddingTop: '8px',
-    // paddingBottom: '8px',
+    height: 'auto',
+    lineHeight: '1em',
   },
-}));
+});
 
 export type IAutoCompleteProps<T> = WithStyle<ReturnType<typeof styles>, ICustomProps<T> & React.InputHTMLAtrributes<any>>;
 
@@ -77,20 +85,22 @@ class AutoComplete<T> extends React.Component<IAutoCompleteProps<T>, any> {
     });
   }
 
-  renderInput = (classes: Record<IStyleClasses, string>, error: string | undefined, inputProps: any, ref: HTMLElement) => {
-    const { label, disabled, autoFocus, value, align, ...other } = inputProps;
+  renderInput = (classes: Record<IStyleClasses, string>, error: string | undefined, inputProps: any, InputProps: any, ref: (node: any) => any) => {
+    const { label, disabled, autoFocus, value, ...other } = inputProps;
+    const { startAdornment, endAdornment, align }         = InputProps;
 
     return (
       <TextField
-        autoFocus={autoFocus}
         className={classes.textField}
+        classes={{root: classes.formControlRoot}}
         value={value}
         label={label}
         error={!disabled && !!error}
         helperText={error}
         inputRef={ref}
         disabled={disabled}
-        InputProps={{classes: {root: classes.inputRoot}}}
+        autoFocus={autoFocus}
+        InputProps={{startAdornment: startAdornment, endAdornment: endAdornment, classes: {root: classes.inputRoot}}}
         inputProps={{style: {textAlign: align || 'left'}}}
         {...other}
       />
@@ -166,14 +176,28 @@ class AutoComplete<T> extends React.Component<IAutoCompleteProps<T>, any> {
   }
 
   renderSuggestionsContainer = (options: any) => {
-    const { containerProps, isOpen, suggestionsContainerNode, children, classes } = options;
+    const { getMenuProps, isOpen, suggestionsContainerNode, children, classes, usePopper } = options;
+
+    if (usePopper) {
+      return (
+        <Popper open={isOpen} placement='bottom-start' anchorEl={suggestionsContainerNode} className={classes.popper}>
+          <div {...(isOpen ? getMenuProps({}, {suppressRefError: true}) : {})}>
+            <Paper>
+              {children}
+            </Paper>
+          </div>
+        </Popper>
+      );
+    }
 
     return (
-      <Popper open={true} placement='bottom-start' anchorEl={suggestionsContainerNode} className={classes.popper}>
-        <Paper {...containerProps} className={classes.popup}>
-          {children}
-        </Paper>
-      </Popper>
+      isOpen
+        ? <div className={classes.paperContainer}>
+            <Paper className={classes.paper}>
+              {children}
+            </Paper>
+          </div>
+        : undefined
     );
   }
 
@@ -237,12 +261,15 @@ class AutoComplete<T> extends React.Component<IAutoCompleteProps<T>, any> {
   }
 
   render() {
-    const { classes, theme, disabled, visible, error, label, placeholder, autoFocus, align } = this.props;
+    const { classes, theme, disabled, visible, error, label, placeholder, autoFocus, align, usePopper } = this.props;
     if (visible === false) {
       return null;
     }
 
     let suggestionsContainerNode: HTMLElement;
+
+    const startAdornment = this.props.startAdornment ? <InputAdornment position='start'>{this.props.startAdornment}</InputAdornment> : undefined;
+    const endAdornment   = this.props.endAdornment ? <InputAdornment position='end'>{this.props.endAdornment}</InputAdornment> : undefined;
 
     return (
       <Downshift
@@ -270,31 +297,31 @@ class AutoComplete<T> extends React.Component<IAutoCompleteProps<T>, any> {
                   autoFocus: autoFocus,
                   label: label,
                   placeholder: placeholder,
-                  align: align,
                 }),
+                {align: align, startAdornment: startAdornment, endAdornment: endAdornment},
                 (node => {
                   suggestionsContainerNode = node;
                 }),
               )}
-              <div {...getMenuProps()}>
-                {this.renderSuggestionsContainer({
-                  suggestionsContainerNode: suggestionsContainerNode,
-                  isOpen: isOpen,
-                  classes: classes,
-                  children: this.state.suggestions.map((suggestion, index) =>
-                    this.renderSuggestion({
-                      suggestion,
-                      index,
-                      inputValue,
-                      theme,
-                      classes: classes,
-                      itemProps: getItemProps({ item: suggestion }),
-                      highlightedIndex,
-                      selectedItem,
-                    }),
-                  ),
-                })}
-              </div>
+              {this.renderSuggestionsContainer({
+                getMenuProps: getMenuProps,
+                suggestionsContainerNode: suggestionsContainerNode,
+                isOpen: isOpen,
+                classes: classes,
+                usePopper: usePopper,
+                children: this.state.suggestions.map((suggestion, index) =>
+                  this.renderSuggestion({
+                    suggestion,
+                    index,
+                    inputValue,
+                    theme,
+                    classes: classes,
+                    itemProps: getItemProps({ item: suggestion }),
+                    highlightedIndex,
+                    selectedItem,
+                  }),
+                ),
+              })}
             </div>
           )}
       </Downshift>

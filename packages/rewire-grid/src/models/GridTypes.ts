@@ -1,6 +1,5 @@
 import { EditorType }      from 'rewire-ui';
 import { SearchFn, MapFn } from 'rewire-ui';
-import { defaultEquals }   from 'rewire-core';
 export { EditorType };
 
 export interface IRows {
@@ -15,42 +14,52 @@ export type SortDirection = 'ascending' | 'descending';
 export type TextAlignment = 'left' | 'right' | 'center';
 
 export interface IGrid extends IRows, IDisposable {
-  id                    : number;
-  enabled               : boolean;
-  rows                  : IRow[];
-  fixedRows             : IRow[];
-  columns               : IColumn[];
-  readonly editingCell? : ICell;
-  readonly selectedRows : IRow[];
-  readonly selectedCells: ICell[];
-  width                 : string;
-  height                : string;
-  fixedWidth            : string;
-  readonly fixedColumns : IColumn[];
-  readonly dataColumns  : IColumn[];
-  dataRowsByPosition    : IRow[];
-  groupBy               : IColumn[];
-  clipboard             : ICell[];
-  isMouseDown           : boolean;
-  multiSelect           : boolean;
-  startCell?            : ICell;
+  id                        : number;
+  enabled                   : boolean;
+  rows                      : IRow[];
+  fixedRows                 : IRow[];
+  columns                   : IColumn[];
+  editingCell?              : ICell;
+  selectedRows              : IRow[];
+  selectedCells             : ICell[];
+  width                     : string;
+  height                    : string;
+  fixedWidth                : string;
+  loading                   : boolean;
+  readonly fixedColumns     : IColumn[];
+  readonly dataColumns      : IColumn[];
+  dataRowsByPosition        : IRow[];
+  originalDataRowsByPosition: IRow[];
+  groupBy                   : IColumn[];
+  clipboard                 : ICell[];
+  isMouseDown               : boolean;
+  multiSelect               : boolean;
+  startCell?                : ICell;
+  changed                   : boolean;
 
   hasChanges(): boolean;
   copy(): void;
   paste(): void;
   addSort(column: IColumn, sort?: SortDirection, insert?: boolean): IGrid;
   setSort(column: IColumn, sort?: SortDirection): IGrid;
+  sort(): void;
+  sortItems(items: any[], comparer: (a: any, b: any) => number): void;
 
   selectRows(rows: IRow[]): void;
   selectCells(cells: ICell[], multiSelect?: boolean, append?: boolean): void;
   unselectCells(cells: ICell[]): void;
+  updateCellSelectionProperties(cells: ICell[]): void;
   editCell(cell?: ICell): void;
   selectCellsTo(cell: ICell, append?: boolean): void;
+  selectCellsToMergeHelper(rows: IRow[], columnsToSelect: IColumn[]): IColumn[];
+  clearSelection(): void;
 
   cell(rowId: string, column: string): ICell | undefined;
   cellByPos(rowPosition: number, columnPosition: number): ICell | undefined;
   getCellsByRange(colStart: number, rowStart: number, colEnd: number, rowEnd: number, allowCollapsed?: boolean): ICell[];
   adjacentTopCell(cell: ICell): ICell | undefined;
+  adjacentRightCell(cell: ICell): ICell | undefined;
+  adjacentBottomCell(cell: ICell): ICell | undefined;
   adjacentLeftCell(cell: ICell): ICell | undefined;
   row(rowId: string): IRow | undefined;
   rowByPos(rowPosition: number): IRow | undefined;
@@ -71,6 +80,7 @@ export interface IGrid extends IRows, IDisposable {
   addRow(row: any): IRow;
   _addRow(row: any): IRow;
   addRows(rows: any[]): void;
+  _addRows(rows: any[]): void;
 }
 
 export interface IGridColors {
@@ -80,8 +90,10 @@ export interface IGridColors {
   gridBackground?: string;
   gridText?: string;
   gridBorder?: string;
+  gridBorderSelected?: string;
   groupRowBackground?: string;
   rowSelectedBackground?: string;
+  rowSelectedBorder?: string;
   cellSelectedBackground?: string;
   rowSelectedText?: string;
   rowStripedBackground?: string;
@@ -108,7 +120,7 @@ export interface IRow extends IDisposable {
   cls                  : string;
   options              : IRowOptions;
   position             : number;
-  readonly data        : any;
+  readonly data        : ICellDataMap;
   cellsByColumnPosition: ICell[];
   parentRow?           : IGroupRow;
   visible              : boolean;
@@ -125,30 +137,29 @@ export interface IGroupRow extends IRow, IRows {
 }
 
 export type IColumnEditor =
-  'text' | 'date' | 'time' | 'checked' | 'password' |
+  'text' | 'date' | 'time' | 'checked' | 'password' | 'none' |
   {type: 'auto-complete', options: {search: SearchFn<any>, map: MapFn<any>}} |
   {type: 'select', options: {search: SearchFn<any>, map: MapFn<any>}} |
   {type: 'number', options: {decimals: number, thousandSeparator?: boolean, fixed?: boolean}};
 
 
 export interface ICellProperties {
-  id        : number;
-  grid      : IGrid;
-  tooltip?  : string;
-  cls       : any;
-  enabled   : boolean;
-  readOnly  : boolean;
-  align?    : TextAlignment;
-  type      : EditorType;
-  editor?   : React.SFC<any>;
-  renderer? : React.SFC<any>;
-  colSpan?  : number;
-  rowSpan?  : number;
-  validator?: (value: any) => IError | undefined;
+  id       : number;
+  grid     : IGrid;
+  tooltip? : string;
+  cls?     : any;
+  enabled  : boolean;
+  readOnly : boolean;
+  editable : boolean;
+  align?   : TextAlignment;
+  renderer?: React.SFC<any>;
+  colSpan? : number;
+  rowSpan? : number;
 }
 
 export interface IColumn extends ICellProperties {
   name          : string;
+  type          : EditorType;
   title?        : string;
   width?        : string;
   fixed         : boolean;
@@ -156,11 +167,14 @@ export interface IColumn extends ICellProperties {
   position      : number;
   readonly sort?: SortDirection;
   canSort?      : boolean;
+  options?      : any;
+  editor?       : React.SFC<any>;
 
-  map?      (value: any): string;
+  validator?(value: any): IError | undefined;
+  map?(value: any): string;
   predicate?(value: any, filter: {value: any}): boolean;
-  compare?  (x: any, y: any): number;
-  setEditor (type?: IColumnEditor): void;
+  compare?(x: any, y: any): number;
+  setEditor(type?: IColumnEditor): void;
 }
 
 export enum ErrorSeverity {
@@ -172,20 +186,20 @@ export enum ErrorSeverity {
 export interface IError { messageText: string; severity: ErrorSeverity; }
 
 export interface ICell extends ICellProperties {
-  row                      : IRow;
-  column                   : IColumn;
-  error?                   : IError;
-  selected                 : boolean;
-  value                    : any;
-  readonly editing         : boolean;
-  rowSpan                  : number;
-  colSpan                  : number;
-  rowPosition              : number;
-  columnPosition           : number;
-  isTopMostSelection       : boolean;
-  isLeftMostSelection      : boolean;
-  isAdjacentToLeftSelection: boolean;
-  isAdjacentToTopSelection : boolean;
+  row                  : IRow;
+  column               : IColumn;
+  error?               : IError;
+  selected             : boolean;
+  value                : any;
+  readonly editing     : boolean;
+  rowSpan              : number;
+  colSpan              : number;
+  rowPosition          : number;
+  columnPosition       : number;
+  isTopMostSelection   : boolean;
+  isRightMostSelection : boolean;
+  isBottomMostSelection: boolean;
+  isLeftMostSelection  : boolean;
 
   hasChanges(): boolean;
   clone(row: IRow): ICell;
@@ -193,7 +207,8 @@ export interface ICell extends ICellProperties {
   setEditing(editing: boolean): void;
 }
 
-export type ICellMap = {[columnName: string]: ICell};
+export type ICellMap     = {[columnName: string]: ICell};
+export type ICellDataMap = {[columnName: string]: any};
 
 export function isRow(row: any): row is IRow {
   return !!(row && (row as IRow).createCell);
@@ -209,8 +224,13 @@ export function isColumn(column: any): column is IColumn {
 
 export function getValue(row: IRow | ObjectType, column: IColumn): string | undefined {
   if (!row || !column) return undefined;
+  let value: any;
+  if (isGroupRow(row)) {
+    value = row.cells[column.name].value;
+  } else {
+    value = row[column.name];
+  }
 
-  let value =  ((row as IRow).data || row)[column.name];
   if (column.map) value = column.map(value);
   return value;
 }
@@ -282,8 +302,61 @@ export function find<T>(rows: IterableIterator<T>, predicate: (row: T) => boolea
   return undefined;
 }
 
-export function findRowByData(rows: IRow[], row: any): IRowIteratorResult | undefined {
-  return find(allDataRows(rows), (row) => defaultEquals(row.row.data, row));
+export function findRowByCellData(rows: IRow[], cell: ICell): IRowIteratorResult | undefined {
+  return find(allDataRows(rows), (r) => {
+    let rCell = r.row.cells[cell.column.name];
+    return !!rCell && (rCell.value === cell.value || (!!rCell.column.compare && rCell.column.compare(rCell.value, cell.value) === 0));
+  });
+}
+
+export function findRowByRowData(rows: IRow[], row: any): IRowIteratorResult | undefined {
+  return find(allDataRows(rows), (r) => {
+    let match            = false;
+    let rCellDataByName  = r.row.cells;
+    let rowCellDataByPos = row.cellsByColumnPosition;
+
+    for (let i = 0; i < rowCellDataByPos.length; i++) {
+      let rowCell = rowCellDataByPos[i];
+      let rCell   = rCellDataByName[rowCell.column.name];
+      if (!rCell) {
+        continue;
+      }
+
+      if (rCell === rowCell || rCell.value === rowCell.value || (rCell.column.compare && rCell.column.compare(rCell.value, rowCell.value) === 0)) {
+        match = true;
+        break;
+      }
+    }
+    return match;
+  });
+}
+
+export function findRowByRowDataExact(rows: IRow[], row: any): IRowIteratorResult | undefined {
+  return find(allDataRows(rows), (r) => {
+    let rCellData   = r.row.cellsByColumnPosition;
+    let rowCellData = row.cellsByColumnPosition;
+    if (rCellData.length !== rowCellData.length) {
+      return false;
+    }
+
+    let same = true;
+    for (let i = 0; i < rCellData.length; i++) {
+      let rCell   = rCellData[i];
+      let rowCell = rowCellData[i];
+      if (rCell.column.compare) {
+        if (rCell.column.compare(rCell.value, rowCell.value) !== 0) {
+          same = false;
+          break;
+        }
+      } else {
+        if (rCell.value !== rowCell.value) {
+          same = false;
+          break;
+        }
+      }
+    }
+    return same;
+  });
 }
 
 export function findRowById(iterator: IterableIterator<IRowIteratorResult>, id: string): IRowIteratorResult | undefined {
@@ -312,16 +385,4 @@ export function expandAll(rows: IRow[]) {
   for (const groupRow of groupRows(rows)) {
     groupRow.row.expanded = true;
   }
-}
-
-export function cellPositionCompare(a: ICell, b: ICell): number {
-  return a.rowPosition < b.rowPosition ? -1 : a.rowPosition > b.rowPosition ? 1 : a.columnPosition < b.columnPosition ? -1 : a.columnPosition > b.columnPosition ? 1 : 0;
-}
-
-export function rowPositionCompare(a: IRow, b: IRow): number {
-  return a.position < b.position ? -1 : a.position > b.position ? 1 : 0;
-}
-
-export function columnPositionCompare(a: IColumn, b: IColumn): number {
-  return a.position < b.position ? -1 : a.position > b.position ? 1 : 0;
 }

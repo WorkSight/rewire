@@ -14,6 +14,7 @@ export * from './components/Select';
 export * from './components/Sortable';
 export * from './components/styles';
 export * from './components/TextField';
+export * from './components/PasswordField';
 export * from './components/StaticField';
 
 export {default as Form}               from './models/Form';
@@ -31,4 +32,5 @@ export {default as Select}             from './components/Select';
 export {default as Sortable}           from './components/Sortable';
 export {default as decorate}           from './components/styles';
 export {default as TextField}          from './components/TextField';
+export {default as PasswordField}      from './components/TextField';
 export {default as StaticField}        from './components/StaticField';
