@@ -78,7 +78,7 @@ class DialogInternal extends React.Component<DialogProps> {
         <Dialog classes={{paper: classes.root}} open={dialog.isOpen} fullWidth maxWidth={maxWidth} hideBackdrop={hideBackdrop} transitionDuration={transitionTime} TransitionComponent={transitionAction} fullScreen={fullScreen} disableEscapeKeyDown={disableEscapeKeyDown} onEscapeKeyDown={escapeAction}>
           {(dialog.title || title) &&
             <div className={classes.heading}>
-              <Typography variant='title'>{(title && title(dialog)) || dialog.title}</Typography>
+              <Typography variant='h6'>{(title && title(dialog)) || dialog.title}</Typography>
               <hr/>
             </div>}
             {children}

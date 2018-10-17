@@ -1,18 +1,17 @@
-import * as React        from 'react';
-import * as is           from 'is';
+import * as React              from 'react';
+import * as is                 from 'is';
 import Downshift, {
   ControllerStateAndHelpers,
-  StateChangeOptions }   from 'downshift';
-import TextField         from '@material-ui/core/TextField';
-import Paper             from '@material-ui/core/Paper';
-import MenuItem          from '@material-ui/core/MenuItem';
-import {
-  withStyles,
-  WithStyles,
-  Theme,
-  StyledComponentProps }   from '@material-ui/core/styles';
-import {debounce}          from 'rewire-common';
-import {match}             from 'rewire-common';
+  StateChangeOptions }         from 'downshift';
+import TextField               from '@material-ui/core/TextField';
+import Paper                   from '@material-ui/core/Paper';
+import Popper                  from '@material-ui/core/Popper';
+import MenuItem                from '@material-ui/core/MenuItem';
+import InputAdornment          from '@material-ui/core/InputAdornment';
+import {Theme}                 from '@material-ui/core/styles';
+import {debounce}              from 'rewire-common';
+import {match}                 from 'rewire-common';
+import {withStyles, WithStyle} from './styles';
 import {
   ICustomProps,
   SearchFn,
@@ -20,28 +19,48 @@ import {
   defaultMap
 } from '../models/search';
 
-export {StyledComponentProps as StyledComponentProps};
-
-export type IStyleClasses = 'container' | 'popup' | 'textField';
-const decorate = withStyles<IStyleClasses>((theme: Theme) => ({
+const styles = (theme: Theme) => ({
   container: {
     flexGrow: 1,
     position: 'relative',
   },
-  popup: {
-    position: 'fixed',
+  popper: {
     width: 'auto',
+    minWidth: '255px',
     overflowY: 'auto',
-    maxHeight: '80vh',
-    minWidth: '150px',
-    zIndex: 1500,
+    maxHeight: 'calc(50vh - 20px)',
+    boxShadow: theme.shadows[7],
+    zIndex: 1300,
+  },
+  paperContainer: {
+    position: 'absolute',
+    zIndex: 1300,
+    width: '100%',
+  },
+  paper: {
+    minWidth: '255px',
+    overflowY: 'auto',
+    maxHeight: '50vh',
+    marginBottom: '10px',
+    boxShadow: theme.shadows[7],
   },
   textField: {
-    width: '100%'
-  }
-}));
+    width: '100%',
+  },
+  inputRoot: {
+    lineHeight: 'inherit',
+    fontSize: 'inherit',
+  },
+  formControlRoot: {
+  },
+  menuItem: {
+    fontSize: 'inherit',
+    height: 'auto',
+    lineHeight: '1em',
+  },
+});
 
-export type IAutoCompleteProps<T> = ICustomProps<T> & React.InputHTMLAttributes<any> & WithStyles<IStyleClasses>;
+export type IAutoCompleteProps<T> = WithStyle<ReturnType<typeof styles>, ICustomProps<T> & React.InputHTMLAtrributes<any>>;
 
 class AutoComplete<T> extends React.Component<IAutoCompleteProps<T>, any> {
   state = {suggestions: []};
@@ -66,19 +85,22 @@ class AutoComplete<T> extends React.Component<IAutoCompleteProps<T>, any> {
     });
   }
 
-  renderInput = (classes: Record<IStyleClasses, string>, error: string | undefined, inputProps: any) => {
-    const { label, disabled, autoFocus, value, ref, align, ...other } = inputProps;
+  renderInput = (classes: Record<IStyleClasses, string>, error: string | undefined, inputProps: any, InputProps: any, ref: (node: any) => any) => {
+    const { label, disabled, autoFocus, value, ...other } = inputProps;
+    const { startAdornment, endAdornment, align }         = InputProps;
 
     return (
       <TextField
-        autoFocus={autoFocus}
         className={classes.textField}
+        classes={{root: classes.formControlRoot}}
         value={value}
         label={label}
         error={!disabled && !!error}
         helperText={error}
         inputRef={ref}
         disabled={disabled}
+        autoFocus={autoFocus}
+        InputProps={{startAdornment: startAdornment, endAdornment: endAdornment, classes: {root: classes.inputRoot}}}
         inputProps={{style: {textAlign: align || 'left'}}}
         {...other}
       />
@@ -121,13 +143,13 @@ class AutoComplete<T> extends React.Component<IAutoCompleteProps<T>, any> {
   }
 
   renderSuggestion = (params: any) => {
-    const { suggestion, index, itemProps, theme, highlightedIndex, inputValue } = params;
+    const { suggestion, index, itemProps, theme, highlightedIndex, inputValue, classes } = params;
     const isHighlighted = highlightedIndex === index;
     const name          = this.map(suggestion);
 
     if (this.props.renderSuggestion) {
       return (
-        <MenuItem selected={isHighlighted} component='div' key={index}>
+        <MenuItem selected={isHighlighted} component='div' key={index} className={classes.menuItem}>
           {this.props.renderSuggestion(suggestion, {theme, isHighlighted, inputValue})}
         </MenuItem>
       );
@@ -141,6 +163,7 @@ class AutoComplete<T> extends React.Component<IAutoCompleteProps<T>, any> {
         key={index}
         selected={isHighlighted}
         component='div'
+        className={classes.menuItem}
       >{parts.map((part, index) => {
           return part.highlight ? (
             <span key={String(index)} style={{ fontWeight: 700 }} dangerouslySetInnerHTML={{__html: part.text}} />
@@ -153,12 +176,28 @@ class AutoComplete<T> extends React.Component<IAutoCompleteProps<T>, any> {
   }
 
   renderSuggestionsContainer = (options: any) => {
-    const { containerProps, children, classes } = options;
+    const { getMenuProps, isOpen, suggestionsContainerNode, children, classes, usePopper } = options;
+
+    if (usePopper) {
+      return (
+        <Popper open={isOpen} placement='bottom-start' anchorEl={suggestionsContainerNode} className={classes.popper}>
+          <div {...(isOpen ? getMenuProps({}, {suppressRefError: true}) : {})}>
+            <Paper>
+              {children}
+            </Paper>
+          </div>
+        </Popper>
+      );
+    }
 
     return (
-      <Paper {...containerProps} className={classes.popup} square>
-        {children}
-      </Paper>
+      isOpen
+        ? <div className={classes.paperContainer}>
+            <Paper className={classes.paper}>
+              {children}
+            </Paper>
+          </div>
+        : undefined
     );
   }
 
@@ -222,10 +261,15 @@ class AutoComplete<T> extends React.Component<IAutoCompleteProps<T>, any> {
   }
 
   render() {
-    const { classes, theme, disabled, visible, error, label, placeholder, autoFocus, align } = this.props;
+    const { classes, theme, disabled, visible, error, label, placeholder, autoFocus, align, usePopper } = this.props;
     if (visible === false) {
       return null;
     }
+
+    let suggestionsContainerNode: HTMLElement;
+
+    const startAdornment = this.props.startAdornment ? <InputAdornment position='start'>{this.props.startAdornment}</InputAdornment> : undefined;
+    const endAdornment   = this.props.endAdornment ? <InputAdornment position='end'>{this.props.endAdornment}</InputAdornment> : undefined;
 
     return (
       <Downshift
@@ -235,46 +279,54 @@ class AutoComplete<T> extends React.Component<IAutoCompleteProps<T>, any> {
         onInputValueChange={this.handleInputChanged}
         onUserAction={this.handleItemChanged}
         ref={(v) => this.downShift = v}
-        render={({
-          getInputProps,
-          getItemProps,
-          isOpen,
-          inputValue,
-          selectedItem,
-          highlightedIndex,
-        }) => (
-          <div className={classes.container + ' ' + (this.props.className || '')}>
-            {this.renderInput(classes, error,
-              getInputProps({
-                disabled: disabled,
-                onKeyDown: this.handleKeyDown,
-                autoFocus: autoFocus,
-                label: label,
-                placeholder: placeholder,
-                align: align,
-              }),
-            )}
-            {isOpen
-              ? this.renderSuggestionsContainer({
-                  classes: classes,
-                  children: this.state.suggestions.map((suggestion, index) =>
-                    this.renderSuggestion({
-                      suggestion,
-                      index,
-                      inputValue,
-                      theme,
-                      itemProps: getItemProps({ item: suggestion }),
-                      highlightedIndex,
-                      selectedItem,
-                    }),
-                  ),
-                })
-              : this.state.suggestions = []}
-          </div>
-        )}
-      />
+        >
+          {({
+            getInputProps,
+            getItemProps,
+            getMenuProps,
+            isOpen,
+            inputValue,
+            selectedItem,
+            highlightedIndex,
+          }) => (
+            <div className={classes.container + ' ' + (this.props.className || '')}>
+              {this.renderInput(classes, error,
+                getInputProps({
+                  disabled: disabled,
+                  onKeyDown: this.handleKeyDown,
+                  autoFocus: autoFocus,
+                  label: label,
+                  placeholder: placeholder,
+                }),
+                {align: align, startAdornment: startAdornment, endAdornment: endAdornment},
+                (node => {
+                  suggestionsContainerNode = node;
+                }),
+              )}
+              {this.renderSuggestionsContainer({
+                getMenuProps: getMenuProps,
+                suggestionsContainerNode: suggestionsContainerNode,
+                isOpen: isOpen,
+                classes: classes,
+                usePopper: usePopper,
+                children: this.state.suggestions.map((suggestion, index) =>
+                  this.renderSuggestion({
+                    suggestion,
+                    index,
+                    inputValue,
+                    theme,
+                    classes: classes,
+                    itemProps: getItemProps({ item: suggestion }),
+                    highlightedIndex,
+                    selectedItem,
+                  }),
+                ),
+              })}
+            </div>
+          )}
+      </Downshift>
     );
   }
 }
 
-export default decorate(AutoComplete);
+export default withStyles(styles, AutoComplete);

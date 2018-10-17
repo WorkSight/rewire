@@ -45,40 +45,42 @@ html {
     border-width: 1px;
     font-weight: normal;
     white-space: nowrap;
-    &.selected {
+    &.selected, &:focus {
       outline: none;
     }
   }
 
-  input[type="radio"],
-  input[type="checkbox"] {
-    margin: 0;
-    padding: 0;
-    height: 14px;
-  }
   input[type="file"] {
     display: block;
   }
   input[type="range"],
   input,
   input[type="text"] {
-    display: inline;
+    height: 100%;
     padding: 0 3px;
   }
   input[type="range"] {
-    display: block;
     width: 100%;
   }
-  select[multiple],
-  select[size] {
-    height: auto;
+  input[type="date"] {
+    height: initial;
+
+    &::-webkit-clear-button{
+      margin-right: 2px;
+    }
+    &::-webkit-inner-spin-button {
+      // -webkit-appearance:none;
+      margin-top: 5px;
+    }
+    &::-webkit-calendar-picker-indicator {
+      margin-top: 1px;
+      font-size: 1.1em;
+    }
   }
 
+
   .group {
-    min-height: 24px;
-    font-size: 14px;
     border-right: 0;
-    // display: inline-block;
 
     div {
       display: flex;
@@ -86,7 +88,7 @@ html {
       &:before {
         @extend .material-icons;
         display: inline-block;
-        font-size: 14px;
+        font-size: inherit;
         margin: 0;
         padding: 0px 8px 0 0;
       }
@@ -152,9 +154,6 @@ html {
     table {
       margin-bottom: -1px;
     }
-    tr {
-      height: 36px;
-    }
 
     div.sort {
       &:after {
@@ -164,6 +163,7 @@ html {
         margin-left: 4px;
         transition: 0.2s ease-in-out;
         content: '\e5d8';
+        color: inherit;
         // content: 'arrow_upward';
       }
   
@@ -176,8 +176,6 @@ html {
 
     th {
       vertical-align: middle;
-      padding: 7px;
-      min-height: 32px;
     }
     th:first-child {
       border-left-width: 0px;
@@ -209,19 +207,8 @@ html {
 
   td {
     vertical-align: middle;
-    min-height: 28px;
-    /* font-size: 1.1rem; */
   }
-  td.edit > div > div > :first-child {
-    flex: 1;
-  }
-  td.edit > div > div > div > :first-child {
-    flex: 1;
-  }
-  td.edit {
-    padding: 0;
-    border: 0;
-  }
+
   table {
     table-layout: fixed;
     margin: 0;

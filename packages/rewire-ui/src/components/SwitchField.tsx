@@ -1,21 +1,29 @@
-import * as React            from 'react';
-import Switch, {SwitchProps} from '@material-ui/core/Switch';
-import FormControlLabel      from '@material-ui/core/FormControlLabel';
+import * as React              from 'react';
+import Switch, {SwitchProps}   from '@material-ui/core/Switch';
+import FormControlLabel        from '@material-ui/core/FormControlLabel';
+import {Theme}                 from '@material-ui/core/styles';
+import {withStyles, WithStyle} from './styles';
+
+const styles = (theme: Theme) => ({
+});
 
 export interface ISwitchProps {
-  visible?     : boolean;
-  disabled?    : boolean;
-  value?       : boolean;
-  label?       : string;
+  visible? : boolean;
+  disabled?: boolean;
+  value?   : boolean;
+  label?   : string;
+
   onValueChange: (value?: boolean) => void;
 }
 
-export default class SwitchInternal extends React.Component<SwitchProps & ISwitchProps> {
-  constructor(props: SwitchProps & ISwitchProps) {
+type SwitchPropsStyled = WithStyle<ReturnType<typeof styles>, SwitchProps & ISwitchProps>;
+
+class SwitchInternal extends React.Component<SwitchPropsStyled> {
+  constructor(props: SwitchPropsStyled) {
     super(props);
   }
 
-  shouldComponentUpdate(nextProps: ISwitchProps) {
+  shouldComponentUpdate(nextProps: SwitchPropsStyled) {
     return (
       (nextProps.value !== this.props.value) ||
       (nextProps.disabled !== this.props.disabled) ||
@@ -59,3 +67,5 @@ export default class SwitchInternal extends React.Component<SwitchProps & ISwitc
     );
   }
 }
+
+export default withStyles(styles, SwitchInternal);

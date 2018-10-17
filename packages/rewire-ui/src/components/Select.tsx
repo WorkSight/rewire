@@ -1,26 +1,57 @@
-import { ChangeEvent }                 from 'react';
-import FormControl                     from '@material-ui/core/FormControl';
-import FormHelperText                  from '@material-ui/core/FormHelperText';
-import InputLabel                      from '@material-ui/core/InputLabel';
-import MenuItem                        from '@material-ui/core/MenuItem';
-import * as React                      from 'react';
-import Select                          from '@material-ui/core/Select';
+import { ChangeEvent }         from 'react';
+import {Theme}                 from '@material-ui/core/styles';
+import FormControl             from '@material-ui/core/FormControl';
+import FormHelperText          from '@material-ui/core/FormHelperText';
+import Input                   from '@material-ui/core/Input';
+import InputLabel              from '@material-ui/core/InputLabel';
+import MenuItem                from '@material-ui/core/MenuItem';
+import * as React              from 'react';
+import Select                  from '@material-ui/core/Select';
+import InputAdornment          from '@material-ui/core/InputAdornment';
 import {
   ICustomProps,
   SearchFn,
   MapFn,
   defaultMap
 } from '../models/search';
-import {disposeOnUnmount} from 'rewire-core';
+import {disposeOnUnmount}      from 'rewire-core';
+import {withStyles, WithStyle} from './styles';
+
+const styles = (theme: Theme) => ({
+  inputRoot: {
+    lineHeight: 'inherit',
+    fontSize: 'inherit',
+    alignItems: 'stretch',
+  },
+  selectRoot: {
+    lineHeight: 'inherit',
+    fontSize: 'inherit',
+    display: 'inline-flex',
+    alignItems: 'stretch',
+  },
+  select: {
+    display: 'flex',
+    alignItems: 'center',
+    flex: 1,
+  },
+  selectMenuPaper: {
+  },
+  selectMenuItem: {
+    fontSize: 'inherit',
+    height: 'auto',
+    lineHeight: '1em',
+  },
+});
 
 export type ISelectProps<T> = ICustomProps<T> & React.InputHTMLAttributes<any>;
+type SelectProps<T>         = WithStyle<ReturnType<typeof styles>, ISelectProps<T>>;
 
-export default class SelectInternal<T> extends React.Component<ISelectProps<T>, any> {
+class SelectInternal<T> extends React.Component<SelectProps<T>, any> {
   state : any;
   search: SearchFn<T>;
   map   : MapFn<T>;
 
-  constructor(props: ISelectProps<T>) {
+  constructor(props: SelectProps<T>) {
     super(props);
     this.state  = {suggestions: []};
     this.search = props.search;
@@ -41,7 +72,7 @@ export default class SelectInternal<T> extends React.Component<ISelectProps<T>, 
 
     if (this.props.renderSuggestion) {
       return (
-        <MenuItem value={displayName} component='div' key={index}>
+        <MenuItem value={displayName} component='div' key={index} classes={{root: this.props.classes.selectMenuItem}}>
           {this.props.renderSuggestion(suggestion, {isHighlighted, displayName, index})}
         </MenuItem>
       );
@@ -52,7 +83,7 @@ export default class SelectInternal<T> extends React.Component<ISelectProps<T>, 
     }
 
     return (
-      <MenuItem key={index} component='div' value={displayName} style={s}>{displayName}</MenuItem>
+      <MenuItem key={index} component='div' value={displayName} style={s} classes={{root: this.props.classes.selectMenuItem}}>{displayName}</MenuItem>
     );
   }
 
@@ -81,9 +112,20 @@ export default class SelectInternal<T> extends React.Component<ISelectProps<T>, 
   }
 
   renderSelect(disabled: boolean, cls: string, value?: T, autoFocus?: boolean) {
-    const v   = this.map(value);
+    const v              = this.map(value);
+    const startAdornment = this.props.startAdornment ? <InputAdornment position='start'>{this.props.startAdornment}</InputAdornment> : undefined;
+    const endAdornment   = this.props.endAdornment ? <InputAdornment position='end'>{this.props.endAdornment}</InputAdornment> : undefined;
     return (
-    <Select disabled={disabled} value={v as any} onChange={this.handleChanged} className={cls} style={this.props.style} renderValue={(p) => <span>{v}</span>}>{
+    <Select
+      disabled={disabled}
+      value={v as any}
+      onChange={this.handleChanged}
+      className={cls}
+      style={this.props.style}
+      classes={{root: this.props.classes.selectRoot, select: this.props.classes.select}}
+      MenuProps={{classes: {paper: this.props.classes.selectMenuPaper}}}
+      input={<Input startAdornment={startAdornment} endAdornment={endAdornment} classes={{root: this.props.classes.inputRoot}}/>}
+      renderValue={(p) => <span>{v}</span>}>{
         this.state.suggestions.map((suggestion: any, index: number) => {
           const displayName = this.map(suggestion);
           return this.renderSuggestion({
@@ -99,9 +141,9 @@ export default class SelectInternal<T> extends React.Component<ISelectProps<T>, 
   }
 
   render() {
-    const disabled           = this.props.disabled === true;
-    const visible            = this.props.visible;
-    const error              = this.props.error;
+    const disabled = this.props.disabled === true;
+    const visible  = this.props.visible;
+    const error    = this.props.error;
     if (visible === false) {
       return null;
     }
@@ -121,3 +163,5 @@ export default class SelectInternal<T> extends React.Component<ISelectProps<T>, 
     return this.renderSelect(disabled, cls, this.props.selectedItem, this.props.autoFocus);
   }
 }
+
+export default withStyles(styles, SelectInternal);

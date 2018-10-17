@@ -1,8 +1,26 @@
-import {createMuiTheme, Theme} from '@material-ui/core/styles';
-import {ThemeOptions}          from '@material-ui/core/styles/createMuiTheme';
-import Color                   from 'color';
-import merge                   from 'deepmerge';
-import {IGridColors}           from '../models/GridTypes';
+import {createMuiTheme, Theme}       from '@material-ui/core/styles';
+import {ThemeOptions}                from '@material-ui/core/styles/createMuiTheme';
+import Color                         from 'color';
+import merge                         from 'deepmerge';
+import {IGridColors, IGridFontSizes} from '../models/GridTypes';
+
+declare module '@material-ui/core/styles/createMuiTheme' {
+  interface Theme {
+    fontSizes: {
+      header: string,
+      body: string,
+      groupRow: string,
+    };
+  }
+
+  interface ThemeOptions {
+    fontSizes?: {
+      header?: string,
+      body?: string,
+      groupRow?: string,
+    };
+  }
+}
 
 declare module '@material-ui/core/styles/createPalette' {
   interface Palette {
@@ -36,12 +54,27 @@ declare module '@material-ui/core/styles/createPalette' {
       main: string,
       dark: string,
     };
+    gridBorderSelected: {
+      light: string,
+      main: string,
+      dark: string,
+    };
     groupRowBackground: {
       light: string,
       main: string,
       dark: string,
     };
     rowSelectedBackground: {
+      light: string,
+      main: string,
+      dark: string,
+    };
+    rowSelectedBorder: {
+      light: string,
+      main: string,
+      dark: string,
+    };
+    cellSelectedBackground: {
       light: string,
       main: string,
       dark: string,
@@ -56,7 +89,7 @@ declare module '@material-ui/core/styles/createPalette' {
       main: string,
       dark: string,
     };
-    rowStripedBackgroundSelected: {
+    rowStripedSelectedBackground: {
       light: string,
       main: string,
       dark: string,
@@ -103,12 +136,27 @@ declare module '@material-ui/core/styles/createPalette' {
       main?: string,
       dark?: string,
     };
+    gridBorderSelected: {
+      light?: string,
+      main?: string,
+      dark?: string,
+    };
     groupRowBackground: {
       light?: string,
       main?: string,
       dark?: string,
     };
     rowSelectedBackground: {
+      light?: string,
+      main?: string,
+      dark?: string,
+    };
+    rowSelectedBorder: {
+      light?: string,
+      main?: string,
+      dark?: string,
+    };
+    cellSelectedBackground: {
       light?: string,
       main?: string,
       dark?: string,
@@ -123,7 +171,7 @@ declare module '@material-ui/core/styles/createPalette' {
       main?: string,
       dark?: string,
     };
-    rowStripedBackgroundSelected: {
+    rowStripedSelectedBackground: {
       light?: string,
       main?: string,
       dark?: string,
@@ -144,25 +192,40 @@ declare module '@material-ui/core/styles/createPalette' {
 const defaultGridColors: IGridColors = {
   headerBackground: '#607D8B',
   headerText: '#FFFFFF',
-  headerBorder: Color('#607D8B').lighten(0.15).string(),
   gridBackground: '#FFFFFF',
   gridText: '#2e2e2e',
   gridBorder: '#e5e5e5',
   groupRowBackground: '#8AC0CE',
-  rowSelectedBackground: '#C2D4E1',
+  rowSelectedBackground: '#D0DEE8',
   rowSelectedText: '#000000',
   rowStripedBackground: '#F5F8FA',
-  rowStripedBackgroundSelected: Color('#F5F8FA').darken(0.15).string(),
+  rowStripedSelectedBackground: '#D0DEE8',
   leftLabelBackground: '#F5F8FA',
   cellOutline: '#1976D2',
 };
 
-export default function createGridTheme(options: ThemeOptions): Theme {
+defaultGridColors.headerBorder           = Color(defaultGridColors.headerBackground).lighten(0.15).string();
+defaultGridColors.cellSelectedBackground = Color(defaultGridColors.rowSelectedBackground).lighten(0.07).string();
+defaultGridColors.gridBorderSelected     = Color(defaultGridColors.cellSelectedBackground).darken(0.12).string();
+defaultGridColors.rowSelectedBorder      = Color(defaultGridColors.rowSelectedBackground).darken(0.12).string();
+
+const defaultGridFontSizes: IGridFontSizes = {
+  header: '1rem',
+  body: '1rem',
+  groupRow: '0.9rem',
+};
+
+const defaultGridTypography: any = {
+  useNextVariants: true,
+};
+
+export default function createGridTheme(options: ThemeOptions = {}): Theme {
   let defaultPalette: any = {};
   Object.keys(defaultGridColors).forEach(colorName => {
     defaultPalette[colorName] = {main: defaultGridColors[colorName]};
   });
-  let defaultTheme: ThemeOptions = {palette: defaultPalette};
-  let gridTheme: ThemeOptions    = merge(defaultTheme, options);
-  return createMuiTheme(gridTheme);
+
+  let defaultThemeOptions: ThemeOptions = {palette: defaultPalette, fontSizes: defaultGridFontSizes, typography: defaultGridTypography};
+  let gridThemeOptions: ThemeOptions    = merge(defaultThemeOptions, options);
+  return createMuiTheme(gridThemeOptions);
 }

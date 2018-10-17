@@ -1,6 +1,9 @@
 import * as React from 'react';
+import {Theme}                       from '@material-ui/core/styles';
 import TextField, { TextFieldProps } from '@material-ui/core/TextField';
+import InputAdornment                from '@material-ui/core/InputAdornment';
 import {TextAlignment}               from './editors';
+import {withStyles, WithStyle}       from './styles';
 
 export class TimeValidator {
   rounding: number;
@@ -110,15 +113,27 @@ export class TimeValidator {
   }
 }
 
+const styles = (theme: Theme) => ({
+  inputRoot: {
+    lineHeight: 'inherit',
+    fontSize: 'inherit',
+  },
+  formControlRoot: {
+  },
+});
+
 export interface ITimeFieldProps {
-  visible?     : boolean;
-  disabled?    : boolean;
-  error?       : string;
-  value?       : number;
-  label?       : string;
-  align?       : TextAlignment;
-  placeholder? : string;
-  rounding?    : number;
+  visible?       : boolean;
+  disabled?      : boolean;
+  error?         : string;
+  value?         : number;
+  label?         : string;
+  align?         : TextAlignment;
+  placeholder?   : string;
+  rounding?      : number;
+  startAdornment?: JSX.Element;
+  endAdornment?  : JSX.Element;
+
   onValueChange: (value?: number) => void;
 }
 
@@ -128,19 +143,21 @@ export interface ITimeState {
   text: string;
 }
 
-export default class TimeInputField extends React.Component<TextFieldProps & ITimeFieldProps, ITimeState> {
+type TimeFieldProps = WithStyle<ReturnType<typeof styles>, TextFieldProps & ITimeFieldProps>;
+
+class TimeInputField extends React.Component<TimeFieldProps, ITimeState> {
   validator: TimeValidator;
-  constructor(props: TextFieldProps & ITimeFieldProps) {
+  constructor(props: TimeFieldProps) {
     super(props);
     this.validator = new TimeValidator(props.rounding);
     this.state     = this._valueToSet(props.value);
   }
 
-  componentWillReceiveProps (nextProps: ITimeFieldProps) {
+  componentWillReceiveProps (nextProps: TimeFieldProps) {
     this.setValue(nextProps.value);
   }
 
-  shouldComponentUpdate(nextProps: ITimeFieldProps, nextState: ITimeState) {
+  shouldComponentUpdate(nextProps: TimeFieldProps, nextState: ITimeState) {
     return (
       (nextState.text !== this.state.text) ||
       (nextProps.disabled !== this.props.disabled) ||
@@ -172,8 +189,14 @@ export default class TimeInputField extends React.Component<TextFieldProps & ITi
     if (visible === false) {
       return null;
     }
+
+    const startAdornment = this.props.startAdornment ? <InputAdornment position='start'>{this.props.startAdornment}</InputAdornment> : undefined;
+    const endAdornment   = this.props.endAdornment ? <InputAdornment position='end'>{this.props.endAdornment}</InputAdornment> : undefined;
+
     return (
       <TextField
+        className={this.props.className}
+        classes={{root: this.props.classes.formControlRoot}}
         disabled={disabled}
         error={!disabled && (!!error || (!!this.state.text && !this.state.isValid))}
         value={this.state.text}
@@ -183,7 +206,10 @@ export default class TimeInputField extends React.Component<TextFieldProps & ITi
         onBlur={this.handleBlur}
         placeholder={placeholder}
         inputProps={{autoFocus: this.props.autoFocus, style: {textAlign: this.props.align || 'left'}}}
+        InputProps={{startAdornment: startAdornment, endAdornment: endAdornment, classes: {root: this.props.classes.inputRoot}}}
         InputLabelProps={{shrink: true}}
       />);
   }
 }
+
+export default withStyles(styles, TimeInputField);

@@ -54,7 +54,6 @@ export default class Column extends React.PureComponent<IColumnCellProps> {
   }
 
   get value(): string {
-    if (this.props.cell.column.map) return this.props.cell.column.map(this.props.cell.value);
     return this.props.cell.value;
   }
 
@@ -73,7 +72,7 @@ export default class Column extends React.PureComponent<IColumnCellProps> {
         style.fontStyle = 'italic';
       }
 
-      if (this.column.sort) {
+      if (this.column.canSort && this.column.sort) {
         if (cls) {
           cls += ' sort ' + this.column.sort;
         } else {
@@ -83,7 +82,7 @@ export default class Column extends React.PureComponent<IColumnCellProps> {
 
       return (
         <th
-          onMouseDown={this.handleSort}
+          onMouseDown={this.column.canSort ? this.handleSort : undefined}
           colSpan={this.props.cell.colSpan}
           ref={(element) => this.node = element as HTMLTableHeaderCellElement}
           rowSpan={this.props.cell.rowSpan}
