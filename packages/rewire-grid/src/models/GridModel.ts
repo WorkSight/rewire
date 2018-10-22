@@ -198,46 +198,77 @@ class GridModel implements IGrid, IDisposable {
     return cell;
   }
 
-  adjacentTopCell(cell: ICell): ICell | undefined {
-    let adjacentTopCell = this.cellByPos(cell.rowPosition - 1, cell.columnPosition);
+  adjacentTopCell(cell: ICell, onlySelectable: boolean = false): ICell | undefined {
+    let adjacentTopCell: ICell | undefined;
+    let i = 1;
+    do {
+      adjacentTopCell = this.cellByPos(cell.rowPosition - i++, cell.columnPosition);
+    } while (onlySelectable && adjacentTopCell && (!adjacentTopCell.row.visible || !adjacentTopCell.enabled || adjacentTopCell.column.fixed || !adjacentTopCell.column.visible));
+
     if (adjacentTopCell && adjacentTopCell.colSpan === 0) {
-      adjacentTopCell = this.adjacentLeftCell(adjacentTopCell);
+      adjacentTopCell = this.adjacentLeftCell(adjacentTopCell, onlySelectable);
     }
 
-    let sameGroup = !!adjacentTopCell && (adjacentTopCell.row.parentRow && adjacentTopCell.row.parentRow.id) === (cell.row.parentRow && cell.row.parentRow.id);
-
-    return sameGroup ? adjacentTopCell : undefined;
+    return adjacentTopCell;
   }
 
-  adjacentRightCell(cell: ICell): ICell | undefined {
+  adjacentRightCell(cell: ICell, onlySelectable: boolean = false): ICell | undefined {
     let adjacentRightCell: ICell | undefined;
     let i = 1;
     do {
       adjacentRightCell = this.cellByPos(cell.rowPosition, cell.columnPosition + i++);
-    } while (adjacentRightCell && (!adjacentRightCell.column.visible || adjacentRightCell.colSpan === 0));
+    } while (adjacentRightCell && (!adjacentRightCell.column.visible || adjacentRightCell.colSpan === 0 || (onlySelectable && (adjacentRightCell.column.fixed || !adjacentRightCell.enabled))));
 
     return adjacentRightCell;
   }
 
-  adjacentBottomCell(cell: ICell): ICell | undefined {
-    let adjacentBottomCell = this.cellByPos(cell.rowPosition + 1, cell.columnPosition);
+  adjacentBottomCell(cell: ICell, onlySelectable: boolean = false): ICell | undefined {
+    let adjacentBottomCell: ICell | undefined;
+    let i = 1;
+    do {
+      adjacentBottomCell = this.cellByPos(cell.rowPosition + i++, cell.columnPosition);
+    } while (onlySelectable && adjacentBottomCell && (!adjacentBottomCell.row.visible || !adjacentBottomCell.enabled || adjacentBottomCell.column.fixed || !adjacentBottomCell.column.visible));
+
     if (adjacentBottomCell && adjacentBottomCell.colSpan === 0) {
-      adjacentBottomCell = this.adjacentLeftCell(adjacentBottomCell);
+      adjacentBottomCell = this.adjacentLeftCell(adjacentBottomCell, onlySelectable);
     }
 
-    let sameGroup = !!adjacentBottomCell && (adjacentBottomCell.row.parentRow && adjacentBottomCell.row.parentRow.id) === (cell.row.parentRow && cell.row.parentRow.id);
-
-    return sameGroup ? adjacentBottomCell : undefined;
+    return adjacentBottomCell;
   }
 
-  adjacentLeftCell(cell: ICell): ICell | undefined {
+  adjacentLeftCell(cell: ICell, onlySelectable: boolean = false): ICell | undefined {
     let adjacentLeftCell: ICell | undefined;
     let i = 1;
     do {
       adjacentLeftCell = this.cellByPos(cell.rowPosition, cell.columnPosition - i++);
-    } while (adjacentLeftCell && (!adjacentLeftCell.column.visible || adjacentLeftCell.colSpan === 0));
+    } while (adjacentLeftCell && (!adjacentLeftCell.column.visible || adjacentLeftCell.colSpan === 0 || (onlySelectable && (adjacentLeftCell.column.fixed || !adjacentLeftCell.enabled))));
 
     return adjacentLeftCell;
+  }
+
+  nextCell(cell: ICell, onlySelectable: boolean = false): ICell | undefined {
+    let nextCell = this.adjacentRightCell(cell, onlySelectable);
+    if (!nextCell) {
+      nextCell = this.cellByPos(cell.rowPosition + 1, 0);
+      if (nextCell && (!nextCell.column.visible || nextCell.colSpan === 0 || (onlySelectable && (nextCell.column.fixed || !nextCell.enabled)))) {
+        nextCell = this.adjacentRightCell(nextCell, onlySelectable);
+      }
+    }
+
+    return nextCell;
+  }
+
+  previousCell(cell: ICell, onlySelectable: boolean = false): ICell | undefined {
+    let prevCell = this.adjacentLeftCell(cell, onlySelectable);
+    if (!prevCell) {
+      let prevRow = this.rowByPos(cell.rowPosition - 1);
+      prevCell    = prevRow && this.cellByPos(prevRow.position, prevRow.cellsByColumnPosition.length - 1);
+      if (prevCell && (!prevCell.column.visible || prevCell.colSpan === 0 || (onlySelectable && (prevCell.column.fixed || !prevCell.enabled)))) {
+        prevCell = this.adjacentLeftCell(prevCell, onlySelectable);
+      }
+    }
+
+    return prevCell;
   }
 
   row(rowId: string): IRow | undefined {
@@ -639,7 +670,6 @@ class GridModel implements IGrid, IDisposable {
     // let cellGroupRow = cells[0].row.parentRow.parentRow;
     // let x = firstGroupRow === cellGroupRow;
     this.editCell(undefined);
-    let currentCellsDiff       = currentCells.filter(currCell => !cells.includes(currCell));
     let rowsToSelect: IRow[]   = [];
     let cellsToSelect: ICell[] = [];
 
@@ -668,6 +698,8 @@ class GridModel implements IGrid, IDisposable {
       }
     });
 
+    let currentCellsDiff = currentCells.filter(currCell => !cellsToSelect.includes(currCell));
+
     if (append) {
       rowsToSelect  = rowsToSelect.concat(this.selectedRows);
       cellsToSelect = cellsToSelect.concat(currentCellsDiff);
@@ -692,7 +724,8 @@ class GridModel implements IGrid, IDisposable {
   updateCellSelectionProperties(cellsToSelect: ICell[]) {
     cellsToSelect.forEach(cell => {
       let adjacentTopCell = this.adjacentTopCell(cell);
-      if (!adjacentTopCell || !adjacentTopCell.selected) {
+      let sameGroupTop    = !!adjacentTopCell && (adjacentTopCell.row.parentRow && adjacentTopCell.row.parentRow.id) === (cell.row.parentRow && cell.row.parentRow.id);
+      if (!adjacentTopCell || !sameGroupTop || !adjacentTopCell.selected) {
         cell.isTopMostSelection = true;
       } else {
         cell.isTopMostSelection = false;
@@ -706,7 +739,8 @@ class GridModel implements IGrid, IDisposable {
       }
 
       let adjacentBottomCell = this.adjacentBottomCell(cell);
-      if (!adjacentBottomCell || !adjacentBottomCell.selected) {
+      let sameGroupBottom    = !!adjacentBottomCell && (adjacentBottomCell.row.parentRow && adjacentBottomCell.row.parentRow.id) === (cell.row.parentRow && cell.row.parentRow.id);
+      if (!adjacentBottomCell || !sameGroupBottom || !adjacentBottomCell.selected) {
         cell.isBottomMostSelection = true;
       } else {
         cell.isBottomMostSelection = false;

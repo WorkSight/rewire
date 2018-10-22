@@ -21,11 +21,11 @@ export class CellModel implements ICell {
   row                  : IRow;
   column               : IColumn;
   grid                 : IGrid;
-  error?               : IError;
   rowSpan              : number;
   colSpan              : number;
   selected             : boolean;
   value                : any;
+  error?               : IError;
   editing              : boolean;
   options              : any;
   isTopMostSelection   : boolean;
@@ -55,11 +55,11 @@ export class CellModel implements ICell {
     this.row                   = row;
     this.column                = column;
     this.grid                  = row.grid;
-    this.error                 = column.validator ? column.validator(this.value) : undefined;
     this.rowSpan               = 1;
     this.colSpan               = 1;
     this.selected              = false;
     this.value                 = value;
+    this.error                 = column.validator ? column.validator(this.value) : undefined;
     this.editing               = false;
     this.options               = undefined;
     this.isTopMostSelection    = false;

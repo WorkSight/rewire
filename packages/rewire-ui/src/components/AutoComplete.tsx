@@ -177,11 +177,17 @@ class AutoComplete<T> extends React.Component<IAutoCompleteProps<T>, any> {
 
   renderSuggestionsContainer = (options: any) => {
     const { getMenuProps, isOpen, suggestionsContainerNode, children, classes, usePopper } = options;
+    const menuProps = {
+      onKeyPress: this.handleMenuKeyPress,
+      onMouseDown: this.handleMenuMouseDown,
+      onClick: this.handleMenuClick,
+      onDoubleClick: this.handleMenuDoubleClick,
+    };
 
     if (usePopper) {
       return (
         <Popper open={isOpen} placement='bottom-start' anchorEl={suggestionsContainerNode} className={classes.popper}>
-          <div {...(isOpen ? getMenuProps({}, {suppressRefError: true}) : {})}>
+          <div {...(isOpen ? getMenuProps({}, {suppressRefError: true}) : {})} {...menuProps}>
             <Paper>
               {children}
             </Paper>
@@ -235,7 +241,33 @@ class AutoComplete<T> extends React.Component<IAutoCompleteProps<T>, any> {
           });
         }
         break;
+      case 38:
+      case 40:
+        if (this.state.suggestions.length > 0) {
+          event.stopPropagation();
+        }
+        break;
     }
+  }
+
+  handleMenuKeyPress = (event: React.KeyboardEvent<any>) => {
+    event.stopPropagation();
+    event.preventDefault();
+  }
+
+  handleMenuMouseDown = (event: React.MouseEvent<any>) => {
+    event.stopPropagation();
+    event.preventDefault();
+  }
+
+  handleMenuClick = (event: React.MouseEvent<any>) => {
+    event.stopPropagation();
+    event.preventDefault();
+  }
+
+  handleMenuDoubleClick = (event: React.MouseEvent<any>) => {
+    event.stopPropagation();
+    event.preventDefault();
   }
 
   componentWillReceiveProps (nextProps: ICustomProps<T>) {

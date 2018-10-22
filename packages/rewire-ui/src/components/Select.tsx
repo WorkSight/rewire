@@ -33,6 +33,9 @@ const styles = (theme: Theme) => ({
     display: 'flex',
     alignItems: 'center',
     flex: 1,
+    '&:focus': {
+      backgroundColor: 'transparent',
+    }
   },
   selectMenuPaper: {
   },
@@ -95,6 +98,43 @@ class SelectInternal<T> extends React.Component<SelectProps<T>, any> {
     }
   }
 
+  handleMenuKeyDown = (event: React.KeyboardEvent<any>) => {
+    switch (event.keyCode) {
+      case 37:
+      case 38:
+      case 39:
+      case 40:
+        event.stopPropagation();
+        event.preventDefault();
+        break;
+    }
+  }
+
+  handleMenuKeyPress = (event: React.KeyboardEvent<any>) => {
+    event.stopPropagation();
+    event.preventDefault();
+  }
+
+  handleMenuMouseEnter = (event: React.MouseEvent<any>) => {
+    event.stopPropagation();
+    event.preventDefault();
+  }
+
+  handleMenuMouseDown = (event: React.MouseEvent<any>) => {
+    event.stopPropagation();
+    event.preventDefault();
+  }
+
+  handleMenuClick = (event: React.MouseEvent<any>) => {
+    event.stopPropagation();
+    event.preventDefault();
+  }
+
+  handleMenuDoubleClick = (event: React.MouseEvent<any>) => {
+    event.stopPropagation();
+    event.preventDefault();
+  }
+
   handleChanged = (event: ChangeEvent<any>) => {
     if (this.props.onSelectItem) {
       this.props.onSelectItem(this.state.suggestions.find((v: any) => event.target.value === this.map(v)));
@@ -115,6 +155,15 @@ class SelectInternal<T> extends React.Component<SelectProps<T>, any> {
     const v              = this.map(value);
     const startAdornment = this.props.startAdornment ? <InputAdornment position='start'>{this.props.startAdornment}</InputAdornment> : undefined;
     const endAdornment   = this.props.endAdornment ? <InputAdornment position='end'>{this.props.endAdornment}</InputAdornment> : undefined;
+    const menuListProps  = {
+      onKeyDown: this.handleMenuKeyDown,
+      onKeyPress: this.handleMenuKeyPress,
+      onMouseEnter: this.handleMenuMouseEnter,
+      onMouseDown: this.handleMenuMouseDown,
+      onClick: this.handleMenuClick,
+      onDoubleClick: this.handleMenuDoubleClick,
+    };
+
     return (
     <Select
       disabled={disabled}
@@ -123,8 +172,8 @@ class SelectInternal<T> extends React.Component<SelectProps<T>, any> {
       className={cls}
       style={this.props.style}
       classes={{root: this.props.classes.selectRoot, select: this.props.classes.select}}
-      MenuProps={{classes: {paper: this.props.classes.selectMenuPaper}}}
-      input={<Input startAdornment={startAdornment} endAdornment={endAdornment} classes={{root: this.props.classes.inputRoot}}/>}
+      MenuProps={{classes: {paper: this.props.classes.selectMenuPaper}, MenuListProps: menuListProps}}
+      input={<Input startAdornment={startAdornment} endAdornment={endAdornment} autoFocus={autoFocus} classes={{root: this.props.classes.inputRoot}}/>}
       renderValue={(p) => <span>{v}</span>}>{
         this.state.suggestions.map((suggestion: any, index: number) => {
           const displayName = this.map(suggestion);

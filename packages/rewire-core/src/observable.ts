@@ -11,6 +11,7 @@ export const observe: O = S;
 export const root       = S.root;
 export const freeze     = S.freeze;
 export const property   = S.data;
+export const sample     = S.sample;
 
 export function is_proxy(value: ObjectType) {
   return ((value !== undefined) && (value !== null) && !!value[proxyProperty]);

@@ -11,7 +11,7 @@ import {
   property,
   DataSignal
 } from 'rewire-core';
-import {KeyHandler}              from 'rewire-ui';
+import {GridKeyHandler}          from './GridKeyboardNavigation';
 import {debounce}                from 'rewire-common';
 import Color                     from 'color';
 import {MuiThemeProvider, Theme} from '@material-ui/core/styles';
@@ -345,7 +345,6 @@ const GridInternal = withStyles(styles, class extends React.PureComponent<GridPr
 
   handleMouseUp = (evt: Event) => {
     this.grid.isMouseDown = false;
-    this.grid.startCell   = undefined;
   }
 
   handleScroll = (evt: React.UIEvent<any>) => {
@@ -490,16 +489,16 @@ const GridInternal = withStyles(styles, class extends React.PureComponent<GridPr
       <Observe render={() => (
         <div className={classNames('grid-scroll', this.props.classes.gridScroll)} onScroll={this.handleScroll}>
           {this.renderFixedColumnData()}
-          <KeyHandler>{
+          <GridKeyHandler>{
             (keyboard) => (
-              <div className={classNames('grid-content', this.props.classes.gridContent)} onKeyDown={keyboard.handleKeyDown2} ref={(c: HTMLDivElement) => (keyboard.element = c, this._gridContent(c))}>
+              <div className={classNames('grid-content', this.props.classes.gridContent)} onKeyDown={keyboard.handleKeyDown} ref={(c: HTMLDivElement) => (keyboard.element = c, this._gridContent(c))}>
               <table role='grid' style={{width: this.props.grid.width}}>
                 {this.renderColumnGroups(false)}
                 <BodyRenderer grid={this.props.grid} gridContent={this._gridContent} scrollY={this.scrollY} rowElements={rowElements} fixedRowElements={fixedRowElements} columns={this.props.grid.dataColumns} />
               </table>
             </div>
             )}
-          </KeyHandler>
+          </GridKeyHandler>
         </div>
       )} />
     );
