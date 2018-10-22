@@ -146,7 +146,7 @@ const Row = withStyles(styles, class extends PureComponent<RowProps, {}> {
 
   renderRow() {
     let className = cc([this.props.className, {selected: this.props.row.selected}, this.props.row.cls, 'tabrow']);
-    className     = classNames(className, this.props.row.visible ? this.props.classes.visible : this.props.classes.notVisible);
+    className     = classNames(className, this.props.row.visible ? this.props.classes.visible : this.props.classes.notVisible + ' notVisible');
 
     let ref: ((node: any) => any) | undefined = undefined;
     let rElements = this.props.isFixedRow ? this.props.fixedRowElements : this.props.rowElements;

@@ -107,7 +107,7 @@ export class RowModel implements IRow, IDisposable {
       }
 
       let cell = this.cells[column.name];
-      if (previousCell && cell && (previousValue === cell.value)) {
+      if (previousCell && cell && (previousValue === cell.value) && (previousCell.column.type === cell.column.type)) {
         colSpan++;
         cell.colSpan = 0;
         continue;

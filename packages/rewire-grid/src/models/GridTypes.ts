@@ -57,10 +57,12 @@ export interface IGrid extends IRows, IDisposable {
   cell(rowId: string, column: string): ICell | undefined;
   cellByPos(rowPosition: number, columnPosition: number): ICell | undefined;
   getCellsByRange(colStart: number, rowStart: number, colEnd: number, rowEnd: number, allowCollapsed?: boolean): ICell[];
-  adjacentTopCell(cell: ICell): ICell | undefined;
-  adjacentRightCell(cell: ICell): ICell | undefined;
-  adjacentBottomCell(cell: ICell): ICell | undefined;
-  adjacentLeftCell(cell: ICell): ICell | undefined;
+  adjacentTopCell(cell: ICell, onlySelectable?: boolean): ICell | undefined;
+  adjacentRightCell(cell: ICell, onlySelectable?: boolean): ICell | undefined;
+  adjacentBottomCell(cell: ICell, onlySelectable?: boolean): ICell | undefined;
+  adjacentLeftCell(cell: ICell, onlySelectable?: boolean): ICell | undefined;
+  nextCell(cell: ICell, onlySelectable?: boolean): ICell | undefined;
+  previousCell(cell: ICell, onlySelectable?: boolean): ICell | undefined;
   row(rowId: string): IRow | undefined;
   rowByPos(rowPosition: number): IRow | undefined;
   getRowsByRange(rowStart: number, rowEnd: number, allowCollapsed?: boolean): IRow[];
@@ -158,17 +160,17 @@ export interface ICellProperties {
 }
 
 export interface IColumn extends ICellProperties {
-  name          : string;
-  type          : EditorType;
-  title?        : string;
-  width?        : string;
-  fixed         : boolean;
-  visible       : boolean;
-  position      : number;
-  readonly sort?: SortDirection;
-  canSort?      : boolean;
-  options?      : any;
-  editor?       : React.SFC<any>;
+  name    : string;
+  type    : EditorType;
+  title?  : string;
+  width?  : string;
+  fixed   : boolean;
+  visible : boolean;
+  position: number;
+  sort?   : SortDirection;
+  canSort?: boolean;
+  options?: any;
+  editor? : React.SFC<any>;
 
   validator?(value: any): IError | undefined;
   map?(value: any): string;

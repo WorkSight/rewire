@@ -1,8 +1,9 @@
 import * as React from 'react';
-const focusedElementSelector = '[tabindex="0"]:not([style*="display: none"]),input:not([type="hidden"]):not([disabled]):not([style*="display: none"])';
-const rowsSelector           = '.tabrow:not([type="hidden"]):not([disabled])';
+const focusedElementSelectorCell = 'td[tabindex="0"]:not([style*="display: none"]):not(.notVisible):not(.disabled):not(.fixed)';
+const focusedElementSelector     = '[tabindex="0"]:not([style*="display: none"]):not(.notVisible):not(.disabled):not(.fixed),input:not([type="hidden"]):not([disabled]):not([style*="display: none"])';
+const rowsSelector               = '.tabrow:not([type="hidden"]):not(.notVisible):not([disabled])';
 
-export default class KeyboardNavigation {
+export default class GridKeyboardNavigation {
   private _element: HTMLElement;
   private _fields?: HTMLElement[];
   private _rows?: HTMLElement[];
@@ -67,7 +68,7 @@ export default class KeyboardNavigation {
       return false;
     }
 
-    let index  = this.fields.indexOf(ctl);
+    let index = this.fields.indexOf(ctl);
     if (index < 0) {
       index = this.fields.indexOf(ctl.closest(focusedElementSelector) as HTMLElement);
       if (index < 0) {
@@ -76,10 +77,10 @@ export default class KeyboardNavigation {
     }
 
     index = index + direction;
+
     if (index < 0) {
       index = 0;
     }
-
     if (index >= this.fields.length) {
       index = this.fields.length - 1;
     }
@@ -125,12 +126,12 @@ export default class KeyboardNavigation {
     }
 
     let currentRowIdx = this.rows.indexOf(row);
-    let currentColIdx = this.indexOf(row.querySelectorAll(focusedElementSelector), ctl);
-
+    let currentColIdx = this.indexOf(row.querySelectorAll(focusedElementSelectorCell), ctl);
+    if (currentColIdx < 0) {
+      currentColIdx = this.indexOf(row.querySelectorAll(focusedElementSelector), ctl) - 1;
+    }
     if (currentColIdx < 0) {
       return {row: -1, column: -1};
-      // field = $(ctl).parents(KeyboardNavigation.focusableElements);
-      // currentColIdx = fields.index(field);
     }
 
     return {row: currentRowIdx, column: currentColIdx};
@@ -171,103 +172,42 @@ export default class KeyboardNavigation {
       return false;
     }
 
+    const currRowFields = this.getRowFields(this.rows[row - direction]);
     const nextRowFields = this.getRowFields(this.rows[row]);
+    let currColumnPos   = currRowFields[column]['dataset']['columnPosition'];
+    column              = Math.min(column, nextRowFields.length - 1);
+    let newColumnPos    = nextRowFields[column]['dataset']['columnPosition'];
+
+    if (currColumnPos && newColumnPos) {
+      let currColumnPosNum = Number.parseInt(currColumnPos);
+      let newColumnPosNum  = Number.parseInt(newColumnPos);
+
+      if (newColumnPosNum > currColumnPosNum) {
+        do {
+          column--;
+          newColumnPos    = nextRowFields[column]['dataset']['columnPosition'];
+          newColumnPosNum = newColumnPos && Number.parseInt(newColumnPos) || 0;
+        } while (newColumnPos && newColumnPosNum > currColumnPosNum);
+      } else if (newColumnPosNum < currColumnPosNum) {
+        do {
+          column++;
+          newColumnPos    = nextRowFields[column]['dataset']['columnPosition'];
+          newColumnPosNum = newColumnPos && Number.parseInt(newColumnPos) || 0;
+        } while (newColumnPos && newColumnPosNum < currColumnPosNum);
+      }
+    }
+
+    if (column < 0) {
+      column = 0;
+    }
     if (column > nextRowFields.length) {
       column = nextRowFields.length - 1;
     }
+
     return this.setFocus(nextRowFields[column]);
   }
 
   handleKeyDown = (evt: React.KeyboardEvent<HTMLElement>) => {
-    if (!this._element) return;
-    if (evt.key === 'Enter' && evt.shiftKey) {
-      evt.key = 'ShiftEnter';
-    }
-    if (evt.key === 'Enter' && evt.ctrlKey) {
-      evt.key = 'Ctrl' + evt.key;
-    }
-
-    switch (evt.key) {
-      case 'ArrowRight':
-        if (this.moveToNextControl(evt.target as HTMLElement, 1)) {
-          evt.preventDefault();
-        }
-        evt.stopPropagation();
-        return;
-
-      case 'ArrowLeft':
-        if (this.moveToNextControl(evt.target as HTMLElement, -1)) {
-          evt.preventDefault();
-        }
-        evt.stopPropagation();
-        return;
-
-      case 'ArrowUp':
-      case 'ShiftEnter':
-        this.moveToNextRow(evt.target as HTMLElement, -1);
-        evt.preventDefault();
-        evt.stopPropagation();
-        return;
-
-      case 'ArrowDown':
-      case 'Enter':
-        this.moveToNextRow(evt.target as HTMLElement, 1);
-        evt.preventDefault();
-        evt.stopPropagation();
-        return;
-
-      default:
-        return;
-    }
-  }
-
-  handleDialogKeyDown = (evt: React.KeyboardEvent<HTMLElement>) => {
-    if (!this._element) return;
-    if (evt.shiftKey) {
-      evt.key = 'Shift' + evt.key;
-    }
-
-    if (evt.ctrlKey) {
-      evt.key = 'Ctrl' + evt.key;
-    }
-
-    switch (evt.key) {
-      case 'Tab':
-      case 'ArrowRight':
-        if (this.moveToNextControl(evt.target as HTMLElement, 1)) {
-          evt.preventDefault();
-        }
-        evt.stopPropagation();
-        return;
-
-      case 'ShiftTab':
-      case 'ArrowLeft':
-        if (this.moveToNextControl(evt.target as HTMLElement, -1)) {
-          evt.preventDefault();
-        }
-        evt.stopPropagation();
-        return;
-
-      case 'ArrowUp':
-      case 'ShiftEnter':
-        this.moveToNextRow(evt.target as HTMLElement, -1);
-        evt.preventDefault();
-        evt.stopPropagation();
-        return;
-
-      case 'ArrowDown':
-      case 'Enter':
-        this.moveToNextRow(evt.target as HTMLElement, 1);
-        evt.preventDefault();
-        evt.stopPropagation();
-        return;
-
-      default:
-        return;
-    }
-  }
-
-  handleKeyDown2 = (evt: React.KeyboardEvent<HTMLElement>) => {
     if (!this._element) return;
     if (evt.shiftKey) {
       evt.key = 'Shift' + evt.key;
@@ -302,6 +242,7 @@ export default class KeyboardNavigation {
         return;
 
       case 'ArrowUp':
+      case 'ShiftArrowUp':
         if (this.moveToNextRow(evt.target as HTMLElement, -1)) {
           evt.preventDefault();
         }
@@ -310,6 +251,7 @@ export default class KeyboardNavigation {
         return true;
 
       case 'ArrowDown':
+      case 'ShiftArrowDown':
         if (this.moveToNextRow(evt.target as HTMLElement, 1)) {
           evt.preventDefault();
         }
@@ -318,6 +260,8 @@ export default class KeyboardNavigation {
         return true;
 
       case 'ArrowLeft':
+      case 'ShiftTab':
+      case 'ShiftArrowLeft':
         if (this.moveToNextControl(evt.target as HTMLElement, -1)) {
           evt.preventDefault();
         }
@@ -325,6 +269,8 @@ export default class KeyboardNavigation {
         return;
 
         case 'ArrowRight':
+        case 'Tab':
+        case 'ShiftArrowRight':
         if (this.moveToNextControl(evt.target as HTMLElement, 1)) {
           evt.preventDefault();
         }
@@ -337,12 +283,8 @@ export default class KeyboardNavigation {
   }
 }
 
-export class KeyHandler extends React.Component<{children: (keyboard: KeyboardNavigation) => JSX.Element}> {
-  private _keyboard = new KeyboardNavigation();
-
-  // shouldComponentUpdate() {
-  //   return false;
-  // }
+export class GridKeyHandler extends React.Component<{children: (keyboard: GridKeyboardNavigation) => JSX.Element}> {
+  private _keyboard = new GridKeyboardNavigation();
 
   componentWillUnmount() {
     this._keyboard.element = undefined;

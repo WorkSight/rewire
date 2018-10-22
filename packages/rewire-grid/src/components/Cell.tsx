@@ -1,5 +1,6 @@
 import {
   IGrid,
+  IRow,
   IColumn,
   ICell,
   ErrorSeverity,
@@ -116,20 +117,20 @@ export interface ICellProps {
 type CellProps = WithStyle<ReturnType<typeof styles>, ICellProps>;
 
 class Cell extends React.PureComponent<CellProps, {}> {
-  cell:   ICell;
+  cell: ICell;
+  row: IRow;
   column: IColumn;
-  grid:   IGrid;
+  grid: IGrid;
   keyForEdit?: string;
   element: HTMLTableCellElement;
-  fromMouseEvent: boolean;
 
   constructor(props: CellProps) {
     super(props);
-    this.cell           = props.cell;
-    this.column         = this.cell.column;
-    this.grid           = this.cell.grid;
-    this.keyForEdit     = undefined;
-    this.fromMouseEvent = false;
+    this.cell       = props.cell;
+    this.row        = this.cell.row;
+    this.column     = this.cell.column;
+    this.grid       = this.cell.grid;
+    this.keyForEdit = undefined;
   }
 
   componentDidMount() {
@@ -180,9 +181,7 @@ class Cell extends React.PureComponent<CellProps, {}> {
   }
 
   setFocusFromMouse(set: boolean) {
-    this.fromMouseEvent = true;
     this.setFocus(set);
-    this.fromMouseEvent = false;
   }
 
   handleDoubleClick = (evt: React.MouseEvent<any>) => {
@@ -234,7 +233,7 @@ class Cell extends React.PureComponent<CellProps, {}> {
 
       case 'Enter':
         this.grid.editCell(undefined);
-        if (this.element) this.element.focus();
+          if (this.element) this.element.focus();
         break;
 
       case 'F2':
@@ -243,6 +242,102 @@ class Cell extends React.PureComponent<CellProps, {}> {
           this.grid.editCell(this.cell);
         }
         break;
+
+      case 'ArrowUp':
+        let upCell = this.grid.adjacentTopCell(this.cell, true);
+        if (!upCell) {
+          break;
+        }
+        if (!evt.shiftKey || !this.grid.multiSelect) {
+          this.grid.startCell = upCell;
+          this.grid.selectCells([upCell]);
+        } else {
+          // keyboard multi-select using shift key
+          if (!this.grid.startCell) {
+            this.grid.startCell = this.cell;
+          }
+          this.grid.selectCellsTo(upCell);
+        }
+        return;
+
+      case 'ArrowDown':
+        let downCell = this.grid.adjacentBottomCell(this.cell, true);
+        if (!downCell) {
+          break;
+        }
+        if (!evt.shiftKey || !this.grid.multiSelect) {
+          this.grid.startCell = downCell;
+          this.grid.selectCells([downCell]);
+        } else {
+          // keyboard multi-select using shift key
+          if (!this.grid.startCell) {
+            this.grid.startCell = this.cell;
+          }
+          this.grid.selectCellsTo(downCell);
+        }
+        return;
+
+      case 'ArrowLeft':
+        let prevCell: ICell | undefined;
+        if (!evt.shiftKey || !this.grid.multiSelect) {
+          prevCell = this.grid.previousCell(this.cell, true);
+          if (!prevCell) {
+            break;
+          }
+          this.grid.startCell = prevCell;
+          this.grid.selectCells([prevCell]);
+        } else {
+          // keyboard multi-select using shift key
+          prevCell = this.grid.adjacentLeftCell(this.cell, true);
+          if (!prevCell) {
+            break;
+          }
+          if (!this.grid.startCell) {
+            this.grid.startCell = this.cell;
+          }
+          this.grid.selectCellsTo(prevCell);
+        }
+        return;
+
+      case 'ArrowRight':
+        let nextCell: ICell | undefined;
+        if (!evt.shiftKey || !this.grid.multiSelect) {
+          nextCell = this.grid.nextCell(this.cell, true);
+          if (!nextCell) {
+            break;
+          }
+          this.grid.startCell = nextCell;
+          this.grid.selectCells([nextCell]);
+        } else {
+          // keyboard multi-select using shift key
+          nextCell = this.grid.adjacentRightCell(this.cell, true);
+          if (!nextCell) {
+            break;
+          }
+          if (!this.grid.startCell) {
+            this.grid.startCell = this.cell;
+          }
+          this.grid.selectCellsTo(nextCell);
+        }
+        return;
+
+      case 'Tab':
+        if (!evt.shiftKey) {
+          let nextCell = this.grid.nextCell(this.cell, true);
+          if (!nextCell) {
+            break;
+          }
+          this.grid.startCell = nextCell;
+          this.grid.selectCells([nextCell]);
+        } else {
+          let prevCell = this.grid.previousCell(this.cell, true);
+          if (!prevCell) {
+            break;
+          }
+          this.grid.startCell = prevCell;
+          this.grid.selectCells([prevCell]);
+        }
+        return;
 
       default:
         return;
@@ -258,7 +353,9 @@ class Cell extends React.PureComponent<CellProps, {}> {
     }
 
     this.grid.isMouseDown = true;
-    this.grid.startCell   = this.cell;
+    if (!evt.shiftKey || !this.grid.startCell) {
+      this.grid.startCell = this.cell;
+    }
 
     evt.preventDefault();
     evt.stopPropagation();
@@ -289,7 +386,6 @@ class Cell extends React.PureComponent<CellProps, {}> {
           this.grid.selectCells([this.cell], false, true);
         }
       } else if (evt.shiftKey) {
-        this.grid.startCell = selectedCells[0];
         this.grid.selectCellsTo(this.cell);
       }
     } else {
@@ -301,10 +397,9 @@ class Cell extends React.PureComponent<CellProps, {}> {
   }
 
   handleFocus = (evt: React.FocusEvent<any>) => {
-    if (this.cell.editing || !this.cell.enabled || this.column.fixed || this.fromMouseEvent) {
-      return;
-    }
-    this.grid.selectCells([this.cell]);
+    // if (this.grid.selectedCells.length <= 0) {
+    //   this.grid.selectCells([this.cell]);
+    // }
     evt.stopPropagation();
   }
 
@@ -410,6 +505,7 @@ class Cell extends React.PureComponent<CellProps, {}> {
   onValueChange = (value: any) => {
     this.cell.value = value;
     this.grid.editCell(undefined);
+    if ((this.column.type === 'auto-complete' || this.column.type === 'select' || this.column.type === 'checked') && this.element) setTimeout(() => this.element.focus(), 0);
   }
 
   handleTooltip = (evt: React.MouseEvent<HTMLSpanElement>) => {
@@ -484,6 +580,9 @@ class Cell extends React.PureComponent<CellProps, {}> {
         selectedBottomMost : this.cell.isBottomMostSelection,
         selectedLeftMost   : this.cell.isLeftMostSelection,
         edit               : this.cell.editing,
+        disabled           : !this.cell.enabled,
+        fixed              : this.column.fixed,
+        notVisible         : !this.column.visible || !this.row.visible,
       }, cell.cls]);
 
       let tdClasses = classNames(clazz, classes.tableCell);
@@ -537,7 +636,8 @@ class Cell extends React.PureComponent<CellProps, {}> {
           onClick={this.handleClick}
           onMouseDown={this.grid.multiSelect ? this.handleMouseDown : undefined}
           onMouseEnter={this.grid.multiSelect ? this.handleMouseEnter : undefined}
-          className={tdClasses}>
+          className={tdClasses}
+          data-column-position={this.cell.columnPosition}>
             {cellContent}
         </td>
       );

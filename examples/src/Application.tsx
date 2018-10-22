@@ -462,8 +462,8 @@ function createTestGrid(nRows: number, nColumns: number) {
   grid.multiSelect = true;
 
   // sort first by  column7 then by column6
-  grid.addSort(cols[7], 'ascending')
-      .addSort(cols[6], 'descending');
+  grid.addSort(grid.columnByPos(7)!, 'ascending')
+      .addSort(grid.columnByPos(6)!, 'descending');
 
   // test changing colum and cell properties
   setTimeout(() => {
@@ -479,12 +479,12 @@ function createTestGrid(nRows: number, nColumns: number) {
     grid.columnByPos(7).align = 'center';
     grid.columnByPos(6).setEditor({type: 'number', options: {decimals: 3, thousandSeparator: true}});
     grid.clearSelection();
-  }, 5000);
+  }, 2500);
   setTimeout(() => {
     grid.cellByPos(0, 7).align = '';
     grid.cellByPos(0, 7).enabled = false;
     grid.clearSelection();
-  }, 8000);
+  }, 5000);
   grid.cellByPos(0, 5).editable = false;
   grid.cellByPos(0, 6).readOnly = false;
   grid.cellByPos(0, 8).renderer = (cell) => <div>{cell.value + ' Cell'}</div>;
@@ -548,8 +548,8 @@ function createEmployeesGrid() {
   cols.push(createColumn('email',    'Email',    'text'));
   cols.push(createColumn('isActive', 'IsActive', 'checked'));
   cols.push(createColumn('timeColumn', 'Time', 'time'));
-  cols.push(createColumn('autoCompleteColumn', 'Auto Complete', {type: 'auto-complete', options: countries}));
   cols.push(createColumn('selectColumn', 'Select', {type: 'select', options: countries}));
+  cols.push(createColumn('autoCompleteColumn', 'Auto Complete', {type: 'auto-complete', options: countries}));
 
   // add employee rows
   let rows: any[] = [];
@@ -570,7 +570,7 @@ function createEmployeesGrid() {
   let grid = createGrid(rows, cols);
   // sort by employee names
   grid.multiSelect = true;
-  grid.addSort(cols[0], 'ascending');
+  grid.addSort(grid.columnByPos(0)!, 'ascending');
 
   return grid;
 }
