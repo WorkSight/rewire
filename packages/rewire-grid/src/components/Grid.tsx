@@ -210,90 +210,111 @@ export default class Grid extends React.PureComponent<IGridProps> {
   }
 }
 
-const styles = (theme: Theme) => ({
-  leftLabels: {
-    '& tr, & tr.alt': {
-      backgroundColor: theme.palette.leftLabelBackground.main,
-    },
-  },
-  cornerLabels: {
-    borderColor: theme.palette.headerBorder.main,
-    backgroundColor: theme.palette.headerBackground.main,
-  },
-  topLabels: {
-    fontSize: theme.fontSizes.header,
-    color: theme.palette.headerText.main,
-    borderColor: theme.palette.headerBorder.main,
-    backgroundColor: theme.palette.headerBackground.main,
-    '& div.sort': {
-      '&:after': {
-        color: theme.palette.headerText.main,
+const styles = (theme: Theme) => {
+  // firefox consideration for fractional pixels issue
+  let bodyFontSizeDigits = Number.parseFloat(theme.fontSizes.body.replace(/[^\d.-]/g, ''));
+  let bodyFontSizeUnit   = theme.fontSizes.body.replace(/[\d.-]/g, '');
+  if (bodyFontSizeUnit === 'rem') {
+    let rootElement = document.documentElement;
+    if (rootElement) {
+      let rootElementFontSize = window.getComputedStyle(rootElement).getPropertyValue('font-size');
+      bodyFontSizeDigits     *= Number.parseFloat(rootElementFontSize.replace(/[^\d.-]/g, ''));
+    }
+  } else if (bodyFontSizeUnit === 'em') {
+    bodyFontSizeDigits *= theme.typography.fontSize;
+  }
+
+  let cellContainerLineHeight = `${2 * Math.round(bodyFontSizeDigits)}px`;
+
+  let styleObj = {
+    leftLabels: {
+      '& tr, & tr.alt': {
+        backgroundColor: theme.palette.leftLabelBackground.main,
       },
     },
-    '& tr': {
-      height: `calc(2.4 * ${theme.fontSizes.header})`,
-    },
-    '& th': {
+    cornerLabels: {
       borderColor: theme.palette.headerBorder.main,
-      padding: '0px 7px',
+      backgroundColor: theme.palette.headerBackground.main,
     },
-  },
-  wsGrid: {
-    color: theme.palette.gridText.main,
-    borderColor: theme.palette.gridBorder.main,
-    backgroundColor: theme.palette.gridBackground.main,
-    '& tr.selected td, & tr.selected th': {
-      '&.selected': {
-        borderRightColor: theme.palette.gridBorderSelected.main,
-        borderBottomColor: theme.palette.gridBorderSelected.main,
-        backgroundColor: theme.palette.cellSelectedBackground.main,
+    topLabels: {
+      fontSize: theme.fontSizes.header,
+      color: theme.palette.headerText.main,
+      borderColor: theme.palette.headerBorder.main,
+      backgroundColor: theme.palette.headerBackground.main,
+      '& div.sort': {
+        '&:after': {
+          color: theme.palette.headerText.main,
+        },
       },
-      '&.selectedTopMost': {
-        borderTopColor: theme.palette.cellOutline.main,
+      '& tr': {
+        height: `calc(2.4 * ${theme.fontSizes.header})`,
       },
-      '&.selectedRightMost': {
-        borderRightColor: theme.palette.cellOutline.main,
-      },
-      '&.selectedBottomMost': {
-        borderBottomColor: theme.palette.cellOutline.main,
-      },
-      '&.selectedLeftMost': {
-        borderLeftColor: theme.palette.cellOutline.main,
+      '& th': {
+        borderColor: theme.palette.headerBorder.main,
+        padding: '0px 7px',
       },
     },
-    '& td, & .left-labels td.selected': {
-      borderTopColor: 'transparent',
-      borderRightColor: theme.palette.gridBorder.main,
-      borderBottomColor: theme.palette.gridBorder.main,
-      borderLeftColor: 'transparent',
+    wsGrid: {
+      color: theme.palette.gridText.main,
+      borderColor: theme.palette.gridBorder.main,
+      backgroundColor: theme.palette.gridBackground.main,
+      '& tr.selected td, & tr.selected th': {
+        '&.selected': {
+          borderRightColor: theme.palette.gridBorderSelected.main,
+          borderBottomColor: theme.palette.gridBorderSelected.main,
+          backgroundColor: theme.palette.cellSelectedBackground.main,
+        },
+        '&.selectedTopMost': {
+          borderTopColor: theme.palette.cellOutline.main,
+        },
+        '&.selectedRightMost': {
+          borderRightColor: theme.palette.cellOutline.main,
+        },
+        '&.selectedBottomMost': {
+          borderBottomColor: theme.palette.cellOutline.main,
+        },
+        '&.selectedLeftMost': {
+          borderLeftColor: theme.palette.cellOutline.main,
+        },
+      },
+      '& td, & .left-labels td.selected': {
+        borderTopColor: 'transparent',
+        borderRightColor: theme.palette.gridBorder.main,
+        borderBottomColor: theme.palette.gridBorder.main,
+        borderLeftColor: 'transparent',
+        '& .cellContainer': {
+          lineHeight: cellContainerLineHeight,
+        },
+      },
+      '& th': {
+        borderTopColor: 'transparent',
+        borderRightColor: theme.palette.headerBorder.main,
+        borderBottomColor: theme.palette.headerBorder.main,
+        borderLeftColor: 'transparent',
+      },
     },
-    '& th': {
-      borderTopColor: 'transparent',
-      borderRightColor: theme.palette.headerBorder.main,
-      borderBottomColor: theme.palette.headerBorder.main,
-      borderLeftColor: 'transparent',
+    gridContent: {
+      '& tr.selected': {
+        backgroundColor: theme.palette.rowSelectedBackground.main,
+        color: theme.palette.rowSelectedText.main,
+        '& td': {
+          borderRightColor: theme.palette.rowSelectedBorder.main,
+          borderBottomColor: theme.palette.rowSelectedBorder.main,
+        }
+      },
+      '& tr.alt': {
+        backgroundColor: theme.palette.rowStripedBackground.main,
+      },
+      '& tr.alt.selected': {
+        backgroundColor: theme.palette.rowStripedSelectedBackground.main,
+      },
     },
-  },
-  gridContent: {
-    '& tr.selected': {
-      backgroundColor: theme.palette.rowSelectedBackground.main,
-      color: theme.palette.rowSelectedText.main,
-      '& td': {
-        borderRightColor: theme.palette.rowSelectedBorder.main,
-        borderBottomColor: theme.palette.rowSelectedBorder.main,
-      }
+    gridScroll: {
+      fontSize: theme.fontSizes.body,
     },
-    '& tr.alt': {
-      backgroundColor: theme.palette.rowStripedBackground.main,
-    },
-    '& tr.alt.selected': {
-      backgroundColor: theme.palette.rowStripedSelectedBackground.main,
-    },
-  },
-  gridScroll: {
-    fontSize: theme.fontSizes.body,
-  },
-});
+  };
+  return styleObj;
+};
 
 type GridProps = WithStyle<ReturnType<typeof styles>, IGridProps>;
 
@@ -447,7 +468,7 @@ const GridInternal = withStyles(styles, class extends React.PureComponent<GridPr
         <table role='grid' ref={(c) => this._gridFixed = c as HTMLTableElement} style={{width: this.props.grid.fixedWidth}}>
           {this.renderColumnGroups(true)}
           <tbody role='rowgroup'>
-            {this.props.grid.rows.map((row, index) => <Row key={row.id} row={row} fixedRowElements={this._fixedRowElements} Cell={Cell} columns={this.props.grid.fixedColumns} isFixedRow={true} index={index} visibleColumns={visibleColumns} className={((index % 2) === 1) ? 'alt' : ''} />)}
+            {this.props.grid.rows.map((row, index) => <Row key={row.id} row={row} fixedRowElements={this._fixedRowElements} Cell={Cell} columns={this.props.grid.fixedColumns} isFixedColumnsRow={true} index={index} visibleColumns={visibleColumns} className={((index % 2) === 1) ? 'alt' : ''} />)}
           </tbody>
         </table>
       </div>

@@ -4,7 +4,7 @@ import {
   IRow,
   IColumn,
   SortDirection,
-  allRows,
+  groupRows,
   findColumnByName,
   findColumnByPosition,
   fixedRows,
@@ -384,20 +384,26 @@ class GridModel implements IGrid, IDisposable {
   }
 
   sort() {
-    for (const rows of allRows(this.rows)) {
-      rows.rows.sort((r1, r2) => {
-        for (const column of this._sort) {
-          let compareFn = column.compare;
-          let v1 = r1.cells[column.name].value;
-          let v2 = r2.cells[column.name].value;
-          let r  = compareFn ? compareFn(v1, v2) : compare(v1, v2);
-          if (r !== 0) {
-            if (column.sort === 'ascending') return r;
-            return -1 * r;
-          }
+    let rowCompareFn = (r1: IRow, r2: IRow): number => {
+      for (const column of this._sort) {
+        let compareFn = column.compare;
+        let v1 = r1.cells[column.name].value;
+        let v2 = r2.cells[column.name].value;
+        let r  = compareFn ? compareFn(v1, v2) : compare(v1, v2);
+        if (r !== 0) {
+          if (column.sort === 'ascending') return r;
+          return -1 * r;
         }
-        return 0;
-      });
+      }
+      return 0;
+    };
+
+    if (this.groupBy.length > 0) {
+      for (let rows of groupRows(this.rows)) {
+        rows.row.rows.sort(rowCompareFn);
+      }
+    } else {
+      this.rows.sort(rowCompareFn);
     }
 
     // recalibrate row positions and recalculate selection flags
@@ -418,22 +424,6 @@ class GridModel implements IGrid, IDisposable {
 
     this.dataRowsByPosition = newDataRowsByPosition;
     this.updateCellSelectionProperties(this.selectedCells);
-
-    // for (let rows of groupRows(this.rows)) {
-    //   rows.rows.sort((r1, r2) => {
-    //     for (const column of this._sort) {
-    //       let compareFn = column.compare;
-    //       let v1 = r1.cells[column.name].value;
-    //       let v2 = r2.cells[column.name].value;
-    //       let r  = compareFn ? compareFn(v1, v2) : compare(v1, v2);
-    //       if (r !== 0) {
-    //         if (column.sort === 'ascending') return r;
-    //         return -1 * r;
-    //       }
-    //     }
-    //     return 0;
-    //   });
-    // }
   }
 
   sortItems(items: any[], comparer: (a: any, b: any) => number) {
@@ -506,9 +496,8 @@ class GridModel implements IGrid, IDisposable {
   }
 
   addColumn(column: IColumn): IColumn {
-    let position    = this.columns.length;
     column.grid     = this;
-    column.position = position;
+    column.position = this.columns.length;
     this.columns.push(column);
     return column;
   }
@@ -577,7 +566,7 @@ class GridModel implements IGrid, IDisposable {
     }
   }
 
-  hasChanges() {
+  hasChanges(): boolean {
     let dataRowsIds         = this.dataRowsByPosition.map(row => row.id);
     let originalDataRowsIds = this.originalDataRowsByPosition.map(row => row.id);
     if (!dataRowsIds.every(rowId => originalDataRowsIds.includes(rowId)) || !originalDataRowsIds.every(rowId => dataRowsIds.includes(rowId))) {
