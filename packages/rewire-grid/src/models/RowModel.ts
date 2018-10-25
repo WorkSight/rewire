@@ -33,6 +33,7 @@ export class RowModel implements IRow, IDisposable {
   cls                  : string;
   visible              : boolean;
   options              : IRowOptions;
+  isFixed              : boolean;
   position             : number;
 
   dispose: () => void = EmptyFn;
@@ -50,6 +51,7 @@ export class RowModel implements IRow, IDisposable {
     this.visible  = true;
     this.position = position;
     this.options  = data && data.options;
+    this.isFixed  = fixed;
 
     if (data && data.id) {
       this.id = String(data.id);
@@ -107,7 +109,7 @@ export class RowModel implements IRow, IDisposable {
       }
 
       let cell = this.cells[column.name];
-      if (previousCell && cell && (previousValue === cell.value) && (previousCell.column.type === cell.column.type)) {
+      if (previousCell && cell && (previousValue === cell.value) && ((previousCell.row.isFixed && cell.row.isFixed) || (previousCell.column.type === cell.column.type))) {
         colSpan++;
         cell.colSpan = 0;
         continue;
@@ -126,7 +128,7 @@ export class RowModel implements IRow, IDisposable {
     }
   }
 
-  hasChanges() {
+  hasChanges(): boolean {
     for (const column of this.grid.columns) {
       let cell = this.cells[column.name];
       if (!cell) continue;

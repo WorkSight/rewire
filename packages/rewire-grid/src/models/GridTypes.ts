@@ -126,6 +126,7 @@ export interface IRow extends IDisposable {
   cellsByColumnPosition: ICell[];
   parentRow?           : IGroupRow;
   visible              : boolean;
+  isFixed              : boolean;
 
   hasChanges(): boolean;
   createCell(column: IColumn, value: any, type?: string): ICell;

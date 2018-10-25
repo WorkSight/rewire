@@ -42,7 +42,6 @@ const styles = (theme: Theme) => ({
     alignItems: 'stretch',
     height: '100%',
     width: '100%',
-    lineHeight: `calc(2 * ${theme.fontSizes.body})`,
   },
   cellInnerContainer: {
     overflow: 'hidden',
@@ -178,10 +177,6 @@ class Cell extends React.PureComponent<CellProps, {}> {
     //   this.element.focus();
     // }, 0);
     this.element.focus();
-  }
-
-  setFocusFromMouse(set: boolean) {
-    this.setFocus(set);
   }
 
   handleDoubleClick = (evt: React.MouseEvent<any>) => {
@@ -367,7 +362,7 @@ class Cell extends React.PureComponent<CellProps, {}> {
     }
 
     this.grid.selectCellsTo(this.cell, evt.ctrlKey);
-    this.setFocusFromMouse(true);
+    this.setFocus(true);
   }
 
   handleClick = (evt: React.MouseEvent<any>) => {
@@ -393,7 +388,7 @@ class Cell extends React.PureComponent<CellProps, {}> {
     }
 
     evt.stopPropagation();
-    this.setFocusFromMouse(true);
+    this.setFocus(true);
   }
 
   handleFocus = (evt: React.FocusEvent<any>) => {
@@ -606,7 +601,7 @@ class Cell extends React.PureComponent<CellProps, {}> {
       let rowSpan = cell.rowSpan;
 
       let innerCell =
-        <div className={classes.cellContainer}>
+        <div className={classNames(classes.cellContainer, 'cellContainer')}>
           <div className={cellInnerContainerClasses}>
             {this.renderCell()}
           </div>

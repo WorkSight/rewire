@@ -168,7 +168,7 @@ export class CellModel implements ICell {
     this.value = undefined;
   }
 
-  hasChanges() {
+  hasChanges(): boolean {
     let changes: boolean;
     if (this.column.compare) {
       changes = this.column.compare(this.value, this.row.data[this.column.name]) !== 0;

@@ -16,15 +16,15 @@ import {Theme}                 from '@material-ui/core/styles';
 import {WithStyle, withStyles} from 'rewire-ui';
 
 export interface IRowProps {
-  row              : IRow;
-  columns          : IColumn[];
-  Cell             : React.ComponentClass<any>;
-  rowElements?     : {[s: string]: HTMLTableRowElement};
-  fixedRowElements?: {[s: string]: HTMLTableRowElement};
-  isFixedRow?      : boolean;
-  index            : number;
-  visibleColumns   : number;
-  className?       : string;
+  row               : IRow;
+  columns           : IColumn[];
+  Cell              : React.ComponentClass<any>;
+  rowElements?      : {[s: string]: HTMLTableRowElement};
+  fixedRowElements? : {[s: string]: HTMLTableRowElement};
+  isFixedColumnsRow?: boolean;
+  index             : number;
+  visibleColumns    : number;
+  className?        : string;
 }
 
 const styles = (theme: Theme) => {
@@ -81,19 +81,19 @@ const Row = withStyles(styles, class extends PureComponent<RowProps, {}> {
       return;
     }
 
-    let rElements = this.props.isFixedRow ? this.props.fixedRowElements : this.props.rowElements;
+    let rElements = this.props.isFixedColumnsRow ? this.props.fixedRowElements : this.props.rowElements;
     if (rElements) {
       delete rElements[this.props.row.id];
     }
 
-    if (!this.props.isFixedRow && this.elementResizeObserver) {
+    if (!this.props.isFixedColumnsRow && this.elementResizeObserver) {
       this.elementResizeObserver.disconnect();
       delete this.elementResizeObserver;
     }
   }
 
   componentDidMount() {
-    if (!this.element || this.props.isFixedRow || isGroupRow(this.props.row)) {
+    if (!this.element || this.props.isFixedColumnsRow || isGroupRow(this.props.row)) {
       return;
     }
 
@@ -149,7 +149,7 @@ const Row = withStyles(styles, class extends PureComponent<RowProps, {}> {
     className     = classNames(className, this.props.row.visible ? this.props.classes.visible : this.props.classes.notVisible + ' notVisible');
 
     let ref: ((node: any) => any) | undefined = undefined;
-    let rElements = this.props.isFixedRow ? this.props.fixedRowElements : this.props.rowElements;
+    let rElements = this.props.isFixedColumnsRow ? this.props.fixedRowElements : this.props.rowElements;
     if (rElements) {
       ref = (rowElement: any) => {
         this.element = rowElement;
@@ -167,7 +167,7 @@ const Row = withStyles(styles, class extends PureComponent<RowProps, {}> {
   renderChildRows(groupRow: IGroupRow): React.ReactNode[] | null {
     // if (!groupRow.expanded) return null;
 
-    return groupRow.rows.map((r, idx) => <Row key={r.id} row={r} rowElements={this.props.rowElements} fixedRowElements={this.props.fixedRowElements} columns={this.props.columns} index={idx} Cell={this.props.Cell} isFixedRow={this.props.isFixedRow} className={((idx % 2) === 1) ? 'alt' : ''} visibleColumns={this.props.visibleColumns} />);
+    return groupRow.rows.map((r, idx) => <Row key={r.id} row={r} rowElements={this.props.rowElements} fixedRowElements={this.props.fixedRowElements} columns={this.props.columns} index={idx} Cell={this.props.Cell} isFixedColumnsRow={this.props.isFixedColumnsRow} className={((idx % 2) === 1) ? 'alt' : ''} visibleColumns={this.props.visibleColumns} />);
   }
 
   renderGroupRow(groupRow: IGroupRow) {
