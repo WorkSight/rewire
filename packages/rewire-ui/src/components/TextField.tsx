@@ -16,6 +16,30 @@ const styles = (theme: Theme) => ({
   inputType: {
     height: 'auto',
   },
+  inputAdornmentRoot: {
+    height: 'auto',
+    paddingBottom: '2px',
+  },
+  nativeInput: {
+    '&::placeholder, &-webkit-input-::placeholder': {
+      color: 'inherit',
+      opacity: 0.4,
+    },
+    '&[type=date]': {
+      padding: '4px 0px 4px 0px',
+      '&::-webkit-clear-button': {
+        marginRight: '4px',
+      },
+      '&::-webkit-inner-spin-button': {
+        // '-webkit-appearance': 'none',
+        marginRight: '1px',
+      },
+      '&::-webkit-calendar-picker-indicator': {
+        marginTop: '2px',
+        fontSize: '1.1em',
+      },
+    },
+  },
 });
 
 export interface ITextFieldProps {
@@ -66,28 +90,30 @@ class TextFieldInternal extends React.Component<TextFieldPropsStyled> {
       return null;
     }
 
-    const startAdornment = this.props.startAdornment ? <InputAdornment position='start'>{this.props.startAdornment}</InputAdornment> : undefined;
-    const endAdornment   = this.props.endAdornment ? <InputAdornment position='end'>{this.props.endAdornment}</InputAdornment> : undefined;
+    const {classes, type} = this.props;
+
+    const startAdornment = this.props.startAdornment ? <InputAdornment position='start' classes={{root: classes.inputAdornmentRoot}}>{this.props.startAdornment}</InputAdornment> : undefined;
+    const endAdornment   = this.props.endAdornment ? <InputAdornment position='end' classes={{root: classes.inputAdornmentRoot}}>{this.props.endAdornment}</InputAdornment> : undefined;
 
     if (this.props.updateOnChange) {
       return (
       <TextField
         className={this.props.className}
-        classes={{root: this.props.classes.formControlRoot}}
-        type={this.props.type}
+        classes={{root: classes.formControlRoot}}
+        type={type}
         disabled={this.props.disabled}
         label={this.props.label}
         placeholder={this.props.placeholder}
         error={!this.props.disabled && !!this.props.error}
-        helperText={!this.props.disabled && this.props.error}
+        helperText={<span>{(!this.props.disabled && this.props.error) || ''}</span>}
         value={this.props.value}
         autoFocus={this.props.autoFocus}
         onFocus={this.handleFocus}
         onBlur={this.props.onBlur}
         onKeyDown={this.props.onKeyDown}
         onChange={(evt: React.ChangeEvent<HTMLInputElement>) => this.props.onValueChange(evt.target.value)}
-        inputProps={{autoFocus: this.props.autoFocus, style: {textAlign: this.props.align || 'left'}}}
-        InputProps={{startAdornment: startAdornment, endAdornment: endAdornment, classes: {root: this.props.classes.inputRoot, inputType: this.props.classes.inputType}}}
+        inputProps={{autoFocus: this.props.autoFocus, className: classes.nativeInput, style: {textAlign: this.props.align || 'left'}}}
+        InputProps={{startAdornment: startAdornment, endAdornment: endAdornment, classes: {root: classes.inputRoot, inputType: classes.inputType}}}
         InputLabelProps={{shrink: true}}
       />);
     }
@@ -97,21 +123,21 @@ class TextFieldInternal extends React.Component<TextFieldPropsStyled> {
       render={(props: TextFieldPropsStyled) =>
         <TextField
           className={props.className}
-          classes={{root: props.classes.formControlRoot}}
-          type={props.type}
+          classes={{root: classes.formControlRoot}}
+          type={type}
           disabled={props.disabled}
           label={props.label}
           placeholder={props.placeholder}
           error={!props.disabled && !!props.error}
-          helperText={!props.disabled && props.error}
+          helperText={<span>{(!props.disabled && props.error) || ''}</span>}
           value={props.value}
           autoFocus={props.autoFocus}
           onFocus={this.handleFocus}
           onBlur={props.onBlur}
           onKeyDown={props.onKeyDown}
           onChange={props.onChange}
-          inputProps={{autoFocus: props.autoFocus, style: {textAlign: props.align || 'left'}}}
-          InputProps={{startAdornment: startAdornment, endAdornment: endAdornment, classes: {root: props.classes.inputRoot, inputType: this.props.classes.inputType}}}
+          inputProps={{autoFocus: props.autoFocus, className: classes.nativeInput, style: {textAlign: props.align || 'left'}}}
+          InputProps={{startAdornment: startAdornment, endAdornment: endAdornment, classes: {root: classes.inputRoot, inputType: classes.inputType}}}
           InputLabelProps={{shrink: true}}
         />
       }

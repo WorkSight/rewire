@@ -44,6 +44,13 @@ const styles = (theme: Theme) => ({
     height: 'auto',
     lineHeight: '1em',
   },
+  inputAdornmentRoot: {
+    height: 'auto',
+    paddingBottom: '2px',
+  },
+  placeholderValue: {
+    opacity: 0.4,
+  },
 });
 
 export type ISelectProps<T> = ICustomProps<T> & React.InputHTMLAttributes<any>;
@@ -151,11 +158,12 @@ class SelectInternal<T> extends React.Component<SelectProps<T>, any> {
       );
   }
 
-  renderSelect(disabled: boolean, cls: string, value?: T, autoFocus?: boolean) {
-    const v              = this.map(value);
-    const startAdornment = this.props.startAdornment ? <InputAdornment position='start'>{this.props.startAdornment}</InputAdornment> : undefined;
-    const endAdornment   = this.props.endAdornment ? <InputAdornment position='end'>{this.props.endAdornment}</InputAdornment> : undefined;
-    const menuListProps  = {
+  renderSelect(disabled: boolean, cls: string, value?: T, autoFocus?: boolean, placeholder?: string) {
+    const {classes, style} = this.props;
+    const v                = this.map(value);
+    const startAdornment   = this.props.startAdornment ? <InputAdornment position='start' classes={{root: this.props.classes.inputAdornmentRoot}}>{this.props.startAdornment}</InputAdornment> : undefined;
+    const endAdornment     = this.props.endAdornment ? <InputAdornment position='end' classes={{root: this.props.classes.inputAdornmentRoot}}>{this.props.endAdornment}</InputAdornment> : undefined;
+    const menuListProps    = {
       onKeyDown: this.handleMenuKeyDown,
       onKeyPress: this.handleMenuKeyPress,
       onMouseEnter: this.handleMenuMouseEnter,
@@ -169,12 +177,13 @@ class SelectInternal<T> extends React.Component<SelectProps<T>, any> {
       disabled={disabled}
       value={v as any}
       onChange={this.handleChanged}
+      displayEmpty={true}
       className={cls}
-      style={this.props.style}
-      classes={{root: this.props.classes.selectRoot, select: this.props.classes.select}}
-      MenuProps={{classes: {paper: this.props.classes.selectMenuPaper}, MenuListProps: menuListProps}}
-      input={<Input startAdornment={startAdornment} endAdornment={endAdornment} autoFocus={autoFocus} classes={{root: this.props.classes.inputRoot}}/>}
-      renderValue={(p) => <span>{v}</span>}>{
+      style={style}
+      classes={{root: classes.selectRoot, select: classes.select}}
+      MenuProps={{classes: {paper: classes.selectMenuPaper}, MenuListProps: menuListProps}}
+      input={<Input startAdornment={startAdornment} endAdornment={endAdornment} autoFocus={autoFocus} classes={{root: classes.inputRoot}}/>}
+      renderValue={(p) => <span>{v || <span className={classes.placeholderValue}>{placeholder}</span>}</span>}>{
         this.state.suggestions.map((suggestion: any, index: number) => {
           const displayName = this.map(suggestion);
           return this.renderSuggestion({
@@ -202,14 +211,14 @@ class SelectInternal<T> extends React.Component<SelectProps<T>, any> {
     if (label) {
       return (
         <FormControl error={!disabled && !!error} className={cls}>
-          <InputLabel htmlFor='name-error'>{label}</InputLabel>
-          {this.renderSelect(disabled, '', this.props.selectedItem, this.props.autoFocus)}
-          {!disabled && error && <FormHelperText>{error}</FormHelperText>}
+          <InputLabel htmlFor='name-error' shrink={true}>{label}</InputLabel>
+          {this.renderSelect(disabled, '', this.props.selectedItem, this.props.autoFocus, this.props.placeholder)}
+          {<FormHelperText>{!disabled && error}</FormHelperText>}
         </FormControl>
       );
     }
 
-    return this.renderSelect(disabled, cls, this.props.selectedItem, this.props.autoFocus);
+    return this.renderSelect(disabled, cls, this.props.selectedItem, this.props.autoFocus, this.props.placeholder);
   }
 }
 

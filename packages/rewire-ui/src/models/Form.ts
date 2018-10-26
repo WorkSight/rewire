@@ -154,7 +154,7 @@ export default class Form {
 
     root((dispose) => {
       this.dispose        = dispose;
-      const result        = this.validator.validate(this.toObject);
+      const result        = this.validator.validate(this.toObjectLabelsAndValues());
       const fieldsChanged = observe(() => this.fields.map(f => f.value));
       this._hasChanges    = computed(fieldsChanged, () => {
         if (!this._value) return false;
@@ -258,9 +258,23 @@ export default class Form {
     return this.field[name];
   }
 
-  private toObject() {
+  private toObjectValues() {
     return this.fields.reduce((prev: ObjectType, current) => {
       if (current.value !== undefined) prev[current.name] = current.value;
+      return prev;
+    }, {});
+  }
+
+  private toObjectLabelsAndValues() {
+    return this.fields.reduce((prev: ObjectType, current) => {
+      prev[current.name] = {label: current.label && current.label.toLowerCase(), value: current.value};
+      return prev;
+    }, {});
+  }
+
+  private toObject() {
+    return this.fields.reduce((prev: ObjectType, current) => {
+      prev[current.name] = current;
       return prev;
     }, {});
   }
@@ -274,12 +288,12 @@ export default class Form {
   public submit = (enforceValidation: boolean = true) => {
     if (!this._value) return false;
     if (!this.validate() && enforceValidation) return false;
-    replace(this._value, this.toObject());
+    replace(this._value, this.toObjectValues());
     return true;
   }
 
   private validate(): ValidationResult {
-    let result  = this.validator.validate(this.toObject());
+    let result = this.validator.validate(this.toObjectLabelsAndValues());
     this.fields.forEach(element => {
       element.error = result.errors[element.name];
     });

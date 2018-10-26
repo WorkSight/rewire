@@ -78,6 +78,7 @@ export default function editor(type: EditorType, propsForEdit?: any): React.SFC<
           <Select
             label={field.label}
             onValueChange={onValueChange}
+            placeholder={field.placeholder}
             autoFocus={field.autoFocus}
             error={field.error}
             disabled={field.disabled && field.disabled(field)}
@@ -109,7 +110,7 @@ export default function editor(type: EditorType, propsForEdit?: any): React.SFC<
             disabled={field.disabled && field.disabled(field)}
             visible={field.visible}
             align={field.align || 'left'}
-            value={utc(field.value).toDateString()}
+            value={field.value && utc(field.value).toDateString()}
             type='date'
             className={className}
             classes={classes}
@@ -221,7 +222,7 @@ export default function editor(type: EditorType, propsForEdit?: any): React.SFC<
             disabled={field.disabled && field.disabled(field)}
             autoFocus={field.autoFocus}
             visible={field.visible}
-            align={field.align || 'right'}
+            align={field.align || 'left'}
             className={className}
             classes={classes}
             startAdornment={field.startAdornment && field.startAdornment()}

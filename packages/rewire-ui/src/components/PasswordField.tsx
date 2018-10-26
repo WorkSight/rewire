@@ -28,6 +28,16 @@ const styles = (theme: Theme) => ({
       opacity: 1,
     },
   },
+  inputAdornmentRoot: {
+    height: 'auto',
+    paddingBottom: '2px',
+  },
+  nativeInput: {
+    '&::placeholder, &-webkit-input-::placeholder': {
+      color: 'inherit',
+      opacity: 0.4,
+    },
+  },
 });
 
 export interface IPasswordFieldProps {
@@ -90,7 +100,7 @@ class PasswordFieldInternal extends React.Component<PasswordFieldPropsStyled, IP
 
     let adornment = this.props.hasAdornment
       ? (
-        <InputAdornment position='end'>
+        <InputAdornment position='end' classes={{root: this.props.classes.inputAdornmentRoot}}>
           <IconButton classes={{root: this.props.classes.iconButtonRoot}} disableRipple={true} onClick={this.handleClickShowPassword}>
             {this.state.showPassword
               ? <VisibilityOffIcon />
@@ -111,14 +121,14 @@ class PasswordFieldInternal extends React.Component<PasswordFieldPropsStyled, IP
           label={this.props.label}
           placeholder={this.props.placeholder}
           error={!this.props.disabled && !!this.props.error}
-          helperText={!this.props.disabled && this.props.error}
+          helperText={<span>{(!this.props.disabled && this.props.error) || ''}</span>}
           value={this.props.value}
           autoFocus={this.props.autoFocus}
           onFocus={this.handleFocus}
           onBlur={this.props.onBlur}
           onKeyDown={this.props.onKeyDown}
           onChange={(evt: React.ChangeEvent<HTMLInputElement>) => this.props.onValueChange(evt.target.value)}
-          inputProps={{autoFocus: this.props.autoFocus, style: {textAlign: this.props.align || 'left'}}}
+          inputProps={{autoFocus: this.props.autoFocus, className: this.props.classes.nativeInput, style: {textAlign: this.props.align || 'left'}}}
           InputProps={{endAdornment: adornment, classes: {root: this.props.classes.inputRoot, inputType: this.props.classes.inputType}}}
           InputLabelProps={{shrink: true}}
         />
@@ -136,14 +146,14 @@ class PasswordFieldInternal extends React.Component<PasswordFieldPropsStyled, IP
             label={props.label}
             placeholder={props.placeholder}
             error={!props.disabled && !!props.error}
-            helperText={!props.disabled && props.error}
+            helperText={<span>{(!props.disabled && props.error) || ''}</span>}
             value={props.value}
             autoFocus={props.autoFocus}
             onFocus={this.handleFocus}
             onBlur={props.onBlur}
             onKeyDown={props.onKeyDown}
             onChange={props.onChange}
-            inputProps={{autoFocus: props.autoFocus, style: {textAlign: props.align || 'left'}}}
+            inputProps={{autoFocus: props.autoFocus, className: props.classes.nativeInput, style: {textAlign: props.align || 'left'}}}
             InputProps={{classes: {root: props.classes.inputRoot, inputType: props.classes.inputType}}}
             InputLabelProps={{shrink: true}}
           />

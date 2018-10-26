@@ -120,6 +120,16 @@ const styles = (theme: Theme) => ({
   },
   formControlRoot: {
   },
+  inputAdornmentRoot: {
+    height: 'auto',
+    paddingBottom: '2px',
+  },
+  nativeInput: {
+    '&::placeholder, &-webkit-input-::placeholder': {
+      color: 'inherit',
+      opacity: 0.4,
+    },
+  },
 });
 
 export interface ITimeFieldProps {
@@ -190,8 +200,8 @@ class TimeInputField extends React.Component<TimeFieldProps, ITimeState> {
       return null;
     }
 
-    const startAdornment = this.props.startAdornment ? <InputAdornment position='start'>{this.props.startAdornment}</InputAdornment> : undefined;
-    const endAdornment   = this.props.endAdornment ? <InputAdornment position='end'>{this.props.endAdornment}</InputAdornment> : undefined;
+    const startAdornment = this.props.startAdornment ? <InputAdornment position='start' classes={{root: this.props.classes.inputAdornmentRoot}}>{this.props.startAdornment}</InputAdornment> : undefined;
+    const endAdornment   = this.props.endAdornment ? <InputAdornment position='end' classes={{root: this.props.classes.inputAdornmentRoot}}>{this.props.endAdornment}</InputAdornment> : undefined;
 
     return (
       <TextField
@@ -201,11 +211,11 @@ class TimeInputField extends React.Component<TimeFieldProps, ITimeState> {
         error={!disabled && (!!error || (!!this.state.text && !this.state.isValid))}
         value={this.state.text}
         label={label}
-        helperText={!disabled && error}
+        helperText={<span>{(!disabled && error) || ''}</span>}
         onChange={this.handleChange}
         onBlur={this.handleBlur}
         placeholder={placeholder}
-        inputProps={{autoFocus: this.props.autoFocus, style: {textAlign: this.props.align || 'left'}}}
+        inputProps={{autoFocus: this.props.autoFocus, className: this.props.classes.nativeInput, style: {textAlign: this.props.align || 'left'}}}
         InputProps={{startAdornment: startAdornment, endAdornment: endAdornment, classes: {root: this.props.classes.inputRoot}}}
         InputLabelProps={{shrink: true}}
       />);

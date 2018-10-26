@@ -539,7 +539,7 @@ class Cell extends React.PureComponent<CellProps, {}> {
 
       return (
         <div className={this.props.classes.editorContainer} style={{height: this.element.clientHeight + 'px'}}>
-          <Editor field={{...cell, value: value, autoFocus: true, error: undefined}} endOfTextOnFocus={endOfTextOnFocus} selectOnFocus={selectOnFocus} className={cell.cls} onValueChange={this.onValueChange} classes={editorClasses} {...additionalProps}/>
+          <Editor field={{...cell, value: value, autoFocus: true, align: cell.align, error: undefined}} endOfTextOnFocus={endOfTextOnFocus} selectOnFocus={selectOnFocus} className={cell.cls} onValueChange={this.onValueChange} classes={editorClasses} {...additionalProps}/>
         </div>
       );
     }

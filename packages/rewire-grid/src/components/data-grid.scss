@@ -64,7 +64,7 @@ html {
   }
   input[type="date"] {
     height: initial;
-
+    padding: 6px 0 7px;
     &::-webkit-clear-button{
       margin-right: 2px;
     }

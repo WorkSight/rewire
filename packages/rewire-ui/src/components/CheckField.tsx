@@ -18,6 +18,10 @@ const styles = (theme: Theme) => ({
   formControlLabelLabel: {
     paddingLeft: '8px',
   },
+  checkboxContainerNoLabel: {
+    display: 'flex',
+    alignItems: 'center',
+  }
 });
 
 export interface ICheckboxProps {
@@ -71,15 +75,17 @@ class CheckboxInternal extends React.Component<CheckboxPropsStyled> {
     }
 
     return (
-      <Checkbox
-        className={this.props.className}
-        autoFocus={this.props.autoFocus}
-        disabled={this.props.disabled}
-        inputProps={{autoFocus: this.props.autoFocus}}
-        checked={this.props.value}
-        onChange={(evt: React.ChangeEvent<HTMLInputElement>) => this.props.onValueChange(evt.target.checked)}
-        classes={{root: this.props.classes.checkboxRoot}}
-      />
+      <div className={this.props.classes.checkboxContainerNoLabel}>
+        <Checkbox
+          className={this.props.className}
+          autoFocus={this.props.autoFocus}
+          disabled={this.props.disabled}
+          inputProps={{autoFocus: this.props.autoFocus}}
+          checked={this.props.value}
+          onChange={(evt: React.ChangeEvent<HTMLInputElement>) => this.props.onValueChange(evt.target.checked)}
+          classes={{root: this.props.classes.checkboxRoot}}
+        />
+      </div>
     );
   }
 }

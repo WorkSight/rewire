@@ -16,6 +16,7 @@ import Button                from '@material-ui/core/Button';
 import Typography            from '@material-ui/core/Typography';
 import { withStyles }        from '@material-ui/core/styles';
 import AddIcon               from '@material-ui/icons/Add';
+import AccessibilityIcon     from '@material-ui/icons/Accessibility';
 import {Sortable, SortableList, IItem} from 'rewire-ui';
 import {
   BrowserRouter as Router,
@@ -618,16 +619,17 @@ const Home = _Home;
 
 class TestDialog extends Modal {
   form = Form.create({
-    date                 : Form.date().label('Date').validators(isRequired).placeholder(utc().toDateString()).autoFocus(),
+    date                 : Form.date().label('Date').validators(isRequired),
     dollars              : Form.number().label('Dollars').placeholder('').startAdornment(() => <div style={{display: 'flex', alignItems: 'center'}}><AddIcon /><span>$</span></div>),
-    shouldI              : Form.select(searcher).label('Should I?').validators(isRequired),
+    shouldI              : Form.select(searcher).label('Should I?').placeholder('choose!').startAdornment(() => <AccessibilityIcon />).validators(isRequired),
     isGreat              : Form.boolean().label('Is Great'),
     noLabel              : Form.boolean(),
     disabled             : Form.boolean().label('Disabled').disabled(() => true),
     email                : Form.email().label('Email').validators(isRequired).placeholder('enter a valid email'),
     password             : Form.password().label('Password').validators(and(isRequired, isSameAsOther('password_confirmation', 'passwords are not the same'))).placeholder('enter a password'),
     password_confirmation: Form.password().label('Confirm Password').placeholder('confirm your password'),
-    country              : Form.reference(countries).label('Country').validators(isRequired),
+    country              : Form.reference(countries).label('Country').placeholder('pick a country').validators(isRequired),
+    time                 : Form.time().label('Time').placeholder('enter a time').validators(isRequired),
     avatar               : Form.avatar({width: 1000, height: 1000, avatarDiameter: 150, cropRadius: 75}).label('Add Photo'),
   }, {email: 'splace@worksight.net', isGreat: true, avatar: doucheSuitDude});
 
@@ -667,6 +669,7 @@ const TestFormView = ({form}: {form: typeof testDialog.form}) => (
     <div className='content'>
       <form.field.country.Editor className='span4' />
       <form.field.isGreat.Editor className='span4' />
+      <form.field.time.Editor className='span4' />
     </div>
     <div className='content'>
     <form.field.avatar.Editor />
