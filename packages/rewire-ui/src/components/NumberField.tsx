@@ -15,6 +15,16 @@ const styles = (theme: Theme) => ({
   },
   formControlRoot: {
   },
+  inputAdornmentRoot: {
+    height: 'auto',
+    paddingBottom: '2px',
+  },
+  nativeInput: {
+    '&::placeholder, &-webkit-input-::placeholder': {
+      color: 'inherit',
+      opacity: 0.4,
+    },
+  },
 });
 
 export interface INumberFieldProps {
@@ -75,8 +85,8 @@ class NumberTextField extends React.Component<NumberFieldProps> {
       return null;
     }
     let value            = this.parse(this.props.value);
-    const startAdornment = this.props.startAdornment ? <InputAdornment position='start'>{this.props.startAdornment}</InputAdornment> : undefined;
-    const endAdornment   = this.props.endAdornment ? <InputAdornment position='end'>{this.props.endAdornment}</InputAdornment> : undefined;
+    const startAdornment = this.props.startAdornment ? <InputAdornment position='start' classes={{root: this.props.classes.inputAdornmentRoot}}>{this.props.startAdornment}</InputAdornment> : undefined;
+    const endAdornment   = this.props.endAdornment ? <InputAdornment position='end' classes={{root: this.props.classes.inputAdornmentRoot}}>{this.props.endAdornment}</InputAdornment> : undefined;
 
     if (updateOnChange) {
       return (
@@ -93,13 +103,13 @@ class NumberTextField extends React.Component<NumberFieldProps> {
           onFocus={this.handleFocus}
           thousandSeparator={this.props.thousandSeparator || undefined}
           decimalScale={this.props.decimals}
-          inputProps={{style: {textAlign: this.props.align || 'left'}}}
+          inputProps={{className: this.props.classes.nativeInput, style: {textAlign: this.props.align || 'left'}}}
           InputProps={{startAdornment: startAdornment, endAdornment: endAdornment, classes: {root: this.props.classes.inputRoot}}}
           InputLabelProps={{shrink: true}}
           fixedDecimalScale={this.props.fixed}
           customInput={TextField}
           placeholder={this.props.placeholder}
-          helperText={!this.props.disabled && this.props.error}
+          helperText={<span>{(!this.props.disabled && this.props.error) || ''}</span>}
         />);
     }
 
@@ -122,13 +132,13 @@ class NumberTextField extends React.Component<NumberFieldProps> {
             onFocus={this.handleFocus}
             thousandSeparator={props.thousandSeparator || undefined}
             decimalScale={props.decimals}
-            inputProps={{style: {textAlign: props.align || 'left'}}}
+            inputProps={{className: props.classes.nativeInput, style: {textAlign: props.align || 'left'}}}
             InputProps={{startAdornment: startAdornment, endAdornment: endAdornment, classes: {root: props.classes.inputRoot}}}
             InputLabelProps={{shrink: true}}
             fixedDecimalScale={props.fixed}
             customInput={TextField}
             placeholder={props.placeholder}
-            helperText={!props.disabled && props.error}
+            helperText={<span>{(!props.disabled && props.error) || ''}</span>}
           />)
         }
       />);

@@ -51,6 +51,16 @@ const styles = (theme: Theme) => ({
     lineHeight: 'inherit',
     fontSize: 'inherit',
   },
+  inputAdornmentRoot: {
+    height: 'auto',
+    paddingBottom: '2px',
+  },
+  nativeInput: {
+    '&::placeholder, &-webkit-input-::placeholder': {
+      color: 'inherit',
+      opacity: 0.4,
+    },
+  },
   formControlRoot: {
   },
   menuItem: {
@@ -96,12 +106,13 @@ class AutoComplete<T> extends React.Component<IAutoCompleteProps<T>, any> {
         value={value}
         label={label}
         error={!disabled && !!error}
-        helperText={error}
+        helperText={<span>{(!disabled && error) || ''}</span>}
         inputRef={ref}
         disabled={disabled}
         autoFocus={autoFocus}
+        inputProps={{className: classes.nativeInput, style: {textAlign: align || 'left'}}}
         InputProps={{startAdornment: startAdornment, endAdornment: endAdornment, classes: {root: classes.inputRoot}}}
-        inputProps={{style: {textAlign: align || 'left'}}}
+        InputLabelProps={{shrink: true}}
         {...other}
       />
     );
@@ -300,8 +311,8 @@ class AutoComplete<T> extends React.Component<IAutoCompleteProps<T>, any> {
 
     let suggestionsContainerNode: HTMLElement;
 
-    const startAdornment = this.props.startAdornment ? <InputAdornment position='start'>{this.props.startAdornment}</InputAdornment> : undefined;
-    const endAdornment   = this.props.endAdornment ? <InputAdornment position='end'>{this.props.endAdornment}</InputAdornment> : undefined;
+    const startAdornment = this.props.startAdornment ? <InputAdornment position='start' classes={{root: classes.inputAdornmentRoot}}>{this.props.startAdornment}</InputAdornment> : undefined;
+    const endAdornment   = this.props.endAdornment ? <InputAdornment position='end' classes={{root: classes.inputAdornmentRoot}}>{this.props.endAdornment}</InputAdornment> : undefined;
 
     return (
       <Downshift
