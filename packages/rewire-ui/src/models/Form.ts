@@ -27,6 +27,7 @@ export interface IFieldDefn {
   align(text: TextAlignment): IFieldDefn;
   autoFocus(): IFieldDefn;
   disabled(action: (field: IEditorField) => boolean): IFieldDefn;
+  disableErrors(): IFieldDefn;
   startAdornment(adornment?: () => JSX.Element): IFieldDefn;
   endAdornment(adornment?: () => JSX.Element): IFieldDefn;
   editor(editorType: EditorType, editProps?: any): IFieldDefn;
@@ -53,6 +54,7 @@ interface IBaseFieldDefn {
   error?         : string;
   value?         : any;
   disabled?      : (field: IEditorField) => boolean;
+  disableErrors? : boolean;
   visible?       : boolean;
   validators?    : IValidateFn;
 
@@ -88,6 +90,11 @@ class BaseField implements IFieldDefn {
 
   disabled(action: (field: IEditorField) => boolean): IFieldDefn {
     this.typeDefn.disabled = action;
+    return this;
+  }
+
+  disableErrors(): IFieldDefn {
+    this.typeDefn.disableErrors = true;
     return this;
   }
 
@@ -228,6 +235,7 @@ export default class Form {
       align: fieldDefn.typeDefn.align,
       label: fieldDefn.typeDefn.label,
       disabled: fieldDefn.typeDefn.disabled,
+      disableErrors: fieldDefn.typeDefn.disableErrors,
       visible: true,
       startAdornment: fieldDefn.typeDefn.startAdornment,
       endAdornment: fieldDefn.typeDefn.endAdornment,

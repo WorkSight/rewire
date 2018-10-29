@@ -43,6 +43,7 @@ const styles = (theme: Theme) => ({
 export interface IPasswordFieldProps {
   visible?         : boolean;
   disabled?        : boolean;
+  disableErrors?   : boolean;
   error?           : string;
   value?           : string;
   label?           : string;
@@ -77,7 +78,12 @@ class PasswordFieldInternal extends React.Component<PasswordFieldPropsStyled, IP
       (nextProps.disabled !== this.props.disabled) ||
       (nextProps.visible !== this.props.visible) ||
       (nextProps.error !== this.props.error) ||
-      (nextState.showPassword !== this.state.showPassword)
+      (nextState.showPassword !== this.state.showPassword) ||
+      (nextProps.hasAdornment !== this.props.hasAdornment) ||
+      (nextProps.label !== this.props.label) ||
+      (nextProps.placeholder !== this.props.placeholder) ||
+      (nextProps.align !== this.props.align) ||
+      (nextProps.disableErrors !== this.props.disableErrors)
     );
   }
 
@@ -120,8 +126,8 @@ class PasswordFieldInternal extends React.Component<PasswordFieldPropsStyled, IP
           disabled={this.props.disabled}
           label={this.props.label}
           placeholder={this.props.placeholder}
-          error={!this.props.disabled && !!this.props.error}
-          helperText={<span>{(!this.props.disabled && this.props.error) || ''}</span>}
+          error={!this.props.disableErrors && !this.props.disabled && !!this.props.error}
+          helperText={!this.props.disableErrors && <span>{(!this.props.disabled && this.props.error) || ''}</span>}
           value={this.props.value}
           autoFocus={this.props.autoFocus}
           onFocus={this.handleFocus}
@@ -145,8 +151,8 @@ class PasswordFieldInternal extends React.Component<PasswordFieldPropsStyled, IP
             disabled={props.disabled}
             label={props.label}
             placeholder={props.placeholder}
-            error={!props.disabled && !!props.error}
-            helperText={<span>{(!props.disabled && props.error) || ''}</span>}
+            error={!props.disableErrors && !props.disabled && !!props.error}
+            helperText={!props.disableErrors && <span>{(!props.disabled && props.error) || ''}</span>}
             value={props.value}
             autoFocus={props.autoFocus}
             onFocus={this.handleFocus}

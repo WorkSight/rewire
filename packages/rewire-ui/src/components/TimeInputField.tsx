@@ -135,6 +135,7 @@ const styles = (theme: Theme) => ({
 export interface ITimeFieldProps {
   visible?       : boolean;
   disabled?      : boolean;
+  disableErrors? : boolean;
   error?         : string;
   value?         : number;
   label?         : string;
@@ -172,7 +173,14 @@ class TimeInputField extends React.Component<TimeFieldProps, ITimeState> {
       (nextState.text !== this.state.text) ||
       (nextProps.disabled !== this.props.disabled) ||
       (nextProps.visible !== this.props.visible) ||
-      (nextProps.error !== this.props.error)
+      (nextProps.error !== this.props.error) ||
+      (nextProps.rounding !== this.props.rounding) ||
+      (nextProps.label !== this.props.label) ||
+      (nextProps.placeholder !== this.props.placeholder) ||
+      (nextProps.align !== this.props.align) ||
+      (nextProps.disableErrors !== this.props.disableErrors) ||
+      (nextProps.startAdornment !== this.props.startAdornment) ||
+      (nextProps.endAdornment !== this.props.endAdornment)
     );
   }
 
@@ -195,28 +203,28 @@ class TimeInputField extends React.Component<TimeFieldProps, ITimeState> {
   }
 
   render() {
-    const {visible, disabled, error, label, placeholder} = this.props;
+    const {classes, className, visible, disabled, error, label, placeholder, align, disableErrors, autoFocus} = this.props;
     if (visible === false) {
       return null;
     }
 
-    const startAdornment = this.props.startAdornment ? <InputAdornment position='start' classes={{root: this.props.classes.inputAdornmentRoot}}>{this.props.startAdornment}</InputAdornment> : undefined;
-    const endAdornment   = this.props.endAdornment ? <InputAdornment position='end' classes={{root: this.props.classes.inputAdornmentRoot}}>{this.props.endAdornment}</InputAdornment> : undefined;
+    const startAdornment = this.props.startAdornment ? <InputAdornment position='start' classes={{root: classes.inputAdornmentRoot}}>{this.props.startAdornment}</InputAdornment> : undefined;
+    const endAdornment   = this.props.endAdornment ? <InputAdornment position='end' classes={{root: classes.inputAdornmentRoot}}>{this.props.endAdornment}</InputAdornment> : undefined;
 
     return (
       <TextField
-        className={this.props.className}
-        classes={{root: this.props.classes.formControlRoot}}
+        className={className}
+        classes={{root: classes.formControlRoot}}
         disabled={disabled}
-        error={!disabled && (!!error || (!!this.state.text && !this.state.isValid))}
+        error={!disableErrors && !disabled && (!!error || (!!this.state.text && !this.state.isValid))}
         value={this.state.text}
         label={label}
-        helperText={<span>{(!disabled && error) || ''}</span>}
+        helperText={!disableErrors && <span>{(!disabled && error) || ''}</span>}
         onChange={this.handleChange}
         onBlur={this.handleBlur}
         placeholder={placeholder}
-        inputProps={{autoFocus: this.props.autoFocus, className: this.props.classes.nativeInput, style: {textAlign: this.props.align || 'left'}}}
-        InputProps={{startAdornment: startAdornment, endAdornment: endAdornment, classes: {root: this.props.classes.inputRoot}}}
+        inputProps={{autoFocus: autoFocus, className: classes.nativeInput, style: {textAlign: align || 'left'}}}
+        InputProps={{startAdornment: startAdornment, endAdornment: endAdornment, classes: {root: classes.inputRoot}}}
         InputLabelProps={{shrink: true}}
       />);
   }

@@ -1,12 +1,13 @@
 import * as React       from 'react';
 import {TextFieldProps} from '@material-ui/core/TextField';
+import {InputProps}      from '@material-ui/core/Input';
 
 export interface IBlurState {
   readonly value?: string | number | React.ReactText[];
   currentExternalValue?: string | number | React.ReactText[];
 }
 
-export type IBlurProps = {render<T>(props: TextFieldProps & T): JSX.Element | null, onValueChange(value?: string | number | React.ReactText[]): void} & TextFieldProps;
+export type IBlurProps = {render<T>(props: TextFieldProps & T): JSX.Element | null, onValueChange(value?: string | number | React.ReactText[]): void} & TextFieldProps & InputProps;
 
 export default class BlurInputHOC extends React.Component<IBlurProps, IBlurState> {
   state: IBlurState = {value: undefined};
@@ -26,6 +27,12 @@ export default class BlurInputHOC extends React.Component<IBlurProps, IBlurState
       (nextProps.value !== this.props.value) ||
       (nextProps.error !== this.props.error) ||
       (nextProps.disabled !== this.props.disabled) ||
+      (nextProps.label !== this.props.label) ||
+      (nextProps.placeholder !== this.props.placeholder) ||
+      (nextProps.align !== this.props.align) ||
+      (nextProps.disableErrors !== this.props.disableErrors) ||
+      (nextProps.startAdornment !== this.props.startAdornment) ||
+      (nextProps.endAdornment !== this.props.endAdornment) ||
       (nextState.value !== this.state.value) ||
       (nextState.currentExternalValue !== this.state.currentExternalValue)
     );

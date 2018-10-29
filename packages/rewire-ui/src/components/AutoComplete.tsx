@@ -25,24 +25,11 @@ const styles = (theme: Theme) => ({
     position: 'relative',
   },
   popper: {
-    width: 'auto',
-    minWidth: '255px',
+    minWidth: '225px',
     overflowY: 'auto',
     maxHeight: 'calc(50vh - 20px)',
     boxShadow: theme.shadows[7],
     zIndex: 1300,
-  },
-  paperContainer: {
-    position: 'absolute',
-    zIndex: 1300,
-    width: '100%',
-  },
-  paper: {
-    minWidth: '255px',
-    overflowY: 'auto',
-    maxHeight: '50vh',
-    marginBottom: '10px',
-    boxShadow: theme.shadows[7],
   },
   textField: {
     width: '100%',
@@ -75,8 +62,9 @@ export type IAutoCompleteProps<T> = WithStyle<ReturnType<typeof styles>, ICustom
 class AutoComplete<T> extends React.Component<IAutoCompleteProps<T>, any> {
   state = {suggestions: []};
   downShift: any;
-  search   : SearchFn<T>;
-  map      : MapFn<T>;
+  search: SearchFn<T>;
+  map: MapFn<T>;
+  suggestionsContainerNode: HTMLElement;
 
   constructor(props: IAutoCompleteProps<T>) {
     super(props);
@@ -96,8 +84,8 @@ class AutoComplete<T> extends React.Component<IAutoCompleteProps<T>, any> {
   }
 
   renderInput = (classes: Record<IStyleClasses, string>, error: string | undefined, inputProps: any, InputProps: any, ref: (node: any) => any) => {
-    const { label, disabled, autoFocus, value, ...other } = inputProps;
-    const { startAdornment, endAdornment, align }         = InputProps;
+    const { label, disabled, autoFocus, value, ...other }        = inputProps;
+    const { startAdornment, endAdornment, align, disableErrors } = InputProps;
 
     return (
       <TextField
@@ -105,8 +93,8 @@ class AutoComplete<T> extends React.Component<IAutoCompleteProps<T>, any> {
         classes={{root: classes.formControlRoot}}
         value={value}
         label={label}
-        error={!disabled && !!error}
-        helperText={<span>{(!disabled && error) || ''}</span>}
+        error={!disableErrors && !disabled && !!error}
+        helperText={!disableErrors && <span>{(!disabled && error) || ''}</span>}
         inputRef={ref}
         disabled={disabled}
         autoFocus={autoFocus}
@@ -187,7 +175,7 @@ class AutoComplete<T> extends React.Component<IAutoCompleteProps<T>, any> {
   }
 
   renderSuggestionsContainer = (options: any) => {
-    const { getMenuProps, isOpen, suggestionsContainerNode, children, classes, usePopper } = options;
+    const { getMenuProps, isOpen, children, classes } = options;
     const menuProps = {
       onKeyPress: this.handleMenuKeyPress,
       onMouseDown: this.handleMenuMouseDown,
@@ -195,36 +183,24 @@ class AutoComplete<T> extends React.Component<IAutoCompleteProps<T>, any> {
       onDoubleClick: this.handleMenuDoubleClick,
     };
 
-    if (usePopper) {
-      return (
-        <Popper open={isOpen} placement='bottom-start' anchorEl={suggestionsContainerNode} className={classes.popper}>
-          <div {...(isOpen ? getMenuProps({}, {suppressRefError: true}) : {})} {...menuProps}>
-            <Paper>
-              {children}
-            </Paper>
-          </div>
-        </Popper>
-      );
-    }
-
     return (
-      isOpen
-        ? <div className={classes.paperContainer}>
-            <Paper className={classes.paper}>
-              {children}
-            </Paper>
-          </div>
-        : undefined
+      <Popper open={isOpen} placement='bottom-start' anchorEl={this.suggestionsContainerNode} className={classes.popper} style={{width: this.suggestionsContainerNode ? this.suggestionsContainerNode.clientWidth : 'auto'}}>
+        <div {...(isOpen ? getMenuProps({}, {suppressRefError: true}) : {})} {...menuProps}>
+          <Paper>
+            {children}
+          </Paper>
+        </div>
+      </Popper>
     );
   }
 
-  handleInputChanged = (inputValue: string, helpers: ControllerStateAndHelpers) => {
+  handleInputChanged = (inputValue: string, helpers: ControllerStateAndHelpers<any>) => {
     if (helpers.isOpen) {
       this.performSearch(inputValue);
     }
   }
 
-  handleItemChanged = (options: StateChangeOptions, helpers: ControllerStateAndHelpers) => {
+  handleItemChanged = (options: StateChangeOptions<any>, helpers: ControllerStateAndHelpers<any>) => {
     if (!options) {
       return;
     }
@@ -299,17 +275,21 @@ class AutoComplete<T> extends React.Component<IAutoCompleteProps<T>, any> {
         (nextProps.error !== this.props.error) ||
         (nextProps.disabled !== this.props.disabled) ||
         (nextProps.visible !== this.props.visible) ||
-        (nextState.suggestions !== this.state.suggestions)
+        (nextState.suggestions !== this.state.suggestions) ||
+        (nextProps.label !== this.props.label) ||
+        (nextProps.placeholder !== this.props.placeholder) ||
+        (nextProps.align !== this.props.align) ||
+        (nextProps.disableErrors !== this.props.disableErrors) ||
+        (nextProps.startAdornment !== this.props.startAdornment) ||
+        (nextProps.endAdornment !== this.props.endAdornment)
       );
   }
 
   render() {
-    const { classes, theme, disabled, visible, error, label, placeholder, autoFocus, align, usePopper } = this.props;
+    const { classes, theme, disabled, visible, error, label, placeholder, autoFocus, align, disableErrors } = this.props;
     if (visible === false) {
       return null;
     }
-
-    let suggestionsContainerNode: HTMLElement;
 
     const startAdornment = this.props.startAdornment ? <InputAdornment position='start' classes={{root: classes.inputAdornmentRoot}}>{this.props.startAdornment}</InputAdornment> : undefined;
     const endAdornment   = this.props.endAdornment ? <InputAdornment position='end' classes={{root: classes.inputAdornmentRoot}}>{this.props.endAdornment}</InputAdornment> : undefined;
@@ -341,17 +321,15 @@ class AutoComplete<T> extends React.Component<IAutoCompleteProps<T>, any> {
                   label: label,
                   placeholder: placeholder,
                 }),
-                {align: align, startAdornment: startAdornment, endAdornment: endAdornment},
+                {align: align, disableErrors: disableErrors, startAdornment: startAdornment, endAdornment: endAdornment},
                 (node => {
-                  suggestionsContainerNode = node;
+                  this.suggestionsContainerNode = node;
                 }),
               )}
               {this.renderSuggestionsContainer({
                 getMenuProps: getMenuProps,
-                suggestionsContainerNode: suggestionsContainerNode,
                 isOpen: isOpen,
                 classes: classes,
-                usePopper: usePopper,
                 children: this.state.suggestions.map((suggestion, index) =>
                   this.renderSuggestion({
                     suggestion,

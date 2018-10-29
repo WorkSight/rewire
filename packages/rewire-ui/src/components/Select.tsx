@@ -48,6 +48,9 @@ const styles = (theme: Theme) => ({
     height: 'auto',
     paddingBottom: '2px',
   },
+  valueRendererContainer: {
+    width: '100%',
+  },
   placeholderValue: {
     opacity: 0.4,
   },
@@ -154,16 +157,22 @@ class SelectInternal<T> extends React.Component<SelectProps<T>, any> {
         (nextProps.error !== this.props.error) ||
         (nextProps.disabled !== this.props.disabled) ||
         (nextProps.visible !== this.props.visible) ||
-        (nextState.suggestions !== this.state.suggestions)
+        (nextState.suggestions !== this.state.suggestions) ||
+        (nextProps.label !== this.props.label) ||
+        (nextProps.placeholder !== this.props.placeholder) ||
+        (nextProps.align !== this.props.align) ||
+        (nextProps.disableErrors !== this.props.disableErrors) ||
+        (nextProps.startAdornment !== this.props.startAdornment) ||
+        (nextProps.endAdornment !== this.props.endAdornment)
       );
   }
 
   renderSelect(disabled: boolean, cls: string, value?: T, autoFocus?: boolean, placeholder?: string) {
-    const {classes, style} = this.props;
-    const v                = this.map(value);
-    const startAdornment   = this.props.startAdornment ? <InputAdornment position='start' classes={{root: this.props.classes.inputAdornmentRoot}}>{this.props.startAdornment}</InputAdornment> : undefined;
-    const endAdornment     = this.props.endAdornment ? <InputAdornment position='end' classes={{root: this.props.classes.inputAdornmentRoot}}>{this.props.endAdornment}</InputAdornment> : undefined;
-    const menuListProps    = {
+    const {classes, style, align} = this.props;
+    const v              = this.map(value);
+    const startAdornment = this.props.startAdornment ? <InputAdornment position='start' classes={{root: this.props.classes.inputAdornmentRoot}}>{this.props.startAdornment}</InputAdornment> : undefined;
+    const endAdornment   = this.props.endAdornment ? <InputAdornment position='end' classes={{root: this.props.classes.inputAdornmentRoot}}>{this.props.endAdornment}</InputAdornment> : undefined;
+    const menuListProps  = {
       onKeyDown: this.handleMenuKeyDown,
       onKeyPress: this.handleMenuKeyPress,
       onMouseEnter: this.handleMenuMouseEnter,
@@ -183,7 +192,10 @@ class SelectInternal<T> extends React.Component<SelectProps<T>, any> {
       classes={{root: classes.selectRoot, select: classes.select}}
       MenuProps={{classes: {paper: classes.selectMenuPaper}, MenuListProps: menuListProps}}
       input={<Input startAdornment={startAdornment} endAdornment={endAdornment} autoFocus={autoFocus} classes={{root: classes.inputRoot}}/>}
-      renderValue={(p) => <span>{v || <span className={classes.placeholderValue}>{placeholder}</span>}</span>}>{
+      renderValue={(p) => (
+        <span className={classes.valueRendererContainer} style={{textAlign: align || 'left'}}>
+          {v || <span className={classes.placeholderValue}>{placeholder}</span>}
+        </span>)}>{
         this.state.suggestions.map((suggestion: any, index: number) => {
           const displayName = this.map(suggestion);
           return this.renderSuggestion({
@@ -199,9 +211,10 @@ class SelectInternal<T> extends React.Component<SelectProps<T>, any> {
   }
 
   render() {
-    const disabled = this.props.disabled === true;
-    const visible  = this.props.visible;
-    const error    = this.props.error;
+    const disabled      = this.props.disabled === true;
+    const disableErrors = this.props.disableErrors;
+    const visible       = this.props.visible;
+    const error         = this.props.error;
     if (visible === false) {
       return null;
     }
@@ -210,10 +223,10 @@ class SelectInternal<T> extends React.Component<SelectProps<T>, any> {
     let   cls   = (this.props.className || '') + ' select';
     if (label) {
       return (
-        <FormControl error={!disabled && !!error} className={cls}>
+        <FormControl error={!disableErrors && !disabled && !!error} className={cls}>
           <InputLabel htmlFor='name-error' shrink={true}>{label}</InputLabel>
           {this.renderSelect(disabled, '', this.props.selectedItem, this.props.autoFocus, this.props.placeholder)}
-          {<FormHelperText>{!disabled && error}</FormHelperText>}
+          {!disableErrors && <FormHelperText>{!disabled && error}</FormHelperText>}
         </FormControl>
       );
     }

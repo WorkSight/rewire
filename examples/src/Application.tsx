@@ -194,7 +194,8 @@ class LoginDialog extends Modal {
     password             : Form.password().label('Password').validators(and(isRequired, isSameAsOther('password_confirmation', 'passwords are not the same'))).placeholder('enter a password'),
     password_confirmation: Form.password().label('Confirm Password').placeholder('confirm your password'),
     country              : Form.reference(countries).label('Country').validators(isRequired).placeholder('ooga'),
-    time                 : Form.time().label('Time').validators(isRequired)
+    time                 : Form.time().label('Time').validators(isRequired),
+    selectCountry        : Form.select(countries).label('Select Country').validators(isRequired).placeholder('ooga'),
   });
 
   constructor() {
@@ -219,6 +220,7 @@ const LoginFormView = ({form}: {form: typeof loginDialog.form}) => (
     <div className='content'>
       <form.field.email.Editor className='span2' />
       <form.field.country.Editor className='span2' />
+      <form.field.selectCountry.Editor className='span2' />
       <form.field.time.Editor className='span2' />
     </div>
     <div className='content'>
@@ -620,7 +622,7 @@ const Home = _Home;
 class TestDialog extends Modal {
   form = Form.create({
     date                 : Form.date().label('Date').validators(isRequired),
-    dollars              : Form.number().label('Dollars').placeholder('').startAdornment(() => <div style={{display: 'flex', alignItems: 'center'}}><AddIcon /><span>$</span></div>),
+    dollars              : Form.number().label('Dollars').validators(isRequired).placeholder('Show me the money').disableErrors().startAdornment(() => <div style={{display: 'flex', alignItems: 'center'}}><AddIcon /><span>$</span></div>),
     shouldI              : Form.select(searcher).label('Should I?').placeholder('choose!').startAdornment(() => <AccessibilityIcon />).validators(isRequired),
     isGreat              : Form.boolean().label('Is Great'),
     noLabel              : Form.boolean(),
@@ -628,7 +630,7 @@ class TestDialog extends Modal {
     email                : Form.email().label('Email').validators(isRequired).placeholder('enter a valid email'),
     password             : Form.password().label('Password').validators(and(isRequired, isSameAsOther('password_confirmation', 'passwords are not the same'))).placeholder('enter a password'),
     password_confirmation: Form.password().label('Confirm Password').placeholder('confirm your password'),
-    country              : Form.reference(countries).label('Country').placeholder('pick a country').validators(isRequired),
+    country              : Form.reference(countries).label('Country').placeholder('pick a country').startAdornment(() => <AccessibilityIcon />).validators(isRequired),
     time                 : Form.time().label('Time').placeholder('enter a time').validators(isRequired),
     avatar               : Form.avatar({width: 1000, height: 1000, avatarDiameter: 150, cropRadius: 75}).label('Add Photo'),
   }, {email: 'splace@worksight.net', isGreat: true, avatar: doucheSuitDude});

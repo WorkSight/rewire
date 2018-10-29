@@ -533,13 +533,12 @@ class Cell extends React.PureComponent<CellProps, {}> {
       }
 
       if (cellType === 'auto-complete') {
-        additionalProps['usePopper'] = true;
         Object.assign(editorClasses, {menuItem: this.props.classes.editorPopupMenuItem, container: this.props.classes.editorAutoCompleteContainer});
       }
 
       return (
         <div className={this.props.classes.editorContainer} style={{height: this.element.clientHeight + 'px'}}>
-          <Editor field={{...cell, value: value, autoFocus: true, align: cell.align, error: undefined}} endOfTextOnFocus={endOfTextOnFocus} selectOnFocus={selectOnFocus} className={cell.cls} onValueChange={this.onValueChange} classes={editorClasses} {...additionalProps}/>
+          <Editor field={{...cell, value: value, autoFocus: true, align: cell.align, error: undefined, disableErrors: true}} endOfTextOnFocus={endOfTextOnFocus} selectOnFocus={selectOnFocus} className={cell.cls} onValueChange={this.onValueChange} classes={editorClasses} {...additionalProps}/>
         </div>
       );
     }
