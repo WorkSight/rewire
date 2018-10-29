@@ -23,6 +23,7 @@ export interface IField {
   value?         : any;
   disabled?      : (field: IField) => boolean;
   visible?       : boolean;
+  disableErrors? : boolean;
 
   startAdornment?(): JSX.Element;
   endAdornment?(): JSX.Element;
@@ -66,7 +67,6 @@ export type TextEditorProps = {
   classes?: React.CSSProperties,
   selectOnFocus?   : boolean,
   endOfTextOnFocus?: boolean,
-  usePopper?: boolean,
   onValueChange: (v: any) => void,
 };
 
@@ -83,6 +83,7 @@ export default function editor(type: EditorType, propsForEdit?: any): React.SFC<
             error={field.error}
             disabled={field.disabled && field.disabled(field)}
             visible={field.visible}
+            disableErrors={field.disableErrors}
             style={{width: '100%', minWidth: '120px', textAlign: field.align || 'left'}}
             align={field.align || 'left'}
             selectedItem={field.value}
@@ -109,6 +110,7 @@ export default function editor(type: EditorType, propsForEdit?: any): React.SFC<
             error={field.error}
             disabled={field.disabled && field.disabled(field)}
             visible={field.visible}
+            disableErrors={field.disableErrors}
             align={field.align || 'left'}
             value={field.value && utc(field.value).toDateString()}
             type='date'
@@ -135,6 +137,7 @@ export default function editor(type: EditorType, propsForEdit?: any): React.SFC<
             error={field.error}
             disabled={field.disabled && field.disabled(field)}
             visible={field.visible}
+            disableErrors={field.disableErrors}
             align={field.align || 'left'}
             className={className}
             classes={classes}
@@ -175,6 +178,7 @@ export default function editor(type: EditorType, propsForEdit?: any): React.SFC<
             error={field.error}
             disabled={field.disabled && field.disabled(field)}
             visible={field.visible}
+            disableErrors={field.disableErrors}
             align={field.align || 'left'}
             className={className}
             classes={classes}
@@ -199,6 +203,7 @@ export default function editor(type: EditorType, propsForEdit?: any): React.SFC<
             error={field.error}
             disabled={field.disabled && field.disabled(field)}
             visible={field.visible}
+            disableErrors={field.disableErrors}
             align={field.align || 'left'}
             className={className}
             classes={classes}
@@ -222,6 +227,7 @@ export default function editor(type: EditorType, propsForEdit?: any): React.SFC<
             disabled={field.disabled && field.disabled(field)}
             autoFocus={field.autoFocus}
             visible={field.visible}
+            disableErrors={field.disableErrors}
             align={field.align || 'left'}
             className={className}
             classes={classes}
@@ -246,6 +252,7 @@ export default function editor(type: EditorType, propsForEdit?: any): React.SFC<
             autoFocus={field.autoFocus}
             disabled={field.disabled && field.disabled(field)}
             visible={field.visible}
+            disableErrors={field.disableErrors}
             align={field.align || 'left'}
             className={className}
             classes={classes}
@@ -291,7 +298,7 @@ export default function editor(type: EditorType, propsForEdit?: any): React.SFC<
     );
 
     case 'auto-complete':
-      return ({field, className, classes, usePopper, onValueChange}: TextEditorProps) => (
+      return ({field, className, classes, onValueChange}: TextEditorProps) => (
         <Observe render={() => (
           <AutoComplete
             placeholder={field.placeholder}
@@ -301,12 +308,12 @@ export default function editor(type: EditorType, propsForEdit?: any): React.SFC<
             autoFocus={field.autoFocus}
             disabled={field.disabled && field.disabled(field)}
             visible={field.visible}
+            disableErrors={field.disableErrors}
             align={field.align || 'left'}
             selectedItem={field.value}
             onSelectItem={onValueChange}
             className={className}
             classes={classes}
-            usePopper={usePopper}
             startAdornment={field.startAdornment && field.startAdornment()}
             endAdornment={field.endAdornment && field.endAdornment()}
             {...propsForEdit}

@@ -27,7 +27,8 @@ class SwitchInternal extends React.Component<SwitchPropsStyled> {
     return (
       (nextProps.value !== this.props.value) ||
       (nextProps.disabled !== this.props.disabled) ||
-      (nextProps.visible !== this.props.visible)
+      (nextProps.visible !== this.props.visible) ||
+      (nextProps.label !== this.props.label)
     );
   }
 

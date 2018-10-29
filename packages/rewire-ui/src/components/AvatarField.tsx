@@ -58,6 +58,7 @@ class AvatarField extends React.Component<AvatarFieldProps, IAvatarFieldState> {
     return (
       (nextProps.value !== this.props.value) ||
       (nextProps.visible !== this.props.visible) ||
+      (nextProps.label !== this.props.label) ||
       (nextState.value !== this.state.value) ||
       (nextState.loadedValue !== this.state.loadedValue)
     );

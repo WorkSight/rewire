@@ -45,6 +45,7 @@ const styles = (theme: Theme) => ({
 export interface ITextFieldProps {
   visible?         : boolean;
   disabled?        : boolean;
+  disableErrors?   : boolean;
   error?           : string;
   value?           : string;
   label?           : string;
@@ -71,7 +72,13 @@ class TextFieldInternal extends React.Component<TextFieldPropsStyled> {
       (nextProps.value !== this.props.value) ||
       (nextProps.disabled !== this.props.disabled) ||
       (nextProps.visible !== this.props.visible) ||
-      (nextProps.error !== this.props.error)
+      (nextProps.error !== this.props.error) ||
+      (nextProps.label !== this.props.label) ||
+      (nextProps.placeholder !== this.props.placeholder) ||
+      (nextProps.align !== this.props.align) ||
+      (nextProps.disableErrors !== this.props.disableErrors) ||
+      (nextProps.startAdornment !== this.props.startAdornment) ||
+      (nextProps.endAdornment !== this.props.endAdornment)
     );
   }
 
@@ -104,8 +111,8 @@ class TextFieldInternal extends React.Component<TextFieldPropsStyled> {
         disabled={this.props.disabled}
         label={this.props.label}
         placeholder={this.props.placeholder}
-        error={!this.props.disabled && !!this.props.error}
-        helperText={<span>{(!this.props.disabled && this.props.error) || ''}</span>}
+        error={!this.props.disableErrors && !this.props.disabled && !!this.props.error}
+        helperText={!this.props.disableErrors && <span>{(!this.props.disabled && this.props.error) || ''}</span>}
         value={this.props.value}
         autoFocus={this.props.autoFocus}
         onFocus={this.handleFocus}
@@ -128,8 +135,8 @@ class TextFieldInternal extends React.Component<TextFieldPropsStyled> {
           disabled={props.disabled}
           label={props.label}
           placeholder={props.placeholder}
-          error={!props.disabled && !!props.error}
-          helperText={<span>{(!props.disabled && props.error) || ''}</span>}
+          error={!props.disableErrors && !props.disabled && !!props.error}
+          helperText={!props.disableErrors && <span>{(!props.disabled && props.error) || ''}</span>}
           value={props.value}
           autoFocus={props.autoFocus}
           onFocus={this.handleFocus}

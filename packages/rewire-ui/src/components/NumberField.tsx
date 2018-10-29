@@ -30,6 +30,7 @@ const styles = (theme: Theme) => ({
 export interface INumberFieldProps {
   visible?          : boolean;
   disabled?         : boolean;
+  disableErrors?    : boolean;
   error?            : string;
   value?            : number;
   label?            : string;
@@ -61,7 +62,22 @@ class NumberTextField extends React.Component<NumberFieldProps> {
   }
 
   shouldComponentUpdate(nextProps: NumberFieldProps) {
-    return (nextProps.value !== this.props.value);
+    return (
+      (nextProps.value !== this.props.value) ||
+      (nextProps.disabled !== this.props.disabled) ||
+      (nextProps.visible !== this.props.visible) ||
+      (nextProps.format !== this.props.format) ||
+      (nextProps.mask !== this.props.mask) ||
+      (nextProps.decimals !== this.props.decimals) ||
+      (nextProps.fixed !== this.props.fixed) ||
+      (nextProps.error !== this.props.error) ||
+      (nextProps.label !== this.props.label) ||
+      (nextProps.placeholder !== this.props.placeholder) ||
+      (nextProps.align !== this.props.align) ||
+      (nextProps.disableErrors !== this.props.disableErrors) ||
+      (nextProps.startAdornment !== this.props.startAdornment) ||
+      (nextProps.endAdornment !== this.props.endAdornment)
+    );
   }
 
   handleFocus = (evt: React.FocusEvent<HTMLInputElement>) => {
@@ -94,7 +110,7 @@ class NumberTextField extends React.Component<NumberFieldProps> {
           className={this.props.className}
           classes={{root: this.props.classes.formControlRoot}}
           disabled={this.props.disabled}
-          error={!this.props.disabled && !!this.props.error}
+          error={!this.props.disableErrors && !this.props.disabled && !!this.props.error}
           value={value}
           label={this.props.label}
           onValueChange={this.handleValueChanged}
@@ -109,7 +125,7 @@ class NumberTextField extends React.Component<NumberFieldProps> {
           fixedDecimalScale={this.props.fixed}
           customInput={TextField}
           placeholder={this.props.placeholder}
-          helperText={<span>{(!this.props.disabled && this.props.error) || ''}</span>}
+          helperText={!this.props.disableErrors && <span>{(!this.props.disabled && this.props.error) || ''}</span>}
         />);
     }
 
@@ -123,7 +139,7 @@ class NumberTextField extends React.Component<NumberFieldProps> {
             className={props.className}
             classes={{root: props.classes.formControlRoot}}
             disabled={props.disabled}
-            error={!props.disabled && !!props.error}
+            error={!props.disableErrors && !props.disabled && !!props.error}
             value={props.value}
             label={props.label}
             onValueChange={(values: any) => props.onChange && props.onChange({target: {value: values.floatValue}} as any)}
@@ -138,7 +154,7 @@ class NumberTextField extends React.Component<NumberFieldProps> {
             fixedDecimalScale={props.fixed}
             customInput={TextField}
             placeholder={props.placeholder}
-            helperText={<span>{(!props.disabled && props.error) || ''}</span>}
+            helperText={!props.disableErrors && <span>{(!props.disabled && props.error) || ''}</span>}
           />)
         }
       />);
