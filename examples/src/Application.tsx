@@ -196,6 +196,7 @@ class LoginDialog extends Modal {
     country              : Form.reference(countries).label('Country').validators(isRequired).placeholder('ooga'),
     time                 : Form.time().label('Time').validators(isRequired),
     selectCountry        : Form.select(countries).label('Select Country').validators(isRequired).placeholder('ooga'),
+    money                : Form.number().label('Show Me').validators(isRequired).placeholder('The Money'),
   });
 
   constructor() {
@@ -226,6 +227,7 @@ const LoginFormView = ({form}: {form: typeof loginDialog.form}) => (
     <div className='content'>
       <form.field.password.Editor />
       <form.field.password_confirmation.Editor />
+      <form.field.money.Editor />
     </div>
   </FormView>
 );
@@ -653,34 +655,36 @@ class TestDialog extends Modal {
 
 const testDialog = new TestDialog();
 const TestFormView = ({form}: {form: typeof testDialog.form}) => (
-  <FormView form={form} onSubmit={testDialog.actionFn('login')}>
-    <div className='content'>
-      <form.field.date.Editor className='span4' />
-      <form.field.dollars.Editor className='span4' />
-      <form.field.shouldI.Editor className='span4' />
-    </div>
-    <div className='content'>
-      <form.field.noLabel.Editor className='span4' />
-      <form.field.disabled.Editor className='span4' />
-      <form.field.email.Editor className='span4' />
-    </div>
-    <div className='content'>
-      <form.field.password.Editor />
-      <form.field.password_confirmation.Editor />
-    </div>
-    <div className='content'>
-      <form.field.country.Editor className='span4' />
-      <form.field.isGreat.Editor className='span4' />
-      <form.field.time.Editor className='span4' />
-    </div>
-    <div className='content'>
-    <form.field.avatar.Editor />
-    </div>
-    <div className='content'>
-      <button style={{height: '30px'}}  value='Submit' onClick={testDialog.actionFn('login')}>Submit</button>
-      <button style={{height: '30px'}}  value='Cancel' onClick={testDialog.actionFn('cancel')}>Cancel</button>
-    </div>
-  </FormView>
+  <Observe render={() => (
+    <FormView form={form} onSubmit={testDialog.actionFn('login')}>
+      <div className='content'>
+        <form.field.date.Editor className='span4' />
+        <form.field.dollars.Editor className='span4' />
+        <form.field.shouldI.Editor className='span4' />
+      </div>
+      <div className='content'>
+        <form.field.noLabel.Editor className='span4' />
+        <form.field.disabled.Editor className='span4' />
+        <form.field.email.Editor className='span4' />
+      </div>
+      <div className='content'>
+        <form.field.password.Editor />
+        <form.field.password_confirmation.Editor />
+      </div>
+      <div className='content'>
+        <form.field.country.Editor className='span4' />
+        <form.field.isGreat.Editor className='span4' />
+        <form.field.time.Editor className='span4' />
+      </div>
+      <div className='content'>
+      <form.field.avatar.Editor />
+      </div>
+      <div className='content'>
+        <button style={{height: '30px'}}  value='Submit' onClick={testDialog.actionFn('login')}>Submit</button>
+        <button style={{height: '30px'}}  value='Cancel' onClick={testDialog.actionFn('cancel')}>Cancel</button>
+      </div>
+    </FormView>
+  )} />;
 );
 
 

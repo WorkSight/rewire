@@ -25,6 +25,7 @@ export default class BlurInputHOC extends React.Component<IBlurProps, IBlurState
   shouldComponentUpdate(nextProps: IBlurProps, nextState: IBlurState) {
     return (
       (nextProps.value !== this.props.value) ||
+      (nextProps.type !== this.props.type) ||
       (nextProps.error !== this.props.error) ||
       (nextProps.disabled !== this.props.disabled) ||
       (nextProps.label !== this.props.label) ||

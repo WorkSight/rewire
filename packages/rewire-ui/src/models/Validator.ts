@@ -7,98 +7,134 @@ export function isNull(value?: any) {
   return ((value.id !== undefined) && !value.id);
 }
 
-export type IValidateFn = (obj: ObjectType, field: string, label: string | undefined, value: any) => string | undefined;
+export type IValidateFn     = (obj: ObjectType, fieldName: string, label: string | undefined, value: any) => string | undefined;
+export type IValidateFnData = {linkedFieldNames: string[], fn: IValidateFn};
 
-export const isRequired = (obj: ObjectType, field: string, label: string | undefined, value: any) => {
-  return (isNull(value)) ? `${label || 'field'} is required` : undefined;
-};
-
-export const isRegEx = (re: RegExp, text: string) => (obj: ObjectType, field: string, label: string | undefined, value: any) => {
-  if (!re.test(String(value).toLowerCase())) {
-    return text;
+export const isRequired = {
+  linkedFieldNames: [],
+  fn: (obj: ObjectType, fieldName: string, label: string | undefined, value: any) => {
+    return (isNull(value)) ? `${label || 'field'} is required` : undefined;
   }
-  return undefined;
 };
 
-export const isEmail = (obj: ObjectType, field: string, label: string | undefined, value: any) => {
-  const re = /^(([^<>()\[\]\\.,;:\s@"]+(\.[^<>()\[\]\\.,;:\s@"]+)*)|(".+"))@((\[[0-9]{1,3}\.[0-9]{1,3}\.[0-9]{1,3}\.[0-9]{1,3}\])|(([a-zA-Z\-0-9]+\.)+[a-zA-Z]{2,}))$/;
-  if (!re.test(String(value).toLowerCase())) {
-    return 'email is not in a valid format';
+export const isRegEx = (re: RegExp, text: string) => {
+  return {
+    linkedFieldNames: [],
+    fn: (obj: ObjectType, fieldName: string, label: string | undefined, value: any) => {
+      if (!re.test(String(value).toLowerCase())) {
+        return text;
+      }
+      return undefined;
+    }
+  };
+};
+
+export const isEmail = {
+  linkedFieldNames: [],
+  fn: (obj: ObjectType, fieldName: string, label: string | undefined, value: any) => {
+    const re = /^(([^<>()\[\]\\.,;:\s@"]+(\.[^<>()\[\]\\.,;:\s@"]+)*)|(".+"))@((\[[0-9]{1,3}\.[0-9]{1,3}\.[0-9]{1,3}\.[0-9]{1,3}\])|(([a-zA-Z\-0-9]+\.)+[a-zA-Z]{2,}))$/;
+    if (!re.test(String(value).toLowerCase())) {
+      return 'email is not in a valid format';
+    }
+    return undefined;
   }
-  return undefined;
 };
 
-export const requiredWhenOtherIsNotNull = (field: string) => (obj: ObjectType, otherField: string, otherLabel: string | undefined, otherValue: any): string | undefined => {
-  if (isNull(otherValue)) return undefined;
-  let label = obj[field] && obj[field].label;
-  let value = obj[field] && obj[field].value;
-  return isRequired(obj, field, label, value);
+export const requiredWhenOtherIsNotNull = (fieldName: string) => {
+  return {
+    linkedFieldNames: [fieldName],
+    fn: (obj: ObjectType, otherFieldName: string, otherLabel: string | undefined, otherValue: any): string | undefined => {
+      if (isNull(otherValue)) return undefined;
+      let label = obj[fieldName] && obj[fieldName].label;
+      let value = obj[fieldName] && obj[fieldName].value;
+      return isRequired.fn(obj, fieldName, label, value);
+    }
+  };
 };
 
-export const isSameAsOther = (field: string, text?: string) => (obj: ObjectType, otherField: string, otherLabel: string | undefined, otherValue: any): string | undefined => {
-  let value = obj[field] && obj[field].value;
-  if (!defaultEquals(otherValue, value)) {
-    if (text) return text;
-    let label = obj[field] && obj[field].label;
-    return `${label || field} must be the same as ${otherLabel || otherField}`;
-  }
-  return undefined;
+export const isSameAsOther = (fieldName: string, text?: string) => {
+  return {
+    linkedFieldNames: [fieldName],
+    fn: (obj: ObjectType, otherFieldName: string, otherLabel: string | undefined, otherValue: any): string | undefined => {
+      let value = obj[fieldName] && obj[fieldName].value;
+      if (!defaultEquals(otherValue, value)) {
+        if (text) return text;
+        let label = obj[fieldName] && obj[fieldName].label;
+        return `${label || fieldName} must be the same as ${otherLabel || otherFieldName}`;
+      }
+      return undefined;
+    }
+  };
 };
 
-export const isDifferentFromOther = (field: string, text?: string) => (obj: ObjectType, otherField: string, otherLabel: string | undefined, otherValue: any): string | undefined => {
-  let value = obj[field] && obj[field].value;
-  if (defaultEquals(otherValue, value)) {
-    if (text) return text;
-    let label = obj[field] && obj[field].label;
-    return `${label || field} must be different from ${otherLabel || otherField}`;
-  }
-  return undefined;
+export const isDifferentFromOther = (fieldName: string, text?: string) => {
+  return {
+    linkedFieldNames: [fieldName],
+    fn: (obj: ObjectType, otherFieldName: string, otherLabel: string | undefined, otherValue: any): string | undefined => {
+      let value = obj[fieldName] && obj[fieldName].value;
+      if (defaultEquals(otherValue, value)) {
+        if (text) return text;
+        let label = obj[fieldName] && obj[fieldName].label;
+        return `${label || fieldName} must be different from ${otherLabel || otherFieldName}`;
+      }
+      return undefined;
+    }
+  };
 };
 
-export const and = (...args: IValidateFn[]) => (obj: Object, field: string, label: string | undefined, value: any): string | undefined => {
-  for (const fn of args) {
-    const result = fn(obj, field, label, value);
-    if (result) return result;
-  }
+export const and = (...args: IValidateFnData[]) => {
+  return {
+    linkedFieldNames: [...new Set(args.map(arg => arg.linkedFieldNames).reduce((prev, next) => prev.concat(next)))],
+    fn: (obj: Object, fieldName: string, label: string | undefined, value: any): string | undefined => {
+      for (const func of args) {
+        const fn = func.fn;
+        const result = fn(obj, fieldName, label, value);
+        if (result) return result;
+      }
+    }
+  };
 };
 
 export interface ValidationResult {
   success: boolean;
-  errors: {[index: string]: string};
+  errors: {[index: string]: string | undefined};
 }
 
 export default class Validator {
-  private rules: {[index: string]: IValidateFn} = {};
+  private rules: {[index: string]: IValidateFnData} = {};
   constructor() { }
 
-  addRule(name: string, fn: IValidateFn) {
-    if (this.rules[name]) {
-      this.rules[name] = and(this.rules[name], fn);
+  addRule(fieldName: string, fnData: IValidateFnData) {
+    if (this.rules[fieldName]) {
+      this.rules[fieldName] = and(this.rules[fieldName], fnData);
       return;
     }
 
-    this.rules[name] = fn;
+    this.rules[fieldName] = fnData;
   }
 
-  validate(obj: ObjectType): ValidationResult {
-    if (!obj) return {success: true, errors: {}};
+  validateFields(fieldNames: string[], obj: ObjectType): ValidationResult {
     let result: ValidationResult = {
       success: true,
       errors: {}
     };
+    if (!fieldNames || !obj) {
+      return result;
+    }
 
-    for (const field in this.rules) {
-      const value = obj[field] && obj[field].value;
-      const label = obj[field] && obj[field].label;
-      const fn = this.rules[field];
+    fieldNames.forEach(fieldName => {
+      const value = obj[fieldName] && obj[fieldName].value;
+      const label = obj[fieldName] && obj[fieldName].label;
+      const fn    = this.rules[fieldName] && this.rules[fieldName].fn;
+
       if (fn) {
-        const v = fn(obj, field, label, value);
+        const v = fn(obj, fieldName, label, value);
         if (v) {
-          result.success       = false;
-          result.errors[field] = v;
+          result.success           = false;
+          result.errors[fieldName] = v;
         }
       }
-    }
+    });
 
     return result;
   }

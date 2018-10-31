@@ -7,10 +7,12 @@ import {
   root,
   observe
 } from 'rewire-core';
-import MailOutlineIcon                              from '@material-ui/icons/MailOutline';
-import AccessTimeIcon                               from '@material-ui/icons/AccessTime';
-import DateRangeIcon                                from '@material-ui/icons/DateRange';
-import Validator, { ValidationResult, IValidateFn } from './Validator';
+import MailOutlineIcon from '@material-ui/icons/MailOutline';
+import AccessTimeIcon  from '@material-ui/icons/AccessTime';
+import DateRangeIcon   from '@material-ui/icons/DateRange';
+import Validator, {
+  ValidationResult,
+  IValidateFnData} from './Validator';
 import editor, {
   EditorType,
   TextAlignment,
@@ -31,12 +33,13 @@ export interface IFieldDefn {
   startAdornment(adornment?: () => JSX.Element): IFieldDefn;
   endAdornment(adornment?: () => JSX.Element): IFieldDefn;
   editor(editorType: EditorType, editProps?: any): IFieldDefn;
-  validators(fn: IValidateFn): IFieldDefn;
+  validators(fnData: IValidateFnData): IFieldDefn;
 }
 
 export interface IEditorField extends IField {
   Editor: React.SFC<any>;
-  type:   IFieldTypes;
+  type: IFieldTypes;
+  linkedFieldNames: string[];
 }
 
 export interface IFieldDefns {
@@ -44,19 +47,19 @@ export interface IFieldDefns {
 }
 
 interface IBaseFieldDefn {
-  type           : IFieldTypes;
-  editorType?    : EditorType;
-  autoFocus?     : boolean;
-  editProps?     : any;
-  label?         : string;
-  placeholder?   : string;
-  align?         : TextAlignment;
-  error?         : string;
-  value?         : any;
-  disabled?      : (field: IEditorField) => boolean;
-  disableErrors? : boolean;
-  visible?       : boolean;
-  validators?    : IValidateFn;
+  type             : IFieldTypes;
+  editorType?      : EditorType;
+  autoFocus?       : boolean;
+  editProps?       : any;
+  label?           : string;
+  placeholder?     : string;
+  align?           : TextAlignment;
+  error?           : string;
+  value?           : any;
+  disabled?        : (field: IEditorField) => boolean;
+  disableErrors?   : boolean;
+  visible?         : boolean;
+  validators?      : IValidateFnData;
 
   startAdornment?(): JSX.Element;
   endAdornment?(): JSX.Element;
@@ -116,12 +119,13 @@ class BaseField implements IFieldDefn {
     return this;
   }
 
-  validators(text: IValidateFn): IFieldDefn {
+  validators(validateFnData: IValidateFnData): IFieldDefn {
     if (this.typeDefn.validators) {
-      this.typeDefn.validators = and(text, this.typeDefn.validators);
+      this.typeDefn.validators = and(validateFnData, this.typeDefn.validators);
     } else {
-      this.typeDefn.validators = text;
+      this.typeDefn.validators = validateFnData;
     }
+
     return this;
   }
 }
@@ -129,6 +133,7 @@ class BaseField implements IFieldDefn {
 export interface IFormOptions {
   defaultAdornmentsEnabled?: boolean;
   updateOnChange?: boolean;
+  validateOnUpdate?: boolean;
 }
 
 export default class Form {
@@ -138,6 +143,7 @@ export default class Form {
   private _hasErrors      : () => boolean;
   defaultAdornmentsEnabled: boolean;
   updateOnChange          : boolean;
+  validateOnUpdate        : boolean;
   fields                  : IEditorField[];
   validator               : Validator;
   field                   : {[index: string]: IEditorField};
@@ -146,7 +152,9 @@ export default class Form {
     this.field                    = observable({});
     this.validator                = new Validator();
     this.defaultAdornmentsEnabled = options && options.defaultAdornmentsEnabled !== undefined ? options.defaultAdornmentsEnabled : true;
-    this.updateOnChange           = options && options.updateOnChange !== undefined ? options.updateOnChange : true;
+    // this.updateOnChange           = options && options.updateOnChange !== undefined ? options.updateOnChange : true;
+    this.updateOnChange           = options && options.updateOnChange || false;
+    this.validateOnUpdate         = options && options.validateOnUpdate !== undefined ? options.validateOnUpdate : true;
     this.initializeFields(fields);
     this.value = initial || {};
   }
@@ -161,7 +169,7 @@ export default class Form {
 
     root((dispose) => {
       this.dispose        = dispose;
-      const result        = this.validator.validate(this.toObjectLabelsAndValues());
+      const result        = this.validator.validateFields(this.fields.map(field => field.name), this.toObjectLabelsAndValues());
       const fieldsChanged = observe(() => this.fields.map(f => f.value));
       this._hasChanges    = computed(fieldsChanged, () => {
         if (!this._value) return false;
@@ -174,7 +182,7 @@ export default class Form {
 
       this._hasErrors = computed(fieldsChanged, () => {
         if (!this._value) return false;
-        const result = this.validate();
+        const result = this.validateForm(false);
         return !result.success;
       }, !result.success);
     });
@@ -216,7 +224,12 @@ export default class Form {
 
   private createEditor(editorType: EditorType | undefined, field: IEditorField, editProps?: any): React.SFC<any> {
     if (!editorType) editorType = Form.editorDefaults[field.type];
-    const onValueChange = (v: any) => field.value = v;
+    const onValueChange = (v: any) => {
+      field.value = v;
+      if (this.validateOnUpdate) {
+        this.validateField(field.name);
+      }
+    };
 
     if (!editProps) {
       editProps = {updateOnChange: this.updateOnChange};
@@ -231,6 +244,7 @@ export default class Form {
       name,
       autoFocus: fieldDefn.typeDefn.autoFocus,
       type: fieldDefn.typeDefn.type,
+      Editor: undefined,
       placeholder: fieldDefn.typeDefn.placeholder,
       align: fieldDefn.typeDefn.align,
       label: fieldDefn.typeDefn.label,
@@ -239,6 +253,7 @@ export default class Form {
       visible: true,
       startAdornment: fieldDefn.typeDefn.startAdornment,
       endAdornment: fieldDefn.typeDefn.endAdornment,
+      linkedFieldNames: fieldDefn.typeDefn.validators && fieldDefn.typeDefn.validators.linkedFieldNames || [],
     } as IEditorField;
 
     if (this.defaultAdornmentsEnabled && !Object.prototype.hasOwnProperty.call(fieldDefn.typeDefn, 'endAdornment')) {
@@ -295,16 +310,34 @@ export default class Form {
 
   public submit = (enforceValidation: boolean = true) => {
     if (!this._value) return false;
-    if (!this.validate() && enforceValidation) return false;
+    let result = this.validateForm();
+    if (!result.success && enforceValidation) return false;
     replace(this._value, this.toObjectValues());
     return true;
   }
 
-  private validate(): ValidationResult {
-    let result = this.validator.validate(this.toObjectLabelsAndValues());
-    this.fields.forEach(element => {
-      element.error = result.errors[element.name];
+  private validateField(fieldName: string) {
+    let fieldNamesLinkedToThisField = this.fields.filter(field => field.linkedFieldNames.includes(fieldName)).map(field => field.name);
+    let fieldNamesToValidate        = [...new Set([fieldName, ...fieldNamesLinkedToThisField])];
+
+    let result = this.validator.validateFields(fieldNamesToValidate, this.toObjectLabelsAndValues());
+    fieldNamesToValidate.forEach(fieldName => {
+      let field = this.field[fieldName];
+      if (field) {
+        field.error = result.errors[fieldName];
+      }
     });
+
+    return result;
+  }
+
+  private validateForm(produceErrors: boolean = true): ValidationResult {
+    let result = this.validator.validateFields(this.fields.map(field => field.name), this.toObjectLabelsAndValues());
+    if (produceErrors) {
+      this.fields.forEach(field => {
+        field.error = result.errors[field.name];
+      });
+    }
     return result;
   }
 
