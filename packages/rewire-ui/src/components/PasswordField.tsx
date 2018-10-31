@@ -107,7 +107,7 @@ class PasswordFieldInternal extends React.Component<PasswordFieldPropsStyled, IP
     let adornment = this.props.hasAdornment
       ? (
         <InputAdornment position='end' classes={{root: this.props.classes.inputAdornmentRoot}}>
-          <IconButton classes={{root: this.props.classes.iconButtonRoot}} disableRipple={true} onClick={this.handleClickShowPassword}>
+          <IconButton tabIndex={-1} classes={{root: this.props.classes.iconButtonRoot}} disableRipple={true} onClick={this.handleClickShowPassword}>
             {this.state.showPassword
               ? <VisibilityOffIcon />
               : <VisibilityIcon />
@@ -117,12 +117,14 @@ class PasswordFieldInternal extends React.Component<PasswordFieldPropsStyled, IP
         )
       : undefined;
 
+    const type = this.state.showPassword ? 'text' : 'password';
+
     if (this.props.updateOnChange) {
       return (
         <TextField
           className={this.props.className}
           classes={{root: this.props.classes.formControlRoot}}
-          type={this.state.showPassword ? 'text' : 'password'}
+          type={type}
           disabled={this.props.disabled}
           label={this.props.label}
           placeholder={this.props.placeholder}
@@ -142,12 +144,12 @@ class PasswordFieldInternal extends React.Component<PasswordFieldPropsStyled, IP
     }
 
     return (
-      <BlurInputHOC {...this.props} onValueChange={this.props.onValueChange}
+      <BlurInputHOC {...this.props} type={type} onValueChange={this.props.onValueChange}
         render={(props: PasswordFieldPropsStyled) =>
           <TextField
             className={props.className}
             classes={{root: props.classes.formControlRoot}}
-            type='password'
+            type={type}
             disabled={props.disabled}
             label={props.label}
             placeholder={props.placeholder}
@@ -160,7 +162,7 @@ class PasswordFieldInternal extends React.Component<PasswordFieldPropsStyled, IP
             onKeyDown={props.onKeyDown}
             onChange={props.onChange}
             inputProps={{autoFocus: props.autoFocus, className: props.classes.nativeInput, style: {textAlign: props.align || 'left'}}}
-            InputProps={{classes: {root: props.classes.inputRoot, inputType: props.classes.inputType}}}
+            InputProps={{endAdornment: adornment, classes: {root: props.classes.inputRoot, inputType: props.classes.inputType}}}
             InputLabelProps={{shrink: true}}
           />
         }

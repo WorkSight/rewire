@@ -1,4 +1,5 @@
-import {fetch, match} from 'rewire-common';
+import {fetch, match}  from 'rewire-common';
+import {TextAlignment} from '../components/editors';
 
 export interface ISearchOptions {
   parentId?: string;
@@ -74,7 +75,11 @@ export interface ICustomProps<T> {
   readonly selectedItem?: T;
   visible?              : boolean;
   error?                : string;
+  align?                : TextAlignment;
   label?                : string;
+  disableErrors?        : boolean;
+  startAdornment?       : JSX.Element;
+  endAdornment?         : JSX.Element;
   onSelectItem          : (value?: T) => void;
   search                : SearchFn<T>;
   map?                  : MapFn<T>;

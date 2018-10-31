@@ -228,7 +228,7 @@ class Cell extends React.PureComponent<CellProps, {}> {
 
       case 'Enter':
         this.grid.editCell(undefined);
-          if (this.element) this.element.focus();
+        if (this.element) this.element.focus();
         break;
 
       case 'F2':

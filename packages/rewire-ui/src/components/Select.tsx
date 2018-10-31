@@ -6,7 +6,7 @@ import Input                   from '@material-ui/core/Input';
 import InputLabel              from '@material-ui/core/InputLabel';
 import MenuItem                from '@material-ui/core/MenuItem';
 import * as React              from 'react';
-import Select                  from '@material-ui/core/Select';
+import Select, {SelectProps}   from '@material-ui/core/Select';
 import InputAdornment          from '@material-ui/core/InputAdornment';
 import {
   ICustomProps,
@@ -56,17 +56,17 @@ const styles = (theme: Theme) => ({
   },
 });
 
-export type ISelectProps<T> = ICustomProps<T> & React.InputHTMLAttributes<any>;
-type SelectProps<T>         = WithStyle<ReturnType<typeof styles>, ISelectProps<T>>;
+export type ISelectInternalProps<T> = ICustomProps<T> & React.InputHTMLAttributes<any> & SelectProps;
+type SelectInternalProps<T>         = WithStyle<ReturnType<typeof styles>, ISelectInternalProps<T>>;
 
-class SelectInternal<T> extends React.Component<SelectProps<T>, any> {
+class SelectInternal<T> extends React.Component<SelectInternalProps<T>, any> {
   state : any;
   search: SearchFn<T>;
   map   : MapFn<T>;
 
-  constructor(props: SelectProps<T>) {
+  constructor(props: SelectInternalProps<T>) {
     super(props);
-    this.state  = {suggestions: []};
+    this.state  = {suggestions: [], isOpen: false};
     this.search = props.search;
     this.map    = props.map || defaultMap;
   }
@@ -108,14 +108,27 @@ class SelectInternal<T> extends React.Component<SelectProps<T>, any> {
     }
   }
 
+  handleOnClose = (event: object) => {
+    this.setState({isOpen: false});
+  }
+
+  handleOnOpen = (event: object) => {
+    this.setState({isOpen: true});
+  }
+
   handleMenuKeyDown = (event: React.KeyboardEvent<any>) => {
     switch (event.keyCode) {
+      case 9:
+        this.props.onSelectItem && this.props.onSelectItem(this.state.suggestions.find((v: any) => event.target.dataset.value === this.map(v)));
+        this.setState({isOpen: false});
+        event.stopPropagation();
+        event.preventDefault();
+      case 13:
       case 37:
       case 38:
       case 39:
       case 40:
         event.stopPropagation();
-        event.preventDefault();
         break;
     }
   }
@@ -158,6 +171,7 @@ class SelectInternal<T> extends React.Component<SelectProps<T>, any> {
         (nextProps.disabled !== this.props.disabled) ||
         (nextProps.visible !== this.props.visible) ||
         (nextState.suggestions !== this.state.suggestions) ||
+        (nextState.isOpen !== this.state.isOpen) ||
         (nextProps.label !== this.props.label) ||
         (nextProps.placeholder !== this.props.placeholder) ||
         (nextProps.align !== this.props.align) ||
@@ -185,6 +199,9 @@ class SelectInternal<T> extends React.Component<SelectProps<T>, any> {
     <Select
       disabled={disabled}
       value={v as any}
+      open={this.state.isOpen}
+      onOpen={this.handleOnOpen}
+      onClose={this.handleOnClose}
       onChange={this.handleChanged}
       displayEmpty={true}
       className={cls}
@@ -192,7 +209,7 @@ class SelectInternal<T> extends React.Component<SelectProps<T>, any> {
       classes={{root: classes.selectRoot, select: classes.select}}
       MenuProps={{classes: {paper: classes.selectMenuPaper}, MenuListProps: menuListProps}}
       input={<Input startAdornment={startAdornment} endAdornment={endAdornment} autoFocus={autoFocus} classes={{root: classes.inputRoot}}/>}
-      renderValue={(p) => (
+      renderValue={() => (
         <span className={classes.valueRendererContainer} style={{textAlign: align || 'left'}}>
           {v || <span className={classes.placeholderValue}>{placeholder}</span>}
         </span>)}>{

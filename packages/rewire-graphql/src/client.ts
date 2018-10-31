@@ -91,8 +91,10 @@ class Client implements IClient {
   }
 }
 
-export default function client(url: string) {
+export default function client(url: string, fetchOptions?: object | (() => object), cache?: ICache) {
   return new Client({
     url,
+    fetchOptions,
+    cache
   }) as IClient;
 }

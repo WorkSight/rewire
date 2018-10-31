@@ -177,11 +177,14 @@ class AutoComplete<T> extends React.Component<IAutoCompleteProps<T>, any> {
   renderSuggestionsContainer = (options: any) => {
     const { getMenuProps, isOpen, children, classes } = options;
     const menuProps = {
-      onKeyPress: this.handleMenuKeyPress,
       onMouseDown: this.handleMenuMouseDown,
       onClick: this.handleMenuClick,
       onDoubleClick: this.handleMenuDoubleClick,
     };
+
+    if (!children || children.length <= 0) {
+      return null;
+    }
 
     return (
       <Popper open={isOpen} placement='bottom-start' anchorEl={this.suggestionsContainerNode} className={classes.popper} style={{width: this.suggestionsContainerNode ? this.suggestionsContainerNode.clientWidth : 'auto'}}>
@@ -219,27 +222,29 @@ class AutoComplete<T> extends React.Component<IAutoCompleteProps<T>, any> {
       case 13:
         const state = this.downShift.getState();
         if (state.isOpen) {
-          if (!state.inputValue) {
-            this.downShift.clearSelection();
+          if (this.state.suggestions.length > 0) {
+            this.downShift.selectHighlightedItem({
+              type: '__autocomplete_keydown_enter__'
+            });
+          } else {
+            this.downShift.selectItem(state.selectedItem, {
+              type: '__autocomplete_keydown_enter__'
+            });
             return;
           }
-        this.downShift.selectHighlightedItem({
-            type: '__autocomplete_keydown_enter__'
-          });
+          event.stopPropagation();
+          event.preventDefault();
         }
         break;
+      case 37:
       case 38:
+      case 39:
       case 40:
         if (this.state.suggestions.length > 0) {
           event.stopPropagation();
         }
         break;
     }
-  }
-
-  handleMenuKeyPress = (event: React.KeyboardEvent<any>) => {
-    event.stopPropagation();
-    event.preventDefault();
   }
 
   handleMenuMouseDown = (event: React.MouseEvent<any>) => {
@@ -297,7 +302,7 @@ class AutoComplete<T> extends React.Component<IAutoCompleteProps<T>, any> {
     return (
       <Downshift
         defaultHighlightedIndex={0}
-        selectedItem={this.props.selectedItem}
+        initialSelectedItem={this.props.selectedItem}
         itemToString={this.map}
         onInputValueChange={this.handleInputChanged}
         onUserAction={this.handleItemChanged}
