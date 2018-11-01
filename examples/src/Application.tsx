@@ -630,10 +630,10 @@ class TestDialog extends Modal {
     noLabel              : Form.boolean(),
     disabled             : Form.boolean().label('Disabled').disabled(() => true),
     email                : Form.email().label('Email').validators(isRequired).placeholder('enter a valid email'),
-    password             : Form.password().label('Password').validators(and(isRequired, isSameAsOther('password_confirmation', 'passwords are not the same'))).placeholder('enter a password'),
-    password_confirmation: Form.password().label('Confirm Password').placeholder('confirm your password'),
+    password             : Form.password().label('Password').validators(and(isRequired, isSameAsOther('password_confirmation', 'passwords are not the same'))).placeholder('enter a password').updateOnChange(),
+    password_confirmation: Form.password().label('Confirm Password').placeholder('confirm your password').updateOnChange(),
     country              : Form.reference(countries).label('Country').placeholder('pick a country').startAdornment(() => <AccessibilityIcon />).validators(isRequired),
-    time                 : Form.time().label('Time').placeholder('enter a time').validators(isRequired),
+    time                 : Form.time().label('Time').placeholder('enter a time').validators(isRequired).validateOnUpdate(false),
     avatar               : Form.avatar({width: 1000, height: 1000, avatarDiameter: 150, cropRadius: 75}).label('Add Photo'),
   }, {email: 'splace@worksight.net', isGreat: true, avatar: doucheSuitDude});
 
