@@ -29,16 +29,20 @@ export interface IFieldDefn {
   align(text: TextAlignment): IFieldDefn;
   autoFocus(): IFieldDefn;
   disabled(action: (field: IEditorField) => boolean): IFieldDefn;
-  disableErrors(): IFieldDefn;
+  disableErrors(disableErrors?: boolean): IFieldDefn;
   startAdornment(adornment?: () => JSX.Element): IFieldDefn;
   endAdornment(adornment?: () => JSX.Element): IFieldDefn;
   editor(editorType: EditorType, editProps?: any): IFieldDefn;
+  updateOnChange(updateOnChange?: boolean): IFieldDefn;
+  validateOnUpdate(validateOnUpdate?: boolean): IFieldDefn;
   validators(fnData: IValidateFnData): IFieldDefn;
 }
 
 export interface IEditorField extends IField {
   Editor: React.SFC<any>;
   type: IFieldTypes;
+  updateOnChange: boolean;
+  validateOnUpdate: boolean;
   linkedFieldNames: string[];
 }
 
@@ -59,6 +63,8 @@ interface IBaseFieldDefn {
   disabled?        : (field: IEditorField) => boolean;
   disableErrors?   : boolean;
   visible?         : boolean;
+  updateOnChange?  : boolean;
+  validateOnUpdate?: boolean;
   validators?      : IValidateFnData;
 
   startAdornment?(): JSX.Element;
@@ -96,8 +102,8 @@ class BaseField implements IFieldDefn {
     return this;
   }
 
-  disableErrors(): IFieldDefn {
-    this.typeDefn.disableErrors = true;
+  disableErrors(disableErrors: boolean = true): IFieldDefn {
+    this.typeDefn.disableErrors = disableErrors;
     return this;
   }
 
@@ -108,6 +114,16 @@ class BaseField implements IFieldDefn {
 
   endAdornment(adornment?: () => JSX.Element): IFieldDefn {
     this.typeDefn.endAdornment = adornment;
+    return this;
+  }
+
+  updateOnChange(updateOnChange: boolean = true): IFieldDefn {
+    this.typeDefn.updateOnChange = updateOnChange;
+    return this;
+  }
+
+  validateOnUpdate(validateOnUpdate: boolean = true): IFieldDefn {
+    this.typeDefn.validateOnUpdate = validateOnUpdate;
     return this;
   }
 
@@ -132,6 +148,7 @@ class BaseField implements IFieldDefn {
 
 export interface IFormOptions {
   defaultAdornmentsEnabled?: boolean;
+  disableErrors?: boolean;
   updateOnChange?: boolean;
   validateOnUpdate?: boolean;
 }
@@ -142,6 +159,7 @@ export default class Form {
   private _hasChanges     : () => boolean;
   private _hasErrors      : () => boolean;
   defaultAdornmentsEnabled: boolean;
+  disableErrors           : boolean;
   updateOnChange          : boolean;
   validateOnUpdate        : boolean;
   fields                  : IEditorField[];
@@ -152,6 +170,7 @@ export default class Form {
     this.field                    = observable({});
     this.validator                = new Validator();
     this.defaultAdornmentsEnabled = options && options.defaultAdornmentsEnabled !== undefined ? options.defaultAdornmentsEnabled : true;
+    this.disableErrors            = options && options.disableErrors || false;
     // this.updateOnChange           = options && options.updateOnChange !== undefined ? options.updateOnChange : true;
     this.updateOnChange           = options && options.updateOnChange || false;
     this.validateOnUpdate         = options && options.validateOnUpdate !== undefined ? options.validateOnUpdate : true;
@@ -224,18 +243,20 @@ export default class Form {
 
   private createEditor(editorType: EditorType | undefined, field: IEditorField, editProps?: any): React.SFC<any> {
     if (!editorType) editorType = Form.editorDefaults[field.type];
+
+    if (!editProps) {
+      editProps = {updateOnChange: field.updateOnChange};
+    } else {
+      editProps['updateOnChange'] = field.updateOnChange;
+    }
+
     const onValueChange = (v: any) => {
       field.value = v;
-      if (this.validateOnUpdate) {
+      if (field.validateOnUpdate) {
         this.validateField(field.name);
       }
     };
 
-    if (!editProps) {
-      editProps = {updateOnChange: this.updateOnChange};
-    } else {
-      if (editProps.updateOnChange === undefined) editProps['updateOnChange'] = this.updateOnChange;
-    }
     return (props) => createElement(editor(editorType!, editProps), {...props, field: field, onValueChange});
   }
 
@@ -244,12 +265,13 @@ export default class Form {
       name,
       autoFocus: fieldDefn.typeDefn.autoFocus,
       type: fieldDefn.typeDefn.type,
-      Editor: undefined,
       placeholder: fieldDefn.typeDefn.placeholder,
       align: fieldDefn.typeDefn.align,
       label: fieldDefn.typeDefn.label,
       disabled: fieldDefn.typeDefn.disabled,
-      disableErrors: fieldDefn.typeDefn.disableErrors,
+      disableErrors: fieldDefn.typeDefn.disableErrors !== undefined ? fieldDefn.typeDefn.disableErrors : this.disableErrors,
+      updateOnChange: fieldDefn.typeDefn.updateOnChange !== undefined ? fieldDefn.typeDefn.updateOnChange : this.updateOnChange,
+      validateOnUpdate: fieldDefn.typeDefn.validateOnUpdate !== undefined ? fieldDefn.typeDefn.validateOnUpdate : this.validateOnUpdate,
       visible: true,
       startAdornment: fieldDefn.typeDefn.startAdornment,
       endAdornment: fieldDefn.typeDefn.endAdornment,
@@ -350,7 +372,9 @@ export default class Form {
       isOpen                  : boolean,
       hasChanges              : boolean,
       defaultAdornmentsEnabled: boolean,
+      disableErrors           : boolean,
       updateOnChange          : boolean,
+      validateOnUpdate        : boolean,
 
       submit(): void;
     };
