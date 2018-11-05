@@ -64,9 +64,9 @@ export default class GridKeyboardNavigation {
   }
 
   moveToNextControl(ctl: HTMLElement, direction: number) {
-    if (!this.canMove(ctl, direction)) {
-      return false;
-    }
+    // if (!this.canMove(ctl, direction)) {
+    //   return false;
+    // }
 
     let index = this.fields.indexOf(ctl);
     if (index < 0) {

@@ -19,7 +19,8 @@ import editor, {
   TextAlignment,
   IField,
 } from '../components/editors';
-import {and, isEmail}    from './Validator';
+import {and, isEmail, isRegEx} from './Validator';
+import {defaultPhoneFormat, defaultPhoneMask} from '../components/PhoneField';
 import { createElement } from 'react';
 
 export type IFieldTypes = 'string' | 'static' | 'reference' | 'select' | 'number' | 'boolean' | 'date' | 'time' | 'avatar' | 'password' | 'email' | 'phone';
@@ -421,7 +422,11 @@ export default class Form {
   }
 
   static phone(editProps?: any): IFieldDefn {
-    return new BaseField('phone', editProps);
+    let field                 = new BaseField('phone', editProps);
+    let phoneLength           = ((editProps && editProps.format) || defaultPhoneFormat).replace(new RegExp('[^#]', 'g'), '').length;
+    let phoneRegEx            = new RegExp('^$|^[0-9]{' + phoneLength + '}$');
+    field.typeDefn.validators = isRegEx(phoneRegEx, 'phone number is not in a valid format');
+    return field;
   }
 
   static select(searcher: any, editProps?: any): IFieldDefn {

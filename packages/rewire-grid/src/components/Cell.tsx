@@ -273,6 +273,14 @@ class Cell extends React.PureComponent<CellProps, {}> {
         return;
 
       case 'ArrowLeft':
+        if (this.cell.editing) {
+          evt.stopPropagation();
+          if (this.column.type === 'select' || this.column.type === 'checked') {
+            evt.preventDefault();
+          }
+          return;
+        }
+
         let prevCell: ICell | undefined;
         if (!evt.shiftKey || !this.grid.multiSelect) {
           prevCell = this.grid.previousCell(this.cell, true);
@@ -295,6 +303,14 @@ class Cell extends React.PureComponent<CellProps, {}> {
         return;
 
       case 'ArrowRight':
+        if (this.cell.editing) {
+          evt.stopPropagation();
+          if (this.column.type === 'select' || this.column.type === 'checked') {
+            evt.preventDefault();
+          }
+          return;
+        }
+
         let nextCell: ICell | undefined;
         if (!evt.shiftKey || !this.grid.multiSelect) {
           nextCell = this.grid.nextCell(this.cell, true);
@@ -489,8 +505,8 @@ class Cell extends React.PureComponent<CellProps, {}> {
         endOfTextOnFocus = true;
         selectOnFocus = false;
       }
-      let editorClasses   = undefined;
-      let cellType        = this.column.type;
+      let editorClasses = undefined;
+      let cellType      = this.column.type;
       let additionalProps = {};
       if (cellType === 'select') {
         editorClasses = {select: this.props.classes.selectEditorSelect, selectMenuItem: this.props.classes.editorPopupMenuItem};
