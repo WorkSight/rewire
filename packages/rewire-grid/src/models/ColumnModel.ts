@@ -1,5 +1,5 @@
 import { IColumn, EditorType, IColumnEditor, SortDirection, IGrid, TextAlignment, IError } from './GridTypes';
-import {editor, compare} from 'rewire-ui';
+import {editor, compare, defaultPhoneFormat, defaultPhoneMask} from 'rewire-ui';
 import {freeze} from 'rewire-core';
 import * as is from 'is';
 
@@ -77,7 +77,7 @@ export class ColumnModel implements IColumn {
 
     freeze(() => {
       this.type    = t;
-      this.options = options;
+      this.options = options || {};
       if (this.type === 'none') {
         this.editor = undefined;
       } else {
@@ -90,10 +90,14 @@ export class ColumnModel implements IColumn {
       this.compare   = undefined;
 
       if (t === 'number') {
-        this.map   = (value: any) => (options.decimals && is.number(value)) ? value.toFixed(options.decimals) : value;
+        this.map   = getNumberString;
         this.align = this.align || 'right';
       } else if (t === 'checked') {
         this.map = (value: boolean) => value ? 'True' : 'False';
+      } else if (t === 'phone') {
+        this.options.format = options && options.format !== undefined ? options.format : defaultPhoneFormat;
+        this.options.mask   = options && options.mask !== undefined ? options.mask : defaultPhoneMask;
+        this.map            = getPhoneString;
       }
 
       if (options && options.map) {
@@ -103,6 +107,59 @@ export class ColumnModel implements IColumn {
       }
     });
   }
+}
+
+function getNumberString(value: any): string {
+  if (value === undefined) return value;
+
+  let numberStr = this.options && this.options.decimals && is.number(value) ? value.toFixed(this.options.decimals) : value;
+  numberStr     = this.options && this.options.thousandSeparator ? getThousandSeparatedNumberString(numberStr) : numberStr;
+
+  return numberStr;
+}
+
+function splitDecimal(numStr: string): any {
+  const hasNagation = numStr[0] === '-';
+  const addNegation = hasNagation;
+  numStr = numStr.replace('-', '');
+
+  const parts         = numStr.split('.');
+  const beforeDecimal = parts[0];
+  const afterDecimal  = parts[1] || '';
+
+  return {
+    beforeDecimal,
+    afterDecimal,
+    addNegation,
+  };
+}
+
+function getThousandSeparatedNumberString(numStr: string): string {
+  let {beforeDecimal, afterDecimal, addNegation} = splitDecimal(numStr);
+  let hasDecimalSeparator = !!afterDecimal && afterDecimal.length > 0;
+
+  beforeDecimal = beforeDecimal.replace(/(\d)(?=(\d{3})+(?!\d))/g, '$1' + ',');
+
+  if (addNegation) beforeDecimal = '-' + beforeDecimal;
+
+  return beforeDecimal + (hasDecimalSeparator ? '.' : '') + afterDecimal;
+}
+
+function getPhoneString(value: any): string {
+  if (value === undefined) return value;
+
+  let phoneStr             = value.toString();
+  let phoneFormat          = this.options.format;
+  let phoneMask            = this.options.mask;
+  let hashCount            = 0;
+  const formattedNumberArr = phoneFormat.split('');
+  for (let i = 0; i < phoneFormat.length; i++) {
+    if (phoneFormat[i] === '#') {
+      formattedNumberArr[i] = phoneStr[hashCount] || phoneMask;
+      hashCount++;
+    }
+  }
+  return formattedNumberArr.join('');
 }
 
 export default function create(name: string, title: string): IColumn;

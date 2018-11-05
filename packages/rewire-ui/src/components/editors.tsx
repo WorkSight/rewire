@@ -6,6 +6,7 @@ import TextField       from './TextField';
 import PasswordField   from './PasswordField';
 import StaticField     from './StaticField';
 import NumberField     from './NumberField';
+import PhoneField      from './PhoneField';
 import CheckField      from './CheckField';
 import SwitchField     from './SwitchField';
 import TimeInputField  from './TimeInputField';
@@ -29,7 +30,7 @@ export interface IField {
   endAdornment?(): JSX.Element;
 }
 
-export type EditorType = 'text' | 'static' | 'auto-complete' | 'select' | 'date' | 'time' | 'number' | 'checked' | 'switch' | 'password' | 'email' | 'avatar' | 'none';
+export type EditorType = 'text' | 'static' | 'auto-complete' | 'select' | 'date' | 'time' | 'number' | 'checked' | 'switch' | 'password' | 'email' | 'phone' | 'avatar' | 'none';
 
 export type TextAlignment = 'left' | 'right' | 'center';
 
@@ -124,46 +125,6 @@ export default function editor(type: EditorType, propsForEdit?: any): React.SFC<
       );
 
     case 'text':
-      return ({field, className, classes, onValueChange, endOfTextOnFocus, selectOnFocus}: TextEditorProps) => (
-        <Observe render={() => (
-          <TextField
-            placeholder={field.placeholder}
-            label={field.label}
-            value={field.value}
-            autoFocus={field.autoFocus}
-            endOfTextOnFocus={endOfTextOnFocus}
-            selectOnFocus={selectOnFocus}
-            onValueChange={onValueChange}
-            error={field.error}
-            disabled={field.disabled && field.disabled(field)}
-            visible={field.visible}
-            disableErrors={field.disableErrors}
-            align={field.align || 'left'}
-            className={className}
-            classes={classes}
-            startAdornment={field.startAdornment && field.startAdornment()}
-            endAdornment={field.endAdornment && field.endAdornment()}
-            {...propsForEdit}
-          />
-        )} />
-      );
-
-    case 'static':
-    return ({field, className, classes, onValueChange}: TextEditorProps) => (
-      <Observe render={() => (
-        <StaticField
-          label={field.label}
-          value={field.value}
-          onValueChange={onValueChange}
-          visible={field.visible}
-          align={field.align || 'left'}
-          className={className}
-          classes={classes}
-          {...propsForEdit}
-        />
-      )} />
-    );
-
     case 'email':
       return ({field, className, classes, onValueChange, endOfTextOnFocus, selectOnFocus}: TextEditorProps) => (
         <Observe render={() => (
@@ -188,6 +149,46 @@ export default function editor(type: EditorType, propsForEdit?: any): React.SFC<
           />
         )} />
       );
+
+    case 'phone':
+      return ({field, className, classes, onValueChange, endOfTextOnFocus, selectOnFocus}: TextEditorProps) => (
+        <Observe render={() => (
+          <PhoneField
+            label={field.label}
+            value={field.value}
+            onValueChange={onValueChange}
+            endOfTextOnFocus={endOfTextOnFocus}
+            selectOnFocus={selectOnFocus}
+            error={field.error}
+            disabled={field.disabled && field.disabled(field)}
+            autoFocus={field.autoFocus}
+            visible={field.visible}
+            disableErrors={field.disableErrors}
+            align={field.align || 'left'}
+            className={className}
+            classes={classes}
+            startAdornment={field.startAdornment && field.startAdornment()}
+            endAdornment={field.endAdornment && field.endAdornment()}
+            {...propsForEdit}
+          />
+        )} />
+      );
+
+    case 'static':
+      return ({field, className, classes, onValueChange}: TextEditorProps) => (
+        <Observe render={() => (
+          <StaticField
+            label={field.label}
+            value={field.value}
+            onValueChange={onValueChange}
+            visible={field.visible}
+            align={field.align || 'left'}
+            className={className}
+            classes={classes}
+            {...propsForEdit}
+          />
+        )} />
+    );
 
     case 'password':
       return ({field, className, classes, onValueChange, endOfTextOnFocus, selectOnFocus}: TextEditorProps) => (

@@ -379,6 +379,7 @@ function createTestGrid(nRows: number, nColumns: number) {
   for (let col = 0; col < nColumns; col++) {
     cols.push(createColumn('column' + col, 'Header# ' + col, 'text', Math.trunc(Math.random() * 250 + 50) + 'px'));
   }
+  cols.push(createColumn('phoneColumn', 'Phone', {type: 'phone'}, Math.trunc(Math.random() * 250 + 50) + 'px'));
   cols.push(createColumn('numberColumn', 'Number', {type: 'number', options: {decimals: 2, thousandSeparator: false}}, Math.trunc(Math.random() * 250 + 50) + 'px'));
   cols.push(createColumn('dateColumn', 'Date', 'date', Math.trunc(Math.random() * 250 + 50) + 'px'));
   cols.push(createColumn('timeColumn', 'Time', 'time', Math.trunc(Math.random() * 250 + 50) + 'px'));
@@ -446,6 +447,7 @@ function createTestGrid(nRows: number, nColumns: number) {
       else if (colName === 'timeColumn') v = '7:30';
       else if (colName === 'dateColumn') v = '2018-11-11';
       else if (colName === 'complexColumn') v = row > 3 ? new ComplexCellData(guid(), 'Homer', 45) : undefined;
+      else if (colName === 'phoneColumn') v = Number.parseInt('1250' + Math.round(Math.random() * 100000000).toString());
       else if (((column >= 5) && (column <= 6)) || colName === 'numberColumn') v = Math.random() * 10000;
       r[colName] = v;
     }
@@ -632,6 +634,7 @@ class TestDialog extends Modal {
     email                : Form.email().label('Email').validators(isRequired).placeholder('enter a valid email'),
     password             : Form.password().label('Password').validators(and(isRequired, isSameAsOther('password_confirmation', 'passwords are not the same'))).placeholder('enter a password').updateOnChange(),
     password_confirmation: Form.password().label('Confirm Password').placeholder('confirm your password').updateOnChange(),
+    phone                : Form.phone().label('Phone Number').validators(isRequired).placeholder('your phone number'),
     country              : Form.reference(countries).label('Country').placeholder('pick a country').startAdornment(() => <AccessibilityIcon />).validators(isRequired),
     time                 : Form.time().label('Time').placeholder('enter a time').validators(isRequired).validateOnUpdate(false),
     avatar               : Form.avatar({width: 1000, height: 1000, avatarDiameter: 150, cropRadius: 75}).label('Add Photo'),
@@ -670,6 +673,7 @@ const TestFormView = ({form}: {form: typeof testDialog.form}) => (
       <div className='content'>
         <form.field.password.Editor />
         <form.field.password_confirmation.Editor />
+        <form.field.phone.Editor />
       </div>
       <div className='content'>
         <form.field.country.Editor className='span4' />
