@@ -634,7 +634,8 @@ class TestDialog extends Modal {
     email                : Form.email().label('Email').validators(isRequired).placeholder('enter a valid email'),
     password             : Form.password().label('Password').validators(and(isRequired, isSameAsOther('password_confirmation', 'passwords are not the same'))).placeholder('enter a password').updateOnChange(),
     password_confirmation: Form.password().label('Confirm Password').placeholder('confirm your password').updateOnChange(),
-    phone                : Form.phone().label('Phone Number').validators(isRequired).placeholder('your phone number'),
+    phone                : Form.phone().label('Phone Number (optional)').placeholder('your phone number'),
+    phoneCustom          : Form.phone({format: '#-##-###-####-#####'}).label('Phone Number Custom (optional)').placeholder('your phone number'),
     country              : Form.reference(countries).label('Country').placeholder('pick a country').startAdornment(() => <AccessibilityIcon />).validators(isRequired),
     time                 : Form.time().label('Time').placeholder('enter a time').validators(isRequired).validateOnUpdate(false),
     avatar               : Form.avatar({width: 1000, height: 1000, avatarDiameter: 150, cropRadius: 75}).label('Add Photo'),
@@ -674,6 +675,7 @@ const TestFormView = ({form}: {form: typeof testDialog.form}) => (
         <form.field.password.Editor />
         <form.field.password_confirmation.Editor />
         <form.field.phone.Editor />
+        <form.field.phoneCustom.Editor />
       </div>
       <div className='content'>
         <form.field.country.Editor className='span4' />

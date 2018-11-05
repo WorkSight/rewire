@@ -20,6 +20,7 @@ const styles = (theme: Theme) => ({
   },
   checkboxContainerNoLabel: {
     display: 'flex',
+    flex: '1',
     alignItems: 'center',
   }
 });
