@@ -140,10 +140,11 @@ export interface IGroupRow extends IRow, IRows {
 }
 
 export type IColumnEditor =
-  'text' | 'date' | 'time' | 'checked' | 'password' | 'none' |
+  'text' | 'date' | 'time' | 'checked' | 'password' | 'mask' | 'none' |
   {type: 'auto-complete', options: {search: SearchFn<any>, map: MapFn<any>}} |
   {type: 'select', options: {search: SearchFn<any>, map: MapFn<any>}} |
-  {type: 'number', options: {decimals: number, thousandSeparator?: boolean, fixed?: boolean}};
+  {type: 'number', options?: {decimals?: number, thousandSeparator?: boolean, fixed?: boolean}} |
+  {type: 'phone', options?: {format?: string, mask?: string}};
 
 
 export interface ICellProperties {

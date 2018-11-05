@@ -460,40 +460,8 @@ class Cell extends React.PureComponent<CellProps, {}> {
     return <div className={this.props.classes.errorContainer}><ErrorIconToUse className={classNames(this.props.classes.errorIcon, errorColorClass, errorCls)} /></div>;
   }
 
-  splitDecimal(numStr: string) {
-    const hasNagation = numStr[0] === '-';
-    const addNegation = hasNagation;
-    numStr = numStr.replace('-', '');
-
-    const parts         = numStr.split('.');
-    const beforeDecimal = parts[0];
-    const afterDecimal  = parts[1] || '';
-
-    return {
-      beforeDecimal,
-      afterDecimal,
-      addNegation,
-    };
-  }
-
-  getThousandSeparatedNumberString(numStr: string): string {
-    let {beforeDecimal, afterDecimal, addNegation} = this.splitDecimal(numStr);
-    let hasDecimalSeparator = !!afterDecimal && afterDecimal.length > 0;
-
-    beforeDecimal = beforeDecimal.replace(/(\d)(?=(\d{3})+(?!\d))/g, '$1' + ',');
-
-    if (addNegation) beforeDecimal = '-' + beforeDecimal;
-
-    return beforeDecimal + (hasDecimalSeparator ? '.' : '') + afterDecimal;
-  }
-
   get value(): string {
     let value = this.column.map ? this.column.map(this.cell.value) : this.cell.value;
-
-    if (value && this.column.type === 'number' && !this.cell.renderer && this.column.options && this.column.options.thousandSeparator) {
-      value = this.getThousandSeparatedNumberString(value);
-    }
-
     return value;
   }
 
@@ -528,7 +496,7 @@ class Cell extends React.PureComponent<CellProps, {}> {
         editorClasses = {select: this.props.classes.selectEditorSelect, selectMenuItem: this.props.classes.editorPopupMenuItem};
       } else if (cellType === 'checked') {
         editorClasses = {checkboxRoot: this.props.classes.editorCheckboxRoot};
-      } else if (cellType === 'text' || cellType === 'date' || cellType === 'email' || cellType === 'password' || cellType === 'time' || cellType === 'number' || cellType === 'auto-complete') {
+      } else if (cellType === 'text' || cellType === 'date' || cellType === 'email' || cellType === 'password' || cellType === 'time' || cellType === 'number' || cellType === 'phone' || cellType === 'auto-complete') {
         editorClasses = {formControlRoot: this.props.classes.editorFormControlRoot, inputRoot: this.props.classes.editorInputRoot};
       }
 

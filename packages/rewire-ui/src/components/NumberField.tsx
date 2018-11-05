@@ -119,6 +119,8 @@ class NumberTextField extends React.Component<NumberFieldProps> {
           onFocus={this.handleFocus}
           thousandSeparator={this.props.thousandSeparator || undefined}
           decimalScale={this.props.decimals}
+          format={this.props.format}
+          mask={this.props.mask}
           inputProps={{className: this.props.classes.nativeInput, style: {textAlign: this.props.align || 'left'}}}
           InputProps={{startAdornment: startAdornment, endAdornment: endAdornment, classes: {root: this.props.classes.inputRoot}}}
           InputLabelProps={{shrink: true}}
@@ -148,6 +150,8 @@ class NumberTextField extends React.Component<NumberFieldProps> {
             onFocus={this.handleFocus}
             thousandSeparator={props.thousandSeparator || undefined}
             decimalScale={props.decimals}
+            format={props.format}
+            mask={props.mask}
             inputProps={{className: props.classes.nativeInput, style: {textAlign: props.align || 'left'}}}
             InputProps={{startAdornment: startAdornment, endAdornment: endAdornment, classes: {root: props.classes.inputRoot}}}
             InputLabelProps={{shrink: true}}

@@ -8,6 +8,7 @@ import {
   observe
 } from 'rewire-core';
 import MailOutlineIcon from '@material-ui/icons/MailOutline';
+import PhoneIcon       from '@material-ui/icons/Phone';
 import AccessTimeIcon  from '@material-ui/icons/AccessTime';
 import DateRangeIcon   from '@material-ui/icons/DateRange';
 import Validator, {
@@ -21,7 +22,7 @@ import editor, {
 import {and, isEmail}    from './Validator';
 import { createElement } from 'react';
 
-export type IFieldTypes = 'string' | 'static' | 'reference' | 'select' | 'number' | 'boolean' | 'date' | 'time' | 'avatar' | 'password' | 'email';
+export type IFieldTypes = 'string' | 'static' | 'reference' | 'select' | 'number' | 'boolean' | 'date' | 'time' | 'avatar' | 'password' | 'email' | 'phone';
 
 export interface IFieldDefn {
   label(text: string): IFieldDefn;
@@ -237,6 +238,7 @@ export default class Form {
     'time'     : 'time',
     'password' : 'password',
     'email'    : 'email',
+    'phone'    : 'phone',
     'number'   : 'number',
     'avatar'   : 'avatar'
   };
@@ -289,6 +291,9 @@ export default class Form {
           break;
         case 'email':
           this.field[name].endAdornment = () => createElement(MailOutlineIcon, undefined, undefined);
+          break;
+        case 'phone':
+          this.field[name].endAdornment = () => createElement(PhoneIcon, {style: {transform: 'scaleX(-1)'}}, undefined);
           break;
         case 'password':
           this.field[name].endAdornment = () => createElement('span', undefined, undefined);
@@ -413,6 +418,10 @@ export default class Form {
     let field                 = new BaseField('email', editProps);
     field.typeDefn.validators = isEmail;
     return field;
+  }
+
+  static phone(editProps?: any): IFieldDefn {
+    return new BaseField('phone', editProps);
   }
 
   static select(searcher: any, editProps?: any): IFieldDefn {
