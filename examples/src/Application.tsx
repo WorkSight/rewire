@@ -43,7 +43,7 @@ import {createGrid, createColumn, IError, ErrorSeverity}   from 'rewire-grid';
 import {Grid, ICell}         from 'rewire-grid';
 // import { ICell, collapseAll, expandAll } from 'rewire-grid/models/GridTypes';
 import {editor}       from 'rewire-ui';
-import {isRequired, isEmail, and, isSameAsOther} from 'rewire-ui';
+import {isRequired, isEmail, and, isSameAsOther, isGreaterThan, isGreaterThanOrEquals, isLessThan, isLessThanOrEquals} from 'rewire-ui';
 import './graphqltest';
 import doucheSuitDude from './images/doucheSuitDude.jpg';
 import { MuiThemeProvider, Theme, createMuiTheme } from '@material-ui/core/styles';
@@ -625,25 +625,27 @@ const Home = _Home;
 
 class TestDialog extends Modal {
   form = Form.create({
-    date                 : Form.date().label('Date').validators(isRequired),
-    dollars              : Form.number().label('Dollars').validators(isRequired).placeholder('Show me the money').disableErrors().startAdornment(() => <div style={{display: 'flex', alignItems: 'center'}}><AddIcon /><span>$</span></div>),
-    shouldI              : Form.select(searcher).label('Should I?').placeholder('choose!').startAdornment(() => <AccessibilityIcon />).validators(isRequired),
+    date                 : Form.date().label('Date').validators(isRequired).variant('outlined'),
+    dollars              : Form.number().label('Dollars').validators(isRequired).placeholder('Show me the money').disableErrors().startAdornment(() => <div style={{display: 'flex', alignItems: 'center'}}><AddIcon /><span>$</span></div>).variant('outlined'),
+    shouldI              : Form.select(searcher).label('Should I?').placeholder('choose!').startAdornment(() => <AccessibilityIcon />).validators(isRequired).variant('outlined'),
     isGreat              : Form.boolean().label('Is Great'),
     noLabel              : Form.boolean(),
     disabled             : Form.boolean().label('Disabled').disabled(() => true),
-    email                : Form.email().label('Email').validators(isRequired).placeholder('enter a valid email'),
-    password             : Form.password().label('Password').validators(and(isRequired, isSameAsOther('password_confirmation', 'passwords are not the same'))).placeholder('enter a password').updateOnChange(),
-    password_confirmation: Form.password().label('Confirm Password').placeholder('confirm your password').updateOnChange(),
-    phone                : Form.phone().label('Phone Number (optional)').placeholder('your phone number'),
-    phoneCustom          : Form.phone({format: '#-##-###-####-#####'}).label('Phone Number Custom (optional)').placeholder('your phone number'),
-    country              : Form.reference(countries).label('Country').placeholder('pick a country').startAdornment(() => <AccessibilityIcon />).validators(isRequired),
-    time                 : Form.time().label('Time').placeholder('enter a time').validators(isRequired).validateOnUpdate(false),
+    email                : Form.email().label('Email').validators(isRequired).placeholder('enter a valid email').variant('outlined'),
+    name                 : Form.string().label('Name').validators(isRequired).placeholder('enter your name').startAdornment(() => <AccessibilityIcon />).variant('outlined'),
+    password             : Form.password().label('Password').validators(and(isRequired, isSameAsOther('password_confirmation', 'passwords are not the same'))).placeholder('enter a password').updateOnChange().variant('outlined'),
+    password_confirmation: Form.password().label('Confirm Password').placeholder('confirm your password').variant('outlined').updateOnChange(),
+    phone                : Form.phone().label('Phone Number (optional)').placeholder('your phone number').variant('outlined'),
+    phoneCustom          : Form.phone({format: '#-##-###-####-#####'}).label('Phone Number Custom (optional)').placeholder('your phone number').variant('outlined'),
+    country              : Form.reference(countries).label('Country').placeholder('pick a country').startAdornment(() => <AccessibilityIcon />).validators(isRequired).variant('outlined'),
+    timeOut              : Form.time().label('Time Out').placeholder('enter a time').validators(and(isRequired, isLessThan('timeIn'))).variant('outlined'),
+    timeIn               : Form.time().label('Time In').placeholder('enter a time').validators(isRequired).variant('outlined'),
     avatar               : Form.avatar({width: 1000, height: 1000, avatarDiameter: 150, cropRadius: 75}).label('Add Photo'),
   }, {email: 'splace@worksight.net', isGreat: true, avatar: doucheSuitDude});
 
   constructor() {
     super('Test Form');
-    this.action('login', this.submit, {type: 'submit', disabled: () => this.form.hasErrors})
+    this.action('login', this.submit, {type: 'submit'})
         .action('cancel', {color: 'secondary', icon: 'cancel'});
   }
 
@@ -670,6 +672,7 @@ const TestFormView = ({form}: {form: typeof testDialog.form}) => (
         <form.field.noLabel.Editor className='span4' />
         <form.field.disabled.Editor className='span4' />
         <form.field.email.Editor className='span4' />
+        <form.field.name.Editor className='span4' />
       </div>
       <div className='content'>
         <form.field.password.Editor />
@@ -680,7 +683,8 @@ const TestFormView = ({form}: {form: typeof testDialog.form}) => (
       <div className='content'>
         <form.field.country.Editor className='span4' />
         <form.field.isGreat.Editor className='span4' />
-        <form.field.time.Editor className='span4' />
+        <form.field.timeOut.Editor className='span4' />
+        <form.field.timeIn.Editor className='span4' />
       </div>
       <div className='content'>
       <form.field.avatar.Editor />
@@ -690,7 +694,7 @@ const TestFormView = ({form}: {form: typeof testDialog.form}) => (
         <button style={{height: '30px'}}  value='Cancel' onClick={testDialog.actionFn('cancel')}>Cancel</button>
       </div>
     </FormView>
-  )} />;
+  )} />
 );
 
 

@@ -58,7 +58,7 @@ export interface IDialogProps {
   transition?           : (props: any) => JSX.Element;
   transitionDuration?   : number;
   title?                : (dialog: Modal) => JSX.Element;
-  maxWidth?             : 'xs' | 'sm' | 'md' | false;
+  maxWidth?             : 'xs' | 'sm' | 'md' | 'lg' | false;
   ButtonRenderer?       : ActionRenderType;
 }
 

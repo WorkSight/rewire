@@ -2,7 +2,7 @@ import * as React from 'react';
 import {Theme}                       from '@material-ui/core/styles';
 import TextField, { TextFieldProps } from '@material-ui/core/TextField';
 import InputAdornment                from '@material-ui/core/InputAdornment';
-import {TextAlignment}               from './editors';
+import {TextAlignment, TextVariant}  from './editors';
 import {withStyles, WithStyle}       from './styles';
 
 export class TimeValidator {
@@ -130,6 +130,13 @@ const styles = (theme: Theme) => ({
       opacity: 0.4,
     },
   },
+  helperTextRoot: {
+    marginTop: '6px',
+  },
+  helperTextContained: {
+    marginLeft: '14px',
+    marginRight: '14px',
+  },
 });
 
 export interface ITimeFieldProps {
@@ -140,6 +147,7 @@ export interface ITimeFieldProps {
   value?         : number;
   label?         : string;
   align?         : TextAlignment;
+  variant?       : TextVariant;
   placeholder?   : string;
   rounding?      : number;
   startAdornment?: JSX.Element;
@@ -178,6 +186,7 @@ class TimeInputField extends React.Component<TimeFieldProps, ITimeState> {
       (nextProps.label !== this.props.label) ||
       (nextProps.placeholder !== this.props.placeholder) ||
       (nextProps.align !== this.props.align) ||
+      (nextProps.variant !== this.props.variant) ||
       (nextProps.disableErrors !== this.props.disableErrors) ||
       (nextProps.startAdornment !== this.props.startAdornment) ||
       (nextProps.endAdornment !== this.props.endAdornment)
@@ -203,7 +212,7 @@ class TimeInputField extends React.Component<TimeFieldProps, ITimeState> {
   }
 
   render() {
-    const {classes, className, visible, disabled, error, label, placeholder, align, disableErrors, autoFocus} = this.props;
+    const {classes, className, visible, disabled, error, label, placeholder, align, disableErrors, autoFocus, variant} = this.props;
     if (visible === false) {
       return null;
     }
@@ -223,9 +232,11 @@ class TimeInputField extends React.Component<TimeFieldProps, ITimeState> {
         onChange={this.handleChange}
         onBlur={this.handleBlur}
         placeholder={placeholder}
+        variant={variant}
         inputProps={{autoFocus: autoFocus, className: classes.nativeInput, style: {textAlign: align || 'left'}}}
         InputProps={{startAdornment: startAdornment, endAdornment: endAdornment, classes: {root: classes.inputRoot}}}
         InputLabelProps={{shrink: true}}
+        FormHelperTextProps={{classes: {root: classes.helperTextRoot, contained: classes.helperTextContained}}}
       />);
   }
 }

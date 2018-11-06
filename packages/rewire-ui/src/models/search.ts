@@ -1,5 +1,5 @@
-import {fetch, match}  from 'rewire-common';
-import {TextAlignment} from '../components/editors';
+import {fetch, match}               from 'rewire-common';
+import {TextAlignment, TextVariant} from '../components/editors';
 
 export interface ISearchOptions {
   parentId?: string;
@@ -76,6 +76,7 @@ export interface ICustomProps<T> {
   visible?              : boolean;
   error?                : string;
   align?                : TextAlignment;
+  variant?              : TextVariant;
   label?                : string;
   disableErrors?        : boolean;
   startAdornment?       : JSX.Element;

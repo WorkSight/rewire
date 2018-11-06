@@ -5,7 +5,7 @@ import TextField, { TextFieldProps } from '@material-ui/core/TextField';
 import InputAdornment                from '@material-ui/core/InputAdornment';
 import {Theme}                       from '@material-ui/core/styles';
 import BlurInputHOC                  from './BlurInputHOC';
-import {TextAlignment}               from './editors';
+import {TextAlignment, TextVariant}  from './editors';
 import {withStyles, WithStyle}       from './styles';
 
 const styles = (theme: Theme) => ({
@@ -24,6 +24,13 @@ const styles = (theme: Theme) => ({
       color: 'inherit',
       opacity: 0.4,
     },
+  },
+  helperTextRoot: {
+    marginTop: '6px',
+  },
+  helperTextContained: {
+    marginLeft: '14px',
+    marginRight: '14px',
   },
 });
 
@@ -74,6 +81,7 @@ class NumberTextField extends React.Component<NumberFieldProps> {
       (nextProps.label !== this.props.label) ||
       (nextProps.placeholder !== this.props.placeholder) ||
       (nextProps.align !== this.props.align) ||
+      (nextProps.variant !== this.props.variant) ||
       (nextProps.disableErrors !== this.props.disableErrors) ||
       (nextProps.startAdornment !== this.props.startAdornment) ||
       (nextProps.endAdornment !== this.props.endAdornment)
@@ -124,9 +132,11 @@ class NumberTextField extends React.Component<NumberFieldProps> {
           inputProps={{className: this.props.classes.nativeInput, style: {textAlign: this.props.align || 'left'}}}
           InputProps={{startAdornment: startAdornment, endAdornment: endAdornment, classes: {root: this.props.classes.inputRoot}}}
           InputLabelProps={{shrink: true}}
+          FormHelperTextProps={{classes: {root: this.props.classes.helperTextRoot, contained: this.props.classes.helperTextContained}}}
           fixedDecimalScale={this.props.fixed}
           customInput={TextField}
           placeholder={this.props.placeholder}
+          variant={this.props.variant}
           helperText={!this.props.disableErrors && <span>{(!this.props.disabled && this.props.error) || ''}</span>}
         />);
     }
@@ -155,9 +165,11 @@ class NumberTextField extends React.Component<NumberFieldProps> {
             inputProps={{className: props.classes.nativeInput, style: {textAlign: props.align || 'left'}}}
             InputProps={{startAdornment: startAdornment, endAdornment: endAdornment, classes: {root: props.classes.inputRoot}}}
             InputLabelProps={{shrink: true}}
+            FormHelperTextProps={{classes: {root: props.classes.helperTextRoot, contained: props.classes.helperTextContained}}}
             fixedDecimalScale={props.fixed}
             customInput={TextField}
             placeholder={props.placeholder}
+            variant={props.variant}
             helperText={!props.disableErrors && <span>{(!props.disabled && props.error) || ''}</span>}
           />)
         }

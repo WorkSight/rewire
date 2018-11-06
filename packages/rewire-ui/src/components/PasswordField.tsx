@@ -6,7 +6,7 @@ import {Theme}                       from '@material-ui/core/styles';
 import VisibilityIcon                from '@material-ui/icons/Visibility';
 import VisibilityOffIcon             from '@material-ui/icons/VisibilityOff';
 import BlurInputHOC                  from './BlurInputHOC';
-import {TextAlignment}               from './editors';
+import {TextAlignment, TextVariant}  from './editors';
 import {withStyles, WithStyle}       from './styles';
 
 const styles = (theme: Theme) => ({
@@ -38,6 +38,13 @@ const styles = (theme: Theme) => ({
       opacity: 0.4,
     },
   },
+  helperTextRoot: {
+    marginTop: '6px',
+  },
+  helperTextContained: {
+    marginLeft: '14px',
+    marginRight: '14px',
+  },
 });
 
 export interface IPasswordFieldProps {
@@ -49,6 +56,7 @@ export interface IPasswordFieldProps {
   label?           : string;
   placeholder?     : string;
   align?           : TextAlignment;
+  variant?         : TextVariant;
   selectOnFocus?   : boolean;
   endOfTextOnFocus?: boolean;
   updateOnChange?  : boolean;
@@ -83,6 +91,7 @@ class PasswordFieldInternal extends React.Component<PasswordFieldPropsStyled, IP
       (nextProps.label !== this.props.label) ||
       (nextProps.placeholder !== this.props.placeholder) ||
       (nextProps.align !== this.props.align) ||
+      (nextProps.variant !== this.props.variant) ||
       (nextProps.disableErrors !== this.props.disableErrors)
     );
   }
@@ -128,6 +137,7 @@ class PasswordFieldInternal extends React.Component<PasswordFieldPropsStyled, IP
           disabled={this.props.disabled}
           label={this.props.label}
           placeholder={this.props.placeholder}
+          variant={this.props.variant}
           error={!this.props.disableErrors && !this.props.disabled && !!this.props.error}
           helperText={!this.props.disableErrors && <span>{(!this.props.disabled && this.props.error) || ''}</span>}
           value={this.props.value}
@@ -139,6 +149,7 @@ class PasswordFieldInternal extends React.Component<PasswordFieldPropsStyled, IP
           inputProps={{autoFocus: this.props.autoFocus, className: this.props.classes.nativeInput, style: {textAlign: this.props.align || 'left'}}}
           InputProps={{endAdornment: adornment, classes: {root: this.props.classes.inputRoot, inputType: this.props.classes.inputType}}}
           InputLabelProps={{shrink: true}}
+          FormHelperTextProps={{classes: {root: this.props.classes.helperTextRoot, contained: this.props.classes.helperTextContained}}}
         />
       );
     }
@@ -153,6 +164,7 @@ class PasswordFieldInternal extends React.Component<PasswordFieldPropsStyled, IP
             disabled={props.disabled}
             label={props.label}
             placeholder={props.placeholder}
+            variant={props.variant}
             error={!props.disableErrors && !props.disabled && !!props.error}
             helperText={!props.disableErrors && <span>{(!props.disabled && props.error) || ''}</span>}
             value={props.value}
@@ -164,6 +176,7 @@ class PasswordFieldInternal extends React.Component<PasswordFieldPropsStyled, IP
             inputProps={{autoFocus: props.autoFocus, className: props.classes.nativeInput, style: {textAlign: props.align || 'left'}}}
             InputProps={{endAdornment: adornment, classes: {root: props.classes.inputRoot, inputType: props.classes.inputType}}}
             InputLabelProps={{shrink: true}}
+            FormHelperTextProps={{classes: {root: props.classes.helperTextRoot, contained: props.classes.helperTextContained}}}
           />
         }
       />

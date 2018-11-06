@@ -55,6 +55,13 @@ const styles = (theme: Theme) => ({
     height: 'auto',
     lineHeight: '1em',
   },
+  helperTextRoot: {
+    marginTop: '6px',
+  },
+  helperTextContained: {
+    marginLeft: '14px',
+    marginRight: '14px',
+  },
 });
 
 export type IAutoCompleteProps<T> = WithStyle<ReturnType<typeof styles>, ICustomProps<T> & React.InputHTMLAtrributes<any>>;
@@ -84,8 +91,8 @@ class AutoComplete<T> extends React.Component<IAutoCompleteProps<T>, any> {
   }
 
   renderInput = (classes: Record<IStyleClasses, string>, error: string | undefined, inputProps: any, InputProps: any, ref: (node: any) => any) => {
-    const { label, disabled, autoFocus, value, ...other }        = inputProps;
-    const { startAdornment, endAdornment, align, disableErrors } = InputProps;
+    const { label, disabled, autoFocus, value, ...other }                 = inputProps;
+    const { startAdornment, endAdornment, align, variant, disableErrors } = InputProps;
 
     return (
       <TextField
@@ -93,6 +100,7 @@ class AutoComplete<T> extends React.Component<IAutoCompleteProps<T>, any> {
         classes={{root: classes.formControlRoot}}
         value={value}
         label={label}
+        variant={variant}
         error={!disableErrors && !disabled && !!error}
         helperText={!disableErrors && <span>{(!disabled && error) || ''}</span>}
         inputRef={ref}
@@ -101,6 +109,7 @@ class AutoComplete<T> extends React.Component<IAutoCompleteProps<T>, any> {
         inputProps={{className: classes.nativeInput, style: {textAlign: align || 'left'}}}
         InputProps={{startAdornment: startAdornment, endAdornment: endAdornment, classes: {root: classes.inputRoot}}}
         InputLabelProps={{shrink: true}}
+        FormHelperTextProps={{classes: {root: classes.helperTextRoot, contained: classes.helperTextContained}}}
         {...other}
       />
     );
@@ -284,6 +293,7 @@ class AutoComplete<T> extends React.Component<IAutoCompleteProps<T>, any> {
         (nextProps.label !== this.props.label) ||
         (nextProps.placeholder !== this.props.placeholder) ||
         (nextProps.align !== this.props.align) ||
+        (nextProps.variant !== this.props.variant) ||
         (nextProps.disableErrors !== this.props.disableErrors) ||
         (nextProps.startAdornment !== this.props.startAdornment) ||
         (nextProps.endAdornment !== this.props.endAdornment)
@@ -291,7 +301,7 @@ class AutoComplete<T> extends React.Component<IAutoCompleteProps<T>, any> {
   }
 
   render() {
-    const { classes, theme, disabled, visible, error, label, placeholder, autoFocus, align, disableErrors } = this.props;
+    const { classes, theme, disabled, visible, error, label, placeholder, autoFocus, align, disableErrors, variant } = this.props;
     if (visible === false) {
       return null;
     }
@@ -326,7 +336,7 @@ class AutoComplete<T> extends React.Component<IAutoCompleteProps<T>, any> {
                   label: label,
                   placeholder: placeholder,
                 }),
-                {align: align, disableErrors: disableErrors, startAdornment: startAdornment, endAdornment: endAdornment},
+                {align: align, variant, disableErrors: disableErrors, startAdornment: startAdornment, endAdornment: endAdornment},
                 (node => {
                   this.suggestionsContainerNode = node;
                 }),

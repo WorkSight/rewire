@@ -1,4 +1,33 @@
 import {defaultEquals} from 'rewire-core';
+import * as is from 'is';
+
+export function defaultGreaterThan(v1: any, v2: any) {
+  if (v1 === undefined || v1 === null || v2 === undefined || v2 === null) {
+    return true;
+  }
+
+  if (is.string(v1) && is.string(v2)) {
+    return v1.localeCompare(v2) > 0 ;
+  } else if ((is.number(v1) && is.number(v2)) || (is.date(v1) && is.date(v2))) {
+    return v1 > v2;
+  }
+
+  return true;
+}
+
+export function defaultLessThan(v1: any, v2: any) {
+  if (v1 === undefined || v1 === null || v2 === undefined || v2 === null) {
+    return true;
+  }
+
+  if (is.string(v1) && is.string(v2)) {
+    return v1.localeCompare(v2) < 0;
+  } else if ((is.number(v1) && is.number(v2)) || (is.date(v1) && is.date(v2))) {
+    return v1 < v2;
+  }
+
+  return true;
+}
 
 export function isNull(value?: any) {
   if ((value === undefined) || (value === null)) return true;
@@ -52,6 +81,66 @@ export const requiredWhenOtherIsNotNull = (fieldName: string) => {
   };
 };
 
+export const isGreaterThan = (fieldName: string, text?: string) => {
+  return {
+    linkedFieldNames: [fieldName],
+    fn: (obj: ObjectType, otherFieldName: string, otherLabel: string | undefined, otherValue: any): string | undefined => {
+      let value = obj[fieldName] && obj[fieldName].value;
+      if (!defaultGreaterThan(otherValue, value)) {
+        if (text) return text;
+        let label = obj[fieldName] && obj[fieldName].label;
+        return `${otherLabel || otherFieldName} must be greather than ${label || fieldName}`;
+      }
+      return undefined;
+    }
+  };
+};
+
+export const isGreaterThanOrEquals = (fieldName: string, text?: string) => {
+  return {
+    linkedFieldNames: [fieldName],
+    fn: (obj: ObjectType, otherFieldName: string, otherLabel: string | undefined, otherValue: any): string | undefined => {
+      let value = obj[fieldName] && obj[fieldName].value;
+      if (!defaultEquals(otherValue, value) && !defaultGreaterThan(otherValue, value)) {
+        if (text) return text;
+        let label = obj[fieldName] && obj[fieldName].label;
+        return `${otherLabel || otherFieldName} must be greather than or equals to ${label || fieldName}`;
+      }
+      return undefined;
+    }
+  };
+};
+
+export const isLessThan = (fieldName: string, text?: string) => {
+  return {
+    linkedFieldNames: [fieldName],
+    fn: (obj: ObjectType, otherFieldName: string, otherLabel: string | undefined, otherValue: any): string | undefined => {
+      let value = obj[fieldName] && obj[fieldName].value;
+      if (!defaultLessThan(otherValue, value)) {
+        if (text) return text;
+        let label = obj[fieldName] && obj[fieldName].label;
+        return `${otherLabel || otherFieldName} must be less than ${label || fieldName}`;
+      }
+      return undefined;
+    }
+  };
+};
+
+export const isLessThanOrEquals = (fieldName: string, text?: string) => {
+  return {
+    linkedFieldNames: [fieldName],
+    fn: (obj: ObjectType, otherFieldName: string, otherLabel: string | undefined, otherValue: any): string | undefined => {
+      let value = obj[fieldName] && obj[fieldName].value;
+      if (!defaultEquals(otherValue, value) && !defaultLessThan(otherValue, value)) {
+        if (text) return text;
+        let label = obj[fieldName] && obj[fieldName].label;
+        return `${otherLabel || otherFieldName} must be less than or equals to ${label || fieldName}`;
+      }
+      return undefined;
+    }
+  };
+};
+
 export const isSameAsOther = (fieldName: string, text?: string) => {
   return {
     linkedFieldNames: [fieldName],
@@ -60,7 +149,7 @@ export const isSameAsOther = (fieldName: string, text?: string) => {
       if (!defaultEquals(otherValue, value)) {
         if (text) return text;
         let label = obj[fieldName] && obj[fieldName].label;
-        return `${label || fieldName} must be the same as ${otherLabel || otherFieldName}`;
+        return `${otherLabel || otherFieldName} must be the same as ${label || fieldName}`;
       }
       return undefined;
     }
@@ -75,7 +164,7 @@ export const isDifferentFromOther = (fieldName: string, text?: string) => {
       if (defaultEquals(otherValue, value)) {
         if (text) return text;
         let label = obj[fieldName] && obj[fieldName].label;
-        return `${label || fieldName} must be different from ${otherLabel || otherFieldName}`;
+        return `${otherLabel || otherFieldName} must be different from ${label || fieldName}`;
       }
       return undefined;
     }
