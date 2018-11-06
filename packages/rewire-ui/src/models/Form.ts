@@ -17,10 +17,11 @@ import Validator, {
 import editor, {
   EditorType,
   TextAlignment,
+  TextVariant,
   IField,
 } from '../components/editors';
 import {and, isEmail, isRegEx} from './Validator';
-import {defaultPhoneFormat, defaultPhoneMask} from '../components/PhoneField';
+import {defaultPhoneFormat} from '../components/PhoneField';
 import { createElement } from 'react';
 
 export type IFieldTypes = 'string' | 'static' | 'reference' | 'select' | 'number' | 'boolean' | 'date' | 'time' | 'avatar' | 'password' | 'email' | 'phone';
@@ -29,6 +30,7 @@ export interface IFieldDefn {
   label(text: string): IFieldDefn;
   placeholder(text: string): IFieldDefn;
   align(text: TextAlignment): IFieldDefn;
+  variant(text: TextVariant): IFieldDefn;
   autoFocus(): IFieldDefn;
   disabled(action: (field: IEditorField) => boolean): IFieldDefn;
   disableErrors(disableErrors?: boolean): IFieldDefn;
@@ -60,6 +62,7 @@ interface IBaseFieldDefn {
   label?           : string;
   placeholder?     : string;
   align?           : TextAlignment;
+  variant?         : TextVariant;
   error?           : string;
   value?           : any;
   disabled?        : (field: IEditorField) => boolean;
@@ -91,6 +94,11 @@ class BaseField implements IFieldDefn {
 
   align(text: TextAlignment): IFieldDefn {
     this.typeDefn.align = text;
+    return this;
+  }
+
+  variant(text: TextVariant): IFieldDefn {
+    this.typeDefn.variant = text;
     return this;
   }
 
@@ -190,7 +198,7 @@ export default class Form {
 
     root((dispose) => {
       this.dispose        = dispose;
-      const result        = this.validator.validateFields(this.fields.map(field => field.name), this.toObjectLabelsAndValues());
+      const result        = this.validator.validateFields(this.fields.filter(field => !field.disableErrors).map(field => field.name), this.toObjectLabelsAndValues());
       const fieldsChanged = observe(() => this.fields.map(f => f.value));
       this._hasChanges    = computed(fieldsChanged, () => {
         if (!this._value) return false;
@@ -256,7 +264,7 @@ export default class Form {
     const onValueChange = (v: any) => {
       field.value = v;
       if (field.validateOnUpdate) {
-        this.validateField(field.name);
+        this.validateField(field);
       }
     };
 
@@ -270,6 +278,7 @@ export default class Form {
       type: fieldDefn.typeDefn.type,
       placeholder: fieldDefn.typeDefn.placeholder,
       align: fieldDefn.typeDefn.align,
+      variant: fieldDefn.typeDefn.variant,
       label: fieldDefn.typeDefn.label,
       disabled: fieldDefn.typeDefn.disabled,
       disableErrors: fieldDefn.typeDefn.disableErrors !== undefined ? fieldDefn.typeDefn.disableErrors : this.disableErrors,
@@ -344,15 +353,17 @@ export default class Form {
     return true;
   }
 
-  private validateField(fieldName: string) {
-    let fieldNamesLinkedToThisField = this.fields.filter(field => field.linkedFieldNames.includes(fieldName)).map(field => field.name);
-    let fieldNamesToValidate        = [...new Set([fieldName, ...fieldNamesLinkedToThisField])];
-
+  private validateField(field: IEditorField) {
+    let fieldNamesToValidate = this.fields.filter(f => !f.disableErrors && f.linkedFieldNames.includes(field.name)).map(f => f.name);
+    if (!field.disableErrors) {
+      fieldNamesToValidate.push(field.name);
+    }
+    fieldNamesToValidate = [...new Set(fieldNamesToValidate)];
     let result = this.validator.validateFields(fieldNamesToValidate, this.toObjectLabelsAndValues());
     fieldNamesToValidate.forEach(fieldName => {
-      let field = this.field[fieldName];
-      if (field) {
-        field.error = result.errors[fieldName];
+      let fld = this.field[fieldName];
+      if (fld) {
+        fld.error = result.errors[fieldName];
       }
     });
 
@@ -360,7 +371,7 @@ export default class Form {
   }
 
   private validateForm(produceErrors: boolean = true): ValidationResult {
-    let result = this.validator.validateFields(this.fields.map(field => field.name), this.toObjectLabelsAndValues());
+    let result = this.validator.validateFields(this.fields.filter(field => !field.disableErrors).map(field => field.name), this.toObjectLabelsAndValues());
     if (produceErrors) {
       this.fields.forEach(field => {
         field.error = result.errors[field.name];

@@ -19,6 +19,7 @@ export interface IField {
   label?         : string;
   placeholder?   : string;
   align?         : TextAlignment;
+  variant?       : TextVariant;
   autoFocus?     : boolean;
   error?         : string;
   value?         : any;
@@ -33,6 +34,8 @@ export interface IField {
 export type EditorType = 'text' | 'static' | 'auto-complete' | 'select' | 'date' | 'time' | 'number' | 'checked' | 'switch' | 'password' | 'email' | 'phone' | 'avatar' | 'none';
 
 export type TextAlignment = 'left' | 'right' | 'center';
+
+export type TextVariant = 'standard' | 'outlined';
 
 export function compare<T>(x?: T, y?: T) {
   if (x && !y) {
@@ -87,6 +90,7 @@ export default function editor(type: EditorType, propsForEdit?: any): React.SFC<
             disableErrors={field.disableErrors}
             style={{width: '100%', minWidth: '120px', textAlign: field.align || 'left'}}
             align={field.align || 'left'}
+            variant={field.variant}
             selectedItem={field.value}
             onSelectItem={onValueChange}
             className={className}
@@ -113,6 +117,7 @@ export default function editor(type: EditorType, propsForEdit?: any): React.SFC<
             visible={field.visible}
             disableErrors={field.disableErrors}
             align={field.align || 'left'}
+            variant={field.variant}
             value={field.value && utc(field.value).toDateString()}
             type='date'
             className={className}
@@ -141,6 +146,7 @@ export default function editor(type: EditorType, propsForEdit?: any): React.SFC<
             visible={field.visible}
             disableErrors={field.disableErrors}
             align={field.align || 'left'}
+            variant={field.variant}
             className={className}
             classes={classes}
             startAdornment={field.startAdornment && field.startAdornment()}
@@ -165,6 +171,7 @@ export default function editor(type: EditorType, propsForEdit?: any): React.SFC<
             visible={field.visible}
             disableErrors={field.disableErrors}
             align={field.align || 'left'}
+            variant={field.variant}
             className={className}
             classes={classes}
             startAdornment={field.startAdornment && field.startAdornment()}
@@ -206,6 +213,7 @@ export default function editor(type: EditorType, propsForEdit?: any): React.SFC<
             visible={field.visible}
             disableErrors={field.disableErrors}
             align={field.align || 'left'}
+            variant={field.variant}
             className={className}
             classes={classes}
             hasAdornment={field.endAdornment}
@@ -230,6 +238,7 @@ export default function editor(type: EditorType, propsForEdit?: any): React.SFC<
             visible={field.visible}
             disableErrors={field.disableErrors}
             align={field.align || 'left'}
+            variant={field.variant}
             className={className}
             classes={classes}
             startAdornment={field.startAdornment && field.startAdornment()}
@@ -255,6 +264,7 @@ export default function editor(type: EditorType, propsForEdit?: any): React.SFC<
             visible={field.visible}
             disableErrors={field.disableErrors}
             align={field.align || 'left'}
+            variant={field.variant}
             className={className}
             classes={classes}
             startAdornment={field.startAdornment && field.startAdornment()}
@@ -311,6 +321,7 @@ export default function editor(type: EditorType, propsForEdit?: any): React.SFC<
             visible={field.visible}
             disableErrors={field.disableErrors}
             align={field.align || 'left'}
+            variant={field.variant}
             selectedItem={field.value}
             onSelectItem={onValueChange}
             className={className}
@@ -336,7 +347,7 @@ export default function editor(type: EditorType, propsForEdit?: any): React.SFC<
         )} />
       );
     case 'none':
-      return () => undefined;
+      return () => null;
   }
   throw new Error(`unknown editor for type:${type}`);
 }

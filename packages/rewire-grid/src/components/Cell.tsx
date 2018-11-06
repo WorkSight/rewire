@@ -87,8 +87,11 @@ const styles = (theme: Theme) => ({
     display: 'flex',
     flex: '1',
   },
-  selectEditorSelect: {
+  editorSelectSelect: {
     padding: '0px 3px',
+  },
+  editorSelectInputRoot: {
+    alignItems: 'stretch',
   },
   editorPopupMenuItem: {
     fontSize: theme.fontSizes.body,
@@ -509,7 +512,7 @@ class Cell extends React.PureComponent<CellProps, {}> {
       let cellType      = this.column.type;
       let additionalProps = {};
       if (cellType === 'select') {
-        editorClasses = {select: this.props.classes.selectEditorSelect, selectMenuItem: this.props.classes.editorPopupMenuItem};
+        editorClasses = {inputRoot: this.props.classes.editorSelectInputRoot, select: this.props.classes.editorSelectSelect, selectMenuItem: this.props.classes.editorPopupMenuItem};
       } else if (cellType === 'checked') {
         editorClasses = {checkboxRoot: this.props.classes.editorCheckboxRoot};
       } else if (cellType === 'text' || cellType === 'date' || cellType === 'email' || cellType === 'password' || cellType === 'time' || cellType === 'number' || cellType === 'phone' || cellType === 'auto-complete') {

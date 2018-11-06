@@ -3,7 +3,7 @@ import BlurInputHOC                  from './BlurInputHOC';
 import TextField, { TextFieldProps } from '@material-ui/core/TextField';
 import InputAdornment                from '@material-ui/core/InputAdornment';
 import {Theme}                       from '@material-ui/core/styles';
-import {TextAlignment}               from './editors';
+import {TextAlignment, TextVariant}  from './editors';
 import {withStyles, WithStyle}       from './styles';
 
 const styles = (theme: Theme) => ({
@@ -26,19 +26,25 @@ const styles = (theme: Theme) => ({
       opacity: 0.4,
     },
     '&[type=date]': {
-      padding: '4px 0px 4px 0px',
       '&::-webkit-clear-button': {
-        marginRight: '4px',
+        // marginRight: '4px',
       },
       '&::-webkit-inner-spin-button': {
-        // '-webkit-appearance': 'none',
-        marginRight: '1px',
+        '-webkit-appearance': 'none',
+        // marginRight: '1px',
       },
       '&::-webkit-calendar-picker-indicator': {
         marginTop: '2px',
         fontSize: '1.1em',
       },
     },
+  },
+  helperTextRoot: {
+    marginTop: '6px',
+  },
+  helperTextContained: {
+    marginLeft: '14px',
+    marginRight: '14px',
   },
 });
 
@@ -51,6 +57,7 @@ export interface ITextFieldProps {
   label?           : string;
   placeholder?     : string;
   align?           : TextAlignment;
+  variant?         : TextVariant;
   selectOnFocus?   : boolean;
   endOfTextOnFocus?: boolean;
   updateOnChange?  : boolean;
@@ -76,6 +83,7 @@ class TextFieldInternal extends React.Component<TextFieldPropsStyled> {
       (nextProps.label !== this.props.label) ||
       (nextProps.placeholder !== this.props.placeholder) ||
       (nextProps.align !== this.props.align) ||
+      (nextProps.variant !== this.props.variant) ||
       (nextProps.disableErrors !== this.props.disableErrors) ||
       (nextProps.startAdornment !== this.props.startAdornment) ||
       (nextProps.endAdornment !== this.props.endAdornment)
@@ -97,10 +105,10 @@ class TextFieldInternal extends React.Component<TextFieldPropsStyled> {
       return null;
     }
 
-    const {classes, type} = this.props;
-
-    const startAdornment = this.props.startAdornment ? <InputAdornment position='start' classes={{root: classes.inputAdornmentRoot}}>{this.props.startAdornment}</InputAdornment> : undefined;
-    const endAdornment   = this.props.endAdornment ? <InputAdornment position='end' classes={{root: classes.inputAdornmentRoot}}>{this.props.endAdornment}</InputAdornment> : undefined;
+    const {classes, type, variant} = this.props;
+    const startAdornment           = this.props.startAdornment ? <InputAdornment position='start' classes={{root: classes.inputAdornmentRoot}}>{this.props.startAdornment}</InputAdornment> : undefined;
+    const endAdornment             = this.props.endAdornment ? <InputAdornment position='end' classes={{root: classes.inputAdornmentRoot}}>{this.props.endAdornment}</InputAdornment> : undefined;
+    const inputTypeClassName       = type !== 'date' ? classes.inputType : undefined;
 
     if (this.props.updateOnChange) {
       return (
@@ -111,6 +119,7 @@ class TextFieldInternal extends React.Component<TextFieldPropsStyled> {
         disabled={this.props.disabled}
         label={this.props.label}
         placeholder={this.props.placeholder}
+        variant={variant}
         error={!this.props.disableErrors && !this.props.disabled && !!this.props.error}
         helperText={!this.props.disableErrors && <span>{(!this.props.disabled && this.props.error) || ''}</span>}
         value={this.props.value}
@@ -120,8 +129,9 @@ class TextFieldInternal extends React.Component<TextFieldPropsStyled> {
         onKeyDown={this.props.onKeyDown}
         onChange={(evt: React.ChangeEvent<HTMLInputElement>) => this.props.onValueChange(evt.target.value)}
         inputProps={{autoFocus: this.props.autoFocus, className: classes.nativeInput, style: {textAlign: this.props.align || 'left'}}}
-        InputProps={{startAdornment: startAdornment, endAdornment: endAdornment, classes: {root: classes.inputRoot, inputType: classes.inputType}}}
+        InputProps={{startAdornment: startAdornment, endAdornment: endAdornment, classes: {root: classes.inputRoot, inputType: inputTypeClassName}}}
         InputLabelProps={{shrink: true}}
+        FormHelperTextProps={{classes: {root: classes.helperTextRoot, contained: classes.helperTextContained}}}
       />);
     }
 
@@ -135,6 +145,7 @@ class TextFieldInternal extends React.Component<TextFieldPropsStyled> {
           disabled={props.disabled}
           label={props.label}
           placeholder={props.placeholder}
+          variant={variant}
           error={!props.disableErrors && !props.disabled && !!props.error}
           helperText={!props.disableErrors && <span>{(!props.disabled && props.error) || ''}</span>}
           value={props.value}
@@ -144,8 +155,9 @@ class TextFieldInternal extends React.Component<TextFieldPropsStyled> {
           onKeyDown={props.onKeyDown}
           onChange={props.onChange}
           inputProps={{autoFocus: props.autoFocus, className: classes.nativeInput, style: {textAlign: props.align || 'left'}}}
-          InputProps={{startAdornment: startAdornment, endAdornment: endAdornment, classes: {root: classes.inputRoot, inputType: classes.inputType}}}
+          InputProps={{startAdornment: startAdornment, endAdornment: endAdornment, classes: {root: classes.inputRoot, inputType: inputTypeClassName}}}
           InputLabelProps={{shrink: true}}
+          FormHelperTextProps={{classes: {root: classes.helperTextRoot, contained: classes.helperTextContained}}}
         />
       }
     />);
