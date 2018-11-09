@@ -1,3 +1,4 @@
+import * as is             from 'is';
 import { EditorType }      from 'rewire-ui';
 import { SearchFn, MapFn } from 'rewire-ui';
 export { EditorType };
@@ -143,6 +144,7 @@ export type IColumnEditor =
   'text' | 'date' | 'time' | 'checked' | 'password' | 'mask' | 'none' |
   {type: 'auto-complete', options: {search: SearchFn<any>, map: MapFn<any>}} |
   {type: 'select', options: {search: SearchFn<any>, map: MapFn<any>}} |
+  {type: 'multiselect', options: {search: SearchFn<any>, map: MapFn<any>}} |
   {type: 'number', options?: {decimals?: number, thousandSeparator?: boolean, fixed?: boolean}} |
   {type: 'phone', options?: {format?: string, mask?: string}};
 
@@ -237,6 +239,16 @@ export function getValue(row: IRow | ObjectType, column: IColumn): string | unde
 
   if (column.map) value = column.map(value);
   return value;
+}
+
+export function cloneValue(value: any): any {
+  if (is.array(value)) {
+    return value.map((v: any) => this.cloneValue(v));
+  } else if (is.object(value)) {
+    return value.clone ? value.clone() : Object.assign({}, value);
+  } else {
+    return value;
+  }
 }
 
 export interface IRowIteratorResult {

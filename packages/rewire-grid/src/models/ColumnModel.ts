@@ -67,8 +67,7 @@ export class ColumnModel implements IColumn {
     let t: EditorType;
     if (type === undefined) {
       t = 'text';
-    }
-    else if (typeof (type) === 'string') {
+    } else if (typeof (type) === 'string') {
       t       = type;
     } else {
       t       = type.type;
@@ -87,7 +86,7 @@ export class ColumnModel implements IColumn {
       this.editable  = !!this.editor;
       this.map       = undefined;
       this.predicate = undefined;
-      this.compare   = undefined;
+      this.compare   = options && options.compare;
 
       if (t === 'number') {
         this.map   = getNumberString;
@@ -98,16 +97,48 @@ export class ColumnModel implements IColumn {
         this.options.format = options && options.format !== undefined ? options.format : defaultPhoneFormat;
         this.options.mask   = options && options.mask !== undefined ? options.mask : defaultPhoneMask;
         this.map            = getPhoneString;
+      } else if (t === 'multiselect') {
+        this.map       = getArrayString(options && options.map);
+        this.predicate = (value: any, filter: any) => toLowerCase(this.map!(value)).includes(toLowerCase(filter.value));
+        this.compare   = arrayCompare(options);
       }
 
-      if (options && options.map) {
+      if (options && options.map && t !== 'multiselect') {
         this.map       = (value: any) => options.map(value);
         this.predicate = (value: any, filter: any) => toLowerCase(options.map(value)).includes(toLowerCase(filter.value));
-        this.compare   = (x: any, y: any) => compare(options.map(x), options.map(y));
+        if (this.compare) {
+          this.compare = (x: any, y: any) => this.compare!(options.map(x), options.map(y));
+        } else {
+          this.compare = (x: any, y: any) => compare(options.map(x), options.map(y));
+        }
       }
     });
   }
 }
+
+const getArrayString = (map?: (v: any) => string) => (value: any): string => {
+  if (!value) return '';
+
+  let values = map ? value.map((v: any) => map(v)) : value;
+  return values.join(', ');
+};
+
+const arrayCompare = (options?: any) => (x: any, y: any): number => {
+  if (!x && !y) return 0;
+  if (!x) return -1;
+  if (!y) return 1;
+
+  for (let i = 0; i < x.length && i < y.length; i++) {
+    let xVal = options && options.map ? options.map(x[i]) : x[i];
+    let yVal = options && options.map ? options.map(y[i]) : y[i];
+    let c    = options && options.compare ? options.compare(xVal, yVal) : compare(xVal, yVal);
+    if (c !== 0) {
+      return c;
+    }
+  }
+
+  return (x.length < y.length ? -1 : x.length > y.length ? 1 : 0);
+};
 
 function getNumberString(value: any): string {
   if (value === undefined) return value;

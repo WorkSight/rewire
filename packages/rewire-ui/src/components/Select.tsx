@@ -1,5 +1,6 @@
-import RootRef                 from '@material-ui/core/RootRef';
 import { ChangeEvent }         from 'react';
+import classNames              from 'classnames';
+import RootRef                 from '@material-ui/core/RootRef';
 import {Theme}                 from '@material-ui/core/styles';
 import FormControl             from '@material-ui/core/FormControl';
 import FormHelperText          from '@material-ui/core/FormHelperText';
@@ -21,6 +22,7 @@ import {withStyles, WithStyle} from './styles';
 
 const styles = (theme: Theme) => ({
   inputRoot: {
+    flex: '1',
     lineHeight: 'inherit',
     fontSize: 'inherit',
   },
@@ -29,6 +31,11 @@ const styles = (theme: Theme) => ({
     fontSize: 'inherit',
     display: 'inline-flex',
     alignItems: 'stretch',
+  },
+  selectRootOutlined: {
+    '& svg': {
+      right: '5px',
+    },
   },
   select: {
     display: 'flex',
@@ -39,6 +46,7 @@ const styles = (theme: Theme) => ({
     }
   },
   selectMenuPaper: {
+    minWidth: '250px !important',
   },
   selectMenuItem: {
     fontSize: 'inherit',
@@ -51,6 +59,7 @@ const styles = (theme: Theme) => ({
   },
   valueRendererContainer: {
     width: '100%',
+    paddingRight: '20px',
   },
   placeholderValue: {
     opacity: 0.4,
@@ -61,6 +70,9 @@ const styles = (theme: Theme) => ({
   helperTextContained: {
     marginLeft: '14px',
     marginRight: '14px',
+  },
+  formControlRoot: {
+    flex: '1',
   },
 });
 
@@ -82,7 +94,7 @@ class SelectInternal<T> extends React.Component<SelectInternalProps<T>, any> {
   }
 
   componentDidMount() {
-    disposeOnUnmount(this, () => this.performSearch(''));
+    disposeOnUnmount(this, () => this.performSearch());
     let labelElement = this.InputLabelRef.current;
     if (labelElement) {
       this.setState({
@@ -91,8 +103,8 @@ class SelectInternal<T> extends React.Component<SelectInternalProps<T>, any> {
     }
   }
 
-  performSearch = async (value: string) => {
-    const suggestions = await this.search(value, this.props.options);
+  performSearch = async () => {
+    const suggestions = await this.search('', this.props.options);
     this.setState({suggestions: suggestions});
   }
 
@@ -135,7 +147,22 @@ class SelectInternal<T> extends React.Component<SelectInternalProps<T>, any> {
   handleMenuKeyDown = (event: React.KeyboardEvent<any>) => {
     switch (event.keyCode) {
       case 9:
-        this.props.onSelectItem && this.props.onSelectItem(this.state.suggestions.find((v: any) => event.target.dataset.value === this.map(v)));
+        let valueToSelect = this.state.suggestions.find((v: any) => event.target.dataset.value === this.map(v));
+        if (this.props.multiple) {
+          let values = this.props.selectedItem;
+          if (values) {
+            let valueToSelectMapped = this.map(valueToSelect);
+            if (values.findIndex((v: any) => this.map(v) === valueToSelectMapped) >= 0) {
+              values = values.filter((v: any) => this.map(v) !== valueToSelectMapped);
+              values = values.length <= 0 ? undefined : values;
+            } else {
+              values.push(valueToSelect);
+            }
+          }
+          this.props.onSelectItem && this.props.onSelectItem(values);
+        } else {
+          this.props.onSelectItem && this.props.onSelectItem(valueToSelect);
+        }
         this.setState({isOpen: false});
         event.stopPropagation();
         event.preventDefault();
@@ -176,7 +203,14 @@ class SelectInternal<T> extends React.Component<SelectInternalProps<T>, any> {
 
   handleChanged = (event: ChangeEvent<any>) => {
     if (this.props.onSelectItem) {
-      this.props.onSelectItem(this.state.suggestions.find((v: any) => event.target.value === this.map(v)));
+      if (this.props.multiple) {
+        let values = this.state.suggestions.filter((v: any) => event.target.value && event.target.value.includes(this.map(v)));
+        values = values.length <= 0 ? undefined : values;
+        this.props.onSelectItem(values);
+        // this.props.onSelectItem(this.state.suggestions.filter((v: any) => event.target.value && event.target.value.includes(this.map(v))));
+      } else {
+        this.props.onSelectItem(this.state.suggestions.find((v: any) => event.target.value === this.map(v)));
+      }
     }
   }
 
@@ -192,6 +226,7 @@ class SelectInternal<T> extends React.Component<SelectInternalProps<T>, any> {
         (nextProps.placeholder !== this.props.placeholder) ||
         (nextProps.align !== this.props.align) ||
         (nextProps.variant !== this.props.variant) ||
+        (nextProps.multiple !== this.props.multiple) ||
         (nextProps.disableErrors !== this.props.disableErrors) ||
         (nextProps.startAdornment !== this.props.startAdornment) ||
         (nextProps.endAdornment !== this.props.endAdornment)
@@ -199,8 +234,8 @@ class SelectInternal<T> extends React.Component<SelectInternalProps<T>, any> {
   }
 
   renderSelect(disabled: boolean, cls: string, value?: T, autoFocus?: boolean, placeholder?: string) {
-    const {classes, style, align, variant} = this.props;
-    const v              = this.map(value);
+    const {classes, style, align, variant, multiple} = this.props;
+    const v              = multiple ? value && value.map(val => this.map(val)) : this.map(value);
     const startAdornment = this.props.startAdornment ? <InputAdornment position='start' classes={{root: this.props.classes.inputAdornmentRoot}}>{this.props.startAdornment}</InputAdornment> : undefined;
     const endAdornment   = this.props.endAdornment ? <InputAdornment position='end' classes={{root: this.props.classes.inputAdornmentRoot}}>{this.props.endAdornment}</InputAdornment> : undefined;
     const menuListProps  = {
@@ -213,42 +248,59 @@ class SelectInternal<T> extends React.Component<SelectInternalProps<T>, any> {
     };
 
     let InputToUse           = Input;
+    let selectRootClasses    = classes.selectRoot;
     let additionalProps: any = {};
     if (variant === 'outlined') {
       InputToUse                 = OutlinedInput;
       additionalProps.labelWidth = this.state.labelWidth;
+      if (!endAdornment) {
+        selectRootClasses = classNames(selectRootClasses, classes.selectRootOutlined);
+      }
     }
 
     return (
-    <Select
-      disabled={disabled}
-      value={v as any}
-      open={this.state.isOpen}
-      onOpen={this.handleOnOpen}
-      onClose={this.handleOnClose}
-      onChange={this.handleChanged}
-      displayEmpty={true}
-      className={cls}
-      style={style}
-      classes={{root: classes.selectRoot, select: classes.select}}
-      MenuProps={{classes: {paper: classes.selectMenuPaper}, MenuListProps: menuListProps}}
-      input={<InputToUse startAdornment={startAdornment} endAdornment={endAdornment} autoFocus={autoFocus} classes={{root: classes.inputRoot}} {...additionalProps} />}
-      renderValue={() => (
-        <span className={classes.valueRendererContainer} style={{textAlign: align || 'left'}}>
-          {v || <span className={classes.placeholderValue}>{placeholder}</span>}
-        </span>)}>{
-        this.state.suggestions.map((suggestion: any, index: number) => {
-          const displayName = this.map(suggestion);
-          return this.renderSuggestion({
-            suggestion,
-            index,
-            displayName,
-            isHighlighted: (displayName === v)
-          });
-        })
-      }
+      <Select
+        disabled={disabled}
+        value={v as any}
+        multiple={multiple}
+        open={this.state.isOpen}
+        onOpen={this.handleOnOpen}
+        onClose={this.handleOnClose}
+        onChange={this.handleChanged}
+        displayEmpty={true}
+        className={cls}
+        style={style}
+        classes={{root: selectRootClasses, select: classes.select}}
+        MenuProps={{classes: {paper: classes.selectMenuPaper}, MenuListProps: menuListProps}}
+        input={<InputToUse startAdornment={startAdornment} endAdornment={endAdornment} autoFocus={autoFocus} classes={{root: classes.inputRoot}} {...additionalProps} />}
+        renderValue={() => (
+          <span className={classes.valueRendererContainer} style={{textAlign: align || 'left'}}>
+            {this.renderValue(v, multiple, placeholder)}
+          </span>)}>{
+          this.state.suggestions.map((suggestion: any, index: number) => {
+            const displayName = this.map(suggestion);
+            return this.renderSuggestion({
+              suggestion,
+              index,
+              displayName,
+              isHighlighted: (multiple ? v && v.includes(displayName) : displayName === v)
+            });
+          })
+        }
       </Select>
     );
+  }
+
+  renderValue(v: any, multiple?: boolean, placeholder?: string) {
+    if (!v || (multiple && v.length <= 0)) {
+      return <span className={this.props.classes.placeholderValue}>{placeholder}</span>;
+    }
+
+    if (multiple) {
+      return v.length > 3 ? `${v.slice(0, 3).join(', ')}, ....` : v.join(', ');
+    } else {
+      return v;
+    }
   }
 
   render() {
@@ -261,17 +313,13 @@ class SelectInternal<T> extends React.Component<SelectInternalProps<T>, any> {
 
     const label = this.props.label;
     let   cls   = (this.props.className || '') + ' select';
-    if (label) {
-      return (
-        <FormControl error={!disableErrors && !disabled && !!error} variant={variant} className={cls}>
-          <RootRef rootRef={this.InputLabelRef}><InputLabel htmlFor='name-error' shrink={true}>{label}</InputLabel></RootRef>
-          {this.renderSelect(disabled, '', this.props.selectedItem, this.props.autoFocus, this.props.placeholder)}
-          {!disableErrors && <FormHelperText classes={{root: classes.helperTextRoot, contained: classes.helperTextContained}}>{!disabled && error}</FormHelperText>}
-        </FormControl>
-      );
-    }
-
-    return this.renderSelect(disabled, cls, this.props.selectedItem, this.props.autoFocus, this.props.placeholder);
+    return (
+      <FormControl error={!disableErrors && !disabled && !!error} variant={variant} className={classNames(cls, classes.formControlRoot)}>
+        {label && <RootRef rootRef={this.InputLabelRef}><InputLabel htmlFor='name-error' shrink={true}>{label}</InputLabel></RootRef>}
+        {this.renderSelect(disabled, '', this.props.selectedItem, this.props.autoFocus, this.props.placeholder)}
+        {!disableErrors && <FormHelperText classes={{root: classes.helperTextRoot, contained: classes.helperTextContained}}>{!disabled && error}</FormHelperText>}
+      </FormControl>
+    );
   }
 }
 

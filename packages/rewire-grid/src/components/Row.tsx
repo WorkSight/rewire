@@ -4,7 +4,8 @@ import {
   IColumn,
   IGroupRow,
   getValue,
-  isGroupRow
+  isGroupRow,
+  cloneValue,
 }                              from '../models/GridTypes';
 import * as React              from 'react';
 import ResizeObserver          from 'resize-observer-polyfill';
@@ -67,12 +68,7 @@ const Row = withStyles(styles, class extends PureComponent<RowProps, {}> {
     super(props);
     let row = props.row;
     Object.keys(row.cells).forEach(columnName => {
-      let value = row.cells[columnName].value;
-      if (typeof value === 'object') {
-        row.data[columnName] = value.clone ? value.clone() : Object.assign({}, value);
-      } else {
-        row.data[columnName] = value;
-      }
+      row.data[columnName] = cloneValue(row.cells[columnName].value);
     });
   }
 

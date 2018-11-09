@@ -6,6 +6,7 @@ import {
   ErrorSeverity,
 }                                                  from '../models/GridTypes';
 import * as React                                  from 'react';
+import * as is                                     from 'is';
 import cc                                          from 'classcat';
 import classNames                                  from 'classnames';
 import {Observe, watch, observe, disposeOnUnmount} from 'rewire-core';
@@ -230,6 +231,9 @@ class Cell extends React.PureComponent<CellProps, {}> {
         break;
 
       case 'Enter':
+        if (this.column.type === 'multiselect') {
+          break;
+        }
         this.grid.editCell(undefined);
         if (this.element) this.element.focus();
         break;
@@ -278,7 +282,7 @@ class Cell extends React.PureComponent<CellProps, {}> {
       case 'ArrowLeft':
         if (this.cell.editing) {
           evt.stopPropagation();
-          if (this.column.type === 'select' || this.column.type === 'checked') {
+          if (this.column.type === 'select' || this.column.type === 'multiselect' || this.column.type === 'checked') {
             evt.preventDefault();
           }
           return;
@@ -308,7 +312,7 @@ class Cell extends React.PureComponent<CellProps, {}> {
       case 'ArrowRight':
         if (this.cell.editing) {
           evt.stopPropagation();
-          if (this.column.type === 'select' || this.column.type === 'checked') {
+          if (this.column.type === 'select' || this.column.type === 'multiselect' || this.column.type === 'checked') {
             evt.preventDefault();
           }
           return;
@@ -480,19 +484,29 @@ class Cell extends React.PureComponent<CellProps, {}> {
   }
 
   get value(): string {
-    let value = this.column.map ? this.column.map(this.cell.value) : this.cell.value;
+    let value: string;
+    if (is.array(this.cell.value)) {
+      let valueToUse = this.cell.value.slice(0, 3);
+      let values     = this.column.map ? this.column.map(valueToUse) : valueToUse;
+      value          = this.cell.value.length > 3 ? `${values}, ....` : values;
+    } else {
+      value = this.column.map ? this.column.map(this.cell.value) : this.cell.value;
+    }
     return value;
   }
 
   onValueChange = (value: any) => {
     this.cell.value = value;
+    if (this.column.type === 'multiselect') {
+      return;
+    }
     this.grid.editCell(undefined);
     if ((this.column.type === 'auto-complete' || this.column.type === 'select' || this.column.type === 'checked') && this.element) setTimeout(() => this.element.focus(), 0);
   }
 
   handleTooltip = (evt: React.MouseEvent<HTMLSpanElement>) => {
     const node = evt.target as HTMLSpanElement;
-    node.setAttribute('title', (node.offsetWidth < node.scrollWidth) ? this.cell.value : '');
+    node.setAttribute('title', (node.offsetWidth < node.scrollWidth) ? this.value : '');
   }
 
   renderCell() {
@@ -511,7 +525,7 @@ class Cell extends React.PureComponent<CellProps, {}> {
       let editorClasses = undefined;
       let cellType      = this.column.type;
       let additionalProps = {};
-      if (cellType === 'select') {
+      if (cellType === 'select' || cellType === 'multiselect') {
         editorClasses = {inputRoot: this.props.classes.editorSelectInputRoot, select: this.props.classes.editorSelectSelect, selectMenuItem: this.props.classes.editorPopupMenuItem};
       } else if (cellType === 'checked') {
         editorClasses = {checkboxRoot: this.props.classes.editorCheckboxRoot};
