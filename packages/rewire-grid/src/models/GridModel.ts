@@ -12,10 +12,12 @@ import {
   IRowIteratorResult,
   IDisposable,
   findRowById,
+  cloneValue,
 }                              from './GridTypes';
 import createRow, {RowModel}   from './RowModel';
 import {ColumnModel}           from './ColumnModel';
 import {CellModel}             from './CellModel';
+import * as is                 from 'is';
 import {
   observable,
   computed,
@@ -328,13 +330,7 @@ class GridModel implements IGrid, IDisposable {
 
       this.dataRowsByPosition.forEach(row => {
         for (const column of this.columns) {
-          if (typeof row.cells[column.name].value === 'object' && row.data[column.name] !== undefined) {
-            Object.assign(row.cells[column.name].value, row.data[column.name]);
-          } else if (typeof row.data[column.name] === 'object') {
-            row.cells[column.name].value = row.data[column.name].clone ? row.data[column.name].clone() : Object.assign({}, row.data[column.name]);
-          } else {
-            row.cells[column.name].value = row.data[column.name];
-          }
+          row.cells[column.name].value = cloneValue(row.data[column.name]);
         }
       });
     });
@@ -460,12 +456,8 @@ class GridModel implements IGrid, IDisposable {
         return;
       }
 
-      let clipboardCell = clipboardCellsForColumn.shift();
-      if (typeof clipboardCell.value === 'object') {
-        selectedCell.value = clipboardCell.value.clone ? clipboardCell.value.clone() : Object.assign({}, clipboardCell.value);
-      } else {
-        selectedCell.value = clipboardCell.value;
-      }
+      let clipboardCell  = clipboardCellsForColumn.shift();
+      selectedCell.value = cloneValue(clipboardCell.value);
 
       if (clipboardCellsForColumn.length <= 0) {
         clipboardCellsByColumnPosition[selectedCell.columnPosition] = clipboardCellsByColumnPositionOriginal[selectedCell.columnPosition].slice();

@@ -24,7 +24,7 @@ import {and, isEmail, isRegEx} from './Validator';
 import {defaultPhoneFormat} from '../components/PhoneField';
 import { createElement } from 'react';
 
-export type IFieldTypes = 'string' | 'static' | 'reference' | 'select' | 'number' | 'boolean' | 'date' | 'time' | 'avatar' | 'password' | 'email' | 'phone';
+export type IFieldTypes = 'string' | 'static' | 'reference' | 'select' | 'multiselect' | 'number' | 'boolean' | 'date' | 'time' | 'avatar' | 'password' | 'email' | 'phone';
 
 export interface IFieldDefn {
   label(text: string): IFieldDefn;
@@ -159,6 +159,7 @@ class BaseField implements IFieldDefn {
 export interface IFormOptions {
   defaultAdornmentsEnabled?: boolean;
   disableErrors?: boolean;
+  variant?: TextVariant;
   updateOnChange?: boolean;
   validateOnUpdate?: boolean;
 }
@@ -170,6 +171,7 @@ export default class Form {
   private _hasErrors      : () => boolean;
   defaultAdornmentsEnabled: boolean;
   disableErrors           : boolean;
+  variant                 : TextVariant;
   updateOnChange          : boolean;
   validateOnUpdate        : boolean;
   fields                  : IEditorField[];
@@ -181,6 +183,7 @@ export default class Form {
     this.validator                = new Validator();
     this.defaultAdornmentsEnabled = options && options.defaultAdornmentsEnabled !== undefined ? options.defaultAdornmentsEnabled : true;
     this.disableErrors            = options && options.disableErrors || false;
+    this.variant                  = options && options.variant || 'standard';
     // this.updateOnChange           = options && options.updateOnChange !== undefined ? options.updateOnChange : true;
     this.updateOnChange           = options && options.updateOnChange || false;
     this.validateOnUpdate         = options && options.validateOnUpdate !== undefined ? options.validateOnUpdate : true;
@@ -238,18 +241,19 @@ export default class Form {
   }
 
   private static editorDefaults: {[K in IFieldTypes]: EditorType} = {
-    'string'   : 'text',
-    'static'   : 'static',
-    'select'   : 'select',
-    'reference': 'auto-complete',
-    'boolean'  : 'checked',
-    'date'     : 'date',
-    'time'     : 'time',
-    'password' : 'password',
-    'email'    : 'email',
-    'phone'    : 'phone',
-    'number'   : 'number',
-    'avatar'   : 'avatar'
+    'string'     : 'text',
+    'static'     : 'static',
+    'select'     : 'select',
+    'multiselect': 'multiselect',
+    'reference'  : 'auto-complete',
+    'boolean'    : 'checked',
+    'date'       : 'date',
+    'time'       : 'time',
+    'password'   : 'password',
+    'email'      : 'email',
+    'phone'      : 'phone',
+    'number'     : 'number',
+    'avatar'     : 'avatar',
   };
 
   private createEditor(editorType: EditorType | undefined, field: IEditorField, editProps?: any): React.SFC<any> {
@@ -278,10 +282,10 @@ export default class Form {
       type: fieldDefn.typeDefn.type,
       placeholder: fieldDefn.typeDefn.placeholder,
       align: fieldDefn.typeDefn.align,
-      variant: fieldDefn.typeDefn.variant,
       label: fieldDefn.typeDefn.label,
       disabled: fieldDefn.typeDefn.disabled,
       disableErrors: fieldDefn.typeDefn.disableErrors !== undefined ? fieldDefn.typeDefn.disableErrors : this.disableErrors,
+      variant: fieldDefn.typeDefn.variant || this.variant,
       updateOnChange: fieldDefn.typeDefn.updateOnChange !== undefined ? fieldDefn.typeDefn.updateOnChange : this.updateOnChange,
       validateOnUpdate: fieldDefn.typeDefn.validateOnUpdate !== undefined ? fieldDefn.typeDefn.validateOnUpdate : this.validateOnUpdate,
       visible: true,
@@ -342,6 +346,7 @@ export default class Form {
   public clear() {
     this.fields.forEach(field => {
       field.value = undefined;
+      field.error = undefined;
     });
   }
 
@@ -443,6 +448,11 @@ export default class Form {
   static select(searcher: any, editProps?: any): IFieldDefn {
     let eProps = Object.assign({}, searcher, editProps);
     return new BaseField('select', eProps);
+  }
+
+  static multiselect(searcher: any, editProps?: any): IFieldDefn {
+    let eProps = Object.assign({}, searcher, editProps);
+    return new BaseField('multiselect', eProps);
   }
 
   static reference(searcher: any, editProps?: any): IFieldDefn {

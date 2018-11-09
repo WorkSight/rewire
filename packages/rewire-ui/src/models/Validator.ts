@@ -31,7 +31,6 @@ export function defaultLessThan(v1: any, v2: any) {
 
 export function isNull(value?: any) {
   if ((value === undefined) || (value === null)) return true;
-  if (value === null) return true;
   if (typeof(value) === 'string') return !value;
   return ((value.id !== undefined) && !value.id);
 }
@@ -42,7 +41,7 @@ export type IValidateFnData = {linkedFieldNames: string[], fn: IValidateFn};
 export const isRequired = {
   linkedFieldNames: [],
   fn: (obj: ObjectType, fieldName: string, label: string | undefined, value: any) => {
-    return (isNull(value)) ? `${label || 'field'} is required` : undefined;
+    return (isNull(value) || (is.array(value) && value.length <= 0)) ? `${label || 'field'} is required` : undefined;
   }
 };
 

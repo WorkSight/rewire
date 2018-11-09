@@ -1,5 +1,5 @@
 import * as React from 'react';
-import {IGrid, IColumn, ICell, IRow, IError, TextAlignment} from './GridTypes';
+import {IGrid, IColumn, ICell, IRow, IError, TextAlignment, cloneValue} from './GridTypes';
 import { observable, defaultEquals, property, DataSignal } from 'rewire-core';
 
 let id = 0;
@@ -187,15 +187,10 @@ export class CellModel implements ICell {
     this.editing = value;
   }
 
-  clone(newRow: IRow) {
-    let newValue: any;
-    if (typeof this.value === 'object') {
-      newValue = this.value.clone ? this.value.clone() : Object.assign({}, this.value);
-    } else {
-      newValue = this.value;
-    }
-    let row     = newRow || this.row;
-    let newCell = new CellModel(row, this.column, newValue);
+  clone(newRow: IRow): any {
+    let newValue    = cloneValue(this.value);
+    let row         = newRow || this.row;
+    let newCell     = new CellModel(row, this.column, newValue);
     newCell.rowSpan = this.rowSpan;
     newCell.colSpan = this.colSpan;
     return newCell;

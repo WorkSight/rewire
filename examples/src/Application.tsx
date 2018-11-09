@@ -385,6 +385,7 @@ function createTestGrid(nRows: number, nColumns: number) {
   cols.push(createColumn('timeColumn', 'Time', 'time', Math.trunc(Math.random() * 250 + 50) + 'px'));
   cols.push(createColumn('autoCompleteColumn', 'Auto Complete', {type: 'auto-complete', options: countries}, Math.trunc(Math.random() * 250 + 50) + 'px'));
   cols.push(createColumn('selectColumn', 'Select', {type: 'select', options: countries}, Math.trunc(Math.random() * 250 + 50) + 'px'));
+  cols.push(createColumn('multiselectColumn', 'MultiSelect', {type: 'multiselect', options: countries}, Math.trunc(Math.random() * 250 + 50) + 'px'));
   cols.push(createColumn('checkedColumn', 'Checked', 'checked', Math.trunc(Math.random() * 250 + 50) + 'px'));
 
   let complexColumn = createColumn('complexColumn', 'Complex', 'none', Math.trunc(Math.random() * 250 + 50) + 'px');
@@ -443,6 +444,7 @@ function createTestGrid(nRows: number, nColumns: number) {
       let colName = cols[column].name;
       if ((column <= 1 || column >= 4) && row === 1) v = undefined;
       else if ((colName === 'autoCompleteColumn') || (colName === 'selectColumn')) v = {id: '14', name: 'Austria'};
+      else if (colName === 'multiselectColumn') v = [{id: '14', name: 'Austria'}];
       else if (colName === 'checkedColumn') v = true;
       else if (colName === 'timeColumn') v = '7:30';
       else if (colName === 'dateColumn') v = '2018-11-11';
@@ -556,6 +558,7 @@ function createEmployeesGrid() {
   cols.push(createColumn('isActive', 'IsActive', 'checked'));
   cols.push(createColumn('timeColumn', 'Time', 'time'));
   cols.push(createColumn('selectColumn', 'Select', {type: 'select', options: countries}));
+  cols.push(createColumn('multiselectColumn', 'Multiselect', {type: 'multiselect', options: countries}));
   cols.push(createColumn('autoCompleteColumn', 'Auto Complete', {type: 'auto-complete', options: countries}));
 
   // add employee rows
@@ -566,6 +569,8 @@ function createEmployeesGrid() {
       let fieldName: string = cols[column].name;
       if (fieldName === 'name') {
         r[fieldName] = employees[row][fieldName]; // somehow make into a button that opens a dialog on click???
+      } else if (fieldName === 'multiselectColumn') {
+        r[fieldName] = [{id: '14', name: 'Austria'}];
       } else {
         r[fieldName] = employees[row][fieldName];
       }
@@ -625,23 +630,23 @@ const Home = _Home;
 
 class TestDialog extends Modal {
   form = Form.create({
-    date                 : Form.date().label('Date').validators(isRequired).variant('outlined'),
-    dollars              : Form.number().label('Dollars').validators(isRequired).placeholder('Show me the money').disableErrors().startAdornment(() => <div style={{display: 'flex', alignItems: 'center'}}><AddIcon /><span>$</span></div>).variant('outlined'),
-    shouldI              : Form.select(searcher).label('Should I?').placeholder('choose!').startAdornment(() => <AccessibilityIcon />).validators(isRequired).variant('outlined'),
+    date                 : Form.date().label('Date').validators(isRequired),
+    dollars              : Form.number().label('Dollars').validators(isRequired).placeholder('Show me the money').disableErrors().startAdornment(() => <div style={{display: 'flex', alignItems: 'center'}}><AddIcon /><span>$</span></div>),
+    shouldI              : Form.multiselect(searcher).label('Should I?').placeholder('choose!').startAdornment(() => <AccessibilityIcon />).validators(isRequired),
     isGreat              : Form.boolean().label('Is Great'),
     noLabel              : Form.boolean(),
     disabled             : Form.boolean().label('Disabled').disabled(() => true),
-    email                : Form.email().label('Email').validators(isRequired).placeholder('enter a valid email').variant('outlined'),
-    name                 : Form.string().label('Name').validators(isRequired).placeholder('enter your name').startAdornment(() => <AccessibilityIcon />).variant('outlined'),
-    password             : Form.password().label('Password').validators(and(isRequired, isSameAsOther('password_confirmation', 'passwords are not the same'))).placeholder('enter a password').updateOnChange().variant('outlined'),
-    password_confirmation: Form.password().label('Confirm Password').placeholder('confirm your password').variant('outlined').updateOnChange(),
-    phone                : Form.phone().label('Phone Number (optional)').placeholder('your phone number').variant('outlined'),
-    phoneCustom          : Form.phone({format: '#-##-###-####-#####'}).label('Phone Number Custom (optional)').placeholder('your phone number').variant('outlined'),
-    country              : Form.reference(countries).label('Country').placeholder('pick a country').startAdornment(() => <AccessibilityIcon />).validators(isRequired).variant('outlined'),
-    timeOut              : Form.time().label('Time Out').placeholder('enter a time').validators(and(isRequired, isLessThan('timeIn'))).variant('outlined'),
-    timeIn               : Form.time().label('Time In').placeholder('enter a time').validators(isRequired).variant('outlined'),
-    avatar               : Form.avatar({width: 1000, height: 1000, avatarDiameter: 150, cropRadius: 75}).label('Add Photo'),
-  }, {email: 'splace@worksight.net', isGreat: true, avatar: doucheSuitDude});
+    email                : Form.email().label('Email').validators(isRequired).placeholder('enter a valid email'),
+    name                 : Form.string().label('Name').validators(isRequired).placeholder('enter your name').startAdornment(() => <AccessibilityIcon />),
+    password             : Form.password().label('Password').validators(and(isRequired, isSameAsOther('password_confirmation', 'passwords are not the same'))).placeholder('enter a password').updateOnChange(),
+    password_confirmation: Form.password().label('Confirm Password').placeholder('confirm your password').updateOnChange(),
+    phone                : Form.phone().label('Phone Number (optional)').placeholder('your phone number'),
+    phoneCustom          : Form.phone({format: '#-##-###-####-#####'}).label('Phone Number Custom (optional)').placeholder('your phone number'),
+    country              : Form.reference(countries).label('Country').placeholder('pick a country').startAdornment(() => <AccessibilityIcon />).validators(isRequired),
+    timeOut              : Form.time().label('Time Out').placeholder('enter a time').validators(and(isRequired, isLessThan('timeIn'))),
+    timeIn               : Form.time().label('Time In').placeholder('enter a time').validators(isRequired),
+    avatar               : Form.avatar({width: 1000, height: 1000, avatarDiameter: 150, cropRadius: 75}).label('Add Photo (Optional)'),
+  }, {email: 'splace@worksight.net', isGreat: true}, {variant: 'outlined'});
 
   constructor() {
     super('Test Form');

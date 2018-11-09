@@ -156,9 +156,11 @@ const innerAvatarStyles = () => ({
     zIndex: -1,
   },
   label: {
-    fontSize: '1.2em',
+    fontSize: '1.1em',
     fontWeight: '600',
-    display: 'inline-block',
+    display: 'flex',
+    alignItems: 'center',
+    justifyContent: 'center',
     cursor: 'pointer',
     width: '100%',
   },
@@ -226,7 +228,7 @@ const InnerAvatar = withStyles(innerAvatarStyles, class extends React.Component<
     const diameter             = (avatarDiameter || this.defaultInnerAvatarProps.avatarDiameter);
     const loaderLabel          = (label || this.defaultInnerAvatarProps.label);
     const diameterStr          = diameter + 'px';
-    const labelStyle           = {lineHeight: diameterStr};
+    const labelStyle           = {height: diameterStr};
     const loaderContainerStyle = {
       width: diameterStr,
       height: diameterStr,

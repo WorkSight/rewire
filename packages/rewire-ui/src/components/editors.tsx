@@ -31,7 +31,7 @@ export interface IField {
   endAdornment?(): JSX.Element;
 }
 
-export type EditorType = 'text' | 'static' | 'auto-complete' | 'select' | 'date' | 'time' | 'number' | 'checked' | 'switch' | 'password' | 'email' | 'phone' | 'avatar' | 'none';
+export type EditorType = 'text' | 'static' | 'auto-complete' | 'select' | 'multiselect' | 'date' | 'time' | 'number' | 'checked' | 'switch' | 'password' | 'email' | 'phone' | 'avatar' | 'none';
 
 export type TextAlignment = 'left' | 'right' | 'center';
 
@@ -101,6 +101,33 @@ export default function editor(type: EditorType, propsForEdit?: any): React.SFC<
           />
         )} />
       );
+
+    case 'multiselect':
+    return ({field, className, classes, onValueChange}: TextEditorProps) => (
+      <Observe render={() => (
+        <Select
+          multiple={true}
+          label={field.label}
+          onValueChange={onValueChange}
+          placeholder={field.placeholder}
+          autoFocus={field.autoFocus}
+          error={field.error}
+          disabled={field.disabled && field.disabled(field)}
+          visible={field.visible}
+          disableErrors={field.disableErrors}
+          style={{width: '100%', minWidth: '120px', textAlign: field.align || 'left'}}
+          align={field.align || 'left'}
+          variant={field.variant}
+          selectedItem={field.value || []}
+          onSelectItem={onValueChange}
+          className={className}
+          classes={classes}
+          startAdornment={field.startAdornment && field.startAdornment()}
+          endAdornment={field.endAdornment && field.endAdornment()}
+          {...propsForEdit}
+        />
+      )} />
+    );
 
     case 'date':
       return ({field, className, classes, onValueChange, endOfTextOnFocus, selectOnFocus}: TextEditorProps) => (
