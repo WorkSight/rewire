@@ -1,6 +1,7 @@
 import * as is             from 'is';
 import { EditorType }      from 'rewire-ui';
 import { SearchFn, MapFn } from 'rewire-ui';
+import { IValidateFnData } from './Validator';
 export { EditorType };
 
 export interface IRows {
@@ -37,8 +38,11 @@ export interface IGrid extends IRows, IDisposable {
   multiSelect               : boolean;
   startCell?                : ICell;
   changed                   : boolean;
+  inError                   : boolean;
 
   hasChanges(): boolean;
+  hasErrors(): boolean;
+  getErrors(): IErrorData[];
   copy(): void;
   paste(): void;
   addSort(column: IColumn, sort?: SortDirection, insert?: boolean): IGrid;
@@ -130,6 +134,8 @@ export interface IRow extends IDisposable {
   isFixed              : boolean;
 
   hasChanges(): boolean;
+  hasErrors(): boolean;
+  getErrors(): IErrorData[];
   createCell(column: IColumn, value: any, type?: string): ICell;
 }
 
@@ -164,19 +170,19 @@ export interface ICellProperties {
 }
 
 export interface IColumn extends ICellProperties {
-  name    : string;
-  type    : EditorType;
-  title?  : string;
-  width?  : string;
-  fixed   : boolean;
-  visible : boolean;
-  position: number;
-  sort?   : SortDirection;
-  canSort?: boolean;
-  options?: any;
-  editor? : React.SFC<any>;
+  name      : string;
+  type      : EditorType;
+  title?    : string;
+  width?    : string;
+  fixed     : boolean;
+  visible   : boolean;
+  position  : number;
+  sort?     : SortDirection;
+  canSort?  : boolean;
+  options?  : any;
+  editor?   : React.SFC<any>;
+  validator?: IValidateFnData;
 
-  validator?(value: any): IError | undefined;
   map?(value: any): string;
   predicate?(value: any, filter: {value: any}): boolean;
   compare?(x: any, y: any): number;
@@ -190,6 +196,7 @@ export enum ErrorSeverity {
   critical
 }
 export interface IError { messageText: string; severity: ErrorSeverity; }
+export interface IErrorData { name: string; error: IError; }
 
 export interface ICell extends ICellProperties {
   row                  : IRow;
@@ -208,6 +215,8 @@ export interface ICell extends ICellProperties {
   isLeftMostSelection  : boolean;
 
   hasChanges(): boolean;
+  hasErrors(): boolean;
+  getErrors(): IErrorData[];
   clone(row: IRow): ICell;
   clear(): void;
   setEditing(editing: boolean): void;

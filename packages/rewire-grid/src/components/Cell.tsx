@@ -145,9 +145,24 @@ class Cell extends React.PureComponent<CellProps, {}> {
       });
       watch(value, () => {
         if (this.column.validator) {
-          this.cell.error = this.column.validator(this.cell.value);
+          this.cell.error = this.column.validator.fn(this.row, this.cell.value);
         }
+        // validate other cells in this row if they have a column validator whose linkedColumnNames contains this cells column name
+        let columnsToValidate = this.row.cellsByColumnPosition.filter((cell: ICell) => cell.column.validator && cell.column.validator.linkedColumnNames.includes(this.cell.column.name)).map((cell: ICell) => cell.column);
+        columnsToValidate.forEach((column: IColumn) => {
+          let otherCell   = this.row.cells[column.name];
+          otherCell.error = column.validator!.fn(otherCell.row, otherCell.value);
+        });
         this.grid.changed = this.grid.hasChanges();
+      });
+
+      const error = observe(() => {
+        if (typeof this.cell.error === 'object') {
+          Object.keys(this.cell.error).map(key => this.cell.error![key]);
+        }
+      });
+      watch(error, () => {
+        this.grid.inError = this.grid.hasErrors();
       });
     });
   }

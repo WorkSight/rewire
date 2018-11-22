@@ -38,17 +38,17 @@ export function isNull(value?: any) {
 export type IValidateFn     = (obj: ObjectType, fieldName: string, label: string | undefined, value: any) => string | undefined;
 export type IValidateFnData = {linkedFieldNames: string[], fn: IValidateFn};
 
-export const isRequired = {
+export const isRequired: IValidateFnData = {
   linkedFieldNames: [],
-  fn: (obj: ObjectType, fieldName: string, label: string | undefined, value: any) => {
+  fn: (obj: ObjectType, fieldName: string, label: string | undefined, value: any): string | undefined => {
     return (isNull(value) || (is.array(value) && value.length <= 0)) ? `${label || 'field'} is required` : undefined;
   }
 };
 
-export const isRegEx = (re: RegExp, text: string) => {
+export const isRegEx = (re: RegExp, text: string): IValidateFnData => {
   return {
     linkedFieldNames: [],
-    fn: (obj: ObjectType, fieldName: string, label: string | undefined, value: any) => {
+    fn: (obj: ObjectType, fieldName: string, label: string | undefined, value: any): string | undefined => {
       if (!re.test(String(value !== undefined ? value : ''))) {
         return text;
       }
@@ -57,9 +57,9 @@ export const isRegEx = (re: RegExp, text: string) => {
   };
 };
 
-export const isEmail = {
+export const isEmail: IValidateFnData = {
   linkedFieldNames: [],
-  fn: (obj: ObjectType, fieldName: string, label: string | undefined, value: any) => {
+  fn: (obj: ObjectType, fieldName: string, label: string | undefined, value: any): string | undefined => {
     const re = /(^$|^(([^<>()\[\]\\.,;:\s@"]+(\.[^<>()\[\]\\.,;:\s@"]+)*)|(".+"))@((\[[0-9]{1,3}\.[0-9]{1,3}\.[0-9]{1,3}\.[0-9]{1,3}\])|(([a-zA-Z\-0-9]+\.)+[a-zA-Z]{2,}))$)/;
     if (!re.test(String(value !== undefined ? value : ''))) {
       return 'email is not in a valid format';
@@ -68,7 +68,7 @@ export const isEmail = {
   }
 };
 
-export const requiredWhenOtherIsNotNull = (otherFieldName: string) => {
+export const requiredWhenOtherIsNotNull = (otherFieldName: string): IValidateFnData => {
   return {
     linkedFieldNames: [otherFieldName],
     fn: (obj: ObjectType, fieldName: string, label: string | undefined, value: any): string | undefined => {
@@ -79,7 +79,7 @@ export const requiredWhenOtherIsNotNull = (otherFieldName: string) => {
   };
 };
 
-export const requiredWhenOtherIsValue = (otherFieldName: string, requiredValue: any) => {
+export const requiredWhenOtherIsValue = (otherFieldName: string, requiredValue: any): IValidateFnData => {
   return {
     linkedFieldNames: [otherFieldName],
     fn: (obj: ObjectType, fieldName: string, label: string | undefined, value: any): string | undefined => {
@@ -90,7 +90,7 @@ export const requiredWhenOtherIsValue = (otherFieldName: string, requiredValue: 
   };
 };
 
-export const isGreaterThan = (otherFieldName: string, text?: string) => {
+export const isGreaterThan = (otherFieldName: string, text?: string): IValidateFnData => {
   return {
     linkedFieldNames: [otherFieldName],
     fn: (obj: ObjectType, fieldName: string, label: string | undefined, value: any): string | undefined => {
@@ -105,7 +105,7 @@ export const isGreaterThan = (otherFieldName: string, text?: string) => {
   };
 };
 
-export const isGreaterThanOrEquals = (otherFieldName: string, text?: string) => {
+export const isGreaterThanOrEquals = (otherFieldName: string, text?: string): IValidateFnData => {
   return {
     linkedFieldNames: [otherFieldName],
     fn: (obj: ObjectType, fieldName: string, label: string | undefined, value: any): string | undefined => {
@@ -120,7 +120,7 @@ export const isGreaterThanOrEquals = (otherFieldName: string, text?: string) => 
   };
 };
 
-export const isLessThan = (otherFieldName: string, text?: string) => {
+export const isLessThan = (otherFieldName: string, text?: string): IValidateFnData => {
   return {
     linkedFieldNames: [otherFieldName],
     fn: (obj: ObjectType, fieldName: string, label: string | undefined, value: any): string | undefined => {
@@ -135,7 +135,7 @@ export const isLessThan = (otherFieldName: string, text?: string) => {
   };
 };
 
-export const isLessThanOrEquals = (otherFieldName: string, text?: string) => {
+export const isLessThanOrEquals = (otherFieldName: string, text?: string): IValidateFnData => {
   return {
     linkedFieldNames: [otherFieldName],
     fn: (obj: ObjectType, fieldName: string, label: string | undefined, value: any): string | undefined => {
@@ -150,7 +150,7 @@ export const isLessThanOrEquals = (otherFieldName: string, text?: string) => {
   };
 };
 
-export const isSameAsOther = (otherFieldName: string, text?: string) => {
+export const isSameAsOther = (otherFieldName: string, text?: string): IValidateFnData => {
   return {
     linkedFieldNames: [otherFieldName],
     fn: (obj: ObjectType, fieldName: string, label: string | undefined, value: any): string | undefined => {
@@ -165,7 +165,7 @@ export const isSameAsOther = (otherFieldName: string, text?: string) => {
   };
 };
 
-export const isDifferentFromOther = (otherFieldName: string, text?: string) => {
+export const isDifferentFromOther = (otherFieldName: string, text?: string): IValidateFnData => {
   return {
     linkedFieldNames: [otherFieldName],
     fn: (obj: ObjectType, fieldName: string, label: string | undefined, value: any): string | undefined => {

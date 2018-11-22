@@ -3,6 +3,7 @@ import {
   ICell,
   IRow,
   IColumn,
+  IErrorData,
   SortDirection,
   groupRows,
   findColumnByName,
@@ -54,6 +55,7 @@ class GridModel implements IGrid, IDisposable {
   isMouseDown               : boolean;
   startCell?                : ICell;
   changed                   : boolean;
+  inError                   : boolean;
 
   private _dispose: () => void;
 
@@ -81,6 +83,7 @@ class GridModel implements IGrid, IDisposable {
     this.isMouseDown                = false;
     this.startCell                  = undefined;
     this.changed                    = false;
+    this.inError                    = false;
   }
 
   initialize(dispose: () => void) {
@@ -572,6 +575,24 @@ class GridModel implements IGrid, IDisposable {
     return false;
   }
 
+  hasErrors(): boolean {
+    for (const row of this.dataRowsByPosition) {
+      if (!row) continue;
+      if (row.hasErrors()) return true;
+    }
+    return false;
+  }
+
+  getErrors(): IErrorData[] {
+    let errors: IErrorData[] = [];
+
+    for (const row of this.dataRowsByPosition) {
+      if (!row) continue;
+      errors.concat(row.getErrors());
+    }
+    return errors;
+  }
+
   selectRows(rows: IRow[]): void {
     let currentRows = this.selectedRows;
 
@@ -892,6 +913,7 @@ export default function create(rows: any[], columns: IColumn[], groupBy?: string
     // mergeRows(grid.fixedRows, grid.fixedColumns);
     // mergeRows(grid.fixedRows, grid.dataColumns);
     // mergeRows(grid.rows, grid.dataColumns);
+    grid.inError = grid.hasErrors();
     return grid;
   });
 }

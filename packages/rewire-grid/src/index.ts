@@ -3,6 +3,7 @@ export * from './models/ColumnModel';
 export * from './models/GridModel';
 export * from './models/GridTypes';
 export * from './models/RowModel';
+export * from './models/Validator';
 export * from './components/Cell';
 export * from './components/Column';
 export * from './components/Grid';

@@ -8,6 +8,7 @@ import {
   ICellDataMap,
   IGroupRow,
   IRows,
+  IErrorData,
   getValue,
   IDisposable,
   isGroupRow,
@@ -135,6 +136,26 @@ export class RowModel implements IRow, IDisposable {
       if (cell.hasChanges()) return true;
     }
     return false;
+  }
+
+  hasErrors(): boolean {
+    for (const column of this.grid.columns) {
+      let cell = this.cells[column.name];
+      if (!cell) continue;
+      if (cell.hasErrors()) return true;
+    }
+    return false;
+  }
+
+  getErrors(): IErrorData[] {
+    let errors: IErrorData[] = [];
+
+    for (const column of this.grid.columns) {
+      let cell = this.cells[column.name];
+      if (!cell) continue;
+      errors.concat(cell.getErrors());
+    }
+    return errors;
   }
 }
 
