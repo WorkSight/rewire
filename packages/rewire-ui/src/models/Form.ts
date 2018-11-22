@@ -322,21 +322,21 @@ export default class Form {
     return this.field[name];
   }
 
-  private toObjectValues() {
+  private toObjectValues(): ObjectType {
     return this.fields.reduce((prev: ObjectType, current) => {
       if (current.value !== undefined) prev[current.name] = current.value;
       return prev;
     }, {});
   }
 
-  private toObjectLabelsAndValues() {
+  private toObjectLabelsAndValues(): ObjectType {
     return this.fields.reduce((prev: ObjectType, current) => {
       prev[current.name] = {label: current.label && current.label.toLowerCase(), value: current.value};
       return prev;
     }, {});
   }
 
-  private toObject() {
+  private toObject(): ObjectType {
     return this.fields.reduce((prev: ObjectType, current) => {
       prev[current.name] = current;
       return prev;
@@ -350,7 +350,7 @@ export default class Form {
     });
   }
 
-  public submit = (enforceValidation: boolean = true) => {
+  public submit = (enforceValidation: boolean = true): boolean => {
     if (!this._value) return false;
     let result = this.validateForm();
     if (!result.success && enforceValidation) return false;
@@ -358,7 +358,7 @@ export default class Form {
     return true;
   }
 
-  private validateField(field: IEditorField) {
+  private validateField(field: IEditorField): ValidationResult {
     let fieldNamesToValidate = this.fields.filter(f => !f.disableErrors && f.linkedFieldNames.includes(field.name)).map(f => f.name);
     if (!field.disableErrors) {
       fieldNamesToValidate.push(field.name);

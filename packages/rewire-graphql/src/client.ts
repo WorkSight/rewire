@@ -90,7 +90,7 @@ class Client implements IClient {
     return this.executeQuery({query, variables}, false, mutate);
   }
 
-  mutation(query: GQL, variables: object, mutate: boolean = false): Promise<IQueryResponse> {
+  mutation(query: GQL, variables: object): Promise<IQueryResponse> {
     return this.query(query, variables, true);
   }
 

@@ -102,12 +102,12 @@ class VirtualBody extends React.PureComponent<BodyType, {offset: number, loading
   }
 
   onScroll = async () => {
-    let   offset  = Math.trunc(this.props.scrollY() / 29);
+    let offset = Math.trunc(this.props.scrollY() / 30);
     if (offset < 0 || this.state.offset === offset) {
       return;
     }
     await this.loadMoreRows(offset);
-    this._body!.style.transform = 'translateY(' + (offset * 29) + 'px)';
+    this._body!.style.transform = 'translateY(' + (offset * 30) + 'px)';
     this.setState({loading: false, offset});
   }
 
@@ -117,9 +117,9 @@ class VirtualBody extends React.PureComponent<BodyType, {offset: number, loading
         let gridContent = this.props.gridContent();
         if (!gridContent) return;
         let rows                 = this.props.grid.rows;
-        let totalSize            = Math.trunc(rows.length * 29);
+        let totalSize            = Math.trunc(rows.length * 30);
         gridContent.style.height = totalSize + 'px';
-        this.viewportCount       = Math.trunc(gridContent.parentElement!.clientHeight / 29) + 2;
+        this.viewportCount       = Math.trunc(gridContent.parentElement!.clientHeight / 30) + 2;
         this.forceUpdate();
       });
 
@@ -151,7 +151,7 @@ class VirtualBody extends React.PureComponent<BodyType, {offset: number, loading
       }
 
       let row   = rows[rowIdx];
-      cachedRow = <Row key={rowIdx} className={((rowIdx % 2) === 1) ? 'alt' : ''} Cell={Cell} row={row} index={rowIdx} columns={this.props.columns} visibleColumns={this.visibleColumns} />;
+      cachedRow = <Row key={rowIdx} rowElements={this.props.rowElements} fixedRowElements={this.props.fixedRowElements} className={((rowIdx % 2) === 1) ? 'alt' : ''} Cell={Cell} row={row} index={rowIdx} columns={this.props.columns} visibleColumns={this.visibleColumns} />;
       this.rowCache[rowIdx] = cachedRow;
       result.push(cachedRow);
     }
@@ -364,7 +364,7 @@ const GridInternal = withStyles(styles, class extends React.PureComponent<GridPr
     });
   }
 
-  handleMouseUp = (evt: Event) => {
+  handleMouseUp = (evt: React.MouseEvent<any>) => {
     this.grid.isMouseDown = false;
   }
 
@@ -391,6 +391,7 @@ const GridInternal = withStyles(styles, class extends React.PureComponent<GridPr
 
   componentWillUnmount() {
     if (this.grid.multiSelect) {
+      this.grid.isMouseDown = false;
       document.removeEventListener('mouseup', this.handleMouseUp);
     }
   }
@@ -495,8 +496,11 @@ const GridInternal = withStyles(styles, class extends React.PureComponent<GridPr
     );
   }
 
-  componentDidUpdate() {
+  componentDidUpdate(prevProps: GridProps) {
     this.updateForScrollbars();
+    if (prevProps.grid !== this.props.grid) {
+      this.grid = this.props.grid;
+    }
   }
 
   _body: HTMLTableSectionElement | null;
