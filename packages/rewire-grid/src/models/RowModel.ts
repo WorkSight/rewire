@@ -157,6 +157,14 @@ export class RowModel implements IRow, IDisposable {
     }
     return errors;
   }
+
+  validate(): void {
+    for (const column of this.grid.columns) {
+      let cell = this.cells[column.name];
+      if (!cell) continue;
+      cell.validate();
+    }
+  }
 }
 
 function find(rows: IRows, column: IColumn, row: any): IGroupRow | undefined {

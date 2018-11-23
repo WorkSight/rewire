@@ -456,8 +456,8 @@ function createTestGrid(nRows: number, nColumns: number) {
       else if ((colName === 'autoCompleteColumn') || (colName === 'selectColumn')) v = {id: '14', name: 'Austria'};
       else if (colName === 'multiselectColumn') v = [{id: '14', name: 'Austria'}];
       else if (colName === 'checkedColumn') v = true;
-      else if (colName === 'timeOutColumn') v = '7:30';
-      else if (colName === 'timeInColumn') v = '11:30';
+      else if (colName === 'timeOutColumn') v = 7.5;
+      else if (colName === 'timeInColumn') v = 11.5;
       else if (colName === 'dateColumn') v = '2018-11-11';
       else if (colName === 'complexColumn') v = row > 3 ? new ComplexCellData(guid(), 'Homer', 45) : undefined;
       else if (colName === 'phoneColumn') v = Number.parseInt('1250' + Math.round(Math.random() * 100000000).toString());

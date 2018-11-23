@@ -59,7 +59,7 @@ export class CellModel implements ICell {
     this.colSpan               = 1;
     this.selected              = false;
     this.value                 = value;
-    this.error                 = column.validator ? column.validator.fn(this.row, this.value) : undefined;
+    this.error                 = undefined;
     this.editing               = false;
     this.options               = undefined;
     this.isTopMostSelection    = false;
@@ -210,6 +210,18 @@ export class CellModel implements ICell {
     newCell.rowSpan = this.rowSpan;
     newCell.colSpan = this.colSpan;
     return newCell;
+  }
+
+  validate() {
+    if (this.column.validator) {
+      this.error = this.column.validator.fn(this.row, this.value);
+    }
+    // validate other cells in the same row if they have a column validator whose linkedColumnNames contains this cells column name
+    let columnsToValidate = this.row.cellsByColumnPosition.filter((cell: ICell) => cell.column.validator && cell.column.validator.linkedColumnNames.includes(this.column.name)).map((cell: ICell) => cell.column);
+    columnsToValidate.forEach((column: IColumn) => {
+      let otherCell   = this.row.cells[column.name];
+      otherCell.error = column.validator!.fn(otherCell.row, otherCell.value);
+    });
   }
 }
 

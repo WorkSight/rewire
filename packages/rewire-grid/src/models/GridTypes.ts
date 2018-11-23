@@ -43,6 +43,7 @@ export interface IGrid extends IRows, IDisposable {
   hasChanges(): boolean;
   hasErrors(): boolean;
   getErrors(): IErrorData[];
+  validate(): void;
   copy(): void;
   paste(): void;
   addSort(column: IColumn, sort?: SortDirection, insert?: boolean): IGrid;
@@ -137,6 +138,7 @@ export interface IRow extends IDisposable {
   hasErrors(): boolean;
   getErrors(): IErrorData[];
   createCell(column: IColumn, value: any, type?: string): ICell;
+  validate(): void;
 }
 
 export interface IGroupRow extends IRow, IRows {
@@ -220,6 +222,7 @@ export interface ICell extends ICellProperties {
   clone(row: IRow): ICell;
   clear(): void;
   setEditing(editing: boolean): void;
+  validate(): void;
 }
 
 export type ICellMap     = {[columnName: string]: ICell};

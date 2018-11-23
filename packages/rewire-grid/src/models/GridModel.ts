@@ -593,6 +593,13 @@ class GridModel implements IGrid, IDisposable {
     return errors;
   }
 
+  validate(): void {
+    for (const row of this.dataRowsByPosition) {
+      if (!row) continue;
+      row.validate();
+    }
+  }
+
   selectRows(rows: IRow[]): void {
     let currentRows = this.selectedRows;
 
@@ -913,6 +920,7 @@ export default function create(rows: any[], columns: IColumn[], groupBy?: string
     // mergeRows(grid.fixedRows, grid.fixedColumns);
     // mergeRows(grid.fixedRows, grid.dataColumns);
     // mergeRows(grid.rows, grid.dataColumns);
+    grid.validate();
     grid.inError = grid.hasErrors();
     return grid;
   });
