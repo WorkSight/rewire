@@ -307,15 +307,14 @@ export default class KeyboardNavigation {
         }
 
         evt.stopPropagation();
-        return true;
+        return;
 
       case 'ArrowDown':
         if (this.moveToNextRow(evt.target as HTMLElement, 1)) {
           evt.preventDefault();
         }
-
         evt.stopPropagation();
-        return true;
+        return;
 
       case 'ArrowLeft':
         if (this.moveToNextControl(evt.target as HTMLElement, -1)) {

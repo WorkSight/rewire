@@ -3,7 +3,7 @@ Date.prototype.getTimezoneOffset = function() {
 };
 
 export type DateType = Date | string | number;
-export enum TimeSpan { years, months, days, weeks, hours, minutes, seconds, milliseconds }
+export enum TimeSpan { Years, Months, Days, Weeks, Hours, Minutes, Seconds, Milliseconds }
 
 export class UTC {
   private _dt: number;
@@ -60,13 +60,13 @@ export class UTC {
     return +amount.toFixed(decimals);
   }
 
-  add(amount: number, ts: TimeSpan = TimeSpan.days) {
+  add(amount: number, ts: TimeSpan = TimeSpan.Days) {
     switch (ts) {
-      case TimeSpan.years:
+      case TimeSpan.Years:
         const d = new Date(this._dt);
         return d.setUTCFullYear(d.getUTCFullYear() + amount);
 
-      case TimeSpan.months:
+      case TimeSpan.Months:
         const d2 = new Date(this._dt);
         return d2.setUTCFullYear(d2.getUTCFullYear(), (d2.getUTCMonth() + amount));
 
@@ -75,7 +75,7 @@ export class UTC {
     }
   }
 
-  subtract(dt: DateType, ts: TimeSpan = TimeSpan.days, roundTo: number = 0) {
+  subtract(dt: DateType, ts: TimeSpan = TimeSpan.Days, roundTo: number = 0) {
     let right  = UTC.toNumber(dt);
     let left   = this._dt;
     let result = (left - right) / UTC.TimeSpanToMillis[ts];
@@ -94,14 +94,14 @@ export class UTC {
   private static MillisecondsPerSecond = 1000;
 
   public static TimeSpanToMillis = {
-    [TimeSpan.years]       : UTC.MillisecondsPerYear,
-    [TimeSpan.months]      : UTC.MillisecondsPerMonth,
-    [TimeSpan.weeks]       : UTC.MillisecondsPerWeek,
-    [TimeSpan.days]        : UTC.MillisecondsPerDay,
-    [TimeSpan.hours]       : UTC.MillisecondsPerHour,
-    [TimeSpan.minutes]     : UTC.MillisecondsPerMinute,
-    [TimeSpan.seconds]     : UTC.MillisecondsPerSecond,
-    [TimeSpan.milliseconds]: 1
+    [TimeSpan.Years]       : UTC.MillisecondsPerYear,
+    [TimeSpan.Months]      : UTC.MillisecondsPerMonth,
+    [TimeSpan.Weeks]       : UTC.MillisecondsPerWeek,
+    [TimeSpan.Days]        : UTC.MillisecondsPerDay,
+    [TimeSpan.Hours]       : UTC.MillisecondsPerHour,
+    [TimeSpan.Minutes]     : UTC.MillisecondsPerMinute,
+    [TimeSpan.Seconds]     : UTC.MillisecondsPerSecond,
+    [TimeSpan.Milliseconds]: 1
   };
 }
 

@@ -241,23 +241,28 @@ export default class GridKeyboardNavigation {
         evt.stopPropagation();
         return;
 
+      case 'CtrlDelete':
+        if (this.moveToNextRow(evt.target as HTMLElement, 1) || this.moveToNextRow(evt.target as HTMLElement, -1)) {
+          evt.preventDefault();
+        }
+        evt.stopPropagation();
+        return;
+
       case 'ArrowUp':
       case 'ShiftArrowUp':
         if (this.moveToNextRow(evt.target as HTMLElement, -1)) {
           evt.preventDefault();
         }
-
         evt.stopPropagation();
-        return true;
+        return;
 
       case 'ArrowDown':
       case 'ShiftArrowDown':
         if (this.moveToNextRow(evt.target as HTMLElement, 1)) {
           evt.preventDefault();
         }
-
         evt.stopPropagation();
-        return true;
+        return;
 
       case 'ArrowLeft':
       case 'ShiftTab':

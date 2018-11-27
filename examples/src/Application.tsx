@@ -40,10 +40,10 @@ import {Dialog as DialogView}   from 'rewire-ui';
 import {FormView}     from 'rewire-ui';
 // import column         from './models/Grid';
 import {createGrid, createColumn, IError, ErrorSeverity}   from 'rewire-grid';
-import {Grid, ICell}         from 'rewire-grid';
+import {Grid, ICell, IRow, isLessThan as gridIsLessThan, isGreaterThan as gridIsGreaterThan, isRequired as gridIsRequired, isSumOfOthers as gridIsSumOfOthers, isDifferenceOfOthers as gridIsDifferenceOfOthers}   from 'rewire-grid';
 // import { ICell, collapseAll, expandAll } from 'rewire-grid/models/GridTypes';
 import {editor}       from 'rewire-ui';
-import {isRequired, isEmail, and, isSameAsOther, isGreaterThan, isGreaterThanOrEquals, isLessThan, isLessThanOrEquals} from 'rewire-ui';
+import {isRequired, isEmail, and, isSameAsOther, isGreaterThan, isGreaterThanOrEquals, isLessThan, isLessThanOrEquals, isDifferenceOfOthers, isSumOfOthers, requiredWhenOtherIsNotNull, requiredWhenOtherIsValue} from 'rewire-ui';
 import './graphqltest';
 import doucheSuitDude from './images/doucheSuitDude.jpg';
 import { MuiThemeProvider, Theme, createMuiTheme } from '@material-ui/core/styles';
@@ -382,58 +382,73 @@ function createTestGrid(nRows: number, nColumns: number) {
   cols.push(createColumn('phoneColumn', 'Phone', {type: 'phone'}, Math.trunc(Math.random() * 250 + 50) + 'px'));
   cols.push(createColumn('numberColumn', 'Number', {type: 'number', options: {decimals: 2, thousandSeparator: false}}, Math.trunc(Math.random() * 250 + 50) + 'px'));
   cols.push(createColumn('dateColumn', 'Date', 'date', Math.trunc(Math.random() * 250 + 50) + 'px'));
-  cols.push(createColumn('timeColumn', 'Time', 'time', Math.trunc(Math.random() * 250 + 50) + 'px'));
+  cols.push(createColumn('timeOutColumn', 'Time Out', 'time', Math.trunc(Math.random() * 250 + 50) + 'px'));
+  cols.push(createColumn('timeInColumn', 'Time In', 'time', Math.trunc(Math.random() * 250 + 50) + 'px'));
+  cols.push(createColumn('differenceColumn', 'Time Difference', {type: 'number'}, Math.trunc(Math.random() * 250 + 50) + 'px'));
+  cols.push(createColumn('sumColumn', 'Time Sum', {type: 'number'}, Math.trunc(Math.random() * 250 + 50) + 'px'));
   cols.push(createColumn('autoCompleteColumn', 'Auto Complete', {type: 'auto-complete', options: countries}, Math.trunc(Math.random() * 250 + 50) + 'px'));
   cols.push(createColumn('selectColumn', 'Select', {type: 'select', options: countries}, Math.trunc(Math.random() * 250 + 50) + 'px'));
   cols.push(createColumn('multiselectColumn', 'MultiSelect', {type: 'multiselect', options: countries}, Math.trunc(Math.random() * 250 + 50) + 'px'));
   cols.push(createColumn('checkedColumn', 'Checked', 'checked', Math.trunc(Math.random() * 250 + 50) + 'px'));
 
+  cols[15].validator = gridIsRequired;
+  cols[18].validator = gridIsGreaterThan('timeOutColumn');
+  cols[19].validator = gridIsDifferenceOfOthers(['timeInColumn', 'timeOutColumn']);
+  cols[20].validator = gridIsSumOfOthers(['timeInColumn', 'timeOutColumn']);
+
+
   let complexColumn = createColumn('complexColumn', 'Complex', 'none', Math.trunc(Math.random() * 250 + 50) + 'px');
   complexColumn.renderer  = ComplexCell;
   complexColumn.compare   = ComplexCellData.compare;
-  complexColumn.validator = (value: any): IError | undefined => {
-    if (value === undefined) {
-      return undefined;
-    }
+  complexColumn.validator = {
+    linkedColumnNames: [],
+    fn: (row: IRow, value: any): IError | undefined => {
+      if (value === undefined) {
+        return undefined;
+      }
 
-    let error: IError | undefined;
-    let errorMsg: string             = '';
-    let errorSeverity: ErrorSeverity = ErrorSeverity.error;
-    if (value.name === 'Homer') {
-      errorMsg      = 'No Homers allowed!';
-      errorSeverity = ErrorSeverity.critical;
+      let error: IError | undefined;
+      let errorMsg: string             = '';
+      let errorSeverity: ErrorSeverity = ErrorSeverity.Error;
+      if (value.name === 'Homer') {
+        errorMsg      = 'No Homers allowed!';
+        errorSeverity = ErrorSeverity.Critical;
+      }
+      error = errorMsg ? {messageText: errorMsg, severity: errorSeverity} : undefined;
+      return error;
     }
-    error = errorMsg ? {messageText: errorMsg, severity: errorSeverity} : undefined;
-    return error;
   };
   cols.push(complexColumn);
   // Override and set some columns to be number!
   cols[5].setEditor({type: 'number', options: {decimals: 2, thousandSeparator: true}});
-  cols[5].validator = (value: any): IError | undefined => {
-    if (value === undefined) {
-      return undefined;
-    }
+  cols[5].validator = {
+    linkedColumnNames: [],
+    fn: (row: IRow, value: any): IError | undefined => {
+      if (value === undefined) {
+        return undefined;
+      }
 
-    let error: IError | undefined;
-    let errorMsg: string             = '';
-    let errorSeverity: ErrorSeverity = ErrorSeverity.error;
-    if (value < 2000) {
-      errorMsg      = 'Less than 2000';
-      errorSeverity = ErrorSeverity.warning;
-    } else if (value > 7000) {
-      errorMsg      = 'Greater than 7000';
-      errorSeverity = ErrorSeverity.critical;
-    } else if (value > 4000) {
-      errorMsg      = 'Greater than 4000';
-      errorSeverity = ErrorSeverity.error;
-    } else if (value >= 2000 && value <= 4000) {
-      errorMsg      = 'Between 2000 and 4000';
-      errorSeverity = ErrorSeverity.info;
+      let error: IError | undefined;
+      let errorMsg: string             = '';
+      let errorSeverity: ErrorSeverity = ErrorSeverity.Error;
+      if (value < 2000) {
+        errorMsg      = 'Less than 2000';
+        errorSeverity = ErrorSeverity.Warning;
+      } else if (value > 7000) {
+        errorMsg      = 'Greater than 7000';
+        errorSeverity = ErrorSeverity.Critical;
+      } else if (value > 4000) {
+        errorMsg      = 'Greater than 4000';
+        errorSeverity = ErrorSeverity.Error;
+      } else if (value >= 2000 && value <= 4000) {
+        errorMsg      = 'Between 2000 and 4000';
+        errorSeverity = ErrorSeverity.Info;
+      }
+      error = errorMsg ? {messageText: errorMsg, severity: errorSeverity} : undefined;
+      return error;
     }
-    error = errorMsg ? {messageText: errorMsg, severity: errorSeverity} : undefined;
-    return error;
   };
-  // cols[6].setEditor({type: 'number', options: {decimals: 3, thousandSeparator: true}});
+  cols[6].setEditor({type: 'number', options: {decimals: 3, thousandSeparator: true}});
 
   // add some cell data!
   let rows = [];
@@ -446,7 +461,10 @@ function createTestGrid(nRows: number, nColumns: number) {
       else if ((colName === 'autoCompleteColumn') || (colName === 'selectColumn')) v = {id: '14', name: 'Austria'};
       else if (colName === 'multiselectColumn') v = [{id: '14', name: 'Austria'}];
       else if (colName === 'checkedColumn') v = true;
-      else if (colName === 'timeColumn') v = '7:30';
+      else if (colName === 'timeOutColumn') v = 7.5;
+      else if (colName === 'timeInColumn') v = 11.5;
+      else if (colName === 'differenceColumn') v = 4;
+      else if (colName === 'sumColumn') v = 19;
       else if (colName === 'dateColumn') v = '2018-11-11';
       else if (colName === 'complexColumn') v = row > 3 ? new ComplexCellData(guid(), 'Homer', 45) : undefined;
       else if (colName === 'phoneColumn') v = Number.parseInt('1250' + Math.round(Math.random() * 100000000).toString());
@@ -492,6 +510,8 @@ function createTestGrid(nRows: number, nColumns: number) {
   setTimeout(() => {
     grid.cellByPos(0, 7).align = '';
     grid.cellByPos(0, 7).enabled = false;
+    grid.cellByPos(0, 19).value = 3;
+    grid.cellByPos(0, 20).value = 20;
     grid.clearSelection();
   }, 5000);
   grid.cellByPos(0, 5).editable = false;
@@ -532,6 +552,22 @@ console.log(r);
 
 function createEmployeesGrid() {
   let employees = [
+    {id: '1e',  name: 'Schrute, Dwight',         email: 'testEmail11@test.com',       isActive: true, timeColumn: '7:30', autoCompleteColumn: undefined        , selectColumn: {name: 'Bermuda'}},
+    {id: '2e',  name: 'Scott, Michael',          email: 'testEmail22@test.com',       isActive: true, timeColumn: '7:30', autoCompleteColumn: {name: 'Bermuda'}, selectColumn: {name: 'Bermuda'}},
+    {id: '3e',  name: 'Lannister, Jaime',        email: 'testEmail33@test.com',       isActive: true, timeColumn: '7:30', autoCompleteColumn: {name: 'Bermuda'}, selectColumn: {name: 'Bermuda'}},
+    {id: '4e',  name: 'Dayne, Arthur',           email: 'testEmail44@test.com',       isActive: true, timeColumn: '7:30', autoCompleteColumn: {name: 'Bermuda'}, selectColumn: {name: 'Bermuda'}},
+    {id: '5e',  name: 'Snow, Jon',               email: 'testEmail55@test.com',       isActive: true, timeColumn: '7:30', autoCompleteColumn: {name: 'Bermuda'}, selectColumn: {name: 'Bermuda'}},
+    {id: '6e',  name: 'Stark, Ned',              email: 'testEmail66@test.com',       isActive: true, timeColumn: '7:30', autoCompleteColumn: {name: 'Bermuda'}, selectColumn: {name: 'Bermuda'}},
+    {id: '7e',  name: 'Stark, Arya',             email: 'testEmail77@test.com',       isActive: true, timeColumn: '7:30', autoCompleteColumn: {name: 'Bermuda'}, selectColumn: {name: 'Bermuda'}},
+    {id: '8e',  name: 'Biggus, Headus',          email: 'testEmail88@test.com',       isActive: true, timeColumn: '7:30', autoCompleteColumn: {name: 'Bermuda'}, selectColumn: {name: 'Bermuda'}},
+    {id: '9e',  name: 'Drumpf, Donald',          email: 'testEmail99@test.com',       isActive: true, timeColumn: '7:30', autoCompleteColumn: {name: 'Bermuda'}, selectColumn: {name: 'Bermuda'}},
+    {id: '7e',  name: 'Johnson, Ruin',           email: 'testEmail00@test.com',       isActive: true, timeColumn: '7:30', autoCompleteColumn: {name: 'Bermuda'}, selectColumn: {name: 'Bermuda'}},
+    {id: '8e',  name: 'Ren, Emo',                email: 'testEmail1234@test.com',     isActive: true, timeColumn: '7:30', autoCompleteColumn: {name: 'Bermuda'}, selectColumn: {name: 'Bermuda'}},
+    {id: '9e',  name: 'Swolo, Ben',              email: 'testEmail5678@test.com',     isActive: true, timeColumn: '7:30', autoCompleteColumn: {name: 'Bermuda'}, selectColumn: {name: 'Bermuda'}},
+    {id: '10e', name: 'Sue, Mary',               email: 'testEmail90210@test.com',    isActive: true, timeColumn: '7:30', autoCompleteColumn: {name: 'Bermuda'}, selectColumn: {name: 'Bermuda'}},
+    {id: '11e', name: 'Poppins, Leia',           email: 'testEmail6274309@test.com',  isActive: true, timeColumn: '7:30', autoCompleteColumn: {name: 'Bermuda'}, selectColumn: {name: 'Bermuda'}},
+    {id: '12e', name: 'Snoke, Nobody',           email: 'testEmail13371337@test.com', isActive: true, timeColumn: '7:30', autoCompleteColumn: {name: 'Bermuda'}, selectColumn: {name: 'Bermuda'}},
+    {id: '13e', name: 'Too tired to live, Luke', email: 'testEmail253545@test.com',   isActive: true, timeColumn: '7:30', autoCompleteColumn: {name: 'Bermuda'}, selectColumn: {name: 'Bermuda'}},
     {id: '1e',  name: 'Schrute, Dwight',         email: 'testEmail11@test.com',       isActive: true, timeColumn: '7:30', autoCompleteColumn: undefined        , selectColumn: {name: 'Bermuda'}},
     {id: '2e',  name: 'Scott, Michael',          email: 'testEmail22@test.com',       isActive: true, timeColumn: '7:30', autoCompleteColumn: {name: 'Bermuda'}, selectColumn: {name: 'Bermuda'}},
     {id: '3e',  name: 'Lannister, Jaime',        email: 'testEmail33@test.com',       isActive: true, timeColumn: '7:30', autoCompleteColumn: {name: 'Bermuda'}, selectColumn: {name: 'Bermuda'}},
@@ -612,7 +648,8 @@ const _Home = (props: any) => <Observe render={() => (
             }}>
               Change Complex Cell Value
             </Button>
-            <Observe render={() => (<Button variant='contained' disabled={!grid.changed} onClick={() => grid.revert()}>Enabled if has Changes. Reverts Changes</Button>)} />
+            <Observe render={() => (<Button style={{marginRight: '15px'}} variant='contained' disabled={!grid.changed} onClick={() => grid.revert()}>Enabled if has Changes. Reverts Changes</Button>)} />
+            <Observe render={() => (<Button variant='contained' disabled={!grid.inError}>Enabled if has Errors</Button>)} />
           </div>
           <Paper style={{width: '80%', padding: 20, display: 'flex', alignItems: 'center', justifyContent: 'center', height: 800}}>
             <Observe render={() => (<Grid grid={grid} gridFontSizes={{header: '0.9rem', body: '0.9rem', groupRow: '0.8rem'}} />)} />
@@ -636,7 +673,7 @@ class TestDialog extends Modal {
     isGreat              : Form.boolean().label('Is Great'),
     noLabel              : Form.boolean(),
     disabled             : Form.boolean().label('Disabled').disabled(() => true),
-    email                : Form.email().label('Email').validators(isRequired).placeholder('enter a valid email'),
+    email                : Form.email().label('Email').validators(requiredWhenOtherIsValue('name', 'Ryan')).placeholder('enter a valid email'),
     name                 : Form.string().label('Name').validators(isRequired).placeholder('enter your name').startAdornment(() => <AccessibilityIcon />),
     password             : Form.password().label('Password').validators(and(isRequired, isSameAsOther('password_confirmation', 'passwords are not the same'))).placeholder('enter a password').updateOnChange(),
     password_confirmation: Form.password().label('Confirm Password').placeholder('confirm your password').updateOnChange(),
@@ -644,7 +681,9 @@ class TestDialog extends Modal {
     phoneCustom          : Form.phone({format: '#-##-###-####-#####'}).label('Phone Number Custom (optional)').placeholder('your phone number'),
     country              : Form.reference(countries).label('Country').placeholder('pick a country').startAdornment(() => <AccessibilityIcon />).validators(isRequired),
     timeOut              : Form.time().label('Time Out').placeholder('enter a time').validators(and(isRequired, isLessThan('timeIn'))),
-    timeIn               : Form.time().label('Time In').placeholder('enter a time').validators(isRequired),
+    timeIn               : Form.time().label('Time In').placeholder('enter a time').validators(requiredWhenOtherIsNotNull('timeOut')),
+    difference           : Form.number().label('Time Difference').placeholder('enter difference').validators(isDifferenceOfOthers(['timeIn', 'timeOut'])),
+    sum                  : Form.number().label('Time Sum').placeholder('enter sum').validators(isSumOfOthers(['timeIn', 'timeOut'])),
     avatar               : Form.avatar({width: 1000, height: 1000, avatarDiameter: 150, cropRadius: 75}).label('Add Photo (Optional)'),
   }, {email: 'splace@worksight.net', isGreat: true}, {variant: 'outlined'});
 
@@ -686,10 +725,14 @@ const TestFormView = ({form}: {form: typeof testDialog.form}) => (
         <form.field.phoneCustom.Editor />
       </div>
       <div className='content'>
-        <form.field.country.Editor className='span4' />
-        <form.field.isGreat.Editor className='span4' />
         <form.field.timeOut.Editor className='span4' />
         <form.field.timeIn.Editor className='span4' />
+        <form.field.country.Editor className='span4' />
+        <form.field.isGreat.Editor className='span4' />
+      </div>
+      <div className='content'>
+        <form.field.difference.Editor className='span1' />
+        <form.field.sum.Editor className='span1' />
       </div>
       <div className='content'>
       <form.field.avatar.Editor />
