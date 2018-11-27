@@ -81,14 +81,22 @@ export interface IGrid extends IRows, IDisposable {
 
   addColumn(column: IColumn): IColumn;
 
-  addFixedRow(row: any): IRow;
+  addFixedRow(row: any, position?: number): IRow;
   removeFixedRow(id: string): void;
 
+  _removeRow(rows: any, id: string): void;
   removeRow(id: string): void;
-  addRow(row: any): IRow;
-  _addRow(row: any): IRow;
-  addRows(rows: any[]): void;
-  _addRows(rows: any[]): void;
+  removeRows(ids: string[]): void;
+  removeSelectedRows(): void;
+  addRow(row: any, position?: number): IRow;
+  _addRow(row: any, position?: number): IRow;
+  addRows(rows: any[], position?: number): void;
+  _addRows(rows: any[], position?: number): IRow[];
+  _duplicateRow(rows: any, id: string, position?: number): void;
+  duplicateRow(id: string, position?: number): void;
+  duplicateRows(ids: string[], position?: number): void;
+  duplicateSelectedRows(): void;
+  insertRowAtSelection(): void;
 }
 
 export interface IGridColors {
@@ -128,7 +136,7 @@ export interface IRow extends IDisposable {
   cls                  : string;
   options              : IRowOptions;
   position             : number;
-  readonly data        : ICellDataMap;
+  readonly data        : ICellDataMap & any;
   cellsByColumnPosition: ICell[];
   parentRow?           : IGroupRow;
   visible              : boolean;
@@ -138,6 +146,7 @@ export interface IRow extends IDisposable {
   hasErrors(): boolean;
   getErrors(): IErrorData[];
   createCell(column: IColumn, value: any, type?: string): ICell;
+  clone(): IRow;
   validate(): void;
 }
 
@@ -192,10 +201,10 @@ export interface IColumn extends ICellProperties {
 }
 
 export enum ErrorSeverity {
-  info,
-  warning,
-  error,
-  critical
+  Info,
+  Warning,
+  Error,
+  Critical
 }
 export interface IError { messageText: string; severity: ErrorSeverity; }
 export interface IErrorData { name: string; error: IError; }

@@ -156,8 +156,15 @@ class BaseField implements IFieldDefn {
   }
 }
 
+export enum InitialValuesValidationMode {
+  All,
+  WithValues,
+  None,
+}
+
 export interface IFormOptions {
   defaultAdornmentsEnabled?: boolean;
+  initialValuesValidationMode?: InitialValuesValidationMode;
   disableErrors?: boolean;
   variant?: TextVariant;
   updateOnChange?: boolean;
@@ -165,28 +172,30 @@ export interface IFormOptions {
 }
 
 export default class Form {
-  private _value          : ObjectType;
-  private dispose         : () => void;
-  private _hasChanges     : () => boolean;
-  private _hasErrors      : () => boolean;
-  defaultAdornmentsEnabled: boolean;
-  disableErrors           : boolean;
-  variant                 : TextVariant;
-  updateOnChange          : boolean;
-  validateOnUpdate        : boolean;
-  fields                  : IEditorField[];
-  validator               : Validator;
-  field                   : {[index: string]: IEditorField};
+  private _value             : ObjectType;
+  private dispose            : () => void;
+  private _hasChanges        : () => boolean;
+  private _hasErrors         : () => boolean;
+  defaultAdornmentsEnabled   : boolean;
+  initialValuesValidationMode: InitialValuesValidationMode;
+  disableErrors              : boolean;
+  variant                    : TextVariant;
+  updateOnChange             : boolean;
+  validateOnUpdate           : boolean;
+  fields                     : IEditorField[];
+  validator                  : Validator;
+  field                      : {[index: string]: IEditorField};
 
   private constructor(fields: IFieldDefns, initial?: ObjectType, options?: IFormOptions) {
-    this.field                    = observable({});
-    this.validator                = new Validator();
-    this.defaultAdornmentsEnabled = options && options.defaultAdornmentsEnabled !== undefined ? options.defaultAdornmentsEnabled : true;
-    this.disableErrors            = options && options.disableErrors || false;
-    this.variant                  = options && options.variant || 'standard';
-    // this.updateOnChange           = options && options.updateOnChange !== undefined ? options.updateOnChange : true;
-    this.updateOnChange           = options && options.updateOnChange || false;
-    this.validateOnUpdate         = options && options.validateOnUpdate !== undefined ? options.validateOnUpdate : true;
+    this.field                       = observable({});
+    this.validator                   = new Validator();
+    this.defaultAdornmentsEnabled    = options && options.defaultAdornmentsEnabled !== undefined ? options.defaultAdornmentsEnabled : true;
+    this.initialValuesValidationMode = options && options.initialValuesValidationMode ? options.initialValuesValidationMode : InitialValuesValidationMode.WithValues;
+    this.disableErrors               = options && options.disableErrors || false;
+    this.variant                     = options && options.variant || 'standard';
+    // this.updateOnChange              = options && options.updateOnChange !== undefined ? options.updateOnChange : true;
+    this.updateOnChange              = options && options.updateOnChange || false;
+    this.validateOnUpdate            = options && options.validateOnUpdate !== undefined ? options.validateOnUpdate : true;
     this.initializeFields(fields);
     this.value = initial || {};
   }
@@ -197,6 +206,14 @@ export default class Form {
     this._value = value;
     this.fields.forEach(field => {
       field.value = field.type === 'boolean' ? value[field.name] || false : value[field.name];
+      // validate initial values
+      if (this.initialValuesValidationMode === InitialValuesValidationMode.All) {
+        this.validateField(field);
+      } else if (this.initialValuesValidationMode === InitialValuesValidationMode.WithValues) {
+        if (field.value) {
+          this.validateField(field);
+        }
+      }
     });
 
     root((dispose) => {
@@ -266,10 +283,7 @@ export default class Form {
     }
 
     const onValueChange = (v: any) => {
-      field.value = v;
-      if (field.validateOnUpdate) {
-        this.validateField(field);
-      }
+      this.setFieldValue(field.name, v);
     };
 
     return (props) => createElement(editor(editorType!, editProps), {...props, field: field, onValueChange});
@@ -320,6 +334,21 @@ export default class Form {
       this.validator.addRule(name, fieldDefn.typeDefn.validators);
     }
     return this.field[name];
+  }
+
+  public setFieldValue(fieldName: string, value: any) {
+    let field = this.field[fieldName];
+    if (!field) return;
+    field.value = value;
+    if (field.validateOnUpdate) {
+      this.validateField(field);
+    }
+  }
+
+  public getFieldValue(fieldName: string): any {
+    let field = this.field[fieldName];
+    if (!field) return;
+    return field.value;
   }
 
   private toObjectValues(): ObjectType {

@@ -229,8 +229,36 @@ class Cell extends React.PureComponent<CellProps, {}> {
         }
         break;
 
+      case 'Insert':
+        if (this.cell.editing || !evt.ctrlKey) {
+          return;
+        }
+        // insert row
+        this.grid.insertRowAtSelection();
+        break;
+
+      case 'd':
+        if (this.cell.editing || !evt.ctrlKey) {
+          return;
+        }
+        // duplcate row(s)
+        this.grid.duplicateSelectedRows();
+        break;
+
       case 'Delete':
         if (this.cell.editing) {
+          return;
+        }
+        if (evt.ctrlKey) {
+          // delete row(s)
+          let bottomMostCell  = this.grid.selectedCells.reduce((prevCell: ICell, currCell: ICell): ICell => prevCell.rowPosition > currCell.rowPosition ? prevCell : currCell);
+          let newCellToSelect = this.grid.adjacentBottomCell(bottomMostCell, true) || this.grid.adjacentTopCell(bottomMostCell, true);
+          this.grid.removeSelectedRows();
+          if (!newCellToSelect) {
+            break;
+          }
+          this.grid.startCell = newCellToSelect;
+          this.grid.selectCells([newCellToSelect]);
           return;
         }
         this.grid.selectedCells.forEach(cell => cell.clear());
@@ -456,19 +484,19 @@ class Cell extends React.PureComponent<CellProps, {}> {
     let ErrorIconToUse: React.ComponentType<any>;
     let errorColorClass: string;
     switch (this.cell!.error!.severity) {
-      case ErrorSeverity.info:
+      case ErrorSeverity.Info:
         ErrorIconToUse  = InfoIcon;
         errorColorClass = this.props.classes.info;
         break;
-      case ErrorSeverity.warning:
+      case ErrorSeverity.Warning:
         ErrorIconToUse  = ErrorIcon;
         errorColorClass = this.props.classes.warning;
         break;
-      case ErrorSeverity.critical:
+      case ErrorSeverity.Critical:
         ErrorIconToUse  = WarningIcon;
         errorColorClass = this.props.classes.critical;
         break;
-      case ErrorSeverity.error:
+      case ErrorSeverity.Error:
       default:
         ErrorIconToUse  = ErrorIcon;
         errorColorClass = this.props.classes.error;

@@ -360,7 +360,10 @@ const GridInternal = withStyles(styles, class extends React.PureComponent<GridPr
 
       watch(_currentWindowSize, () => this.updateForScrollbars());
 
-      watch(() => this.grid.dataRowsByPosition.length, () => this.grid.changed = this.grid.hasChanges());
+      watch(() => this.grid.dataRowsByPosition.length, () => {
+        this.grid.changed = this.grid.hasChanges();
+        this.grid.inError = this.grid.hasErrors();
+      });
     });
   }
 

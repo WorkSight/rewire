@@ -12,6 +12,7 @@ import {
   getValue,
   IDisposable,
   isGroupRow,
+  cloneValue,
 }                              from './GridTypes';
 import createCell, {CellModel} from './CellModel';
 import {observable,
@@ -28,7 +29,7 @@ export class RowModel implements IRow, IDisposable {
   id                   : string;
   grid                 : IGrid;
   cells                : ICellMap;
-  data                 : ICellDataMap;
+  data                 : ICellDataMap & any;
   cellsByColumnPosition: ICell[];
   selected             : boolean;
   cls                  : string;
@@ -43,7 +44,7 @@ export class RowModel implements IRow, IDisposable {
     return a.position < b.position ? -1 : a.position > b.position ? 1 : 0;
   }
 
-  constructor(grid: IGrid, public data: any, position: number = 0, fixed: boolean = false) {
+  constructor(grid: IGrid, data: any, position: number = 0, fixed: boolean = false) {
     this.grid     = grid;
     this.cells    = {};
     this.data     = {};
@@ -77,6 +78,10 @@ export class RowModel implements IRow, IDisposable {
         observe(this.mergeColumns);
       }
     });
+
+    if (!this.grid.loading && !fixed && !isGroupRow(this)) {
+    this.validate();
+  }
   }
 
   set parentRow(groupRow: IGroupRow | undefined) {
@@ -158,6 +163,17 @@ export class RowModel implements IRow, IDisposable {
     return errors;
   }
 
+  clone(): IRow {
+    let newCellValues: ICellMap = {};
+    for (const column of this.grid.columns) {
+      let cell = this.cells[column.name];
+      if (!cell) continue;
+      newCellValues[column.name] = cloneValue(cell.value);
+    }
+    let newRow = new RowModel(this.grid, {options: this.options, ...newCellValues}, this.position, this.isFixed);
+    return newRow;
+  }
+
   validate(): void {
     for (const column of this.grid.columns) {
       let cell = this.cells[column.name];
@@ -177,8 +193,8 @@ function find(rows: IRows, column: IColumn, row: any): IGroupRow | undefined {
   return undefined;
 }
 
-export default function create(grid: IGrid, rows: IRow[], row: any, fixed: boolean = false): IRow {
-  let position = rows.length;
+export default function create(grid: IGrid, rows: IRow[], row: any, position?: number, fixed: boolean = false): IRow {
+  let rowPos = (position !== undefined) && position + 1 || rows.length;
 
   if (grid.groupBy.length > 0 && !fixed) {
     let root:   IGroupRow;
@@ -199,17 +215,18 @@ export default function create(grid: IGrid, rows: IRow[], row: any, fixed: boole
       parent = r;
     }
 
-    let newRow       = new RowModel(grid, row, undefined, fixed);
+    let newRow       = new RowModel(grid, row, rowPos, fixed);
     newRow.parentRow = parent as IGroupRow;
-    parent.rows.push(newRow);
-    grid.dataRowsByPosition.push(newRow);
-    return root!;
+    let insertIdx    = parent.rows.findIndex((row: IRow) => row.position === rowPos - 1) + 1;
+    parent.rows.splice(insertIdx, 0, newRow);
+    grid.dataRowsByPosition.splice(rowPos, 0, newRow);
+    return newRow;
   }
 
-  let r = new RowModel(grid, row, position, fixed);
-  rows.push(r);
+  let r = new RowModel(grid, row, rowPos, fixed);
+  rows.splice(rowPos, 0, r);
   if (!fixed) {
-    grid.dataRowsByPosition.push(r);
+    grid.dataRowsByPosition.splice(rowPos, 0, r);
   }
   return r;
 }

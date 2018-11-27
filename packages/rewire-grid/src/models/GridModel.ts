@@ -357,6 +357,16 @@ class GridModel implements IGrid, IDisposable {
     this._removeRow(allDataRows(this.rows), id);
   }
 
+  removeRows(ids: string[]): void {
+    ids.forEach(id => {
+      this.removeRow(id);
+    });
+  }
+
+  removeSelectedRows(): void {
+    this.removeRows(this.selectedRows.map(row => row.id));
+  }
+
   addSort(column: IColumn, sort?: SortDirection, insert?: boolean): IGrid {
     let sortColumn = this._sort.indexOf(column);
     if (sortColumn >= 0) {
@@ -497,15 +507,14 @@ class GridModel implements IGrid, IDisposable {
     return column;
   }
 
-  addRow(row: any): IRow {
-    let newRow = this._addRow(row);
+  addRow(row: any, position?: number): IRow {
+    let newRow = this._addRow(row, position);
 
-    if (this.groupBy.length > 0) {
+    if (position !== undefined || this.groupBy.length > 0) {
       this.setRowPositions();
-      this.sortItems(this.dataRowsByPosition, RowModel.positionCompare);
     }
 
-    const addedRow = findRowById(allDataRows(this.rows), row.id);
+    const addedRow = findRowById(allDataRows(this.rows), newRow.id);
     if (addedRow) {
       this.addedRows.push(addedRow);
     }
@@ -513,12 +522,12 @@ class GridModel implements IGrid, IDisposable {
     return newRow;
   }
 
-  _addRow(row: any): IRow {
-    return createRow(this, this.rows, row);
+  _addRow(row: any, position?: number): IRow {
+    return createRow(this, this.rows, row, position);
   }
 
-  addFixedRow(row: any): IRow {
-    let newRow = createRow(this, this.fixedRows, row, true);
+  addFixedRow(row: any, position?: number): IRow {
+    let newRow = createRow(this, this.fixedRows, row, position, true);
     this.mergeFixedRows();
     return newRow;
   }
@@ -528,26 +537,68 @@ class GridModel implements IGrid, IDisposable {
     mergeRows(this.fixedRows, this.dataColumns, true);
   }
 
-  addRows(rows: any[]): void {
-    this._addRows(rows);
-    let dataRows = allDataRows(this.rows);
-    for (const row of rows) {
-      const addedRow = findRowById(dataRows, row.id);
+  addRows(rows: any[], position?: number): void {
+    let newRows = this._addRows(rows, position);
+    for (const newRow of newRows) {
+      const addedRow = findRowById(allDataRows(this.rows), newRow.id);
       if (addedRow) {
         this.addedRows.push(addedRow);
       }
     }
   }
 
-  _addRows(rows: any[]): void {
+  _addRows(rows: any[], position?: number): IRow[] {
+    let addedRows: IRow[] = [];
+    let pos               = position;
     for (const row of rows) {
-      this._addRow(row);
+      addedRows.push(this._addRow(row, pos));
+      if (pos !== undefined) {
+        pos++;
+      }
     }
 
-    if (this.groupBy.length > 0) {
+    if (position !== undefined || this.groupBy.length > 0) {
       this.setRowPositions();
-      this.sortItems(this.dataRowsByPosition, RowModel.positionCompare);
     }
+
+    return addedRows;
+  }
+
+  _duplicateRow(iterator: IterableIterator<IRowIteratorResult>, id: string, position?: number): void {
+    const row = findRowById(iterator, id);
+    if (!row) return;
+    let rowValuesObj = {};
+    Object.keys(row.row.cells).forEach(columnName => {
+      rowValuesObj[columnName] = cloneValue(row.row.cells[columnName].value);
+    });
+    let rowToAdd: any = {options: row.row.options, ...rowValuesObj};
+    this.addRow(rowToAdd, position);
+  }
+
+  duplicateRow(id: string, position?: number): void {
+    this._duplicateRow(allDataRows(this.rows), id, position);
+  }
+
+  duplicateRows(ids: string[], position?: number): void {
+    let pos = position;
+    ids.forEach(id => {
+      this.duplicateRow(id, pos);
+      if (pos !== undefined) {
+        pos++;
+      }
+    });
+  }
+
+  duplicateSelectedRows(): void {
+    this.duplicateRows(this.selectedRows.map(row => row.id), Math.max(...this.selectedRows.map(row => row.position)));
+  }
+
+  insertRowAtSelection(): void {
+    let rowToInsert = {};
+    this.groupBy.forEach((column: IColumn) => {
+      rowToInsert[column.name] = this.selectedRows[0].cells[column.name].value;
+    });
+    this.addRow(rowToInsert, Math.max(...this.selectedRows.map(row => row.position)));
   }
 
   setRowPositions() {
@@ -904,7 +955,8 @@ export function mergeRows(rows: IRow[], columns: IColumn[], mergeEmpty: boolean 
 
 export default function create(rows: any[], columns: IColumn[], groupBy?: string[]): IGrid {
   return root((dispose) => {
-    let grid = observable(new GridModel());
+    let grid     = observable(new GridModel());
+    grid.loading = true;
     grid.initialize(dispose);
     freeze(() => {
       for (const column of columns) {
@@ -917,6 +969,7 @@ export default function create(rows: any[], columns: IColumn[], groupBy?: string
       if (groupBy) grid.groupBy = groupBy.map(name => findColumnByName(grid.columns, name)!);
       grid._addRows(rows);
     });
+    grid.loading = false;
     // mergeRows(grid.fixedRows, grid.fixedColumns);
     // mergeRows(grid.fixedRows, grid.dataColumns);
     // mergeRows(grid.rows, grid.dataColumns);

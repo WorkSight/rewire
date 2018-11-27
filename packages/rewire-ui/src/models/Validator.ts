@@ -97,8 +97,8 @@ export const isGreaterThan = (otherFieldName: string, text?: string): IValidateF
       let otherValue = obj[otherFieldName] && obj[otherFieldName].value;
       if (!defaultGreaterThan(value, otherValue)) {
         if (text) return text;
-        let otherLabel = obj[otherFieldName] && obj[otherFieldName].label;
-        return `${label || fieldName} must be greather than ${otherLabel || otherFieldName}`;
+        let otherLabel = obj[otherFieldName] && obj[otherFieldName].label || otherFieldName;
+        return `${label || fieldName} must be greather than ${otherLabel}`;
       }
       return undefined;
     }
@@ -112,8 +112,8 @@ export const isGreaterThanOrEquals = (otherFieldName: string, text?: string): IV
       let otherValue = obj[otherFieldName] && obj[otherFieldName].value;
       if (!defaultGreaterThan(value, otherValue) && !defaultEquals(value, otherValue)) {
         if (text) return text;
-        let otherLabel = obj[otherFieldName] && obj[otherFieldName].label;
-        return `${label || fieldName} must be greather than or equals to ${otherLabel || otherFieldName}`;
+        let otherLabel = obj[otherFieldName] && obj[otherFieldName].label || otherFieldName;
+        return `${label || fieldName} must be greather than or equals to ${otherLabel}`;
       }
       return undefined;
     }
@@ -127,8 +127,8 @@ export const isLessThan = (otherFieldName: string, text?: string): IValidateFnDa
       let otherValue = obj[otherFieldName] && obj[otherFieldName].value;
       if (!defaultLessThan(value, otherValue)) {
         if (text) return text;
-        let otherLabel = obj[otherFieldName] && obj[otherFieldName].label;
-        return `${label || fieldName} must be less than ${otherLabel || otherFieldName}`;
+        let otherLabel = obj[otherFieldName] && obj[otherFieldName].label || otherFieldName;
+        return `${label || fieldName} must be less than ${otherLabel}`;
       }
       return undefined;
     }
@@ -142,8 +142,8 @@ export const isLessThanOrEquals = (otherFieldName: string, text?: string): IVali
       let otherValue = obj[otherFieldName] && obj[otherFieldName].value;
       if (!defaultLessThan(value, otherValue) && !defaultEquals(value, otherValue)) {
         if (text) return text;
-        let otherLabel = obj[otherFieldName] && obj[otherFieldName].label;
-        return `${label || fieldName} must be less than or equals to ${otherLabel || otherFieldName}`;
+        let otherLabel = obj[otherFieldName] && obj[otherFieldName].label || otherFieldName;
+        return `${label || fieldName} must be less than or equals to ${otherLabel}`;
       }
       return undefined;
     }
@@ -157,8 +157,8 @@ export const isSameAsOther = (otherFieldName: string, text?: string): IValidateF
       let otherValue = obj[otherFieldName] && obj[otherFieldName].value;
       if (!defaultEquals(value, otherValue)) {
         if (text) return text;
-        let otherLabel = obj[otherFieldName] && obj[otherFieldName].label;
-        return `${label || fieldName} must be same as ${otherLabel || otherFieldName}`;
+        let otherLabel = obj[otherFieldName] && obj[otherFieldName].label || otherFieldName;
+        return `${label || fieldName} must be same as ${otherLabel}`;
       }
       return undefined;
     }
@@ -172,8 +172,46 @@ export const isDifferentFromOther = (otherFieldName: string, text?: string): IVa
       let otherValue = obj[otherFieldName] && obj[otherFieldName].value;
       if (defaultEquals(value, otherValue)) {
         if (text) return text;
-        let otherLabel = obj[otherFieldName] && obj[otherFieldName].label;
-        return `${label || fieldName} must be different from ${otherLabel || otherFieldName}`;
+        let otherLabel = obj[otherFieldName] && obj[otherFieldName].label || otherFieldName;
+        return `${label || fieldName} must be different from ${otherLabel}`;
+      }
+      return undefined;
+    }
+  };
+};
+
+export const isDifferenceOfOthers = (otherFieldNames: string[], text?: string): IValidateFnData => {
+  return {
+    linkedFieldNames: otherFieldNames,
+    fn: (obj: ObjectType, fieldName: string, label: string | undefined, value: any): string | undefined => {
+      let otherValues: any[] = otherFieldNames.map((otherFieldName: string) => obj[otherFieldName] && obj[otherFieldName].value) || [];
+      let difference         = otherValues.reduce((totalValue: number, currValue: number) => (totalValue || 0) - (currValue || 0));
+      if (value !== difference) {
+        if (text) return text;
+        let otherLabels: string[]   = otherFieldNames.map((otherFieldName: string) => obj[otherFieldName] && obj[otherFieldName].label || otherFieldName) || [];
+        let otherLabelsErrorMessage = otherLabels.reduce((message: string, otherLabel: string, idx: number) => {
+          return message.concat(` and ${otherLabel}`);
+        });
+        return `${label || fieldName} must equal difference of ${otherLabelsErrorMessage}`;
+      }
+      return undefined;
+    }
+  };
+};
+
+export const isSumOfOthers = (otherFieldNames: string[], text?: string): IValidateFnData => {
+  return {
+    linkedFieldNames: otherFieldNames,
+    fn: (obj: ObjectType, fieldName: string, label: string | undefined, value: any): string | undefined => {
+      let otherValues: any[] = otherFieldNames.map((otherFieldName: string) => obj[otherFieldName] && obj[otherFieldName].value) || [];
+      let sum                = otherValues.reduce((totalValue: number, currValue: number) => (totalValue || 0) + (currValue || 0));
+      if (value !== sum) {
+        if (text) return text;
+        let otherLabels: string[]   = otherFieldNames.map((otherFieldName: string) => obj[otherFieldName] && obj[otherFieldName].label || otherFieldName) || [];
+        let otherLabelsErrorMessage = otherLabels.reduce((message: string, otherLabel: string, idx: number) => {
+          return message.concat(` and ${otherLabel}`);
+        });
+        return `${label || fieldName} must equal sum of ${otherLabelsErrorMessage}`;
       }
       return undefined;
     }

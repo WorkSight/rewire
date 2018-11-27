@@ -11,7 +11,7 @@ export const isRequired: IValidateFnData = {
   fn: (row: IRow, value: any): IError | undefined => {
     let error: IError | undefined;
     let errorMsg: string             = '';
-    let errorSeverity: ErrorSeverity = ErrorSeverity.error;
+    let errorSeverity: ErrorSeverity = ErrorSeverity.Error;
     if (isNull(value) || (is.array(value) && value.length <= 0)) {
       errorMsg = 'required';
     }
@@ -26,7 +26,7 @@ export const isRegEx = (re: RegExp, text: string): IValidateFnData => {
     fn: (row: IRow, value: any): IError | undefined => {
       let error: IError | undefined;
       let errorMsg: string             = '';
-      let errorSeverity: ErrorSeverity = ErrorSeverity.error;
+      let errorSeverity: ErrorSeverity = ErrorSeverity.Error;
       if (!re.test(String(value !== undefined ? value : ''))) {
         errorMsg = text;
       }
@@ -41,7 +41,7 @@ export const isEmail: IValidateFnData = {
   fn: (row: IRow, value: any): IError | undefined => {
     let error: IError | undefined;
     let errorMsg: string             = '';
-    let errorSeverity: ErrorSeverity = ErrorSeverity.error;
+    let errorSeverity: ErrorSeverity = ErrorSeverity.Error;
     const re = /(^$|^(([^<>()\[\]\\.,;:\s@"]+(\.[^<>()\[\]\\.,;:\s@"]+)*)|(".+"))@((\[[0-9]{1,3}\.[0-9]{1,3}\.[0-9]{1,3}\.[0-9]{1,3}\])|(([a-zA-Z\-0-9]+\.)+[a-zA-Z]{2,}))$)/;
     if (!re.test(String(value !== undefined ? value : ''))) {
       errorMsg = 'email is not in a valid format';
@@ -79,14 +79,14 @@ export const isGreaterThan = (otherColumnName: string, text?: string): IValidate
     fn: (row: IRow, value: any): IError | undefined => {
       let error: IError | undefined;
       let errorMsg: string             = '';
-      let errorSeverity: ErrorSeverity = ErrorSeverity.error;
+      let errorSeverity: ErrorSeverity = ErrorSeverity.Error;
       let otherValue                   = row.cells[otherColumnName] && row.cells[otherColumnName].value;
       if (!defaultGreaterThan(value, otherValue)) {
         if (text) {
           errorMsg = text;
         } else {
-          let otherTitle = row.cells[otherColumnName] && row.cells[otherColumnName].column.title;
-          errorMsg       =  `must be greater than ${otherTitle || otherColumnName}`;
+          let otherTitle = row.cells[otherColumnName] && row.cells[otherColumnName].column.title || otherColumnName;
+          errorMsg       = `must be greater than ${otherTitle}`;
         }
       }
       error = errorMsg ? {messageText: errorMsg, severity: errorSeverity} : undefined;
@@ -101,14 +101,14 @@ export const isGreaterThanOrEquals = (otherColumnName: string, text?: string): I
     fn: (row: IRow, value: any): IError | undefined => {
       let error: IError | undefined;
       let errorMsg: string             = '';
-      let errorSeverity: ErrorSeverity = ErrorSeverity.error;
+      let errorSeverity: ErrorSeverity = ErrorSeverity.Error;
       let otherValue                   = row.cells[otherColumnName] && row.cells[otherColumnName].value;
       if (!defaultGreaterThan(value, otherValue) && !defaultEquals(value, otherValue)) {
         if (text) {
           errorMsg = text;
         } else {
-          let otherTitle = row.cells[otherColumnName] && row.cells[otherColumnName].column.title;
-          errorMsg       =  `must be greater than or equals to ${otherTitle || otherColumnName}`;
+          let otherTitle = row.cells[otherColumnName] && row.cells[otherColumnName].column.title || otherColumnName;
+          errorMsg       = `must be greater than or equals to ${otherTitle}`;
         }
       }
       error = errorMsg ? {messageText: errorMsg, severity: errorSeverity} : undefined;
@@ -123,14 +123,14 @@ export const isLessThan = (otherColumnName: string, text?: string): IValidateFnD
     fn: (row: IRow, value: any): IError | undefined => {
       let error: IError | undefined;
       let errorMsg: string             = '';
-      let errorSeverity: ErrorSeverity = ErrorSeverity.error;
+      let errorSeverity: ErrorSeverity = ErrorSeverity.Error;
       let otherValue                   = row.cells[otherColumnName] && row.cells[otherColumnName].value;
       if (!defaultLessThan(value, otherValue)) {
         if (text) {
           errorMsg = text;
         } else {
-          let otherTitle = row.cells[otherColumnName] && row.cells[otherColumnName].column.title;
-          errorMsg       =  `must be less than ${otherTitle || otherColumnName}`;
+          let otherTitle = row.cells[otherColumnName] && row.cells[otherColumnName].column.title || otherColumnName;
+          errorMsg       = `must be less than ${otherTitle}`;
         }
       }
       error = errorMsg ? {messageText: errorMsg, severity: errorSeverity} : undefined;
@@ -145,14 +145,14 @@ export const isLessThanOrEquals = (otherColumnName: string, text?: string): IVal
     fn: (row: IRow, value: any): IError | undefined => {
       let error: IError | undefined;
       let errorMsg: string             = '';
-      let errorSeverity: ErrorSeverity = ErrorSeverity.error;
+      let errorSeverity: ErrorSeverity = ErrorSeverity.Error;
       let otherValue                   = row.cells[otherColumnName] && row.cells[otherColumnName].value;
       if (!defaultLessThan(value, otherValue) && !defaultEquals(value, otherValue)) {
         if (text) {
           errorMsg = text;
         } else {
-          let otherTitle = row.cells[otherColumnName] && row.cells[otherColumnName].column.title;
-          errorMsg       =  `must be less than or equals to ${otherTitle || otherColumnName}`;
+          let otherTitle = row.cells[otherColumnName] && row.cells[otherColumnName].column.title || otherColumnName;
+          errorMsg       = `must be less than or equals to ${otherTitle}`;
         }
       }
       error = errorMsg ? {messageText: errorMsg, severity: errorSeverity} : undefined;
@@ -167,14 +167,14 @@ export const isSameAsOther = (otherColumnName: string, text?: string): IValidate
     fn: (row: IRow, value: any): IError | undefined => {
       let error: IError | undefined;
       let errorMsg: string             = '';
-      let errorSeverity: ErrorSeverity = ErrorSeverity.error;
+      let errorSeverity: ErrorSeverity = ErrorSeverity.Error;
       let otherValue                   = row.cells[otherColumnName] && row.cells[otherColumnName].value;
       if (!defaultEquals(value, otherValue)) {
         if (text) {
           errorMsg = text;
         } else {
-          let otherTitle = row.cells[otherColumnName] && row.cells[otherColumnName].column.title;
-          errorMsg       =  `must be equals to ${otherTitle || otherColumnName}`;
+          let otherTitle = row.cells[otherColumnName] && row.cells[otherColumnName].column.title || otherColumnName;
+          errorMsg       = `must be equals to ${otherTitle}`;
         }
       }
       error = errorMsg ? {messageText: errorMsg, severity: errorSeverity} : undefined;
@@ -189,14 +189,72 @@ export const isDifferentFromOther = (otherColumnName: string, text?: string): IV
     fn: (row: IRow, value: any): IError | undefined => {
       let error: IError | undefined;
       let errorMsg: string             = '';
-      let errorSeverity: ErrorSeverity = ErrorSeverity.error;
+      let errorSeverity: ErrorSeverity = ErrorSeverity.Error;
       let otherValue                   = row.cells[otherColumnName] && row.cells[otherColumnName].value;
       if (defaultEquals(value, otherValue)) {
         if (text) {
           errorMsg = text;
         } else {
-          let otherTitle = row.cells[otherColumnName] && row.cells[otherColumnName].column.title;
-          errorMsg       =  `must be different from ${otherTitle || otherColumnName}`;
+          let otherTitle = row.cells[otherColumnName] && row.cells[otherColumnName].column.title || otherColumnName;
+          errorMsg       = `must be different from ${otherTitle}`;
+        }
+      }
+      error = errorMsg ? {messageText: errorMsg, severity: errorSeverity} : undefined;
+      return error;
+    }
+  };
+};
+
+export const isDifferenceOfOthers = (otherColumnNames: string[], text?: string): IValidateFnData => {
+  return {
+    linkedColumnNames: otherColumnNames,
+    fn: (row: IRow, value: any): IError | undefined => {
+      let error: IError | undefined;
+      let errorMsg: string             = '';
+      let errorSeverity: ErrorSeverity = ErrorSeverity.Error;
+      let otherValues: any[]           = otherColumnNames.map((otherColumnName: string) => row.cells[otherColumnName] && row.cells[otherColumnName].value) || [];
+      let difference                   = otherValues.reduce((totalValue: number, currValue: number) => {
+        let value = (totalValue || 0) - (currValue || 0);
+        return is.number(value) ? value : 0;
+      });
+      if (value !== difference) {
+        if (text) {
+          errorMsg = text;
+        } else {
+          let otherTitles: string[]   = otherColumnNames.map((otherColumnName: string) => row.cells[otherColumnName] && row.cells[otherColumnName].column.title || otherColumnName) || [];
+          let otherTitlesErrorMessage = otherTitles.reduce((message: string, otherTitle: string, idx: number) => {
+            return message.concat(` and ${otherTitle}`);
+          });
+          errorMsg = `must equal difference of ${otherTitlesErrorMessage}`;
+        }
+      }
+      error = errorMsg ? {messageText: errorMsg, severity: errorSeverity} : undefined;
+      return error;
+    }
+  };
+};
+
+export const isSumOfOthers = (otherColumnNames: string[], text?: string): IValidateFnData => {
+  return {
+    linkedColumnNames: otherColumnNames,
+    fn: (row: IRow, value: any): IError | undefined => {
+      let error: IError | undefined;
+      let errorMsg: string             = '';
+      let errorSeverity: ErrorSeverity = ErrorSeverity.Error;
+      let otherValues: any[]           = otherColumnNames.map((otherColumnName: string) => row.cells[otherColumnName] && row.cells[otherColumnName].value) || [];
+      let sum                          = otherValues.reduce((totalValue: number, currValue: number) => {
+        let value = (totalValue || 0) + (currValue || 0);
+        return is.number(value) ? value : 0;
+      });
+      if (value !== sum) {
+        if (text) {
+          errorMsg = text;
+        } else {
+          let otherTitles: string[]   = otherColumnNames.map((otherColumnName: string) => row.cells[otherColumnName] && row.cells[otherColumnName].column.title || otherColumnName) || [];
+          let otherTitlesErrorMessage = otherTitles.reduce((message: string, otherTitle: string, idx: number) => {
+            return message.concat(` and ${otherTitle}`);
+          });
+          errorMsg = `must equal sum of ${otherTitlesErrorMessage}`;
         }
       }
       error = errorMsg ? {messageText: errorMsg, severity: errorSeverity} : undefined;

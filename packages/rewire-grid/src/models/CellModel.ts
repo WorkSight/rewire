@@ -203,10 +203,10 @@ export class CellModel implements ICell {
     this.editing = isEditing;
   }
 
-  clone(newRow: IRow): any {
+  clone(newRow: IRow): ICell {
     let newValue    = cloneValue(this.value);
     let row         = newRow || this.row;
-    let newCell     = new CellModel(row, this.column, newValue);
+    let newCell     = create(row, this.column, newValue);
     newCell.rowSpan = this.rowSpan;
     newCell.colSpan = this.colSpan;
     return newCell;

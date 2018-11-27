@@ -40,10 +40,10 @@ import {Dialog as DialogView}   from 'rewire-ui';
 import {FormView}     from 'rewire-ui';
 // import column         from './models/Grid';
 import {createGrid, createColumn, IError, ErrorSeverity}   from 'rewire-grid';
-import {Grid, ICell, IRow, isLessThan as gridIsLessThan, isRequired as gridIsRequired}   from 'rewire-grid';
+import {Grid, ICell, IRow, isLessThan as gridIsLessThan, isGreaterThan as gridIsGreaterThan, isRequired as gridIsRequired, isSumOfOthers as gridIsSumOfOthers, isDifferenceOfOthers as gridIsDifferenceOfOthers}   from 'rewire-grid';
 // import { ICell, collapseAll, expandAll } from 'rewire-grid/models/GridTypes';
 import {editor}       from 'rewire-ui';
-import {isRequired, isEmail, and, isSameAsOther, isGreaterThan, isGreaterThanOrEquals, isLessThan, isLessThanOrEquals, requiredWhenOtherIsNotNull, requiredWhenOtherIsValue} from 'rewire-ui';
+import {isRequired, isEmail, and, isSameAsOther, isGreaterThan, isGreaterThanOrEquals, isLessThan, isLessThanOrEquals, isDifferenceOfOthers, isSumOfOthers, requiredWhenOtherIsNotNull, requiredWhenOtherIsValue} from 'rewire-ui';
 import './graphqltest';
 import doucheSuitDude from './images/doucheSuitDude.jpg';
 import { MuiThemeProvider, Theme, createMuiTheme } from '@material-ui/core/styles';
@@ -384,13 +384,18 @@ function createTestGrid(nRows: number, nColumns: number) {
   cols.push(createColumn('dateColumn', 'Date', 'date', Math.trunc(Math.random() * 250 + 50) + 'px'));
   cols.push(createColumn('timeOutColumn', 'Time Out', 'time', Math.trunc(Math.random() * 250 + 50) + 'px'));
   cols.push(createColumn('timeInColumn', 'Time In', 'time', Math.trunc(Math.random() * 250 + 50) + 'px'));
+  cols.push(createColumn('differenceColumn', 'Time Difference', {type: 'number'}, Math.trunc(Math.random() * 250 + 50) + 'px'));
+  cols.push(createColumn('sumColumn', 'Time Sum', {type: 'number'}, Math.trunc(Math.random() * 250 + 50) + 'px'));
   cols.push(createColumn('autoCompleteColumn', 'Auto Complete', {type: 'auto-complete', options: countries}, Math.trunc(Math.random() * 250 + 50) + 'px'));
   cols.push(createColumn('selectColumn', 'Select', {type: 'select', options: countries}, Math.trunc(Math.random() * 250 + 50) + 'px'));
   cols.push(createColumn('multiselectColumn', 'MultiSelect', {type: 'multiselect', options: countries}, Math.trunc(Math.random() * 250 + 50) + 'px'));
   cols.push(createColumn('checkedColumn', 'Checked', 'checked', Math.trunc(Math.random() * 250 + 50) + 'px'));
 
-  cols[17].validator = gridIsLessThan('timeInColumn');
   cols[15].validator = gridIsRequired;
+  cols[18].validator = gridIsGreaterThan('timeOutColumn');
+  cols[19].validator = gridIsDifferenceOfOthers(['timeInColumn', 'timeOutColumn']);
+  cols[20].validator = gridIsSumOfOthers(['timeInColumn', 'timeOutColumn']);
+
 
   let complexColumn = createColumn('complexColumn', 'Complex', 'none', Math.trunc(Math.random() * 250 + 50) + 'px');
   complexColumn.renderer  = ComplexCell;
@@ -404,10 +409,10 @@ function createTestGrid(nRows: number, nColumns: number) {
 
       let error: IError | undefined;
       let errorMsg: string             = '';
-      let errorSeverity: ErrorSeverity = ErrorSeverity.error;
+      let errorSeverity: ErrorSeverity = ErrorSeverity.Error;
       if (value.name === 'Homer') {
         errorMsg      = 'No Homers allowed!';
-        errorSeverity = ErrorSeverity.critical;
+        errorSeverity = ErrorSeverity.Critical;
       }
       error = errorMsg ? {messageText: errorMsg, severity: errorSeverity} : undefined;
       return error;
@@ -425,25 +430,25 @@ function createTestGrid(nRows: number, nColumns: number) {
 
       let error: IError | undefined;
       let errorMsg: string             = '';
-      let errorSeverity: ErrorSeverity = ErrorSeverity.error;
+      let errorSeverity: ErrorSeverity = ErrorSeverity.Error;
       if (value < 2000) {
         errorMsg      = 'Less than 2000';
-        errorSeverity = ErrorSeverity.warning;
+        errorSeverity = ErrorSeverity.Warning;
       } else if (value > 7000) {
         errorMsg      = 'Greater than 7000';
-        errorSeverity = ErrorSeverity.critical;
+        errorSeverity = ErrorSeverity.Critical;
       } else if (value > 4000) {
         errorMsg      = 'Greater than 4000';
-        errorSeverity = ErrorSeverity.error;
+        errorSeverity = ErrorSeverity.Error;
       } else if (value >= 2000 && value <= 4000) {
         errorMsg      = 'Between 2000 and 4000';
-        errorSeverity = ErrorSeverity.info;
+        errorSeverity = ErrorSeverity.Info;
       }
       error = errorMsg ? {messageText: errorMsg, severity: errorSeverity} : undefined;
       return error;
     }
   };
-  // cols[6].setEditor({type: 'number', options: {decimals: 3, thousandSeparator: true}});
+  cols[6].setEditor({type: 'number', options: {decimals: 3, thousandSeparator: true}});
 
   // add some cell data!
   let rows = [];
@@ -458,6 +463,8 @@ function createTestGrid(nRows: number, nColumns: number) {
       else if (colName === 'checkedColumn') v = true;
       else if (colName === 'timeOutColumn') v = 7.5;
       else if (colName === 'timeInColumn') v = 11.5;
+      else if (colName === 'differenceColumn') v = 4;
+      else if (colName === 'sumColumn') v = 19;
       else if (colName === 'dateColumn') v = '2018-11-11';
       else if (colName === 'complexColumn') v = row > 3 ? new ComplexCellData(guid(), 'Homer', 45) : undefined;
       else if (colName === 'phoneColumn') v = Number.parseInt('1250' + Math.round(Math.random() * 100000000).toString());
@@ -503,6 +510,8 @@ function createTestGrid(nRows: number, nColumns: number) {
   setTimeout(() => {
     grid.cellByPos(0, 7).align = '';
     grid.cellByPos(0, 7).enabled = false;
+    grid.cellByPos(0, 19).value = 3;
+    grid.cellByPos(0, 20).value = 20;
     grid.clearSelection();
   }, 5000);
   grid.cellByPos(0, 5).editable = false;
@@ -673,6 +682,8 @@ class TestDialog extends Modal {
     country              : Form.reference(countries).label('Country').placeholder('pick a country').startAdornment(() => <AccessibilityIcon />).validators(isRequired),
     timeOut              : Form.time().label('Time Out').placeholder('enter a time').validators(and(isRequired, isLessThan('timeIn'))),
     timeIn               : Form.time().label('Time In').placeholder('enter a time').validators(requiredWhenOtherIsNotNull('timeOut')),
+    difference           : Form.number().label('Time Difference').placeholder('enter difference').validators(isDifferenceOfOthers(['timeIn', 'timeOut'])),
+    sum                  : Form.number().label('Time Sum').placeholder('enter sum').validators(isSumOfOthers(['timeIn', 'timeOut'])),
     avatar               : Form.avatar({width: 1000, height: 1000, avatarDiameter: 150, cropRadius: 75}).label('Add Photo (Optional)'),
   }, {email: 'splace@worksight.net', isGreat: true}, {variant: 'outlined'});
 
@@ -714,10 +725,14 @@ const TestFormView = ({form}: {form: typeof testDialog.form}) => (
         <form.field.phoneCustom.Editor />
       </div>
       <div className='content'>
-        <form.field.country.Editor className='span4' />
-        <form.field.isGreat.Editor className='span4' />
         <form.field.timeOut.Editor className='span4' />
         <form.field.timeIn.Editor className='span4' />
+        <form.field.country.Editor className='span4' />
+        <form.field.isGreat.Editor className='span4' />
+      </div>
+      <div className='content'>
+        <form.field.difference.Editor className='span1' />
+        <form.field.sum.Editor className='span1' />
       </div>
       <div className='content'>
       <form.field.avatar.Editor />
