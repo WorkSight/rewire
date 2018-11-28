@@ -32,6 +32,8 @@ export interface IGrid extends IRows, IDisposable {
   readonly dataColumns      : IColumn[];
   dataRowsByPosition        : IRow[];
   originalDataRowsByPosition: IRow[];
+  addedRows                 : IRowIteratorResult[];
+  removedRows               : IRowIteratorResult[];
   groupBy                   : IColumn[];
   clipboard                 : ICell[];
   isMouseDown               : boolean;
@@ -85,6 +87,7 @@ export interface IGrid extends IRows, IDisposable {
   removeFixedRow(id: string): void;
 
   _removeRow(rows: any, id: string): void;
+  _removeGroupRow(rows: any, id: string): void;
   removeRow(id: string): void;
   removeRows(ids: string[]): void;
   removeSelectedRows(): void;
@@ -147,7 +150,7 @@ export interface IRow extends IDisposable {
   getErrors(): IErrorData[];
   createCell(column: IColumn, value: any, type?: string): ICell;
   clone(): IRow;
-  validate(): void;
+  validate(columnNames?: string[]): void;
 }
 
 export interface IGroupRow extends IRow, IRows {

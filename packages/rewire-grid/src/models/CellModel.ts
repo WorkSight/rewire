@@ -217,10 +217,10 @@ export class CellModel implements ICell {
       this.error = this.column.validator.fn(this.row, this.value);
     }
     // validate other cells in the same row if they have a column validator whose linkedColumnNames contains this cells column name
-    let columnsToValidate = this.row.cellsByColumnPosition.filter((cell: ICell) => cell.column.validator && cell.column.validator.linkedColumnNames.includes(this.column.name)).map((cell: ICell) => cell.column);
-    columnsToValidate.forEach((column: IColumn) => {
-      let otherCell   = this.row.cells[column.name];
-      otherCell.error = column.validator!.fn(otherCell.row, otherCell.value);
+    let cellsToValidate = this.row.cellsByColumnPosition.filter((cell: ICell) => cell.column.validator && cell.column.validator.linkedColumnNames.includes(this.column.name));
+    cellsToValidate.forEach((cell: ICell) => {
+      let column = cell.column;
+      cell.error = column.validator!.fn(cell.row, cell.value);
     });
   }
 }

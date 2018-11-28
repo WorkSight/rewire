@@ -636,7 +636,12 @@ const _Home = (props: any) => <Observe render={() => (
         </DialogView>
         <div style={{overflow: 'auto', padding: 10, display: 'flex', flexDirection: 'column', alignItems: 'center', justifyContent: 'center'}}>
           <div style={{marginBottom: '10px'}}>
-            <Button style={{marginRight: '15px'}} variant='contained' onClick={() => grid.addRow({id: 'newRow-' + Math.random() * 2000, 'column2': 'RC 2-1', 'column3': 'RC 3-1', options: {allowMergeColumns: true}})}>Add Row</Button>
+            <Button style={{marginRight: '15px'}} variant='contained' onClick={() => {
+              grid.addRow({id: 'newRow-' + Math.random() * 2000, 'column2': 'RC 2-1', 'column3': 'RC 3-1', options: {allowMergeColumns: true}});
+              employeesGrid.addRow({id: 'newRow-' + Math.random() * 2000, name: 'New Employee', email: 'employeeEmail@test.com'});
+            }}>
+              Add Row
+            </Button>
             <Button style={{marginRight: '15px'}} variant='contained' onClick={() => grid.removeRow(grid.dataRowsByPosition[grid.dataRowsByPosition.length - 1].id)}>Remove Row</Button>
             <Button style={{marginRight: '15px'}} variant='contained' onClick={() => grid.dataRowsByPosition[0].cells['numberColumn'].value = 1337}>Change Number Cell Value</Button>
             <Button style={{marginRight: '15px'}} variant='contained' onClick={() => {

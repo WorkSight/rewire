@@ -336,13 +336,14 @@ export default class Form {
     return this.field[name];
   }
 
-  public setFieldValue(fieldName: string, value: any) {
+  public setFieldValue(fieldName: string, value: any): boolean {
     let field = this.field[fieldName];
-    if (!field) return;
+    if (!field || field.value === value) return false;
     field.value = value;
     if (field.validateOnUpdate) {
       this.validateField(field);
     }
+    return true;
   }
 
   public getFieldValue(fieldName: string): any {

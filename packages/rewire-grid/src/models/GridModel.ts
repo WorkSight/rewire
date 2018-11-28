@@ -309,10 +309,26 @@ class GridModel implements IGrid, IDisposable {
       let originalDataRowIds = this.originalDataRowsByPosition.map(row => row.id);
       if (this.removedRows) {
         for (const removedRow of this.removedRows) {
-          if (originalDataRowIds.includes(removedRow.row.id)) {
-            removedRow.rows.splice(removedRow.idx, 0, removedRow.row);
-            this.dataRowsByPosition.splice(removedRow.row.position, 0, removedRow.row);
+          if (!originalDataRowIds.includes(removedRow.row.id)) {
+            continue;
           }
+          removedRow.rows.splice(removedRow.idx, 0, removedRow.row);
+          this.dataRowsByPosition.splice(removedRow.row.position, 0, removedRow.row);
+          // *** TODO get revert of group row removal (add them back) working.
+          // let parentRow = removedRow.row.parentRow;
+          // if (!parentRow) {
+          //   continue;
+          // }
+          // let grandparentRow = parentRow.parentRow;
+          // while (grandparentRow) {
+          //   if (grandparentRow.rows.find((row: IRow) => row.id === parentRow!.id)) break;
+          //   grandparentRow.rows.push(parentRow);
+          //   parentRow      = grandparentRow;
+          //   grandparentRow = grandparentRow.parentRow;
+          // }
+
+          // if (this.rows.find((row: IRow) => row.id === parentRow!.id)) continue;
+          // this.rows.push(parentRow);
         }
         this.removedRows.length = 0;
       }
@@ -320,12 +336,16 @@ class GridModel implements IGrid, IDisposable {
       if (this.addedRows) {
         // remove added rows
         for (const addedRow of this.addedRows) {
-          if (!originalDataRowIds.includes(addedRow.row.id)) {
-            let idx: number;
-            idx = addedRow.rows.findIndex(row => row.id === addedRow.row.id);
-            if (idx >= 0) addedRow.rows.splice(idx, 1);
-            idx = this.dataRowsByPosition.findIndex(row => row.id === addedRow.row.id);
-            if (idx >= 0) this.dataRowsByPosition.splice(idx, 1);
+          if (originalDataRowIds.includes(addedRow.row.id)) {
+            continue;
+          }
+          let idx: number;
+          idx = addedRow.rows.findIndex(row => row.id === addedRow.row.id);
+          if (idx >= 0) addedRow.rows.splice(idx, 1);
+          idx = this.dataRowsByPosition.findIndex(row => row.id === addedRow.row.id);
+          if (idx >= 0) this.dataRowsByPosition.splice(idx, 1);
+          if (addedRow.row.parentRow && addedRow.rows.length <= 0) {
+            this._removeGroupRow(groupRows(this.rows), addedRow.row.parentRow.id);
           }
         }
         this.addedRows.length = 0;
@@ -340,11 +360,25 @@ class GridModel implements IGrid, IDisposable {
     this.sort();
   }
 
+  _removeGroupRow(iterator: IterableIterator<IRowIteratorResult>, id: string): void {
+    const groupRow = findRowById(iterator, id);
+    if (!groupRow) return;
+    groupRow.rows.splice(groupRow.idx, 1);
+    if (groupRow.row.parentRow && groupRow.rows.length <= 0) {
+      this._removeGroupRow(groupRows(this.rows), groupRow.row.parentRow.id);
+    }
+  }
+
   _removeRow(iterator: IterableIterator<IRowIteratorResult>, id: string): void {
     const row = findRowById(iterator, id);
     if (!row) return;
     this.removedRows.push(row);
     row.rows.splice(row.idx, 1);
+    // *** TODO use this code to remove group rows if they are empty, once the revert is working
+    // if (row.row.parentRow && row.rows.length <= 0) {
+    //   this._removeGroupRow(groupRows(this.rows), row.row.parentRow.id);
+    // }
+
     this.dataRowsByPosition.splice(row.row.position, 1);
     this.setRowPositions();
   }
@@ -510,9 +544,7 @@ class GridModel implements IGrid, IDisposable {
   addRow(row: any, position?: number): IRow {
     let newRow = this._addRow(row, position);
 
-    if (position !== undefined || this.groupBy.length > 0) {
-      this.setRowPositions();
-    }
+    this.setRowPositions();
 
     const addedRow = findRowById(allDataRows(this.rows), newRow.id);
     if (addedRow) {
@@ -557,9 +589,7 @@ class GridModel implements IGrid, IDisposable {
       }
     }
 
-    if (position !== undefined || this.groupBy.length > 0) {
-      this.setRowPositions();
-    }
+    this.setRowPositions();
 
     return addedRows;
   }
