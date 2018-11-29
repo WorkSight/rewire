@@ -203,7 +203,7 @@ function find(rows: IRows, column: IColumn, row: any): IGroupRow | undefined {
 }
 
 export default function create(grid: IGrid, rows: IRow[], row: any, position?: number, fixed: boolean = false): IRow {
-  let rowPos = (position !== undefined) && position + 1 || undefined;
+  let rowPos = (position !== undefined) && position + 1 || (fixed ? rows.length : undefined);
 
   if (grid.groupBy.length > 0 && !fixed) {
     let root:   IGroupRow;

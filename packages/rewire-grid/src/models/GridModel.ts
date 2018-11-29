@@ -372,8 +372,9 @@ class GridModel implements IGrid, IDisposable {
   _removeRow(iterator: IterableIterator<IRowIteratorResult>, id: string): void {
     const row = findRowById(iterator, id);
     if (!row) return;
-    this.removedRows.push(row);
     row.rows.splice(row.idx, 1);
+    if (row.row.isFixed) return;
+    this.removedRows.push(row);
     // *** TODO use this code to remove group rows if they are empty, once the revert is working
     // if (row.row.parentRow && row.rows.length <= 0) {
     //   this._removeGroupRow(groupRows(this.rows), row.row.parentRow.id);
