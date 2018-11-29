@@ -189,12 +189,12 @@ const suggestions2 = observable(suggestions);
 // setTimeout(() => { console.log('here'); suggestions2[0].name = 'error!!'; }, 5000);
 
 class LoginDialog extends Modal {
-  form = Form.create({
-    email                : Form.email().label('Email').validators(isRequired).placeholder('enter a valid email').autoFocus(),
+  form: Form = Form.create({
+    email                : Form.email().label('Email').validators(isRequired).placeholder('enter a valid email').onValueChange((form: Form, v: any) => form.setFieldValue('money', 5)).autoFocus(),
     password             : Form.password().label('Password').validators(and(isRequired, isSameAsOther('password_confirmation', 'passwords are not the same'))).placeholder('enter a password'),
     password_confirmation: Form.password().label('Confirm Password').placeholder('confirm your password'),
     country              : Form.reference(countries).label('Country').validators(isRequired).placeholder('ooga'),
-    time                 : Form.time().label('Time').validators(isRequired),
+    time                 : Form.time().label('Time').validators(isRequired).onValueChange((form: Form, v: any) => form.setFieldValue('email', 'hi@hi.com')),
     selectCountry        : Form.select(countries).label('Select Country').validators(isRequired).placeholder('ooga'),
     money                : Form.number().label('Show Me').validators(isRequired).placeholder('The Money'),
   });
@@ -384,15 +384,17 @@ function createTestGrid(nRows: number, nColumns: number) {
   cols.push(createColumn('dateColumn', 'Date', 'date', Math.trunc(Math.random() * 250 + 50) + 'px'));
   cols.push(createColumn('timeOutColumn', 'Time Out', 'time', Math.trunc(Math.random() * 250 + 50) + 'px'));
   cols.push(createColumn('timeInColumn', 'Time In', 'time', Math.trunc(Math.random() * 250 + 50) + 'px'));
-  cols.push(createColumn('differenceColumn', 'Time Difference', {type: 'number'}, Math.trunc(Math.random() * 250 + 50) + 'px'));
-  cols.push(createColumn('sumColumn', 'Time Sum', {type: 'number'}, Math.trunc(Math.random() * 250 + 50) + 'px'));
+  cols.push(createColumn('differenceColumn', 'Time Difference', {type: 'number', options: {decimals: 2}}, Math.trunc(Math.random() * 250 + 50) + 'px'));
+  cols.push(createColumn('sumColumn', 'Time Sum', {type: 'number', options: {decimals: 2}}, Math.trunc(Math.random() * 250 + 50) + 'px'));
   cols.push(createColumn('autoCompleteColumn', 'Auto Complete', {type: 'auto-complete', options: countries}, Math.trunc(Math.random() * 250 + 50) + 'px'));
   cols.push(createColumn('selectColumn', 'Select', {type: 'select', options: countries}, Math.trunc(Math.random() * 250 + 50) + 'px'));
   cols.push(createColumn('multiselectColumn', 'MultiSelect', {type: 'multiselect', options: countries}, Math.trunc(Math.random() * 250 + 50) + 'px'));
   cols.push(createColumn('checkedColumn', 'Checked', 'checked', Math.trunc(Math.random() * 250 + 50) + 'px'));
 
   cols[15].validator = gridIsRequired;
+  cols[17].onValueChange = (row: IRow, value: any) => row.cells['differenceColumn'].value = (row.cells['timeInColumn'].value || 0) - (value || 0);
   cols[18].validator = gridIsGreaterThan('timeOutColumn');
+  cols[18].onValueChange = (row: IRow, value: any) => row.cells['differenceColumn'].value = (value || 0) - (row.cells['timeOutColumn'].value || 0);
   cols[19].validator = gridIsDifferenceOfOthers(['timeInColumn', 'timeOutColumn']);
   cols[20].validator = gridIsSumOfOthers(['timeInColumn', 'timeOutColumn']);
 

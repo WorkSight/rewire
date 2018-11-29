@@ -145,6 +145,7 @@ class Cell extends React.PureComponent<CellProps, {}> {
       });
       watch(value, () => {
         this.cell.validate();
+        this.cell.onValueChange && this.cell.onValueChange(this.row, this.cell.value);
         this.grid.changed = this.grid.hasChanges();
       });
 
@@ -582,7 +583,7 @@ class Cell extends React.PureComponent<CellProps, {}> {
     return <Observe render={
       () => {
         let hasError = !!cell.error;
-        let value    = this.value || <span>&nbsp;</span>;
+        let value    = this.value !== undefined && this.value !== null ? this.value : <span>&nbsp;</span>;
 
         return (
           < >

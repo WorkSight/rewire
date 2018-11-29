@@ -181,6 +181,8 @@ export interface ICellProperties {
   renderer?: React.SFC<any>;
   colSpan? : number;
   rowSpan? : number;
+
+  onValueChange?(row: IRow, v: any): void;
 }
 
 export interface IColumn extends ICellProperties {

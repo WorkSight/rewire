@@ -40,6 +40,7 @@ export interface IFieldDefn {
   updateOnChange(updateOnChange?: boolean): IFieldDefn;
   validateOnUpdate(validateOnUpdate?: boolean): IFieldDefn;
   validators(fnData: IValidateFnData): IFieldDefn;
+  onValueChange(handleValueChange: (form: Form, v: any) => void): IFieldDefn;
 }
 
 export interface IEditorField extends IField {
@@ -48,6 +49,8 @@ export interface IEditorField extends IField {
   updateOnChange: boolean;
   validateOnUpdate: boolean;
   linkedFieldNames: string[];
+
+  onValueChange?(form: Form, v: any): void;
 }
 
 export interface IFieldDefns {
@@ -72,6 +75,7 @@ interface IBaseFieldDefn {
   validateOnUpdate?: boolean;
   validators?      : IValidateFnData;
 
+  onValueChange?(form: Form, v: any): void;
   startAdornment?(): JSX.Element;
   endAdornment?(): JSX.Element;
 }
@@ -152,6 +156,11 @@ class BaseField implements IFieldDefn {
       this.typeDefn.validators = validateFnData;
     }
 
+    return this;
+  }
+
+  onValueChange(handleValueChange: (form: Form, v: any) => void): IFieldDefn {
+    this.typeDefn.onValueChange = handleValueChange;
     return this;
   }
 }
@@ -306,6 +315,7 @@ export default class Form {
       startAdornment: fieldDefn.typeDefn.startAdornment,
       endAdornment: fieldDefn.typeDefn.endAdornment,
       linkedFieldNames: fieldDefn.typeDefn.validators && fieldDefn.typeDefn.validators.linkedFieldNames || [],
+      onValueChange: fieldDefn.typeDefn.onValueChange,
     } as IEditorField;
 
     if (this.defaultAdornmentsEnabled && !Object.prototype.hasOwnProperty.call(fieldDefn.typeDefn, 'endAdornment')) {
@@ -343,6 +353,7 @@ export default class Form {
     if (field.validateOnUpdate) {
       this.validateField(field);
     }
+    field.onValueChange && field.onValueChange(this, value);
     return true;
   }
 

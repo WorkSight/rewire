@@ -4,12 +4,13 @@ import { observable, defaultEquals, property, DataSignal } from 'rewire-core';
 
 let id = 0;
 export class CellModel implements ICell {
-  private _enabled    : DataSignal<boolean | undefined>;
-  private _readOnly   : DataSignal<boolean | undefined>;
-  private _editable   : DataSignal<boolean | undefined>;
-  private _cls        : DataSignal<string | undefined>;
-  private _align      : DataSignal<TextAlignment | undefined>;
-  private _renderer   : DataSignal<React.SFC<any> | undefined>;
+  private _enabled      : DataSignal<boolean | undefined>;
+  private _readOnly     : DataSignal<boolean | undefined>;
+  private _editable     : DataSignal<boolean | undefined>;
+  private _cls          : DataSignal<string | undefined>;
+  private _align        : DataSignal<TextAlignment | undefined>;
+  private _renderer     : DataSignal<React.SFC<any> | undefined>;
+  private _onValueChange: DataSignal<((row: IRow, v: any) => void) | undefined>;
   // private _enabled?    : boolean;
   // private _readOnly?   : boolean;
   // private _editable?   : boolean;
@@ -38,12 +39,13 @@ export class CellModel implements ICell {
   }
 
   constructor(row: IRow, column: IColumn, value: any) {
-    this._enabled  = property(undefined);
-    this._readOnly = property(undefined);
-    this._editable = property(undefined);
-    this._cls      = property(undefined);
-    this._align    = property(undefined);
-    this._renderer = property(undefined);
+    this._enabled       = property(undefined);
+    this._readOnly      = property(undefined);
+    this._editable      = property(undefined);
+    this._cls           = property(undefined);
+    this._align         = property(undefined);
+    this._renderer      = property(undefined);
+    this._onValueChange = property(undefined);
     // this._enabled  = undefined;
     // this._readOnly = undefined;
     // this._editable = undefined;
@@ -108,6 +110,13 @@ export class CellModel implements ICell {
   }
   get renderer(): React.SFC<any> | undefined {
     return this._renderer() || this.column.renderer;
+  }
+
+  set onValueChange(value: ((row: IRow, v: any) => void) | undefined) {
+    this._onValueChange(value);
+  }
+  get onValueChange(): ((row: IRow, v: any) => void) | undefined {
+    return this._onValueChange() || this.column.onValueChange;
   }
 
   // set enabled(value: boolean) {
