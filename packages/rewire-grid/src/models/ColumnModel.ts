@@ -32,6 +32,7 @@ export class ColumnModel implements IColumn {
   editor?   : React.SFC<any>;
   validator?: IValidateFnData;
 
+  onValueChange?(row: IRow, v: any): void;
   map?(value: any): string;
   predicate?(value: any, filter: {value: any}): boolean;
   compare?(x: any, y: any): number;
@@ -41,25 +42,26 @@ export class ColumnModel implements IColumn {
   }
 
   constructor(name: string, title: string, type?: IColumnEditor, width?: string, align?: TextAlignment) {
-    this.id       = id++;
-    this.name     = name;
-    this.title    = title;
-    this.enabled  = true;
-    this.readOnly = false;
-    this.editable = true;
-    this.fixed    = false;
-    this.width    = width;
-    this.visible  = true;
-    this.align    = align;
-    this.colSpan  = 1;
-    this.rowSpan  = 1;
-    this.position = 0;
-    this.sort     = undefined;
-    this.canSort  = true;
-    this.tooltip  = undefined;
-    this.cls      = undefined;
-    this.options  = undefined;
-    this.renderer = undefined;
+    this.id            = id++;
+    this.name          = name;
+    this.title         = title;
+    this.enabled       = true;
+    this.readOnly      = false;
+    this.editable      = true;
+    this.fixed         = false;
+    this.width         = width;
+    this.visible       = true;
+    this.align         = align;
+    this.colSpan       = 1;
+    this.rowSpan       = 1;
+    this.position      = 0;
+    this.sort          = undefined;
+    this.canSort       = true;
+    this.tooltip       = undefined;
+    this.cls           = undefined;
+    this.options       = undefined;
+    this.renderer      = undefined;
+    this.onValueChange = undefined;
     this.setEditor(type);
   }
 
@@ -144,8 +146,11 @@ const arrayCompare = (options?: any) => (x: any, y: any): number => {
 function getNumberString(value: any): string {
   if (value === undefined) return value;
 
-  let numberStr = this.options && this.options.decimals && is.number(value) ? value.toFixed(this.options.decimals) : value;
-  numberStr     = this.options && this.options.thousandSeparator ? getThousandSeparatedNumberString(numberStr) : numberStr;
+  let numberStr = this.options && this.options.decimals && is.number(value) ? value.toFixed(this.options.decimals) : value.toString();
+  if (this.options && !this.options.fixed) {
+    numberStr = parseFloat(numberStr).toString();
+  }
+  numberStr = this.options && this.options.thousandSeparator ? getThousandSeparatedNumberString(numberStr) : numberStr;
 
   return numberStr;
 }

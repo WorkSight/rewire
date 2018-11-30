@@ -60,6 +60,7 @@ export interface ITextFieldProps {
   variant?         : TextVariant;
   selectOnFocus?   : boolean;
   endOfTextOnFocus?: boolean;
+  cursorPositionOnFocus?: number;
   updateOnChange?  : boolean;
   startAdornment?  : JSX.Element;
   endAdornment?    : JSX.Element;
@@ -97,6 +98,9 @@ class TextFieldInternal extends React.Component<TextFieldPropsStyled> {
       evt.target.setSelectionRange(0, evt.target.value.length);
     } else if (this.props.endOfTextOnFocus) {
       evt.target.setSelectionRange(evt.target.value.length, evt.target.value.length);
+    } else if (this.props.cursorPositionOnFocus !== undefined) {
+      let cursorPosition = Math.max(0, Math.min(this.props.cursorPositionOnFocus, evt.target.value.length));
+      evt.target.setSelectionRange(cursorPosition, cursorPosition);
     }
   }
 

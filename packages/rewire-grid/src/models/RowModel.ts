@@ -13,6 +13,8 @@ import {
   IDisposable,
   isGroupRow,
   cloneValue,
+  allRows,
+  findRowById,
 }                              from './GridTypes';
 import createCell, {CellModel} from './CellModel';
 import {observable,
@@ -174,12 +176,21 @@ export class RowModel implements IRow, IDisposable {
     return newRow;
   }
 
-  validate(): void {
-    for (const column of this.grid.columns) {
-      let cell = this.cells[column.name];
-      if (!cell) continue;
-      cell.validate();
+  validate(columnNames?: string[]): void {
+    // only need to validate cells once, so filter accordingly. (Does not call cell.validate because of validation overlap with linked cells).
+    let columnsToValidate = columnNames ? this.grid.columns.filter((column: IColumn) => !!column.validator && columnNames.includes(column.name)) : this.grid.columns.filter((column: IColumn) => !!column.validator);
+    if (columnNames) {
+      let linkedColumnNames   = [...new Set(columnsToValidate.reduce((columnNames: string[], column: IColumn) => columnNames.concat(column.validator!.linkedColumnNames), []))];
+      let combinedColumnNames = [...new Set(columnNames.concat(linkedColumnNames))];
+      columnsToValidate       = this.grid.columns.filter((column: IColumn) => !!column.validator && combinedColumnNames.includes(column.name));
     }
+
+    columnsToValidate.forEach((column: IColumn) => {
+      let cell   = this.cells[column.name];
+      cell.error = column.validator!.fn(this, cell.value);
+    });
+
+    this.grid.inError = this.grid.hasErrors();
   }
 }
 
@@ -194,11 +205,11 @@ function find(rows: IRows, column: IColumn, row: any): IGroupRow | undefined {
 }
 
 export default function create(grid: IGrid, rows: IRow[], row: any, position?: number, fixed: boolean = false): IRow {
-  let rowPos = (position !== undefined) && position + 1 || rows.length;
+  let rowPos = (position !== undefined) && position + 1 || (fixed ? rows.length : undefined);
 
   if (grid.groupBy.length > 0 && !fixed) {
     let root:   IGroupRow;
-    let parent: IRows = grid;
+    let parent: any = grid;
     let level = 0;
     for (const column of grid.groupBy) {
       let r = find(parent, column, row);
@@ -215,18 +226,29 @@ export default function create(grid: IGrid, rows: IRow[], row: any, position?: n
       parent = r;
     }
 
+    if (rowPos === undefined) {
+      if (parent.rows.length > 0) {
+        rowPos = parent.rows[0].position;
+      } else {
+        rowPos = 0;
+        for (const row of allRows(rows)) {
+          if (row.row.id === parent.id) break;
+          if (!isGroupRow(row.row)) rowPos++;
+        }
+      }
+    }
     let newRow       = new RowModel(grid, row, rowPos, fixed);
     newRow.parentRow = parent as IGroupRow;
-    let insertIdx    = parent.rows.findIndex((row: IRow) => row.position === rowPos - 1) + 1;
+    let insertIdx    = parent.rows.findIndex((row: IRow) => row.position === newRow.position - 1) + 1;
     parent.rows.splice(insertIdx, 0, newRow);
-    grid.dataRowsByPosition.splice(rowPos, 0, newRow);
+    grid.dataRowsByPosition.splice(newRow.position, 0, newRow);
     return newRow;
   }
 
   let r = new RowModel(grid, row, rowPos, fixed);
-  rows.splice(rowPos, 0, r);
+  rows.splice(r.position, 0, r);
   if (!fixed) {
-    grid.dataRowsByPosition.splice(rowPos, 0, r);
+    grid.dataRowsByPosition.splice(r.position, 0, r);
   }
   return r;
 }
@@ -237,5 +259,6 @@ export class GroupModel extends RowModel implements IGroupRow {
 
   constructor(grid: IGrid, data: any, public column: IColumn, public level: number) {
     super(grid, data);
+    this.id = nanoid(10);
   }
 }

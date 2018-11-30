@@ -35,24 +35,25 @@ const styles = (theme: Theme) => ({
 });
 
 export interface INumberFieldProps {
-  visible?          : boolean;
-  disabled?         : boolean;
-  disableErrors?    : boolean;
-  error?            : string;
-  value?            : number;
-  label?            : string;
-  placeholder?      : string;
-  format?           : string;
-  mask?             : string | string[];
-  align?            : TextAlignment;
-  decimals?         : number;
-  fixed?            : boolean;
-  thousandSeparator?: boolean;
-  updateOnChange?   : boolean;
-  selectOnFocus?    : boolean;
-  endOfTextOnFocus? : boolean;
-  startAdornment?   : JSX.Element;
-  endAdornment?     : JSX.Element;
+  visible?              : boolean;
+  disabled?             : boolean;
+  disableErrors?        : boolean;
+  error?                : string;
+  value?                : number;
+  label?                : string;
+  placeholder?          : string;
+  format?               : string;
+  mask?                 : string | string[];
+  align?                : TextAlignment;
+  decimals?             : number;
+  fixed?                : boolean;
+  thousandSeparator?    : boolean;
+  updateOnChange?       : boolean;
+  selectOnFocus?        : boolean;
+  endOfTextOnFocus?     : boolean;
+  cursorPositionOnFocus?: number;
+  startAdornment?       : JSX.Element;
+  endAdornment?         : JSX.Element;
 
   onValueChange: (value?: number) => void;
 }
@@ -93,6 +94,9 @@ class NumberTextField extends React.Component<NumberFieldProps> {
       evt.target.setSelectionRange(0, evt.target.value.length);
     } else if (this.props.endOfTextOnFocus) {
       evt.target.setSelectionRange(evt.target.value.length, evt.target.value.length);
+    } else if (this.props.cursorPositionOnFocus !== undefined) {
+      let cursorPosition = Math.max(0, Math.min(this.props.cursorPositionOnFocus, evt.target.value.length));
+      evt.target.setSelectionRange(cursorPosition, cursorPosition);
     }
   }
 
@@ -127,13 +131,13 @@ class NumberTextField extends React.Component<NumberFieldProps> {
           onFocus={this.handleFocus}
           thousandSeparator={this.props.thousandSeparator || undefined}
           decimalScale={this.props.decimals}
+          fixedDecimalScale={this.props.fixed}
           format={this.props.format}
           mask={this.props.mask}
           inputProps={{className: this.props.classes.nativeInput, style: {textAlign: this.props.align || 'left'}}}
           InputProps={{startAdornment: startAdornment, endAdornment: endAdornment, classes: {root: this.props.classes.inputRoot}}}
           InputLabelProps={{shrink: true}}
           FormHelperTextProps={{classes: {root: this.props.classes.helperTextRoot, contained: this.props.classes.helperTextContained}}}
-          fixedDecimalScale={this.props.fixed}
           customInput={TextField}
           placeholder={this.props.placeholder}
           variant={this.props.variant}
@@ -160,13 +164,13 @@ class NumberTextField extends React.Component<NumberFieldProps> {
             onFocus={this.handleFocus}
             thousandSeparator={props.thousandSeparator || undefined}
             decimalScale={props.decimals}
+            fixedDecimalScale={props.fixed}
             format={props.format}
             mask={props.mask}
             inputProps={{className: props.classes.nativeInput, style: {textAlign: props.align || 'left'}}}
             InputProps={{startAdornment: startAdornment, endAdornment: endAdornment, classes: {root: props.classes.inputRoot}}}
             InputLabelProps={{shrink: true}}
             FormHelperTextProps={{classes: {root: props.classes.helperTextRoot, contained: props.classes.helperTextContained}}}
-            fixedDecimalScale={props.fixed}
             customInput={TextField}
             placeholder={props.placeholder}
             variant={props.variant}

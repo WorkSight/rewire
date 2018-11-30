@@ -64,16 +64,22 @@ const styles = (theme: Theme) => ({
   },
 });
 
-export type IAutoCompleteProps<T> = WithStyle<ReturnType<typeof styles>, ICustomProps<T> & React.InputHTMLAtrributes<any>>;
+interface IAutoCompleteProps {
+  selectOnFocus?   : boolean;
+  endOfTextOnFocus?: boolean;
+  cursorPositionOnFocus?: number;
+}
 
-class AutoComplete<T> extends React.Component<IAutoCompleteProps<T>, any> {
+export type AutoCompleteProps<T> = WithStyle<ReturnType<typeof styles>, IAutoCompleteProps & ICustomProps<T> & React.InputHTMLAtrributes<any>>;
+
+class AutoComplete<T> extends React.Component<AutoCompleteProps<T>, any> {
   state = {suggestions: []};
   downShift: any;
   search: SearchFn<T>;
   map: MapFn<T>;
   suggestionsContainerNode: HTMLElement;
 
-  constructor(props: IAutoCompleteProps<T>) {
+  constructor(props: AutoCompleteProps<T>) {
     super(props);
     this.search = props.search;
     if (props.debounce) {
@@ -106,6 +112,7 @@ class AutoComplete<T> extends React.Component<IAutoCompleteProps<T>, any> {
         inputRef={ref}
         disabled={disabled}
         autoFocus={autoFocus}
+        onFocus={this.handleFocus}
         inputProps={{className: classes.nativeInput, style: {textAlign: align || 'left'}}}
         InputProps={{startAdornment: startAdornment, endAdornment: endAdornment, classes: {root: classes.inputRoot}}}
         InputLabelProps={{shrink: true}}
@@ -204,6 +211,17 @@ class AutoComplete<T> extends React.Component<IAutoCompleteProps<T>, any> {
         </div>
       </Popper>
     );
+  }
+
+  handleFocus = (evt: React.FocusEvent<HTMLInputElement>) => {
+    if (this.props.selectOnFocus) {
+      evt.target.setSelectionRange(0, evt.target.value.length);
+    } else if (this.props.endOfTextOnFocus) {
+      evt.target.setSelectionRange(evt.target.value.length, evt.target.value.length);
+    } else if (this.props.cursorPositionOnFocus !== undefined) {
+      let cursorPosition = Math.max(0, Math.min(this.props.cursorPositionOnFocus, evt.target.value.length));
+      evt.target.setSelectionRange(cursorPosition, cursorPosition);
+    }
   }
 
   handleInputChanged = (inputValue: string, helpers: ControllerStateAndHelpers<any>) => {

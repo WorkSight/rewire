@@ -4,12 +4,13 @@ import { observable, defaultEquals, property, DataSignal } from 'rewire-core';
 
 let id = 0;
 export class CellModel implements ICell {
-  private _enabled    : DataSignal<boolean | undefined>;
-  private _readOnly   : DataSignal<boolean | undefined>;
-  private _editable   : DataSignal<boolean | undefined>;
-  private _cls        : DataSignal<string | undefined>;
-  private _align      : DataSignal<TextAlignment | undefined>;
-  private _renderer   : DataSignal<React.SFC<any> | undefined>;
+  private _enabled      : DataSignal<boolean | undefined>;
+  private _readOnly     : DataSignal<boolean | undefined>;
+  private _editable     : DataSignal<boolean | undefined>;
+  private _cls          : DataSignal<string | undefined>;
+  private _align        : DataSignal<TextAlignment | undefined>;
+  private _renderer     : DataSignal<React.SFC<any> | undefined>;
+  private _onValueChange: DataSignal<((row: IRow, v: any) => void) | undefined>;
   // private _enabled?    : boolean;
   // private _readOnly?   : boolean;
   // private _editable?   : boolean;
@@ -38,12 +39,13 @@ export class CellModel implements ICell {
   }
 
   constructor(row: IRow, column: IColumn, value: any) {
-    this._enabled  = property(undefined);
-    this._readOnly = property(undefined);
-    this._editable = property(undefined);
-    this._cls      = property(undefined);
-    this._align    = property(undefined);
-    this._renderer = property(undefined);
+    this._enabled       = property(undefined);
+    this._readOnly      = property(undefined);
+    this._editable      = property(undefined);
+    this._cls           = property(undefined);
+    this._align         = property(undefined);
+    this._renderer      = property(undefined);
+    this._onValueChange = property(undefined);
     // this._enabled  = undefined;
     // this._readOnly = undefined;
     // this._editable = undefined;
@@ -110,6 +112,13 @@ export class CellModel implements ICell {
     return this._renderer() || this.column.renderer;
   }
 
+  set onValueChange(value: ((row: IRow, v: any) => void) | undefined) {
+    this._onValueChange(value);
+  }
+  get onValueChange(): ((row: IRow, v: any) => void) | undefined {
+    return this._onValueChange() || this.column.onValueChange;
+  }
+
   // set enabled(value: boolean) {
   //   this._enabled = value;
   // }
@@ -160,12 +169,19 @@ export class CellModel implements ICell {
     return this.column.position;
   }
 
+  setValue(value: any) {
+    this.value = value;
+    this.validate();
+    this.onValueChange && this.onValueChange(this.row, value);
+    this.grid.changed = this.grid.hasChanges();
+  }
+
   clear() {
     if (this.readOnly || !this.enabled) {
       return;
     }
 
-    this.value = undefined;
+    this.setValue(undefined);
   }
 
   hasChanges(): boolean {
@@ -217,11 +233,13 @@ export class CellModel implements ICell {
       this.error = this.column.validator.fn(this.row, this.value);
     }
     // validate other cells in the same row if they have a column validator whose linkedColumnNames contains this cells column name
-    let columnsToValidate = this.row.cellsByColumnPosition.filter((cell: ICell) => cell.column.validator && cell.column.validator.linkedColumnNames.includes(this.column.name)).map((cell: ICell) => cell.column);
-    columnsToValidate.forEach((column: IColumn) => {
-      let otherCell   = this.row.cells[column.name];
-      otherCell.error = column.validator!.fn(otherCell.row, otherCell.value);
+    let cellsToValidate = this.row.cellsByColumnPosition.filter((cell: ICell) => cell.column.validator && cell.column.validator.linkedColumnNames.includes(this.column.name));
+    cellsToValidate.forEach((cell: ICell) => {
+      let column = cell.column;
+      cell.error = column.validator!.fn(cell.row, cell.value);
     });
+
+    this.grid.inError = this.grid.hasErrors();
   }
 }
 

@@ -32,6 +32,8 @@ export interface IGrid extends IRows, IDisposable {
   readonly dataColumns      : IColumn[];
   dataRowsByPosition        : IRow[];
   originalDataRowsByPosition: IRow[];
+  addedRows                 : IRowIteratorResult[];
+  removedRows               : IRowIteratorResult[];
   groupBy                   : IColumn[];
   clipboard                 : ICell[];
   isMouseDown               : boolean;
@@ -85,6 +87,7 @@ export interface IGrid extends IRows, IDisposable {
   removeFixedRow(id: string): void;
 
   _removeRow(rows: any, id: string): void;
+  _removeGroupRow(rows: any, id: string): void;
   removeRow(id: string): void;
   removeRows(ids: string[]): void;
   removeSelectedRows(): void;
@@ -147,7 +150,7 @@ export interface IRow extends IDisposable {
   getErrors(): IErrorData[];
   createCell(column: IColumn, value: any, type?: string): ICell;
   clone(): IRow;
-  validate(): void;
+  validate(columnNames?: string[]): void;
 }
 
 export interface IGroupRow extends IRow, IRows {
@@ -158,7 +161,8 @@ export interface IGroupRow extends IRow, IRows {
 }
 
 export type IColumnEditor =
-  'text' | 'date' | 'time' | 'checked' | 'password' | 'mask' | 'none' |
+  'text' | 'date' | 'checked' | 'password' | 'mask' | 'none' |
+  {type: 'time', options?: {rounding?: number}} |
   {type: 'auto-complete', options: {search: SearchFn<any>, map: MapFn<any>}} |
   {type: 'select', options: {search: SearchFn<any>, map: MapFn<any>}} |
   {type: 'multiselect', options: {search: SearchFn<any>, map: MapFn<any>}} |
@@ -178,6 +182,8 @@ export interface ICellProperties {
   renderer?: React.SFC<any>;
   colSpan? : number;
   rowSpan? : number;
+
+  onValueChange?(row: IRow, v: any): void;
 }
 
 export interface IColumn extends ICellProperties {
@@ -232,6 +238,7 @@ export interface ICell extends ICellProperties {
   clear(): void;
   setEditing(editing: boolean): void;
   validate(): void;
+  setValue(v: any): void;
 }
 
 export type ICellMap     = {[columnName: string]: ICell};

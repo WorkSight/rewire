@@ -71,6 +71,7 @@ export type TextEditorProps = {
   classes?: React.CSSProperties,
   selectOnFocus?   : boolean,
   endOfTextOnFocus?: boolean,
+  cursorPositionOnFocus?: number,
   onValueChange: (v: any) => void,
 };
 
@@ -130,13 +131,14 @@ export default function editor(type: EditorType, propsForEdit?: any): React.SFC<
     );
 
     case 'date':
-      return ({field, className, classes, onValueChange, endOfTextOnFocus, selectOnFocus}: TextEditorProps) => (
+      return ({field, className, classes, onValueChange, endOfTextOnFocus, selectOnFocus, cursorPositionOnFocus}: TextEditorProps) => (
         <Observe render={() => (
           <TextField
             onValueChange={onValueChange}
             placeholder={field.placeholder}
             endOfTextOnFocus={endOfTextOnFocus}
             selectOnFocus={selectOnFocus}
+            cursorPositionOnFocus={cursorPositionOnFocus}
             label={field.label}
             autoFocus={field.autoFocus}
             error={field.error}
@@ -158,7 +160,7 @@ export default function editor(type: EditorType, propsForEdit?: any): React.SFC<
 
     case 'text':
     case 'email':
-      return ({field, className, classes, onValueChange, endOfTextOnFocus, selectOnFocus}: TextEditorProps) => (
+      return ({field, className, classes, onValueChange, endOfTextOnFocus, selectOnFocus, cursorPositionOnFocus}: TextEditorProps) => (
         <Observe render={() => (
           <TextField
             placeholder={field.placeholder}
@@ -167,6 +169,7 @@ export default function editor(type: EditorType, propsForEdit?: any): React.SFC<
             autoFocus={field.autoFocus}
             endOfTextOnFocus={endOfTextOnFocus}
             selectOnFocus={selectOnFocus}
+            cursorPositionOnFocus={cursorPositionOnFocus}
             onValueChange={onValueChange}
             error={field.error}
             disabled={field.disabled && field.disabled(field)}
@@ -184,7 +187,7 @@ export default function editor(type: EditorType, propsForEdit?: any): React.SFC<
       );
 
     case 'phone':
-      return ({field, className, classes, onValueChange, endOfTextOnFocus, selectOnFocus}: TextEditorProps) => (
+      return ({field, className, classes, onValueChange, endOfTextOnFocus, selectOnFocus, cursorPositionOnFocus}: TextEditorProps) => (
         <Observe render={() => (
           <PhoneField
             label={field.label}
@@ -192,6 +195,7 @@ export default function editor(type: EditorType, propsForEdit?: any): React.SFC<
             onValueChange={onValueChange}
             endOfTextOnFocus={endOfTextOnFocus}
             selectOnFocus={selectOnFocus}
+            cursorPositionOnFocus={cursorPositionOnFocus}
             error={field.error}
             disabled={field.disabled && field.disabled(field)}
             autoFocus={field.autoFocus}
@@ -225,7 +229,7 @@ export default function editor(type: EditorType, propsForEdit?: any): React.SFC<
     );
 
     case 'password':
-      return ({field, className, classes, onValueChange, endOfTextOnFocus, selectOnFocus}: TextEditorProps) => (
+      return ({field, className, classes, onValueChange, endOfTextOnFocus, selectOnFocus, cursorPositionOnFocus}: TextEditorProps) => (
         <Observe render={() => (
           <PasswordField
             placeholder={field.placeholder}
@@ -234,6 +238,7 @@ export default function editor(type: EditorType, propsForEdit?: any): React.SFC<
             autoFocus={field.autoFocus}
             endOfTextOnFocus={endOfTextOnFocus}
             selectOnFocus={selectOnFocus}
+            cursorPositionOnFocus={cursorPositionOnFocus}
             onValueChange={onValueChange}
             error={field.error}
             disabled={field.disabled && field.disabled(field)}
@@ -250,7 +255,7 @@ export default function editor(type: EditorType, propsForEdit?: any): React.SFC<
       );
 
     case 'number':
-      return ({field, className, classes, onValueChange, endOfTextOnFocus, selectOnFocus}: TextEditorProps) => (
+      return ({field, className, classes, onValueChange, endOfTextOnFocus, selectOnFocus, cursorPositionOnFocus}: TextEditorProps) => (
         <Observe render={() => (
           <NumberField
             placeholder={field.placeholder}
@@ -259,6 +264,7 @@ export default function editor(type: EditorType, propsForEdit?: any): React.SFC<
             onValueChange={onValueChange}
             endOfTextOnFocus={endOfTextOnFocus}
             selectOnFocus={selectOnFocus}
+            cursorPositionOnFocus={cursorPositionOnFocus}
             error={field.error}
             disabled={field.disabled && field.disabled(field)}
             autoFocus={field.autoFocus}
@@ -276,7 +282,7 @@ export default function editor(type: EditorType, propsForEdit?: any): React.SFC<
       );
 
     case 'time':
-      return ({field, className, classes, onValueChange, endOfTextOnFocus, selectOnFocus}: TextEditorProps) => (
+      return ({field, className, classes, onValueChange, endOfTextOnFocus, selectOnFocus, cursorPositionOnFocus}: TextEditorProps) => (
         <Observe render={() => (
           <TimeInputField
             placeholder={field.placeholder}
@@ -284,6 +290,7 @@ export default function editor(type: EditorType, propsForEdit?: any): React.SFC<
             value={field.value}
             endOfTextOnFocus={endOfTextOnFocus}
             selectOnFocus={selectOnFocus}
+            cursorPositionOnFocus={cursorPositionOnFocus}
             onValueChange={onValueChange}
             error={field.error}
             autoFocus={field.autoFocus}
@@ -336,11 +343,14 @@ export default function editor(type: EditorType, propsForEdit?: any): React.SFC<
     );
 
     case 'auto-complete':
-      return ({field, className, classes, onValueChange}: TextEditorProps) => (
+      return ({field, className, classes, onValueChange, endOfTextOnFocus, selectOnFocus, cursorPositionOnFocus}: TextEditorProps) => (
         <Observe render={() => (
           <AutoComplete
             placeholder={field.placeholder}
             label={field.label}
+            endOfTextOnFocus={endOfTextOnFocus}
+            selectOnFocus={selectOnFocus}
+            cursorPositionOnFocus={cursorPositionOnFocus}
             onValueChange={onValueChange}
             error={field.error}
             autoFocus={field.autoFocus}

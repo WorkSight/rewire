@@ -166,7 +166,10 @@ export default class GridKeyboardNavigation {
   moveToNextRow(ctl: HTMLElement, direction: number) {
     let {row, column} = this.getPosition(ctl);
     if (row === -1) return;
+    return this._moveToNextRow(row, column, direction);
+  }
 
+  _moveToNextRow(row: number, column: number, direction: number) {
     row += direction;
     if ((row < 0) || (row >= this.rows.length)) {
       return false;
@@ -242,7 +245,45 @@ export default class GridKeyboardNavigation {
         return;
 
       case 'CtrlDelete':
-        if (this.moveToNextRow(evt.target as HTMLElement, 1) || this.moveToNextRow(evt.target as HTMLElement, -1)) {
+        let cell          = evt.target as HTMLElement;
+        let cellPositions = this.getPosition(cell);
+        if (cellPositions.row === -1) return;
+
+        let direction: number              = 1;
+        let currRowIdx: number             = cellPositions.row;
+        let nextRow: HTMLElement | null    = null;
+        let nextRowIdx: number             = cellPositions.row + 1;
+        let notSelectedRow: Element | null = null;
+        while (nextRowIdx < this.rows.length) {
+          nextRow = this.rows[nextRowIdx];
+          if (!nextRow.classList.contains('selected')) {
+            notSelectedRow = nextRow;
+            break;
+          }
+          currRowIdx++;
+          nextRowIdx++;
+        }
+
+        if (!notSelectedRow) {
+          direction  = -1;
+          currRowIdx = cellPositions.row;
+          nextRow    = null;
+          nextRowIdx = cellPositions.row - 1;
+          while (nextRowIdx >= 0) {
+            nextRow        = this.rows[nextRowIdx];
+            if (!nextRow.classList.contains('selected')) {
+              notSelectedRow = nextRow;
+              break;
+            }
+            currRowIdx--;
+            nextRowIdx--;
+          }
+        }
+
+        if (!notSelectedRow) {
+          return;
+        }
+        if (this._moveToNextRow(currRowIdx, cellPositions.column, direction)) {
           evt.preventDefault();
         }
         evt.stopPropagation();
