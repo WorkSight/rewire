@@ -55,7 +55,7 @@ const styles = (theme: Theme) => ({
     width: '100%',
   },
   cellInnerContainerEditing: {
-    padding: '0px 1px',
+    padding: '0px 0px 0px 1px',
   },
   tooltipPopper: {
     // marginLeft: '-8px',
@@ -134,30 +134,6 @@ class Cell extends React.PureComponent<CellProps, {}> {
     this.column     = this.cell.column;
     this.grid       = this.cell.grid;
     this.keyForEdit = undefined;
-  }
-
-  componentDidMount() {
-    disposeOnUnmount(this, () => {
-      const value = observe(() => {
-        if (typeof this.cell.value === 'object') {
-          Object.keys(this.cell.value).map(key => this.cell.value[key]);
-        }
-      });
-      watch(value, () => {
-        this.cell.validate();
-        this.cell.onValueChange && this.cell.onValueChange(this.row, this.cell.value);
-        this.grid.changed = this.grid.hasChanges();
-      });
-
-      const error = observe(() => {
-        if (typeof this.cell.error === 'object') {
-          Object.keys(this.cell.error).map(key => this.cell.error![key]);
-        }
-      });
-      watch(error, () => {
-        this.grid.inError = this.grid.hasErrors();
-      });
-    });
   }
 
   setFocus(set: boolean) {
@@ -252,8 +228,20 @@ class Cell extends React.PureComponent<CellProps, {}> {
         }
         if (evt.ctrlKey) {
           // delete row(s)
-          let bottomMostCell  = this.grid.selectedCells.reduce((prevCell: ICell, currCell: ICell): ICell => prevCell.rowPosition > currCell.rowPosition ? prevCell : currCell);
-          let newCellToSelect = this.grid.adjacentBottomCell(bottomMostCell, true) || this.grid.adjacentTopCell(bottomMostCell, true);
+          let currCell: ICell                    = this.cell;
+          let newCellToSelect: ICell | undefined = this.cell;
+          do {
+            currCell        = newCellToSelect;
+            newCellToSelect = this.grid.adjacentBottomCell(currCell, true);
+          } while (newCellToSelect && newCellToSelect.selected);
+          if (!newCellToSelect) {
+            currCell        = this.cell;
+            newCellToSelect = this.cell;
+            do {
+              currCell        = newCellToSelect;
+              newCellToSelect = this.grid.adjacentTopCell(currCell, true);
+            } while (newCellToSelect && newCellToSelect.selected);
+          }
           this.grid.removeSelectedRows();
           if (!newCellToSelect) {
             break;
@@ -532,7 +520,7 @@ class Cell extends React.PureComponent<CellProps, {}> {
   }
 
   onValueChange = (value: any) => {
-    this.cell.value = value;
+    this.cell.setValue(value);
     if (this.column.type === 'multiselect') {
       return;
     }
@@ -550,16 +538,21 @@ class Cell extends React.PureComponent<CellProps, {}> {
     if (cell.editing) {
       let Editor = this.column.editor;
       if (!Editor) return;
-      let endOfTextOnFocus = false;
-      let selectOnFocus    = true;
-      let value            = cell.value;
+      let cellType              = this.column.type;
+      let endOfTextOnFocus      = false;
+      let selectOnFocus         = true;
+      let cursorPositionOnFocus = undefined;
+      let value                 = cell.value;
       if (this.keyForEdit) {
-        value = this.keyForEdit;
+        value            = this.keyForEdit;
         endOfTextOnFocus = true;
-        selectOnFocus = false;
+        selectOnFocus    = false;
+        if (cellType === 'number') {
+          endOfTextOnFocus      = false;
+          cursorPositionOnFocus = 1;
+        }
       }
       let editorClasses = undefined;
-      let cellType      = this.column.type;
       let additionalProps = {};
       if (cellType === 'select' || cellType === 'multiselect') {
         editorClasses = {inputRoot: this.props.classes.editorSelectInputRoot, select: this.props.classes.editorSelectSelect, selectMenuItem: this.props.classes.editorPopupMenuItem};
@@ -575,7 +568,7 @@ class Cell extends React.PureComponent<CellProps, {}> {
 
       return (
         <div className={this.props.classes.editorContainer} style={{height: this.element.clientHeight + 'px'}}>
-          <Editor field={{...cell, value: value, autoFocus: true, align: cell.align, error: undefined, disableErrors: true}} endOfTextOnFocus={endOfTextOnFocus} selectOnFocus={selectOnFocus} className={cell.cls} onValueChange={this.onValueChange} classes={editorClasses} {...additionalProps}/>
+          <Editor field={{...cell, value: value, autoFocus: true, align: cell.align, error: undefined, disableErrors: true}} endOfTextOnFocus={endOfTextOnFocus} selectOnFocus={selectOnFocus} cursorPositionOnFocus={cursorPositionOnFocus} className={cell.cls} onValueChange={this.onValueChange} classes={editorClasses} {...additionalProps}/>
         </div>
       );
     }

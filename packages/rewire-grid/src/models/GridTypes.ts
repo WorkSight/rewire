@@ -161,7 +161,8 @@ export interface IGroupRow extends IRow, IRows {
 }
 
 export type IColumnEditor =
-  'text' | 'date' | 'time' | 'checked' | 'password' | 'mask' | 'none' |
+  'text' | 'date' | 'checked' | 'password' | 'mask' | 'none' |
+  {type: 'time', options?: {rounding?: number}} |
   {type: 'auto-complete', options: {search: SearchFn<any>, map: MapFn<any>}} |
   {type: 'select', options: {search: SearchFn<any>, map: MapFn<any>}} |
   {type: 'multiselect', options: {search: SearchFn<any>, map: MapFn<any>}} |
@@ -237,6 +238,7 @@ export interface ICell extends ICellProperties {
   clear(): void;
   setEditing(editing: boolean): void;
   validate(): void;
+  setValue(v: any): void;
 }
 
 export type ICellMap     = {[columnName: string]: ICell};

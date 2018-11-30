@@ -146,8 +146,11 @@ const arrayCompare = (options?: any) => (x: any, y: any): number => {
 function getNumberString(value: any): string {
   if (value === undefined) return value;
 
-  let numberStr = this.options && this.options.decimals && is.number(value) ? value.toFixed(this.options.decimals) : value;
-  numberStr     = this.options && this.options.thousandSeparator ? getThousandSeparatedNumberString(numberStr) : numberStr;
+  let numberStr = this.options && this.options.decimals && is.number(value) ? value.toFixed(this.options.decimals) : value.toString();
+  if (this.options && !this.options.fixed) {
+    numberStr = parseFloat(numberStr).toString();
+  }
+  numberStr = this.options && this.options.thousandSeparator ? getThousandSeparatedNumberString(numberStr) : numberStr;
 
   return numberStr;
 }

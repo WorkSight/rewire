@@ -8,10 +8,10 @@ import {withStyles, WithStyle}       from './styles';
 export class TimeValidator {
   rounding: number;
   constructor(rounding?: number) {
-    this.rounding = rounding || 0.1;
+    this.rounding = rounding !== undefined ? rounding : 0.1;
   }
 
-  parse(value?: string | number) {
+  parse(value?: string | number): any {
     if (typeof value === 'number') {
       const rounded = this.round(value);
       return {
@@ -35,7 +35,7 @@ export class TimeValidator {
     };
   }
 
-  private _parse(value?: string) {
+  private _parse(value?: string): number | undefined {
     if (!value) {
       return undefined;
     }
@@ -50,28 +50,28 @@ export class TimeValidator {
       return result;
     }
 
-    result = this._parseFloat(value.match(/^[0-9]?[0-9]?([\.][0-9]?[0-9]?)?$/));
+    result = this._parseFloat(value.match(/^[0-9]?[0-9]?([\.][0-9]*)?$/));
     if (result !== undefined) {
-      return result;
+      return parseFloat(result.toFixed(2));
     }
     return undefined;
   }
 
-  private parseMilitary(value: RegExpMatchArray | null) {
+  private parseMilitary(value: RegExpMatchArray | null): number | undefined {
     if (!value || (value.length < 3)) {
       return undefined;
     }
     return parseInt(value[1], 10) + parseInt(value[2], 10) / 60.0;
   }
 
-  private _parseFloat(value: RegExpMatchArray | null) {
+  private _parseFloat(value: RegExpMatchArray | null): number | undefined {
     if (!value || (value.length < 1)) {
       return undefined;
     }
     return parseFloat(value[0]);
   }
 
-  private parseAMPM(value: RegExpMatchArray | null) {
+  private parseAMPM(value: RegExpMatchArray | null): number | undefined {
     if (!value || (value.length < 5)) {
       return undefined;
     }
@@ -84,11 +84,11 @@ export class TimeValidator {
     return hours + minutes;
   }
 
-  private remainder(v: number) {
+  private remainder(v: number): number {
     return Math.floor(((v - Math.floor(v)) * 1000) + 0.1) / 1000;
   }
 
-  private round(value: number) {
+  private round(value: number): number {
     switch (this.rounding) {
       case 0:
         return value;
@@ -99,7 +99,7 @@ export class TimeValidator {
     }
   }
 
-  private _round(value: number) {
+  private _round(value: number): number {
     if (this.rounding === 0) {
       return value;
     }
@@ -140,18 +140,21 @@ const styles = (theme: Theme) => ({
 });
 
 export interface ITimeFieldProps {
-  visible?       : boolean;
-  disabled?      : boolean;
-  disableErrors? : boolean;
-  error?         : string;
-  value?         : number;
-  label?         : string;
-  align?         : TextAlignment;
-  variant?       : TextVariant;
-  placeholder?   : string;
-  rounding?      : number;
-  startAdornment?: JSX.Element;
-  endAdornment?  : JSX.Element;
+  visible?              : boolean;
+  disabled?             : boolean;
+  disableErrors?        : boolean;
+  error?                : string;
+  value?                : number;
+  label?                : string;
+  align?                : TextAlignment;
+  variant?              : TextVariant;
+  placeholder?          : string;
+  rounding?             : number;
+  selectOnFocus?        : boolean;
+  endOfTextOnFocus?     : boolean;
+  cursorPositionOnFocus?: number;
+  startAdornment?       : JSX.Element;
+  endAdornment?         : JSX.Element;
 
   onValueChange: (value?: number) => void;
 }
@@ -199,7 +202,7 @@ class TimeInputField extends React.Component<TimeFieldProps, ITimeState> {
 
   _valueToSet(value?: number | string): any {
     const state = this.validator.parse(value);
-    return {...state, text: state.value ? state.value.toFixed(2) : ''};
+    return {...state, text: state.value ? state.value : ''};
   }
 
   handleChange = (evt: React.ChangeEvent<HTMLInputElement>) => {
@@ -209,6 +212,17 @@ class TimeInputField extends React.Component<TimeFieldProps, ITimeState> {
 
   handleBlur = (evt: React.FocusEvent<HTMLInputElement>) => {
     this.props.onValueChange(this.state.value);
+  }
+
+  handleFocus = (evt: React.FocusEvent<HTMLInputElement>) => {
+    if (this.props.selectOnFocus) {
+      evt.target.setSelectionRange(0, evt.target.value.length);
+    } else if (this.props.endOfTextOnFocus) {
+      evt.target.setSelectionRange(evt.target.value.length, evt.target.value.length);
+    } else if (this.props.cursorPositionOnFocus !== undefined) {
+      let cursorPosition = Math.max(0, Math.min(this.props.cursorPositionOnFocus, evt.target.value.length));
+      evt.target.setSelectionRange(cursorPosition, cursorPosition);
+    }
   }
 
   render() {
@@ -231,6 +245,7 @@ class TimeInputField extends React.Component<TimeFieldProps, ITimeState> {
         helperText={!disableErrors && <span>{(!disabled && error) || ''}</span>}
         onChange={this.handleChange}
         onBlur={this.handleBlur}
+        onFocus={this.handleFocus}
         placeholder={placeholder}
         variant={variant}
         inputProps={{autoFocus: autoFocus, className: classes.nativeInput, style: {textAlign: align || 'left'}}}

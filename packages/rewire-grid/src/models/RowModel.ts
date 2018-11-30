@@ -189,6 +189,8 @@ export class RowModel implements IRow, IDisposable {
       let cell   = this.cells[column.name];
       cell.error = column.validator!.fn(this, cell.value);
     });
+
+    this.grid.inError = this.grid.hasErrors();
   }
 }
 

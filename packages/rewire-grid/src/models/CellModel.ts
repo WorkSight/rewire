@@ -169,12 +169,19 @@ export class CellModel implements ICell {
     return this.column.position;
   }
 
+  setValue(value: any) {
+    this.value = value;
+    this.validate();
+    this.onValueChange && this.onValueChange(this.row, value);
+    this.grid.changed = this.grid.hasChanges();
+  }
+
   clear() {
     if (this.readOnly || !this.enabled) {
       return;
     }
 
-    this.value = undefined;
+    this.setValue(undefined);
   }
 
   hasChanges(): boolean {
@@ -231,6 +238,8 @@ export class CellModel implements ICell {
       let column = cell.column;
       cell.error = column.validator!.fn(cell.row, cell.value);
     });
+
+    this.grid.inError = this.grid.hasErrors();
   }
 }
 

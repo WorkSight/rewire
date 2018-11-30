@@ -380,10 +380,10 @@ function createTestGrid(nRows: number, nColumns: number) {
     cols.push(createColumn('column' + col, 'Header# ' + col, 'text', Math.trunc(Math.random() * 250 + 50) + 'px'));
   }
   cols.push(createColumn('phoneColumn', 'Phone', {type: 'phone'}, Math.trunc(Math.random() * 250 + 50) + 'px'));
-  cols.push(createColumn('numberColumn', 'Number', {type: 'number', options: {decimals: 2, thousandSeparator: false}}, Math.trunc(Math.random() * 250 + 50) + 'px'));
+  cols.push(createColumn('numberColumn', 'Number', {type: 'number', options: {decimals: 2, fixed: true, thousandSeparator: false}}, Math.trunc(Math.random() * 250 + 50) + 'px'));
   cols.push(createColumn('dateColumn', 'Date', 'date', Math.trunc(Math.random() * 250 + 50) + 'px'));
-  cols.push(createColumn('timeOutColumn', 'Time Out', 'time', Math.trunc(Math.random() * 250 + 50) + 'px'));
-  cols.push(createColumn('timeInColumn', 'Time In', 'time', Math.trunc(Math.random() * 250 + 50) + 'px'));
+  cols.push(createColumn('timeOutColumn', 'Time Out', {type: 'time'}, Math.trunc(Math.random() * 250 + 50) + 'px'));
+  cols.push(createColumn('timeInColumn', 'Time In', {type: 'time'}, Math.trunc(Math.random() * 250 + 50) + 'px'));
   cols.push(createColumn('differenceColumn', 'Time Difference', {type: 'number', options: {decimals: 2}}, Math.trunc(Math.random() * 250 + 50) + 'px'));
   cols.push(createColumn('sumColumn', 'Time Sum', {type: 'number', options: {decimals: 2}}, Math.trunc(Math.random() * 250 + 50) + 'px'));
   cols.push(createColumn('autoCompleteColumn', 'Auto Complete', {type: 'auto-complete', options: countries}, Math.trunc(Math.random() * 250 + 50) + 'px'));
@@ -392,9 +392,9 @@ function createTestGrid(nRows: number, nColumns: number) {
   cols.push(createColumn('checkedColumn', 'Checked', 'checked', Math.trunc(Math.random() * 250 + 50) + 'px'));
 
   cols[15].validator = gridIsRequired;
-  cols[17].onValueChange = (row: IRow, value: any) => row.cells['differenceColumn'].value = (row.cells['timeInColumn'].value || 0) - (value || 0);
+  cols[17].onValueChange = (row: IRow, value: any) => row.cells['differenceColumn'].setValue((row.cells['timeInColumn'].value || 0) - (value || 0));
   cols[18].validator = gridIsGreaterThan('timeOutColumn');
-  cols[18].onValueChange = (row: IRow, value: any) => row.cells['differenceColumn'].value = (value || 0) - (row.cells['timeOutColumn'].value || 0);
+  cols[18].onValueChange = (row: IRow, value: any) => row.cells['differenceColumn'].setValue((value || 0) - (row.cells['timeOutColumn'].value || 0));
   cols[19].validator = gridIsDifferenceOfOthers(['timeInColumn', 'timeOutColumn']);
   cols[20].validator = gridIsSumOfOthers(['timeInColumn', 'timeOutColumn']);
 
@@ -512,8 +512,8 @@ function createTestGrid(nRows: number, nColumns: number) {
   setTimeout(() => {
     grid.cellByPos(0, 7).align = '';
     grid.cellByPos(0, 7).enabled = false;
-    grid.cellByPos(0, 19).value = 3;
-    grid.cellByPos(0, 20).value = 20;
+    grid.cellByPos(0, 19).setValue(3);
+    grid.cellByPos(0, 20).setValue(20);
     grid.clearSelection();
   }, 5000);
   grid.cellByPos(0, 5).editable = false;
@@ -594,7 +594,7 @@ function createEmployeesGrid() {
   cols.push(createColumn('name',     'Employee', 'text'));
   cols.push(createColumn('email',    'Email',    'text'));
   cols.push(createColumn('isActive', 'IsActive', 'checked'));
-  cols.push(createColumn('timeColumn', 'Time', 'time'));
+  cols.push(createColumn('timeColumn', 'Time', {type: 'time'}));
   cols.push(createColumn('selectColumn', 'Select', {type: 'select', options: countries}));
   cols.push(createColumn('multiselectColumn', 'Multiselect', {type: 'multiselect', options: countries}));
   cols.push(createColumn('autoCompleteColumn', 'Auto Complete', {type: 'auto-complete', options: countries}));

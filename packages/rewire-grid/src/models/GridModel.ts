@@ -357,6 +357,7 @@ class GridModel implements IGrid, IDisposable {
         }
       });
     });
+    this.validate();
     this.sort();
   }
 
@@ -504,8 +505,8 @@ class GridModel implements IGrid, IDisposable {
         return;
       }
 
-      let clipboardCell  = clipboardCellsForColumn.shift();
-      selectedCell.value = cloneValue(clipboardCell.value);
+      let clipboardCell = clipboardCellsForColumn.shift();
+      selectedCell.setValue(cloneValue(clipboardCell.value));
 
       if (clipboardCellsForColumn.length <= 0) {
         clipboardCellsByColumnPosition[selectedCell.columnPosition] = clipboardCellsByColumnPositionOriginal[selectedCell.columnPosition].slice();
@@ -1005,7 +1006,6 @@ export default function create(rows: any[], columns: IColumn[], groupBy?: string
     // mergeRows(grid.fixedRows, grid.dataColumns);
     // mergeRows(grid.rows, grid.dataColumns);
     grid.validate();
-    grid.inError = grid.hasErrors();
     return grid;
   });
 }

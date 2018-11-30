@@ -48,19 +48,20 @@ const styles = (theme: Theme) => ({
 });
 
 export interface IPasswordFieldProps {
-  visible?         : boolean;
-  disabled?        : boolean;
-  disableErrors?   : boolean;
-  error?           : string;
-  value?           : string;
-  label?           : string;
-  placeholder?     : string;
-  align?           : TextAlignment;
-  variant?         : TextVariant;
-  selectOnFocus?   : boolean;
-  endOfTextOnFocus?: boolean;
-  updateOnChange?  : boolean;
-  hasAdornment?    : boolean;
+  visible?              : boolean;
+  disabled?             : boolean;
+  disableErrors?        : boolean;
+  error?                : string;
+  value?                : string;
+  label?                : string;
+  placeholder?          : string;
+  align?                : TextAlignment;
+  variant?              : TextVariant;
+  selectOnFocus?        : boolean;
+  endOfTextOnFocus?     : boolean;
+  cursorPositionOnFocus?: number;
+  updateOnChange?       : boolean;
+  hasAdornment?         : boolean;
 
   onValueChange: (value?: string) => void;
 }
@@ -101,6 +102,9 @@ class PasswordFieldInternal extends React.Component<PasswordFieldPropsStyled, IP
       evt.target.setSelectionRange(0, evt.target.value.length);
     } else if (this.props.endOfTextOnFocus) {
       evt.target.setSelectionRange(evt.target.value.length, evt.target.value.length);
+    } else if (this.props.cursorPositionOnFocus !== undefined) {
+      let cursorPosition = Math.max(0, Math.min(this.props.cursorPositionOnFocus, evt.target.value.length));
+      evt.target.setSelectionRange(cursorPosition, cursorPosition);
     }
   }
 
