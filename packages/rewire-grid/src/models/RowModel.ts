@@ -21,6 +21,7 @@ import {observable,
   observe,
   root
 } from 'rewire-core';
+import * as is from 'is';
 import * as nanoid  from 'nanoid';
 
 const EmptyFn = () => {};
@@ -163,6 +164,34 @@ export class RowModel implements IRow, IDisposable {
       errors.concat(cell.getErrors());
     }
     return errors;
+  }
+
+  clear(columnNames?: string[]) {
+    let columnsToClear     = columnNames ? this.grid.columns.filter((column: IColumn) => columnNames.includes(column.name)) : this.grid.columns;
+    let columnNamesToClear = columnsToClear.map((column: IColumn) => column.name);
+    let rowData: {[columnName: string]: any} = {};
+    columnNamesToClear.forEach((columnName: string) => {
+      rowData[columnName] = undefined;
+    });
+    this.setValue(rowData);
+  }
+
+  setValue(data: ICellDataMap) {
+    if (!data) return;
+    let columnNamesToSet = Object.keys(data).filter((columnName: string) => this.cells[columnName]);
+    columnNamesToSet.forEach((columnName: string) => {
+      let cell = this.cells[columnName];
+      if (is.object(cell.value) && is.object(data[columnName])) {
+        let clearedObj: object = {};
+        Object.keys(cell.value).forEach(key => clearedObj[key] = undefined);
+        Object.assign(cell.value, clearedObj, data[columnName]);
+      } else {
+        cell.value = data[columnName];
+      }
+      cell.onValueChange && cell.onValueChange(this, data[columnName]);
+    });
+    this.validate(columnNamesToSet);
+    this.grid.changed = this.grid.hasChanges();
   }
 
   clone(): IRow {

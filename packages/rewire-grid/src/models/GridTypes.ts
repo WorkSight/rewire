@@ -149,6 +149,8 @@ export interface IRow extends IDisposable {
   hasErrors(): boolean;
   getErrors(): IErrorData[];
   createCell(column: IColumn, value: any, type?: string): ICell;
+  clear(columnNames?: string[]): void;
+  setValue(data: ICellDataMap): void;
   clone(): IRow;
   validate(columnNames?: string[]): void;
 }
@@ -168,7 +170,6 @@ export type IColumnEditor =
   {type: 'multiselect', options: {search: SearchFn<any>, map: MapFn<any>}} |
   {type: 'number', options?: {decimals?: number, thousandSeparator?: boolean, fixed?: boolean}} |
   {type: 'phone', options?: {format?: string, mask?: string}};
-
 
 export interface ICellProperties {
   id       : number;

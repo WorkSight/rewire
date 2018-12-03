@@ -731,8 +731,6 @@ class GridModel implements IGrid, IDisposable {
   }
 
   unselectCells(cells: ICell[]): void {
-    let t0 = performance.now();
-
     let newSelectCells = this.selectedCells.slice();
     cells.forEach(cell => {
       for (let i = 0; i < cell.colSpan; i++) {
@@ -746,13 +744,10 @@ class GridModel implements IGrid, IDisposable {
         }
       }
     });
-    let t1 = performance.now();
-    console.log(`Call to unselectCells took: ${t1 - t0} milliseconds.`);
     this.selectCells(newSelectCells, true);
   }
 
   selectCells(cells: ICell[], multiSelect: boolean = false, append: boolean = false): void {
-    let t0 = performance.now();
     let currentCells = this.selectedCells;
 
     if (currentCells.length <= 0 && cells.length <= 0) {
@@ -809,8 +804,6 @@ class GridModel implements IGrid, IDisposable {
     this.updateCellSelectionProperties(cellsToSelect);
     this.selectRows([...new Set(rowsToSelect)]);
     this.selectedCells = cellsToSelect;
-    let t1 = performance.now();
-    console.log(`Call to selectCells took: ${t1 - t0} milliseconds.`);
   }
 
   updateCellSelectionProperties(cellsToSelect: ICell[]) {
@@ -848,7 +841,6 @@ class GridModel implements IGrid, IDisposable {
   }
 
   selectCellsTo(cell: ICell, append: boolean = false) {
-    let t0 = performance.now();
     let rowPos      = cell.rowPosition;
     let colPos      = cell.columnPosition;
     let startRowPos = this.startCell!.rowPosition;
@@ -910,8 +902,6 @@ class GridModel implements IGrid, IDisposable {
     // }
 
     cellsToSelect.sort(CellModel.positionCompare);
-    let t1 = performance.now();
-    console.log(`Call to selectCellsTo took: ${t1 - t0} milliseconds.`);
     this.selectCells(cellsToSelect, true, append);
   }
 

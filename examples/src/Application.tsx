@@ -190,7 +190,7 @@ const suggestions2 = observable(suggestions);
 
 class LoginDialog extends Modal {
   form: Form = Form.create({
-    email                : Form.email().label('Email').validators(isRequired).placeholder('enter a valid email').onValueChange((form: Form, v: any) => form.setFieldValue('money', 5)).autoFocus(),
+    email                : Form.email().label('Email').validators(isRequired).placeholder('enter a valid email').onValueChange((form: Form, v: any) => form.setFieldValues({money: 5, password: '123', 'password_confirmation': '123'})).autoFocus(),
     password             : Form.password().label('Password').validators(and(isRequired, isSameAsOther('password_confirmation', 'passwords are not the same'))).placeholder('enter a password'),
     password_confirmation: Form.password().label('Confirm Password').placeholder('confirm your password'),
     country              : Form.reference(countries).label('Country').validators(isRequired).placeholder('ooga'),
@@ -637,26 +637,27 @@ const _Home = (props: any) => <Observe render={() => (
           <Typography style={{margin: 16}}>Are you sure you want to do this crazy shit?</Typography>
         </DialogView>
         <div style={{overflow: 'auto', padding: 10, display: 'flex', flexDirection: 'column', alignItems: 'center', justifyContent: 'center'}}>
-          <div style={{marginBottom: '10px'}}>
-            <Button style={{marginRight: '15px'}} variant='contained' onClick={() => {
+          <div>
+            <Button style={{margin: '0px 15px 10px 0px'}} variant='contained' onClick={() => {
               grid.addRow({id: 'newRow-' + Math.random() * 2000, 'column2': 'RC 2-1', 'column3': 'RC 3-1', options: {allowMergeColumns: true}});
               employeesGrid.addRow({id: 'newRow-' + Math.random() * 2000, name: 'New Employee', email: 'employeeEmail@test.com'});
             }}>
               Add Row
             </Button>
-            <Button style={{marginRight: '15px'}} variant='contained' onClick={() => grid.removeRow(grid.dataRowsByPosition[grid.dataRowsByPosition.length - 1].id)}>Remove Row</Button>
-            <Button style={{marginRight: '15px'}} variant='contained' onClick={() => grid.dataRowsByPosition[0].cells['numberColumn'].value = 1337}>Change Number Cell Value</Button>
-            <Button style={{marginRight: '15px'}} variant='contained' onClick={() => {
-              if (grid.dataRowsByPosition[0].cells['complexColumn'].value) {
-                Object.assign(grid.dataRowsByPosition[0].cells['complexColumn'].value, {name: 'Smithers', age: 57});
-              } else {
-                grid.dataRowsByPosition[0].cells['complexColumn'].value = new ComplexCellData(guid(), 'Smithers', 57);
-              }
+            <Button style={{margin: '0px 15px 10px 0px'}} variant='contained' onClick={() => grid.removeRow(grid.dataRowsByPosition[grid.dataRowsByPosition.length - 1].id)}>Remove Row</Button>
+            <Button style={{margin: '0px 15px 10px 0px'}} variant='contained' onClick={() => grid.dataRowsByPosition.forEach(row => row.cells['numberColumn'].setValue(1337))}>Change Number Cell Value</Button>
+            <Button style={{margin: '0px 15px 10px 0px'}} variant='contained' onClick={() => grid.dataRowsByPosition.forEach(row => row.setValue({'numberColumn': 2222, 'dateColumn': '1985-11-26'}))}>Change Number And Date Cells</Button>
+            <Button style={{margin: '0px 15px 10px 0px'}} variant='contained' onClick={() => grid.dataRowsByPosition.forEach(row => row.clear(['numberColumn', 'dateColumn']))}>Clear Number And Date</Button>
+            <Button style={{margin: '0px 15px 10px 0px'}} variant='contained' onClick={() => {
+              grid.dataRowsByPosition.forEach(row => {
+                let id = row.cells['complexColumn'].value ? row.cells['complexColumn'].value.id : guid();
+                row.cells['complexColumn'].setValue(new ComplexCellData(id, 'Smithers', 57));
+              });
             }}>
               Change Complex Cell Value
             </Button>
-            <Observe render={() => (<Button style={{marginRight: '15px'}} variant='contained' disabled={!grid.changed} onClick={() => grid.revert()}>Enabled if has Changes. Reverts Changes</Button>)} />
-            <Observe render={() => (<Button variant='contained' disabled={!grid.inError}>Enabled if has Errors</Button>)} />
+            <Observe render={() => (<Button style={{margin: '0px 15px 10px 0px'}} variant='contained' disabled={!grid.changed} onClick={() => grid.revert()}>Enabled if has Changes. Reverts Changes</Button>)} />
+            <Observe render={() => (<Button style={{margin: '0px 0px 10px 0px'}} variant='contained' disabled={!grid.inError}>Enabled if has Errors</Button>)} />
           </div>
           <Paper style={{width: '80%', padding: 20, display: 'flex', alignItems: 'center', justifyContent: 'center', height: 800}}>
             <Observe render={() => (<Grid grid={grid} gridFontSizes={{header: '0.9rem', body: '0.9rem', groupRow: '0.8rem'}} />)} />
@@ -692,7 +693,7 @@ class TestDialog extends Modal {
     difference           : Form.number().label('Time Difference').placeholder('enter difference').validators(isDifferenceOfOthers(['timeIn', 'timeOut'])),
     sum                  : Form.number().label('Time Sum').placeholder('enter sum').validators(isSumOfOthers(['timeIn', 'timeOut'])),
     avatar               : Form.avatar({width: 1000, height: 1000, avatarDiameter: 150, cropRadius: 75}).label('Add Photo (Optional)'),
-  }, {email: 'splace@worksight.net', isGreat: true}, {variant: 'outlined'});
+  }, {email: 'splace@worksight.net', isGreat: true}, {variant: 'outlined', initialValuesValidationMode: 'withValues'});
 
   constructor() {
     super('Test Form');

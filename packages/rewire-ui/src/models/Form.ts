@@ -165,15 +165,11 @@ class BaseField implements IFieldDefn {
   }
 }
 
-export enum InitialValuesValidationMode {
-  All,
-  WithValues,
-  None,
-}
+export type IInitialValuesValidationModeType = 'all' | 'withValues' | 'none';
 
 export interface IFormOptions {
   defaultAdornmentsEnabled?: boolean;
-  initialValuesValidationMode?: InitialValuesValidationMode;
+  initialValuesValidationMode?: IInitialValuesValidationModeType;
   disableErrors?: boolean;
   variant?: TextVariant;
   updateOnChange?: boolean;
@@ -186,7 +182,7 @@ export default class Form {
   private _hasChanges        : () => boolean;
   private _hasErrors         : () => boolean;
   defaultAdornmentsEnabled   : boolean;
-  initialValuesValidationMode: InitialValuesValidationMode;
+  initialValuesValidationMode: IInitialValuesValidationModeType;
   disableErrors              : boolean;
   variant                    : TextVariant;
   updateOnChange             : boolean;
@@ -199,7 +195,7 @@ export default class Form {
     this.field                       = observable({});
     this.validator                   = new Validator();
     this.defaultAdornmentsEnabled    = options && options.defaultAdornmentsEnabled !== undefined ? options.defaultAdornmentsEnabled : true;
-    this.initialValuesValidationMode = options && options.initialValuesValidationMode ? options.initialValuesValidationMode : InitialValuesValidationMode.WithValues;
+    this.initialValuesValidationMode = options && options.initialValuesValidationMode ? options.initialValuesValidationMode : 'withValues';
     this.disableErrors               = options && options.disableErrors || false;
     this.variant                     = options && options.variant || 'standard';
     // this.updateOnChange              = options && options.updateOnChange !== undefined ? options.updateOnChange : true;
@@ -215,15 +211,14 @@ export default class Form {
     this._value = value;
     this.fields.forEach(field => {
       field.value = field.type === 'boolean' ? value[field.name] || false : value[field.name];
-      // validate initial values
-      if (this.initialValuesValidationMode === InitialValuesValidationMode.All) {
-        this.validateField(field);
-      } else if (this.initialValuesValidationMode === InitialValuesValidationMode.WithValues) {
-        if (field.value) {
-          this.validateField(field);
-        }
-      }
     });
+
+    if (this.initialValuesValidationMode === 'all') {
+      this.validateForm();
+    } else if (this.initialValuesValidationMode === 'withValues') {
+      let fieldsToValidate = this.fields.filter(field => field.value !== undefined);
+      this.validateFields(fieldsToValidate);
+    }
 
     root((dispose) => {
       this.dispose        = dispose;
@@ -357,6 +352,21 @@ export default class Form {
     return true;
   }
 
+  public setFieldValues(fieldKVPairs: {[s: string]: any}): boolean {
+    if (!fieldKVPairs) return false;
+
+    let success     = false;
+    let fieldsToSet = Object.keys(fieldKVPairs).map((fieldName: string) => this.field[fieldName]).filter((field: IEditorField) => field && field.value !== fieldKVPairs[field.name]);
+    fieldsToSet.forEach((field: IEditorField) => {
+      field.value = fieldKVPairs[field.name];
+      success     = true;
+      field.onValueChange && field.onValueChange(this, value);
+    });
+
+    this.validateFields(fieldsToSet.filter((field: IEditorField) => field.validateOnUpdate));
+    return success;
+  }
+
   public getFieldValue(fieldName: string): any {
     let field = this.field[fieldName];
     if (!field) return;
@@ -389,6 +399,9 @@ export default class Form {
       field.value = undefined;
       field.error = undefined;
     });
+    if (this.initialValuesValidationMode === 'all') {
+      this.validateForm();
+    }
   }
 
   public submit = (enforceValidation: boolean = true): boolean => {
@@ -404,6 +417,26 @@ export default class Form {
     if (!field.disableErrors) {
       fieldNamesToValidate.push(field.name);
     }
+    fieldNamesToValidate = [...new Set(fieldNamesToValidate)];
+    let result = this.validator.validateFields(fieldNamesToValidate, this.toObjectLabelsAndValues());
+    fieldNamesToValidate.forEach(fieldName => {
+      let fld = this.field[fieldName];
+      if (fld) {
+        fld.error = result.errors[fieldName];
+      }
+    });
+
+    return result;
+  }
+
+  private validateFields(fields: IEditorField[]): ValidationResult {
+    let fieldNamesToValidate = this.fields.filter(f => !f.disableErrors && fields.findIndex(field => f.linkedFieldNames.includes(field.name)) >= 0).map(f => f.name);
+    fields.forEach((field: IEditorField) => {
+      if (!field.disableErrors) {
+        fieldNamesToValidate.push(field.name);
+      }
+    });
+
     fieldNamesToValidate = [...new Set(fieldNamesToValidate)];
     let result = this.validator.validateFields(fieldNamesToValidate, this.toObjectLabelsAndValues());
     fieldNamesToValidate.forEach(fieldName => {
