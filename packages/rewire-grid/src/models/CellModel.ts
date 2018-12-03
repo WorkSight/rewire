@@ -1,4 +1,5 @@
 import * as React from 'react';
+import * as is from 'is';
 import {IGrid, IColumn, ICell, IRow, IError, IErrorData, TextAlignment, cloneValue} from './GridTypes';
 import { observable, defaultEquals, property, DataSignal } from 'rewire-core';
 
@@ -170,7 +171,14 @@ export class CellModel implements ICell {
   }
 
   setValue(value: any) {
-    this.value = value;
+    if (is.object(this.value) && is.object(value)) {
+      let clearedObj: object = {};
+      Object.keys(this.value).forEach(key => clearedObj[key] = undefined);
+      Object.assign(this.value, clearedObj, value);
+    } else {
+      this.value = value;
+    }
+
     this.validate();
     this.onValueChange && this.onValueChange(this.row, value);
     this.grid.changed = this.grid.hasChanges();
