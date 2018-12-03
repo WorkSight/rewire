@@ -190,7 +190,7 @@ const suggestions2 = observable(suggestions);
 
 class LoginDialog extends Modal {
   form: Form = Form.create({
-    email                : Form.email().label('Email').validators(isRequired).placeholder('enter a valid email').onValueChange((form: Form, v: any) => form.setFieldValue('money', 5)).autoFocus(),
+    email                : Form.email().label('Email').validators(isRequired).placeholder('enter a valid email').onValueChange((form: Form, v: any) => form.setFieldValues({money: 5, password: '123', 'password_confirmation': '123'})).autoFocus(),
     password             : Form.password().label('Password').validators(and(isRequired, isSameAsOther('password_confirmation', 'passwords are not the same'))).placeholder('enter a password'),
     password_confirmation: Form.password().label('Confirm Password').placeholder('confirm your password'),
     country              : Form.reference(countries).label('Country').validators(isRequired).placeholder('ooga'),
@@ -692,7 +692,7 @@ class TestDialog extends Modal {
     difference           : Form.number().label('Time Difference').placeholder('enter difference').validators(isDifferenceOfOthers(['timeIn', 'timeOut'])),
     sum                  : Form.number().label('Time Sum').placeholder('enter sum').validators(isSumOfOthers(['timeIn', 'timeOut'])),
     avatar               : Form.avatar({width: 1000, height: 1000, avatarDiameter: 150, cropRadius: 75}).label('Add Photo (Optional)'),
-  }, {email: 'splace@worksight.net', isGreat: true}, {variant: 'outlined'});
+  }, {email: 'splace@worksight.net', isGreat: true}, {variant: 'outlined', initialValuesValidationMode: 'withValues'});
 
   constructor() {
     super('Test Form');
