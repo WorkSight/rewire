@@ -360,7 +360,7 @@ export default class Form {
     fieldsToSet.forEach((field: IEditorField) => {
       field.value = fieldKVPairs[field.name];
       success     = true;
-      field.onValueChange && field.onValueChange(this, value);
+      field.onValueChange && field.onValueChange(this, fieldKVPairs[field.name]);
     });
 
     this.validateFields(fieldsToSet.filter((field: IEditorField) => field.validateOnUpdate));
