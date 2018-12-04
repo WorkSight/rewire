@@ -171,6 +171,7 @@ export class CellModel implements ICell {
   }
 
   setValue(value: any) {
+    if (this.value === value) return;
     if (is.object(this.value) && is.object(value)) {
       let clearedObj: object = {};
       Object.keys(this.value).forEach(key => clearedObj[key] = undefined);
