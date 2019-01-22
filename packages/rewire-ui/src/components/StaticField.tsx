@@ -6,10 +6,17 @@ import {TextAlignment}               from './editors';
 
 const styles = (theme: Theme) => ({
   inputRoot: {
+    fontSize: 'inherit',
     lineHeight: 'inherit',
     '&::before': {
       display: 'none',
     },
+  },
+  inputLabelRoot: {
+    fontSize: 'inherit',
+  },
+  inputLabelRootShrink: {
+    transform: 'translate(14px, -0.375em) scale(0.75) !important',
   },
 });
 
@@ -44,6 +51,8 @@ class StaticFieldInternal extends React.Component<StaticFieldProps> {
       return null;
     }
 
+    const {classes} = this.props;
+
     return (
       <TextField
         className={this.props.className}
@@ -52,8 +61,8 @@ class StaticFieldInternal extends React.Component<StaticFieldProps> {
         value={this.props.value}
         type={this.props.type}
         onChange={(evt: React.ChangeEvent<HTMLInputElement>) => this.props.onValueChange(evt.target.value)}
-        InputLabelProps={{shrink: true}}
-        InputProps={{style: {color: 'inherit'}, classes: {root: this.props.classes.inputRoot}}}
+        InputLabelProps={{shrink: true, classes: {root: classes.inputLabelRoot, outlined: classes.inputLabelRootShrink}}}
+        InputProps={{style: {color: 'inherit'}, classes: {root: classes.inputRoot}}}
         inputProps={{style: {textAlign: this.props.align || 'left'}}}
       />);
   }

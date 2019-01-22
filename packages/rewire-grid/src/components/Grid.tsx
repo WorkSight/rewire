@@ -399,6 +399,14 @@ const GridInternal = withStyles(styles, class extends React.PureComponent<GridPr
     }
   }
 
+  componentWillReceiveProps(nextProps: GridProps) {
+    if (nextProps.grid !== this.grid) {
+      // reset column groups
+      this._fixedColGroups = undefined;
+      this._colGroups      = undefined;
+    }
+  }
+
   updateForScrollbars() {
     let columnWrap = this._columnTableWrapper;
     if (columnWrap.style) {
@@ -485,7 +493,7 @@ const GridInternal = withStyles(styles, class extends React.PureComponent<GridPr
         <div className={classNames('top-labels', this.props.classes.topLabels)}>
         {this.renderFixedColumnHeaders()}
         <div className='column-wrapper' ref={(c) => this._columnTableWrapper = c as HTMLDivElement }>
-          <table role='grid' ref={(c) => this._columnTable = c as HTMLTableElement} style={{width: this.props.grid.width}}>
+          <table role='grid' ref={(c) => this._columnTable = c as HTMLTableElement}>
             {this.renderColumnGroups(false)}
             <thead role='rowgroup'>
               <Observe render={() => (
@@ -520,7 +528,7 @@ const GridInternal = withStyles(styles, class extends React.PureComponent<GridPr
           <GridKeyHandler>{
             (keyboard) => (
               <div className={classNames('grid-content', this.props.classes.gridContent)} onKeyDown={keyboard.handleKeyDown} ref={(c: HTMLDivElement) => (keyboard.element = c, this._gridContent(c))}>
-              <table role='grid' style={{width: this.props.grid.width}}>
+              <table role='grid'>
                 {this.renderColumnGroups(false)}
                 <BodyRenderer grid={this.props.grid} gridContent={this._gridContent} scrollY={this.scrollY} rowElements={rowElements} fixedRowElements={fixedRowElements} columns={this.props.grid.dataColumns} />
               </table>
@@ -533,8 +541,10 @@ const GridInternal = withStyles(styles, class extends React.PureComponent<GridPr
   }
 
   render() {
+    const {style, className, classes} = this.props;
+
     return (
-      <div className={classNames('ws-grid', this.props.className, this.props.classes.wsGrid)} style={this.props.style}>
+      <div className={classNames('ws-grid', className, classes.wsGrid)} style={style}>
         {this.renderHeaders()}
         {this.renderData()}
       </div>

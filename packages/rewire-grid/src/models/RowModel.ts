@@ -83,8 +83,8 @@ export class RowModel implements IRow, IDisposable {
     });
 
     if (!this.grid.loading && !fixed && !isGroupRow(this)) {
-    this.validate();
-  }
+      this.validate();
+    }
   }
 
   set parentRow(groupRow: IGroupRow | undefined) {
@@ -176,20 +176,20 @@ export class RowModel implements IRow, IDisposable {
     this.setValue(rowData);
   }
 
+  _setValue(data: ICellDataMap) {
+    if (!data) return;
+    Object.keys(data).forEach((columnName: string) => {
+      let cell = this.cells[columnName];
+      if (cell) {
+        cell._setValue(data[columnName]);
+      }
+    });
+  }
+
   setValue(data: ICellDataMap) {
     if (!data) return;
+    this._setValue(data);
     let columnNamesToSet = Object.keys(data).filter((columnName: string) => this.cells[columnName]);
-    columnNamesToSet.forEach((columnName: string) => {
-      let cell = this.cells[columnName];
-      if (is.object(cell.value) && is.object(data[columnName])) {
-        let clearedObj: object = {};
-        Object.keys(cell.value).forEach(key => clearedObj[key] = undefined);
-        Object.assign(cell.value, clearedObj, data[columnName]);
-      } else {
-        cell.value = data[columnName];
-      }
-      cell.onValueChange && cell.onValueChange(this, data[columnName]);
-    });
     this.validate(columnNamesToSet);
     this.grid.changed = this.grid.hasChanges();
   }
@@ -220,6 +220,26 @@ export class RowModel implements IRow, IDisposable {
     });
 
     this.grid.inError = this.grid.hasErrors();
+  }
+
+  private _revertHelper(): ICellDataMap {
+    let rowValue: ICellDataMap = {};
+    for (const column of this.grid.columns) {
+      let cell = this.cells[column.name];
+      if (cell.hasChanges()) { // maybe don't need
+        rowValue[column.name] = cloneValue(this.data[column.name]);
+      }
+    }
+    return rowValue;
+  }
+
+  // reverts value without validation or grid changed update
+  _revert() {
+    this._setValue(this._revertHelper());
+  }
+
+  revert() {
+    this.setValue(this._revertHelper());
   }
 }
 

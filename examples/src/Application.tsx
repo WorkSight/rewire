@@ -24,6 +24,7 @@ import {
   Link,
   NavLink,
 } from 'react-router-dom';
+import * as nanoid from 'nanoid';
 // import {TimeInputField} from 'rewire-ui';
 import {utc}            from 'rewire-common';
 // import Grid           from './components/Grid';
@@ -40,13 +41,14 @@ import {Dialog as DialogView}   from 'rewire-ui';
 import {FormView}     from 'rewire-ui';
 // import column         from './models/Grid';
 import {createGrid, createColumn, IError, ErrorSeverity}   from 'rewire-grid';
-import {Grid, ICell, IRow, isLessThan as gridIsLessThan, isGreaterThan as gridIsGreaterThan, isRequired as gridIsRequired, isSumOfOthers as gridIsSumOfOthers, isDifferenceOfOthers as gridIsDifferenceOfOthers}   from 'rewire-grid';
+import {Grid, IGridOptions, ICell, IRow, isLessThan as gridIsLessThan, isGreaterThan as gridIsGreaterThan, isRequired as gridIsRequired, isSumOfOthers as gridIsSumOfOthers, isDifferenceOfOthers as gridIsDifferenceOfOthers}   from 'rewire-grid';
 // import { ICell, collapseAll, expandAll } from 'rewire-grid/models/GridTypes';
 import {editor}       from 'rewire-ui';
 import {isRequired, isEmail, and, isSameAsOther, isGreaterThan, isGreaterThanOrEquals, isLessThan, isLessThanOrEquals, isDifferenceOfOthers, isSumOfOthers, requiredWhenOtherIsNotNull, requiredWhenOtherIsValue} from 'rewire-ui';
 import './graphqltest';
 import doucheSuitDude from './images/doucheSuitDude.jpg';
 import { MuiThemeProvider, Theme, createMuiTheme } from '@material-ui/core/styles';
+import { NotificationDoNotDisturb } from 'material-ui/svg-icons';
 
 const suggestions = [
   {id: '0', name: 'Afghanistan'},
@@ -153,7 +155,6 @@ setTimeout(() => {
 //   uistate.disabled = true;
 // }, 4000);
 
-
 const BasicExample = (props: any) => {
   return (
     <Router>
@@ -197,6 +198,8 @@ class LoginDialog extends Modal {
     time                 : Form.time().label('Time').validators(isRequired).onValueChange((form: Form, v: any) => form.setFieldValue('email', 'hi@hi.com')),
     selectCountry        : Form.select(countries).label('Select Country').validators(isRequired).placeholder('ooga'),
     money                : Form.number().label('Show Me').validators(isRequired).placeholder('The Money'),
+    date                 : Form.date().label('Date'),
+    multi                : Form.multistring({rows: 1}).label('Multiline').placeholder('enter multistring'),
   });
 
   constructor() {
@@ -217,6 +220,7 @@ class LoginDialog extends Modal {
 
 const loginDialog = new LoginDialog();
 const LoginFormView = ({form}: {form: typeof loginDialog.form}) => (
+  <div style={{fontSize: '16px'}}>
   <FormView form={form} onSubmit={loginDialog.actionFn('login')}>
     <div className='content'>
       <form.field.email.Editor className='span2' />
@@ -228,8 +232,11 @@ const LoginFormView = ({form}: {form: typeof loginDialog.form}) => (
       <form.field.password.Editor />
       <form.field.password_confirmation.Editor />
       <form.field.money.Editor />
+      <form.field.date.Editor />
+      <form.field.multi.Editor />
     </div>
   </FormView>
+  </div>
 );
 
 // watch(() => loginDialog.form.hasChanges, () => console.log('has changes =', loginDialog.form.hasChanges));
@@ -242,6 +249,113 @@ const getLoginTitle = (dialog: Modal): JSX.Element => {
 const DialogLoginForm = () => (
   <DialogView dialog={loginDialog} title={getLoginTitle} maxWidth='md'>
     <LoginFormView form={loginDialog.form} />
+  </ DialogView>
+);
+
+class GridHotkeysDialogModel extends Modal {
+  constructor() {
+    super('');
+    this.action('close', {color: 'secondary', icon: 'cancel'});
+  }
+
+  submit = async () => {
+    if (!this.form.submit()) return false;
+    console.log(this.form.value);
+    await delay(2000);
+    setTimeout(() => confirmation.open(), 0);
+    // await perform login from server
+    return true;
+  }
+}
+
+const gridHotkeysDialogModel = new GridHotkeysDialogModel();
+
+const getGridDialogTitle = (dialog: Modal): JSX.Element => {
+  return <div>Grid Hotkeys List</div>;
+};
+
+const GridHotkeysDialog = () => (
+  <DialogView dialog={gridHotkeysDialogModel} title={getGridDialogTitle} maxWidth='md'>
+    <div style={{padding: '16px', maxHeight: '500px'}}>
+      <div style={{display: 'flex', flexDirection: 'column', justifyContent: 'flex-start', alignItems: 'flex-start', flexWrap: 'wrap'}}>
+        <div style={{display: 'flex'}}>
+          <Typography style={{width: '125px'}}>Ctrl + C:</Typography>
+          <Typography>Copy Selected Cell(s)</Typography>
+        </div>
+        <div style={{display: 'flex'}}>
+          <Typography style={{width: '125px'}}>Ctrl + V:</Typography>
+          <Typography>Paste To Selected Cell(s)</Typography>
+        </div>
+        <div style={{display: 'flex'}}>
+          <Typography style={{width: '125px'}}>Ctrl + X:</Typography>
+          <Typography>Cut Selected Cell(s)</Typography>
+        </div>
+        <div style={{display: 'flex'}}>
+          <Typography style={{width: '125px'}}>Ctrl + R:</Typography>
+          <Typography>Revert Selected Cell(s)</Typography>
+        </div>
+        <div style={{display: 'flex'}}>
+          <Typography style={{width: '125px'}}>Ctrl + U:</Typography>
+          <Typography>Revert Selected Row(s)</Typography>
+        </div>
+        <div style={{display: 'flex'}}>
+          <Typography style={{width: '125px'}}>Ctrl + Insert:</Typography>
+          <Typography>Insert Row below selected row(s)</Typography>
+        </div>
+        <div style={{display: 'flex'}}>
+          <Typography style={{width: '125px'}}>Ctrl + D:</Typography>
+          <Typography>Duplicate selected row(s)</Typography>
+        </div>
+        <div style={{display: 'flex'}}>
+          <Typography style={{width: '125px'}}>Ctrl + Delete:</Typography>
+          <Typography>Delete selected row(s)</Typography>
+        </div>
+        <div style={{display: 'flex'}}>
+          <Typography style={{width: '125px'}}>Escape:</Typography>
+          <Typography>If editing, exit editing without changes. Otherwise, de-select cell(s)</Typography>
+        </div>
+        <div style={{display: 'flex'}}>
+          <Typography style={{width: '125px'}}>Enter:</Typography>
+          <Typography>If editing, exit editing with changes</Typography>
+        </div>
+        <div style={{display: 'flex'}}>
+          <Typography style={{width: '125px'}}>Delete:</Typography>
+          <Typography>If not editing, delete value of selected cell(s)</Typography>
+        </div>
+        <div style={{display: 'flex'}}>
+          <Typography style={{width: '125px'}}>Arrow Up:</Typography>
+          <Typography>Move up one cell</Typography>
+        </div>
+        <div style={{display: 'flex'}}>
+          <Typography style={{width: '125px'}}>Arrow Down:</Typography>
+          <Typography>Move down one cell</Typography>
+        </div>
+        <div style={{display: 'flex'}}>
+          <Typography style={{width: '125px'}}>Arrow Left:</Typography>
+          <Typography>Move left one cell. If end of line, attempt to wrap to line above</Typography>
+        </div>
+        <div style={{display: 'flex'}}>
+          <Typography style={{width: '125px'}}>Arrow Right:</Typography>
+          <Typography>Move right one cell. If end of line, attempt to wrap to line below</Typography>
+        </div>
+        <div style={{display: 'flex'}}>
+          <Typography style={{width: '125px'}}>Ctrl + Click:</Typography>
+          <Typography>If Multiselect, append selection</Typography>
+        </div>
+        <div style={{display: 'flex'}}>
+          <Typography style={{width: '125px'}}>Ctrl + Drag:</Typography>
+          <Typography>If Multiselect, append dragged cells</Typography>
+        </div>
+        <div style={{display: 'flex'}}>
+          <Typography style={{width: '125px'}}>Shift + Click:</Typography>
+          <Typography>If Multiselect, append cells between start and clicked cell</Typography>
+        </div>
+        <div style={{display: 'flex'}}>
+          <Typography style={{width: '125px'}}>Shift + Drag:</Typography>
+          <Typography>If Multiselect, append cells between start and dragged cells</Typography>
+        </div>
+      </div>
+    </div>
   </ DialogView>
 );
 
@@ -316,21 +430,6 @@ const confirmation = new Modal('Delete entire hard drive?')
   .action('yes', () => (console.log('no way you chose that'), true), {color: 'primary'})
   .action('no');
 
-function guid(): string {
-  // http://www.ietf.org/rfc/rfc4122.txt
-  let s: any[] = [];
-  let hexDigits = '0123456789abcdef';
-  for (let i = 0; i < 36; i++) {
-    s[i] = hexDigits.substr(Math.floor(Math.random() * 0x10), 1);
-  }
-  s[14] = '4';  // bits 12-15 of the time_hi_and_version field to 0010
-  s[19] = hexDigits.substr((s[19] & 0x3) | 0x8, 1);  // bits 6-7 of the clock_seq_hi_and_reserved to 01
-  s[8] = s[13] = s[18] = s[23] = '-';
-
-  let uuid = s.join('');
-  return uuid;
-}
-
 class ComplexCellData {
   id: string;
   name: string;
@@ -341,7 +440,10 @@ class ComplexCellData {
     this.age  = age;
   }
   clone() {
-    return new ComplexCellData(guid(), this.name, this.age);
+    return new ComplexCellData(this.id, this.name, this.age);
+  }
+  toString() {
+    return `${this.name} ${this.age}`;
   }
   static compare(val1: ComplexCellData, val2: ComplexCellData) {
     if (!val1 && !val2) return 0;
@@ -359,10 +461,10 @@ class ComplexCellData {
 const ComplexCell: React.SFC<ICell> = (cell) => {
   return (
     <div style={{width: '100%', textAlign: cell.align}}>
-      <div style={{fontSize: '0.85rem', fontWeight: 'bold', color: '#14809D'}}>
+      <div style={{fontSize: '0.9em', fontWeight: 'bold', color: '#14809D'}}>
         {cell.value && cell.value.name}
       </div>
-      <div style={{fontSize: '0.8rem'}}>
+      <div style={{fontSize: '0.85em'}}>
         {cell.value && cell.value.age}
       </div>
     </div>
@@ -468,7 +570,7 @@ function createTestGrid(nRows: number, nColumns: number) {
       else if (colName === 'differenceColumn') v = 4;
       else if (colName === 'sumColumn') v = 19;
       else if (colName === 'dateColumn') v = '2018-11-11';
-      else if (colName === 'complexColumn') v = row > 3 ? new ComplexCellData(guid(), 'Homer', 45) : undefined;
+      else if (colName === 'complexColumn') v = row > 3 ? new ComplexCellData(nanoid(10), 'Homer', 45) : undefined;
       else if (colName === 'phoneColumn') v = Number.parseInt('1250' + Math.round(Math.random() * 100000000).toString());
       else if (((column >= 5) && (column <= 6)) || colName === 'numberColumn') v = Math.random() * 10000;
       r[colName] = v;
@@ -483,42 +585,41 @@ function createTestGrid(nRows: number, nColumns: number) {
   cols[1].width   = '65px';
   cols[1].align   = 'right';
   // create the grid model and group by 'column2' and 'column3'
-  let grid = createGrid(rows, cols, ['column2', 'column3']);
+  let grid = createGrid(rows, cols, {groupBy: ['column2', 'column3'], multiSelect: true} as IGridOptions);
 
   grid.fixedRows[0].cells['column5'].value = 'Sales';
   grid.fixedRows[0].cells['column6'].value = 'Sales';
   grid.addFixedRow({column5: '2017', column6: '2018'});
-  grid.multiSelect = true;
 
   // sort first by  column7 then by column6
   grid.addSort(grid.columnByPos(7)!, 'ascending')
       .addSort(grid.columnByPos(6)!, 'descending');
 
   // test changing colum and cell properties
-  setTimeout(() => {
-    grid.columnByPos(4).canSort = false;
-    grid.columnByPos(5).editable = true;
-    grid.columnByPos(6).readOnly = true;
-    grid.columnByPos(7).enabled = false;
-    grid.columnByPos(8).enabled = false;
-    grid.columnByPos(8).renderer = (cell) => <div>{cell.value + ' Col'}</div>;
-    grid.cellByPos(0, 9).renderer = (cell) => <div>{cell.value + ' Cell'}</div>;
-    grid.cellByPos(0, 7).align = 'right';
-    grid.cellByPos(0, 7).enabled = true;
-    grid.columnByPos(7).align = 'center';
-    grid.columnByPos(6).setEditor({type: 'number', options: {decimals: 3, thousandSeparator: true}});
-    grid.clearSelection();
-  }, 2500);
-  setTimeout(() => {
-    grid.cellByPos(0, 7).align = '';
-    grid.cellByPos(0, 7).enabled = false;
-    grid.cellByPos(0, 19).setValue(3);
-    grid.cellByPos(0, 20).setValue(20);
-    grid.clearSelection();
-  }, 5000);
-  grid.cellByPos(0, 5).editable = false;
-  grid.cellByPos(0, 6).readOnly = false;
-  grid.cellByPos(0, 8).renderer = (cell) => <div>{cell.value + ' Cell'}</div>;
+  // setTimeout(() => {
+  //   grid.columnByPos(4).canSort = false;
+  //   grid.columnByPos(5).editable = true;
+  //   grid.columnByPos(6).readOnly = true;
+  //   grid.columnByPos(7).enabled = false;
+  //   grid.columnByPos(8).enabled = false;
+  //   grid.columnByPos(8).renderer = (cell) => <div>{cell.value + ' Col'}</div>;
+  //   grid.cellByPos(0, 9).renderer = (cell) => <div>{cell.value + ' Cell'}</div>;
+  //   grid.cellByPos(0, 7).align = 'right';
+  //   grid.cellByPos(0, 7).enabled = true;
+  //   grid.columnByPos(7).align = 'center';
+  //   grid.columnByPos(6).setEditor({type: 'number', options: {decimals: 3, thousandSeparator: true}});
+  //   grid.clearSelection();
+  // }, 2500);
+  // setTimeout(() => {
+  //   grid.cellByPos(0, 7).align = '';
+  //   grid.cellByPos(0, 7).enabled = false;
+  //   grid.cellByPos(0, 19).setValue(3);
+  //   grid.cellByPos(0, 20).setValue(20);
+  //   grid.clearSelection();
+  // }, 5000);
+  // grid.cellByPos(0, 5).editable = false;
+  // grid.cellByPos(0, 6).readOnly = false;
+  // grid.cellByPos(0, 8).renderer = (cell) => <div>{cell.value + ' Cell'}</div>;
 
   console.timeEnd('start tester'); // how long did it take to create the reactive model?
   return grid;
@@ -552,52 +653,52 @@ console.log(r);
 //   }
 // });
 
-function createEmployeesGrid() {
-  let employees = [
-    {id: '1e',  name: 'Schrute, Dwight',         email: 'testEmail11@test.com',       isActive: true, timeColumn: '7:30', autoCompleteColumn: undefined        , selectColumn: {name: 'Bermuda'}},
-    {id: '2e',  name: 'Scott, Michael',          email: 'testEmail22@test.com',       isActive: true, timeColumn: '7:30', autoCompleteColumn: {name: 'Bermuda'}, selectColumn: {name: 'Bermuda'}},
-    {id: '3e',  name: 'Lannister, Jaime',        email: 'testEmail33@test.com',       isActive: true, timeColumn: '7:30', autoCompleteColumn: {name: 'Bermuda'}, selectColumn: {name: 'Bermuda'}},
-    {id: '4e',  name: 'Dayne, Arthur',           email: 'testEmail44@test.com',       isActive: true, timeColumn: '7:30', autoCompleteColumn: {name: 'Bermuda'}, selectColumn: {name: 'Bermuda'}},
-    {id: '5e',  name: 'Snow, Jon',               email: 'testEmail55@test.com',       isActive: true, timeColumn: '7:30', autoCompleteColumn: {name: 'Bermuda'}, selectColumn: {name: 'Bermuda'}},
-    {id: '6e',  name: 'Stark, Ned',              email: 'testEmail66@test.com',       isActive: true, timeColumn: '7:30', autoCompleteColumn: {name: 'Bermuda'}, selectColumn: {name: 'Bermuda'}},
-    {id: '7e',  name: 'Stark, Arya',             email: 'testEmail77@test.com',       isActive: true, timeColumn: '7:30', autoCompleteColumn: {name: 'Bermuda'}, selectColumn: {name: 'Bermuda'}},
-    {id: '8e',  name: 'Biggus, Headus',          email: 'testEmail88@test.com',       isActive: true, timeColumn: '7:30', autoCompleteColumn: {name: 'Bermuda'}, selectColumn: {name: 'Bermuda'}},
-    {id: '9e',  name: 'Drumpf, Donald',          email: 'testEmail99@test.com',       isActive: true, timeColumn: '7:30', autoCompleteColumn: {name: 'Bermuda'}, selectColumn: {name: 'Bermuda'}},
-    {id: '7e',  name: 'Johnson, Ruin',           email: 'testEmail00@test.com',       isActive: true, timeColumn: '7:30', autoCompleteColumn: {name: 'Bermuda'}, selectColumn: {name: 'Bermuda'}},
-    {id: '8e',  name: 'Ren, Emo',                email: 'testEmail1234@test.com',     isActive: true, timeColumn: '7:30', autoCompleteColumn: {name: 'Bermuda'}, selectColumn: {name: 'Bermuda'}},
-    {id: '9e',  name: 'Swolo, Ben',              email: 'testEmail5678@test.com',     isActive: true, timeColumn: '7:30', autoCompleteColumn: {name: 'Bermuda'}, selectColumn: {name: 'Bermuda'}},
-    {id: '10e', name: 'Sue, Mary',               email: 'testEmail90210@test.com',    isActive: true, timeColumn: '7:30', autoCompleteColumn: {name: 'Bermuda'}, selectColumn: {name: 'Bermuda'}},
-    {id: '11e', name: 'Poppins, Leia',           email: 'testEmail6274309@test.com',  isActive: true, timeColumn: '7:30', autoCompleteColumn: {name: 'Bermuda'}, selectColumn: {name: 'Bermuda'}},
-    {id: '12e', name: 'Snoke, Nobody',           email: 'testEmail13371337@test.com', isActive: true, timeColumn: '7:30', autoCompleteColumn: {name: 'Bermuda'}, selectColumn: {name: 'Bermuda'}},
-    {id: '13e', name: 'Too tired to live, Luke', email: 'testEmail253545@test.com',   isActive: true, timeColumn: '7:30', autoCompleteColumn: {name: 'Bermuda'}, selectColumn: {name: 'Bermuda'}},
-    {id: '1e',  name: 'Schrute, Dwight',         email: 'testEmail11@test.com',       isActive: true, timeColumn: '7:30', autoCompleteColumn: undefined        , selectColumn: {name: 'Bermuda'}},
-    {id: '2e',  name: 'Scott, Michael',          email: 'testEmail22@test.com',       isActive: true, timeColumn: '7:30', autoCompleteColumn: {name: 'Bermuda'}, selectColumn: {name: 'Bermuda'}},
-    {id: '3e',  name: 'Lannister, Jaime',        email: 'testEmail33@test.com',       isActive: true, timeColumn: '7:30', autoCompleteColumn: {name: 'Bermuda'}, selectColumn: {name: 'Bermuda'}},
-    {id: '4e',  name: 'Dayne, Arthur',           email: 'testEmail44@test.com',       isActive: true, timeColumn: '7:30', autoCompleteColumn: {name: 'Bermuda'}, selectColumn: {name: 'Bermuda'}},
-    {id: '5e',  name: 'Snow, Jon',               email: 'testEmail55@test.com',       isActive: true, timeColumn: '7:30', autoCompleteColumn: {name: 'Bermuda'}, selectColumn: {name: 'Bermuda'}},
-    {id: '6e',  name: 'Stark, Ned',              email: 'testEmail66@test.com',       isActive: true, timeColumn: '7:30', autoCompleteColumn: {name: 'Bermuda'}, selectColumn: {name: 'Bermuda'}},
-    {id: '7e',  name: 'Stark, Arya',             email: 'testEmail77@test.com',       isActive: true, timeColumn: '7:30', autoCompleteColumn: {name: 'Bermuda'}, selectColumn: {name: 'Bermuda'}},
-    {id: '8e',  name: 'Biggus, Headus',          email: 'testEmail88@test.com',       isActive: true, timeColumn: '7:30', autoCompleteColumn: {name: 'Bermuda'}, selectColumn: {name: 'Bermuda'}},
-    {id: '9e',  name: 'Drumpf, Donald',          email: 'testEmail99@test.com',       isActive: true, timeColumn: '7:30', autoCompleteColumn: {name: 'Bermuda'}, selectColumn: {name: 'Bermuda'}},
-    {id: '7e',  name: 'Johnson, Ruin',           email: 'testEmail00@test.com',       isActive: true, timeColumn: '7:30', autoCompleteColumn: {name: 'Bermuda'}, selectColumn: {name: 'Bermuda'}},
-    {id: '8e',  name: 'Ren, Emo',                email: 'testEmail1234@test.com',     isActive: true, timeColumn: '7:30', autoCompleteColumn: {name: 'Bermuda'}, selectColumn: {name: 'Bermuda'}},
-    {id: '9e',  name: 'Swolo, Ben',              email: 'testEmail5678@test.com',     isActive: true, timeColumn: '7:30', autoCompleteColumn: {name: 'Bermuda'}, selectColumn: {name: 'Bermuda'}},
-    {id: '10e', name: 'Sue, Mary',               email: 'testEmail90210@test.com',    isActive: true, timeColumn: '7:30', autoCompleteColumn: {name: 'Bermuda'}, selectColumn: {name: 'Bermuda'}},
-    {id: '11e', name: 'Poppins, Leia',           email: 'testEmail6274309@test.com',  isActive: true, timeColumn: '7:30', autoCompleteColumn: {name: 'Bermuda'}, selectColumn: {name: 'Bermuda'}},
-    {id: '12e', name: 'Snoke, Nobody',           email: 'testEmail13371337@test.com', isActive: true, timeColumn: '7:30', autoCompleteColumn: {name: 'Bermuda'}, selectColumn: {name: 'Bermuda'}},
-    {id: '13e', name: 'Too tired to live, Luke', email: 'testEmail253545@test.com',   isActive: true, timeColumn: '7:30', autoCompleteColumn: {name: 'Bermuda'}, selectColumn: {name: 'Bermuda'}},
-  ];
+let employees = [
+  {id: '1e',  name: 'Schrute, Dwight',         email: 'testEmail11@test.com',       isActive: true, timeColumn: '7:30', autoCompleteColumn: undefined        , selectColumn: {name: 'Bermuda'}, numberColumn1: 1, numberColumn2: 2, numberColumn3: 3},
+  {id: '2e',  name: 'Scott, Michael',          email: 'testEmail22@test.com',       isActive: true, timeColumn: '7:30', autoCompleteColumn: {name: 'Bermuda'}, selectColumn: {name: 'Bermuda'}, numberColumn1: 1, numberColumn2: 2, numberColumn3: 3},
+  {id: '3e',  name: 'Lannister, Jaime',        email: 'testEmail33@test.com',       isActive: true, timeColumn: '7:30', autoCompleteColumn: {name: 'Bermuda'}, selectColumn: {name: 'Bermuda'}, numberColumn1: 1, numberColumn2: 2, numberColumn3: 3},
+  {id: '4e',  name: 'Dayne, Arthur',           email: 'testEmail44@test.com',       isActive: true, timeColumn: '7:30', autoCompleteColumn: {name: 'Bermuda'}, selectColumn: {name: 'Bermuda'}, numberColumn1: 1, numberColumn2: 2, numberColumn3: 3},
+  {id: '5e',  name: 'Snow, Jon',               email: 'testEmail55@test.com',       isActive: true, timeColumn: '7:30', autoCompleteColumn: {name: 'Bermuda'}, selectColumn: {name: 'Bermuda'}, numberColumn1: 1, numberColumn2: 2, numberColumn3: 3},
+  {id: '6e',  name: 'Stark, Ned',              email: 'testEmail66@test.com',       isActive: true, timeColumn: '7:30', autoCompleteColumn: {name: 'Bermuda'}, selectColumn: {name: 'Bermuda'}, numberColumn1: 1, numberColumn2: 2, numberColumn3: 3},
+  {id: '7e',  name: 'Stark, Arya',             email: 'testEmail77@test.com',       isActive: true, timeColumn: '7:30', autoCompleteColumn: {name: 'Bermuda'}, selectColumn: {name: 'Bermuda'}, numberColumn1: 1, numberColumn2: 2, numberColumn3: 3},
+  {id: '8e',  name: 'Biggus, Headus',          email: 'testEmail88@test.com',       isActive: true, timeColumn: '7:30', autoCompleteColumn: {name: 'Bermuda'}, selectColumn: {name: 'Bermuda'}, numberColumn1: 1, numberColumn2: 2, numberColumn3: 3},
+  {id: '9e',  name: 'Drumpf, Donald',          email: 'testEmail99@test.com',       isActive: true, timeColumn: '7:30', autoCompleteColumn: {name: 'Bermuda'}, selectColumn: {name: 'Bermuda'}, numberColumn1: 1, numberColumn2: 2, numberColumn3: 3},
+  {id: '7e',  name: 'Johnson, Ruin',           email: 'testEmail00@test.com',       isActive: true, timeColumn: '7:30', autoCompleteColumn: {name: 'Bermuda'}, selectColumn: {name: 'Bermuda'}, numberColumn1: 1, numberColumn2: 2, numberColumn3: 3},
+  {id: '8e',  name: 'Ren, Emo',                email: 'testEmail1234@test.com',     isActive: true, timeColumn: '7:30', autoCompleteColumn: {name: 'Bermuda'}, selectColumn: {name: 'Bermuda'}, numberColumn1: 1, numberColumn2: 2, numberColumn3: 3},
+  {id: '9e',  name: 'Swolo, Ben',              email: 'testEmail5678@test.com',     isActive: true, timeColumn: '7:30', autoCompleteColumn: {name: 'Bermuda'}, selectColumn: {name: 'Bermuda'}, numberColumn1: 1, numberColumn2: 2, numberColumn3: 3},
+  {id: '10e', name: 'Sue, Mary',               email: 'testEmail90210@test.com',    isActive: true, timeColumn: '7:30', autoCompleteColumn: {name: 'Bermuda'}, selectColumn: {name: 'Bermuda'}, numberColumn1: 1, numberColumn2: 2, numberColumn3: 3},
+  {id: '11e', name: 'Poppins, Leia',           email: 'testEmail6274309@test.com',  isActive: true, timeColumn: '7:30', autoCompleteColumn: {name: 'Bermuda'}, selectColumn: {name: 'Bermuda'}, numberColumn1: 1, numberColumn2: 2, numberColumn3: 3},
+  {id: '12e', name: 'Snoke, Nobody',           email: 'testEmail13371337@test.com', isActive: true, timeColumn: '7:30', autoCompleteColumn: {name: 'Bermuda'}, selectColumn: {name: 'Bermuda'}, numberColumn1: 1, numberColumn2: 2, numberColumn3: 3},
+  {id: '13e', name: 'Too tired to live, Luke', email: 'testEmail253545@test.com',   isActive: true, timeColumn: '7:30', autoCompleteColumn: {name: 'Bermuda'}, selectColumn: {name: 'Bermuda'}, numberColumn1: 1, numberColumn2: 2, numberColumn3: 3},
+  {id: '1e',  name: 'Schrute, Dwight',         email: 'testEmail11@test.com',       isActive: true, timeColumn: '7:30', autoCompleteColumn: undefined        , selectColumn: {name: 'Bermuda'}, numberColumn1: 1, numberColumn2: 2, numberColumn3: 3},
+  {id: '2e',  name: 'Scott, Michael',          email: 'testEmail22@test.com',       isActive: true, timeColumn: '7:30', autoCompleteColumn: {name: 'Bermuda'}, selectColumn: {name: 'Bermuda'}, numberColumn1: 1, numberColumn2: 2, numberColumn3: 3},
+  {id: '3e',  name: 'Lannister, Jaime',        email: 'testEmail33@test.com',       isActive: true, timeColumn: '7:30', autoCompleteColumn: {name: 'Bermuda'}, selectColumn: {name: 'Bermuda'}, numberColumn1: 1, numberColumn2: 2, numberColumn3: 3},
+  {id: '4e',  name: 'Dayne, Arthur',           email: 'testEmail44@test.com',       isActive: true, timeColumn: '7:30', autoCompleteColumn: {name: 'Bermuda'}, selectColumn: {name: 'Bermuda'}, numberColumn1: 1, numberColumn2: 2, numberColumn3: 3},
+  {id: '5e',  name: 'Snow, Jon',               email: 'testEmail55@test.com',       isActive: true, timeColumn: '7:30', autoCompleteColumn: {name: 'Bermuda'}, selectColumn: {name: 'Bermuda'}, numberColumn1: 1, numberColumn2: 2, numberColumn3: 3},
+  {id: '6e',  name: 'Stark, Ned',              email: 'testEmail66@test.com',       isActive: true, timeColumn: '7:30', autoCompleteColumn: {name: 'Bermuda'}, selectColumn: {name: 'Bermuda'}, numberColumn1: 1, numberColumn2: 2, numberColumn3: 3},
+  {id: '7e',  name: 'Stark, Arya',             email: 'testEmail77@test.com',       isActive: true, timeColumn: '7:30', autoCompleteColumn: {name: 'Bermuda'}, selectColumn: {name: 'Bermuda'}, numberColumn1: 1, numberColumn2: 2, numberColumn3: 3},
+  {id: '8e',  name: 'Biggus, Headus',          email: 'testEmail88@test.com',       isActive: true, timeColumn: '7:30', autoCompleteColumn: {name: 'Bermuda'}, selectColumn: {name: 'Bermuda'}, numberColumn1: 1, numberColumn2: 2, numberColumn3: 3},
+  {id: '9e',  name: 'Drumpf, Donald',          email: 'testEmail99@test.com',       isActive: true, timeColumn: '7:30', autoCompleteColumn: {name: 'Bermuda'}, selectColumn: {name: 'Bermuda'}, numberColumn1: 1, numberColumn2: 2, numberColumn3: 3},
+  {id: '7e',  name: 'Johnson, Ruin',           email: 'testEmail00@test.com',       isActive: true, timeColumn: '7:30', autoCompleteColumn: {name: 'Bermuda'}, selectColumn: {name: 'Bermuda'}, numberColumn1: 1, numberColumn2: 2, numberColumn3: 3},
+  {id: '8e',  name: 'Ren, Emo',                email: 'testEmail1234@test.com',     isActive: true, timeColumn: '7:30', autoCompleteColumn: {name: 'Bermuda'}, selectColumn: {name: 'Bermuda'}, numberColumn1: 1, numberColumn2: 2, numberColumn3: 3},
+  {id: '9e',  name: 'Swolo, Ben',              email: 'testEmail5678@test.com',     isActive: true, timeColumn: '7:30', autoCompleteColumn: {name: 'Bermuda'}, selectColumn: {name: 'Bermuda'}, numberColumn1: 1, numberColumn2: 2, numberColumn3: 3},
+  {id: '10e', name: 'Sue, Mary',               email: 'testEmail90210@test.com',    isActive: true, timeColumn: '7:30', autoCompleteColumn: {name: 'Bermuda'}, selectColumn: {name: 'Bermuda'}, numberColumn1: 1, numberColumn2: 2, numberColumn3: 3},
+  {id: '11e', name: 'Poppins, Leia',           email: 'testEmail6274309@test.com',  isActive: true, timeColumn: '7:30', autoCompleteColumn: {name: 'Bermuda'}, selectColumn: {name: 'Bermuda'}, numberColumn1: 1, numberColumn2: 2, numberColumn3: 3},
+  {id: '12e', name: 'Snoke, Nobody',           email: 'testEmail13371337@test.com', isActive: true, timeColumn: '7:30', autoCompleteColumn: {name: 'Bermuda'}, selectColumn: {name: 'Bermuda'}, numberColumn1: 1, numberColumn2: 2, numberColumn3: 3},
+  {id: '13e', name: 'Too tired to live, Luke', email: 'testEmail253545@test.com',   isActive: true, timeColumn: '7:30', autoCompleteColumn: {name: 'Bermuda'}, selectColumn: {name: 'Bermuda'}, numberColumn1: 1, numberColumn2: 2, numberColumn3: 3},
+];
 
+function createEmployeesGrid1() {
   let cols = [];
 
   // add header columns
-  cols.push(createColumn('name',     'Employee', 'text'));
-  cols.push(createColumn('email',    'Email',    'text'));
-  cols.push(createColumn('isActive', 'IsActive', 'checked'));
-  cols.push(createColumn('timeColumn', 'Time', {type: 'time'}));
-  cols.push(createColumn('selectColumn', 'Select', {type: 'select', options: countries}));
-  cols.push(createColumn('multiselectColumn', 'Multiselect', {type: 'multiselect', options: countries}));
-  cols.push(createColumn('autoCompleteColumn', 'Auto Complete', {type: 'auto-complete', options: countries}));
+  cols.push(createColumn('name',     'Employee', 'text', '120px'));
+  cols.push(createColumn('email',    'Email',    'text'   , '120px'));
+  cols.push(createColumn('isActive', 'IsActive', 'checked', '150px'));
+  cols.push(createColumn('timeColumn', 'Time', {type: 'time'}, '150px'));
+  cols.push(createColumn('selectColumn', 'Select', {type: 'select', options: countries}, '150px'));
+  cols.push(createColumn('multiselectColumn', 'Multiselect', {type: 'multiselect', options: countries}, '150px'));
+  cols.push(createColumn('autoCompleteColumn', 'Auto Complete', {type: 'auto-complete', options: countries}, '150px'));
 
   // add employee rows
   let rows: any[] = [];
@@ -617,30 +718,80 @@ function createEmployeesGrid() {
   }
 
   // create the grid model
-  let grid = createGrid(rows, cols);
+  let grid = createGrid(rows, cols, {multiSelect: true});
   // sort by employee names
-  grid.multiSelect = true;
   grid.addSort(grid.columnByPos(0)!, 'ascending');
 
   return grid;
 }
 
-let employeesGrid = createEmployeesGrid();
+function createEmployeesGrid2() {
+  let cols = [];
+
+  // add header columns
+  cols.push(createColumn('name',     'Employee', 'text', '120px'));
+  cols.push(createColumn('email',    'Email',    'text'   , '120px'));
+  cols.push(createColumn('isActive', 'IsActive', 'checked', '250px'));
+  cols.push(createColumn('timeColumn', 'Time', {type: 'time'}, '250px'));
+  cols.push(createColumn('selectColumn', 'Select', {type: 'select', options: countries}, '250px'));
+  cols.push(createColumn('multiselectColumn', 'Multiselect', {type: 'multiselect', options: countries}, '100px'));
+  cols.push(createColumn('autoCompleteColumn', 'Auto Complete', {type: 'auto-complete', options: countries}, '100px'));
+  cols.push(createColumn('numberColumn1', 'Number Column 1', {type: 'number', options: {}}, '250px'));
+  cols.push(createColumn('numberColumn2', 'Number Column 2', {type: 'number', options: {}}, '250px'));
+  cols.push(createColumn('numberColumn3', 'Number Column 3', {type: 'number', options: {}}, '250px'));
+
+  // add employee rows
+  let rows: any[] = [];
+  for (let row = 0; row < employees.length; row++) {
+    let r: any = {id: row};
+    for (let column = 0; column < cols.length; column++) {
+      let fieldName: string = cols[column].name;
+      if (fieldName === 'name') {
+        r[fieldName] = employees[row][fieldName]; // somehow make into a button that opens a dialog on click???
+      } else if (fieldName === 'multiselectColumn') {
+        r[fieldName] = [{id: '14', name: 'Austria'}];
+      } else {
+        r[fieldName] = employees[row][fieldName];
+      }
+    }
+    rows.push(r);
+  }
+
+  // create the grid model
+  let grid = createGrid(rows, cols, {multiSelect: true});
+  // sort by employee names
+  grid.addSort(grid.columnByPos(0)!, 'ascending');
+
+  return grid;
+}
+
+let employeesGrid1 = createEmployeesGrid1();
+let employeesGrid2 = createEmployeesGrid2();
+// observable dates don't work, but not sure if they ever need to.
+// let testDate = observable(new Date());
+let mode = observable({
+  gridMode: 'employees1',
+});
 
 const _Home = (props: any) => <Observe render={() => (
     <div>
       <div>
-        <Button color='primary' variant='contained' onClick={() => loginDialog.open()}>Load Dialog Test</Button>
+        {/* <span>{testDate.toDateString()}</span> */}
+        <Button color='primary' variant='contained' style={{marginRight: '15px'}} onClick={() => {loginDialog.form.clear(); loginDialog.open(); }}>Load Dialog Test</Button>
+        <Button color='primary' variant='contained' onClick={() => gridHotkeysDialogModel.open()}>Load Grid Hotkeys List</Button>
         <DialogLoginForm />
+        <GridHotkeysDialog />
         {/* <LoginFormView form={loginDialog.form} /> */}
         <DialogView dialog={confirmation}>
           <Typography style={{margin: 16}}>Are you sure you want to do this crazy shit?</Typography>
         </DialogView>
         <div style={{overflow: 'auto', padding: 10, display: 'flex', flexDirection: 'column', alignItems: 'center', justifyContent: 'center'}}>
-          <div>
+          <div style={{display: 'flex', alignItems: 'center', justifyContent: 'center'}}>
+            <Button style={{margin: '0px 15px 10px 0px'}} variant='contained' onClick={() => grid.selectCellByPos(0, 4)}>Select Cell</Button>
+            <Button style={{margin: '0px 15px 10px 0px'}} variant='contained' onClick={() => grid.selectCellsByRange(1, 4, 3, 5)}>Select Cells</Button>
             <Button style={{margin: '0px 15px 10px 0px'}} variant='contained' onClick={() => {
               grid.addRow({id: 'newRow-' + Math.random() * 2000, 'column2': 'RC 2-1', 'column3': 'RC 3-1', options: {allowMergeColumns: true}});
-              employeesGrid.addRow({id: 'newRow-' + Math.random() * 2000, name: 'New Employee', email: 'employeeEmail@test.com'});
+              employeesGrid1.addRow({id: 'newRow-' + Math.random() * 2000, name: 'New Employee', email: 'employeeEmail@test.com'});
             }}>
               Add Row
             </Button>
@@ -650,20 +801,28 @@ const _Home = (props: any) => <Observe render={() => (
             <Button style={{margin: '0px 15px 10px 0px'}} variant='contained' onClick={() => grid.dataRowsByPosition.forEach(row => row.clear(['numberColumn', 'dateColumn']))}>Clear Number And Date</Button>
             <Button style={{margin: '0px 15px 10px 0px'}} variant='contained' onClick={() => {
               grid.dataRowsByPosition.forEach(row => {
-                let id = row.cells['complexColumn'].value ? row.cells['complexColumn'].value.id : guid();
+                let id = row.cells['complexColumn'].value ? row.cells['complexColumn'].value.id : nanoid(10);
                 row.cells['complexColumn'].setValue(new ComplexCellData(id, 'Smithers', 57));
               });
             }}>
               Change Complex Cell Value
             </Button>
-            <Observe render={() => (<Button style={{margin: '0px 15px 10px 0px'}} variant='contained' disabled={!grid.changed} onClick={() => grid.revert()}>Enabled if has Changes. Reverts Changes</Button>)} />
-            <Observe render={() => (<Button style={{margin: '0px 0px 10px 0px'}} variant='contained' disabled={!grid.inError}>Enabled if has Errors</Button>)} />
           </div>
-          <Paper style={{width: '80%', padding: 20, display: 'flex', alignItems: 'center', justifyContent: 'center', height: 800}}>
-            <Observe render={() => (<Grid grid={grid} gridFontSizes={{header: '0.9rem', body: '0.9rem', groupRow: '0.8rem'}} />)} />
+          <div style={{display: 'flex', alignItems: 'center', justifyContent: 'center'}}>
+            <Observe render={() => (<Button style={{margin: '0px 15px 10px 0px'}} variant='contained' disabled={!grid.changed} onClick={() => grid.revert()}>Enabled if has Changes. Reverts Changes</Button>)} />
+            <Observe render={() => (<Button style={{margin: '0px 15px 10px 0px'}} variant='contained' disabled={!grid.inError}>Enabled if has Errors</Button>)} />
+            <Observe render={() => (<Button style={{margin: '0px 15px 10px 0px'}} variant='contained' onClick={() => console.log(grid.get())}> Save All</Button>)} />
+            <Observe render={() => (<Button style={{margin: '0px 0px 10px 0px'}} variant='contained' onClick={() => console.log(grid.getChanges())}> Save Changes</Button>)} />
+          </div>
+          <Paper style={{padding: 20, width: '80%', display: 'flex', flexDirection: 'column', alignItems: 'center', justifyContent: 'center', marginBottom: '20px'}}>
+            <Observe render={() => (<Grid grid={grid} gridFontSizes={{header: '0.9rem', body: '0.85rem', groupRow: '0.8rem'}} style={{height: '650px'}} />)} />
           </Paper>
-          <Paper style={{width: '80%', padding: 20, display: 'flex', alignItems: 'center', justifyContent: 'center', height: 400}}>
-            <Grid grid={employeesGrid} gridFontSizes={{header: '0.95rem', body: '0.9rem', groupRow: '0.8rem'}} />
+          <Paper style={{padding: 20, width: '80%', display: 'flex', flexDirection: 'column', alignItems: 'center', justifyContent: 'center'}}>
+            <div style={{display: 'flex', marginBottom: '10px'}}>
+              <Button onClick={() => mode.gridMode = 'employees1'} variant='outlined'>Grid 1</Button>
+              <Button onClick={() => mode.gridMode = 'employees2'} variant='outlined'>Grid 2</Button>
+            </div>
+            <Grid key={mode.gridMode} grid={mode.gridMode === 'employees1' ? employeesGrid1 : employeesGrid2} gridFontSizes={{header: '0.95rem', body: '0.9rem', groupRow: '0.8rem'}} style={{height: '400px'}} />
           </Paper>
         </div>
       </div>
@@ -675,8 +834,8 @@ const Home = _Home;
 
 class TestDialog extends Modal {
   form = Form.create({
-    date                 : Form.date().label('Date').validators(isRequired),
-    dollars              : Form.number().label('Dollars').validators(isRequired).placeholder('Show me the money').disableErrors().startAdornment(() => <div style={{display: 'flex', alignItems: 'center'}}><AddIcon /><span>$</span></div>),
+    date                 : Form.date().label('Date').validators(isRequired).autoFocus(),
+    dollars              : Form.number().label('Dollars').validators(isRequired).placeholder('Show me the money').startAdornment(() => <div style={{display: 'flex', alignItems: 'center'}}><AddIcon /><span>$</span></div>),
     shouldI              : Form.multiselect(searcher).label('Should I?').placeholder('choose!').startAdornment(() => <AccessibilityIcon />).validators(isRequired),
     isGreat              : Form.boolean().label('Is Great'),
     noLabel              : Form.boolean(),
@@ -693,7 +852,10 @@ class TestDialog extends Modal {
     difference           : Form.number().label('Time Difference').placeholder('enter difference').validators(isDifferenceOfOthers(['timeIn', 'timeOut'])),
     sum                  : Form.number().label('Time Sum').placeholder('enter sum').validators(isSumOfOthers(['timeIn', 'timeOut'])),
     avatar               : Form.avatar({width: 1000, height: 1000, avatarDiameter: 150, cropRadius: 75}).label('Add Photo (Optional)'),
-  }, {email: 'splace@worksight.net', isGreat: true}, {variant: 'outlined', initialValuesValidationMode: 'withValues'});
+    multi                : Form.multistring().validators(isRequired).placeholder('enter some multiline text').startAdornment(() => <AccessibilityIcon />).endAdornment(() => <AddIcon />),
+    switch1              : Form.switch().label('Switch 1'),
+    switch2              : Form.switch(),
+  }, {email: 'splace@worksight.net', isGreat: true, switch2: true}, {variant: 'outlined', initialValuesValidationMode: 'withValues'});
 
   constructor() {
     super('Test Form');
@@ -714,6 +876,7 @@ class TestDialog extends Modal {
 const testDialog = new TestDialog();
 const TestFormView = ({form}: {form: typeof testDialog.form}) => (
   <Observe render={() => (
+    <div style={{fontSize: '16px'}}>
     <FormView form={form} onSubmit={testDialog.actionFn('login')}>
       <div className='content'>
         <form.field.date.Editor className='span4' />
@@ -735,12 +898,17 @@ const TestFormView = ({form}: {form: typeof testDialog.form}) => (
       <div className='content'>
         <form.field.timeOut.Editor className='span4' />
         <form.field.timeIn.Editor className='span4' />
-        <form.field.country.Editor className='span4' />
         <form.field.isGreat.Editor className='span4' />
       </div>
       <div className='content'>
         <form.field.difference.Editor className='span1' />
         <form.field.sum.Editor className='span1' />
+        <form.field.multi.Editor className='span1' />
+      </div>
+      <div className='content'>
+        <form.field.switch1.Editor className='span1' />
+        <form.field.switch2.Editor className='span1' />
+        <form.field.country.Editor className='span4' />
       </div>
       <div className='content'>
       <form.field.avatar.Editor />
@@ -750,6 +918,7 @@ const TestFormView = ({form}: {form: typeof testDialog.form}) => (
         <button style={{height: '30px'}}  value='Cancel' onClick={testDialog.actionFn('cancel')}>Cancel</button>
       </div>
     </FormView>
+    </div>
   )} />
 );
 

@@ -28,6 +28,7 @@ html {
   flex-direction: column;
   overflow: hidden;
   box-shadow: none;
+  width: 100%;
   height: 100%;
   font-family: 'roboto';
   outline: 0;
@@ -203,10 +204,6 @@ html {
     flex: 1;
     height: 100%;
     overflow: auto;
-  }
-
-  td {
-    vertical-align: middle;
   }
 
   table {

@@ -49,7 +49,7 @@ const styles = (theme: Theme) => ({
     flex: '1',
     height: '100%',
     alignItems: 'center',
-    padding: '0px 4px',
+    padding: '4px',
     margin: 0,
     display: 'flex',
     width: '100%',
@@ -61,16 +61,18 @@ const styles = (theme: Theme) => ({
     // marginLeft: '-8px',
   },
   tooltip: {
+    fontSize: `calc(${theme.fontSizes.body} * 0.8)`,
+    padding: `calc(${theme.fontSizes.body} * 0.25) calc(${theme.fontSizes.body} * 0.5)`,
   },
   errorContainer: {
     display: 'flex',
     height: '100%',
-    marginLeft: '5px',
+    marginLeft: '0.3125em',
     alignItems: 'center',
     justifyContent: 'center',
   },
   errorIcon: {
-    fontSize: '18px',
+    fontSize: '1.125em',
   },
   info: {
     color: '#1A51A8',
@@ -93,9 +95,6 @@ const styles = (theme: Theme) => ({
   },
   editorSelectInputRoot: {
     alignItems: 'stretch',
-  },
-  editorPopupMenuItem: {
-    fontSize: theme.fontSizes.body,
   },
   editorInputRoot: {
     flex: '1',
@@ -125,7 +124,7 @@ class Cell extends React.PureComponent<CellProps, {}> {
   column: IColumn;
   grid: IGrid;
   keyForEdit?: string;
-  element: HTMLTableCellElement;
+  element?: HTMLTableDataCellElement;
 
   constructor(props: CellProps) {
     super(props);
@@ -136,35 +135,10 @@ class Cell extends React.PureComponent<CellProps, {}> {
     this.keyForEdit = undefined;
   }
 
-  setFocus(set: boolean) {
-    if (!set) {
-      return;
-    }
-
-    if (this.cell.editing) {
-      return;
-    }
-
-    if (!this.element) {
-      return;
-    }
-
-    if (!this.cell.selected) {
-      return;
-    }
-
-    if (!this.element || (this.element === document.activeElement)) {
-      return;
-    }
-
-    // if (item[0].scrollIntoView) {
-    //   item[0].scrollIntoView(false);
-    // }
-
-    // setTimeout(function() {
-    //   this.element.focus();
-    // }, 0);
+  setFocus() {
+    if (!this.cell.editing && this.cell.selected && this.element && this.element !== (document.activeElement as HTMLTableDataCellElement)) {
     this.element.focus();
+  }
   }
 
   handleDoubleClick = (evt: React.MouseEvent<any>) => {
@@ -178,16 +152,40 @@ class Cell extends React.PureComponent<CellProps, {}> {
 
   handleKeyDown = (evt: React.KeyboardEvent<any>) => {
     if (evt.keyCode === 67) { evt.key = 'C'; }
+    if (evt.keyCode === 68) { evt.key = 'D'; }
+    if (evt.keyCode === 82) { evt.key = 'R'; }
+    if (evt.keyCode === 85) { evt.key = 'U'; }
     if (evt.keyCode === 86) { evt.key = 'V'; }
+    if (evt.keyCode === 88) { evt.key = 'X'; }
     switch (evt.key) {
+      case 'R':
+        if (this.cell.editing || !evt.ctrlKey) {
+          return;
+        }
+        this.grid.revertSelectedCells();
+        break;
+      case 'U':
+        if (this.cell.editing || !evt.ctrlKey) {
+          return;
+        }
+        this.grid.revertSelectedRows();
+        break;
       case 'C':
-        if (!evt.ctrlKey) {
+        if (this.cell.editing || !evt.ctrlKey) {
           return;
         }
         this.grid.copy();
         break;
+      case 'X':
+        if (this.cell.editing || !evt.ctrlKey) {
+          return;
+        }
+        this.grid.copy();
+        this.grid.selectedCells.forEach(cell => cell.clear());
+        this.grid.updateCellSelectionProperties(this.grid.selectedCells);
+        break;
       case 'V':
-        if (!evt.ctrlKey) {
+        if (this.cell.editing || !evt.ctrlKey) {
           return;
         }
         this.grid.paste();
@@ -214,8 +212,8 @@ class Cell extends React.PureComponent<CellProps, {}> {
         this.grid.insertRowAtSelection();
         break;
 
-      case 'd':
         if (this.cell.editing || !evt.ctrlKey) {
+      case 'D':
           return;
         }
         // duplcate row(s)
@@ -409,7 +407,7 @@ class Cell extends React.PureComponent<CellProps, {}> {
     }
 
     this.grid.selectCellsTo(this.cell, evt.ctrlKey);
-    this.setFocus(true);
+    this.setFocus();
   }
 
   handleClick = (evt: React.MouseEvent<any>) => {
@@ -435,7 +433,7 @@ class Cell extends React.PureComponent<CellProps, {}> {
     }
 
     evt.stopPropagation();
-    this.setFocus(true);
+    this.setFocus();
   }
 
   handleFocus = (evt: React.FocusEvent<any>) => {
@@ -525,7 +523,7 @@ class Cell extends React.PureComponent<CellProps, {}> {
       return;
     }
     this.grid.editCell(undefined);
-    if ((this.column.type === 'auto-complete' || this.column.type === 'select' || this.column.type === 'checked') && this.element) setTimeout(() => this.element.focus(), 0);
+    if ((this.column.type === 'auto-complete' || this.column.type === 'select' || this.column.type === 'checked') && this.element) setTimeout(() => this.element!.focus(), 0);
   }
 
   handleTooltip = (evt: React.MouseEvent<HTMLSpanElement>) => {
@@ -555,7 +553,7 @@ class Cell extends React.PureComponent<CellProps, {}> {
       let editorClasses = undefined;
       let additionalProps = {};
       if (cellType === 'select' || cellType === 'multiselect') {
-        editorClasses = {inputRoot: this.props.classes.editorSelectInputRoot, select: this.props.classes.editorSelectSelect, selectMenuItem: this.props.classes.editorPopupMenuItem};
+        editorClasses = {inputRoot: this.props.classes.editorSelectInputRoot, select: this.props.classes.editorSelectSelect};
       } else if (cellType === 'checked') {
         editorClasses = {checkboxRoot: this.props.classes.editorCheckboxRoot};
       } else if (cellType === 'text' || cellType === 'date' || cellType === 'email' || cellType === 'password' || cellType === 'time' || cellType === 'number' || cellType === 'phone' || cellType === 'auto-complete') {
@@ -563,7 +561,7 @@ class Cell extends React.PureComponent<CellProps, {}> {
       }
 
       if (cellType === 'auto-complete') {
-        Object.assign(editorClasses, {menuItem: this.props.classes.editorPopupMenuItem, container: this.props.classes.editorAutoCompleteContainer});
+        Object.assign(editorClasses, {container: this.props.classes.editorAutoCompleteContainer});
       }
 
       return (
@@ -580,7 +578,14 @@ class Cell extends React.PureComponent<CellProps, {}> {
 
         return (
           < >
-            {(cell.renderer && cell.renderer(cell)) || <span onMouseEnter={this.handleTooltip} style={{width: '100%', textAlign: cell.align}}>{value}</span>}
+            {cell.renderer
+              ? <div onMouseEnter={this.handleTooltip} style={{width: '100%', textAlign: cell.align}}>
+                  {cell.renderer(cell)}
+            </div>
+              : <span onMouseEnter={this.handleTooltip} style={{width: '100%', textAlign: cell.align}}>
+                  {value}
+                </span>
+            }
             {hasError && this.renderErrorIcon()}
           </>
         );
@@ -650,6 +655,7 @@ class Cell extends React.PureComponent<CellProps, {}> {
 
       return (
         <td tabIndex={0}
+          style={{verticalAlign: cell.verticalAlign}}
           colSpan={colSpan}
           rowSpan={rowSpan}
           onFocus={this.handleFocus}

@@ -31,6 +31,9 @@ export default class BlurInputHOC extends React.Component<IBlurProps, IBlurState
       (nextProps.label !== this.props.label) ||
       (nextProps.placeholder !== this.props.placeholder) ||
       (nextProps.align !== this.props.align) ||
+      (nextProps.multiline !== this.props.multiline) ||
+      (nextProps.rows !== this.props.rows) ||
+      (nextProps.rowsMax !== this.props.rowsMax) ||
       (nextProps.variant !== this.props.variant) ||
       (nextProps.disableErrors !== this.props.disableErrors) ||
       (nextProps.startAdornment !== this.props.startAdornment) ||

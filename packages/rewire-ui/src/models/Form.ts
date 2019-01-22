@@ -24,7 +24,7 @@ import {and, isEmail, isRegEx} from './Validator';
 import {defaultPhoneFormat} from '../components/PhoneField';
 import { createElement } from 'react';
 
-export type IFieldTypes = 'string' | 'static' | 'reference' | 'select' | 'multiselect' | 'number' | 'boolean' | 'date' | 'time' | 'avatar' | 'password' | 'email' | 'phone';
+export type IFieldTypes = 'string' | 'multistring' | 'static' | 'reference' | 'select' | 'multiselect' | 'number' | 'boolean' | 'switch' | 'date' | 'time' | 'avatar' | 'password' | 'email' | 'phone';
 
 export interface IFieldDefn {
   label(text: string): IFieldDefn;
@@ -210,7 +210,7 @@ export default class Form {
 
     this._value = value;
     this.fields.forEach(field => {
-      field.value = field.type === 'boolean' ? value[field.name] || false : value[field.name];
+      field.value = field.type === 'boolean' || field.type === 'switch' ? value[field.name] || false : value[field.name];
     });
 
     if (this.initialValuesValidationMode === 'all') {
@@ -263,11 +263,13 @@ export default class Form {
 
   private static editorDefaults: {[K in IFieldTypes]: EditorType} = {
     'string'     : 'text',
+    'multistring': 'multitext',
     'static'     : 'static',
     'select'     : 'select',
     'multiselect': 'multiselect',
     'reference'  : 'auto-complete',
     'boolean'    : 'checked',
+    'switch'     : 'switch',
     'date'       : 'date',
     'time'       : 'time',
     'password'   : 'password',
@@ -412,7 +414,7 @@ export default class Form {
     return true;
   }
 
-  private validateField(field: IEditorField): ValidationResult {
+  public validateField(field: IEditorField): ValidationResult {
     let fieldNamesToValidate = this.fields.filter(f => !f.disableErrors && f.linkedFieldNames.includes(field.name)).map(f => f.name);
     if (!field.disableErrors) {
       fieldNamesToValidate.push(field.name);
@@ -429,7 +431,7 @@ export default class Form {
     return result;
   }
 
-  private validateFields(fields: IEditorField[]): ValidationResult {
+  public validateFields(fields: IEditorField[]): ValidationResult {
     let fieldNamesToValidate = this.fields.filter(f => !f.disableErrors && fields.findIndex(field => f.linkedFieldNames.includes(field.name)) >= 0).map(f => f.name);
     fields.forEach((field: IEditorField) => {
       if (!field.disableErrors) {
@@ -449,7 +451,7 @@ export default class Form {
     return result;
   }
 
-  private validateForm(produceErrors: boolean = true): ValidationResult {
+  public validateForm(produceErrors: boolean = true): ValidationResult {
     let result = this.validator.validateFields(this.fields.filter(field => !field.disableErrors).map(field => field.name), this.toObjectLabelsAndValues());
     if (produceErrors) {
       this.fields.forEach(field => {
@@ -481,6 +483,10 @@ export default class Form {
     return new BaseField('string', editProps);
   }
 
+  static multistring(editProps?: any): IFieldDefn {
+    return new BaseField('multistring', editProps);
+  }
+
   static static(): IFieldDefn {
     return new BaseField('static');
   }
@@ -491,6 +497,10 @@ export default class Form {
 
   static boolean(editProps?: any): IFieldDefn {
     return new BaseField('boolean', editProps);
+  }
+
+  static switch(editProps?: any): IFieldDefn {
+    return new BaseField('switch', editProps);
   }
 
   static date(editProps?: any): IFieldDefn {

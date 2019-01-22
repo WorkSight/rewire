@@ -118,11 +118,31 @@ const styles = (theme: Theme) => ({
     lineHeight: 'inherit',
     fontSize: 'inherit',
   },
+  inputInput: {
+    paddingTop: '0.375em',
+    paddingBottom: '0.4375em',
+  },
+  inputOutlinedInput: {
+    paddingTop: '0.75em',
+    paddingBottom: '0.75em',
+  },
+  inputLabelRoot: {
+    fontSize: 'inherit',
+  },
+  inputLabelRootShrink: {
+    transform: 'translate(14px, -0.375em) scale(0.75) !important',
+  },
+  inputFormControlWithLabel: {
+    marginTop: '1em !important',
+  },
   formControlRoot: {
   },
   inputAdornmentRoot: {
     height: 'auto',
-    paddingBottom: '2px',
+    paddingBottom: '0.125em',
+    '& svg': {
+      fontSize: '1.5em',
+    },
   },
   nativeInput: {
     '&::placeholder, &-webkit-input-::placeholder': {
@@ -132,6 +152,7 @@ const styles = (theme: Theme) => ({
   },
   helperTextRoot: {
     marginTop: '6px',
+    fontSize: '0.8em',
   },
   helperTextContained: {
     marginLeft: '14px',
@@ -231,8 +252,10 @@ class TimeInputField extends React.Component<TimeFieldProps, ITimeState> {
       return null;
     }
 
-    const startAdornment = this.props.startAdornment ? <InputAdornment position='start' classes={{root: classes.inputAdornmentRoot}}>{this.props.startAdornment}</InputAdornment> : undefined;
-    const endAdornment   = this.props.endAdornment ? <InputAdornment position='end' classes={{root: classes.inputAdornmentRoot}}>{this.props.endAdornment}</InputAdornment> : undefined;
+    const startAdornment            = this.props.startAdornment ? <InputAdornment position='start' classes={{root: classes.inputAdornmentRoot}}>{this.props.startAdornment}</InputAdornment> : undefined;
+    const endAdornment              = this.props.endAdornment ? <InputAdornment position='end' classes={{root: classes.inputAdornmentRoot}}>{this.props.endAdornment}</InputAdornment> : undefined;
+    const inputClassName            = variant === 'outlined' ? classes.inputOutlinedInput : classes.inputInput;
+    const inputFormControlClassName = variant === 'standard' && this.props.label ? classes.inputFormControlWithLabel : undefined;
 
     return (
       <TextField
@@ -249,8 +272,8 @@ class TimeInputField extends React.Component<TimeFieldProps, ITimeState> {
         placeholder={placeholder}
         variant={variant}
         inputProps={{autoFocus: autoFocus, className: classes.nativeInput, style: {textAlign: align || 'left'}}}
-        InputProps={{startAdornment: startAdornment, endAdornment: endAdornment, classes: {root: classes.inputRoot}}}
-        InputLabelProps={{shrink: true}}
+        InputProps={{startAdornment: startAdornment, endAdornment: endAdornment, classes: {root: classes.inputRoot, input: inputClassName, formControl: inputFormControlClassName}}}
+        InputLabelProps={{shrink: true, classes: {root: classes.inputLabelRoot, outlined: classes.inputLabelRootShrink}}}
         FormHelperTextProps={{classes: {root: classes.helperTextRoot, contained: classes.helperTextContained}}}
       />);
   }

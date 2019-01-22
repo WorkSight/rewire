@@ -31,7 +31,7 @@ export interface IField {
   endAdornment?(): JSX.Element;
 }
 
-export type EditorType = 'text' | 'static' | 'auto-complete' | 'select' | 'multiselect' | 'date' | 'time' | 'number' | 'checked' | 'switch' | 'password' | 'email' | 'phone' | 'avatar' | 'none';
+export type EditorType = 'text' | 'multitext' | 'static' | 'auto-complete' | 'select' | 'multiselect' | 'date' | 'time' | 'number' | 'checked' | 'switch' | 'password' | 'email' | 'phone' | 'avatar' | 'none';
 
 export type TextAlignment = 'left' | 'right' | 'center';
 
@@ -186,19 +186,47 @@ export default function editor(type: EditorType, propsForEdit?: any): React.SFC<
         )} />
       );
 
+    case 'multitext':
+      return ({field, className, classes, onValueChange, endOfTextOnFocus, selectOnFocus, cursorPositionOnFocus}: TextEditorProps) => (
+        <Observe render={() => (
+          <TextField
+            placeholder={field.placeholder}
+            label={field.label}
+            value={field.value}
+            autoFocus={field.autoFocus}
+            endOfTextOnFocus={endOfTextOnFocus}
+            selectOnFocus={selectOnFocus}
+            cursorPositionOnFocus={cursorPositionOnFocus}
+            onValueChange={onValueChange}
+            error={field.error}
+            disabled={field.disabled && field.disabled(field)}
+            visible={field.visible}
+            disableErrors={field.disableErrors}
+            align={field.align || 'left'}
+            variant={field.variant}
+            multiline={true}
+            className={className}
+            classes={classes}
+            startAdornment={field.startAdornment && field.startAdornment()}
+            endAdornment={field.endAdornment && field.endAdornment()}
+            {...propsForEdit}
+          />
+        )} />
+      );
+
     case 'phone':
       return ({field, className, classes, onValueChange, endOfTextOnFocus, selectOnFocus, cursorPositionOnFocus}: TextEditorProps) => (
         <Observe render={() => (
           <PhoneField
             label={field.label}
             value={field.value}
-            onValueChange={onValueChange}
+            autoFocus={field.autoFocus}
             endOfTextOnFocus={endOfTextOnFocus}
             selectOnFocus={selectOnFocus}
             cursorPositionOnFocus={cursorPositionOnFocus}
+            onValueChange={onValueChange}
             error={field.error}
             disabled={field.disabled && field.disabled(field)}
-            autoFocus={field.autoFocus}
             visible={field.visible}
             disableErrors={field.disableErrors}
             align={field.align || 'left'}

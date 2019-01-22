@@ -13,11 +13,31 @@ const styles = (theme: Theme) => ({
     lineHeight: 'inherit',
     fontSize: 'inherit',
   },
+  inputInput: {
+    paddingTop: '0.375em',
+    paddingBottom: '0.4375em',
+  },
+  inputOutlinedInput: {
+    paddingTop: '0.75em',
+    paddingBottom: '0.75em',
+  },
+  inputLabelRoot: {
+    fontSize: 'inherit',
+  },
+  inputLabelRootShrink: {
+    transform: 'translate(14px, -0.375em) scale(0.75) !important',
+  },
+  inputFormControlWithLabel: {
+    marginTop: '1em !important',
+  },
   formControlRoot: {
   },
   inputAdornmentRoot: {
     height: 'auto',
-    paddingBottom: '2px',
+    paddingBottom: '0.125em',
+    '& svg': {
+      fontSize: '1.5em',
+    },
   },
   nativeInput: {
     '&::placeholder, &-webkit-input-::placeholder': {
@@ -27,6 +47,7 @@ const styles = (theme: Theme) => ({
   },
   helperTextRoot: {
     marginTop: '6px',
+    fontSize: '0.8em',
   },
   helperTextContained: {
     marginLeft: '14px',
@@ -112,9 +133,11 @@ class NumberTextField extends React.Component<NumberFieldProps> {
     if (visible === false) {
       return null;
     }
-    let value            = this.parse(this.props.value);
-    const startAdornment = this.props.startAdornment ? <InputAdornment position='start' classes={{root: this.props.classes.inputAdornmentRoot}}>{this.props.startAdornment}</InputAdornment> : undefined;
-    const endAdornment   = this.props.endAdornment ? <InputAdornment position='end' classes={{root: this.props.classes.inputAdornmentRoot}}>{this.props.endAdornment}</InputAdornment> : undefined;
+    let value                       = this.parse(this.props.value);
+    const startAdornment            = this.props.startAdornment ? <InputAdornment position='start' classes={{root: this.props.classes.inputAdornmentRoot}}>{this.props.startAdornment}</InputAdornment> : undefined;
+    const endAdornment              = this.props.endAdornment ? <InputAdornment position='end' classes={{root: this.props.classes.inputAdornmentRoot}}>{this.props.endAdornment}</InputAdornment> : undefined;
+    const inputClassName            = this.props.variant === 'outlined' ? this.props.classes.inputOutlinedInput : this.props.classes.inputInput;
+    const inputFormControlClassName = this.props.variant === 'standard' && this.props.label ? this.props.classes.inputFormControlWithLabel : undefined;
 
     if (updateOnChange) {
       return (
@@ -135,8 +158,8 @@ class NumberTextField extends React.Component<NumberFieldProps> {
           format={this.props.format}
           mask={this.props.mask}
           inputProps={{className: this.props.classes.nativeInput, style: {textAlign: this.props.align || 'left'}}}
-          InputProps={{startAdornment: startAdornment, endAdornment: endAdornment, classes: {root: this.props.classes.inputRoot}}}
-          InputLabelProps={{shrink: true}}
+          InputProps={{startAdornment: startAdornment, endAdornment: endAdornment, classes: {root: this.props.classes.inputRoot, input: inputClassName, formControl: inputFormControlClassName}}}
+          InputLabelProps={{shrink: true, classes: {root: this.props.classes.inputLabelRoot, outlined: this.props.classes.inputLabelRootShrink}}}
           FormHelperTextProps={{classes: {root: this.props.classes.helperTextRoot, contained: this.props.classes.helperTextContained}}}
           customInput={TextField}
           placeholder={this.props.placeholder}
@@ -168,8 +191,8 @@ class NumberTextField extends React.Component<NumberFieldProps> {
             format={props.format}
             mask={props.mask}
             inputProps={{className: props.classes.nativeInput, style: {textAlign: props.align || 'left'}}}
-            InputProps={{startAdornment: startAdornment, endAdornment: endAdornment, classes: {root: props.classes.inputRoot}}}
-            InputLabelProps={{shrink: true}}
+            InputProps={{startAdornment: startAdornment, endAdornment: endAdornment, classes: {root: props.classes.inputRoot, input: inputClassName, formControl: inputFormControlClassName}}}
+            InputLabelProps={{shrink: true, classes: {root: props.classes.inputLabelRoot, outlined: props.classes.inputLabelRootShrink}}}
             FormHelperTextProps={{classes: {root: props.classes.helperTextRoot, contained: props.classes.helperTextContained}}}
             customInput={TextField}
             placeholder={props.placeholder}

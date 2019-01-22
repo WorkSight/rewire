@@ -38,9 +38,29 @@ const styles = (theme: Theme) => ({
     lineHeight: 'inherit',
     fontSize: 'inherit',
   },
+  inputInput: {
+    paddingTop: '0.375em',
+    paddingBottom: '0.4375em',
+  },
+  inputOutlinedInput: {
+    paddingTop: '0.75em',
+    paddingBottom: '0.75em',
+  },
+  inputLabelRoot: {
+    fontSize: 'inherit',
+  },
+  inputLabelRootShrink: {
+    transform: 'translate(14px, -0.375em) scale(0.75) !important',
+  },
+  inputFormControlWithLabel: {
+    marginTop: '1em !important',
+  },
   inputAdornmentRoot: {
     height: 'auto',
-    paddingBottom: '2px',
+    paddingBottom: '0.125em',
+    '& svg': {
+      fontSize: '1.5em',
+    },
   },
   nativeInput: {
     '&::placeholder, &-webkit-input-::placeholder': {
@@ -57,6 +77,7 @@ const styles = (theme: Theme) => ({
   },
   helperTextRoot: {
     marginTop: '6px',
+    fontSize: '0.8em',
   },
   helperTextContained: {
     marginLeft: '14px',
@@ -99,6 +120,8 @@ class AutoComplete<T> extends React.Component<AutoCompleteProps<T>, any> {
   renderInput = (classes: Record<IStyleClasses, string>, error: string | undefined, inputProps: any, InputProps: any, ref: (node: any) => any) => {
     const { label, disabled, autoFocus, value, ...other }                 = inputProps;
     const { startAdornment, endAdornment, align, variant, disableErrors } = InputProps;
+    const inputClassName            = variant === 'outlined' ? classes.inputOutlinedInput : classes.inputInput;
+    const inputFormControlClassName = variant === 'standard' && this.props.label ? classes.inputFormControlWithLabel : undefined;
 
     return (
       <TextField
@@ -114,8 +137,8 @@ class AutoComplete<T> extends React.Component<AutoCompleteProps<T>, any> {
         autoFocus={autoFocus}
         onFocus={this.handleFocus}
         inputProps={{className: classes.nativeInput, style: {textAlign: align || 'left'}}}
-        InputProps={{startAdornment: startAdornment, endAdornment: endAdornment, classes: {root: classes.inputRoot}}}
-        InputLabelProps={{shrink: true}}
+        InputProps={{startAdornment: startAdornment, endAdornment: endAdornment, classes: {root: classes.inputRoot, input: inputClassName, formControl: inputFormControlClassName}}}
+        InputLabelProps={{shrink: true, classes: {root: classes.inputLabelRoot, outlined: classes.inputLabelRootShrink}}}
         FormHelperTextProps={{classes: {root: classes.helperTextRoot, contained: classes.helperTextContained}}}
         {...other}
       />
@@ -158,13 +181,13 @@ class AutoComplete<T> extends React.Component<AutoCompleteProps<T>, any> {
   }
 
   renderSuggestion = (params: any) => {
-    const { suggestion, index, itemProps, theme, highlightedIndex, inputValue, classes } = params;
+    const { suggestion, index, itemProps, theme, highlightedIndex, inputValue, classes, fontSize } = params;
     const isHighlighted = highlightedIndex === index;
     const name          = this.map(suggestion);
 
     if (this.props.renderSuggestion) {
       return (
-        <MenuItem selected={isHighlighted} component='div' key={index} className={classes.menuItem}>
+        <MenuItem selected={isHighlighted} component='div' key={index} className={classes.menuItem} style={{fontSize: fontSize}}>
           {this.props.renderSuggestion(suggestion, {theme, isHighlighted, inputValue})}
         </MenuItem>
       );
@@ -179,6 +202,7 @@ class AutoComplete<T> extends React.Component<AutoCompleteProps<T>, any> {
         selected={isHighlighted}
         component='div'
         className={classes.menuItem}
+        style={{fontSize: fontSize}}
       >{parts.map((part, index) => {
           return part.highlight ? (
             <span key={String(index)} style={{ fontWeight: 700 }} dangerouslySetInnerHTML={{__html: part.text}} />
@@ -373,6 +397,7 @@ class AutoComplete<T> extends React.Component<AutoCompleteProps<T>, any> {
                     itemProps: getItemProps({ item: suggestion }),
                     highlightedIndex,
                     selectedItem,
+                    fontSize: window.getComputedStyle(this.suggestionsContainerNode).getPropertyValue('font-size') // needed to make the menu items font-size the same as the shown value,
                   }),
                 ),
               })}

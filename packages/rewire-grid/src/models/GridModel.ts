@@ -14,6 +14,9 @@ import {
   IDisposable,
   findRowById,
   cloneValue,
+  IGridOptions,
+  VerticalAlignment,
+  ICellDataMap,
 }                              from './GridTypes';
 import createRow, {RowModel}   from './RowModel';
 import {ColumnModel}           from './ColumnModel';
@@ -35,6 +38,8 @@ class GridModel implements IGrid, IDisposable {
   _sort                     : IColumn[];
   id                        : number;
   enabled                   : boolean;
+  readOnly                  : boolean;
+  verticalAlign             : VerticalAlignment;
   addedRows                 : IRowIteratorResult[];
   removedRows               : IRowIteratorResult[];
   rows                      : IRow[];
@@ -47,8 +52,6 @@ class GridModel implements IGrid, IDisposable {
   selectedCells             : ICell[];
   fixedWidth                : string;
   loading                   : boolean;
-  width                     : string;
-  height                    : string;
   isDraggable               : boolean;
   clipboard                 : ICell[];
   multiSelect               : boolean;
@@ -59,10 +62,9 @@ class GridModel implements IGrid, IDisposable {
 
   private _dispose: () => void;
 
-  constructor() {
+  constructor(options?: IGridOptions) {
     this._sort                      = [];
     this.id                         = id++;
-    this.enabled                    = true;
     this.addedRows                  = [];
     this.removedRows                = [];
     this.rows                       = [];
@@ -75,11 +77,12 @@ class GridModel implements IGrid, IDisposable {
     this.selectedCells              = [];
     this.fixedWidth                 = '1px';
     this.loading                    = false;
-    this.width                      = '800px';
-    this.height                     = '1600px';
-    this.isDraggable                = false;
+    this.enabled                    = options && options.enabled !== undefined ? options.enabled : true;
+    this.readOnly                   = options && options.readOnly !== undefined ? options.readOnly : false;
+    this.verticalAlign              = options && options.verticalAlign || 'middle';
+    this.isDraggable                = options && options.isDraggable !== undefined ? options.isDraggable : false;
+    this.multiSelect                = options && options.multiSelect !== undefined ? options.multiSelect : false;
     this.clipboard                  = [];
-    this.multiSelect                = false;
     this.isMouseDown                = false;
     this.startCell                  = undefined;
     this.changed                    = false;
@@ -137,6 +140,23 @@ class GridModel implements IGrid, IDisposable {
     return data;
   }
 
+  getChanges(): any[] {
+    const data: any[] = [];
+    for (const row of allDataRows(this.rows)) {
+      let rowData: any = {};
+      for (const column of this.columns) {
+        let cell = row.row.cells[column.name];
+        if (cell.hasChanges()) {
+          rowData[column.name] = cell.value;
+        }
+      }
+      if (Object.keys(rowData).length > 0) {
+        data.push(rowData);
+      }
+    }
+    return data;
+  }
+
   set(data: any[]): void {
     this.disposeRows();
     freeze(() => {
@@ -145,6 +165,8 @@ class GridModel implements IGrid, IDisposable {
       this.rows.length                       = 0;
       this.dataRowsByPosition.length         = 0;
       this.originalDataRowsByPosition.length = 0;
+      this.selectedRows.length               = 0;
+      this.selectedCells.length              = 0;
       this._addRows(data);
     });
   }
@@ -350,15 +372,29 @@ class GridModel implements IGrid, IDisposable {
         }
         this.addedRows.length = 0;
       }
-
+    });
       this.dataRowsByPosition.forEach(row => {
-        for (const column of this.columns) {
-          row.cells[column.name].value = cloneValue(row.data[column.name]);
-        }
-      });
+      row._revert();
     });
     this.validate();
+    this.changed = this.hasChanges();
     this.sort();
+        }
+
+  revertSelectedCells() {
+    this.selectedCells.forEach((selectedCell: ICell) => {
+      selectedCell._revert();
+      });
+    this.validate();
+    this.changed = this.hasChanges();
+  }
+
+  revertSelectedRows() {
+    this.selectedRows.forEach((selectedRow: IRow) => {
+      selectedRow._revert();
+    });
+    this.validate();
+    this.changed = this.hasChanges();
   }
 
   _removeGroupRow(iterator: IterableIterator<IRowIteratorResult>, id: string): void {
@@ -467,7 +503,10 @@ class GridModel implements IGrid, IDisposable {
       totalRowCount++;
     }
 
-    this.dataRowsByPosition = newDataRowsByPosition;
+    freeze(() => {
+      this.dataRowsByPosition.length = 0;
+      this.dataRowsByPosition.push(...newDataRowsByPosition);
+    });
     this.updateCellSelectionProperties(this.selectedCells);
   }
 
@@ -702,7 +741,10 @@ class GridModel implements IGrid, IDisposable {
       row.selected = true;
     });
 
-    this.selectedRows = rows;
+    freeze(() => {
+      this.selectedRows.length = 0;
+      this.selectedRows.push(...rows);
+    });
   }
 
   editCell(cell?: ICell): void {
@@ -803,7 +845,10 @@ class GridModel implements IGrid, IDisposable {
 
     this.updateCellSelectionProperties(cellsToSelect);
     this.selectRows([...new Set(rowsToSelect)]);
-    this.selectedCells = cellsToSelect;
+    freeze(() => {
+      this.selectedCells.length = 0;
+      this.selectedCells.push(...cellsToSelect);
+    });
   }
 
   updateCellSelectionProperties(cellsToSelect: ICell[]) {
@@ -975,9 +1020,9 @@ export function mergeRows(rows: IRow[], columns: IColumn[], mergeEmpty: boolean 
   }
 }
 
-export default function create(rows: any[], columns: IColumn[], groupBy?: string[]): IGrid {
+export default function create(rows: any[], columns: IColumn[], options?: IGridOptions): IGrid {
   return root((dispose) => {
-    let grid     = observable(new GridModel());
+    let grid     = observable(new GridModel(options));
     grid.loading = true;
     grid.initialize(dispose);
     freeze(() => {
@@ -988,6 +1033,7 @@ export default function create(rows: any[], columns: IColumn[], groupBy?: string
     freeze(() => {
       let headerRow = columns.reduce((previous: any, current: any) => (previous[current.name] = current.title, previous), {});
       grid.addFixedRow(headerRow);
+      let groupBy = options && options.groupBy;
       if (groupBy) grid.groupBy = groupBy.map(name => findColumnByName(grid.columns, name)!);
       grid._addRows(rows);
     });

@@ -41,7 +41,6 @@ const styles = (theme: Theme) => {
     },
     notVisible: {
       visibility: 'collapse',
-
     },
     visible: {
       visibility: 'visible',

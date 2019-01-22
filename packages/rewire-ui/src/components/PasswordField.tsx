@@ -14,6 +14,23 @@ const styles = (theme: Theme) => ({
     lineHeight: 'inherit',
     fontSize: 'inherit',
   },
+  inputInput: {
+    paddingTop: '0.375em',
+    paddingBottom: '0.4375em',
+  },
+  inputOutlinedInput: {
+    paddingTop: '0.75em',
+    paddingBottom: '0.75em',
+  },
+  inputLabelRoot: {
+    fontSize: 'inherit',
+  },
+  inputLabelRootShrink: {
+    transform: 'translate(14px, -0.375em) scale(0.75) !important',
+  },
+  inputFormControlWithLabel: {
+    marginTop: '1em !important',
+  },
   formControlRoot: {
   },
   inputType: {
@@ -30,7 +47,10 @@ const styles = (theme: Theme) => ({
   },
   inputAdornmentRoot: {
     height: 'auto',
-    paddingBottom: '2px',
+    paddingBottom: '0.125em',
+    '& svg': {
+      fontSize: '1.5em',
+    },
   },
   nativeInput: {
     '&::placeholder, &-webkit-input-::placeholder': {
@@ -40,6 +60,7 @@ const styles = (theme: Theme) => ({
   },
   helperTextRoot: {
     marginTop: '6px',
+    fontSize: '0.8em',
   },
   helperTextContained: {
     marginLeft: '14px',
@@ -130,7 +151,9 @@ class PasswordFieldInternal extends React.Component<PasswordFieldPropsStyled, IP
         )
       : undefined;
 
-    const type = this.state.showPassword ? 'text' : 'password';
+    const type                      = this.state.showPassword ? 'text' : 'password';
+    const inputClassName            = this.props.variant === 'outlined' ? this.props.classes.inputOutlinedInput : this.props.classes.inputInput;
+    const inputFormControlClassName = this.props.variant === 'standard' && this.props.label ? this.props.classes.inputFormControlWithLabel : undefined;
 
     if (this.props.updateOnChange) {
       return (
@@ -151,8 +174,8 @@ class PasswordFieldInternal extends React.Component<PasswordFieldPropsStyled, IP
           onKeyDown={this.props.onKeyDown}
           onChange={(evt: React.ChangeEvent<HTMLInputElement>) => this.props.onValueChange(evt.target.value)}
           inputProps={{autoFocus: this.props.autoFocus, className: this.props.classes.nativeInput, style: {textAlign: this.props.align || 'left'}}}
-          InputProps={{endAdornment: adornment, classes: {root: this.props.classes.inputRoot, inputType: this.props.classes.inputType}}}
-          InputLabelProps={{shrink: true}}
+          InputProps={{endAdornment: adornment, classes: {root: this.props.classes.inputRoot, input: inputClassName, inputType: this.props.classes.inputType, formControl: inputFormControlClassName}}}
+          InputLabelProps={{shrink: true, classes: {root: this.props.classes.inputLabelRoot, outlined: this.props.classes.inputLabelRootShrink}}}
           FormHelperTextProps={{classes: {root: this.props.classes.helperTextRoot, contained: this.props.classes.helperTextContained}}}
         />
       );
@@ -178,8 +201,8 @@ class PasswordFieldInternal extends React.Component<PasswordFieldPropsStyled, IP
             onKeyDown={props.onKeyDown}
             onChange={props.onChange}
             inputProps={{autoFocus: props.autoFocus, className: props.classes.nativeInput, style: {textAlign: props.align || 'left'}}}
-            InputProps={{endAdornment: adornment, classes: {root: props.classes.inputRoot, inputType: props.classes.inputType}}}
-            InputLabelProps={{shrink: true}}
+            InputProps={{endAdornment: adornment, classes: {root: props.classes.inputRoot, input: inputClassName, inputType: props.classes.inputType, formControl: inputFormControlClassName}}}
+            InputLabelProps={{shrink: true, classes: {root: props.classes.inputLabelRoot, outlined: props.classes.inputLabelRootShrink}}}
             FormHelperTextProps={{classes: {root: props.classes.helperTextRoot, contained: props.classes.helperTextContained}}}
           />
         }
