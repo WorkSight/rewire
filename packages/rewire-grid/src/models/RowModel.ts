@@ -19,7 +19,9 @@ import {
 import createCell, {CellModel} from './CellModel';
 import {observable,
   observe,
-  root
+  root,
+  sample,
+  watch
 } from 'rewire-core';
 import * as is from 'is';
 import * as nanoid  from 'nanoid';
@@ -78,7 +80,11 @@ export class RowModel implements IRow, IDisposable {
     root((dispose) => {
       this.dispose = dispose;
       if (fixed || (this.options && this.options.allowMergeColumns)) {
-        observe(this.mergeColumns);
+        watch(() => {
+          for (const column of this.grid.dataColumns) {
+            this.cells[column.name].value;
+          }
+        }, this.mergeColumns);
       }
     });
 
@@ -111,7 +117,12 @@ export class RowModel implements IRow, IDisposable {
   mergeColumns = () => {
     let previousValue: any;
     let previousCell: ICell | undefined;
-    let colSpan = 1;
+    let colSpan                        = 1;
+    let isSelected                     = false;
+    let isFocused                      = false;
+    let focusedCell: ICell | undefined = this.grid.focusedCell;
+    let cellToFocus: ICell | undefined = undefined;
+    let cellsToSelect: ICell[]         = [];
     for (const column of this.grid.dataColumns) {
       if (!column.visible) {
         continue;
@@ -121,10 +132,24 @@ export class RowModel implements IRow, IDisposable {
       if (previousCell && cell && (previousValue === cell.value) && ((previousCell.row.isFixed && cell.row.isFixed) || (previousCell.column.type === cell.column.type))) {
         colSpan++;
         cell.colSpan = 0;
+        if (cell.selected) {
+          isSelected = true;
+        }
+        if (focusedCell === cell) {
+          isFocused = true;
+        }
         continue;
       }
       if (previousCell) {
         previousCell.colSpan = colSpan;
+        if (isSelected) {
+          cellsToSelect.push(previousCell);
+          isSelected = false;
+        }
+        if (isFocused) {
+          cellToFocus = previousCell;
+          isFocused   = false;
+        }
       }
 
       colSpan       = 1;
@@ -134,6 +159,18 @@ export class RowModel implements IRow, IDisposable {
 
     if (previousCell) {
       previousCell.colSpan = colSpan;
+    }
+
+    cellsToSelect = cellsToSelect.filter(cell => !this.grid.selectedCells.includes(cell));
+    if (cellsToSelect.length > 0) {
+      setTimeout(() => this.grid.selectCells(cellsToSelect, focusedCell, false, true), 0);
+    } else {
+      setTimeout(() => {
+        this.grid.updateCellSelectionProperties(this.grid.selectedCells);
+        if (cellToFocus) {
+          cellToFocus.setFocus();
+        }
+      }, 0);
     }
   }
 

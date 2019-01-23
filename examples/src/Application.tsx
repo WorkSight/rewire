@@ -339,6 +339,22 @@ const GridHotkeysDialog = () => (
           <Typography>Move right one cell. If end of line, attempt to wrap to line below</Typography>
         </div>
         <div style={{display: 'flex'}}>
+          <Typography style={{width: '125px'}}>Home:</Typography>
+          <Typography>Go to the first selectable cell of the row</Typography>
+        </div>
+        <div style={{display: 'flex'}}>
+          <Typography style={{width: '125px'}}>End:</Typography>
+          <Typography>Go to the last selectable cell of the row</Typography>
+        </div>
+        <div style={{display: 'flex'}}>
+          <Typography style={{width: '125px'}}>Ctrl + Home:</Typography>
+          <Typography>Go to the first selectable cell of the grid</Typography>
+        </div>
+        <div style={{display: 'flex'}}>
+          <Typography style={{width: '125px'}}>Ctrl + End:</Typography>
+          <Typography>Go to the last selectable cell of the grid</Typography>
+        </div>
+        <div style={{display: 'flex'}}>
           <Typography style={{width: '125px'}}>Ctrl + Click:</Typography>
           <Typography>If Multiselect, append selection</Typography>
         </div>

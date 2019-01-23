@@ -28,6 +28,7 @@ export interface IGrid extends IRows, IDisposable {
   editingCell?              : ICell;
   selectedRows              : IRow[];
   selectedCells             : ICell[];
+  focusedCell?              : ICell;
   fixedWidth                : string;
   loading                   : boolean;
   readonly fixedColumns     : IColumn[];
@@ -56,12 +57,14 @@ export interface IGrid extends IRows, IDisposable {
   sortItems(items: any[], comparer: (a: any, b: any) => number): void;
 
   selectRows(rows: IRow[]): void;
-  selectCells(cells: ICell[], multiSelect?: boolean, append?: boolean): void;
-  unselectCells(cells: ICell[]): void;
+  selectCells(cells: ICell[], cellToFocus?: ICell, multiSelect?: boolean, append?: boolean): void;
+  unselectCells(cells: ICell[], cellToFocus?: ICell): void;
   updateCellSelectionProperties(cells: ICell[]): void;
   editCell(cell?: ICell): void;
   selectCellsTo(cell: ICell, append?: boolean): void;
   selectCellsToMergeHelper(rows: IRow[], columnsToSelect: IColumn[]): IColumn[];
+  selectCellByPos(rowPosition: number, columnPosition: number): void;
+  selectCellsByRange(rowPosition1: number, rowPosition2: number, columnPosition1: number, columnPosition2: number): void;
   clearSelection(): void;
 
   cell(rowId: string, column: string): ICell | undefined;
@@ -73,6 +76,10 @@ export interface IGrid extends IRows, IDisposable {
   adjacentLeftCell(cell: ICell, onlySelectable?: boolean): ICell | undefined;
   nextCell(cell: ICell, onlySelectable?: boolean): ICell | undefined;
   previousCell(cell: ICell, onlySelectable?: boolean): ICell | undefined;
+  firstCell(onlySelectable?: boolean): ICell | undefined;
+  lastCell(onlySelectable?: boolean): ICell | undefined;
+  firstCellInRow(row: IRow, onlySelectable?: boolean): ICell | undefined;
+  lastCellInRow(row: IRow, onlySelectable?: boolean): ICell | undefined;
   row(rowId: string): IRow | undefined;
   rowByPos(rowPosition: number): IRow | undefined;
   getRowsByRange(rowStart: number, rowEnd: number, allowCollapsed?: boolean): IRow[];
@@ -245,6 +252,7 @@ export interface ICell extends ICellProperties {
   enabled              : boolean;
   readOnly             : boolean;
   readonly editing     : boolean;
+  element?             : HTMLTableDataCellElement;
   rowSpan              : number;
   colSpan              : number;
   rowPosition          : number;
@@ -260,6 +268,9 @@ export interface ICell extends ICellProperties {
   clone(row: IRow): ICell;
   clear(): void;
   setEditing(editing: boolean): void;
+  canFocus(): boolean;
+  setFocus(focus?: boolean): void;
+  setElement(element: HTMLTableDataCellElement | undefined): void;
   _setValue(v: any): void;
   setValue(v: any): void;
   validate(): void;

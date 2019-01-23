@@ -14,6 +14,7 @@ export class CellModel implements ICell {
   private _verticalAlign: DataSignal<VerticalAlignment | undefined>;
   private _renderer     : DataSignal<React.SFC<any> | undefined>;
   private _onValueChange: DataSignal<((row: IRow, v: any) => void) | undefined>;
+  private _element      : DataSignal<HTMLTableDataCellElement | undefined>;
   // private _enabled?    : boolean;
   // private _readOnly?   : boolean;
   // private _editable?   : boolean;
@@ -50,6 +51,7 @@ export class CellModel implements ICell {
     this._verticalAlign = property(undefined);
     this._renderer      = property(undefined);
     this._onValueChange = property(undefined);
+    this._element       = property(undefined);
     // this._enabled  = undefined;
     // this._readOnly = undefined;
     // this._editable = undefined;
@@ -130,6 +132,17 @@ export class CellModel implements ICell {
     return this._onValueChange() || this.column.onValueChange;
   }
 
+  // set element(value: HTMLTableDataCellElement | undefined) {
+  //   this._element(value);
+  // }
+  get element(): HTMLTableDataCellElement | undefined {
+    return this._element();
+  }
+
+  setElement(element: HTMLTableDataCellElement | undefined) {
+    this._element(element);
+  }
+
   // set enabled(value: boolean) {
   //   this._enabled = value;
   // }
@@ -182,7 +195,7 @@ export class CellModel implements ICell {
 
   _setValue(value: any) {
     if (this.value === value) return;
-      this.value = value;
+    this.value = value;
     this.onValueChange && this.onValueChange(this.row, value);
   }
 
@@ -226,6 +239,24 @@ export class CellModel implements ICell {
       errors.push(newErrorData);
     }
     return errors;
+  }
+
+  canFocus(): boolean {
+    return (!this.editing && this.element && this.element !== (document.activeElement as HTMLTableDataCellElement)) || false;
+  }
+
+  canBlur(): boolean {
+    return (!this.editing && this.element && this.element === (document.activeElement as HTMLTableDataCellElement)) || false;
+  }
+
+  setFocus(focus: boolean = true) {
+    if (focus && this.canFocus()) {
+      this.element!.focus();
+      this.grid.focusedCell = this;
+    } else if (!focus && this.canBlur()) {
+      this.element!.blur();
+      this.grid.focusedCell = undefined;
+    }
   }
 
   setEditing(isEditing: boolean): void {

@@ -127,6 +127,10 @@ class VirtualBody extends React.PureComponent<BodyType, {offset: number, loading
     });
   }
 
+  setBodyRef = (element: HTMLTableSectionElement) => {
+    this._body = element as HTMLTableSectionElement;
+  }
+
   // needsUpdate = false;
   // shouldComponentUpdate() {
   //   return this.needsUpdate;
@@ -160,7 +164,7 @@ class VirtualBody extends React.PureComponent<BodyType, {offset: number, loading
 
   render() {
     return (
-      <tbody ref={(v) => this._body = v} role='rowgroup'>
+      <tbody ref={this.setBodyRef} role='rowgroup'>
         <Observe render={() => this.renderRows()} />
       </tbody>
     );
@@ -427,6 +431,22 @@ const GridInternal = withStyles(styles, class extends React.PureComponent<GridPr
     });
   }
 
+  setGridFixedRef = (element: HTMLTableElement) => {
+    this._gridFixed = element as HTMLTableElement;
+  }
+
+  setColumnTableWrapperRef = (element: HTMLDivElement) => {
+    this._columnTableWrapper = element as HTMLDivElement;
+  }
+
+  setColumnTableRef = (element: HTMLTableElement) => {
+    this._columnTable = element as HTMLTableElement;
+  }
+
+  setGridContentRef = (element: HTMLDivElement) => {
+    this._gridContent(element as HTMLDivElement);
+  }
+
   renderFixedColumnHeaders() {
     if (this.props.grid.fixedColumns.length === 0) {
       return null;
@@ -477,7 +497,7 @@ const GridInternal = withStyles(styles, class extends React.PureComponent<GridPr
     let visibleColumns = this.props.grid.fixedColumns.reduce((prev, current) => prev = prev + (current.visible ? 1 : 0), 0);
     return (
       <div className={classNames('left-labels', this.props.classes.leftLabels)}>
-        <table role='grid' ref={(c) => this._gridFixed = c as HTMLTableElement} style={{width: this.props.grid.fixedWidth}}>
+        <table role='grid' ref={this.setGridFixedRef} style={{width: this.props.grid.fixedWidth}}>
           {this.renderColumnGroups(true)}
           <tbody role='rowgroup'>
             {this.props.grid.rows.map((row, index) => <Row key={row.id} row={row} fixedRowElements={this._fixedRowElements} Cell={Cell} columns={this.props.grid.fixedColumns} isFixedColumnsRow={true} index={index} visibleColumns={visibleColumns} className={((index % 2) === 1) ? 'alt' : ''} />)}
@@ -492,8 +512,8 @@ const GridInternal = withStyles(styles, class extends React.PureComponent<GridPr
       <Observe render={() => (
         <div className={classNames('top-labels', this.props.classes.topLabels)}>
         {this.renderFixedColumnHeaders()}
-        <div className='column-wrapper' ref={(c) => this._columnTableWrapper = c as HTMLDivElement }>
-          <table role='grid' ref={(c) => this._columnTable = c as HTMLTableElement}>
+        <div className='column-wrapper' ref={this.setColumnTableWrapperRef}>
+          <table role='grid' ref={this.setColumnTableRef}>
             {this.renderColumnGroups(false)}
             <thead role='rowgroup'>
               <Observe render={() => (
@@ -525,16 +545,12 @@ const GridInternal = withStyles(styles, class extends React.PureComponent<GridPr
       <Observe render={() => (
         <div className={classNames('grid-scroll', this.props.classes.gridScroll)} onScroll={this.handleScroll}>
           {this.renderFixedColumnData()}
-          <GridKeyHandler>{
-            (keyboard) => (
-              <div className={classNames('grid-content', this.props.classes.gridContent)} onKeyDown={keyboard.handleKeyDown} ref={(c: HTMLDivElement) => (keyboard.element = c, this._gridContent(c))}>
+            <div className={classNames('grid-content', this.props.classes.gridContent)}  ref={this.setGridContentRef}>
               <table role='grid'>
                 {this.renderColumnGroups(false)}
                 <BodyRenderer grid={this.props.grid} gridContent={this._gridContent} scrollY={this.scrollY} rowElements={rowElements} fixedRowElements={fixedRowElements} columns={this.props.grid.dataColumns} />
               </table>
             </div>
-            )}
-          </GridKeyHandler>
         </div>
       )} />
     );

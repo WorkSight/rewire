@@ -57,6 +57,10 @@ export default class Column extends React.PureComponent<IColumnCellProps> {
     return this.props.cell.value;
   }
 
+  setColumnRef = (element: HTMLTableHeaderCellElement) => {
+    this.node = element as HTMLTableHeaderCellElement;
+  }
+
   render() {
     return <Observe render={() => {
       let cls = this.column.cls;
@@ -84,7 +88,7 @@ export default class Column extends React.PureComponent<IColumnCellProps> {
         <th
           onMouseDown={this.column.canSort ? this.handleSort : undefined}
           colSpan={this.props.cell.colSpan}
-          ref={(element) => this.node = element as HTMLTableHeaderCellElement}
+          ref={this.setColumnRef}
           rowSpan={this.props.cell.rowSpan}
           style={style}
           title={this.column.tooltip || this.value}>
