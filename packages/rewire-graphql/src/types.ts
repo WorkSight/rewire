@@ -33,8 +33,8 @@ export interface IQueryResponse {
 export interface IClient {
   cache: ICache;
 
-  executeQuery   (queryObject: IQuery, skipCache?: boolean): Promise<IQueryResponse>;
-  query          (query: GQL, variables?: object): Promise<IQueryResponse>;
-  executeMutation(mutationObject: IMutation): Promise<IQueryResponse>;
-  mutation       (query: GQL, variables: object): Promise<IQueryResponse>;
+  executeQuery   (queryObject: IQuery, headers?: object, skipCache?: boolean): Promise<IQueryResponse>;
+  query          (query: GQL, variables?: object, headers?: object): Promise<IQueryResponse>;
+  executeMutation(mutationObject: IMutation, headers?: object): Promise<IQueryResponse>;
+  mutation       (query: GQL, variables: object, headers?: object): Promise<IQueryResponse>;
 }

@@ -26,6 +26,23 @@ const styles = (theme: Theme) => ({
     lineHeight: 'inherit',
     fontSize: 'inherit',
   },
+  inputInput: {
+    paddingTop: '0.375em',
+    paddingBottom: '0.4375em',
+  },
+  inputOutlinedInput: {
+    paddingTop: '0.75em',
+    paddingBottom: '0.75em',
+  },
+  inputLabelRoot: {
+    fontSize: 'inherit',
+  },
+  inputLabelRootShrink: {
+    transform: 'translate(14px, -0.375em) scale(0.75) !important',
+  },
+  inputFormControlWithLabel: {
+    marginTop: '1em !important',
+  },
   selectRoot: {
     lineHeight: 'inherit',
     fontSize: 'inherit',
@@ -55,7 +72,10 @@ const styles = (theme: Theme) => ({
   },
   inputAdornmentRoot: {
     height: 'auto',
-    paddingBottom: '2px',
+    paddingBottom: '0.125em',
+    '& svg': {
+      fontSize: '1.5em',
+    },
   },
   valueRendererContainer: {
     width: '100%',
@@ -66,6 +86,7 @@ const styles = (theme: Theme) => ({
   },
   helperTextRoot: {
     marginTop: '6px',
+    fontSize: '0.8em',
   },
   helperTextContained: {
     marginLeft: '14px',
@@ -80,7 +101,8 @@ export type ISelectInternalProps<T> = ICustomProps<T> & React.InputHTMLAttribute
 type SelectInternalProps<T>         = WithStyle<ReturnType<typeof styles>, ISelectInternalProps<T>>;
 
 class SelectInternal<T> extends React.Component<SelectInternalProps<T>, any> {
-  private InputLabelRef: React.RefObject<HTMLInputElement>;
+  private InputLabelRef: React.RefObject<HTMLElement>;
+  private SelectRef: React.RefObject<HTMLElement>;
   state : any;
   search: SearchFn<T>;
   map   : MapFn<T>;
@@ -91,6 +113,7 @@ class SelectInternal<T> extends React.Component<SelectInternalProps<T>, any> {
     this.search        = props.search;
     this.map           = props.map || defaultMap;
     this.InputLabelRef = React.createRef();
+    this.SelectRef     = React.createRef();
   }
 
   componentDidMount() {
@@ -109,16 +132,15 @@ class SelectInternal<T> extends React.Component<SelectInternalProps<T>, any> {
   }
 
   renderSuggestion = (params: any) => {
-    const { suggestion, index, isHighlighted, displayName } = params;
-
+    const { suggestion, index, isHighlighted, displayName, fontSize} = params;
     if (this.props.renderSuggestion) {
       return (
-        <MenuItem value={displayName} component='div' key={index} classes={{root: this.props.classes.selectMenuItem}}>
+        <MenuItem value={displayName} component='div' key={index} classes={{root: this.props.classes.selectMenuItem}} style={{fontSize: fontSize}}>
           {this.props.renderSuggestion(suggestion, {isHighlighted, displayName, index})}
         </MenuItem>
       );
     }
-    let s: any = {};
+    let s: any = {fontSize: fontSize};
     if (isHighlighted) {
       s.fontWeight = '500';
     }
@@ -247,47 +269,56 @@ class SelectInternal<T> extends React.Component<SelectInternalProps<T>, any> {
       onDoubleClick: this.handleMenuDoubleClick,
     };
 
-    let InputToUse           = Input;
-    let selectRootClasses    = classes.selectRoot;
-    let additionalProps: any = {};
+    let InputToUse                = Input;
+    let selectRootClasses         = classes.selectRoot;
+    let additionalProps: any      = {};
+    let inputClassName            = classes.inputInput;
+    let inputFormControlClassName = undefined;
     if (variant === 'outlined') {
       InputToUse                 = OutlinedInput;
       additionalProps.labelWidth = this.state.labelWidth;
+      inputClassName             = classes.inputOutlinedInput;
       if (!endAdornment) {
         selectRootClasses = classNames(selectRootClasses, classes.selectRootOutlined);
       }
+    } else if (variant === 'standard' && this.props.label) {
+      inputFormControlClassName = classes.inputFormControlWithLabel;
     }
 
     return (
-      <Select
-        disabled={disabled}
-        value={v as any}
-        multiple={multiple}
-        open={this.state.isOpen}
-        onOpen={this.handleOnOpen}
-        onClose={this.handleOnClose}
-        onChange={this.handleChanged}
-        displayEmpty={true}
-        className={cls}
-        style={style}
-        classes={{root: selectRootClasses, select: classes.select}}
-        MenuProps={{classes: {paper: classes.selectMenuPaper}, MenuListProps: menuListProps}}
-        input={<InputToUse startAdornment={startAdornment} endAdornment={endAdornment} autoFocus={autoFocus} classes={{root: classes.inputRoot}} {...additionalProps} />}
-        renderValue={() => (
-          <span className={classes.valueRendererContainer} style={{textAlign: align || 'left'}}>
-            {this.renderValue(v, multiple, placeholder)}
-          </span>)}>{
-          this.state.suggestions.map((suggestion: any, index: number) => {
-            const displayName = this.map(suggestion);
-            return this.renderSuggestion({
-              suggestion,
-              index,
-              displayName,
-              isHighlighted: (multiple ? v && v.includes(displayName) : displayName === v)
-            });
-          })
-        }
-      </Select>
+      <RootRef rootRef={this.SelectRef}>
+        <Select
+          disabled={disabled}
+          value={v as any}
+          multiple={multiple}
+          open={this.state.isOpen}
+          onOpen={this.handleOnOpen}
+          onClose={this.handleOnClose}
+          onChange={this.handleChanged}
+          displayEmpty={true}
+          className={cls}
+          style={style}
+          classes={{root: selectRootClasses, select: classes.select}}
+          MenuProps={{classes: {paper: classes.selectMenuPaper}, MenuListProps: menuListProps}}
+          input={<InputToUse startAdornment={startAdornment} endAdornment={endAdornment} autoFocus={autoFocus} classes={{root: classes.inputRoot, input: inputClassName, formControl: inputFormControlClassName}} {...additionalProps} />}
+          renderValue={() => (
+            <span className={classes.valueRendererContainer} style={{textAlign: align || 'left'}}>
+              {this.renderValue(v, multiple, placeholder)}
+            </span>)}>
+            {this.state.suggestions.map((suggestion: any, index: number) => {
+              const fontSize    = window.getComputedStyle(this.SelectRef.current!).getPropertyValue('font-size'); // needed to make the menu items font-size the same as the shown value
+              const displayName = this.map(suggestion);
+              return this.renderSuggestion({
+                suggestion,
+                index,
+                displayName,
+                fontSize,
+                isHighlighted: (multiple ? v && v.includes(displayName) : displayName === v)
+              });
+            })
+          }
+        </Select>
+      </RootRef>
     );
   }
 
@@ -315,7 +346,7 @@ class SelectInternal<T> extends React.Component<SelectInternalProps<T>, any> {
     let   cls   = (this.props.className || '') + ' select';
     return (
       <FormControl error={!disableErrors && !disabled && !!error} variant={variant} className={classNames(cls, classes.formControlRoot)}>
-        {label && <RootRef rootRef={this.InputLabelRef}><InputLabel htmlFor='name-error' shrink={true}>{label}</InputLabel></RootRef>}
+        {label && <RootRef rootRef={this.InputLabelRef}><InputLabel htmlFor='name-error' shrink={true} classes={{root: classes.inputLabelRoot, outlined: classes.inputLabelRootShrink}}>{label}</InputLabel></RootRef>}
         {this.renderSelect(disabled, '', this.props.selectedItem, this.props.autoFocus, this.props.placeholder)}
         {!disableErrors && <FormHelperText classes={{root: classes.helperTextRoot, contained: classes.helperTextContained}}>{!disabled && error}</FormHelperText>}
       </FormControl>

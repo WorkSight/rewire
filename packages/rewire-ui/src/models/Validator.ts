@@ -255,6 +255,10 @@ export default class Validator {
     this.rules[fieldName] = fnData;
   }
 
+  setRule(fieldName: string, fnData: IValidateFnData) {
+    this.rules[fieldName] = fnData;
+  }
+
   validateFields(fieldNames: string[], obj: ObjectType): ValidationResult {
     let result: ValidationResult = {
       success: true,

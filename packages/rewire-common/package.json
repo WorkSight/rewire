@@ -1,6 +1,6 @@
 {
   "name": "rewire-common",
-  "version": "1.0.0-beta.115",
+  "version": "1.0.0-beta.131",
   "description": "Common utilities used by the rewire suite of reactive components",
   "main": "./es6-lib.js",
   "typings": "./src/index.ts",

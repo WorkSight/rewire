@@ -1,7 +1,8 @@
 import * as React from 'react';
 import * as is from 'is';
-import {IGrid, IColumn, ICell, IRow, IError, IErrorData, TextAlignment, cloneValue} from './GridTypes';
+import {IGrid, IColumn, ICell, IRow, IError, IErrorData, TextAlignment, VerticalAlignment, cloneValue} from './GridTypes';
 import { observable, defaultEquals, property, DataSignal } from 'rewire-core';
+import * as deepEqual from 'fast-deep-equal';
 
 let id = 0;
 export class CellModel implements ICell {
@@ -10,8 +11,10 @@ export class CellModel implements ICell {
   private _editable     : DataSignal<boolean | undefined>;
   private _cls          : DataSignal<string | undefined>;
   private _align        : DataSignal<TextAlignment | undefined>;
+  private _verticalAlign: DataSignal<VerticalAlignment | undefined>;
   private _renderer     : DataSignal<React.SFC<any> | undefined>;
   private _onValueChange: DataSignal<((row: IRow, v: any) => void) | undefined>;
+  private _element      : DataSignal<HTMLTableDataCellElement | undefined>;
   // private _enabled?    : boolean;
   // private _readOnly?   : boolean;
   // private _editable?   : boolean;
@@ -45,8 +48,10 @@ export class CellModel implements ICell {
     this._editable      = property(undefined);
     this._cls           = property(undefined);
     this._align         = property(undefined);
+    this._verticalAlign = property(undefined);
     this._renderer      = property(undefined);
     this._onValueChange = property(undefined);
+    this._element       = property(undefined);
     // this._enabled  = undefined;
     // this._readOnly = undefined;
     // this._editable = undefined;
@@ -75,14 +80,14 @@ export class CellModel implements ICell {
     this._enabled(value);
   }
   get enabled(): boolean {
-    return (this._enabled() !== undefined ? this._enabled() : this.column.enabled) as boolean;
+    return (this._enabled() !== undefined ? this._enabled() : this.column.enabled !== undefined ? this.column.enabled : this.grid.enabled) as boolean;
   }
 
   set readOnly(value: boolean) {
     this._readOnly(value);
   }
   get readOnly(): boolean {
-    return (this._readOnly() !== undefined ? this._readOnly() : this.column.readOnly) as boolean;
+    return (this._readOnly() !== undefined ? this._readOnly() : this.column.readOnly !== undefined ? this.column.readOnly : this.grid.readOnly) as boolean;
   }
 
   set editable(value: boolean) {
@@ -106,6 +111,13 @@ export class CellModel implements ICell {
     return this._align() || this.column.align;
   }
 
+  set verticalAlign(value: VerticalAlignment) {
+    this._verticalAlign(value);
+  }
+  get verticalAlign(): VerticalAlignment {
+    return this._verticalAlign() || this.column.verticalAlign || this.grid.verticalAlign;
+  }
+
   set renderer(value: React.SFC<any> | undefined) {
     this._renderer(value);
   }
@@ -120,18 +132,29 @@ export class CellModel implements ICell {
     return this._onValueChange() || this.column.onValueChange;
   }
 
+  // set element(value: HTMLTableDataCellElement | undefined) {
+  //   this._element(value);
+  // }
+  get element(): HTMLTableDataCellElement | undefined {
+    return this._element();
+  }
+
+  setElement(element: HTMLTableDataCellElement | undefined) {
+    this._element(element);
+  }
+
   // set enabled(value: boolean) {
   //   this._enabled = value;
   // }
   // get enabled(): boolean {
-  //   return this._enabled !== undefined ? this._enabled : this.column.enabled;
+  //   return this._enabled !== undefined ? this._enabled : this.column.enabled !== undefined ? this.column.enabled : this.grid.enabled;
   // }
 
   // set readOnly(value: boolean) {
   //   this._readOnly = value;
   // }
   // get readOnly(): boolean {
-  //   return this._readOnly !== undefined ? this._readOnly : this.column.readOnly;
+  //   return this._readOnly !== undefined ? this._readOnly : this.column.readOnly !== undefined ? this.column.readOnly : this.grid.readOnly;
   // }
 
   // set editable(value: boolean) {
@@ -170,18 +193,16 @@ export class CellModel implements ICell {
     return this.column.position;
   }
 
+  _setValue(value: any) {
+    if (this.value === value) return;
+    this.value = value;
+    this.onValueChange && this.onValueChange(this.row, value);
+  }
+
   setValue(value: any) {
     if (this.value === value) return;
-    if (is.object(this.value) && is.object(value)) {
-      let clearedObj: object = {};
-      Object.keys(this.value).forEach(key => clearedObj[key] = undefined);
-      Object.assign(this.value, clearedObj, value);
-    } else {
-      this.value = value;
-    }
-
+    this._setValue(value);
     this.validate();
-    this.onValueChange && this.onValueChange(this.row, value);
     this.grid.changed = this.grid.hasChanges();
   }
 
@@ -194,13 +215,14 @@ export class CellModel implements ICell {
   }
 
   hasChanges(): boolean {
-    let changes: boolean;
-    if (this.column.compare) {
-      changes = this.column.compare(this.value, this.row.data[this.column.name]) !== 0;
-    } else {
-      changes = !defaultEquals(this.value, this.row.data[this.column.name]);
+    let prevVal = this.row.data[this.column.name];
+    let currVal = this.value;
+    if (prevVal === currVal || (!prevVal && !currVal)) {
+      return false;
+    } else if (!prevVal || !currVal) {
+      return true;
     }
-    return changes;
+    return !deepEqual(prevVal, currVal);
   }
 
   hasErrors(): boolean {
@@ -217,6 +239,24 @@ export class CellModel implements ICell {
       errors.push(newErrorData);
     }
     return errors;
+  }
+
+  canFocus(): boolean {
+    return (!this.editing && this.element && this.element !== (document.activeElement as HTMLTableDataCellElement)) || false;
+  }
+
+  canBlur(): boolean {
+    return (!this.editing && this.element && this.element === (document.activeElement as HTMLTableDataCellElement)) || false;
+  }
+
+  setFocus(focus: boolean = true) {
+    if (focus && this.canFocus()) {
+      this.element!.focus();
+      this.grid.focusedCell = this;
+    } else if (!focus && this.canBlur()) {
+      this.element!.blur();
+      this.grid.focusedCell = undefined;
+    }
   }
 
   setEditing(isEditing: boolean): void {
@@ -249,6 +289,19 @@ export class CellModel implements ICell {
     });
 
     this.grid.inError = this.grid.hasErrors();
+  }
+
+  // reverts value without validation or grid changed update
+  _revert() {
+    if (this.hasChanges()) {
+      this._setValue(cloneValue(this.row.data[this.column.name]));
+    }
+  }
+
+  revert() {
+    if (this.hasChanges()) {
+      this.setValue(cloneValue(this.row.data[this.column.name]));
+    }
   }
 }
 

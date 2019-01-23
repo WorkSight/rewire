@@ -5,6 +5,43 @@ import {Theme}                 from '@material-ui/core/styles';
 import {withStyles, WithStyle} from './styles';
 
 const styles = (theme: Theme) => ({
+  inputRoot: {
+  },
+  switchRoot: {
+    width: '3.875em',
+    fontSize: '1em',
+  },
+  switchBase: {
+    fontSize: '1em',
+    width: '3em',
+    height: '3em',
+  },
+  switchBar: {
+    width: '2.125em',
+    height: '0.875em',
+    marginTop: '-0.4375em',
+    marginLeft: '-1.0625em',
+    borderRadius: '0.4375em',
+  },
+  switchIcon: {
+    width: '1.25em',
+    height: '1.25em',
+  },
+  switchChecked: {
+    transform: 'translateX(0.875em)',
+  },
+  formControlLabelRoot: {
+    marginLeft: '0px',
+  },
+  formControlLabelLabel: {
+    marginLeft: '-0.375em',
+    fontSize: '0.875em',
+  },
+  switchContainerNoLabel: {
+    display: 'flex',
+    flex: '1',
+    alignItems: 'center',
+  }
 });
 
 export interface ISwitchProps {
@@ -37,6 +74,8 @@ class SwitchInternal extends React.Component<SwitchPropsStyled> {
       return null;
     }
 
+    const {classes} = this.props;
+
     if (this.props.label !== undefined) {
       return (
         <FormControlLabel
@@ -48,23 +87,28 @@ class SwitchInternal extends React.Component<SwitchPropsStyled> {
               inputProps={{autoFocus: this.props.autoFocus}}
               checked={this.props.value}
               onChange={(evt: React.ChangeEvent<HTMLInputElement>) => this.props.onValueChange(evt.target.checked)}
+              classes={{root: classes.switchRoot, switchBase: classes.switchBase, bar: classes.switchBar, icon: classes.switchIcon, checked: classes.switchChecked}}
             />
           }
           disabled={this.props.disabled}
           label={this.props.label}
+          classes={{root: classes.formControlLabelRoot, label: classes.formControlLabelLabel}}
         />
       );
     }
 
     return (
-      <Switch
-        className={this.props.className}
-        autoFocus={this.props.autoFocus}
-        disabled={this.props.disabled}
-        inputProps={{autoFocus: this.props.autoFocus}}
-        checked={this.props.value}
-        onChange={(evt: React.ChangeEvent<HTMLInputElement>) => this.props.onValueChange(evt.target.checked)}
-      />
+      <div className={classes.switchContainerNoLabel}>
+        <Switch
+          className={this.props.className}
+          autoFocus={this.props.autoFocus}
+          disabled={this.props.disabled}
+          inputProps={{autoFocus: this.props.autoFocus}}
+          checked={this.props.value}
+          onChange={(evt: React.ChangeEvent<HTMLInputElement>) => this.props.onValueChange(evt.target.checked)}
+          classes={{root: classes.switchRoot, switchBase: classes.switchBase, bar: classes.switchBar, icon: classes.switchIcon, checked: classes.switchChecked}}
+        />
+      </div>
     );
   }
 }

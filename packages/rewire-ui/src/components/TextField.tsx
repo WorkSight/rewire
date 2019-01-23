@@ -11,6 +11,36 @@ const styles = (theme: Theme) => ({
     lineHeight: 'inherit',
     fontSize: 'inherit',
   },
+  inputInput: {
+    paddingTop: '0.375em',
+    paddingBottom: '0.4375em',
+  },
+  inputOutlinedInput: {
+    paddingTop: '0.75em',
+    paddingBottom: '0.75em',
+  },
+  inputOutlinedMultilineInput: {
+    paddingTop: 0,
+    paddingBottom: 0,
+    marginTop: '0.75em',
+    marginBottom: '0.75em',
+  },
+  inputOutlinedMultiline: {
+    paddingTop: 0,
+    paddingBottom: 0,
+  },
+  inputMultilineWithAdornment: {
+    padding: '0.1875em 0 0.1875em',
+  },
+  inputLabelRoot: {
+    fontSize: 'inherit',
+  },
+  inputLabelRootShrink: {
+    transform: 'translate(14px, -0.375em) scale(0.75) !important',
+  },
+  inputFormControlWithLabel: {
+    marginTop: '1em !important',
+  },
   formControlRoot: {
   },
   inputType: {
@@ -18,7 +48,10 @@ const styles = (theme: Theme) => ({
   },
   inputAdornmentRoot: {
     height: 'auto',
-    paddingBottom: '2px',
+    paddingBottom: '0.125em',
+    '& svg': {
+      fontSize: '1.5em',
+    },
   },
   nativeInput: {
     '&::placeholder, &-webkit-input-::placeholder': {
@@ -34,13 +67,15 @@ const styles = (theme: Theme) => ({
         // marginRight: '1px',
       },
       '&::-webkit-calendar-picker-indicator': {
-        marginTop: '2px',
+        // marginTop: '2px',
+        marginTop: '0.125em',
         fontSize: '1.1em',
       },
     },
   },
   helperTextRoot: {
     marginTop: '6px',
+    fontSize: '0.8em',
   },
   helperTextContained: {
     marginLeft: '14px',
@@ -58,6 +93,9 @@ export interface ITextFieldProps {
   placeholder?     : string;
   align?           : TextAlignment;
   variant?         : TextVariant;
+  multiline?       : boolean;
+  rows?            : string | number; // only used if multiline is true
+  rowsMax?         : string | number; // only used if multiline is true
   selectOnFocus?   : boolean;
   endOfTextOnFocus?: boolean;
   cursorPositionOnFocus?: number;
@@ -84,6 +122,9 @@ class TextFieldInternal extends React.Component<TextFieldPropsStyled> {
       (nextProps.label !== this.props.label) ||
       (nextProps.placeholder !== this.props.placeholder) ||
       (nextProps.align !== this.props.align) ||
+      (nextProps.multiline !== this.props.multiline) ||
+      (nextProps.rows !== this.props.rows) ||
+      (nextProps.rowsMax !== this.props.rowsMax) ||
       (nextProps.variant !== this.props.variant) ||
       (nextProps.disableErrors !== this.props.disableErrors) ||
       (nextProps.startAdornment !== this.props.startAdornment) ||
@@ -104,15 +145,41 @@ class TextFieldInternal extends React.Component<TextFieldPropsStyled> {
     }
   }
 
+  handleKeyDown = (evt: React.KeyboardEvent<any>) => {
+    this.props.onKeyDown && this.props.onKeyDown(evt);
+
+    switch (evt.key) {
+      case 'Enter':
+        if (!this.props.multiline) {
+          break;
+        }
+        evt.stopPropagation();
+        break;
+
+      default:
+        break;
+    }
+  }
+
   render() {
     if (this.props.visible === false) {
       return null;
     }
 
-    const {classes, type, variant} = this.props;
-    const startAdornment           = this.props.startAdornment ? <InputAdornment position='start' classes={{root: classes.inputAdornmentRoot}}>{this.props.startAdornment}</InputAdornment> : undefined;
-    const endAdornment             = this.props.endAdornment ? <InputAdornment position='end' classes={{root: classes.inputAdornmentRoot}}>{this.props.endAdornment}</InputAdornment> : undefined;
-    const inputTypeClassName       = type !== 'date' ? classes.inputType : undefined;
+    const {classes, type, variant, multiline} = this.props;
+    const startAdornment                      = this.props.startAdornment ? <InputAdornment position='start' classes={{root: classes.inputAdornmentRoot}}>{this.props.startAdornment}</InputAdornment> : undefined;
+    const endAdornment                        = this.props.endAdornment ? <InputAdornment position='end' classes={{root: classes.inputAdornmentRoot}}>{this.props.endAdornment}</InputAdornment> : undefined;
+    const inputTypeClassName                  = type !== 'date' ? classes.inputType : undefined;
+    const multilineClassName                  = variant === 'outlined' ? classes.inputOutlinedMultiline : startAdornment || endAdornment ? classes.inputMultilineWithAdornment : classes.inputInput;
+    const inputFormControlClassName           = variant === 'standard' && this.props.label ? classes.inputFormControlWithLabel : undefined;
+    let inputClassName: string | undefined    = undefined;
+    if (variant === 'outlined') {
+      inputClassName = multiline ? classes.inputOutlinedMultilineInput : classes.inputOutlinedInput;
+    } else if (variant === 'standard') {
+      if (!multiline) {
+        inputClassName = classes.inputInput;
+      }
+    }
 
     if (this.props.updateOnChange) {
       return (
@@ -120,6 +187,9 @@ class TextFieldInternal extends React.Component<TextFieldPropsStyled> {
         className={this.props.className}
         classes={{root: classes.formControlRoot}}
         type={type}
+        multiline={multiline}
+        rows={this.props.rows || 2}
+        rowsMax={this.props.rowsMax || 4}
         disabled={this.props.disabled}
         label={this.props.label}
         placeholder={this.props.placeholder}
@@ -130,11 +200,11 @@ class TextFieldInternal extends React.Component<TextFieldPropsStyled> {
         autoFocus={this.props.autoFocus}
         onFocus={this.handleFocus}
         onBlur={this.props.onBlur}
-        onKeyDown={this.props.onKeyDown}
+        onKeyDown={this.handleKeyDown}
         onChange={(evt: React.ChangeEvent<HTMLInputElement>) => this.props.onValueChange(evt.target.value)}
         inputProps={{autoFocus: this.props.autoFocus, className: classes.nativeInput, style: {textAlign: this.props.align || 'left'}}}
-        InputProps={{startAdornment: startAdornment, endAdornment: endAdornment, classes: {root: classes.inputRoot, inputType: inputTypeClassName}}}
-        InputLabelProps={{shrink: true}}
+        InputProps={{startAdornment: startAdornment, endAdornment: endAdornment, classes: {root: classes.inputRoot, multiline: multilineClassName, input: inputClassName, inputType: inputTypeClassName, formControl: inputFormControlClassName}}}
+        InputLabelProps={{shrink: true, classes: {root: classes.inputLabelRoot, outlined: classes.inputLabelRootShrink}}}
         FormHelperTextProps={{classes: {root: classes.helperTextRoot, contained: classes.helperTextContained}}}
       />);
     }
@@ -146,6 +216,9 @@ class TextFieldInternal extends React.Component<TextFieldPropsStyled> {
           className={props.className}
           classes={{root: classes.formControlRoot}}
           type={type}
+          multiline={multiline}
+          rows={props.rows || 2}
+          rowsMax={props.rowsMax || 4}
           disabled={props.disabled}
           label={props.label}
           placeholder={props.placeholder}
@@ -156,11 +229,11 @@ class TextFieldInternal extends React.Component<TextFieldPropsStyled> {
           autoFocus={props.autoFocus}
           onFocus={this.handleFocus}
           onBlur={props.onBlur}
-          onKeyDown={props.onKeyDown}
+          onKeyDown={this.handleKeyDown}
           onChange={props.onChange}
           inputProps={{autoFocus: props.autoFocus, className: classes.nativeInput, style: {textAlign: props.align || 'left'}}}
-          InputProps={{startAdornment: startAdornment, endAdornment: endAdornment, classes: {root: classes.inputRoot, inputType: inputTypeClassName}}}
-          InputLabelProps={{shrink: true}}
+          InputProps={{startAdornment: startAdornment, endAdornment: endAdornment, classes: {root: classes.inputRoot, multiline: multilineClassName, input: inputClassName, inputType: inputTypeClassName, formControl: inputFormControlClassName}}}
+          InputLabelProps={{shrink: true, classes: {root: classes.inputLabelRoot, outlined: classes.inputLabelRootShrink}}}
           FormHelperTextProps={{classes: {root: classes.helperTextRoot, contained: classes.helperTextContained}}}
         />
       }

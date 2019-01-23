@@ -1,30 +1,40 @@
-import * as React            from 'react';
-import Form                  from '../models/Form';
-import decorate, {WithStyle} from './styles';
+import * as React              from 'react';
+import Form                    from '../models/Form';
+import classNames              from 'classnames';
+import {withStyles, WithStyle} from './styles';
 
-const styles = {
+const styles = () => ({
   form: {
     display: 'flex',
     flexDirection: 'column',
   },
-};
+});
 
 export interface IFormViewProps {
   form: Form;
-  classes?: React.CSSProperties;
+  className?: string;
+  style?: React.CSSProperties;
   onSubmit: (form: Form) => void;
 }
 
-class FormView extends React.Component<WithStyle<typeof styles, IFormViewProps>> {
-  render() {
-    const {classes, form, onSubmit, children} = this.props;
+type FormViewProps = WithStyle<ReturnType<typeof styles>, IFormViewProps>;
 
+class FormView extends React.Component<FormViewProps> {
+  shouldComponentUpdate(nextProps: FormViewProps) {
     return (
-      <form autoComplete='off' className={classes.form} onKeyDown={(evt) => evt.keyCode === 13 && form.submit() && onSubmit(form)} onSubmit={(evt) => { evt.preventDefault(); form.submit() && onSubmit(form); }}>
+      nextProps.form !== this.props.form ||
+      nextProps.onSubmit !== this.props.onSubmit
+    );
+  }
+
+  render() {
+    const {style, className, classes, form, onSubmit, children} = this.props;
+    return (
+      <form autoComplete='off' className={classNames(classes.form, className)} style={style} onKeyDown={(evt) => evt.keyCode === 13 && form.submit() && onSubmit(form)} onSubmit={(evt) => { evt.preventDefault(); form.submit() && onSubmit(form); }}>
         {children}
       </form>
     );
   }
 }
 
-export default decorate(styles)<IFormViewProps>(FormView);
+export default withStyles(styles, FormView);

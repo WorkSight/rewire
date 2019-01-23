@@ -9,8 +9,6 @@ export const defaultPhoneMask   = 'x';
 
 const styles = (theme: Theme) => ({
   inputRoot: {
-    lineHeight: 'inherit',
-    fontSize: 'inherit',
   },
   formControlRoot: {
   },

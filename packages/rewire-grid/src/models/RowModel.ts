@@ -19,7 +19,9 @@ import {
 import createCell, {CellModel} from './CellModel';
 import {observable,
   observe,
-  root
+  root,
+  sample,
+  watch
 } from 'rewire-core';
 import * as is from 'is';
 import * as nanoid  from 'nanoid';
@@ -78,13 +80,17 @@ export class RowModel implements IRow, IDisposable {
     root((dispose) => {
       this.dispose = dispose;
       if (fixed || (this.options && this.options.allowMergeColumns)) {
-        observe(this.mergeColumns);
+        watch(() => {
+          for (const column of this.grid.dataColumns) {
+            this.cells[column.name].value;
+          }
+        }, this.mergeColumns);
       }
     });
 
     if (!this.grid.loading && !fixed && !isGroupRow(this)) {
-    this.validate();
-  }
+      this.validate();
+    }
   }
 
   set parentRow(groupRow: IGroupRow | undefined) {
@@ -111,7 +117,12 @@ export class RowModel implements IRow, IDisposable {
   mergeColumns = () => {
     let previousValue: any;
     let previousCell: ICell | undefined;
-    let colSpan = 1;
+    let colSpan                        = 1;
+    let isSelected                     = false;
+    let isFocused                      = false;
+    let focusedCell: ICell | undefined = this.grid.focusedCell;
+    let cellToFocus: ICell | undefined = undefined;
+    let cellsToSelect: ICell[]         = [];
     for (const column of this.grid.dataColumns) {
       if (!column.visible) {
         continue;
@@ -121,10 +132,24 @@ export class RowModel implements IRow, IDisposable {
       if (previousCell && cell && (previousValue === cell.value) && ((previousCell.row.isFixed && cell.row.isFixed) || (previousCell.column.type === cell.column.type))) {
         colSpan++;
         cell.colSpan = 0;
+        if (cell.selected) {
+          isSelected = true;
+        }
+        if (focusedCell === cell) {
+          isFocused = true;
+        }
         continue;
       }
       if (previousCell) {
         previousCell.colSpan = colSpan;
+        if (isSelected) {
+          cellsToSelect.push(previousCell);
+          isSelected = false;
+        }
+        if (isFocused) {
+          cellToFocus = previousCell;
+          isFocused   = false;
+        }
       }
 
       colSpan       = 1;
@@ -134,6 +159,18 @@ export class RowModel implements IRow, IDisposable {
 
     if (previousCell) {
       previousCell.colSpan = colSpan;
+    }
+
+    cellsToSelect = cellsToSelect.filter(cell => !this.grid.selectedCells.includes(cell));
+    if (cellsToSelect.length > 0) {
+      setTimeout(() => this.grid.selectCells(cellsToSelect, focusedCell, false, true), 0);
+    } else {
+      setTimeout(() => {
+        this.grid.updateCellSelectionProperties(this.grid.selectedCells);
+        if (cellToFocus) {
+          cellToFocus.setFocus();
+        }
+      }, 0);
     }
   }
 
@@ -176,20 +213,20 @@ export class RowModel implements IRow, IDisposable {
     this.setValue(rowData);
   }
 
+  _setValue(data: ICellDataMap) {
+    if (!data) return;
+    Object.keys(data).forEach((columnName: string) => {
+      let cell = this.cells[columnName];
+      if (cell) {
+        cell._setValue(data[columnName]);
+      }
+    });
+  }
+
   setValue(data: ICellDataMap) {
     if (!data) return;
+    this._setValue(data);
     let columnNamesToSet = Object.keys(data).filter((columnName: string) => this.cells[columnName]);
-    columnNamesToSet.forEach((columnName: string) => {
-      let cell = this.cells[columnName];
-      if (is.object(cell.value) && is.object(data[columnName])) {
-        let clearedObj: object = {};
-        Object.keys(cell.value).forEach(key => clearedObj[key] = undefined);
-        Object.assign(cell.value, clearedObj, data[columnName]);
-      } else {
-        cell.value = data[columnName];
-      }
-      cell.onValueChange && cell.onValueChange(this, data[columnName]);
-    });
     this.validate(columnNamesToSet);
     this.grid.changed = this.grid.hasChanges();
   }
@@ -220,6 +257,26 @@ export class RowModel implements IRow, IDisposable {
     });
 
     this.grid.inError = this.grid.hasErrors();
+  }
+
+  private _revertHelper(): ICellDataMap {
+    let rowValue: ICellDataMap = {};
+    for (const column of this.grid.columns) {
+      let cell = this.cells[column.name];
+      if (cell.hasChanges()) { // maybe don't need
+        rowValue[column.name] = cloneValue(this.data[column.name]);
+      }
+    }
+    return rowValue;
+  }
+
+  // reverts value without validation or grid changed update
+  _revert() {
+    this._setValue(this._revertHelper());
+  }
+
+  revert() {
+    this.setValue(this._revertHelper());
   }
 }
 

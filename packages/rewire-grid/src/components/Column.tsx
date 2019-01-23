@@ -29,7 +29,7 @@ export default class Column extends React.PureComponent<IColumnCellProps> {
 
   handleMouseDown = (evt: React.MouseEvent<any>) => {
     if (!this.node) return;
-    this.isResizing = true;
+    this.isResizing  = true;
     this.startOffset = this.node.offsetWidth - evt.pageX;
     document.addEventListener('mouseup', this.handleMouseUp, true);
     document.addEventListener('mousemove', this.handleMouseMove, true);
@@ -57,17 +57,21 @@ export default class Column extends React.PureComponent<IColumnCellProps> {
     return this.props.cell.value;
   }
 
+  setColumnRef = (element: HTMLTableHeaderCellElement) => {
+    this.node = element as HTMLTableHeaderCellElement;
+  }
+
   render() {
     return <Observe render={() => {
       let cls = this.column.cls;
 
       let style: React.CSSProperties = {position: 'relative'};
       if (!this.column.visible) {
-        style.display   = 'none';
+        style.display    = 'none';
         style.visibility = 'collapse';
       }
 
-      if (!this.column.enabled) {
+      if ((this.column.enabled !== undefined && !this.column.enabled) || (this.column.enabled === undefined && !this.column.grid.enabled)) {
         style.color     = '#bbb';
         style.fontStyle = 'italic';
       }
@@ -84,7 +88,7 @@ export default class Column extends React.PureComponent<IColumnCellProps> {
         <th
           onMouseDown={this.column.canSort ? this.handleSort : undefined}
           colSpan={this.props.cell.colSpan}
-          ref={(element) => this.node = element as HTMLTableHeaderCellElement}
+          ref={this.setColumnRef}
           rowSpan={this.props.cell.rowSpan}
           style={style}
           title={this.column.tooltip || this.value}>

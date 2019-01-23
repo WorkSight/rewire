@@ -6,17 +6,22 @@ import {withStyles, WithStyle}   from './styles';
 
 const styles = (theme: Theme) => ({
   inputRoot: {
-    lineHeight: 'inherit',
   },
   checkboxRoot: {
-    width: '24px',
-    height: '24px',
+    width: '1.5em',
+    height: '1.5em',
+    fontSize: '1em',
+    padding: 0,
+    '& svg': {
+      fontSize: '1.5em',
+    },
   },
   formControlLabelRoot: {
     marginLeft: '0px',
   },
   formControlLabelLabel: {
-    paddingLeft: '8px',
+    paddingLeft: '0.5em',
+    fontSize: '0.875em',
   },
   checkboxContainerNoLabel: {
     display: 'flex',

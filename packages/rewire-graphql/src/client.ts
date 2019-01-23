@@ -31,7 +31,7 @@ class Client implements IClient {
     this.cache        = opts.cache || new ObservableCache();
   }
 
-  executeQuery(queryObject: IQuery, skipCache: boolean = false, mutate: boolean = false): Promise<IQueryResponse> {
+  executeQuery(queryObject: IQuery, headers?: object, skipCache: boolean = false, mutate: boolean = false): Promise<IQueryResponse> {
     const body    = JSON.stringify({query: (isGQL(queryObject.query)) ? queryObject.query.loc.source.body : queryObject.query, variables: queryObject.variables});
     const queryId = hashString(body);
     if (!skipCache && !mutate) {
@@ -53,21 +53,22 @@ class Client implements IClient {
         : this.fetchOptions;
 
       try {
-        let res =
-        await fetch(this.url, {
+        let reqInit = {
           body: body,
           headers: {
             'Content-Type': 'application/json',
             'Accept': '*/*',
             'Access-Control-Allow-Origin': 'http://localhost:3000',
             'Access-Control-Request-Method': 'post',
-            'Access-Control-Request-Headers' : 'authorization, content-type'
+            'Access-Control-Request-Headers' : 'authorization, content-type',
+            ...headers
           },
           method: 'POST',
           mode: 'cors',
           credentials: 'include',
           ...fetchOptions,
-        });
+        };
+        let res = await fetch(this.url, reqInit);
         let response = await res.json();
         if (res.ok) {
           resolve({
@@ -86,16 +87,16 @@ class Client implements IClient {
     return promise;
   }
 
-  query(query: GQL, variables?: object, mutate: boolean = false): Promise<IQueryResponse> {
-    return this.executeQuery({query, variables}, false, mutate);
+  query(query: GQL, variables?: object, headers?: object, mutate: boolean = false): Promise<IQueryResponse> {
+    return this.executeQuery({query, variables}, headers, false, mutate);
   }
 
-  mutation(query: GQL, variables: object): Promise<IQueryResponse> {
-    return this.query(query, variables, true);
+  mutation(query: GQL, variables: object, headers?: object): Promise<IQueryResponse> {
+    return this.query(query, variables, headers, true);
   }
 
-  executeMutation(mutationObject: IMutation): Promise<IQueryResponse> {
-    return this.executeQuery(mutationObject, true, true);
+  executeMutation(mutationObject: IMutation, headers?: object): Promise<IQueryResponse> {
+    return this.executeQuery(mutationObject, headers, true, true);
   }
 }
 

@@ -2,6 +2,7 @@ import * as is             from 'is';
 import { EditorType }      from 'rewire-ui';
 import { SearchFn, MapFn } from 'rewire-ui';
 import { IValidateFnData } from './Validator';
+import merge               from 'deepmerge';
 export { EditorType };
 
 export interface IRows {
@@ -12,20 +13,22 @@ export interface IDisposable {
   dispose(): void;
 }
 
-export type SortDirection = 'ascending' | 'descending';
-export type TextAlignment = 'left' | 'right' | 'center';
+export type SortDirection     = 'ascending' | 'descending';
+export type TextAlignment     = 'left' | 'center' | 'right';
+export type VerticalAlignment = 'top' | 'middle' | 'bottom';
 
 export interface IGrid extends IRows, IDisposable {
   id                        : number;
   enabled                   : boolean;
+  readOnly                  : boolean;
+  verticalAlign             : VerticalAlignment;
   rows                      : IRow[];
   fixedRows                 : IRow[];
   columns                   : IColumn[];
   editingCell?              : ICell;
   selectedRows              : IRow[];
   selectedCells             : ICell[];
-  width                     : string;
-  height                    : string;
+  focusedCell?              : ICell;
   fixedWidth                : string;
   loading                   : boolean;
   readonly fixedColumns     : IColumn[];
@@ -54,12 +57,14 @@ export interface IGrid extends IRows, IDisposable {
   sortItems(items: any[], comparer: (a: any, b: any) => number): void;
 
   selectRows(rows: IRow[]): void;
-  selectCells(cells: ICell[], multiSelect?: boolean, append?: boolean): void;
-  unselectCells(cells: ICell[]): void;
+  selectCells(cells: ICell[], cellToFocus?: ICell, multiSelect?: boolean, append?: boolean): void;
+  unselectCells(cells: ICell[], cellToFocus?: ICell): void;
   updateCellSelectionProperties(cells: ICell[]): void;
   editCell(cell?: ICell): void;
   selectCellsTo(cell: ICell, append?: boolean): void;
   selectCellsToMergeHelper(rows: IRow[], columnsToSelect: IColumn[]): IColumn[];
+  selectCellByPos(rowPosition: number, columnPosition: number): void;
+  selectCellsByRange(rowPosition1: number, rowPosition2: number, columnPosition1: number, columnPosition2: number): void;
   clearSelection(): void;
 
   cell(rowId: string, column: string): ICell | undefined;
@@ -71,6 +76,10 @@ export interface IGrid extends IRows, IDisposable {
   adjacentLeftCell(cell: ICell, onlySelectable?: boolean): ICell | undefined;
   nextCell(cell: ICell, onlySelectable?: boolean): ICell | undefined;
   previousCell(cell: ICell, onlySelectable?: boolean): ICell | undefined;
+  firstCell(onlySelectable?: boolean): ICell | undefined;
+  lastCell(onlySelectable?: boolean): ICell | undefined;
+  firstCellInRow(row: IRow, onlySelectable?: boolean): ICell | undefined;
+  lastCellInRow(row: IRow, onlySelectable?: boolean): ICell | undefined;
   row(rowId: string): IRow | undefined;
   rowByPos(rowPosition: number): IRow | undefined;
   getRowsByRange(rowStart: number, rowEnd: number, allowCollapsed?: boolean): IRow[];
@@ -78,7 +87,10 @@ export interface IGrid extends IRows, IDisposable {
   columnByPos(columnPosition: number): IColumn | undefined;
 
   revert(): void;
+  revertSelectedCells(): void;
+  revertSelectedRows(): void;
   get(): any[];
+  getChanges(): any[];
   set(data: any[]): void;
 
   addColumn(column: IColumn): IColumn;
@@ -100,6 +112,16 @@ export interface IGrid extends IRows, IDisposable {
   duplicateRows(ids: string[], position?: number): void;
   duplicateSelectedRows(): void;
   insertRowAtSelection(): void;
+}
+
+export interface IGridOptions {
+  enabled?             : boolean;
+  readOnly?            : boolean;
+  verticalAlign?       : VerticalAlignment;
+  isDraggable?         : boolean;
+  multiSelect?         : boolean;
+  groupBy?             : string[];
+  // rowHotkeyPermissions?: IGridRowHotkeyPermissions;
 }
 
 export interface IGridColors {
@@ -150,9 +172,12 @@ export interface IRow extends IDisposable {
   getErrors(): IErrorData[];
   createCell(column: IColumn, value: any, type?: string): ICell;
   clear(columnNames?: string[]): void;
+  _setValue(data: ICellDataMap): void;
   setValue(data: ICellDataMap): void;
   clone(): IRow;
   validate(columnNames?: string[]): void;
+  _revert(): void;
+  revert(): void;
 }
 
 export interface IGroupRow extends IRow, IRows {
@@ -172,17 +197,15 @@ export type IColumnEditor =
   {type: 'phone', options?: {format?: string, mask?: string}};
 
 export interface ICellProperties {
-  id       : number;
-  grid     : IGrid;
-  tooltip? : string;
-  cls?     : any;
-  enabled  : boolean;
-  readOnly : boolean;
-  editable : boolean;
-  align?   : TextAlignment;
-  renderer?: React.SFC<any>;
-  colSpan? : number;
-  rowSpan? : number;
+  id            : number;
+  grid          : IGrid;
+  tooltip?      : string;
+  cls?          : any;
+  editable      : boolean;
+  align?        : TextAlignment;
+  renderer?     : React.SFC<any>;
+  colSpan?      : number;
+  rowSpan?      : number;
 
   onValueChange?(row: IRow, v: any): void;
 }
@@ -194,6 +217,9 @@ export interface IColumn extends ICellProperties {
   width?    : string;
   fixed     : boolean;
   visible   : boolean;
+  verticalAlign?: VerticalAlignment;
+  enabled?      : boolean;
+  readOnly?     : boolean;
   position  : number;
   sort?     : SortDirection;
   canSort?  : boolean;
@@ -222,7 +248,11 @@ export interface ICell extends ICellProperties {
   error?               : IError;
   selected             : boolean;
   value                : any;
+  verticalAlign        : VerticalAlignment;
+  enabled              : boolean;
+  readOnly             : boolean;
   readonly editing     : boolean;
+  element?             : HTMLTableDataCellElement;
   rowSpan              : number;
   colSpan              : number;
   rowPosition          : number;
@@ -238,8 +268,14 @@ export interface ICell extends ICellProperties {
   clone(row: IRow): ICell;
   clear(): void;
   setEditing(editing: boolean): void;
-  validate(): void;
+  canFocus(): boolean;
+  setFocus(focus?: boolean): void;
+  setElement(element: HTMLTableDataCellElement | undefined): void;
+  _setValue(v: any): void;
   setValue(v: any): void;
+  validate(): void;
+  _revert(): void;
+  revert(): void;
 }
 
 export type ICellMap     = {[columnName: string]: ICell};
@@ -274,7 +310,7 @@ export function cloneValue(value: any): any {
   if (is.array(value)) {
     return value.map((v: any) => this.cloneValue(v));
   } else if (is.object(value)) {
-    return value.clone ? value.clone() : Object.assign({}, value);
+    return value.clone ? value.clone() : merge({}, value);
   } else {
     return value;
   }
