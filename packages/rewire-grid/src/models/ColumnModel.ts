@@ -1,4 +1,4 @@
-import { IColumn, IRow, EditorType, IColumnEditor, SortDirection, IGrid, TextAlignment, VerticalAlignment, IError } from './GridTypes';
+import { IColumn, ICell, EditorType, IColumnEditor, SortDirection, IGrid, TextAlignment, VerticalAlignment, IError } from './GridTypes';
 import {IValidateFnData} from './Validator';
 import {editor, compare, defaultPhoneFormat, defaultPhoneMask} from 'rewire-ui';
 import {freeze} from 'rewire-core';
@@ -33,7 +33,7 @@ export class ColumnModel implements IColumn {
   editor?       : React.SFC<any>;
   validator?    : IValidateFnData;
 
-  onValueChange?(row: IRow, v: any): void;
+  onValueChange?(cell: ICell, v: any): void;
   map?(value: any): string;
   predicate?(value: any, filter: {value: any}): boolean;
   compare?(x: any, y: any): number;

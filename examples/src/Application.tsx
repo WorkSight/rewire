@@ -510,9 +510,9 @@ function createTestGrid(nRows: number, nColumns: number) {
   cols.push(createColumn('checkedColumn', 'Checked', 'checked', Math.trunc(Math.random() * 250 + 50) + 'px'));
 
   cols[15].validator = gridIsRequired;
-  cols[17].onValueChange = (row: IRow, value: any) => row.cells['differenceColumn'].setValue((row.cells['timeInColumn'].value || 0) - (value || 0));
+  cols[17].onValueChange = (cell: ICell, value: any) => cell.row.cells['differenceColumn'].setValue((cell.row.cells['timeInColumn'].value || 0) - (value || 0));
   cols[18].validator = gridIsGreaterThan('timeOutColumn');
-  cols[18].onValueChange = (row: IRow, value: any) => row.cells['differenceColumn'].setValue((value || 0) - (row.cells['timeOutColumn'].value || 0));
+  cols[18].onValueChange = (cell: ICell, value: any) => cell.row.cells['differenceColumn'].setValue((value || 0) - (cell.row.cells['timeOutColumn'].value || 0));
   cols[19].validator = gridIsDifferenceOfOthers(['timeInColumn', 'timeOutColumn']);
   cols[20].validator = gridIsSumOfOthers(['timeInColumn', 'timeOutColumn']);
 
@@ -793,7 +793,7 @@ const _Home = (props: any) => <Observe render={() => (
     <div>
       <div>
         {/* <span>{testDate.toDateString()}</span> */}
-        <Button color='primary' variant='contained' style={{marginRight: '15px'}} onClick={() => {loginDialog.form.clear(); loginDialog.open(); }}>Load Dialog Test</Button>
+        <Button color='primary' variant='contained' style={{marginRight: '15px'}} onClick={() => {loginDialog.open(); }}>Load Dialog Test</Button>
         <Button color='primary' variant='contained' onClick={() => gridHotkeysDialogModel.open()}>Load Grid Hotkeys List</Button>
         <DialogLoginForm />
         <GridHotkeysDialog />
@@ -817,8 +817,7 @@ const _Home = (props: any) => <Observe render={() => (
             <Button style={{margin: '0px 15px 10px 0px'}} variant='contained' onClick={() => grid.dataRowsByPosition.forEach(row => row.clear(['numberColumn', 'dateColumn']))}>Clear Number And Date</Button>
             <Button style={{margin: '0px 15px 10px 0px'}} variant='contained' onClick={() => {
               grid.dataRowsByPosition.forEach(row => {
-                let id = row.cells['complexColumn'].value ? row.cells['complexColumn'].value.id : nanoid(10);
-                row.cells['complexColumn'].setValue(new ComplexCellData(id, 'Smithers', 57));
+                row.cells['complexColumn'].setValue(new ComplexCellData('smithers027', 'Smithers', 57));
               });
             }}>
               Change Complex Cell Value
@@ -875,8 +874,8 @@ class TestDialog extends Modal {
 
   constructor() {
     super('Test Form');
-    this.action('login', this.submit, {type: 'submit'})
-        .action('cancel', {color: 'secondary', icon: 'cancel'});
+    this.action('login', this.submit, {type: 'submit', disabled: () => !this.form.hasChanges})
+        .action('cancel', {color: 'secondary', icon: 'cancel'})
   }
 
   submit = async () => {

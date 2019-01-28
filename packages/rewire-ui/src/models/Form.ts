@@ -181,6 +181,7 @@ export default class Form {
   private dispose            : () => void;
   private _hasChanges        : () => boolean;
   private _hasErrors         : () => boolean;
+  private _initial           : ObjectType;
   defaultAdornmentsEnabled   : boolean;
   initialValuesValidationMode: IInitialValuesValidationModeType;
   disableErrors              : boolean;
@@ -202,7 +203,8 @@ export default class Form {
     this.updateOnChange              = options && options.updateOnChange || false;
     this.validateOnUpdate            = options && options.validateOnUpdate !== undefined ? options.validateOnUpdate : true;
     this.initializeFields(fields);
-    this.value = initial || {};
+    this._initial = initial || {};
+    this.value    = this.initial;
   }
 
   set value(value: ObjectType)  {
@@ -211,6 +213,7 @@ export default class Form {
     this._value = value;
     this.fields.forEach(field => {
       field.value = field.type === 'boolean' || field.type === 'switch' ? value[field.name] || false : value[field.name];
+      field.error = undefined;
     });
 
     if (this.initialValuesValidationMode === 'all') {
@@ -222,7 +225,7 @@ export default class Form {
 
     root((dispose) => {
       this.dispose        = dispose;
-      const result        = this.validator.validateFields(this.fields.filter(field => !field.disableErrors).map(field => field.name), this.toObjectLabelsAndValues());
+      const result        = this.validateForm(false);
       const fieldsChanged = observe(() => this.fields.map(f => f.value));
       this._hasChanges    = computed(fieldsChanged, () => {
         if (!this._value) return false;
@@ -247,6 +250,10 @@ export default class Form {
 
   get hasErrors() {
     return this._hasErrors && this._hasErrors();
+  }
+
+  get initial() {
+    return this._initial;
   }
 
   get value() {
@@ -394,6 +401,14 @@ export default class Form {
       prev[current.name] = current;
       return prev;
     }, {});
+  }
+
+  public reset() {
+    this.value = this.initial;
+  }
+
+  public revert() {
+    this.value = this.value;
   }
 
   public clear() {
