@@ -197,35 +197,35 @@ export type IColumnEditor =
   {type: 'phone', options?: {format?: string, mask?: string}};
 
 export interface ICellProperties {
-  id            : number;
-  grid          : IGrid;
-  tooltip?      : string;
-  cls?          : any;
-  editable      : boolean;
-  align?        : TextAlignment;
-  renderer?     : React.SFC<any>;
-  colSpan?      : number;
-  rowSpan?      : number;
+  id       : number;
+  grid     : IGrid;
+  tooltip? : string;
+  cls?     : any;
+  editable : boolean;
+  align?   : TextAlignment;
+  renderer?: React.SFC<any>;
+  colSpan? : number;
+  rowSpan? : number;
 
-  onValueChange?(row: IRow, v: any): void;
+  onValueChange?(cell: ICell, v: any): void;
 }
 
 export interface IColumn extends ICellProperties {
-  name      : string;
-  type      : EditorType;
-  title?    : string;
-  width?    : string;
-  fixed     : boolean;
-  visible   : boolean;
+  name          : string;
+  type          : EditorType;
+  title?        : string;
+  width?        : string;
+  fixed         : boolean;
+  visible       : boolean;
   verticalAlign?: VerticalAlignment;
   enabled?      : boolean;
   readOnly?     : boolean;
-  position  : number;
-  sort?     : SortDirection;
-  canSort?  : boolean;
-  options?  : any;
-  editor?   : React.SFC<any>;
-  validator?: IValidateFnData;
+  position      : number;
+  sort?         : SortDirection;
+  canSort?      : boolean;
+  options?      : any;
+  editor?       : React.SFC<any>;
+  validator?    : IValidateFnData;
 
   map?(value: any): string;
   predicate?(value: any, filter: {value: any}): boolean;

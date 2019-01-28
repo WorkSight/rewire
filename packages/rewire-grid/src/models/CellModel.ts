@@ -2,7 +2,8 @@ import * as React from 'react';
 import * as is from 'is';
 import {IGrid, IColumn, ICell, IRow, IError, IErrorData, TextAlignment, VerticalAlignment, cloneValue} from './GridTypes';
 import { observable, defaultEquals, property, DataSignal } from 'rewire-core';
-import * as deepEqual from 'fast-deep-equal';
+import * as deepEqual                                      from 'fast-deep-equal';
+import mixin                                               from 'mixin-deep';
 
 let id = 0;
 export class CellModel implements ICell {
@@ -13,7 +14,7 @@ export class CellModel implements ICell {
   private _align        : DataSignal<TextAlignment | undefined>;
   private _verticalAlign: DataSignal<VerticalAlignment | undefined>;
   private _renderer     : DataSignal<React.SFC<any> | undefined>;
-  private _onValueChange: DataSignal<((row: IRow, v: any) => void) | undefined>;
+  private _onValueChange: DataSignal<((cell: ICell, v: any) => void) | undefined>;
   private _element      : DataSignal<HTMLTableDataCellElement | undefined>;
   // private _enabled?    : boolean;
   // private _readOnly?   : boolean;
@@ -125,10 +126,10 @@ export class CellModel implements ICell {
     return this._renderer() || this.column.renderer;
   }
 
-  set onValueChange(value: ((row: IRow, v: any) => void) | undefined) {
+  set onValueChange(value: ((cell: ICell, v: any) => void) | undefined) {
     this._onValueChange(value);
   }
-  get onValueChange(): ((row: IRow, v: any) => void) | undefined {
+  get onValueChange(): ((cell: ICell, v: any) => void) | undefined {
     return this._onValueChange() || this.column.onValueChange;
   }
 
@@ -195,8 +196,12 @@ export class CellModel implements ICell {
 
   _setValue(value: any) {
     if (this.value === value) return;
-    this.value = value;
-    this.onValueChange && this.onValueChange(this.row, value);
+    if (is.object(this.value) && is.object(value)) {
+      mixin(this.value, value);
+    } else {
+      this.value = value;
+    }
+    this.onValueChange && this.onValueChange(this, value);
   }
 
   setValue(value: any) {

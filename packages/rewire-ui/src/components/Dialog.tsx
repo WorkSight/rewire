@@ -4,7 +4,7 @@ import classNames            from 'classnames';
 import {Observe}             from 'rewire-core';
 import Typography            from '@material-ui/core/Typography';
 import Dialog                from '@material-ui/core/Dialog';
-import Button                from '@material-ui/core/Button';
+import Button, {ButtonProps} from '@material-ui/core/Button';
 import Divider               from '@material-ui/core/Divider';
 import Icon                  from '@material-ui/core/Icon';
 import Grow                  from '@material-ui/core/Grow';
@@ -57,13 +57,18 @@ let styles = (theme: Theme) => ({
   },
 });
 
-export type ActionRenderType = (props: {label: string, action: ActionType, isDisabled: boolean}) => JSX.Element;
-export const DefaultActionRenderer: ActionRenderType = ({label, action, isDisabled}) => (
+export interface IDefaultActionRendererStyles {
+  button?: string;
+  icon?: string;
+  label?: string;
+}
+export type ActionRenderType = (props: {label: string, action: ActionType, isDisabled: boolean, variant?: ButtonProps['variant'], classes?: IDefaultActionRendererStyles}) => JSX.Element;
+export const DefaultActionRenderer: ActionRenderType = ({label, action, isDisabled, variant, classes}) => (
   <Observe render={() => (
-    <Button type={action.type} color={action.type ? 'primary' : action.color} disabled={isDisabled || action.disabled()} onClick={action.action}>
-    {action.icon && <Icon style={{marginRight: '8px'}}>{action.icon}</Icon>}
-    {label}
-  </Button>
+    <Button className={classes && classes.button} type={action.type} color={action.type ? 'primary' : action.color} variant={variant} disabled={isDisabled || action.disabled()} onClick={action.action}>
+      {action.icon && <Icon className={classes && classes.icon} style={{marginRight: '8px'}}>{action.icon}</Icon>}
+      <span className={classes && classes.label}>{label}</span>
+    </Button>
   )} />
 );
 
