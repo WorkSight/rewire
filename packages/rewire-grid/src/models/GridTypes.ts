@@ -102,7 +102,7 @@ export interface IGrid extends IRows, IDisposable {
   _removeGroupRow(rows: any, id: string): void;
   removeRow(id: string): void;
   removeRows(ids: string[]): void;
-  removeSelectedRows(): void;
+  removeSelectedRows(reselect?: boolean): void;
   addRow(row: any, position?: number): IRow;
   _addRow(row: any, position?: number): IRow;
   addRows(rows: any[], position?: number): void;
@@ -276,6 +276,8 @@ export interface ICell extends ICellProperties {
   validate(): void;
   _revert(): void;
   revert(): void;
+  unselect(): void;
+  findVerticallyNearestCellWithUnselectedRow(): ICell | undefined;
 }
 
 export type ICellMap     = {[columnName: string]: ICell};

@@ -32,7 +32,7 @@ class PhoneField extends React.Component<PhoneFieldProps> {
     let phonePlaceholder = phoneFormat && phoneMask && phoneFormat.slice().replace(new RegExp(/#/, 'g'), phoneMask) || placeholder;
 
     return (
-      <NumberField format={phoneFormat} mask={phoneMask} placeholder={phonePlaceholder} {...otherProps} />
+      <NumberField format={phoneFormat} mask={phoneMask} placeholder={phonePlaceholder} isNumericString={true} {...otherProps} />
     );
   }
 }

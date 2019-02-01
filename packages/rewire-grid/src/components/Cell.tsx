@@ -216,26 +216,7 @@ class Cell extends React.PureComponent<CellProps, {}> {
         }
         if (evt.ctrlKey) {
           // delete row(s)
-          let currCell: ICell                    = this.cell;
-          let newCellToSelect: ICell | undefined = this.cell;
-          do {
-            currCell        = newCellToSelect;
-            newCellToSelect = this.grid.adjacentBottomCell(currCell, true);
-          } while (newCellToSelect && newCellToSelect.selected);
-          if (!newCellToSelect) {
-            currCell        = this.cell;
-            newCellToSelect = this.cell;
-            do {
-              currCell        = newCellToSelect;
-              newCellToSelect = this.grid.adjacentTopCell(currCell, true);
-            } while (newCellToSelect && newCellToSelect.selected);
-          }
           this.grid.removeSelectedRows();
-          if (!newCellToSelect) {
-            break;
-          }
-          this.grid.startCell = newCellToSelect;
-          this.grid.selectCells([newCellToSelect]);
           break;
         }
         this.grid.selectedCells.forEach(cell => cell.clear());

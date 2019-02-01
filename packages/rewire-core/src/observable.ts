@@ -193,9 +193,9 @@ export function defaultEquals(v1: any, v2: any) {
     return true;
   }
 
-  const undefinedOrNull1 = v1 === undefined || v1 === null;
-  const undefinedOrNull2 = v2 === undefined || v2 === null;
-  if (undefinedOrNull1 && undefinedOrNull2) return true;
+  const undefinedOrNullOrEmpty1 = v1 === undefined || v1 === null || v1 === '';
+  const undefinedOrNullOrEmpty2 = v2 === undefined || v2 === null || v2 === '';
+  if (undefinedOrNullOrEmpty1 && undefinedOrNullOrEmpty2) return true;
   if (Array.isArray(v1) && Array.isArray(v2)) {
     if (v1.length !== v2.length) return false;
     for (let i = 0; i < v1.length; i++) {

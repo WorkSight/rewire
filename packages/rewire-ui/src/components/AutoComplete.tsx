@@ -354,7 +354,7 @@ class AutoComplete<T> extends React.Component<AutoCompleteProps<T>, any> {
     return (
       <Downshift
         defaultHighlightedIndex={0}
-        initialSelectedItem={this.props.selectedItem}
+        selectedItem={this.props.selectedItem}
         itemToString={this.map}
         onInputValueChange={this.handleInputChanged}
         onUserAction={this.handleItemChanged}
