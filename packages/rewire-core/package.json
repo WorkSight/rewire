@@ -1,6 +1,6 @@
 {
   "name": "rewire-core",
-  "version": "1.0.0-beta.141",
+  "version": "1.0.0-beta.145",
   "description": "A simple library for developing react applications using reactive state and proxies",
   "main": "./es6-lib.js",
   "typings": "./src/index.ts",
@@ -24,6 +24,7 @@
   },
   "homepage": "https://github.com/worksight/rewire",
   "dependencies": {
+    "mixin-deep": "^2.0.0",
     "react": "^16.4.2",
     "s-js": "^0.4.9"
   }

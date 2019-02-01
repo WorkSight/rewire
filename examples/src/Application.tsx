@@ -1,66 +1,96 @@
-import * as React            from 'react';
-import * as ReactDOM         from 'react-dom';
-import {AutoComplete}        from 'rewire-ui';
-import {
-  arraySearch,
-  documentSearch
-}                            from 'rewire-ui';
-import {Select}              from 'rewire-ui';
-import { observable, watch, root } from 'rewire-core';
-import {Observe}             from 'rewire-core';
-import {fetch}               from 'rewire-common';
-// import TextField          from 'material-ui/TextField';
-import {TextField}           from 'rewire-ui';
-import {NumberField}         from 'rewire-ui';
-import Button                from '@material-ui/core/Button';
-import Typography            from '@material-ui/core/Typography';
-import { withStyles }        from '@material-ui/core/styles';
-import AddIcon               from '@material-ui/icons/Add';
-import AccessibilityIcon     from '@material-ui/icons/Accessibility';
-import {Sortable, SortableList, IItem} from 'rewire-ui';
+import * as React    from 'react';
+import * as ReactDOM from 'react-dom';
+import * as nanoid   from 'nanoid';
+import * as is       from 'is';
 import {
   BrowserRouter as Router,
   Route,
   Link,
   NavLink,
 } from 'react-router-dom';
-import * as nanoid from 'nanoid';
-// import {TimeInputField} from 'rewire-ui';
-import {utc}            from 'rewire-common';
-// import Grid           from './components/Grid';
-import Paper          from '@material-ui/core/Paper';
-import Dialog         from '@material-ui/core/Dialog';
-import ListItem       from '@material-ui/core/ListItem';
-import {delay}        from 'rewire-common';
-import {Loader}       from 'rewire-ui';
-import * as is        from 'is';
-import {Form, IFormOptions}         from 'rewire-ui';
-import { IObject }    from 'rewire-common';
-import {Modal}        from 'rewire-ui';
-import {Dialog as DialogView}   from 'rewire-ui';
-import {FormView}     from 'rewire-ui';
-// import column         from './models/Grid';
-import {createGrid, createColumn, IError, ErrorSeverity}   from 'rewire-grid';
-import {Grid, IGridOptions, ICell, IRow, isLessThan as gridIsLessThan, isGreaterThan as gridIsGreaterThan, isRequired as gridIsRequired, isSumOfOthers as gridIsSumOfOthers, isDifferenceOfOthers as gridIsDifferenceOfOthers}   from 'rewire-grid';
-// import { ICell, collapseAll, expandAll } from 'rewire-grid/models/GridTypes';
-import {editor}       from 'rewire-ui';
-import {isRequired, isEmail, and, isSameAsOther, isGreaterThan, isGreaterThanOrEquals, isLessThan, isLessThanOrEquals, isDifferenceOfOthers, isSumOfOthers, requiredWhenOtherIsNotNull, requiredWhenOtherIsValue} from 'rewire-ui';
+import {
+  fetch,
+  utc,
+  delay,
+  IObject,
+} from 'rewire-common';
+import {
+  Observe,
+  observable,
+  watch,
+  root} from 'rewire-core';
+import {
+  Sortable,
+  SortableList,
+  IItem,
+  arraySearch,
+  documentSearch,
+  AutoComplete,
+  Select,
+  TextField,
+  NumberField,
+  Loader,
+  Form,
+  FormView,
+  IFormOptions,
+  Modal,
+  Dialog as DialogView,
+  editor,
+  isRequired,
+  and,
+  isSameAsOther,
+  isDifferentFromOther,
+  isDifferenceOfOthers,
+  isSumOfOthers,
+  isLessThan,
+  requiredWhenOtherIsNotNull,
+  requiredWhenOtherIsValue,
+} from 'rewire-ui';
+import {
+  createGrid,
+  createColumn,
+  IError,
+  ErrorSeverity,
+  Grid,
+  IGridOptions,
+  ICell,
+  IRow,
+  isLessThan as gridIsLessThan,
+  isGreaterThan as gridIsGreaterThan,
+  isRequired as gridIsRequired,
+  isSumOfOthers as gridIsSumOfOthers,
+  isDifferenceOfOthers as gridIsDifferenceOfOthers,
+} from 'rewire-grid';
+
+import Paper             from '@material-ui/core/Paper';
+import Dialog            from '@material-ui/core/Dialog';
+import ListItem          from '@material-ui/core/ListItem';
+import Button            from '@material-ui/core/Button';
+import Typography        from '@material-ui/core/Typography';
+import {withStyles}      from '@material-ui/core/styles';
+import AddIcon           from '@material-ui/icons/Add';
+import AccessibilityIcon from '@material-ui/icons/Accessibility';
+import {
+  MuiThemeProvider,
+  Theme,
+  createMuiTheme
+} from '@material-ui/core/styles';
+
 import './graphqltest';
 import doucheSuitDude from './images/doucheSuitDude.jpg';
-import { MuiThemeProvider, Theme, createMuiTheme } from '@material-ui/core/styles';
-import { NotificationDoNotDisturb } from 'material-ui/svg-icons';
+import {NotificationDoNotDisturb} from 'material-ui/svg-icons';
 
 const suggestions = [
-  {id: '0', name: 'Afghanistan'},
-  {id: '1', name: 'Aland Islands'},
-  {id: '2', name: 'Albania'},
-  {id: '3', name: 'Algeria'},
-  {id: '4', name: 'American Samoa'},
-  {id: '5', name: 'Andorra'},
-  {id: '6', name: 'Angola'},
-  {id: '7', name: 'Anguilla'},
-  {id: '8', name: 'Antarctica'},
-  {id: '9', name: 'Antigua and Barbuda'},
+  {id: '0',  name: 'Afghanistan'},
+  {id: '1',  name: 'Aland Islands'},
+  {id: '2',  name: 'Albania'},
+  {id: '3',  name: 'Algeria'},
+  {id: '4',  name: 'American Samoa'},
+  {id: '5',  name: 'Andorra'},
+  {id: '6',  name: 'Angola'},
+  {id: '7',  name: 'Anguilla'},
+  {id: '8',  name: 'Antarctica'},
+  {id: '9',  name: 'Antigua and Barbuda'},
   {id: '10', name: 'Argentina'},
   {id: '11', name: 'Armenia'},
   {id: '12', name: 'Aruba'},
@@ -94,28 +124,8 @@ interface IDocument {
   code?: string;
 }
 
-interface IName {
-  name: string;
-}
-
-const searcher = arraySearch(['Yes', 'No', 'Maybe', 'Uncertain', 'Definitely Not'], (item?) => item || '');
+const searcher  = arraySearch(['Yes', 'No', 'Maybe', 'Uncertain', 'Definitely Not'], (item?) => item || '');
 const countries = arraySearch(suggestions, (item?) => (item && item.name) || '');
-const state = documentSearch('state');
-const city = documentSearch('city');
-
-// const fld   = autoCompleteField<IName>(suggestions, 'Countries', (item?) => (item && item.name) || '');
-// const state = autoCompleteField<IDocument>('state', 'State');
-// const city  = autoCompleteField<IDocument>('city', 'City', state);
-// const name  = textField('Sandy', 'Name');
-
-// setTimeout(() => { name.error = 'error!!'; }, 1000);
-// setTimeout(() => { name.enabled = false; }, 3000);
-// setTimeout(() => { name.visible = false; }, 5000);
-// setTimeout(() => { name.visible = true; }, 7000);
-// setTimeout(() => { name.enabled = true; }, 9000);
-// setTimeout(() => state.value = 'Douglas', 2000);
-// fld.value = 'Brazil';
-// watch(() => name.value, () => console.log(name.value));
 
 interface IOoga {
   YesNoValue: string;
@@ -130,11 +140,6 @@ interface IOoga {
   time?     : number;
 }
 
-interface IUIState {
-  disabled?: boolean;
-  visible? : boolean;
-}
-
 const ooga: IOoga = observable({
   YesNoValue: 'Yes',
   name      : 'Sandy',
@@ -143,17 +148,9 @@ const ooga: IOoga = observable({
   loading   : false
 });
 
-// watch(() => ooga.date, () => console.log(ooga.date, utc(ooga.date).toTimestampString()));
-
-const uistate: IUIState = observable({});
-
 setTimeout(() => {
   ooga.YesNoValue = 'BLAH';
 }, 4000);
-
-// setTimeout(() => {
-//   uistate.disabled = true;
-// }, 4000);
 
 const BasicExample = (props: any) => {
   return (
@@ -172,22 +169,6 @@ const BasicExample = (props: any) => {
     </Router>
   );
 };
-
-function stateChanged(v: any) {
-  ooga.state = v;
-}
-
-function cityChanged(v: any) {
-  ooga.city = v;
-}
-
-const asFloat = (value: (v: number) => void) => (evt: React.ChangeEvent<HTMLInputElement>) => value(parseFloat(evt.target.value));
-const asInt   = (evt: React.ChangeEvent<HTMLInputElement>) => parseInt(evt.target.value);
-const asText  = (value: (v: string) => void) => (evt: React.ChangeEvent<HTMLInputElement>) => value(evt.target.value);
-
-let updateName = (v?: string) => ooga.name = v;
-const suggestions2 = observable(suggestions);
-// setTimeout(() => { console.log('here'); suggestions2[0].name = 'error!!'; }, 5000);
 
 class LoginDialog extends Modal {
   form: Form = Form.create({
@@ -238,9 +219,6 @@ const LoginFormView = ({form}: {form: typeof loginDialog.form}) => (
   </FormView>
   </div>
 );
-
-// watch(() => loginDialog.form.hasChanges, () => console.log('has changes =', loginDialog.form.hasChanges));
-// watch(() => loginDialog.form.hasErrors, () => console.log('has errors =', loginDialog.form.hasErrors));
 
 const getLoginTitle = (dialog: Modal): JSX.Element => {
   return <div>Login</div>;
@@ -374,73 +352,6 @@ const GridHotkeysDialog = () => (
     </div>
   </ DialogView>
 );
-
-// const testGrid = {
-//   rows: observable([] as any[]),
-//   columns: [
-//     column('product', 'Product', 'text', 'medium'),
-//     column('name', 'Name', 'password', 'large'),
-//     column('name2', 'Name2', 'number'),
-//     column('description', 'Description', {type: 'number', options: {decimals: 2, thousandSeparator: true}}, 'medium'),
-//     column('code', 'Code', {type: 'auto-complete', options: countries}, 'large'),
-//     column('owner', 'Owner', 'text')
-//   ]
-// };
-
-// async function loadGrid(delayms: number) {
-//   ooga.loading = true;
-//   await delay(delayms);
-//   testGrid.rows.set(
-//     { id: 0, product: 'DevExtreme', owner: 'DevExpress' },
-//     { id: 1, product: 'DevExtreme', owner: 'DevExpress', code: {name: 'Aland Islands'} },
-//     { id: 2, product: 'DevExtreme Reactive', owner: 'DevExpress' },
-//     { id: 3, product: 'DevExtreme', owner: 'DevExpress' },
-//     { id: 4, product: 'DevExtreme Reactive', owner: 'DevExpress' },
-//     { id: 5, product: 'DevExtreme', owner: 'DevExpress' },
-//     { id: 6, product: 'DevExtreme Reactive', owner: 'DevExpress' },
-//     { id: 7, product: 'DevExtreme', owner: 'DevExpress' },
-//     { id: 8, product: 'DevExtreme Reactive', owner: 'DevExpress' },
-//     { id: 9, product: 'DevExtreme', owner: 'DevExpress' },
-//     { id: 10, product: 'DevExtreme', owner: 'DevExpress' },
-//   );
-//   ooga.loading = false;
-// }
-
-// loadGrid(0);
-// // setTimeout(() => {
-//   console.log(JSON.stringify(testGrid.rows));
-//   loadGrid(3500 );
-// }
-//   , 10000);
-// loadGrid(6500);
-
-// setTimeout(() => testGrid.rows.push({id: 4, product: 'goober', owner: 'me'}), 4000);
-// setTimeout(() => testGrid.rows.push({id: 5, product: 'goober2', owner: 'me2'}), 8000);
-// setTimeout(() => testGrid.columns.push({name: 'ooga', title: 'The Ooga'}), 4000);
-// setTimeout(() => testGrid.rows.push({id: 6, product: 'goober2', owner: 'me2'}), 10000);
-// setTimeout(() => testGrid.rows[0].product = 'ooga', 6000);
-// setTimeout(() => testGrid.rows[3].product = 'ooga', 12000);
-
-const items1 = {id: '1000', items: observable([])};
-const items2 = {id: '1001', items: observable([])};
-const items3 = {id: '1002', items: observable([])};
-
-function createItems(items: any[], n: number, y: number = 1) {
-  for (let x = 0; x < n; x++) {
-    let id = x + y;
-    items.push({id: '' + id, name: `item ${id.toFixed(2)}`});
-  }
-}
-
-setTimeout(() => (items1 as any).items[0].name = 'ooga', 3000);
-
-createItems(items1.items, 15);
-createItems(items2.items, 15, 50);
-createItems(items3.items, 15, 90);
-
-const items4 = observable([items1, items2, items3]);
-
-// watch(() => items1.items.length, () => console.log('test has changed'));
 
 const confirmation = new Modal('Delete entire hard drive?')
   .action('yes', () => (console.log('no way you chose that'), true), {color: 'primary'})
@@ -660,14 +571,6 @@ console.log(r);
 // setTimeout(() => grid.rows[0].cells['column0'].value = 'booga', 6000);
 // setTimeout(() => grid.columns[3].visible = false, 7000);
 // setTimeout(() => grid.columns[3].visible = true, 8000);
-
-// watch(() => grid.changed, () => {
-//   if (grid.changed) {
-//     console.log('IT HAS CHANGED');
-//   } else {
-//     console.log('IT IS THE SAME');
-//   }
-// });
 
 let employees = [
   {id: '1e',  name: 'Schrute, Dwight',         email: 'testEmail11@test.com',       isActive: true, timeColumn: '7:30', autoCompleteColumn: undefined        , selectColumn: {name: 'Bermuda'}, numberColumn1: 1, numberColumn2: 2, numberColumn3: 3},
@@ -1006,23 +909,6 @@ async function login() {
   let theme = createMuiTheme({typography: {useNextVariants: true}});
   ReactDOM.render(<MuiThemeProvider theme={theme}><BasicExample /></MuiThemeProvider>, document.getElementById('root'));
 }
-
-let id = 0;
-class Test {
-  id: number = id++;
-  enabled    = true;
-  rows       = [];
-  headers    = [];
-  loading    = false;
-  width      = 'calc(100vh - 260px)';
-  height     = '1600px';
-  fixedWidth = '180px';
-  isDraggable: boolean = false;
-  constructor() {
-
-  }
-}
-
 
 login();
 

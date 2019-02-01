@@ -203,8 +203,8 @@ export default class Form {
     this.updateOnChange              = options && options.updateOnChange || false;
     this.validateOnUpdate            = options && options.validateOnUpdate !== undefined ? options.validateOnUpdate : true;
     this.initializeFields(fields);
-    this._initial = initial || {};
-    this.value    = this.initial;
+    this.value    = initial || {};
+    this._initial = Object.assign({}, this.value);
   }
 
   set value(value: ObjectType)  {
@@ -404,7 +404,7 @@ export default class Form {
   }
 
   public reset() {
-    this.value = this.initial;
+    this.value = Object.assign({}, this.initial);
   }
 
   public revert() {

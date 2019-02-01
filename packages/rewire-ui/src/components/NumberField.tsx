@@ -68,6 +68,7 @@ export interface INumberFieldProps {
   align?                : TextAlignment;
   decimals?             : number;
   fixed?                : boolean;
+  isNumericString?      : boolean;
   thousandSeparator?    : boolean;
   updateOnChange?       : boolean;
   selectOnFocus?        : boolean;
@@ -76,7 +77,7 @@ export interface INumberFieldProps {
   startAdornment?       : JSX.Element;
   endAdornment?         : JSX.Element;
 
-  onValueChange: (value?: number) => void;
+  onValueChange: (value?: number | string) => void;
 }
 
 type NumberFieldProps = WithStyle<ReturnType<typeof styles>, TextFieldProps & INumberFieldProps>;
@@ -87,7 +88,8 @@ class NumberTextField extends React.Component<NumberFieldProps> {
   }
 
   handleValueChanged = (values: any) => {
-    this.props.onValueChange(values.floatValue);
+    let value = this.props.isNumericString ? values.value : values.floatValue;
+    this.props.onValueChange(value);
   }
 
   shouldComponentUpdate(nextProps: NumberFieldProps) {
@@ -133,7 +135,7 @@ class NumberTextField extends React.Component<NumberFieldProps> {
     if (visible === false) {
       return null;
     }
-    let value                       = this.parse(this.props.value);
+    let value                       = this.props.isNumericString ? this.props.value : this.parse(this.props.value);
     const startAdornment            = this.props.startAdornment ? <InputAdornment position='start' classes={{root: this.props.classes.inputAdornmentRoot}}>{this.props.startAdornment}</InputAdornment> : undefined;
     const endAdornment              = this.props.endAdornment ? <InputAdornment position='end' classes={{root: this.props.classes.inputAdornmentRoot}}>{this.props.endAdornment}</InputAdornment> : undefined;
     const inputClassName            = this.props.variant === 'outlined' ? this.props.classes.inputOutlinedInput : this.props.classes.inputInput;
@@ -157,6 +159,7 @@ class NumberTextField extends React.Component<NumberFieldProps> {
           fixedDecimalScale={this.props.fixed}
           format={this.props.format}
           mask={this.props.mask}
+          isNumericString={this.props.isNumericString}
           inputProps={{className: this.props.classes.nativeInput, style: {textAlign: this.props.align || 'left'}}}
           InputProps={{startAdornment: startAdornment, endAdornment: endAdornment, classes: {root: this.props.classes.inputRoot, input: inputClassName, formControl: inputFormControlClassName}}}
           InputLabelProps={{shrink: true, classes: {root: this.props.classes.inputLabelRoot, outlined: this.props.classes.inputLabelRootShrink}}}
@@ -172,7 +175,7 @@ class NumberTextField extends React.Component<NumberFieldProps> {
       <BlurInputHOC
         {...this.props}
         value={value}
-        onValueChange={(v?: number) => this.props.onValueChange(v)}
+        onValueChange={(v?: number | string) => this.props.onValueChange(v)}
         render={(props: NumberFieldProps) => (
           <NumberFormat
             className={props.className}
@@ -181,7 +184,7 @@ class NumberTextField extends React.Component<NumberFieldProps> {
             error={!props.disableErrors && !props.disabled && !!props.error}
             value={props.value}
             label={props.label}
-            onValueChange={(values: any) => props.onChange && props.onChange({target: {value: values.floatValue}} as any)}
+            onValueChange={(values: any) => props.onChange && props.onChange({target: {value: props.isNumericString ? values.value : values.floatValue}} as any)}
             onBlur={props.onBlur}
             autoFocus={props.autoFocus}
             onFocus={this.handleFocus}
@@ -190,6 +193,7 @@ class NumberTextField extends React.Component<NumberFieldProps> {
             fixedDecimalScale={props.fixed}
             format={props.format}
             mask={props.mask}
+            isNumericString={props.isNumericString}
             inputProps={{className: props.classes.nativeInput, style: {textAlign: props.align || 'left'}}}
             InputProps={{startAdornment: startAdornment, endAdornment: endAdornment, classes: {root: props.classes.inputRoot, input: inputClassName, formControl: inputFormControlClassName}}}
             InputLabelProps={{shrink: true, classes: {root: props.classes.inputLabelRoot, outlined: props.classes.inputLabelRootShrink}}}

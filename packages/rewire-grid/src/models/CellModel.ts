@@ -1,9 +1,9 @@
 import * as React from 'react';
 import * as is from 'is';
 import {IGrid, IColumn, ICell, IRow, IError, IErrorData, TextAlignment, VerticalAlignment, cloneValue} from './GridTypes';
-import { observable, defaultEquals, property, DataSignal } from 'rewire-core';
-import * as deepEqual                                      from 'fast-deep-equal';
-import mixin                                               from 'mixin-deep';
+import {observable, defaultEquals, property, DataSignal} from 'rewire-core';
+import * as deepEqual                                    from 'fast-deep-equal';
+import {replace}                                         from 'rewire-core';
 
 let id = 0;
 export class CellModel implements ICell {
@@ -197,7 +197,7 @@ export class CellModel implements ICell {
   _setValue(value: any) {
     if (this.value === value) return;
     if (is.object(this.value) && is.object(value)) {
-      mixin(this.value, value);
+      replace(this.value, value);
     } else {
       this.value = value;
     }
@@ -307,6 +307,33 @@ export class CellModel implements ICell {
     if (this.hasChanges()) {
       this.setValue(cloneValue(this.row.data[this.column.name]));
     }
+  }
+
+  unselect() {
+    this.selected              = false;
+    this.isTopMostSelection    = false;
+    this.isRightMostSelection  = false;
+    this.isBottomMostSelection = false;
+    this.isLeftMostSelection   = false;
+  }
+
+  findVerticallyNearestCellWithUnselectedRow(): ICell | undefined {
+    let currCell: ICell                    = this;
+    let newCellToSelect: ICell | undefined = this;
+    do {
+      currCell        = newCellToSelect;
+      newCellToSelect = this.grid.adjacentBottomCell(currCell, true);
+    } while (newCellToSelect && newCellToSelect.row.selected);
+    if (!newCellToSelect) {
+      currCell        = this;
+      newCellToSelect = this;
+      do {
+        currCell        = newCellToSelect;
+        newCellToSelect = this.grid.adjacentTopCell(currCell, true);
+      } while (newCellToSelect && newCellToSelect.row.selected);
+    }
+
+    return newCellToSelect;
   }
 }
 

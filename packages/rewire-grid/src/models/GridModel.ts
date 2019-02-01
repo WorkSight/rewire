@@ -417,6 +417,9 @@ class GridModel implements IGrid, IDisposable {
     this.validate();
     this.changed = this.hasChanges();
     this.sort();
+    if (this.focusedCell) {
+      this.focusedCell.setFocus();
+    }
         }
 
   revertSelectedCells() {
@@ -455,6 +458,21 @@ class GridModel implements IGrid, IDisposable {
     //   this._removeGroupRow(groupRows(this.rows), row.row.parentRow.id);
     // }
 
+    // unselect the row + any cells that are a part of the removed row.
+    if (row.row.selected) {
+      let selectedRowIdx = this.selectedRows.findIndex((selectedRow: IRow) => selectedRow.id === row.row.id);
+      this.selectedRows.splice(selectedRowIdx, 1);
+      row.row.selected = false;
+      row.row.cellsByColumnPosition.forEach((cell: ICell) => {
+        let cellIdx = this.selectedCells.findIndex((selectedCell: ICell) => selectedCell.id === cell.id);
+        if (cellIdx >= 0) {
+          this.selectedCells.splice(cellIdx, 1);
+          cell.unselect();
+        }
+      });
+      this.updateCellSelectionProperties(this.selectedCells);
+    }
+
     this.dataRowsByPosition.splice(row.row.position, 1);
     this.setRowPositions();
   }
@@ -473,8 +491,17 @@ class GridModel implements IGrid, IDisposable {
     });
   }
 
-  removeSelectedRows(): void {
+  removeSelectedRows(reselect: boolean = true): void {
+    let newCellToSelect: ICell | undefined;
+    if (reselect) {
+      let currCell    = this.focusedCell || (this.selectedCells.length > 0 && this.selectedCells[this.selectedCells.length - 1]) || undefined;
+      newCellToSelect = currCell ? currCell.findVerticallyNearestCellWithUnselectedRow() : undefined;
+    }
     this.removeRows(this.selectedRows.map(row => row.id));
+    if (reselect && newCellToSelect) {
+      this.startCell = newCellToSelect;
+      this.selectCells([newCellToSelect]);
+    }
   }
 
   addSort(column: IColumn, sort?: SortDirection, insert?: boolean): IGrid {
@@ -901,11 +928,7 @@ class GridModel implements IGrid, IDisposable {
       cellsToSelect.sort(CellModel.positionCompare);
     } else {
       currentCellsDiff.forEach(currentCell => {
-        currentCell.selected              = false;
-        currentCell.isTopMostSelection    = false;
-        currentCell.isRightMostSelection  = false;
-        currentCell.isBottomMostSelection = false;
-        currentCell.isLeftMostSelection   = false;
+        currentCell.unselect();
       });
     }
 

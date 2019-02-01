@@ -63,8 +63,7 @@ export default class Column extends React.PureComponent<IColumnCellProps> {
 
   render() {
     return <Observe render={() => {
-      let cls = this.column.cls;
-
+      let cls = '';
       let style: React.CSSProperties = {position: 'relative'};
       if (!this.column.visible) {
         style.display    = 'none';
@@ -77,12 +76,8 @@ export default class Column extends React.PureComponent<IColumnCellProps> {
       }
 
       if (this.column.canSort && this.column.sort) {
-        if (cls) {
-          cls += ' sort ' + this.column.sort;
-        } else {
           cls = 'sort ' + this.column.sort;
         }
-      }
 
       return (
         <th
