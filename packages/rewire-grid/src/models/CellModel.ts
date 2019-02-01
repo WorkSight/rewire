@@ -1,9 +1,8 @@
 import * as React from 'react';
 import * as is from 'is';
 import {IGrid, IColumn, ICell, IRow, IError, IErrorData, TextAlignment, VerticalAlignment, cloneValue} from './GridTypes';
-import {observable, defaultEquals, property, DataSignal} from 'rewire-core';
-import * as deepEqual                                    from 'fast-deep-equal';
-import {replace}                                         from 'rewire-core';
+import {observable, defaultEquals, property, DataSignal, freeze} from 'rewire-core';
+import * as deepEqual                                            from 'fast-deep-equal';
 
 let id = 0;
 export class CellModel implements ICell {
@@ -197,10 +196,15 @@ export class CellModel implements ICell {
   _setValue(value: any) {
     if (this.value === value) return;
     if (is.object(this.value) && is.object(value)) {
-      replace(this.value, value);
+      freeze(() => {
+        Object.keys(this.value).forEach((key: string) => delete this.value[key]);
+        Object.keys(value).forEach((key: string) => this.value[key] = undefined);
+      });
+      Object.assign(this.value, value);
     } else {
       this.value = value;
     }
+
     this.onValueChange && this.onValueChange(this, value);
   }
 
@@ -247,11 +251,11 @@ export class CellModel implements ICell {
   }
 
   canFocus(): boolean {
-    return (!this.editing && this.element && this.element !== (document.activeElement as HTMLTableDataCellElement)) || false;
+    return !!(!this.editing && this.element);
   }
 
   canBlur(): boolean {
-    return (!this.editing && this.element && this.element === (document.activeElement as HTMLTableDataCellElement)) || false;
+    return !!(!this.editing && this.element);
   }
 
   setFocus(focus: boolean = true) {
