@@ -11,12 +11,12 @@ import {
   property,
   DataSignal
 } from 'rewire-core';
-import {GridKeyHandler}          from './GridKeyboardNavigation';
 import {debounce}                from 'rewire-common';
 import Color                     from 'color';
 import {MuiThemeProvider, Theme} from '@material-ui/core/styles';
 import {WithStyle, withStyles}   from 'rewire-ui';
 import createGridTheme           from './GridTheme';
+import {scrollBySmooth}          from '../models/SmoothScroll';
 import './data-grid.scss';
 
 interface IColumnProps {
@@ -61,7 +61,7 @@ export interface IGridProps {
   gridFontSizes?: IGridFontSizes;
 }
 
-type BodyType = {grid: IGrid, columns: IColumn[], gridContent: DataSignal<HTMLDivElement | undefined>, scrollY: DataSignal<number>, rowElements?: {[s: string]: HTMLTableRowElement}, fixedRowElements?: {[s: string]: HTMLTableRowElement}, loadMoreRows?: (args: {start: number, end: number}) => Promise<any[]> };
+type BodyType = {grid: IGrid, columns: IColumn[], scrollY: DataSignal<number>, rowElements?: {[s: string]: HTMLTableRowElement}, fixedRowElements?: {[s: string]: HTMLTableRowElement}, loadMoreRows?: (args: {start: number, end: number}) => Promise<any[]> };
 class Body extends React.PureComponent<BodyType, {offset: number}> {
   constructor(props: BodyType) {
     super(props);
@@ -113,8 +113,8 @@ class VirtualBody extends React.PureComponent<BodyType, {offset: number, loading
 
   componentDidMount() {
     disposeOnUnmount(this, () => {
-      watch(this.props.gridContent, () => {
-        let gridContent = this.props.gridContent();
+      watch(() => this.props.grid.contentElement, () => {
+        let gridContent = this.props.grid.contentElement;
         if (!gridContent) return;
         let rows                 = this.props.grid.rows;
         let totalSize            = Math.trunc(rows.length * 30);
@@ -235,6 +235,14 @@ const styles = (theme: Theme) => {
       '& tr, & tr.alt': {
         backgroundColor: theme.palette.leftLabelBackground.main,
       },
+      '& tr.selected': {
+        backgroundColor: theme.palette.rowSelectedBackground.main,
+        color: theme.palette.rowSelectedText.main,
+        '& td': {
+          borderRightColor: theme.palette.rowSelectedBorder.main,
+          borderBottomColor: theme.palette.rowSelectedBorder.main,
+        },
+      },
     },
     cornerLabels: {
       borderColor: theme.palette.headerBorder.main,
@@ -298,6 +306,7 @@ const styles = (theme: Theme) => {
       },
     },
     gridContent: {
+      position: 'relative',
       '& tr.selected': {
         backgroundColor: theme.palette.rowSelectedBackground.main,
         color: theme.palette.rowSelectedText.main,
@@ -325,10 +334,9 @@ type GridProps = WithStyle<ReturnType<typeof styles>, IGridProps>;
 const GridInternal = withStyles(styles, class extends React.PureComponent<GridProps> {
   private scrollX            : DataSignal<number>;
   private scrollY            : DataSignal<number>;
-  private _gridContent       : DataSignal<HTMLDivElement | undefined>;
   private _columnTableWrapper: HTMLDivElement;
   private _columnTable       : HTMLTableElement;
-  private _gridFixed         : HTMLTableElement;
+  private _leftLabels        : HTMLDivElement;
   private _rowElements       : {[s: string]: HTMLTableRowElement};
   private _fixedRowElements  : {[s: string]: HTMLTableRowElement};
   grid                       : IGrid;
@@ -349,9 +357,8 @@ const GridInternal = withStyles(styles, class extends React.PureComponent<GridPr
     this._fixedRowElements = {};
 
     disposeOnUnmount(this, () => {
-      this._gridContent = property(undefined);
-      this.scrollX      = property(0);
-      this.scrollY      = property(0);
+      this.scrollX = property(0);
+      this.scrollY = property(0);
 
       watch(() => this.scrollX(), () => {
         if (!this._columnTable) return;
@@ -359,7 +366,7 @@ const GridInternal = withStyles(styles, class extends React.PureComponent<GridPr
       });
 
       watch(() => this.scrollY(), () => {
-        if (this._gridFixed) this._gridFixed.style.transform = 'translateY(' + -this.scrollY()  + 'px)';
+        if (this._leftLabels && this._leftLabels.scrollTop !== this.scrollY()) this._leftLabels.scrollTo(this._leftLabels.scrollLeft, this.scrollY());
       });
 
       watch(_currentWindowSize, () => this.updateForScrollbars());
@@ -367,6 +374,7 @@ const GridInternal = withStyles(styles, class extends React.PureComponent<GridPr
       watch(() => this.grid.dataRowsByPosition.length, () => {
         this.grid.changed = this.grid.hasChanges();
         this.grid.inError = this.grid.hasErrors();
+        setTimeout(() => this.updateForScrollbars(), 0);
       });
     });
   }
@@ -377,11 +385,64 @@ const GridInternal = withStyles(styles, class extends React.PureComponent<GridPr
 
   handleScroll = (evt: React.UIEvent<any>) => {
     let target: Element = evt.target as Element;
-    if (target !== this._gridContent()) {
-      return;
+    if (target === this.grid.contentElement) {
+      this.scrollX(target.scrollLeft);
+      this.scrollY(target.scrollTop);
+    } else if (target === this._leftLabels && target.scrollTop !== this.scrollY()) {
+      this.grid.contentElement!.scrollTo(this.scrollX(), target.scrollTop);
     }
-    this.scrollX(target.scrollLeft);
-    this.scrollY(target.scrollTop);
+  }
+
+  handleFixedWheel = (evt: React.WheelEvent) => {
+    evt.preventDefault();
+
+    let scrollAmount: number;
+    switch (evt.deltaMode) {
+      case 2:
+        scrollAmount = evt.deltaY * 100;
+        break;
+      case 1:
+        scrollAmount = evt.deltaY * 33;
+        break;
+      case 0:
+      default:
+        scrollAmount = evt.deltaY;
+        break;
+    }
+
+    if (evt.shiftKey) {
+      // simulate a horizontal scroll on the grid content;
+      this.grid.contentElement!.scrollBy(scrollAmount, 0);
+      // scrollBySmooth(this.grid.contentElement!, scrollAmount, 0, 150);
+      // let variation = this.grid.contentElement!.scrollLeft + scrollAmount;
+      // this.grid.contentElement!.scrollTo({left: variation, top: this.grid.contentElement!.scrollTop, behavior: 'auto'});
+      // this.grid.contentElement!.scroll(variation, this.grid.contentElement!.scrollTop);
+    } else {
+      // simulate a vertical scroll on the grid content;
+      // scrollBySmooth(this.grid.contentElement!, 0, scrollAmount, 150);
+      this.grid.contentElement!.scrollBy(0, scrollAmount);
+      // let variation = this.grid.contentElement!.scrollTop + scrollAmount;
+      // this.grid.contentElement!.scrollTo({left: this.grid.contentElement!.scrollLeft, top: variation, behavior: 'auto'});
+      // this.grid.contentElement!.scroll(this.grid.contentElement!.scrollLeft, variation);
+    }
+  }
+
+  handleFixedKeyDown = (evt: React.KeyboardEvent<any>) => {
+    switch (evt.key) {
+      case 'PageUp':
+        // this.grid.contentElement!.scrollBy(0, -500);
+        scrollBySmooth(this.grid.contentElement!, 0, -500, 100);
+        break;
+      case 'PageDown':
+        // this.grid.contentElement!.scrollBy(0, 500);
+        scrollBySmooth(this.grid.contentElement!, 0, 500, 100);
+        break;
+      default:
+        return;
+    }
+
+    evt.preventDefault();
+    evt.stopPropagation();
   }
 
   componentDidMount() {
@@ -393,7 +454,7 @@ const GridInternal = withStyles(styles, class extends React.PureComponent<GridPr
       return;
     }
 
-    this.updateForFixedColumnRows();
+    this.updateForRowHeights();
   }
 
   componentWillUnmount() {
@@ -414,25 +475,30 @@ const GridInternal = withStyles(styles, class extends React.PureComponent<GridPr
   updateForScrollbars() {
     let columnWrap = this._columnTableWrapper;
     if (columnWrap.style) {
-      let node = this._gridContent() as HTMLElement;
+      let node = this.grid.contentElement as HTMLElement;
       if (node) {
-        let width = Math.round(node.getBoundingClientRect().width);
-        columnWrap.style.paddingRight = (width > node.scrollWidth) ? '17px' : '0';
+        columnWrap.style.paddingRight = (node.clientHeight < node.scrollHeight) ? '17px' : '0';
       }
     }
   }
 
-  updateForFixedColumnRows() {
+  updateForRowHeights() {
     Object.keys(this._fixedRowElements).forEach(rowId => {
       let rowElement = this._rowElements[rowId];
       if (rowElement) {
-        this._fixedRowElements[rowId].style.height = rowElement.clientHeight + 'px';
+        let fixedRowElement = this._fixedRowElements[rowId];
+        if (rowElement.clientHeight === fixedRowElement.clientHeight) return;
+        if (rowElement.clientHeight > fixedRowElement.clientHeight) {
+          fixedRowElement.style.height = rowElement.clientHeight + 'px';
+        } else {
+          rowElement.style.height = fixedRowElement.clientHeight + 'px';
+        }
       }
     });
   }
 
-  setGridFixedRef = (element: HTMLTableElement) => {
-    this._gridFixed = element as HTMLTableElement;
+  setLeftLabelsRef = (element: HTMLDivElement) => {
+    this._leftLabels = element as HTMLDivElement;
   }
 
   setColumnTableWrapperRef = (element: HTMLDivElement) => {
@@ -444,7 +510,10 @@ const GridInternal = withStyles(styles, class extends React.PureComponent<GridPr
   }
 
   setGridContentRef = (element: HTMLDivElement) => {
-    this._gridContent(element as HTMLDivElement);
+    if (element && element !== this.grid.contentElement) {
+      this.grid.setContentElement(element);
+    }
+    // this._gridContent(element as HTMLDivElement);
   }
 
   renderFixedColumnHeaders() {
@@ -496,11 +565,11 @@ const GridInternal = withStyles(styles, class extends React.PureComponent<GridPr
 
     let visibleColumns = this.props.grid.fixedColumns.reduce((prev, current) => prev = prev + (current.visible ? 1 : 0), 0);
     return (
-      <div className={classNames('left-labels', this.props.classes.leftLabels)}>
-        <table role='grid' ref={this.setGridFixedRef} style={{width: this.props.grid.fixedWidth}}>
+      <div className={classNames('left-labels', this.props.classes.leftLabels)} ref={this.setLeftLabelsRef} onWheel={this.handleFixedWheel} onKeyDown={this.handleFixedKeyDown}>
+        <table role='grid' style={{width: this.props.grid.fixedWidth, marginBottom: '17px'}}>
           {this.renderColumnGroups(true)}
           <tbody role='rowgroup'>
-            {this.props.grid.rows.map((row, index) => <Row key={row.id} row={row} fixedRowElements={this._fixedRowElements} Cell={Cell} columns={this.props.grid.fixedColumns} isFixedColumnsRow={true} index={index} visibleColumns={visibleColumns} className={((index % 2) === 1) ? 'alt' : ''} />)}
+            {this.props.grid.rows.map((row, index) => <Row key={row.id} row={row} rowElements={this._rowElements} fixedRowElements={this._fixedRowElements} Cell={Cell} columns={this.props.grid.fixedColumns} isFixedColumnsRow={true} index={index} visibleColumns={visibleColumns} className={((index % 2) === 1) ? 'alt' : ''} />)}
           </tbody>
         </table>
       </div>
@@ -517,7 +586,7 @@ const GridInternal = withStyles(styles, class extends React.PureComponent<GridPr
             {this.renderColumnGroups(false)}
             <thead role='rowgroup'>
               <Observe render={() => (
-                this.props.grid.fixedRows.map((row, index) => <Row key={row.id} Cell={Column} columns={this.props.grid.dataColumns} index={index} visibleColumns={this.props.grid.dataColumns.length} row={row} />)
+                this.props.grid.fixedRows.map((row, index) => <Row key={row.id} Cell={Column} columns={this.props.grid.standardColumns} index={index} visibleColumns={this.props.grid.standardColumns.length} row={row} />)
               )} />
             </thead>
           </table>
@@ -548,7 +617,7 @@ const GridInternal = withStyles(styles, class extends React.PureComponent<GridPr
             <div className={classNames('grid-content', this.props.classes.gridContent)}  ref={this.setGridContentRef}>
               <table role='grid'>
                 {this.renderColumnGroups(false)}
-                <BodyRenderer grid={this.props.grid} gridContent={this._gridContent} scrollY={this.scrollY} rowElements={rowElements} fixedRowElements={fixedRowElements} columns={this.props.grid.dataColumns} />
+                <BodyRenderer grid={this.props.grid} scrollY={this.scrollY} rowElements={rowElements} fixedRowElements={fixedRowElements} columns={this.props.grid.standardColumns} />
               </table>
             </div>
         </div>
@@ -558,9 +627,10 @@ const GridInternal = withStyles(styles, class extends React.PureComponent<GridPr
 
   render() {
     const {style, className, classes} = this.props;
+    const maxHeight = style && style.height !== undefined ? style.height : undefined;
 
     return (
-      <div className={classNames('ws-grid', className, classes.wsGrid)} style={style}>
+      <div className={classNames('ws-grid', className, classes.wsGrid)} style={{maxHeight: maxHeight, ...style}}>
         {this.renderHeaders()}
         {this.renderData()}
       </div>

@@ -16,7 +16,7 @@ export class TimeValidator {
       const rounded = this.round(value);
       return {
         value   : rounded,
-        isValid : rounded === value
+        isValid : true
       };
     }
 
@@ -31,7 +31,7 @@ export class TimeValidator {
     const rounded = this.round(v);
     return {
       value   : rounded,
-      isValid : rounded === v
+      isValid : true
     };
   }
 
@@ -165,7 +165,7 @@ export interface ITimeFieldProps {
   disabled?             : boolean;
   disableErrors?        : boolean;
   error?                : string;
-  value?                : number;
+  value?                : number | string;
   label?                : string;
   align?                : TextAlignment;
   variant?              : TextVariant;
@@ -223,7 +223,7 @@ class TimeInputField extends React.Component<TimeFieldProps, ITimeState> {
 
   _valueToSet(value?: number | string): any {
     const state = this.validator.parse(value);
-    return {...state, text: state.value ? state.value : ''};
+    return {...state, text: state.value ? `${state.value}` : ''};
   }
 
   handleChange = (evt: React.ChangeEvent<HTMLInputElement>) => {
@@ -232,6 +232,9 @@ class TimeInputField extends React.Component<TimeFieldProps, ITimeState> {
   }
 
   handleBlur = (evt: React.FocusEvent<HTMLInputElement>) => {
+    if (this.state.value === this.props.value) {
+      this.setState({text: this.state.value ? `${this.state.value}` : ''});
+    }
     this.props.onValueChange(this.state.value);
   }
 

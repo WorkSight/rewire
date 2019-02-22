@@ -53,6 +53,7 @@ import {
   ErrorSeverity,
   Grid,
   IGridOptions,
+  IRowData,
   ICell,
   IRow,
   isLessThan as gridIsLessThan,
@@ -179,8 +180,9 @@ class LoginDialog extends Modal {
     time                 : Form.time().label('Time').validators(isRequired).onValueChange((form: Form, v: any) => form.setFieldValue('email', 'hi@hi.com')),
     selectCountry        : Form.select(countries).label('Select Country').validators(isRequired).placeholder('ooga'),
     money                : Form.number().label('Show Me').validators(isRequired).placeholder('The Money'),
-    date                 : Form.date().label('Date'),
-    multi                : Form.multistring({rows: 1}).label('Multiline').placeholder('enter multistring'),
+    date                 : Form.date().label('Date').validators(isRequired),
+    multi                : Form.multistring({rows: 1}).label('Multiline').placeholder('enter multistring').validators(isRequired),
+    color                : Form.color().label('Color'),
   });
 
   constructor() {
@@ -215,6 +217,7 @@ const LoginFormView = ({form}: {form: typeof loginDialog.form}) => (
       <form.field.money.Editor />
       <form.field.date.Editor />
       <form.field.multi.Editor />
+      <form.field.color.Editor />
     </div>
   </FormView>
   </div>
@@ -406,32 +409,27 @@ function createTestGrid(nRows: number, nColumns: number) {
   // create some random sized columns!
   let cols = [];
   for (let col = 0; col < nColumns; col++) {
-    cols.push(createColumn('column' + col, 'Header# ' + col, 'text', Math.trunc(Math.random() * 250 + 50) + 'px'));
+    cols.push(createColumn('column' + col, 'Header# ' + col, {type: 'text', width: Math.trunc(Math.random() * 250 + 50) + 'px'}));
   }
-  cols.push(createColumn('phoneColumn', 'Phone', {type: 'phone'}, Math.trunc(Math.random() * 250 + 50) + 'px'));
-  cols.push(createColumn('numberColumn', 'Number', {type: 'number', options: {decimals: 2, fixed: true, thousandSeparator: false}}, Math.trunc(Math.random() * 250 + 50) + 'px'));
-  cols.push(createColumn('dateColumn', 'Date', 'date', Math.trunc(Math.random() * 250 + 50) + 'px'));
-  cols.push(createColumn('timeOutColumn', 'Time Out', {type: 'time'}, Math.trunc(Math.random() * 250 + 50) + 'px'));
-  cols.push(createColumn('timeInColumn', 'Time In', {type: 'time'}, Math.trunc(Math.random() * 250 + 50) + 'px'));
-  cols.push(createColumn('differenceColumn', 'Time Difference', {type: 'number', options: {decimals: 2}}, Math.trunc(Math.random() * 250 + 50) + 'px'));
-  cols.push(createColumn('sumColumn', 'Time Sum', {type: 'number', options: {decimals: 2}}, Math.trunc(Math.random() * 250 + 50) + 'px'));
-  cols.push(createColumn('autoCompleteColumn', 'Auto Complete', {type: 'auto-complete', options: countries}, Math.trunc(Math.random() * 250 + 50) + 'px'));
-  cols.push(createColumn('selectColumn', 'Select', {type: 'select', options: countries}, Math.trunc(Math.random() * 250 + 50) + 'px'));
-  cols.push(createColumn('multiselectColumn', 'MultiSelect', {type: 'multiselect', options: countries}, Math.trunc(Math.random() * 250 + 50) + 'px'));
-  cols.push(createColumn('checkedColumn', 'Checked', 'checked', Math.trunc(Math.random() * 250 + 50) + 'px'));
+  cols[5].title = 'Sales';
+  cols[6].title = 'Sales';
 
-  cols[15].validator = gridIsRequired;
-  cols[17].onValueChange = (cell: ICell, value: any) => cell.row.cells['differenceColumn'].setValue((cell.row.cells['timeInColumn'].value || 0) - (value || 0));
-  cols[18].validator = gridIsGreaterThan('timeOutColumn');
-  cols[18].onValueChange = (cell: ICell, value: any) => cell.row.cells['differenceColumn'].setValue((value || 0) - (cell.row.cells['timeOutColumn'].value || 0));
-  cols[19].validator = gridIsDifferenceOfOthers(['timeInColumn', 'timeOutColumn']);
-  cols[20].validator = gridIsSumOfOthers(['timeInColumn', 'timeOutColumn']);
+  let timeOutOnValueChange = (cell: ICell, value: any) => cell.row.cells['differenceColumn'].setValue((cell.row.cells['timeInColumn'].value || 0) - (value || 0));
+  let timeInOnValueChange  = (cell: ICell, value: any) => cell.row.cells['differenceColumn'].setValue((value || 0) - (cell.row.cells['timeOutColumn'].value || 0));
 
+  cols.push(createColumn('phoneColumn',        'Phone',           {type: {type: 'phone'}, width: Math.trunc(Math.random() * 250 + 50) + 'px'}));
+  cols.push(createColumn('numberColumn',       'Number',          {type: {type: 'number', options: {decimals: 2, fixed: true, thousandSeparator: false}}, validator: gridIsRequired, width: Math.trunc(Math.random() * 250 + 50) + 'px'}));
+  cols.push(createColumn('dateColumn',         'Date',            {type: 'date', width: Math.trunc(Math.random() * 250 + 50) + 'px'}));
+  cols.push(createColumn('timeOutColumn',      'Time Out',        {type: {type: 'time'}, onValueChange: timeOutOnValueChange, width: Math.trunc(Math.random() * 250 + 50) + 'px'}));
+  cols.push(createColumn('timeInColumn',       'Time In',         {type: {type: 'time'}, validator: gridIsGreaterThan('timeOutColumn'), onValueChange: timeInOnValueChange, width: Math.trunc(Math.random() * 250 + 50) + 'px'}));
+  cols.push(createColumn('differenceColumn',   'Time Difference', {type: {type: 'number', options: {decimals: 2}}, validator: gridIsDifferenceOfOthers(['timeInColumn', 'timeOutColumn']), width: Math.trunc(Math.random() * 250 + 50) + 'px'}));
+  cols.push(createColumn('sumColumn',          'Time Sum',        {type: {type: 'number', options: {decimals: 2}}, validator: gridIsSumOfOthers(['timeInColumn', 'timeOutColumn']), width: Math.trunc(Math.random() * 250 + 50) + 'px'}));
+  cols.push(createColumn('autoCompleteColumn', 'Auto Complete',   {type: {type: 'auto-complete', options: countries}, width: Math.trunc(Math.random() * 250 + 50) + 'px'}));
+  cols.push(createColumn('selectColumn',       'Select',          {type: {type: 'select', options: countries}, width: Math.trunc(Math.random() * 250 + 50) + 'px'}));
+  cols.push(createColumn('multiselectColumn',  'MultiSelect',     {type: {type: 'multiselect', options: countries}, width: Math.trunc(Math.random() * 250 + 50) + 'px'}));
+  cols.push(createColumn('checkedColumn',      'Checked',         {type: 'checked', width: Math.trunc(Math.random() * 250 + 50) + 'px'}));
 
-  let complexColumn = createColumn('complexColumn', 'Complex', 'none', Math.trunc(Math.random() * 250 + 50) + 'px');
-  complexColumn.renderer  = ComplexCell;
-  complexColumn.compare   = ComplexCellData.compare;
-  complexColumn.validator = {
+  let complexColumnValidator = {
     linkedColumnNames: [],
     fn: (row: IRow, value: any): IError | undefined => {
       if (value === undefined) {
@@ -449,7 +447,8 @@ function createTestGrid(nRows: number, nColumns: number) {
       return error;
     }
   };
-  cols.push(complexColumn);
+
+  cols.push(createColumn('complexColumn', 'Complex', {type: 'none', renderer: ComplexCell, compare: ComplexCellData.compare, validator: complexColumnValidator, width: Math.trunc(Math.random() * 250 + 50) + 'px'}));
   // Override and set some columns to be number!
   cols[5].setEditor({type: 'number', options: {decimals: 2, thousandSeparator: true}});
   cols[5].validator = {
@@ -482,9 +481,9 @@ function createTestGrid(nRows: number, nColumns: number) {
   cols[6].setEditor({type: 'number', options: {decimals: 3, thousandSeparator: true}});
 
   // add some cell data!
-  let rows = [];
+  let rows: IRowData[] = [];
   for (let row = 0; row < nRows; row++) {
-    let r: any = {id: row, options: {allowMergeColumns: true}};
+    let r: IRowData = {id: `${row}`, data: {}};
     for (let column = 0; column < cols.length; column++) {
       let v: any  = `RC ${column}-${row % 5}`;
       let colName = cols[column].name;
@@ -500,7 +499,7 @@ function createTestGrid(nRows: number, nColumns: number) {
       else if (colName === 'complexColumn') v = row > 3 ? new ComplexCellData(nanoid(10), 'Homer', 45) : undefined;
       else if (colName === 'phoneColumn') v = Number.parseInt('1250' + Math.round(Math.random() * 100000000).toString());
       else if (((column >= 5) && (column <= 6)) || colName === 'numberColumn') v = Math.random() * 10000;
-      r[colName] = v;
+      r.data![colName] = v;
     }
     rows.push(r);
   }
@@ -512,11 +511,9 @@ function createTestGrid(nRows: number, nColumns: number) {
   cols[1].width   = '65px';
   cols[1].align   = 'right';
   // create the grid model and group by 'column2' and 'column3'
-  let grid = createGrid(rows, cols, {groupBy: ['column2', 'column3'], multiSelect: true} as IGridOptions);
+  let grid = createGrid(rows, cols, {groupBy: ['column2', 'column3'], multiSelect: true, allowMergeColumns: true});
 
-  grid.fixedRows[0].cells['column5'].value = 'Sales';
-  grid.fixedRows[0].cells['column6'].value = 'Sales';
-  grid.addFixedRow({column5: '2017', column6: '2018'});
+  grid.addFixedRow({data: {column5: '2017', column6: '2018'}});
 
   // sort first by  column7 then by column6
   grid.addSort(grid.columnByPos(7)!, 'ascending')
@@ -553,91 +550,91 @@ function createTestGrid(nRows: number, nColumns: number) {
 }
 
 let grid = createTestGrid(40, 14);
-let newRow = {id: 'newRowxycdij', options: {allowMergeColumns: true}};
-newRow['column0']    = 'AHHH';
-newRow['column2']    = 'RC 2-3';
-newRow['column3']    = 'RC 3-3';
-newRow['timeColumn'] = '8:11';
+let newRow = {id: 'newRowxycdij', data: {}, options: {allowMergeColumns: false}};
+newRow.data['column0']    = 'AHHH';
+newRow.data['column2']    = 'RC 2-3';
+newRow.data['column3']    = 'RC 3-3';
+newRow.data['timeColumn'] = '8:11';
 grid.addRow(newRow);
 
-let rrr = {column0: 'booga'};
 grid.cell('3', 'column8')!.value = 'oga booga boa';
 const r = grid.get();
 console.log(r);
 // setTimeout(() => grid.rows.length = 0, 4000);
 // setTimeout(() => grid.set(r), 3000);
 // setTimeout(() => expandAll(grid), 6000);
-// setTimeout(() => S.freeze(() => grid.addRow(rrr)), 5000);
 // setTimeout(() => grid.rows[0].cells['column0'].value = 'booga', 6000);
 // setTimeout(() => grid.columns[3].visible = false, 7000);
 // setTimeout(() => grid.columns[3].visible = true, 8000);
 
 let employees = [
-  {id: '1e',  name: 'Schrute, Dwight',         email: 'testEmail11@test.com',       isActive: true, timeColumn: '7:30', autoCompleteColumn: undefined        , selectColumn: {name: 'Bermuda'}, numberColumn1: 1, numberColumn2: 2, numberColumn3: 3},
-  {id: '2e',  name: 'Scott, Michael',          email: 'testEmail22@test.com',       isActive: true, timeColumn: '7:30', autoCompleteColumn: {name: 'Bermuda'}, selectColumn: {name: 'Bermuda'}, numberColumn1: 1, numberColumn2: 2, numberColumn3: 3},
-  {id: '3e',  name: 'Lannister, Jaime',        email: 'testEmail33@test.com',       isActive: true, timeColumn: '7:30', autoCompleteColumn: {name: 'Bermuda'}, selectColumn: {name: 'Bermuda'}, numberColumn1: 1, numberColumn2: 2, numberColumn3: 3},
-  {id: '4e',  name: 'Dayne, Arthur',           email: 'testEmail44@test.com',       isActive: true, timeColumn: '7:30', autoCompleteColumn: {name: 'Bermuda'}, selectColumn: {name: 'Bermuda'}, numberColumn1: 1, numberColumn2: 2, numberColumn3: 3},
-  {id: '5e',  name: 'Snow, Jon',               email: 'testEmail55@test.com',       isActive: true, timeColumn: '7:30', autoCompleteColumn: {name: 'Bermuda'}, selectColumn: {name: 'Bermuda'}, numberColumn1: 1, numberColumn2: 2, numberColumn3: 3},
-  {id: '6e',  name: 'Stark, Ned',              email: 'testEmail66@test.com',       isActive: true, timeColumn: '7:30', autoCompleteColumn: {name: 'Bermuda'}, selectColumn: {name: 'Bermuda'}, numberColumn1: 1, numberColumn2: 2, numberColumn3: 3},
-  {id: '7e',  name: 'Stark, Arya',             email: 'testEmail77@test.com',       isActive: true, timeColumn: '7:30', autoCompleteColumn: {name: 'Bermuda'}, selectColumn: {name: 'Bermuda'}, numberColumn1: 1, numberColumn2: 2, numberColumn3: 3},
-  {id: '8e',  name: 'Biggus, Headus',          email: 'testEmail88@test.com',       isActive: true, timeColumn: '7:30', autoCompleteColumn: {name: 'Bermuda'}, selectColumn: {name: 'Bermuda'}, numberColumn1: 1, numberColumn2: 2, numberColumn3: 3},
-  {id: '9e',  name: 'Drumpf, Donald',          email: 'testEmail99@test.com',       isActive: true, timeColumn: '7:30', autoCompleteColumn: {name: 'Bermuda'}, selectColumn: {name: 'Bermuda'}, numberColumn1: 1, numberColumn2: 2, numberColumn3: 3},
-  {id: '7e',  name: 'Johnson, Ruin',           email: 'testEmail00@test.com',       isActive: true, timeColumn: '7:30', autoCompleteColumn: {name: 'Bermuda'}, selectColumn: {name: 'Bermuda'}, numberColumn1: 1, numberColumn2: 2, numberColumn3: 3},
-  {id: '8e',  name: 'Ren, Emo',                email: 'testEmail1234@test.com',     isActive: true, timeColumn: '7:30', autoCompleteColumn: {name: 'Bermuda'}, selectColumn: {name: 'Bermuda'}, numberColumn1: 1, numberColumn2: 2, numberColumn3: 3},
-  {id: '9e',  name: 'Swolo, Ben',              email: 'testEmail5678@test.com',     isActive: true, timeColumn: '7:30', autoCompleteColumn: {name: 'Bermuda'}, selectColumn: {name: 'Bermuda'}, numberColumn1: 1, numberColumn2: 2, numberColumn3: 3},
-  {id: '10e', name: 'Sue, Mary',               email: 'testEmail90210@test.com',    isActive: true, timeColumn: '7:30', autoCompleteColumn: {name: 'Bermuda'}, selectColumn: {name: 'Bermuda'}, numberColumn1: 1, numberColumn2: 2, numberColumn3: 3},
-  {id: '11e', name: 'Poppins, Leia',           email: 'testEmail6274309@test.com',  isActive: true, timeColumn: '7:30', autoCompleteColumn: {name: 'Bermuda'}, selectColumn: {name: 'Bermuda'}, numberColumn1: 1, numberColumn2: 2, numberColumn3: 3},
-  {id: '12e', name: 'Snoke, Nobody',           email: 'testEmail13371337@test.com', isActive: true, timeColumn: '7:30', autoCompleteColumn: {name: 'Bermuda'}, selectColumn: {name: 'Bermuda'}, numberColumn1: 1, numberColumn2: 2, numberColumn3: 3},
-  {id: '13e', name: 'Too tired to live, Luke', email: 'testEmail253545@test.com',   isActive: true, timeColumn: '7:30', autoCompleteColumn: {name: 'Bermuda'}, selectColumn: {name: 'Bermuda'}, numberColumn1: 1, numberColumn2: 2, numberColumn3: 3},
-  {id: '1e',  name: 'Schrute, Dwight',         email: 'testEmail11@test.com',       isActive: true, timeColumn: '7:30', autoCompleteColumn: undefined        , selectColumn: {name: 'Bermuda'}, numberColumn1: 1, numberColumn2: 2, numberColumn3: 3},
-  {id: '2e',  name: 'Scott, Michael',          email: 'testEmail22@test.com',       isActive: true, timeColumn: '7:30', autoCompleteColumn: {name: 'Bermuda'}, selectColumn: {name: 'Bermuda'}, numberColumn1: 1, numberColumn2: 2, numberColumn3: 3},
-  {id: '3e',  name: 'Lannister, Jaime',        email: 'testEmail33@test.com',       isActive: true, timeColumn: '7:30', autoCompleteColumn: {name: 'Bermuda'}, selectColumn: {name: 'Bermuda'}, numberColumn1: 1, numberColumn2: 2, numberColumn3: 3},
-  {id: '4e',  name: 'Dayne, Arthur',           email: 'testEmail44@test.com',       isActive: true, timeColumn: '7:30', autoCompleteColumn: {name: 'Bermuda'}, selectColumn: {name: 'Bermuda'}, numberColumn1: 1, numberColumn2: 2, numberColumn3: 3},
-  {id: '5e',  name: 'Snow, Jon',               email: 'testEmail55@test.com',       isActive: true, timeColumn: '7:30', autoCompleteColumn: {name: 'Bermuda'}, selectColumn: {name: 'Bermuda'}, numberColumn1: 1, numberColumn2: 2, numberColumn3: 3},
-  {id: '6e',  name: 'Stark, Ned',              email: 'testEmail66@test.com',       isActive: true, timeColumn: '7:30', autoCompleteColumn: {name: 'Bermuda'}, selectColumn: {name: 'Bermuda'}, numberColumn1: 1, numberColumn2: 2, numberColumn3: 3},
-  {id: '7e',  name: 'Stark, Arya',             email: 'testEmail77@test.com',       isActive: true, timeColumn: '7:30', autoCompleteColumn: {name: 'Bermuda'}, selectColumn: {name: 'Bermuda'}, numberColumn1: 1, numberColumn2: 2, numberColumn3: 3},
-  {id: '8e',  name: 'Biggus, Headus',          email: 'testEmail88@test.com',       isActive: true, timeColumn: '7:30', autoCompleteColumn: {name: 'Bermuda'}, selectColumn: {name: 'Bermuda'}, numberColumn1: 1, numberColumn2: 2, numberColumn3: 3},
-  {id: '9e',  name: 'Drumpf, Donald',          email: 'testEmail99@test.com',       isActive: true, timeColumn: '7:30', autoCompleteColumn: {name: 'Bermuda'}, selectColumn: {name: 'Bermuda'}, numberColumn1: 1, numberColumn2: 2, numberColumn3: 3},
-  {id: '7e',  name: 'Johnson, Ruin',           email: 'testEmail00@test.com',       isActive: true, timeColumn: '7:30', autoCompleteColumn: {name: 'Bermuda'}, selectColumn: {name: 'Bermuda'}, numberColumn1: 1, numberColumn2: 2, numberColumn3: 3},
-  {id: '8e',  name: 'Ren, Emo',                email: 'testEmail1234@test.com',     isActive: true, timeColumn: '7:30', autoCompleteColumn: {name: 'Bermuda'}, selectColumn: {name: 'Bermuda'}, numberColumn1: 1, numberColumn2: 2, numberColumn3: 3},
-  {id: '9e',  name: 'Swolo, Ben',              email: 'testEmail5678@test.com',     isActive: true, timeColumn: '7:30', autoCompleteColumn: {name: 'Bermuda'}, selectColumn: {name: 'Bermuda'}, numberColumn1: 1, numberColumn2: 2, numberColumn3: 3},
-  {id: '10e', name: 'Sue, Mary',               email: 'testEmail90210@test.com',    isActive: true, timeColumn: '7:30', autoCompleteColumn: {name: 'Bermuda'}, selectColumn: {name: 'Bermuda'}, numberColumn1: 1, numberColumn2: 2, numberColumn3: 3},
-  {id: '11e', name: 'Poppins, Leia',           email: 'testEmail6274309@test.com',  isActive: true, timeColumn: '7:30', autoCompleteColumn: {name: 'Bermuda'}, selectColumn: {name: 'Bermuda'}, numberColumn1: 1, numberColumn2: 2, numberColumn3: 3},
-  {id: '12e', name: 'Snoke, Nobody',           email: 'testEmail13371337@test.com', isActive: true, timeColumn: '7:30', autoCompleteColumn: {name: 'Bermuda'}, selectColumn: {name: 'Bermuda'}, numberColumn1: 1, numberColumn2: 2, numberColumn3: 3},
-  {id: '13e', name: 'Too tired to live, Luke', email: 'testEmail253545@test.com',   isActive: true, timeColumn: '7:30', autoCompleteColumn: {name: 'Bermuda'}, selectColumn: {name: 'Bermuda'}, numberColumn1: 1, numberColumn2: 2, numberColumn3: 3},
+  {id: '1e',  name: 'Schrute, Dwight',         email: 'testEmail11@test.com',       isActive: true, timeColumn: '7:30', autoCompleteColumn: undefined                ,   selectColumn: {id: '14', name: 'Austria'}, numberColumn1: 1, numberColumn2: 2, numberColumn3: 3},
+  {id: '2e',  name: 'Scott, Michael',          email: 'testEmail22@test.com',       isActive: true, timeColumn: '7:30', autoCompleteColumn: {id: '14', name: 'Austria'}, selectColumn: {id: '14', name: 'Austria'}, numberColumn1: 1, numberColumn2: 2, numberColumn3: 3},
+  {id: '3e',  name: 'Lannister, Jaime',        email: 'testEmail33@test.com',       isActive: true, timeColumn: '7:30', autoCompleteColumn: {id: '14', name: 'Austria'}, selectColumn: {id: '14', name: 'Austria'}, numberColumn1: 1, numberColumn2: 2, numberColumn3: 3},
+  {id: '4e',  name: 'Dayne, Arthur',           email: 'testEmail44@test.com',       isActive: true, timeColumn: '7:30', autoCompleteColumn: {id: '14', name: 'Austria'}, selectColumn: {id: '14', name: 'Austria'}, numberColumn1: 1, numberColumn2: 2, numberColumn3: 3},
+  {id: '5e',  name: 'Snow, Jon',               email: 'testEmail55@test.com',       isActive: true, timeColumn: '7:30', autoCompleteColumn: {id: '14', name: 'Austria'}, selectColumn: {id: '14', name: 'Austria'}, numberColumn1: 1, numberColumn2: 2, numberColumn3: 3},
+  {id: '6e',  name: 'Stark, Ned',              email: 'testEmail66@test.com',       isActive: true, timeColumn: '7:30', autoCompleteColumn: {id: '14', name: 'Austria'}, selectColumn: {id: '14', name: 'Austria'}, numberColumn1: 1, numberColumn2: 2, numberColumn3: 3},
+  {id: '7e',  name: 'Stark, Arya',             email: 'testEmail77@test.com',       isActive: true, timeColumn: '7:30', autoCompleteColumn: {id: '14', name: 'Austria'}, selectColumn: {id: '14', name: 'Austria'}, numberColumn1: 1, numberColumn2: 2, numberColumn3: 3},
+  {id: '8e',  name: 'Biggus, Headus',          email: 'testEmail88@test.com',       isActive: true, timeColumn: '7:30', autoCompleteColumn: {id: '14', name: 'Austria'}, selectColumn: {id: '14', name: 'Austria'}, numberColumn1: 1, numberColumn2: 2, numberColumn3: 3},
+  {id: '9e',  name: 'Drumpf, Donald',          email: 'testEmail99@test.com',       isActive: true, timeColumn: '7:30', autoCompleteColumn: {id: '14', name: 'Austria'}, selectColumn: {id: '14', name: 'Austria'}, numberColumn1: 1, numberColumn2: 2, numberColumn3: 3},
+  {id: '7e',  name: 'Johnson, Ruin',           email: 'testEmail00@test.com',       isActive: true, timeColumn: '7:30', autoCompleteColumn: {id: '14', name: 'Austria'}, selectColumn: {id: '14', name: 'Austria'}, numberColumn1: 1, numberColumn2: 2, numberColumn3: 3},
+  {id: '8e',  name: 'Ren, Emo',                email: 'testEmail1234@test.com',     isActive: true, timeColumn: '7:30', autoCompleteColumn: {id: '14', name: 'Austria'}, selectColumn: {id: '14', name: 'Austria'}, numberColumn1: 1, numberColumn2: 2, numberColumn3: 3},
+  {id: '9e',  name: 'Swolo, Ben',              email: 'testEmail5678@test.com',     isActive: true, timeColumn: '7:30', autoCompleteColumn: {id: '14', name: 'Austria'}, selectColumn: {id: '14', name: 'Austria'}, numberColumn1: 1, numberColumn2: 2, numberColumn3: 3},
+  {id: '10e', name: 'Sue, Mary',               email: 'testEmail90210@test.com',    isActive: true, timeColumn: '7:30', autoCompleteColumn: {id: '14', name: 'Austria'}, selectColumn: {id: '14', name: 'Austria'}, numberColumn1: 1, numberColumn2: 2, numberColumn3: 3},
+  {id: '11e', name: 'Poppins, Leia',           email: 'testEmail6274309@test.com',  isActive: true, timeColumn: '7:30', autoCompleteColumn: {id: '14', name: 'Austria'}, selectColumn: {id: '14', name: 'Austria'}, numberColumn1: 1, numberColumn2: 2, numberColumn3: 3},
+  {id: '12e', name: 'Snoke, Nobody',           email: 'testEmail13371337@test.com', isActive: true, timeColumn: '7:30', autoCompleteColumn: {id: '14', name: 'Austria'}, selectColumn: {id: '14', name: 'Austria'}, numberColumn1: 1, numberColumn2: 2, numberColumn3: 3},
+  {id: '13e', name: 'Too tired to live, Luke', email: 'testEmail253545@test.com',   isActive: true, timeColumn: '7:30', autoCompleteColumn: {id: '14', name: 'Austria'}, selectColumn: {id: '14', name: 'Austria'}, numberColumn1: 1, numberColumn2: 2, numberColumn3: 3},
+  {id: '1e',  name: 'Schrute, Dwight',         email: 'testEmail11@test.com',       isActive: true, timeColumn: '7:30', autoCompleteColumn: undefined                  , selectColumn: {id: '14', name: 'Austria'}, numberColumn1: 1, numberColumn2: 2, numberColumn3: 3},
+  {id: '2e',  name: 'Scott, Michael',          email: 'testEmail22@test.com',       isActive: true, timeColumn: '7:30', autoCompleteColumn: {id: '14', name: 'Austria'}, selectColumn: {id: '14', name: 'Austria'}, numberColumn1: 1, numberColumn2: 2, numberColumn3: 3},
+  {id: '3e',  name: 'Lannister, Jaime',        email: 'testEmail33@test.com',       isActive: true, timeColumn: '7:30', autoCompleteColumn: {id: '14', name: 'Austria'}, selectColumn: {id: '14', name: 'Austria'}, numberColumn1: 1, numberColumn2: 2, numberColumn3: 3},
+  {id: '4e',  name: 'Dayne, Arthur',           email: 'testEmail44@test.com',       isActive: true, timeColumn: '7:30', autoCompleteColumn: {id: '14', name: 'Austria'}, selectColumn: {id: '14', name: 'Austria'}, numberColumn1: 1, numberColumn2: 2, numberColumn3: 3},
+  {id: '5e',  name: 'Snow, Jon',               email: 'testEmail55@test.com',       isActive: true, timeColumn: '7:30', autoCompleteColumn: {id: '14', name: 'Austria'}, selectColumn: {id: '14', name: 'Austria'}, numberColumn1: 1, numberColumn2: 2, numberColumn3: 3},
+  {id: '6e',  name: 'Stark, Ned',              email: 'testEmail66@test.com',       isActive: true, timeColumn: '7:30', autoCompleteColumn: {id: '14', name: 'Austria'}, selectColumn: {id: '14', name: 'Austria'}, numberColumn1: 1, numberColumn2: 2, numberColumn3: 3},
+  {id: '7e',  name: 'Stark, Arya',             email: 'testEmail77@test.com',       isActive: true, timeColumn: '7:30', autoCompleteColumn: {id: '14', name: 'Austria'}, selectColumn: {id: '14', name: 'Austria'}, numberColumn1: 1, numberColumn2: 2, numberColumn3: 3},
+  {id: '8e',  name: 'Biggus, Headus',          email: 'testEmail88@test.com',       isActive: true, timeColumn: '7:30', autoCompleteColumn: {id: '14', name: 'Austria'}, selectColumn: {id: '14', name: 'Austria'}, numberColumn1: 1, numberColumn2: 2, numberColumn3: 3},
+  {id: '9e',  name: 'Drumpf, Donald',          email: 'testEmail99@test.com',       isActive: true, timeColumn: '7:30', autoCompleteColumn: {id: '14', name: 'Austria'}, selectColumn: {id: '14', name: 'Austria'}, numberColumn1: 1, numberColumn2: 2, numberColumn3: 3},
+  {id: '7e',  name: 'Johnson, Ruin',           email: 'testEmail00@test.com',       isActive: true, timeColumn: '7:30', autoCompleteColumn: {id: '14', name: 'Austria'}, selectColumn: {id: '14', name: 'Austria'}, numberColumn1: 1, numberColumn2: 2, numberColumn3: 3},
+  {id: '8e',  name: 'Ren, Emo',                email: 'testEmail1234@test.com',     isActive: true, timeColumn: '7:30', autoCompleteColumn: {id: '14', name: 'Austria'}, selectColumn: {id: '14', name: 'Austria'}, numberColumn1: 1, numberColumn2: 2, numberColumn3: 3},
+  {id: '9e',  name: 'Swolo, Ben',              email: 'testEmail5678@test.com',     isActive: true, timeColumn: '7:30', autoCompleteColumn: {id: '14', name: 'Austria'}, selectColumn: {id: '14', name: 'Austria'}, numberColumn1: 1, numberColumn2: 2, numberColumn3: 3},
+  {id: '10e', name: 'Sue, Mary',               email: 'testEmail90210@test.com',    isActive: true, timeColumn: '7:30', autoCompleteColumn: {id: '14', name: 'Austria'}, selectColumn: {id: '14', name: 'Austria'}, numberColumn1: 1, numberColumn2: 2, numberColumn3: 3},
+  {id: '11e', name: 'Poppins, Leia',           email: 'testEmail6274309@test.com',  isActive: true, timeColumn: '7:30', autoCompleteColumn: {id: '14', name: 'Austria'}, selectColumn: {id: '14', name: 'Austria'}, numberColumn1: 1, numberColumn2: 2, numberColumn3: 3},
+  {id: '12e', name: 'Snoke, Nobody',           email: 'testEmail13371337@test.com', isActive: true, timeColumn: '7:30', autoCompleteColumn: {id: '14', name: 'Austria'}, selectColumn: {id: '14', name: 'Austria'}, numberColumn1: 1, numberColumn2: 2, numberColumn3: 3},
+  {id: '13e', name: 'Too tired to live, Luke', email: 'testEmail253545@test.com',   isActive: true, timeColumn: '7:30', autoCompleteColumn: {id: '14', name: 'Austria'}, selectColumn: {id: '14', name: 'Austria'}, numberColumn1: 1, numberColumn2: 2, numberColumn3: 3},
 ];
 
 function createEmployeesGrid1() {
   let cols = [];
 
   // add header columns
-  cols.push(createColumn('name',     'Employee', 'text', '120px'));
-  cols.push(createColumn('email',    'Email',    'text'   , '120px'));
-  cols.push(createColumn('isActive', 'IsActive', 'checked', '150px'));
-  cols.push(createColumn('timeColumn', 'Time', {type: 'time'}, '150px'));
-  cols.push(createColumn('selectColumn', 'Select', {type: 'select', options: countries}, '150px'));
-  cols.push(createColumn('multiselectColumn', 'Multiselect', {type: 'multiselect', options: countries}, '150px'));
-  cols.push(createColumn('autoCompleteColumn', 'Auto Complete', {type: 'auto-complete', options: countries}, '150px'));
+  cols.push(createColumn('name',                'Employee',       {type: 'text', width: '120px'}));
+  cols.push(createColumn('email',               'Email',          {type: 'text', width: '120px'}));
+  cols.push(createColumn('isActive',            'IsActive',       {type: 'checked', width: '150px'}));
+  cols.push(createColumn('timeColumn',          'Time',           {type: {type: 'time'}, width: '150px'}));
+  cols.push(createColumn('selectColumn',        'Select',         {type: {type: 'select', options: countries}, width: '150px'}));
+  cols.push(createColumn('multiselectColumn',   'Multiselect',    {type: {type: 'multiselect', options: countries}, width: '150px'}));
+  cols.push(createColumn('autoCompleteColumn',  'Auto Complete',  {type: {type: 'auto-complete', options: countries}, width: '150px'}));
 
   // add employee rows
-  let rows: any[] = [];
+  let rows: IRowData[] = [];
   for (let row = 0; row < employees.length; row++) {
-    let r: any = {id: row};
+    let r: IRowData = {id: `${row}`, data: {}};
     for (let column = 0; column < cols.length; column++) {
       let fieldName: string = cols[column].name;
+      let v: any;
       if (fieldName === 'name') {
-        r[fieldName] = employees[row][fieldName]; // somehow make into a button that opens a dialog on click???
+        v = employees[row][fieldName]; // somehow make into a button that opens a dialog on click???
       } else if (fieldName === 'multiselectColumn') {
-        r[fieldName] = [{id: '14', name: 'Austria'}];
+        v = [{id: '14', name: 'Austria'}];
       } else {
-        r[fieldName] = employees[row][fieldName];
+        v = employees[row][fieldName];
       }
+      r.data![fieldName] = v;
     }
     rows.push(r);
   }
 
   // create the grid model
-  let grid = createGrid(rows, cols, {multiSelect: true});
+  let grid = createGrid(rows, cols, {multiSelect: true, allowMergeColumns: true});
   // sort by employee names
   grid.addSort(grid.columnByPos(0)!, 'ascending');
 
@@ -648,30 +645,32 @@ function createEmployeesGrid2() {
   let cols = [];
 
   // add header columns
-  cols.push(createColumn('name',     'Employee', 'text', '120px'));
-  cols.push(createColumn('email',    'Email',    'text'   , '120px'));
-  cols.push(createColumn('isActive', 'IsActive', 'checked', '250px'));
-  cols.push(createColumn('timeColumn', 'Time', {type: 'time'}, '250px'));
-  cols.push(createColumn('selectColumn', 'Select', {type: 'select', options: countries}, '250px'));
-  cols.push(createColumn('multiselectColumn', 'Multiselect', {type: 'multiselect', options: countries}, '100px'));
-  cols.push(createColumn('autoCompleteColumn', 'Auto Complete', {type: 'auto-complete', options: countries}, '100px'));
-  cols.push(createColumn('numberColumn1', 'Number Column 1', {type: 'number', options: {}}, '250px'));
-  cols.push(createColumn('numberColumn2', 'Number Column 2', {type: 'number', options: {}}, '250px'));
-  cols.push(createColumn('numberColumn3', 'Number Column 3', {type: 'number', options: {}}, '250px'));
+  cols.push(createColumn('name',               'Employee',        {type: 'text',    width: '120px'}));
+  cols.push(createColumn('email',              'Email',           {type: 'text'   , width: '120px'}));
+  cols.push(createColumn('isActive',           'IsActive',        {type: 'checked', width: '250px'}));
+  cols.push(createColumn('timeColumn',         'Time',            {type: {type: 'time'}, width: '250px'}));
+  cols.push(createColumn('selectColumn',       'Select',          {type: {type: 'select', options: countries}, width: '250px'}));
+  cols.push(createColumn('multiselectColumn',  'Multiselect',     {type: {type: 'multiselect', options: countries}, width: '100px'}));
+  cols.push(createColumn('autoCompleteColumn', 'Auto Complete',   {type: {type: 'auto-complete', options: countries}, width: '100px'}));
+  cols.push(createColumn('numberColumn1',      'Number Column 1', {type: {type: 'number', options: {}}, width: '250px'}));
+  cols.push(createColumn('numberColumn2',      'Number Column 2', {type: {type: 'number', options: {}}, width: '250px'}));
+  cols.push(createColumn('numberColumn3',      'Number Column 3', {type: {type: 'number', options: {}}, width: '250px'}));
 
   // add employee rows
-  let rows: any[] = [];
+  let rows: IRowData[] = [];
   for (let row = 0; row < employees.length; row++) {
-    let r: any = {id: row};
+    let r: IRowData = {id: `${row}`, data: {}};
     for (let column = 0; column < cols.length; column++) {
       let fieldName: string = cols[column].name;
+      let v: any;
       if (fieldName === 'name') {
-        r[fieldName] = employees[row][fieldName]; // somehow make into a button that opens a dialog on click???
+        v = employees[row][fieldName]; // somehow make into a button that opens a dialog on click???
       } else if (fieldName === 'multiselectColumn') {
-        r[fieldName] = [{id: '14', name: 'Austria'}];
+        v = [{id: '14', name: 'Austria'}];
       } else {
-        r[fieldName] = employees[row][fieldName];
+        v = employees[row][fieldName];
       }
+      r.data![fieldName] = v;
     }
     rows.push(r);
   }
@@ -709,8 +708,8 @@ const _Home = (props: any) => <Observe render={() => (
             <Button style={{margin: '0px 15px 10px 0px'}} variant='contained' onClick={() => grid.selectCellByPos(0, 4)}>Select Cell</Button>
             <Button style={{margin: '0px 15px 10px 0px'}} variant='contained' onClick={() => grid.selectCellsByRange(1, 4, 3, 5)}>Select Cells</Button>
             <Button style={{margin: '0px 15px 10px 0px'}} variant='contained' onClick={() => {
-              grid.addRow({id: 'newRow-' + Math.random() * 2000, 'column2': 'RC 2-1', 'column3': 'RC 3-1', options: {allowMergeColumns: true}});
-              employeesGrid1.addRow({id: 'newRow-' + Math.random() * 2000, name: 'New Employee', email: 'employeeEmail@test.com'});
+              grid.addRow({id: 'newRow-' + Math.random() * 2000, data: {column2: 'RC 2-1', column3: 'RC 3-1'}});
+              employeesGrid1.addRow({id: 'newRow-' + Math.random() * 2000, data: {name: 'New Employee', email: 'employeeEmail@test.com'}});
             }}>
               Add Row
             </Button>
@@ -773,12 +772,13 @@ class TestDialog extends Modal {
     multi                : Form.multistring().validators(isRequired).placeholder('enter some multiline text').startAdornment(() => <AccessibilityIcon />).endAdornment(() => <AddIcon />),
     switch1              : Form.switch().label('Switch 1'),
     switch2              : Form.switch(),
-  }, {email: 'splace@worksight.net', isGreat: true, switch2: true}, {variant: 'outlined', initialValuesValidationMode: 'withValues'});
+    color                : Form.color().disabled(() => true),
+  }, {email: 'splace@worksight.net', isGreat: true, switch2: true, phone: '34232221535'}, {variant: 'outlined', initialValuesValidationMode: 'withValues'});
 
   constructor() {
     super('Test Form');
     this.action('login', this.submit, {type: 'submit', disabled: () => !this.form.hasChanges})
-        .action('cancel', {color: 'secondary', icon: 'cancel'})
+        .action('cancel', {color: 'secondary', icon: 'cancel'});
   }
 
   submit = async () => {
@@ -826,6 +826,7 @@ const TestFormView = ({form}: {form: typeof testDialog.form}) => (
       <div className='content'>
         <form.field.switch1.Editor className='span1' />
         <form.field.switch2.Editor className='span1' />
+        <form.field.color.Editor className='span1' />
         <form.field.country.Editor className='span4' />
       </div>
       <div className='content'>

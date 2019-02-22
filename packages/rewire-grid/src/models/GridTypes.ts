@@ -32,7 +32,7 @@ export interface IGrid extends IRows, IDisposable {
   fixedWidth                : string;
   loading                   : boolean;
   readonly fixedColumns     : IColumn[];
-  readonly dataColumns      : IColumn[];
+  readonly standardColumns  : IColumn[];
   dataRowsByPosition        : IRow[];
   originalDataRowsByPosition: IRow[];
   addedRows                 : IRowIteratorResult[];
@@ -41,9 +41,13 @@ export interface IGrid extends IRows, IDisposable {
   clipboard                 : ICell[];
   isMouseDown               : boolean;
   multiSelect               : boolean;
+  allowMergeColumns         : boolean;
   startCell?                : ICell;
   changed                   : boolean;
   inError                   : boolean;
+  contentElement?           : HTMLDivElement;
+
+  setContentElement(element: HTMLDivElement | undefined): void;
 
   hasChanges(): boolean;
   hasErrors(): boolean;
@@ -55,14 +59,15 @@ export interface IGrid extends IRows, IDisposable {
   setSort(column: IColumn, sort?: SortDirection): IGrid;
   sort(): void;
   sortItems(items: any[], comparer: (a: any, b: any) => number): void;
+  mergeColumns(): void;
+  mergeFixedRows(): void;
 
   selectRows(rows: IRow[]): void;
-  selectCells(cells: ICell[], cellToFocus?: ICell, multiSelect?: boolean, append?: boolean): void;
+  selectCells(cells: ICell[], cellToFocus?: ICell, handleMergedCells?: boolean, append?: boolean): void;
   unselectCells(cells: ICell[], cellToFocus?: ICell): void;
   updateCellSelectionProperties(cells: ICell[]): void;
   editCell(cell?: ICell): void;
   selectCellsTo(cell: ICell, append?: boolean): void;
-  selectCellsToMergeHelper(rows: IRow[], columnsToSelect: IColumn[]): IColumn[];
   selectCellByPos(rowPosition: number, columnPosition: number): void;
   selectCellsByRange(rowPosition1: number, rowPosition2: number, columnPosition1: number, columnPosition2: number): void;
   clearSelection(): void;
@@ -89,29 +94,29 @@ export interface IGrid extends IRows, IDisposable {
   revert(): void;
   revertSelectedCells(): void;
   revertSelectedRows(): void;
-  get(): any[];
-  getChanges(): any[];
-  set(data: any[]): void;
+  get(): ICellDataMap[];
+  getChanges(): ICellDataMap[];
+  set(data: (IRowData | undefined)[]): void;
 
   addColumn(column: IColumn): IColumn;
 
-  addFixedRow(row: any, position?: number): IRow;
+  addFixedRow(data?: IRowData, position?: number): IRow;
   removeFixedRow(id: string): void;
 
-  _removeRow(rows: any, id: string): void;
-  _removeGroupRow(rows: any, id: string): void;
+  _removeRow(rows: IterableIterator<IRowIteratorResult>, id: string): void;
+  _removeGroupRow(rows: IterableIterator<IRowIteratorResult>, id: string): void;
   removeRow(id: string): void;
   removeRows(ids: string[]): void;
   removeSelectedRows(reselect?: boolean): void;
-  addRow(row: any, position?: number): IRow;
-  _addRow(row: any, position?: number): IRow;
-  addRows(rows: any[], position?: number): void;
-  _addRows(rows: any[], position?: number): IRow[];
-  _duplicateRow(rows: any, id: string, position?: number): void;
-  duplicateRow(id: string, position?: number): void;
-  duplicateRows(ids: string[], position?: number): void;
-  duplicateSelectedRows(): void;
-  insertRowAtSelection(): void;
+  addRow(data?: IRowData, position?: number): IRow;
+  _addRow(data?: IRowData, position?: number): IRow;
+  addRows(data: (IRowData | undefined)[], position?: number): IRow[];
+  _addRows(data: (IRowData | undefined)[], position?: number): IRow[];
+  _duplicateRow(rows: IterableIterator<IRowIteratorResult>, id: string, position?: number): IRow | undefined;
+  duplicateRow(id: string, position?: number): IRow | undefined;
+  duplicateRows(ids: string[], position?: number): IRow[];
+  duplicateSelectedRows(): IRow[];
+  insertRowAtSelection(data?: IRowData): IRow;
 }
 
 export interface IGridOptions {
@@ -120,6 +125,7 @@ export interface IGridOptions {
   verticalAlign?       : VerticalAlignment;
   isDraggable?         : boolean;
   multiSelect?         : boolean;
+  allowMergeColumns?   : boolean;
   groupBy?             : string[];
   // rowHotkeyPermissions?: IGridRowHotkeyPermissions;
 }
@@ -150,7 +156,16 @@ export interface IGridFontSizes {
 }
 
 export interface IRowOptions {
-  allowMergeColumns: boolean;
+  cls?: string;
+  visible?: boolean;
+  fixed?: boolean;
+  allowMergeColumns?: boolean;
+}
+
+export interface IRowData {
+  id?: string;
+  data?: ICellDataMap;
+  options?: IRowOptions;
 }
 
 export interface IRow extends IDisposable {
@@ -158,22 +173,25 @@ export interface IRow extends IDisposable {
   grid                 : IGrid;
   cells                : ICellMap;
   selected             : boolean;
-  cls                  : string;
-  options              : IRowOptions;
+  cls?                 : string;
+  allowMergeColumns?   : boolean;
   position             : number;
-  readonly data        : ICellDataMap & any;
+  readonly originalData: ICellDataMap;
   cellsByColumnPosition: ICell[];
   parentRow?           : IGroupRow;
   visible              : boolean;
-  isFixed              : boolean;
+  fixed                : boolean;
 
   hasChanges(): boolean;
   hasErrors(): boolean;
   getErrors(): IErrorData[];
   createCell(column: IColumn, value: any, type?: string): ICell;
   clear(columnNames?: string[]): void;
-  _setValue(data: ICellDataMap): void;
-  setValue(data: ICellDataMap): void;
+  _setValue(data: ICellDataMap): boolean;
+  setValue(data: ICellDataMap): boolean;
+  mergeAllColumns(): void;
+  mergeFixedColumns(): void;
+  mergeStandardColumns(): void;
   clone(): IRow;
   validate(columnNames?: string[]): void;
   _revert(): void;
@@ -188,7 +206,7 @@ export interface IGroupRow extends IRow, IRows {
 }
 
 export type IColumnEditor =
-  'text' | 'date' | 'checked' | 'password' | 'mask' | 'none' |
+  'text' | 'date' | 'checked' | 'mask' | 'none' |
   {type: 'time', options?: {rounding?: number}} |
   {type: 'auto-complete', options: {search: SearchFn<any>, map: MapFn<any>}} |
   {type: 'select', options: {search: SearchFn<any>, map: MapFn<any>}} |
@@ -199,31 +217,59 @@ export type IColumnEditor =
 export interface ICellProperties {
   id       : number;
   grid     : IGrid;
-  tooltip? : string;
   cls?     : any;
   editable : boolean;
   align?   : TextAlignment;
   renderer?: React.SFC<any>;
-  colSpan? : number;
-  rowSpan? : number;
+  colSpan  : number;
+  rowSpan  : number;
 
   onValueChange?(cell: ICell, v: any): void;
 }
 
+export interface IColumnOptions {
+  type?         : IColumnEditor;
+  cls?          : any;
+  enabled?      : boolean;
+  readOnly?     : boolean;
+  editable?     : boolean;
+  fixed?        : boolean;
+  visible?      : boolean;
+  align?        : TextAlignment;
+  verticalAlign?: VerticalAlignment;
+  rowSpan? : number;
+  colSpan?      : number;
+  tooltip?      : string;
+  width?        : string;
+  canSort?      : boolean;
+  renderer?     : React.SFC<any>;
+  validator?    : IValidateFnData;
+
+  onValueChange?(cell: ICell, v: any): void;
+  compare?(x: any, y: any): number;
+}
+
+export interface IColumnData {
+  name: string;
+  title: string;
+  options?: IColumnOptions;
+}
+
 export interface IColumn extends ICellProperties {
   name          : string;
+  title         : string;
   type          : EditorType;
-  title?        : string;
+  tooltip?      : string;
   width?        : string;
   fixed         : boolean;
   visible       : boolean;
-  verticalAlign?: VerticalAlignment;
-  enabled?      : boolean;
-  readOnly?     : boolean;
+  verticalAlign : VerticalAlignment;
+  enabled       : boolean;
+  readOnly      : boolean;
   position      : number;
   sort?         : SortDirection;
-  canSort?      : boolean;
-  options?      : any;
+  canSort       : boolean;
+  typeOptions?  : any;
   editor?       : React.SFC<any>;
   validator?    : IValidateFnData;
 
@@ -253,8 +299,6 @@ export interface ICell extends ICellProperties {
   readOnly             : boolean;
   readonly editing     : boolean;
   element?             : HTMLTableDataCellElement;
-  rowSpan              : number;
-  colSpan              : number;
   rowPosition          : number;
   columnPosition       : number;
   isTopMostSelection   : boolean;
@@ -271,8 +315,8 @@ export interface ICell extends ICellProperties {
   canFocus(): boolean;
   setFocus(focus?: boolean): void;
   setElement(element: HTMLTableDataCellElement | undefined): void;
-  _setValue(v: any): void;
-  setValue(v: any): void;
+  _setValue(v: any): boolean;
+  setValue(v: any): boolean;
   validate(): void;
   _revert(): void;
   revert(): void;
@@ -282,6 +326,11 @@ export interface ICell extends ICellProperties {
 
 export type ICellMap     = {[columnName: string]: ICell};
 export type ICellDataMap = {[columnName: string]: any};
+
+export interface ICellCustomValue {
+  clone?(): any;
+  toString?(): string;
+}
 
 export function isRow(row: any): row is IRow {
   return !!(row && (row as IRow).createCell);
@@ -295,7 +344,7 @@ export function isColumn(column: any): column is IColumn {
   return !!(column && (column as IColumn).name);
 }
 
-export function getValue(row: IRow | ObjectType, column: IColumn): string | undefined {
+export function getValue(row?: IRow | ObjectType, column?: IColumn): string | undefined {
   if (!row || !column) return undefined;
   let value: any;
   if (isGroupRow(row)) {

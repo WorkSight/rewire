@@ -135,7 +135,7 @@ class Cell extends React.PureComponent<CellProps, {}> {
   }
 
   handleDoubleClick = (evt: React.MouseEvent<any>) => {
-    if (!this.cell.enabled || this.cell.readOnly || !this.cell.editable || this.column.fixed || evt.ctrlKey || evt.shiftKey || !this.column.editor) {
+    if (!this.cell.enabled || this.cell.readOnly || !this.cell.editable || evt.ctrlKey || evt.shiftKey || !this.column.editor) {
       return;
     }
 
@@ -161,7 +161,11 @@ class Cell extends React.PureComponent<CellProps, {}> {
         if (this.cell.editing || !evt.ctrlKey) {
           return;
         }
+        if (evt.shiftKey) {
+          this.grid.revert();
+        } else {
         this.grid.revertSelectedRows();
+        }
         break;
       case 'C':
         if (this.cell.editing || !evt.ctrlKey) {
@@ -416,7 +420,7 @@ class Cell extends React.PureComponent<CellProps, {}> {
   }
 
   handleClick = (evt: React.MouseEvent<any>) => {
-    if (this.cell.editing || !this.cell.enabled || this.column.fixed) {
+    if (this.cell.editing || !this.cell.enabled) {
       return;
     }
 
@@ -428,7 +432,7 @@ class Cell extends React.PureComponent<CellProps, {}> {
         if (cellToUnselect) {
           this.grid.unselectCells([cellToUnselect], cellToUnselect);
         } else {
-          this.grid.selectCells([this.cell], this.cell, false, true);
+          this.grid.selectCells([this.cell], this.cell, true, true);
         }
       } else if (evt.shiftKey) {
         this.grid.selectCellsTo(this.cell);
@@ -456,7 +460,9 @@ class Cell extends React.PureComponent<CellProps, {}> {
     //   }
     // }
 
+    if (this.column.type !== 'select' && this.column.type !== 'multiselect') {
     this.keyForEdit       = evt.key;
+    }
     this.grid.editCell(this.cell);
     if (!this.grid.editingCell) {
       return;
@@ -518,7 +524,8 @@ class Cell extends React.PureComponent<CellProps, {}> {
     return value;
   }
 
-  onValueChange = (value: any) => {
+  onValueChange = (v: any) => {
+    let value = v === undefined || v === null || v === '' ? undefined : v;
     this.cell.setValue(value);
     if (this.column.type === 'multiselect') {
       return;
@@ -528,7 +535,7 @@ class Cell extends React.PureComponent<CellProps, {}> {
   }
 
   handleTooltip = (evt: React.MouseEvent<HTMLSpanElement>) => {
-    const node = evt.target as HTMLSpanElement;
+    const node = evt.target as HTMLElement;
     node.setAttribute('title', (node.offsetWidth < node.scrollWidth) ? this.value : '');
   }
 
@@ -545,6 +552,7 @@ class Cell extends React.PureComponent<CellProps, {}> {
       let Editor = this.column.editor;
       if (!Editor) return;
       let cellType              = this.column.type;
+      let additionalProps       = {};
       let endOfTextOnFocus      = false;
       let selectOnFocus         = true;
       let cursorPositionOnFocus = undefined;
@@ -557,9 +565,11 @@ class Cell extends React.PureComponent<CellProps, {}> {
           endOfTextOnFocus      = false;
           cursorPositionOnFocus = 1;
         }
+        if (cellType === 'auto-complete') {
+          additionalProps['initialInputValue'] = this.keyForEdit;
+        }
       }
       let editorClasses = undefined;
-      let additionalProps = {};
       if (cellType === 'select' || cellType === 'multiselect') {
         editorClasses = {inputRoot: this.props.classes.editorSelectInputRoot, select: this.props.classes.editorSelectSelect};
       } else if (cellType === 'checked') {

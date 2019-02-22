@@ -154,6 +154,7 @@ class PasswordFieldInternal extends React.Component<PasswordFieldPropsStyled, IP
     const type                      = this.state.showPassword ? 'text' : 'password';
     const inputClassName            = this.props.variant === 'outlined' ? this.props.classes.inputOutlinedInput : this.props.classes.inputInput;
     const inputFormControlClassName = this.props.variant === 'standard' && this.props.label ? this.props.classes.inputFormControlWithLabel : undefined;
+    let value                       = this.props.value !== undefined && this.props.value !== null ? this.props.value : '';
 
     if (this.props.updateOnChange) {
       return (
@@ -167,7 +168,7 @@ class PasswordFieldInternal extends React.Component<PasswordFieldPropsStyled, IP
           variant={this.props.variant}
           error={!this.props.disableErrors && !this.props.disabled && !!this.props.error}
           helperText={!this.props.disableErrors && <span>{(!this.props.disabled && this.props.error) || ''}</span>}
-          value={this.props.value}
+          value={value}
           autoFocus={this.props.autoFocus}
           onFocus={this.handleFocus}
           onBlur={this.props.onBlur}
@@ -182,7 +183,7 @@ class PasswordFieldInternal extends React.Component<PasswordFieldPropsStyled, IP
     }
 
     return (
-      <BlurInputHOC {...this.props} type={type} onValueChange={this.props.onValueChange}
+      <BlurInputHOC {...this.props} type={type} value={value} onValueChange={this.props.onValueChange}
         render={(props: PasswordFieldPropsStyled) =>
           <TextField
             className={props.className}
