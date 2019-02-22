@@ -45,11 +45,12 @@ let styles = (theme: Theme) => ({
   childrenContainer: {
     overflowY: 'auto',
     margin: '1px 0px',
-    paddingBottom: '19px',
+    paddingTop: '15px',
+    paddingBottom: '15px',
     position: 'relative',
   },
-  childrenContainerTitle: {
-    paddingTop: '15px',
+  childrenContainerActionsNoDivider: {
+    paddingBottom: '0px',
   },
   divider: {
     margin: '0px',
@@ -94,7 +95,7 @@ type DialogProps = WithStyle<ReturnType<typeof styles>, IDialogProps>;
 
 class DialogInternal extends React.Component<DialogProps> {
   render() {
-    const {classes, children, dialog, ButtonRenderer, fullScreen, maxWidth, title, disableEscapeKeyDown, hideBackdrop, transition, transitionDuration, disableTransition, hasDivider} = this.props;
+    const {classes, children, dialog, ButtonRenderer, fullScreen, maxWidth, title, disableEscapeKeyDown, hideBackdrop, transition, transitionDuration, disableTransition} = this.props;
     const escapeAction            = disableEscapeKeyDown ? undefined : () => dialog.close();
     const transitionToUse         = transition ? transition : Transition;
     const transitionDurationToUse = transitionDuration !== undefined ? transitionDuration : TRANSITION_TIMEOUT;
@@ -102,6 +103,7 @@ class DialogInternal extends React.Component<DialogProps> {
     const transitionTime          = disableTransition ? 0 : transitionDurationToUse;
     const hasTitle                = dialog.title || title;
     const hasActions              = dialog.actions && Object.keys(dialog.actions).length > 0;
+    const hasDivider              = hasActions && this.props.hasDivider !== undefined ? this.props.hasDivider : true;
 
     return (
       <Observe render={() => (
@@ -111,10 +113,10 @@ class DialogInternal extends React.Component<DialogProps> {
               <Typography variant='h6'>{(title && title(dialog)) || dialog.title}</Typography>
               <hr/>
             </div>}
-            <div className={classNames(classes.childrenContainer, hasTitle ? classes.childrenContainerTitle : '')}>
+            <div className={classNames(classes.childrenContainer, hasActions && !hasDivider ? classes.childrenContainerActionsNoDivider : '')}>
               {children}
             </div>
-          {hasActions && (hasDivider !== undefined ? hasDivider : true) && <Divider className={classes.divider} />}
+          {hasDivider && <Divider className={classes.divider} />}
           {hasActions && <div className={classes.buttons}>{
               Object.keys(dialog.actions).map(label => ((ButtonRenderer && <ButtonRenderer key={label} label={label} action={dialog.actions[label]} isDisabled={dialog.isDisabled} />) || <DefaultActionRenderer key={label} label={label} action={dialog.actions[label]} isDisabled={dialog.isDisabled} />))
           }</div>}

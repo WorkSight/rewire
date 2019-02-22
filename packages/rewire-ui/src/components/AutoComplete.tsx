@@ -89,6 +89,7 @@ interface IAutoCompleteProps {
   selectOnFocus?   : boolean;
   endOfTextOnFocus?: boolean;
   cursorPositionOnFocus?: number;
+  initialInputValue?: any;
 }
 
 export type AutoCompleteProps<T> = WithStyle<ReturnType<typeof styles>, IAutoCompleteProps & ICustomProps<T> & React.InputHTMLAtrributes<any>>;
@@ -108,6 +109,10 @@ class AutoComplete<T> extends React.Component<AutoCompleteProps<T>, any> {
       this.search = debounce(this.search, wait);
     }
     this.map = props.map || defaultMap;
+
+    if (props.initialInputValue !== undefined) {
+      this.performSearch(props.initialInputValue);
+    }
   }
 
   performSearch = async (value: string) => {
@@ -118,8 +123,8 @@ class AutoComplete<T> extends React.Component<AutoCompleteProps<T>, any> {
   }
 
   renderInput = (classes: Record<IStyleClasses, string>, error: string | undefined, inputProps: any, InputProps: any, ref: (node: any) => any) => {
-    const { label, disabled, autoFocus, value, ...other }                 = inputProps;
-    const { startAdornment, endAdornment, align, variant, disableErrors } = InputProps;
+    const {label, disabled, autoFocus, value, ...other}                 = inputProps;
+    const {startAdornment, endAdornment, align, variant, disableErrors} = InputProps;
     const inputClassName            = variant === 'outlined' ? classes.inputOutlinedInput : classes.inputInput;
     const inputFormControlClassName = variant === 'standard' && this.props.label ? classes.inputFormControlWithLabel : undefined;
 
@@ -343,7 +348,7 @@ class AutoComplete<T> extends React.Component<AutoCompleteProps<T>, any> {
   }
 
   render() {
-    const { classes, theme, disabled, visible, error, label, placeholder, autoFocus, align, disableErrors, variant } = this.props;
+    const {classes, theme, disabled, visible, error, label, placeholder, autoFocus, align, disableErrors, variant, initialInputValue} = this.props;
     if (visible === false) {
       return null;
     }
@@ -354,7 +359,9 @@ class AutoComplete<T> extends React.Component<AutoCompleteProps<T>, any> {
     return (
       <Downshift
         defaultHighlightedIndex={0}
-        selectedItem={this.props.selectedItem}
+        initialInputValue={initialInputValue}
+        initialIsOpen={initialInputValue !== undefined}
+        selectedItem={this.props.selectedItem || null}
         itemToString={this.map}
         onInputValueChange={this.handleInputChanged}
         onUserAction={this.handleItemChanged}

@@ -24,7 +24,7 @@ import {and, isEmail, isRegEx} from './Validator';
 import {defaultPhoneFormat} from '../components/PhoneField';
 import { createElement } from 'react';
 
-export type IFieldTypes = 'string' | 'multistring' | 'static' | 'reference' | 'select' | 'multiselect' | 'number' | 'boolean' | 'switch' | 'date' | 'time' | 'avatar' | 'password' | 'email' | 'phone';
+export type IFieldTypes = 'string' | 'multistring' | 'static' | 'reference' | 'select' | 'multiselect' | 'number' | 'boolean' | 'switch' | 'date' | 'time' | 'avatar' | 'password' | 'email' | 'phone' | 'color';
 
 export interface IFieldDefn {
   label(text: string): IFieldDefn;
@@ -284,6 +284,7 @@ export default class Form {
     'phone'      : 'phone',
     'number'     : 'number',
     'avatar'     : 'avatar',
+    'color'      : 'color',
   };
 
   private createEditor(editorType: EditorType | undefined, field: IEditorField, editProps?: any): React.SFC<any> {
@@ -296,7 +297,8 @@ export default class Form {
     }
 
     const onValueChange = (v: any) => {
-      this.setFieldValue(field.name, v);
+      let value = v === undefined || v === null || v === '' ? undefined : v;
+      this.setFieldValue(field.name, value);
     };
 
     return (props) => createElement(editor(editorType!, editProps), {...props, field: field, onValueChange});
@@ -352,12 +354,12 @@ export default class Form {
 
   public setFieldValue(fieldName: string, value: any): boolean {
     let field = this.field[fieldName];
-    if (!field || field.value === value) return false;
+    if (!field || defaultEquals(field.value, value)) return false;
     field.value = value;
+    field.onValueChange && field.onValueChange(this, value);
     if (field.validateOnUpdate) {
       this.validateField(field);
     }
-    field.onValueChange && field.onValueChange(this, value);
     return true;
   }
 
@@ -365,7 +367,7 @@ export default class Form {
     if (!fieldKVPairs) return false;
 
     let success     = false;
-    let fieldsToSet = Object.keys(fieldKVPairs).map((fieldName: string) => this.field[fieldName]).filter((field: IEditorField) => field && field.value !== fieldKVPairs[field.name]);
+    let fieldsToSet = Object.keys(fieldKVPairs).map((fieldName: string) => this.field[fieldName]).filter((field: IEditorField) => field && !defaultEquals(field.value, fieldKVPairs[field.name]));
     fieldsToSet.forEach((field: IEditorField) => {
       field.value = fieldKVPairs[field.name];
       success     = true;
@@ -561,5 +563,9 @@ export default class Form {
 
   static avatar(editProps?: any): IFieldDefn {
     return new BaseField('avatar', editProps);
+  }
+
+  static color(editProps?: any): IFieldDefn {
+    return new BaseField('color', editProps);
   }
 }

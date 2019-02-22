@@ -44,23 +44,27 @@ function createTestGrid(nRows: number, nColumns: number) {
   if (nColumns < 10) throw new Error('add some more columns!');
 
   // create some random sized columns!
-  let cols = [];
+  let cols: IColumn[] = [];
   for (let col = 0; col < nColumns; col++) {
-    cols.push(createColumn('column' + col, 'Header# ' + col, 'text', Math.trunc(Math.random() * 250 + 50) + 'px'));
+    cols.push(createColumn('column' + col, 'Header# ' + col, {type: 'text', width: Math.trunc(Math.random() * 250 + 50) + 'px'}));
   }
 
   // Override and set some columns to be number!
   cols[5].setEditor({type: 'number', options: {decimals: 2, thousandSeparator: true}});
   cols[6].setEditor({type: 'number', options: {decimals: 3, thousandSeparator: true}});
 
+  // change some of the column header titles
+  cols[5].title = 'Sales';
+  cols[6].title = 'Sales';
+
   // add some cell data!
-  let rows = [];
+  let rows: IRowData[] = [];
   for (let row = 0; row < nRows; row++) {
-    let r: any = {};
+    let r: IRowData = {data: {}};
     for (let column = 0; column < nColumns; column++) {
       let v: any = `RC ${column}-${row % 5}`;
       if ((column >= 5) && (column <= 6)) v = Math.random() * 10000;
-      r['column' + column] = v;
+      r.data!['column' + column] = v;
     }
     rows.push(r);
   }
@@ -76,10 +80,8 @@ function createTestGrid(nRows: number, nColumns: number) {
   // create the grid model and group by 'column2' and 'column3'
   let grid = createGrid(rows, cols, ['column2', 'column3']);
 
-  // change some of the cell header labels and add another second fixed row.
-  grid.fixedRows[0].cells['column5'].value = 'Sales';
-  grid.fixedRows[0].cells['column6'].value = 'Sales';
-  grid.addFixedRow({column5: '2017', column6: '2018'});
+  // add another second fixed row.
+  grid.addFixedRow({data: {column5: '2017', column6: '2018'}});
 
   // sort first by  column7 then by column6
   grid.addSort(cols[7], 'ascending')

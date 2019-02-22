@@ -251,7 +251,8 @@ class SelectInternal<T> extends React.Component<SelectInternalProps<T>, any> {
         (nextProps.multiple !== this.props.multiple) ||
         (nextProps.disableErrors !== this.props.disableErrors) ||
         (nextProps.startAdornment !== this.props.startAdornment) ||
-        (nextProps.endAdornment !== this.props.endAdornment)
+        (nextProps.endAdornment !== this.props.endAdornment) ||
+        (nextState.labelWidth !== this.state.labelWidth)
       );
   }
 

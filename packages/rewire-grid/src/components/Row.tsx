@@ -67,7 +67,7 @@ const Row = withStyles(styles, class extends PureComponent<RowProps, {}> {
     super(props);
     let row = props.row;
     Object.keys(row.cells).forEach(columnName => {
-      row.data[columnName] = cloneValue(row.cells[columnName].value);
+      row.originalData[columnName] = cloneValue(row.cells[columnName].value);
     });
   }
 
@@ -81,26 +81,45 @@ const Row = withStyles(styles, class extends PureComponent<RowProps, {}> {
       delete rElements[this.props.row.id];
     }
 
-    if (!this.props.isFixedColumnsRow && this.elementResizeObserver) {
+    if (this.elementResizeObserver) {
       this.elementResizeObserver.disconnect();
       delete this.elementResizeObserver;
     }
   }
 
   componentDidMount() {
-    if (!this.element || this.props.isFixedColumnsRow || isGroupRow(this.props.row)) {
+    if (!this.element || !this.props.fixedRowElements || isGroupRow(this.props.row)) {
       return;
     }
 
-    this.elementResizeObserver = new ResizeObserver(elements => {
-      for (let element of elements) {
-        let fixedRowElement = this.props.fixedRowElements && this.props.fixedRowElements[this.props.row.id];
-        if (fixedRowElement) {
-          fixedRowElement.style.height = element.contentRect.height + 'px';
-        }
-      }
-    });
+    this.elementResizeObserver = new ResizeObserver(this.props.isFixedColumnsRow ? this.fixedRowResizeHandler : this.standardRowResizeHandler);
     this.elementResizeObserver.observe(this.element);
+  }
+
+  private fixedRowResizeHandler = () => {
+    let fixedRowElement = this.element;
+    let rowElement      = this.props.rowElements && this.props.rowElements[this.props.row.id];
+    if (rowElement) {
+      if (rowElement.clientHeight === fixedRowElement.clientHeight) return;
+      if (rowElement.clientHeight < fixedRowElement.clientHeight) {
+        rowElement.style.height = fixedRowElement.clientHeight + 'px';
+      } else {
+        fixedRowElement.style.height = rowElement.clientHeight + 'px';
+      }
+    }
+  }
+
+  private standardRowResizeHandler = (elements: ResizeObserverEntry[]) => {
+    let rowElement      = this.element;
+    let fixedRowElement = this.props.fixedRowElements && this.props.fixedRowElements[this.props.row.id];
+    if (fixedRowElement) {
+      if (fixedRowElement.clientHeight === rowElement.clientHeight) return;
+      if (fixedRowElement.clientHeight < rowElement.clientHeight) {
+        fixedRowElement.style.height = rowElement.clientHeight + 'px';
+      } else {
+        rowElement.style.height = fixedRowElement.clientHeight + 'px';
+      }
+    }
   }
 
   handleRowClick = () => {
@@ -130,7 +149,7 @@ const Row = withStyles(styles, class extends PureComponent<RowProps, {}> {
     if (!this.props.row.cells) return [];
 
     let cells: JSX.Element[] = [];
-    this.props.columns.forEach((column) => {
+    this.props.columns.forEach((column: IColumn) => {
       let cell = this.props.row.cells[column.name];
       let Cell = this.props.Cell;
       if ((cell.colSpan ===  0) || (cell.rowSpan === 0)) return;
@@ -153,7 +172,7 @@ const Row = withStyles(styles, class extends PureComponent<RowProps, {}> {
     }
 
     return (
-      <tr className={className} ref={ref} onClick={this.handleRowClick}>
+      <tr className={className} ref={ref} onClick={this.handleRowClick} style={{height: this.element && (this.element.clientHeight + 'px')}}>
         {this.renderCells()}
       </tr>
     );
@@ -168,7 +187,7 @@ const Row = withStyles(styles, class extends PureComponent<RowProps, {}> {
   renderGroupRow(groupRow: IGroupRow) {
     let value: JSX.Element | string | undefined;
     let className: any[] = ['group', 'level-' + groupRow.level];
-    if (groupRow.grid.dataColumns === this.props.columns && (groupRow.grid.fixedColumns.length > 0)) {
+    if (groupRow.grid.standardColumns === this.props.columns && (groupRow.grid.fixedColumns.length > 0)) {
       value = <span>&nbsp;</span>;
     } else {
       className.push({expanded: groupRow.expanded, collapsed: !groupRow.expanded});

@@ -1,6 +1,6 @@
 {
   "name": "rewire-graphql",
-  "version": "1.0.0-beta.148",
+  "version": "1.0.0-beta.159",
   "description": "A reactive observable cache for graphql built using rewire-core.",
   "main": "./es6-lib.js",
   "typings": "./src/index.ts",
@@ -14,14 +14,14 @@
     "graphql",
     "reactive"
   ],
-  "author": "Sandy Place",
+  "author": "Sandy Place, Ryan Osler",
   "license": "MIT",
   "bugs": {
     "url": "https://github.com/worksight/rewire/issues"
   },
   "homepage": "https://github.com/worksight/rewire",
   "dependencies": {
-    "is": "^3.2.1",
-    "rewire-core": "^1.0.0-beta.148"
+    "is": "^3.3.0",
+    "rewire-core": "^1.0.0-beta.159"
   }
 }

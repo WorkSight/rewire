@@ -52,13 +52,14 @@ class StaticFieldInternal extends React.Component<StaticFieldProps> {
     }
 
     const {classes} = this.props;
+    let value       = this.props.value !== undefined && this.props.value !== null ? this.props.value : '';
 
     return (
       <TextField
         className={this.props.className}
         disabled={true}
         label={this.props.label}
-        value={this.props.value}
+        value={value}
         type={this.props.type}
         onChange={(evt: React.ChangeEvent<HTMLInputElement>) => this.props.onValueChange(evt.target.value)}
         InputLabelProps={{shrink: true, classes: {root: classes.inputLabelRoot, outlined: classes.inputLabelRootShrink}}}

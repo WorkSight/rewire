@@ -180,6 +180,7 @@ class TextFieldInternal extends React.Component<TextFieldPropsStyled> {
         inputClassName = classes.inputInput;
       }
     }
+    let value = this.props.value !== undefined && this.props.value !== null ? this.props.value : '';
 
     if (this.props.updateOnChange) {
       return (
@@ -196,7 +197,7 @@ class TextFieldInternal extends React.Component<TextFieldPropsStyled> {
         variant={variant}
         error={!this.props.disableErrors && !this.props.disabled && !!this.props.error}
         helperText={!this.props.disableErrors && <span>{(!this.props.disabled && this.props.error) || ''}</span>}
-        value={this.props.value}
+        value={value}
         autoFocus={this.props.autoFocus}
         onFocus={this.handleFocus}
         onBlur={this.props.onBlur}
@@ -210,7 +211,7 @@ class TextFieldInternal extends React.Component<TextFieldPropsStyled> {
     }
 
     return (
-    <BlurInputHOC {...this.props} onValueChange={this.props.onValueChange}
+    <BlurInputHOC {...this.props} value={value} onValueChange={this.props.onValueChange}
       render={(props: TextFieldPropsStyled) =>
         <TextField
           className={props.className}

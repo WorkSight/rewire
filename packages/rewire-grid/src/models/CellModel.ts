@@ -15,12 +15,6 @@ export class CellModel implements ICell {
   private _renderer     : DataSignal<React.SFC<any> | undefined>;
   private _onValueChange: DataSignal<((cell: ICell, v: any) => void) | undefined>;
   private _element      : DataSignal<HTMLTableDataCellElement | undefined>;
-  // private _enabled?    : boolean;
-  // private _readOnly?   : boolean;
-  // private _editable?   : boolean;
-  // private _cls?        : string;
-  // private _align?      : TextAlignment;
-  // private _renderer?   : React.SFC<any>;
 
   id                   : number;
   row                  : IRow;
@@ -52,12 +46,6 @@ export class CellModel implements ICell {
     this._renderer      = property(undefined);
     this._onValueChange = property(undefined);
     this._element       = property(undefined);
-    // this._enabled  = undefined;
-    // this._readOnly = undefined;
-    // this._editable = undefined;
-    // this._cls      = undefined;
-    // this._align    = undefined;
-    // this._renderer = undefined;
 
     this.id                    = id++;
     this.row                   = row;
@@ -80,14 +68,14 @@ export class CellModel implements ICell {
     this._enabled(value);
   }
   get enabled(): boolean {
-    return (this._enabled() !== undefined ? this._enabled() : this.column.enabled !== undefined ? this.column.enabled : this.grid.enabled) as boolean;
+    return (this._enabled() !== undefined ? this._enabled() : this.column.enabled) as boolean;
   }
 
   set readOnly(value: boolean) {
     this._readOnly(value);
   }
   get readOnly(): boolean {
-    return (this._readOnly() !== undefined ? this._readOnly() : this.column.readOnly !== undefined ? this.column.readOnly : this.grid.readOnly) as boolean;
+    return (this._readOnly() !== undefined ? this._readOnly() : this.column.readOnly) as boolean;
   }
 
   set editable(value: boolean) {
@@ -115,7 +103,7 @@ export class CellModel implements ICell {
     this._verticalAlign(value);
   }
   get verticalAlign(): VerticalAlignment {
-    return this._verticalAlign() || this.column.verticalAlign || this.grid.verticalAlign;
+    return this._verticalAlign() || this.column.verticalAlign;
   }
 
   set renderer(value: React.SFC<any> | undefined) {
@@ -132,58 +120,15 @@ export class CellModel implements ICell {
     return this._onValueChange() || this.column.onValueChange;
   }
 
+  setElement(element: HTMLTableDataCellElement | undefined) {
+    this._element(element);
+  }
   // set element(value: HTMLTableDataCellElement | undefined) {
   //   this._element(value);
   // }
   get element(): HTMLTableDataCellElement | undefined {
     return this._element();
   }
-
-  setElement(element: HTMLTableDataCellElement | undefined) {
-    this._element(element);
-  }
-
-  // set enabled(value: boolean) {
-  //   this._enabled = value;
-  // }
-  // get enabled(): boolean {
-  //   return this._enabled !== undefined ? this._enabled : this.column.enabled !== undefined ? this.column.enabled : this.grid.enabled;
-  // }
-
-  // set readOnly(value: boolean) {
-  //   this._readOnly = value;
-  // }
-  // get readOnly(): boolean {
-  //   return this._readOnly !== undefined ? this._readOnly : this.column.readOnly !== undefined ? this.column.readOnly : this.grid.readOnly;
-  // }
-
-  // set editable(value: boolean) {
-  //   this._editable = value;
-  // }
-  // get editable(): boolean {
-  //   return this._editable !== undefined ? this._editable : this.column.editable;
-  // }
-
-  // set cls(value: string | undefined) {
-  //   this._cls = value;
-  // }
-  // get cls(): string | undefined {
-  //   return this._cls || this.column.cls;
-  // }
-
-  // set align(value: TextAlignment | undefined) {
-  //   this._align = value;
-  // }
-  // get align(): TextAlignment | undefined {
-  //   return this._align || this.column.align;
-  // }
-
-  // set renderer(value: React.SFC<any> | undefined) {
-  //   this._renderer = value;
-  // }
-  // get renderer(): React.SFC<any> | undefined {
-  //   return this._renderer || this.column.renderer;
-  // }
 
   get rowPosition(): number {
     return this.row.position;
@@ -193,26 +138,39 @@ export class CellModel implements ICell {
     return this.column.position;
   }
 
-  _setValue(value: any) {
-    if (this.value === value) return;
+  _setValue(value: any): boolean {
     if (is.object(this.value) && is.object(value)) {
+      if (deepEqual(this.value, value)) return false;
       freeze(() => {
         Object.keys(this.value).forEach((key: string) => delete this.value[key]);
         Object.keys(value).forEach((key: string) => this.value[key] = undefined);
       });
       Object.assign(this.value, value);
+    } else if (is.object(value)) {
+      this.value = cloneValue(value);
     } else {
+      if (defaultEquals(this.value, value)) return false;
       this.value = value;
     }
 
     this.onValueChange && this.onValueChange(this, value);
+    return true;
   }
 
-  setValue(value: any) {
-    if (this.value === value) return;
-    this._setValue(value);
-    this.validate();
-    this.grid.changed = this.grid.hasChanges();
+  setValue(value: any): boolean {
+    if (this._setValue(value)) {
+      this.validate();
+
+      if (this.column.fixed) {
+        this.row.mergeFixedColumns();
+      } else {
+        this.row.mergeStandardColumns();
+      }
+
+      this.grid.changed = this.grid.hasChanges();
+      return true;
+    }
+    return false;
   }
 
   clear() {
@@ -224,7 +182,7 @@ export class CellModel implements ICell {
   }
 
   hasChanges(): boolean {
-    let prevVal = this.row.data[this.column.name];
+    let prevVal = this.row.originalData[this.column.name];
     let currVal = this.value;
     if (prevVal === currVal || (!prevVal && !currVal)) {
       return false;
@@ -278,15 +236,26 @@ export class CellModel implements ICell {
   }
 
   clone(newRow: IRow): ICell {
-    let newValue    = cloneValue(this.value);
-    let row         = newRow || this.row;
-    let newCell     = create(row, this.column, newValue);
-    newCell.rowSpan = this.rowSpan;
-    newCell.colSpan = this.colSpan;
+    let newValue          = cloneValue(this.value);
+    let row               = newRow || this.row;
+    let newCell           = create(row, this.column, newValue);
+    newCell.enabled       = this.enabled;
+    newCell.readOnly      = this.readOnly;
+    newCell.editable      = this.editable;
+    newCell.cls           = this.cls;
+    newCell.align         = this.align;
+    newCell.verticalAlign = this.verticalAlign;
+    newCell.renderer      = this.renderer;
+    newCell.onValueChange = this.onValueChange;
+    newCell.error         = this.error;
+    newCell.rowSpan       = this.rowSpan;
+    newCell.colSpan       = this.colSpan;
     return newCell;
   }
 
   validate() {
+    if (this.row.fixed) return;
+
     if (this.column.validator) {
       this.error = this.column.validator.fn(this.row, this.value);
     }
@@ -303,13 +272,13 @@ export class CellModel implements ICell {
   // reverts value without validation or grid changed update
   _revert() {
     if (this.hasChanges()) {
-      this._setValue(cloneValue(this.row.data[this.column.name]));
+      this._setValue(cloneValue(this.row.originalData[this.column.name]));
     }
   }
 
   revert() {
     if (this.hasChanges()) {
-      this.setValue(cloneValue(this.row.data[this.column.name]));
+      this.setValue(cloneValue(this.row.originalData[this.column.name]));
     }
   }
 

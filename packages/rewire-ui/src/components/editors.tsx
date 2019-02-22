@@ -11,6 +11,7 @@ import CheckField      from './CheckField';
 import SwitchField     from './SwitchField';
 import TimeInputField  from './TimeInputField';
 import AvatarField     from './AvatarField';
+import ColorField      from './ColorField';
 import {utc}           from 'rewire-common';
 import * as is         from 'is';
 
@@ -31,7 +32,7 @@ export interface IField {
   endAdornment?(): JSX.Element;
 }
 
-export type EditorType = 'text' | 'multitext' | 'static' | 'auto-complete' | 'select' | 'multiselect' | 'date' | 'time' | 'number' | 'checked' | 'switch' | 'password' | 'email' | 'phone' | 'avatar' | 'none';
+export type EditorType = 'text' | 'multitext' | 'static' | 'auto-complete' | 'select' | 'multiselect' | 'date' | 'time' | 'number' | 'checked' | 'switch' | 'password' | 'email' | 'phone' | 'avatar' | 'color' | 'none';
 
 export type TextAlignment = 'left' | 'right' | 'center';
 
@@ -371,7 +372,7 @@ export default function editor(type: EditorType, propsForEdit?: any): React.SFC<
     );
 
     case 'auto-complete':
-      return ({field, className, classes, onValueChange, endOfTextOnFocus, selectOnFocus, cursorPositionOnFocus}: TextEditorProps) => (
+      return ({field, className, classes, onValueChange, endOfTextOnFocus, selectOnFocus, cursorPositionOnFocus, initialInputValue}: TextEditorProps) => (
         <Observe render={() => (
           <AutoComplete
             placeholder={field.placeholder}
@@ -379,6 +380,7 @@ export default function editor(type: EditorType, propsForEdit?: any): React.SFC<
             endOfTextOnFocus={endOfTextOnFocus}
             selectOnFocus={selectOnFocus}
             cursorPositionOnFocus={cursorPositionOnFocus}
+            initialInputValue={initialInputValue}
             onValueChange={onValueChange}
             error={field.error}
             autoFocus={field.autoFocus}
@@ -405,6 +407,23 @@ export default function editor(type: EditorType, propsForEdit?: any): React.SFC<
             onValueChange={onValueChange}
             value={field.value}
             visible={field.visible}
+            className={className}
+            classes={classes}
+            {...propsForEdit}
+          />
+        )} />
+      );
+    case 'color':
+      return ({field, className, classes, onValueChange}: TextEditorProps) => (
+        <Observe render={() => (
+          <ColorField
+            label={field.label}
+            value={field.value}
+            onValueChange={onValueChange}
+            autoFocus={field.autoFocus}
+            disabled={field.disabled && field.disabled(field)}
+            visible={field.visible}
+            variant={field.variant}
             className={className}
             classes={classes}
             {...propsForEdit}

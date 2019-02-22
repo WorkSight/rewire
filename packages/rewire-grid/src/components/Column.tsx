@@ -14,9 +14,9 @@ export default class Column extends React.PureComponent<IColumnCellProps> {
 
   constructor(props: IColumnCellProps) {
     super(props);
-    this.startOffset  = 0;
-    this.isResizing   = false;
-    this.column       = this.props.cell.column;
+    this.startOffset = 0;
+    this.isResizing  = false;
+    this.column      = this.props.cell.column;
   }
 
   handleMouseUp = (evt: MouseEvent) => {
@@ -39,7 +39,16 @@ export default class Column extends React.PureComponent<IColumnCellProps> {
 
   handleMouseMove = (evt: MouseEvent) => {
     if (this.isResizing) {
-      this.column.width = this.startOffset + evt.pageX + 'px';
+      if (this.node.colSpan > 1) {
+        let currColumn = this.column;
+        let widthToSet = Math.max((this.startOffset + evt.pageX) / this.node.colSpan, 5);
+        for (let i = 1; i <= this.node.colSpan; i++) {
+          currColumn.width = `${widthToSet}px`;
+          currColumn       = currColumn.grid.columnByPos(currColumn.position + 1);
+        }
+      } else {
+        this.column.width = `${Math.max(this.startOffset + evt.pageX, 5)}px`;
+      }
     }
     evt.preventDefault();
   }
@@ -70,14 +79,14 @@ export default class Column extends React.PureComponent<IColumnCellProps> {
         style.visibility = 'collapse';
       }
 
-      if ((this.column.enabled !== undefined && !this.column.enabled) || (this.column.enabled === undefined && !this.column.grid.enabled)) {
+      if (!this.column.enabled) {
         style.color     = '#bbb';
         style.fontStyle = 'italic';
       }
 
       if (this.column.canSort && this.column.sort) {
-          cls = 'sort ' + this.column.sort;
-        }
+        cls = 'sort ' + this.column.sort;
+      }
 
       return (
         <th
