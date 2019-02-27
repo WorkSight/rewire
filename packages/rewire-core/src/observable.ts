@@ -82,7 +82,7 @@ function observable_array(value: ObjectType, eq: EQType, parent?: () => void) {
       if (property === versionProperty) {
         return vsn; // add a version dynamically
       }
-      let   v    = target[property];
+      let v = target[property];
       if (can_observe(v)) {
         v = observable(v, incrementVersion);
         target[property] = v;
@@ -145,11 +145,6 @@ function createHandler(eq: EQType, parent?: () => void) {
         }
       }
 
-      // if (!target.hasOwnProperty(property)) {
-      //   // for getters
-      //   return value;
-      // }
-
       let v = dependencyCache[property];
       if (v) return v();
 
@@ -159,6 +154,19 @@ function createHandler(eq: EQType, parent?: () => void) {
     },
 
     set(target: ObjectType, property: string, value: any, receiver: Object) {
+      // *** Setters on observable objects currently not functioning correctly in some cases. This code doesn't quite fix it for some reason.
+      //     This property calls the objects setter via assigning to the target property, but that is not capturing any updates on assignments
+      //     made in this internal code properly for some cases.
+      // if (!target.hasOwnProperty(property)) {
+      //   // for setters
+      //   let proto    = Object.getPrototypeOf(target);
+      //   let propDesc = Object.getOwnPropertyDescriptor(proto, property);
+      //   if (propDesc && propDesc.set && typeof propDesc.set === 'function') {
+      //     target[property] = value;
+      //     return true;
+      //   }
+      // }
+
       let v = dependencyCache[property];
       if (!v) {
         const oldValue = target[property];

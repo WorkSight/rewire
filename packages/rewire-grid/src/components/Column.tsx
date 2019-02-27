@@ -38,13 +38,18 @@ export default class Column extends React.PureComponent<IColumnCellProps> {
   }
 
   handleMouseMove = (evt: MouseEvent) => {
+    // Known bug with resizing columns when the set widths of the columns is less than the width of the grid (due to it stretching to fill the screen) i.e. no horizontal scrollbar.
+    // In this case, the resize will cause the column to initially grow larger. No known fix at this point.
     if (this.isResizing) {
       if (this.node.colSpan > 1) {
         let currColumn = this.column;
         let widthToSet = Math.max((this.startOffset + evt.pageX) / this.node.colSpan, 5);
         for (let i = 1; i <= this.node.colSpan; i++) {
+          // let cellWidth    = currColumn.grid.dataRowsByPosition[0].cells[currColumn.name].element.offsetWidth;
+          // widthToSet       = currColumn.width ? widthToSet - (cellWidth - currColumn.width.slice().replace(new RegExp(/px/, 'g'), '')) : widthToSet;
+          // widthToSet       = currColumn.width ? cellWidth + (widthToSet - currColumn.width.slice().replace(new RegExp(/px/, 'g'), '')) : widthToSet;
           currColumn.width = `${widthToSet}px`;
-          currColumn       = currColumn.grid.columnByPos(currColumn.position + 1);
+          currColumn       = currColumn.grid.adjacentRightColumn(currColumn)!;
         }
       } else {
         this.column.width = `${Math.max(this.startOffset + evt.pageX, 5)}px`;
