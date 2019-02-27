@@ -90,6 +90,8 @@ export interface IGrid extends IRows, IDisposable {
   getRowsByRange(rowStart: number, rowEnd: number, allowCollapsed?: boolean): IRow[];
   column(columnName: string): IColumn | undefined;
   columnByPos(columnPosition: number): IColumn | undefined;
+  adjacentRightColumn(column: IColumn): IColumn | undefined;
+  adjacentLeftColumn(column: IColumn): IColumn | undefined;
 
   revert(): void;
   revertSelectedCells(): void;
@@ -187,8 +189,8 @@ export interface IRow extends IDisposable {
   getErrors(): IErrorData[];
   createCell(column: IColumn, value: any, type?: string): ICell;
   clear(columnNames?: string[]): void;
-  _setValue(data: ICellDataMap): boolean;
-  setValue(data: ICellDataMap): boolean;
+  _setValue(data: ICellDataMap, triggerOnValueChangeHandler?: boolean): boolean;
+  setValue(data: ICellDataMap, triggerOnValueChangeHandler?: boolean): boolean;
   mergeAllColumns(): void;
   mergeFixedColumns(): void;
   mergeStandardColumns(): void;
@@ -206,12 +208,12 @@ export interface IGroupRow extends IRow, IRows {
 }
 
 export type IColumnEditor =
-  'text' | 'date' | 'checked' | 'mask' | 'none' |
+  'text' | 'date' | 'checked' | 'none' |
   {type: 'time', options?: {rounding?: number}} |
   {type: 'auto-complete', options: {search: SearchFn<any>, map: MapFn<any>}} |
   {type: 'select', options: {search: SearchFn<any>, map: MapFn<any>}} |
   {type: 'multiselect', options: {search: SearchFn<any>, map: MapFn<any>}} |
-  {type: 'number', options?: {decimals?: number, thousandSeparator?: boolean, fixed?: boolean}} |
+  {type: 'number', options?: {decimals?: number, thousandSeparator?: boolean, fixed?: boolean, allowNegative?: boolean}} |
   {type: 'phone', options?: {format?: string, mask?: string}};
 
 export interface ICellProperties {
@@ -315,8 +317,8 @@ export interface ICell extends ICellProperties {
   canFocus(): boolean;
   setFocus(focus?: boolean): void;
   setElement(element: HTMLTableDataCellElement | undefined): void;
-  _setValue(v: any): boolean;
-  setValue(v: any): boolean;
+  _setValue(v: any, triggerOnValueChangeHandler?: boolean): boolean;
+  setValue(v: any, triggerOnValueChangeHandler?: boolean): boolean;
   validate(): void;
   _revert(): void;
   revert(): void;

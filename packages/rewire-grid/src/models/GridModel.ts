@@ -379,6 +379,26 @@ class GridModel implements IGrid, IDisposable {
     return column;
   }
 
+  adjacentRightColumn(column: IColumn): IColumn | undefined {
+    let adjacentRightColumn: IColumn | undefined;
+    let i = 1;
+    do {
+      adjacentRightColumn = this.columnByPos(column.position + i++);
+    } while (adjacentRightColumn && (!adjacentRightColumn.visible || adjacentRightColumn.colSpan === 0));
+
+    return adjacentRightColumn;
+  }
+
+  adjacentLeftColumn(column: IColumn): IColumn | undefined {
+    let adjacentLeftColumn: IColumn | undefined;
+    let i = 1;
+    do {
+      adjacentLeftColumn = this.columnByPos(column.position - i++);
+    } while (adjacentLeftColumn && (!adjacentLeftColumn.visible || adjacentLeftColumn.colSpan === 0));
+
+    return adjacentLeftColumn;
+  }
+
   revert(): void {
     freeze(() => {
       let originalDataRowIds = this.originalDataRowsByPosition.map(row => row.id);
@@ -444,7 +464,12 @@ class GridModel implements IGrid, IDisposable {
     this.selectedCells.forEach((selectedCell: ICell) => {
       selectedCell._revert();
       });
-    this.validate();
+
+    let selectedColumnNames = [...new Set(this.selectedCells.map((cell: ICell) => cell.column.name))];
+    this.selectedRows.forEach((selectedRow: IRow) => {
+      selectedRow.validate(selectedColumnNames);
+      selectedRow.mergeAllColumns();
+    });
     this.changed = this.hasChanges();
   }
 
@@ -453,8 +478,9 @@ class GridModel implements IGrid, IDisposable {
 
     this.selectedRows.forEach((selectedRow: IRow) => {
       selectedRow._revert();
+      selectedRow.validate();
+      selectedRow.mergeAllColumns();
     });
-    this.validate();
     this.changed = this.hasChanges();
   }
 

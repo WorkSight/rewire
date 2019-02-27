@@ -53,7 +53,9 @@ function runDevelopmentServer() {
     const dist = path.resolve('./build');
 
     function sendFile(req, res) {
-      const p = path.join(dist, req.url);
+      let url = req.url.split('#').shift().split('?').shift().split('/').pop();
+      const p = path.join(dist, url);
+      // const p = path.join(dist, req.url);
       if (fs.existsSync(p)) {
         return res.sendFile(p);
       }

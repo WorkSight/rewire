@@ -76,8 +76,7 @@ export class RowModel implements IRow, IDisposable {
     }
 
     if (!this.grid.loading) {
-      this.mergeFixedColumns();
-      this.mergeStandardColumns();
+      this.mergeAllColumns();
     }
   }
 
@@ -229,24 +228,23 @@ export class RowModel implements IRow, IDisposable {
     this.setValue(rowData);
   }
 
-  _setValue(data: ICellDataMap): boolean {
+  _setValue(data: ICellDataMap, triggerOnValueChangeHandler: boolean = true): boolean {
     if (!data) return false;
     let success = false;
     Object.keys(data).forEach((columnName: string) => {
       let cell = this.cells[columnName];
       if (cell) {
-        success = cell._setValue(data[columnName]) || success;
+        success = cell._setValue(data[columnName], triggerOnValueChangeHandler) || success;
       }
     });
     return success;
   }
 
-  setValue(data: ICellDataMap): boolean {
-    if (this._setValue(data)) {
+  setValue(data: ICellDataMap, triggerOnValueChangeHandler: boolean = true): boolean {
+    if (this._setValue(data, triggerOnValueChangeHandler)) {
       let columnNamesToSet = Object.keys(data).filter((columnName: string) => this.cells[columnName]);
       this.validate(columnNamesToSet);
-      this.mergeFixedColumns();
-      this.mergeStandardColumns();
+      this.mergeAllColumns();
       this.grid.changed = this.grid.hasChanges();
       return true;
     }
@@ -302,11 +300,11 @@ export class RowModel implements IRow, IDisposable {
 
   // reverts value without validation or grid changed update
   _revert() {
-    this._setValue(this._revertHelper());
+    this._setValue(this._revertHelper(), false);
   }
 
   revert() {
-    this.setValue(this._revertHelper());
+    this.setValue(this._revertHelper(), false);
   }
 }
 

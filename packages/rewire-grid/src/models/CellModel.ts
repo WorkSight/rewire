@@ -138,7 +138,7 @@ export class CellModel implements ICell {
     return this.column.position;
   }
 
-  _setValue(value: any): boolean {
+  _setValue(value: any, triggerOnValueChangeHandler: boolean = true): boolean {
     if (is.object(this.value) && is.object(value)) {
       if (deepEqual(this.value, value)) return false;
       freeze(() => {
@@ -153,12 +153,12 @@ export class CellModel implements ICell {
       this.value = value;
     }
 
-    this.onValueChange && this.onValueChange(this, value);
+    triggerOnValueChangeHandler && this.onValueChange && this.onValueChange(this, value);
     return true;
   }
 
-  setValue(value: any): boolean {
-    if (this._setValue(value)) {
+  setValue(value: any, triggerOnValueChangeHandler: boolean = true): boolean {
+    if (this._setValue(value, triggerOnValueChangeHandler)) {
       this.validate();
 
       if (this.column.fixed) {
@@ -269,16 +269,16 @@ export class CellModel implements ICell {
     this.grid.inError = this.grid.hasErrors();
   }
 
-  // reverts value without validation or grid changed update
+  // reverts value without validation, onValueChange handler, or grid changed update
   _revert() {
     if (this.hasChanges()) {
-      this._setValue(cloneValue(this.row.originalData[this.column.name]));
+      this._setValue(cloneValue(this.row.originalData[this.column.name]), false);
     }
   }
 
   revert() {
     if (this.hasChanges()) {
-      this.setValue(cloneValue(this.row.originalData[this.column.name]));
+      this.setValue(cloneValue(this.row.originalData[this.column.name]), false);
     }
   }
 
