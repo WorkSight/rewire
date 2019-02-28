@@ -47,7 +47,7 @@ const fuse = FuseBox.init({
 rimraf.sync('build');
 
 function runDevelopmentServer() {
-  fuse.dev({root: 'build/', port: 3000}, (server) => {
+  fuse.dev({root: 'build/', port: 3001}, (server) => {
     const app = server.httpServer.app;
     app.use(compression());
     const dist = path.resolve('./build');
