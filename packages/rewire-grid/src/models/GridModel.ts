@@ -98,11 +98,13 @@ class GridModel implements IGrid, IDisposable {
     this.startCell                  = undefined;
     this.changed                    = false;
     this.inError                    = false;
+  }
 
-  setContentElement(element: HTMLDivElement| undefined) {
+  setContentElement(element: HTMLDivElement | undefined) {
     this._contentElement(element);
   }
-  get contentElement(): HTMLDivElement | undefined{
+
+  get contentElement(): HTMLDivElement | undefined {
     return this._contentElement();
   }
 
@@ -805,7 +807,7 @@ class GridModel implements IGrid, IDisposable {
   }
 
   duplicateSelectedRows(): IRow[] {
-    if (this.selectedRows.length <= 0) return;
+    if (this.selectedRows.length <= 0) return [];
 
     return this.duplicateRows(this.selectedRows.map(row => row.id), Math.max(...this.selectedRows.map(row => row.position)) + 1);
   }

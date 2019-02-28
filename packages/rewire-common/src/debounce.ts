@@ -3,7 +3,7 @@ export type FuncType = (...args: any[]) => void;
 export default function debounce(fn: FuncType, wait: number = 0, options: {leading: boolean, accumulate?: any} = {leading: true}) {
   let lastCallAt: number;
   let deferred: any;
-  let timer: number;
+  let timer: NodeJS.Timeout;
   let pendingArgs: any[] = [];
   return function debounced (...args: any[]) {
     const currentWait = wait;
