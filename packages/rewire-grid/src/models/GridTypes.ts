@@ -207,6 +207,8 @@ export interface IGroupRow extends IRow, IRows {
   expanded      : boolean;
 }
 
+export type MaskType = (string | RegExp)[];
+
 export type IColumnEditor =
   'text' | 'date' | 'checked' | 'none' |
   {type: 'time', options?: {rounding?: number}} |
@@ -214,7 +216,8 @@ export type IColumnEditor =
   {type: 'select', options: {search: SearchFn<any>, map: MapFn<any>}} |
   {type: 'multiselect', options: {search: SearchFn<any>, map: MapFn<any>}} |
   {type: 'number', options?: {decimals?: number, thousandSeparator?: boolean, fixed?: boolean, allowNegative?: boolean}} |
-  {type: 'phone', options?: {format?: string, mask?: string}};
+  {type: 'phone', options?: {format?: string, mask?: string}} |
+  {type: 'mask', options?: {mask?: MaskType | (() => MaskType), guide?: boolean, placeholderChar?: string, showMask?: boolean}};
 
 export interface ICellProperties {
   id       : number;

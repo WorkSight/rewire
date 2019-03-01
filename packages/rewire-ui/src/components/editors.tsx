@@ -12,6 +12,7 @@ import SwitchField     from './SwitchField';
 import TimeInputField  from './TimeInputField';
 import AvatarField     from './AvatarField';
 import ColorField      from './ColorField';
+import MaskField       from './MaskField';
 import {utc}           from 'rewire-common';
 import * as is         from 'is';
 
@@ -32,7 +33,7 @@ export interface IField {
   endAdornment?(): JSX.Element;
 }
 
-export type EditorType = 'text' | 'multitext' | 'static' | 'auto-complete' | 'select' | 'multiselect' | 'date' | 'time' | 'number' | 'checked' | 'switch' | 'password' | 'email' | 'phone' | 'avatar' | 'color' | 'none';
+export type EditorType = 'text' | 'multitext' | 'static' | 'auto-complete' | 'select' | 'multiselect' | 'date' | 'time' | 'number' | 'checked' | 'switch' | 'password' | 'email' | 'phone' | 'avatar' | 'color' | 'mask' | 'none';
 
 export type TextAlignment = 'left' | 'right' | 'center';
 
@@ -426,6 +427,32 @@ export default function editor(type: EditorType, propsForEdit?: any): React.SFC<
             variant={field.variant}
             className={className}
             classes={classes}
+            {...propsForEdit}
+          />
+        )} />
+      );
+
+    case 'mask':
+      return ({field, className, classes, onValueChange, endOfTextOnFocus, selectOnFocus, cursorPositionOnFocus}: TextEditorProps) => (
+        <Observe render={() => (
+          <MaskField
+            label={field.label}
+            value={field.value}
+            autoFocus={field.autoFocus}
+            endOfTextOnFocus={endOfTextOnFocus}
+            selectOnFocus={selectOnFocus}
+            cursorPositionOnFocus={cursorPositionOnFocus}
+            onValueChange={onValueChange}
+            error={field.error}
+            disabled={field.disabled && field.disabled(field)}
+            visible={field.visible}
+            disableErrors={field.disableErrors}
+            align={field.align || 'left'}
+            variant={field.variant}
+            className={className}
+            classes={classes}
+            startAdornment={field.startAdornment && field.startAdornment()}
+            endAdornment={field.endAdornment && field.endAdornment()}
             {...propsForEdit}
           />
         )} />
