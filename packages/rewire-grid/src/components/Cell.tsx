@@ -4,19 +4,20 @@ import {
   IColumn,
   ICell,
   ErrorSeverity,
-}                                                  from '../models/GridTypes';
-import * as React                                  from 'react';
-import * as is                                     from 'is';
-import cc                                          from 'classcat';
-import classNames                                  from 'classnames';
-import {Observe, watch, observe, disposeOnUnmount} from 'rewire-core';
-import {withStyles, WithStyle}                     from 'rewire-ui';
-import {Theme}                                     from '@material-ui/core/styles';
-import ErrorIcon                                   from '@material-ui/icons/Error';
-import WarningIcon                                 from '@material-ui/icons/Warning';
-import InfoIcon                                    from '@material-ui/icons/Info';
-import Tooltip                                     from '@material-ui/core/Tooltip';
-import Fade                                        from '@material-ui/core/Fade';
+}                              from '../models/GridTypes';
+import * as React              from 'react';
+import * as is                 from 'is';
+import cc                      from 'classcat';
+import classNames              from 'classnames';
+// import {Observe, watch, observe, disposeOnUnmount} from 'rewire-core';
+import {Observe}               from 'rewire-core';
+import {withStyles, WithStyle} from 'rewire-ui';
+import {Theme}                 from '@material-ui/core/styles';
+import ErrorIcon               from '@material-ui/icons/Error';
+import WarningIcon             from '@material-ui/icons/Warning';
+import InfoIcon                from '@material-ui/icons/Info';
+import Tooltip                 from '@material-ui/core/Tooltip';
+import Fade                    from '@material-ui/core/Fade';
 
 const styles = (theme: Theme) => ({
   tableCell: {
@@ -206,8 +207,8 @@ class Cell extends React.PureComponent<CellProps, {}> {
         this.grid.insertRowAtSelection();
         break;
 
-        if (this.cell.editing || !evt.ctrlKey) {
       case 'D':
+        if (this.cell.editing || !evt.ctrlKey) {
           return;
         }
         // duplcate row(s)
@@ -534,9 +535,16 @@ class Cell extends React.PureComponent<CellProps, {}> {
     if ((this.column.type === 'auto-complete' || this.column.type === 'select' || this.column.type === 'checked')) setTimeout(() => this.cell.setFocus(), 0);
   }
 
-  handleTooltip = (evt: React.MouseEvent<HTMLSpanElement>) => {
-    const node = evt.target as HTMLElement;
+  handleTooltip = (node: HTMLElement) => {
     node.setAttribute('title', (node.offsetWidth < node.scrollWidth) ? this.value : '');
+  }
+
+  handleTooltipForSpan = (evt: React.MouseEvent<HTMLSpanElement>) => {
+    this.handleTooltip(evt.target as HTMLElement);
+  }
+
+  handleTooltipForDiv = (evt: React.MouseEvent<HTMLDivElement>) => {
+    this.handleTooltip(evt.target as HTMLElement);
   }
 
   setCellRef = (element: HTMLTableDataCellElement) => {
@@ -597,10 +605,10 @@ class Cell extends React.PureComponent<CellProps, {}> {
         return (
           < >
             {cell.renderer
-              ? <div onMouseEnter={this.handleTooltip} style={{width: '100%', textAlign: cell.align}}>
+              ? <div onMouseEnter={this.handleTooltipForDiv} style={{width: '100%', textAlign: cell.align}}>
                   {cell.renderer(cell)}
             </div>
-              : <span onMouseEnter={this.handleTooltip} style={{width: '100%', textAlign: cell.align}}>
+              : <span onMouseEnter={this.handleTooltipForSpan} style={{width: '100%', textAlign: cell.align}}>
                   {value}
                 </span>
             }

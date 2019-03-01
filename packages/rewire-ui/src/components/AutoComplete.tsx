@@ -92,7 +92,7 @@ interface IAutoCompleteProps {
   initialInputValue?: any;
 }
 
-export type AutoCompleteProps<T> = WithStyle<ReturnType<typeof styles>, IAutoCompleteProps & ICustomProps<T> & React.InputHTMLAtrributes<any>>;
+export type AutoCompleteProps<T> = WithStyle<ReturnType<typeof styles>, IAutoCompleteProps & ICustomProps<T> & React.InputHTMLAttributes<any>>;
 
 class AutoComplete<T> extends React.Component<AutoCompleteProps<T>, any> {
   state = {suggestions: []};
