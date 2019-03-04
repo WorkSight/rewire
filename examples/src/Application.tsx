@@ -173,16 +173,20 @@ const BasicExample = (props: any) => {
 
 class LoginDialog extends Modal {
   form: Form = Form.create({
-    email                : Form.email().label('Email').validators(isRequired).placeholder('enter a valid email').onValueChange((form: Form, v: any) => form.setFieldValues({money: 5, password: '123', 'password_confirmation': '123'})).autoFocus(),
+    email                : Form.email().label('Email').validators(isRequired).placeholder('enter a valid email'),
     password             : Form.password().label('Password').validators(and(isRequired, isSameAsOther('password_confirmation', 'passwords are not the same'))).placeholder('enter a password'),
     password_confirmation: Form.password().label('Confirm Password').placeholder('confirm your password'),
-    country              : Form.reference(countries).label('Country').validators(isRequired).placeholder('ooga'),
-    time                 : Form.time().label('Time').validators(isRequired).onValueChange((form: Form, v: any) => form.setFieldValue('email', 'hi@hi.com')),
-    selectCountry        : Form.select(countries).label('Select Country').validators(isRequired).placeholder('ooga'),
+    country              : Form.reference(countries).label('AutoComplete Country').validators(isRequired).placeholder('enter a country'),
+    time                 : Form.time().label('Time').validators(isRequired),
+    selectCountry        : Form.select(countries).label('Select Country').validators(isRequired).placeholder('select a country'),
+    multiselectCountry   : Form.multiselect(countries).label('Multiselect Country').validators(isRequired).placeholder('select countries'),
     money                : Form.number().label('Show Me').validators(isRequired).placeholder('The Money'),
     date                 : Form.date().label('Date').validators(isRequired),
-    multi                : Form.multistring({rows: 1}).label('Multiline').placeholder('enter multistring').validators(isRequired),
+    multi                : Form.multistring({rows: 1}).label('Multiline').placeholder('enter multiline string').validators(isRequired),
     color                : Form.color().label('Color'),
+    phone                : Form.phone().label('Phone'),
+    mask                 : Form.mask({mask: ['(', /[1-9]/, /\d/, /\d/, ')', ' ', /\d/, /\d/, /\d/, '-', /\d/, /\d/, /\d/, /\d/]}).label('MyMask').validators(isRequired).autoFocus(),
+    trigger              : Form.string().label('Trigger').placeholder('Change me to trigger handler').onValueChange((form: Form, v: any) => {form.setFieldValue('email', 'Triggered!@hotmail.com'); form.setFieldValue('money', 1337); }),
   });
 
   constructor() {
@@ -206,17 +210,23 @@ const LoginFormView = ({form}: {form: typeof loginDialog.form}) => (
   <div style={{fontSize: '16px'}}>
   <FormView form={form} onSubmit={loginDialog.actionFn('login')}>
     <div className='content'>
-      <form.field.email.Editor className='span2' />
-      <form.field.country.Editor className='span2' />
-      <form.field.selectCountry.Editor className='span2' />
-      <form.field.time.Editor className='span2' />
+      <form.field.email.Editor />
+      <form.field.country.Editor />
+      <form.field.selectCountry.Editor />
+      <form.field.multiselectCountry.Editor />
     </div>
     <div className='content'>
       <form.field.password.Editor />
       <form.field.password_confirmation.Editor />
       <form.field.money.Editor />
+      <form.field.phone.Editor />
+      <form.field.mask.Editor />
+    </div>
+    <div className='content'>
       <form.field.date.Editor />
+      <form.field.time.Editor />
       <form.field.multi.Editor />
+      <form.field.trigger.Editor />
       <form.field.color.Editor />
     </div>
   </FormView>
@@ -228,7 +238,7 @@ const getLoginTitle = (dialog: Modal): JSX.Element => {
 };
 
 const DialogLoginForm = () => (
-  <DialogView dialog={loginDialog} title={getLoginTitle} maxWidth='md'>
+  <DialogView dialog={loginDialog} title={getLoginTitle} maxWidth='lg'>
     <LoginFormView form={loginDialog.form} />
   </ DialogView>
 );
@@ -417,6 +427,7 @@ function createTestGrid(nRows: number, nColumns: number) {
   let timeOutOnValueChange = (cell: ICell, value: any) => cell.row.cells['differenceColumn'].setValue((cell.row.cells['timeInColumn'].value || 0) - (value || 0));
   let timeInOnValueChange  = (cell: ICell, value: any) => cell.row.cells['differenceColumn'].setValue((value || 0) - (cell.row.cells['timeOutColumn'].value || 0));
 
+  cols.push(createColumn('maskColumn',         'Mask',            {type: {type: 'mask', options: {mask: ['(', /[1-9]/, /\d/, /\d/, ')', ' ', /\d/, /\d/, /\d/, '-', /\d/, /\d/, /\d/, /\d/]}}, width: Math.trunc(Math.random() * 250 + 50) + 'px'}));
   cols.push(createColumn('phoneColumn',        'Phone',           {type: {type: 'phone'}, width: Math.trunc(Math.random() * 250 + 50) + 'px'}));
   cols.push(createColumn('numberColumn',       'Number',          {type: {type: 'number', options: {decimals: 2, fixed: true, thousandSeparator: false}}, validator: gridIsRequired, width: Math.trunc(Math.random() * 250 + 50) + 'px'}));
   cols.push(createColumn('dateColumn',         'Date',            {type: 'date', width: Math.trunc(Math.random() * 250 + 50) + 'px'}));
@@ -495,6 +506,7 @@ function createTestGrid(nRows: number, nColumns: number) {
       else if (colName === 'timeInColumn') v = 11.5;
       else if (colName === 'differenceColumn') v = 4;
       else if (colName === 'sumColumn') v = 19;
+      else if (colName === 'maskColumn') v = undefined;
       else if (colName === 'dateColumn') v = '2018-11-11';
       else if (colName === 'complexColumn') v = row > 3 ? new ComplexCellData(nanoid(10), 'Homer', 45) : undefined;
       else if (colName === 'phoneColumn') v = Number.parseInt('1250' + Math.round(Math.random() * 100000000).toString());
