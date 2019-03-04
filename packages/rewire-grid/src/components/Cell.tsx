@@ -9,7 +9,6 @@ import * as React              from 'react';
 import * as is                 from 'is';
 import cc                      from 'classcat';
 import classNames              from 'classnames';
-// import {Observe, watch, observe, disposeOnUnmount} from 'rewire-core';
 import {Observe}               from 'rewire-core';
 import {withStyles, WithStyle} from 'rewire-ui';
 import {Theme}                 from '@material-ui/core/styles';
