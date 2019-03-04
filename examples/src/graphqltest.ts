@@ -1,7 +1,8 @@
-import gql       from 'graphql-tag';
-import { watch } from 'rewire-core/observable';
-import create    from 'rewire-graphql/client';
-const client = create('https://zr859vll97.lp.gql.zone/graphql');
+import gql                        from 'graphql-tag';
+import { watch }                  from 'rewire-core';
+import { client as createClient } from 'rewire-graphql';
+
+const client = createClient('https://zr859vll97.lp.gql.zone/graphql');
 
 const query = gql`
   query($size: Int!) {
@@ -55,7 +56,7 @@ const query2 = gql`
 
 async function run() {
   let r2: any = client.query(query, {size: 2});
-  r2 = await client.query(query, {size: 2});
+  r2          = await client.query(query, {size: 2});
   let r3: any = await client.query(query2, {size: 2});
   console.log(await r2);
   console.log();
@@ -80,4 +81,4 @@ async function run() {
   // console.log(result);
 }
 
-run();
+// run();

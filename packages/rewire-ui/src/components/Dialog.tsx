@@ -79,6 +79,7 @@ const Transition = (props: any) => <Grow {...props} timeout={TRANSITION_TIMEOUT}
 export interface IDialogProps {
   dialog                : Modal;
   classes?              : React.CSSProperties;
+  fullWidth?            : boolean;
   fullScreen?           : boolean;
   disableEscapeKeyDown? : boolean;
   hideBackdrop?         : boolean;
@@ -95,7 +96,7 @@ type DialogProps = WithStyle<ReturnType<typeof styles>, IDialogProps>;
 
 class DialogInternal extends React.Component<DialogProps> {
   render() {
-    const {classes, children, dialog, ButtonRenderer, fullScreen, maxWidth, title, disableEscapeKeyDown, hideBackdrop, transition, transitionDuration, disableTransition} = this.props;
+    const {classes, children, dialog, ButtonRenderer, fullWidth, fullScreen, maxWidth, title, disableEscapeKeyDown, hideBackdrop, transition, transitionDuration, disableTransition} = this.props;
     const escapeAction            = disableEscapeKeyDown ? undefined : () => dialog.close();
     const transitionToUse         = transition ? transition : Transition;
     const transitionDurationToUse = transitionDuration !== undefined ? transitionDuration : TRANSITION_TIMEOUT;
@@ -105,9 +106,11 @@ class DialogInternal extends React.Component<DialogProps> {
     const hasActions              = dialog.actions && Object.keys(dialog.actions).length > 0;
     const hasDivider              = hasActions && this.props.hasDivider !== undefined ? this.props.hasDivider : true;
 
+    console.log(fullWidth, fullScreen, maxWidth);
+
     return (
       <Observe render={() => (
-        <Dialog classes={{paper: classes.root, paperScrollPaper: classes.scrollPaper}} open={dialog.isOpen} fullWidth maxWidth={maxWidth} hideBackdrop={hideBackdrop} transitionDuration={transitionTime} TransitionComponent={transitionAction} fullScreen={fullScreen} disableEscapeKeyDown={disableEscapeKeyDown} onEscapeKeyDown={escapeAction}>
+        <Dialog classes={{paper: classes.root, paperScrollPaper: classes.scrollPaper}} open={dialog.isOpen} maxWidth={maxWidth} hideBackdrop={hideBackdrop} transitionDuration={transitionTime} TransitionComponent={transitionAction} fullWidth={fullWidth} fullScreen={fullScreen} disableEscapeKeyDown={disableEscapeKeyDown} onEscapeKeyDown={escapeAction}>
           {hasTitle &&
             <div className={classes.heading}>
               <Typography variant='h6'>{(title && title(dialog)) || dialog.title}</Typography>

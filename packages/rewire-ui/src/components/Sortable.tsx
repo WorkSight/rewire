@@ -11,7 +11,11 @@ import {
   DraggableProvided,
   DraggableStateSnapshot,
 }                 from 'react-beautiful-dnd';
-import { StyleProps, WithStyle, withStyles }  from './styles';
+import {
+  StyleProps,
+  WithStyle,
+  withStyles
+}                 from './styles';
 import {Observe}  from 'rewire-core';
 import Icon       from '@material-ui/core/Icon';
 import {omit}     from 'rewire-common';

@@ -1,7 +1,8 @@
-import * as React    from 'react';
-import * as ReactDOM from 'react-dom';
-import * as nanoid   from 'nanoid';
-import * as is       from 'is';
+import * as React                         from 'react';
+import * as ReactDOM                      from 'react-dom';
+import * as nanoid                        from 'nanoid';
+import { countries, employees, searcher } from './demo-data';
+import { SampleLoginDialog }              from './SampleLoginDialog';
 import {
   BrowserRouter as Router,
   Route,
@@ -9,37 +10,23 @@ import {
   NavLink,
 } from 'react-router-dom';
 import {
-  fetch,
-  utc,
   delay,
-  IObject,
 } from 'rewire-common';
 import {
   Observe,
-  observable,
-  watch,
-  root} from 'rewire-core';
+  observable
+} from 'rewire-core';
 import {
   Sortable,
   SortableList,
   IItem,
-  arraySearch,
-  documentSearch,
-  AutoComplete,
-  Select,
-  TextField,
-  NumberField,
-  Loader,
   Form,
   FormView,
-  IFormOptions,
   Modal,
-  Dialog as DialogView,
-  editor,
+  Dialog,
   isRequired,
   and,
   isSameAsOther,
-  isDifferentFromOther,
   isDifferenceOfOthers,
   isSumOfOthers,
   isLessThan,
@@ -52,81 +39,30 @@ import {
   IError,
   ErrorSeverity,
   Grid,
-  IGridOptions,
   IRowData,
   ICell,
   IRow,
-  isLessThan as gridIsLessThan,
-  isGreaterThan as gridIsGreaterThan,
-  isRequired as gridIsRequired,
-  isSumOfOthers as gridIsSumOfOthers,
+  isGreaterThan        as gridIsGreaterThan,
+  isRequired           as gridIsRequired,
+  isSumOfOthers        as gridIsSumOfOthers,
   isDifferenceOfOthers as gridIsDifferenceOfOthers,
 } from 'rewire-grid';
 
-import Paper             from '@material-ui/core/Paper';
-import Dialog            from '@material-ui/core/Dialog';
-import ListItem          from '@material-ui/core/ListItem';
-import Button            from '@material-ui/core/Button';
-import Typography        from '@material-ui/core/Typography';
-import {withStyles}      from '@material-ui/core/styles';
-import AddIcon           from '@material-ui/icons/Add';
-import AccessibilityIcon from '@material-ui/icons/Accessibility';
-import {
-  MuiThemeProvider,
-  Theme,
-  createMuiTheme
-} from '@material-ui/core/styles';
+import Paper                                from '@material-ui/core/Paper';
+import ListItem                             from '@material-ui/core/ListItem';
+import Button                               from '@material-ui/core/Button';
+import Typography                           from '@material-ui/core/Typography';
+import AddIcon                              from '@material-ui/icons/Add';
+import AccessibilityIcon                    from '@material-ui/icons/Accessibility';
+import { MuiThemeProvider, createMuiTheme } from '@material-ui/core/styles';
 
 import './graphqltest';
-import doucheSuitDude from './images/doucheSuitDude.jpg';
-import {NotificationDoNotDisturb} from 'material-ui/svg-icons';
-
-const suggestions = [
-  {id: '0',  name: 'Afghanistan'},
-  {id: '1',  name: 'Aland Islands'},
-  {id: '2',  name: 'Albania'},
-  {id: '3',  name: 'Algeria'},
-  {id: '4',  name: 'American Samoa'},
-  {id: '5',  name: 'Andorra'},
-  {id: '6',  name: 'Angola'},
-  {id: '7',  name: 'Anguilla'},
-  {id: '8',  name: 'Antarctica'},
-  {id: '9',  name: 'Antigua and Barbuda'},
-  {id: '10', name: 'Argentina'},
-  {id: '11', name: 'Armenia'},
-  {id: '12', name: 'Aruba'},
-  {id: '13', name: 'Australia'},
-  {id: '14', name: 'Austria'},
-  {id: '15', name: 'Azerbaijan'},
-  {id: '16', name: 'Bahamas'},
-  {id: '17', name: 'Bahrain'},
-  {id: '18', name: 'Bangladesh'},
-  {id: '19', name: 'Barbados'},
-  {id: '20', name: 'Belarus'},
-  {id: '21', name: 'Belgium'},
-  {id: '22', name: 'Belize'},
-  {id: '23', name: 'Benin'},
-  {id: '24', name: 'Bermuda'},
-  {id: '25', name: 'Bhutan'},
-  {id: '26', name: 'Bolivia, Plurinational State of'},
-  {id: '27', name: 'Bonaire, Sint Eustatius and Saba'},
-  {id: '28', name: 'Bosnia and Herzegovina'},
-  {id: '29', name: 'Botswana'},
-  {id: '30', name: 'Bouvet Island'},
-  {id: '31', name: 'Brazil'},
-  {id: '32', name: 'BLAH'},
-  {id: '33', name: 'British Indian Ocean Territory'},
-  {id: '34', name: 'Brunei Darussalam'},
-];
 
 interface IDocument {
   id: string;
   name?: string;
   code?: string;
 }
-
-const searcher  = arraySearch(['Yes', 'No', 'Maybe', 'Uncertain', 'Definitely Not'], (item?) => item || '');
-const countries = arraySearch(suggestions, (item?) => (item && item.name) || '');
 
 interface IOoga {
   YesNoValue: string;
@@ -171,40 +107,10 @@ const BasicExample = (props: any) => {
   );
 };
 
-class LoginDialog extends Modal {
-  form: Form = Form.create({
-    email                : Form.email().label('Email').validators(isRequired).placeholder('enter a valid email').onValueChange((form: Form, v: any) => form.setFieldValues({money: 5, password: '123', 'password_confirmation': '123'})).autoFocus(),
-    password             : Form.password().label('Password').validators(and(isRequired, isSameAsOther('password_confirmation', 'passwords are not the same'))).placeholder('enter a password'),
-    password_confirmation: Form.password().label('Confirm Password').placeholder('confirm your password'),
-    country              : Form.reference(countries).label('Country').validators(isRequired).placeholder('ooga'),
-    time                 : Form.time().label('Time').validators(isRequired).onValueChange((form: Form, v: any) => form.setFieldValue('email', 'hi@hi.com')),
-    selectCountry        : Form.select(countries).label('Select Country').validators(isRequired).placeholder('ooga'),
-    money                : Form.number().label('Show Me').validators(isRequired).placeholder('The Money'),
-    date                 : Form.date().label('Date').validators(isRequired),
-    multi                : Form.multistring({rows: 1}).label('Multiline').placeholder('enter multistring').validators(isRequired),
-    color                : Form.color().label('Color'),
-  });
-
-  constructor() {
-    super('');
-    this.action('login', this.submit, {type: 'submit', disabled: () => this.form.hasErrors})
-        .action('cancel', {color: 'secondary', icon: 'cancel'});
-  }
-
-  submit = async () => {
-    if (!this.form.submit()) return false;
-    console.log(this.form.value);
-    await delay(2000);
-    setTimeout(() => confirmation.open(), 0);
-    // await perform login from server
-    return true;
-  }
-}
-
-const loginDialog = new LoginDialog();
+const loginDialog = new SampleLoginDialog();
 const LoginFormView = ({form}: {form: typeof loginDialog.form}) => (
   <div style={{fontSize: '16px'}}>
-  <FormView form={form} onSubmit={loginDialog.actionFn('login')}>
+    <FormView form={form} onSubmit={loginDialog.actionFn('login')}>
     <div className='content'>
       <form.field.email.Editor className='span2' />
       <form.field.country.Editor className='span2' />
@@ -223,14 +129,13 @@ const LoginFormView = ({form}: {form: typeof loginDialog.form}) => (
   </div>
 );
 
-const getLoginTitle = (dialog: Modal): JSX.Element => {
-  return <div>Login</div>;
-};
+// override title from
+const getLoginTitle = (dialog: Modal): JSX.Element => <div>Login</div>;
 
 const DialogLoginForm = () => (
-  <DialogView dialog={loginDialog} title={getLoginTitle} maxWidth='md'>
+  <Dialog dialog={loginDialog} title={getLoginTitle} maxWidth='lg'>
     <LoginFormView form={loginDialog.form} />
-  </ DialogView>
+  </Dialog>
 );
 
 class GridHotkeysDialogModel extends Modal {
@@ -240,9 +145,11 @@ class GridHotkeysDialogModel extends Modal {
   }
 
   submit = async () => {
-    if (!this.form.submit()) return false;
-    console.log(this.form.value);
+    console.log('awaiting submit');
+    await this.submit();
+    console.log('2 sec delay');
     await delay(2000);
+    console.log('after 2 sec delay');
     setTimeout(() => confirmation.open(), 0);
     // await perform login from server
     return true;
@@ -256,7 +163,7 @@ const getGridDialogTitle = (dialog: Modal): JSX.Element => {
 };
 
 const GridHotkeysDialog = () => (
-  <DialogView dialog={gridHotkeysDialogModel} title={getGridDialogTitle} maxWidth='md'>
+  <Dialog dialog={gridHotkeysDialogModel} title={getGridDialogTitle} maxWidth='md'>
     <div style={{padding: '16px', maxHeight: '500px'}}>
       <div style={{display: 'flex', flexDirection: 'column', justifyContent: 'flex-start', alignItems: 'flex-start', flexWrap: 'wrap'}}>
         <div style={{display: 'flex'}}>
@@ -353,7 +260,7 @@ const GridHotkeysDialog = () => (
         </div>
       </div>
     </div>
-  </ DialogView>
+  </ Dialog>
 );
 
 const confirmation = new Modal('Delete entire hard drive?')
@@ -549,16 +456,16 @@ function createTestGrid(nRows: number, nColumns: number) {
   return grid;
 }
 
-let grid = createTestGrid(40, 14);
-let newRow = {id: 'newRowxycdij', data: {}, options: {allowMergeColumns: false}};
+let grid                  = createTestGrid(40, 14);
+let newRow                = {id: 'newRowxycdij', data: {}, options: {allowMergeColumns: false}};
 newRow.data['column0']    = 'AHHH';
 newRow.data['column2']    = 'RC 2-3';
 newRow.data['column3']    = 'RC 3-3';
 newRow.data['timeColumn'] = '8:11';
 grid.addRow(newRow);
 
-grid.cell('3', 'column8')!.value = 'oga booga boa';
-const r = grid.get();
+grid.cell('3', 'column8')!.value = 'ooga booga boa';
+const r                          = grid.get();
 console.log(r);
 // setTimeout(() => grid.rows.length = 0, 4000);
 // setTimeout(() => grid.set(r), 3000);
@@ -566,41 +473,6 @@ console.log(r);
 // setTimeout(() => grid.rows[0].cells['column0'].value = 'booga', 6000);
 // setTimeout(() => grid.columns[3].visible = false, 7000);
 // setTimeout(() => grid.columns[3].visible = true, 8000);
-
-let employees = [
-  {id: '1e',  name: 'Schrute, Dwight',         email: 'testEmail11@test.com',       isActive: true, timeColumn: '7:30', autoCompleteColumn: undefined                ,   selectColumn: {id: '14', name: 'Austria'}, numberColumn1: 1, numberColumn2: 2, numberColumn3: 3},
-  {id: '2e',  name: 'Scott, Michael',          email: 'testEmail22@test.com',       isActive: true, timeColumn: '7:30', autoCompleteColumn: {id: '14', name: 'Austria'}, selectColumn: {id: '14', name: 'Austria'}, numberColumn1: 1, numberColumn2: 2, numberColumn3: 3},
-  {id: '3e',  name: 'Lannister, Jaime',        email: 'testEmail33@test.com',       isActive: true, timeColumn: '7:30', autoCompleteColumn: {id: '14', name: 'Austria'}, selectColumn: {id: '14', name: 'Austria'}, numberColumn1: 1, numberColumn2: 2, numberColumn3: 3},
-  {id: '4e',  name: 'Dayne, Arthur',           email: 'testEmail44@test.com',       isActive: true, timeColumn: '7:30', autoCompleteColumn: {id: '14', name: 'Austria'}, selectColumn: {id: '14', name: 'Austria'}, numberColumn1: 1, numberColumn2: 2, numberColumn3: 3},
-  {id: '5e',  name: 'Snow, Jon',               email: 'testEmail55@test.com',       isActive: true, timeColumn: '7:30', autoCompleteColumn: {id: '14', name: 'Austria'}, selectColumn: {id: '14', name: 'Austria'}, numberColumn1: 1, numberColumn2: 2, numberColumn3: 3},
-  {id: '6e',  name: 'Stark, Ned',              email: 'testEmail66@test.com',       isActive: true, timeColumn: '7:30', autoCompleteColumn: {id: '14', name: 'Austria'}, selectColumn: {id: '14', name: 'Austria'}, numberColumn1: 1, numberColumn2: 2, numberColumn3: 3},
-  {id: '7e',  name: 'Stark, Arya',             email: 'testEmail77@test.com',       isActive: true, timeColumn: '7:30', autoCompleteColumn: {id: '14', name: 'Austria'}, selectColumn: {id: '14', name: 'Austria'}, numberColumn1: 1, numberColumn2: 2, numberColumn3: 3},
-  {id: '8e',  name: 'Biggus, Headus',          email: 'testEmail88@test.com',       isActive: true, timeColumn: '7:30', autoCompleteColumn: {id: '14', name: 'Austria'}, selectColumn: {id: '14', name: 'Austria'}, numberColumn1: 1, numberColumn2: 2, numberColumn3: 3},
-  {id: '9e',  name: 'Drumpf, Donald',          email: 'testEmail99@test.com',       isActive: true, timeColumn: '7:30', autoCompleteColumn: {id: '14', name: 'Austria'}, selectColumn: {id: '14', name: 'Austria'}, numberColumn1: 1, numberColumn2: 2, numberColumn3: 3},
-  {id: '7e',  name: 'Johnson, Ruin',           email: 'testEmail00@test.com',       isActive: true, timeColumn: '7:30', autoCompleteColumn: {id: '14', name: 'Austria'}, selectColumn: {id: '14', name: 'Austria'}, numberColumn1: 1, numberColumn2: 2, numberColumn3: 3},
-  {id: '8e',  name: 'Ren, Emo',                email: 'testEmail1234@test.com',     isActive: true, timeColumn: '7:30', autoCompleteColumn: {id: '14', name: 'Austria'}, selectColumn: {id: '14', name: 'Austria'}, numberColumn1: 1, numberColumn2: 2, numberColumn3: 3},
-  {id: '9e',  name: 'Swolo, Ben',              email: 'testEmail5678@test.com',     isActive: true, timeColumn: '7:30', autoCompleteColumn: {id: '14', name: 'Austria'}, selectColumn: {id: '14', name: 'Austria'}, numberColumn1: 1, numberColumn2: 2, numberColumn3: 3},
-  {id: '10e', name: 'Sue, Mary',               email: 'testEmail90210@test.com',    isActive: true, timeColumn: '7:30', autoCompleteColumn: {id: '14', name: 'Austria'}, selectColumn: {id: '14', name: 'Austria'}, numberColumn1: 1, numberColumn2: 2, numberColumn3: 3},
-  {id: '11e', name: 'Poppins, Leia',           email: 'testEmail6274309@test.com',  isActive: true, timeColumn: '7:30', autoCompleteColumn: {id: '14', name: 'Austria'}, selectColumn: {id: '14', name: 'Austria'}, numberColumn1: 1, numberColumn2: 2, numberColumn3: 3},
-  {id: '12e', name: 'Snoke, Nobody',           email: 'testEmail13371337@test.com', isActive: true, timeColumn: '7:30', autoCompleteColumn: {id: '14', name: 'Austria'}, selectColumn: {id: '14', name: 'Austria'}, numberColumn1: 1, numberColumn2: 2, numberColumn3: 3},
-  {id: '13e', name: 'Too tired to live, Luke', email: 'testEmail253545@test.com',   isActive: true, timeColumn: '7:30', autoCompleteColumn: {id: '14', name: 'Austria'}, selectColumn: {id: '14', name: 'Austria'}, numberColumn1: 1, numberColumn2: 2, numberColumn3: 3},
-  {id: '1e',  name: 'Schrute, Dwight',         email: 'testEmail11@test.com',       isActive: true, timeColumn: '7:30', autoCompleteColumn: undefined                  , selectColumn: {id: '14', name: 'Austria'}, numberColumn1: 1, numberColumn2: 2, numberColumn3: 3},
-  {id: '2e',  name: 'Scott, Michael',          email: 'testEmail22@test.com',       isActive: true, timeColumn: '7:30', autoCompleteColumn: {id: '14', name: 'Austria'}, selectColumn: {id: '14', name: 'Austria'}, numberColumn1: 1, numberColumn2: 2, numberColumn3: 3},
-  {id: '3e',  name: 'Lannister, Jaime',        email: 'testEmail33@test.com',       isActive: true, timeColumn: '7:30', autoCompleteColumn: {id: '14', name: 'Austria'}, selectColumn: {id: '14', name: 'Austria'}, numberColumn1: 1, numberColumn2: 2, numberColumn3: 3},
-  {id: '4e',  name: 'Dayne, Arthur',           email: 'testEmail44@test.com',       isActive: true, timeColumn: '7:30', autoCompleteColumn: {id: '14', name: 'Austria'}, selectColumn: {id: '14', name: 'Austria'}, numberColumn1: 1, numberColumn2: 2, numberColumn3: 3},
-  {id: '5e',  name: 'Snow, Jon',               email: 'testEmail55@test.com',       isActive: true, timeColumn: '7:30', autoCompleteColumn: {id: '14', name: 'Austria'}, selectColumn: {id: '14', name: 'Austria'}, numberColumn1: 1, numberColumn2: 2, numberColumn3: 3},
-  {id: '6e',  name: 'Stark, Ned',              email: 'testEmail66@test.com',       isActive: true, timeColumn: '7:30', autoCompleteColumn: {id: '14', name: 'Austria'}, selectColumn: {id: '14', name: 'Austria'}, numberColumn1: 1, numberColumn2: 2, numberColumn3: 3},
-  {id: '7e',  name: 'Stark, Arya',             email: 'testEmail77@test.com',       isActive: true, timeColumn: '7:30', autoCompleteColumn: {id: '14', name: 'Austria'}, selectColumn: {id: '14', name: 'Austria'}, numberColumn1: 1, numberColumn2: 2, numberColumn3: 3},
-  {id: '8e',  name: 'Biggus, Headus',          email: 'testEmail88@test.com',       isActive: true, timeColumn: '7:30', autoCompleteColumn: {id: '14', name: 'Austria'}, selectColumn: {id: '14', name: 'Austria'}, numberColumn1: 1, numberColumn2: 2, numberColumn3: 3},
-  {id: '9e',  name: 'Drumpf, Donald',          email: 'testEmail99@test.com',       isActive: true, timeColumn: '7:30', autoCompleteColumn: {id: '14', name: 'Austria'}, selectColumn: {id: '14', name: 'Austria'}, numberColumn1: 1, numberColumn2: 2, numberColumn3: 3},
-  {id: '7e',  name: 'Johnson, Ruin',           email: 'testEmail00@test.com',       isActive: true, timeColumn: '7:30', autoCompleteColumn: {id: '14', name: 'Austria'}, selectColumn: {id: '14', name: 'Austria'}, numberColumn1: 1, numberColumn2: 2, numberColumn3: 3},
-  {id: '8e',  name: 'Ren, Emo',                email: 'testEmail1234@test.com',     isActive: true, timeColumn: '7:30', autoCompleteColumn: {id: '14', name: 'Austria'}, selectColumn: {id: '14', name: 'Austria'}, numberColumn1: 1, numberColumn2: 2, numberColumn3: 3},
-  {id: '9e',  name: 'Swolo, Ben',              email: 'testEmail5678@test.com',     isActive: true, timeColumn: '7:30', autoCompleteColumn: {id: '14', name: 'Austria'}, selectColumn: {id: '14', name: 'Austria'}, numberColumn1: 1, numberColumn2: 2, numberColumn3: 3},
-  {id: '10e', name: 'Sue, Mary',               email: 'testEmail90210@test.com',    isActive: true, timeColumn: '7:30', autoCompleteColumn: {id: '14', name: 'Austria'}, selectColumn: {id: '14', name: 'Austria'}, numberColumn1: 1, numberColumn2: 2, numberColumn3: 3},
-  {id: '11e', name: 'Poppins, Leia',           email: 'testEmail6274309@test.com',  isActive: true, timeColumn: '7:30', autoCompleteColumn: {id: '14', name: 'Austria'}, selectColumn: {id: '14', name: 'Austria'}, numberColumn1: 1, numberColumn2: 2, numberColumn3: 3},
-  {id: '12e', name: 'Snoke, Nobody',           email: 'testEmail13371337@test.com', isActive: true, timeColumn: '7:30', autoCompleteColumn: {id: '14', name: 'Austria'}, selectColumn: {id: '14', name: 'Austria'}, numberColumn1: 1, numberColumn2: 2, numberColumn3: 3},
-  {id: '13e', name: 'Too tired to live, Luke', email: 'testEmail253545@test.com',   isActive: true, timeColumn: '7:30', autoCompleteColumn: {id: '14', name: 'Austria'}, selectColumn: {id: '14', name: 'Austria'}, numberColumn1: 1, numberColumn2: 2, numberColumn3: 3},
-];
 
 function createEmployeesGrid1() {
   let cols = [];
@@ -685,13 +557,14 @@ function createEmployeesGrid2() {
 
 let employeesGrid1 = createEmployeesGrid1();
 let employeesGrid2 = createEmployeesGrid2();
+
 // observable dates don't work, but not sure if they ever need to.
 // let testDate = observable(new Date());
 let mode = observable({
   gridMode: 'employees1',
 });
 
-const _Home = (props: any) => <Observe render={() => (
+const Home = (props: any) => <Observe render={() => (
     <div>
       <div>
         {/* <span>{testDate.toDateString()}</span> */}
@@ -700,9 +573,9 @@ const _Home = (props: any) => <Observe render={() => (
         <DialogLoginForm />
         <GridHotkeysDialog />
         {/* <LoginFormView form={loginDialog.form} /> */}
-        <DialogView dialog={confirmation}>
+        <Dialog dialog={confirmation}>
           <Typography style={{margin: 16}}>Are you sure you want to do this crazy shit?</Typography>
-        </DialogView>
+        </Dialog>
         <div style={{overflow: 'auto', padding: 10, display: 'flex', flexDirection: 'column', alignItems: 'center', justifyContent: 'center'}}>
           <div style={{display: 'flex', alignItems: 'center', justifyContent: 'center'}}>
             <Button style={{margin: '0px 15px 10px 0px'}} variant='contained' onClick={() => grid.selectCellByPos(0, 4)}>Select Cell</Button>
@@ -717,11 +590,7 @@ const _Home = (props: any) => <Observe render={() => (
             <Button style={{margin: '0px 15px 10px 0px'}} variant='contained' onClick={() => grid.dataRowsByPosition.forEach(row => row.cells['numberColumn'].setValue(1337))}>Change Number Cell Value</Button>
             <Button style={{margin: '0px 15px 10px 0px'}} variant='contained' onClick={() => grid.dataRowsByPosition.forEach(row => row.setValue({'numberColumn': 2222, 'dateColumn': '1985-11-26'}))}>Change Number And Date Cells</Button>
             <Button style={{margin: '0px 15px 10px 0px'}} variant='contained' onClick={() => grid.dataRowsByPosition.forEach(row => row.clear(['numberColumn', 'dateColumn']))}>Clear Number And Date</Button>
-            <Button style={{margin: '0px 15px 10px 0px'}} variant='contained' onClick={() => {
-              grid.dataRowsByPosition.forEach(row => {
-                row.cells['complexColumn'].setValue(new ComplexCellData('smithers027', 'Smithers', 57));
-              });
-            }}>
+            <Button style={{margin: '0px 15px 10px 0px'}} variant='contained' onClick={() => grid.dataRowsByPosition.forEach(row => row.cells['complexColumn'].setValue(new ComplexCellData('smithers027', 'Smithers', 57)))}>
               Change Complex Cell Value
             </Button>
           </div>
@@ -745,9 +614,6 @@ const _Home = (props: any) => <Observe render={() => (
       </div>
     </div>
 )} />;
-
-
-const Home = _Home;
 
 class TestDialog extends Modal {
   form = Form.create({
@@ -782,7 +648,7 @@ class TestDialog extends Modal {
   }
 
   submit = async () => {
-    if (!this.form.submit()) return false;
+    await this.submit();
     console.log(this.form.value);
     await delay(2000);
     setTimeout(() => confirmation.open(), 0);
@@ -790,6 +656,55 @@ class TestDialog extends Modal {
     return true;
   }
 }
+
+const About = (props: any) => (
+  <div>
+    <h2>About</h2>
+    <TestFormView form={testDialog.form} />
+  </div>
+);
+
+let sortableItems: IItem[] = observable([
+  { id: '1item', name: 'First Item' },
+  { id: '2item', name: 'Second Item' },
+  { id: '3item', name: 'Third Item' },
+  { id: '4item', name: 'Fourth Item' },
+]);
+
+const Topics = ({ match }: any) => (
+  <div>
+    <h2>Topics</h2>
+    <ul>
+      <li>
+        <Link to={`${match.url}/rendering`}>
+          Rendering with React
+        </Link>
+      </li>
+      <li>
+        <Link to={`${match.url}/components`}>
+          Components
+        </Link>
+      </li>
+      <li>
+        <Link to={`${match.url}/props-v-state`}>
+          Props v. State
+        </Link>
+      </li>
+    </ul>
+
+
+    <Paper style={{width: '40%', padding: 20, display: 'flex', alignItems: 'center', justifyContent: 'center', height: 400}}>
+      <Sortable>
+        <SortableList listId='myList' items={sortableItems} itemRenderer={sortableItemRenderer} showDragHandle={false} disableTabbing={true} />
+      </Sortable>
+    </Paper>
+
+    <Route path={`${match.url}/:topicId`} component={Topic}/>
+    <Route exact path={match.url} render={() => (
+      <h3>Please select a topic.</h3>
+    )}/>
+  </div>
+);
 
 const testDialog = new TestDialog();
 const TestFormView = ({form}: {form: typeof testDialog.form}) => (
@@ -833,71 +748,21 @@ const TestFormView = ({form}: {form: typeof testDialog.form}) => (
       <form.field.avatar.Editor />
       </div>
       <div className='content'>
-        <button style={{height: '30px'}}  value='Submit' onClick={testDialog.actionFn('login')}>Submit</button>
-        <button style={{height: '30px'}}  value='Cancel' onClick={testDialog.actionFn('cancel')}>Cancel</button>
+        <button style={{height: '30px'}} value='Submit' onClick={testDialog.actionFn('login')}>Submit</button>
+        <button style={{height: '30px'}} value='Cancel' onClick={testDialog.actionFn('cancel')}>Cancel</button>
       </div>
     </FormView>
     </div>
   )} />
 );
 
-
-const About = (props: any) => (
-  <div>
-    <h2>About</h2>
-    <TestFormView form={testDialog.form} />
-  </div>
-);
-
-let sortableItems: IItem[] = observable([
-  {id: '1item', name: 'First Item'},
-  {id: '2item', name: 'Second Item'},
-  {id: '3item', name: 'Third Item'},
-  {id: '4item', name: 'Fourth Item'},
-]);
-
 const sortableItemRenderer = (item: IItem): JSX.Element => {
   return (
     <ListItem key={item.id} component={NavLink} to={`/topics/props-v-state`} activeClassName={'activeLink'}>
-      <Typography>{item.name}</Typography>
+      <Typography>{item.id}</Typography>
     </ListItem>
   );
 };
-
-const Topics = ({ match }: any) => (
-  <div>
-    <h2>Topics</h2>
-    <ul>
-      <li>
-        <Link to={`${match.url}/rendering`}>
-          Rendering with React
-        </Link>
-      </li>
-      <li>
-        <Link to={`${match.url}/components`}>
-          Components
-        </Link>
-      </li>
-      <li>
-        <Link to={`${match.url}/props-v-state`}>
-          Props v. State
-        </Link>
-      </li>
-    </ul>
-
-
-    <Paper style={{width: '40%', padding: 20, display: 'flex', alignItems: 'center', justifyContent: 'center', height: 400}}>
-      <Sortable>
-        <SortableList listId='myList' items={sortableItems} itemRenderer={sortableItemRenderer} showDragHandle={false} disableTabbing={true} />
-      </Sortable>
-    </Paper>
-
-    <Route path={`${match.url}/:topicId`} component={Topic}/>
-    <Route exact path={match.url} render={() => (
-      <h3>Please select a topic.</h3>
-    )}/>
-  </div>
-);
 
 const Topic = ({ match }: any) => (
   <div>
@@ -906,7 +771,7 @@ const Topic = ({ match }: any) => (
 );
 
 async function login() {
-  // await fetch.post('accounts/login', { username: 'Administrator', password: 'eblenglo' });
+  // await fetch.post('accounts/login', { username: 'Administrator', password: '324#$as(lkf)' });
   let theme = createMuiTheme({typography: {useNextVariants: true}});
   ReactDOM.render(<MuiThemeProvider theme={theme}><BasicExample /></MuiThemeProvider>, document.getElementById('root'));
 }

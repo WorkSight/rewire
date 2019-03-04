@@ -28,7 +28,7 @@ export default class Modal {
 
   open() {
     this.state.enable = true;
-    this.state.open = true;
+    this.state.open   = true;
   }
 
   get isOpen() {
@@ -47,8 +47,8 @@ export default class Modal {
     return this.actions[label].action;
   }
 
-  action(label: string, options?: ActionOptions): Modal; // the first two are the overloads the implementation does now show in intellisense!!
-  action(label: string, action: ActionFn, options?: ActionOptions): Modal;
+  action(label: string, options?: ActionOptions):                                    Modal; // the first two are the overloads the implementation does now show in intellisense!!
+  action(label: string, action: ActionFn, options?: ActionOptions):                  Modal;
   action(label: string, action?: ActionFn | ActionOptions, options?: ActionOptions): Modal {
     if (action && typeof(action) === 'function') {
       this.actions[label] = {action: () => this.dispatch(action), disabled, ...options};

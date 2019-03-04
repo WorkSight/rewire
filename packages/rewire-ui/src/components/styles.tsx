@@ -19,9 +19,9 @@ export interface Func<T> {
   ([...args]: any, args2?: any): T;
 }
 
-export type WithStyle<T, P = {}> = {style?: React.CSSProperties, children?: React.ReactNode} & StyleProps<T> & P;
-export type ComponentProps<T> = <P>(component: React.ComponentType<WithStyle<T, P>>) => React.ComponentType<P>;
-export type ComponentPropType<T> = T extends ComponentProps<infer U> ? U : T;
+export type WithStyle<T, P = {}>     = {style?: React.CSSProperties, children?: React.ReactNode} & StyleProps<T> & P;
+export type ComponentProps<T>        = <P>(component: React.ComponentType<WithStyle<T, P>>) => React.ComponentType<P>;
+export type ComponentPropType<T>     = T extends ComponentProps<infer U> ? U : T;
 export type WithDecorator<T, P = {}> = WithStyle<ComponentPropType<T>, P>;
 
 export type ThemeFn<T> = (theme: Theme) => T;
