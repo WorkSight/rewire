@@ -243,6 +243,7 @@ class ColorField extends React.Component<ColorFieldPropsStyled, IColorFieldState
 
     return (
       <FormControl
+        className={this.props.className}
         classes={{root: classes.formControlRoot}}
         onKeyDown={this.handleKeyDown}
         onKeyUp={this.handleKeyUp}

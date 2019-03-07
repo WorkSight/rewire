@@ -54,6 +54,7 @@ export interface IGrid extends IRows, IDisposable {
   getErrors(): IErrorData[];
   validate(): void;
   copy(): void;
+  cut(): void;
   paste(): void;
   addSort(column: IColumn, sort?: SortDirection, insert?: boolean): IGrid;
   setSort(column: IColumn, sort?: SortDirection): IGrid;

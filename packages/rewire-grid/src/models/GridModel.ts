@@ -147,6 +147,11 @@ class GridModel implements IGrid, IDisposable {
     this.clipboard = copiedCells;
   }
 
+  cut() {
+    this.copy();
+    this.selectedCells.forEach(cell => cell.clear());
+  }
+
   get(): ICellDataMap[] {
     const data: ICellDataMap[] = [];
     for (const row of allDataRows(this.rows)) {
