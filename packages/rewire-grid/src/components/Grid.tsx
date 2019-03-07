@@ -232,8 +232,9 @@ const styles = (theme: Theme) => {
 
   let styleObj = {
     leftLabels: {
-      '& tr, & tr.alt': {
-        backgroundColor: theme.palette.leftLabelBackground.main,
+      backgroundColor: theme.palette.leftLabelBackground.main,
+      '& tr.alt': {
+        backgroundColor: theme.palette.rowStripedBackground.main,
       },
       '& tr.selected': {
         backgroundColor: theme.palette.rowSelectedBackground.main,

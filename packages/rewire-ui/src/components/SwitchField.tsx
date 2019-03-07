@@ -1,4 +1,5 @@
 import * as React              from 'react';
+import classNames              from 'classnames';
 import Switch, {SwitchProps}   from '@material-ui/core/Switch';
 import FormControlLabel        from '@material-ui/core/FormControlLabel';
 import {Theme}                 from '@material-ui/core/styles';
@@ -79,9 +80,9 @@ class SwitchInternal extends React.Component<SwitchPropsStyled> {
     if (this.props.label !== undefined) {
       return (
         <FormControlLabel
+          className={this.props.className}
           control={
             <Switch
-              className={this.props.className}
               autoFocus={this.props.autoFocus}
               disabled={this.props.disabled}
               inputProps={{autoFocus: this.props.autoFocus}}
@@ -98,9 +99,8 @@ class SwitchInternal extends React.Component<SwitchPropsStyled> {
     }
 
     return (
-      <div className={classes.switchContainerNoLabel}>
+      <div className={classNames(this.props.className, classes.switchContainerNoLabel)}>
         <Switch
-          className={this.props.className}
           autoFocus={this.props.autoFocus}
           disabled={this.props.disabled}
           inputProps={{autoFocus: this.props.autoFocus}}

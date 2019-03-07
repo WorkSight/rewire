@@ -266,8 +266,8 @@ const getGridDialogTitle = (dialog: Modal): JSX.Element => {
 };
 
 const GridHotkeysDialog = () => (
-  <DialogView dialog={gridHotkeysDialogModel} title={getGridDialogTitle} maxWidth='md'>
-    <div style={{padding: '16px', maxHeight: '500px'}}>
+  <DialogView dialog={gridHotkeysDialogModel} title={getGridDialogTitle} maxWidth='lg'>
+    <div style={{display: 'flex', padding: '16px', maxHeight: '500px'}}>
       <div style={{display: 'flex', flexDirection: 'column', justifyContent: 'flex-start', alignItems: 'flex-start', flexWrap: 'wrap'}}>
         <div style={{display: 'flex'}}>
           <Typography style={{width: '125px'}}>Ctrl + C:</Typography>
@@ -288,6 +288,10 @@ const GridHotkeysDialog = () => (
         <div style={{display: 'flex'}}>
           <Typography style={{width: '125px'}}>Ctrl + U:</Typography>
           <Typography>Revert Selected Row(s)</Typography>
+        </div>
+        <div style={{display: 'flex'}}>
+          <Typography style={{width: '125px'}}>Ctrl + Shift + U:</Typography>
+          <Typography>Revert Grid</Typography>
         </div>
         <div style={{display: 'flex'}}>
           <Typography style={{width: '125px'}}>Ctrl + Insert:</Typography>
@@ -347,7 +351,7 @@ const GridHotkeysDialog = () => (
         </div>
         <div style={{display: 'flex'}}>
           <Typography style={{width: '125px'}}>Ctrl + Click:</Typography>
-          <Typography>If Multiselect, append selection</Typography>
+          <Typography>If Multiselect, and not selected, append selection, otherwise remove selection</Typography>
         </div>
         <div style={{display: 'flex'}}>
           <Typography style={{width: '125px'}}>Ctrl + Drag:</Typography>
@@ -355,11 +359,11 @@ const GridHotkeysDialog = () => (
         </div>
         <div style={{display: 'flex'}}>
           <Typography style={{width: '125px'}}>Shift + Click:</Typography>
-          <Typography>If Multiselect, append cells between start and clicked cell</Typography>
+          <Typography>If Multiselect, select cells between currently selected cell and clicked cell</Typography>
         </div>
         <div style={{display: 'flex'}}>
-          <Typography style={{width: '125px'}}>Shift + Drag:</Typography>
-          <Typography>If Multiselect, append cells between start and dragged cells</Typography>
+          <Typography style={{width: '125px'}}>Shift + Arrow Key:</Typography>
+          <Typography>If Multiselect, acts like Shift + Click except with arrow navigation</Typography>
         </div>
       </div>
     </div>

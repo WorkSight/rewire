@@ -150,43 +150,60 @@ class Cell extends React.PureComponent<CellProps, {}> {
     if (evt.keyCode === 85) { evt.key = 'U'; }
     if (evt.keyCode === 86) { evt.key = 'V'; }
     if (evt.keyCode === 88) { evt.key = 'X'; }
+    if (evt.shiftKey) { evt.key = 'Shift' + evt.key; }
+    if (evt.ctrlKey)  { evt.key = 'Ctrl' + evt.key; }
     switch (evt.key) {
-      case 'R':
-        if (this.cell.editing || !evt.ctrlKey) {
+      case 'CtrlR':
+        // Revert selected cell(s)
+        if (this.cell.editing) {
           return;
         }
         this.grid.revertSelectedCells();
         break;
-      case 'U':
-        if (this.cell.editing || !evt.ctrlKey) {
+
+      case 'CtrlU':
+        // Revert selected row(s)
+        if (this.cell.editing) {
           return;
         }
-        if (evt.shiftKey) {
-          this.grid.revert();
-        } else {
         this.grid.revertSelectedRows();
-        }
         break;
-      case 'C':
-        if (this.cell.editing || !evt.ctrlKey) {
+
+      case 'CtrlShiftU': {
+        // Revert grid
+        if (this.cell.editing) {
+          return;
+        }
+        this.grid.revert();
+        break;
+      }
+
+      case 'CtrlC':
+        // Copy cell(s)
+        if (this.cell.editing) {
           return;
         }
         this.grid.copy();
         break;
-      case 'X':
-        if (this.cell.editing || !evt.ctrlKey) {
+
+      case 'CtrlX':
+        // Cut cell(s)
+        if (this.cell.editing || this.cell.readOnly || !this.cell.enabled) {
           return;
         }
-        this.grid.copy();
-        this.grid.selectedCells.forEach(cell => cell.clear());
+        this.grid.cut();
         break;
-      case 'V':
-        if (this.cell.editing || !evt.ctrlKey) {
+
+      case 'CtrlV':
+        // Paste cell(s)
+        if (this.cell.editing || this.cell.readOnly || !this.cell.enabled) {
           return;
         }
         this.grid.paste();
         break;
+
       case 'Escape':
+        // If editing, exit editing mode without changes, nd re-select cell, otherwise, remove selection.
         if (this.cell.editing) {
           this.grid.editCell(undefined);
           setTimeout(() => {
@@ -198,35 +215,40 @@ class Cell extends React.PureComponent<CellProps, {}> {
         }
         break;
 
-      case 'Insert':
-        if (this.cell.editing || !evt.ctrlKey) {
+      case 'CtrlInsert':
+        // Insert new row below selected row(s)
+        if (this.cell.editing || !this.grid.rowHotkeyPermissions.insertRow) {
           return;
         }
-        // insert row
         this.grid.insertRowAtSelection();
         break;
 
-      case 'D':
-        if (this.cell.editing || !evt.ctrlKey) {
+      case 'CtrlD':
+        // Duplicate selected row(s) below them
+        if (this.cell.editing || !this.grid.rowHotkeyPermissions.duplicateRow) {
           return;
         }
-        // duplcate row(s)
         this.grid.duplicateSelectedRows();
         break;
 
       case 'Delete':
-        if (this.cell.editing) {
+        // Delete cell value(s)
+        if (this.cell.editing || this.cell.readOnly || !this.cell.enabled) {
           return;
         }
-        if (evt.ctrlKey) {
-          // delete row(s)
-          this.grid.removeSelectedRows();
-          break;
-        }
         this.grid.selectedCells.forEach(cell => cell.clear());
+          break;
+
+      case 'CtrlDelete':
+        // Delete row(s)
+        if (this.cell.editing || !this.grid.rowHotkeyPermissions.deleteRow) {
+          return;
+        }
+        this.grid.removeSelectedRows();
         break;
 
       case 'Enter':
+        // Exit editing mode with changes, and re-select cell
         if (this.column.type === 'multiselect') {
           break;
         }
@@ -235,6 +257,7 @@ class Cell extends React.PureComponent<CellProps, {}> {
         break;
 
       case 'F2':
+        // Enter editing mode on selected cell
         if (this.cell.enabled && !this.cell.readOnly && this.cell.editable && this.column.editor) {
           this.keyForEdit = undefined;
           this.grid.editCell(this.cell);
@@ -242,40 +265,57 @@ class Cell extends React.PureComponent<CellProps, {}> {
         break;
 
       case 'ArrowUp':
+        // Select the first selectable cell above the currently selected and focused cell
         let upCell = this.grid.adjacentTopCell(this.cell, true);
         if (!upCell) {
           break;
         }
-        if (!evt.shiftKey || !this.grid.multiSelect) {
           this.grid.startCell = upCell;
           this.grid.selectCells([upCell]);
-        } else {
-          // keyboard multi-select using shift key
+        break;
+
+      case 'ShiftArrowUp':
+        // Select all selectable cells between the starting cell and the first selectable cell above the currently selected and focused cell
+        if (!this.grid.multiSelect) {
+          return;
+        }
+        let upShiftCell = this.grid.adjacentTopCell(this.cell, true);
+        if (!upShiftCell) {
+          break;
+        }
           if (!this.grid.startCell) {
             this.grid.startCell = this.cell;
           }
-          this.grid.selectCellsTo(upCell);
-        }
+        this.grid.selectCellsTo(upShiftCell);
         break;
 
       case 'ArrowDown':
+        // Select the first selectable cell below the currently selected and focused cell
         let downCell = this.grid.adjacentBottomCell(this.cell, true);
         if (!downCell) {
           break;
         }
-        if (!evt.shiftKey || !this.grid.multiSelect) {
           this.grid.startCell = downCell;
           this.grid.selectCells([downCell]);
-        } else {
-          // keyboard multi-select using shift key
+        break;
+
+      case 'ShiftArrowDown':
+        // Select all selectable cells between the starting cell and the first selectable cell below the currently selected and focused cell
+        if (!this.grid.multiSelect) {
+          return;
+        }
+        let downShiftCell = this.grid.adjacentBottomCell(this.cell, true);
+        if (!downShiftCell) {
+          break;
+        }
           if (!this.grid.startCell) {
             this.grid.startCell = this.cell;
           }
-          this.grid.selectCellsTo(downCell);
-        }
+        this.grid.selectCellsTo(downShiftCell);
         break;
 
       case 'ArrowLeft':
+        // Select the first selectable cell to the left of the currently selected and focused cell. If there are none, move up a row and start from the end (right)
         if (this.cell.editing) {
           evt.stopPropagation();
           if (this.column.type === 'select' || this.column.type === 'multiselect' || this.column.type === 'checked') {
@@ -283,29 +323,40 @@ class Cell extends React.PureComponent<CellProps, {}> {
           }
           return;
         }
-
-        let prevCell: ICell | undefined;
-        if (!evt.shiftKey || !this.grid.multiSelect) {
-          prevCell = this.grid.previousCell(this.cell, true);
-          if (!prevCell) {
+        let leftCell: ICell | undefined;
+        leftCell = this.grid.previousCell(this.cell, true);
+        if (!leftCell) {
             break;
           }
-          this.grid.startCell = prevCell;
-          this.grid.selectCells([prevCell]);
-        } else {
-          // keyboard multi-select using shift key
-          prevCell = this.grid.adjacentLeftCell(this.cell, true);
-          if (!prevCell) {
+        this.grid.startCell = leftCell;
+        this.grid.selectCells([leftCell]);
+        break;
+
+      case 'ShiftArrowLeft':
+        // Select all selectable cells between the starting cell and the first selectable cell that is to the left of the currently selected and focused cell
+        if (this.cell.editing) {
+          evt.stopPropagation();
+          if (this.column.type === 'select' || this.column.type === 'multiselect' || this.column.type === 'checked') {
+            evt.preventDefault();
+          }
+          return;
+        }
+        if (!this.grid.multiSelect) {
+          return;
+        }
+        let leftShiftCell: ICell | undefined;
+        leftShiftCell = this.grid.adjacentLeftCell(this.cell, true);
+        if (!leftShiftCell) {
             break;
           }
           if (!this.grid.startCell) {
             this.grid.startCell = this.cell;
           }
-          this.grid.selectCellsTo(prevCell);
-        }
+        this.grid.selectCellsTo(leftShiftCell);
         break;
 
       case 'ArrowRight':
+        // Select the first selectable cell to the right of the currently selected and focused cell. If there are none, move down a row and begin from the start (left)
         if (this.cell.editing) {
           evt.stopPropagation();
           if (this.column.type === 'select' || this.column.type === 'multiselect' || this.column.type === 'checked') {
@@ -313,80 +364,100 @@ class Cell extends React.PureComponent<CellProps, {}> {
           }
           return;
         }
-
-        let nextCell: ICell | undefined;
-        if (!evt.shiftKey || !this.grid.multiSelect) {
-          nextCell = this.grid.nextCell(this.cell, true);
-          if (!nextCell) {
+        let rightCell: ICell | undefined;
+        rightCell = this.grid.nextCell(this.cell, true);
+        if (!rightCell) {
             break;
           }
-          this.grid.startCell = nextCell;
-          this.grid.selectCells([nextCell]);
-        } else {
-          // keyboard multi-select using shift key
-          nextCell = this.grid.adjacentRightCell(this.cell, true);
-          if (!nextCell) {
+        this.grid.startCell = rightCell;
+        this.grid.selectCells([rightCell]);
+        break;
+
+      case 'ShiftArrowRight':
+        // Select all selectable cells between the starting cell and the first selectable cell that is to the right of the currently selected and focused cell
+        if (this.cell.editing) {
+          evt.stopPropagation();
+          if (this.column.type === 'select' || this.column.type === 'multiselect' || this.column.type === 'checked') {
+            evt.preventDefault();
+          }
+          return;
+        }
+        if (!this.grid.multiSelect) {
+          return;
+        }
+        let rightShiftCell: ICell | undefined;
+        rightShiftCell = this.grid.adjacentRightCell(this.cell, true);
+        if (!rightShiftCell) {
             break;
           }
           if (!this.grid.startCell) {
             this.grid.startCell = this.cell;
           }
-          this.grid.selectCellsTo(nextCell);
-        }
+        this.grid.selectCellsTo(rightShiftCell);
         break;
 
       case 'Tab':
-        if (!evt.shiftKey) {
+        // Select the first selectable cell to the right of the currently selected and focused cell. If there are none, move down a row and begin from the start (left)
           let nextCell = this.grid.nextCell(this.cell, true);
           if (!nextCell) {
             break;
           }
           this.grid.startCell = nextCell;
           this.grid.selectCells([nextCell]);
-        } else {
+        break;
+
+      case 'ShiftTab':
+        // Select the first selectable cell to the left of the currently selected and focused cell. If there are none, move up a row and start from the end (right)
           let prevCell = this.grid.previousCell(this.cell, true);
           if (!prevCell) {
             break;
           }
           this.grid.startCell = prevCell;
           this.grid.selectCells([prevCell]);
-        }
         break;
 
       case 'Home':
+        // Select the first selectable cell in the currently selected row (left-most)
         if (this.cell.editing) {
           return;
         }
-
-        if (!evt.ctrlKey) {
           let firstCellInRow = this.grid.firstCellInRow(this.row, true);
           if (firstCellInRow) {
             this.grid.selectCells([firstCellInRow]);
           }
-        } else {
+        break;
+
+      case 'CtrlHome':
+        // Select the first selectable cell grid (top-left-most)
+        if (this.cell.editing) {
+          return;
+        }
           let firstCell = this.grid.firstCell(true);
           if (firstCell) {
             this.grid.selectCells([firstCell]);
           }
-        }
         break;
 
       case 'End':
+        // Select the last selectable cell in the currently selected row (right-most)
         if (this.cell.editing) {
         return;
         }
-
-        if (!evt.ctrlKey) {
           let lastCellInRow = this.grid.lastCellInRow(this.row, true);
           if (lastCellInRow) {
             this.grid.selectCells([lastCellInRow]);
           }
-        } else {
+        break;
+
+      case 'CtrlEnd':
+        // Select the last selectable cell grid (bottom-right-most)
+        if (this.cell.editing) {
+          return;
+        }
           let lastCell = this.grid.lastCell(true);
           if (lastCell) {
             this.grid.selectCells([lastCell]);
           }
-        }
         break;
 
       default:
