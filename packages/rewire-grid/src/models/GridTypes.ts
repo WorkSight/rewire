@@ -16,6 +16,45 @@ export interface IDisposable {
 export type SortDirection     = 'ascending' | 'descending';
 export type TextAlignment     = 'left' | 'center' | 'right';
 export type VerticalAlignment = 'top' | 'middle' | 'bottom';
+export interface IGridRowKeybindPermissions {
+  insertRow: boolean;
+  duplicateRow: boolean;
+  deleteRow: boolean;
+}
+
+export type GridKeybindAction = (evt: React.KeyboardEvent<any>, cell: ICell) => void;
+export interface IGridStaticKeybinds {
+  'ArrowUp': GridKeybindAction;
+  'ArrowDown': GridKeybindAction;
+  'ArrowLeft': GridKeybindAction;
+  'ArrowRight': GridKeybindAction;
+  'Shift+ArrowUp': GridKeybindAction;
+  'Shift+ArrowDown': GridKeybindAction;
+  'Shift+ArrowLeft': GridKeybindAction;
+  'Shift+ArrowRight': GridKeybindAction;
+  'Tab': GridKeybindAction;
+  'Shift+Tab': GridKeybindAction;
+  'Home': GridKeybindAction;
+  'End': GridKeybindAction;
+  'Ctrl+Home': GridKeybindAction;
+  'Ctrl+End': GridKeybindAction;
+  'Escape': GridKeybindAction;
+  'Enter': GridKeybindAction;
+  'F2': GridKeybindAction;
+  'Ctrl+C': GridKeybindAction;
+}
+export interface IGridVariableKeybinds {
+  'Ctrl+R': GridKeybindAction;
+  'Ctrl+U': GridKeybindAction;
+  'Ctrl+Shift+U': GridKeybindAction;
+  'Ctrl+X': GridKeybindAction;
+  'Ctrl+V': GridKeybindAction;
+  'Delete': GridKeybindAction;
+  'Ctrl+Insert': GridKeybindAction;
+  'Ctrl+D': GridKeybindAction;
+  'Ctrl+Delete': GridKeybindAction;
+  [keybind: string]: GridKeybindAction;
+}
 
 export interface IGrid extends IRows, IDisposable {
   id                        : number;
@@ -46,6 +85,9 @@ export interface IGrid extends IRows, IDisposable {
   changed                   : boolean;
   inError                   : boolean;
   contentElement?           : HTMLDivElement;
+  rowKeybindPermissions     : IGridRowKeybindPermissions;
+  staticKeybinds            : IGridStaticKeybinds;
+  variableKeybinds          : IGridVariableKeybinds;
 
   setContentElement(element: HTMLDivElement | undefined): void;
 
@@ -97,6 +139,8 @@ export interface IGrid extends IRows, IDisposable {
   revert(): void;
   revertSelectedCells(): void;
   revertSelectedRows(): void;
+  clear(): void;
+  clearSelectedCells(): void;
   get(): ICellDataMap[];
   getChanges(): ICellDataMap[];
   set(data: (IRowData | undefined)[]): void;
@@ -130,7 +174,8 @@ export interface IGridOptions {
   multiSelect?         : boolean;
   allowMergeColumns?   : boolean;
   groupBy?             : string[];
-  // rowHotkeyPermissions?: IGridRowHotkeyPermissions;
+  rowKeybindPermissions?: IGridRowKeybindPermissions;
+  variableKeybinds?     : {[keybind: string]: GridKeybindAction};
 }
 
 export interface IGridColors {
@@ -311,6 +356,7 @@ export interface ICell extends ICellProperties {
   isRightMostSelection : boolean;
   isBottomMostSelection: boolean;
   isLeftMostSelection  : boolean;
+  keyForEdit?          : string;
 
   hasChanges(): boolean;
   hasErrors(): boolean;
@@ -328,6 +374,7 @@ export interface ICell extends ICellProperties {
   revert(): void;
   unselect(): void;
   findVerticallyNearestCellWithUnselectedRow(): ICell | undefined;
+  performKeybindAction(evt: React.KeyboardEvent<any>): void;
 }
 
 export type ICellMap     = {[columnName: string]: ICell};
