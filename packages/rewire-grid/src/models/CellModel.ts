@@ -221,10 +221,8 @@ export class CellModel implements ICell {
   setFocus(focus: boolean = true) {
     if (focus && this.canFocus()) {
       this.element!.focus();
-      this.grid.focusedCell = this;
     } else if (!focus && this.canBlur()) {
       this.element!.blur();
-      this.grid.focusedCell = undefined;
     }
   }
 

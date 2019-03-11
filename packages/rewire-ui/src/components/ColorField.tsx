@@ -69,7 +69,6 @@ export interface IColorFieldProps {
   value?           : string;
   variant?         : TextVariant;
   label?           : string;
-  updateOnChange?  : boolean;
 
   onValueChange: (value?: string) => void;
 }
