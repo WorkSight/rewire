@@ -215,6 +215,7 @@ class SortableListInternal extends React.Component<SortableListProps & SortableS
                 theme={this.props.theme}
                 itemRenderer={itemRenderer}
               />
+              {dropProvided.placeholder}
             </div>
           </div>
           </List>

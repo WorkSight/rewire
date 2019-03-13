@@ -1,6 +1,6 @@
 {
   "name": "rewire-common",
-  "version": "1.0.0-beta.169",
+  "version": "1.0.0-beta.170",
   "description": "Common utilities used by the rewire suite of reactive components",
   "main": "./es6-lib.js",
   "typings": "./src/index.ts",
@@ -20,6 +20,6 @@
   },
   "homepage": "https://github.com/worksight/rewire",
   "dependencies": {
-    "query-string": "^6.2.0"
+    "query-string": "^6.3.0"
   }
 }
