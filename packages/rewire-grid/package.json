@@ -1,6 +1,6 @@
 {
   "name": "rewire-grid",
-  "version": "1.0.0-beta.168",
+  "version": "1.0.0-beta.169",
   "description": "A lightweight reactive grid implementation built using rewire-core.",
   "repository": {
     "type": "git",
@@ -30,8 +30,8 @@
     "nanoid": "^2.0.1",
     "react": "^16.8.2",
     "resize-observer-polyfill": "^1.5.1",
-    "rewire-common": "^1.0.0-beta.168",
-    "rewire-core": "^1.0.0-beta.168",
-    "rewire-ui": "^1.0.0-beta.168"
+    "rewire-common": "^1.0.0-beta.169",
+    "rewire-core": "^1.0.0-beta.169",
+    "rewire-ui": "^1.0.0-beta.169"
   }
 }
