@@ -265,7 +265,7 @@ class MaskField extends React.Component<MaskFieldProps> {
         onFocus={this.handleFocus}
         onBlur={this.props.onBlur}
         onChange={(evt: React.ChangeEvent<HTMLInputElement>) => this.props.onValueChange(evt.target.value)}
-        inputProps={{autoFocus: this.props.autoFocus, className: classes.nativeInput, style: {textAlign: this.props.align || 'left'}, ...maskProps}}
+        inputProps={{spellCheck: false, className: classes.nativeInput, style: {textAlign: this.props.align || 'left'}, ...maskProps}}
         InputProps={{inputComponent: TextMaskCustom, startAdornment: startAdornment, endAdornment: endAdornment, classes: {root: classes.inputRoot, input: inputClassName, inputType: classes.inputType, formControl: inputFormControlClassName}}}
         InputLabelProps={{shrink: true, classes: {root: classes.inputLabelRoot, outlined: classes.inputLabelRootShrink}}}
         FormHelperTextProps={{classes: {root: classes.helperTextRoot, contained: classes.helperTextContained}}}
@@ -289,7 +289,7 @@ class MaskField extends React.Component<MaskFieldProps> {
           onFocus={this.handleFocus}
           onBlur={props.onBlur}
           onChange={props.onChange}
-          inputProps={{autoFocus: props.autoFocus, className: classes.nativeInput, style: {textAlign: props.align || 'left'}, ...maskProps}}
+          inputProps={{spellCheck: false, className: classes.nativeInput, style: {textAlign: props.align || 'left'}, ...maskProps}}
           InputProps={{inputComponent: TextMaskCustom, startAdornment: startAdornment, endAdornment: endAdornment, classes: {root: classes.inputRoot, input: inputClassName, inputType: classes.inputType, formControl: inputFormControlClassName}}}
           InputLabelProps={{shrink: true, classes: {root: classes.inputLabelRoot, outlined: classes.inputLabelRootShrink}}}
           FormHelperTextProps={{classes: {root: classes.helperTextRoot, contained: classes.helperTextContained}}}

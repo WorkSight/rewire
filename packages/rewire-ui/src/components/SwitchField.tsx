@@ -85,7 +85,7 @@ class SwitchInternal extends React.Component<SwitchPropsStyled> {
             <Switch
               autoFocus={this.props.autoFocus}
               disabled={this.props.disabled}
-              inputProps={{autoFocus: this.props.autoFocus}}
+              inputProps={{}}
               checked={this.props.value}
               onChange={(evt: React.ChangeEvent<HTMLInputElement>) => this.props.onValueChange(evt.target.checked)}
               classes={{root: classes.switchRoot, switchBase: classes.switchBase, bar: classes.switchBar, icon: classes.switchIcon, checked: classes.switchChecked}}
@@ -103,7 +103,7 @@ class SwitchInternal extends React.Component<SwitchPropsStyled> {
         <Switch
           autoFocus={this.props.autoFocus}
           disabled={this.props.disabled}
-          inputProps={{autoFocus: this.props.autoFocus}}
+          inputProps={{}}
           checked={this.props.value}
           onChange={(evt: React.ChangeEvent<HTMLInputElement>) => this.props.onValueChange(evt.target.checked)}
           classes={{root: classes.switchRoot, switchBase: classes.switchBase, bar: classes.switchBar, icon: classes.switchIcon, checked: classes.switchChecked}}

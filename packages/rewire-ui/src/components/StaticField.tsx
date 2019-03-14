@@ -64,7 +64,7 @@ class StaticFieldInternal extends React.Component<StaticFieldProps> {
         onChange={(evt: React.ChangeEvent<HTMLInputElement>) => this.props.onValueChange(evt.target.value)}
         InputLabelProps={{shrink: true, classes: {root: classes.inputLabelRoot, outlined: classes.inputLabelRootShrink}}}
         InputProps={{style: {color: 'inherit'}, classes: {root: classes.inputRoot}}}
-        inputProps={{style: {textAlign: this.props.align || 'left'}}}
+        inputProps={{spellCheck: false, style: {textAlign: this.props.align || 'left'}}}
       />);
   }
 }

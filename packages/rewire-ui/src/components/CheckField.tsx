@@ -69,7 +69,7 @@ class CheckboxInternal extends React.Component<CheckboxPropsStyled> {
             <Checkbox
               autoFocus={this.props.autoFocus}
               disabled={this.props.disabled}
-              inputProps={{autoFocus: this.props.autoFocus}}
+              inputProps={{}}
               checked={this.props.value}
               onChange={(evt: React.ChangeEvent<HTMLInputElement>) => this.props.onValueChange(evt.target.checked)}
               classes={{root: this.props.classes.checkboxRoot}}
@@ -87,7 +87,7 @@ class CheckboxInternal extends React.Component<CheckboxPropsStyled> {
         <Checkbox
           autoFocus={this.props.autoFocus}
           disabled={this.props.disabled}
-          inputProps={{autoFocus: this.props.autoFocus}}
+          inputProps={{}}
           checked={this.props.value}
           onChange={(evt: React.ChangeEvent<HTMLInputElement>) => this.props.onValueChange(evt.target.checked)}
           classes={{root: this.props.classes.checkboxRoot}}
