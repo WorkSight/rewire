@@ -141,7 +141,7 @@ class AutoComplete<T> extends React.Component<AutoCompleteProps<T>, any> {
         disabled={disabled}
         autoFocus={autoFocus}
         onFocus={this.handleFocus}
-        inputProps={{className: classes.nativeInput, style: {textAlign: align || 'left'}}}
+        inputProps={{spellCheck: false, className: classes.nativeInput, style: {textAlign: align || 'left'}}}
         InputProps={{startAdornment: startAdornment, endAdornment: endAdornment, classes: {root: classes.inputRoot, input: inputClassName, formControl: inputFormControlClassName}}}
         InputLabelProps={{shrink: true, classes: {root: classes.inputLabelRoot, outlined: classes.inputLabelRootShrink}}}
         FormHelperTextProps={{classes: {root: classes.helperTextRoot, contained: classes.helperTextContained}}}
