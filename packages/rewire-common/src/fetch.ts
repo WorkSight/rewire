@@ -79,12 +79,12 @@ export class Fetch {
     };
     if (this.server.cors) {
       opts.mode    = 'cors';
-      Object.assign(opts.headers, {
-        'Accept': '*/*',
-        'Access-Control-Allow-Origin': 'http://localhost:3000',
-        'Access-Control-Request-Method': opts.method || 'get',
-        'Access-Control-Request-Headers' : 'authorization,content-type'
-      });
+      // Object.assign(opts.headers, {
+      //   'Accept': '*/*',
+      //   'Access-Control-Allow-Origin': 'http://localhost:3000',
+      //   'Access-Control-Request-Method': opts.method || 'get',
+      //   'Access-Control-Request-Headers' : 'authorization,content-type'
+      // });
     }
     if (isBlob) return this.blob(await Promise.race([timeout(ms), fetch(url, opts)]));
     return this.json(await Promise.race([timeout(ms), fetch(url, opts)]));

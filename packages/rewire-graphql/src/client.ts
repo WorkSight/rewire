@@ -13,6 +13,7 @@ import { ObservableCache } from './ObservableCache';
 
 class Client implements IClient {
   url          : string; // Graphql API URL
+  bearer?      : string; // bearer token
   fetchOptions : object | (() => object); // Options for fetch call
   cache        : ICache; // Cache object
   running      : {[idx: string]: Promise<IQueryResponse>} = {};
@@ -26,6 +27,7 @@ class Client implements IClient {
       throw new Error('Please provide a URL for your GraphQL API');
     }
 
+    this.bearer       = opts.bearer;
     this.url          = opts.url;
     this.fetchOptions = opts.fetchOptions || {};
     this.cache        = opts.cache || new ObservableCache();
@@ -57,17 +59,13 @@ class Client implements IClient {
           body: body,
           headers: {
             'Content-Type': 'application/json',
-            'Accept': '*/*',
-            'Access-Control-Allow-Origin': 'http://localhost:3000',
-            'Access-Control-Request-Method': 'post',
-            'Access-Control-Request-Headers' : 'authorization, content-type',
             ...headers
           },
           method: 'POST',
           mode: 'cors',
-          credentials: 'include',
           ...fetchOptions,
         };
+        if (this.bearer) reqInit.headers.Authorization = 'Bearer ' + this.bearer;
         let res = await fetch(this.url, reqInit);
         let response = await res.json();
         if (res.ok) {

@@ -20,6 +20,7 @@ export interface IMutation extends IQuery { }
 
 export interface IClientOptions {
   url          : string;
+  bearer?      : string;
   fetchOptions?: object | (() => object);
   cache?       : ICache;
 }
@@ -32,6 +33,7 @@ export interface IQueryResponse {
 
 export interface IClient {
   cache: ICache;
+  bearer: string;
 
   executeQuery   (queryObject: IQuery, headers?: object, skipCache?: boolean): Promise<IQueryResponse>;
   query          (query: GQL, variables?: object, headers?: object): Promise<IQueryResponse>;

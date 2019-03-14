@@ -1,7 +1,7 @@
-import gql       from 'graphql-tag';
-import { watch } from 'rewire-core/observable';
-import create    from 'rewire-graphql/client';
-const client = create('https://zr859vll97.lp.gql.zone/graphql');
+import gql                from 'graphql-tag';
+import { watch }          from 'rewire-core';
+import {client as create} from 'rewire-graphql';
+const client = create('http://localhost:3010/graphql');
 
 const query = gql`
   query($size: Int!) {
@@ -32,52 +32,44 @@ const mutation = gql`
     }
   }`;
 
-const query2 = gql`
-{
-  search(options: {filter: {eq: {name: "sandy"}}}, size: 3) {
-    took
-    count
-    results {
-      ... on OccupationCode {
-        _type
-        id
-        employee {
-            id
-            name
-        }
+const employees = gql`
+  query q {
+    employees {
+      data {
         name
         code
       }
     }
   }
-}
 `;
 
 async function run() {
-  let r2: any = client.query(query, {size: 2});
-  r2 = await client.query(query, {size: 2});
-  let r3: any = await client.query(query2, {size: 2});
-  console.log(await r2);
-  console.log();
-  console.log(await [
-    client.query(query, {size: 2}),
-    client.query(query, {size: 2}),
-    client.query(query2),
-    client.mutation(mutation, {text: 'booga'})
-  ]);
-  // let r  = client.executeQuery({query, variables: {size: 2}});
-  let r = await client.executeMutation({query: mutation, variables: {text: 'todo'}});
-  // let firstResult: any = result;
+  client.bearer = '21a3f18381323e5739ac79b6fc6ad426329b7becf1a775f5';
+  let r2: any = await client.query(employees);
   console.log(r2);
-  watch(() => r2.data.search.results[0].employee.name, () => console.log('changed'));
-  // result = await client.executeQuery({query, variables: {size: 1}});
-  // result = await client.executeQuery({query: query2});
-  // result = await client.executeQuery({query: query2});
-  setTimeout(() => {
-    console.log(r2.data.search.results[1].employee === r3.data.search.results[0].employee);
-    r3.data.search.results[1].employee.name = 'booger nose';
-  }, 5000);
-  // console.log(result);
+  // r2 = await client.query(query, {size: 2});
+  // let r3: any = await client.query(query2, {size: 2});
+  // console.log(await r2);
+  // console.log();
+  // console.log(await [
+  //   client.query(query, {size: 2}),
+  //   client.query(query, {size: 2}),
+  //   client.query(query2),
+  //   client.mutation(mutation, {text: 'booga'})
+  // ]);
+  // // let r  = client.executeQuery({query, variables: {size: 2}});
+  // let r = await client.executeMutation({query: mutation, variables: {text: 'todo'}}, {});
+  // // let firstResult: any = result;
+  // console.log(r2);
+  // watch(() => r2.data.search.results[0].employee.name, () => console.log('changed'));
+  // // result = await client.executeQuery({query, variables: {size: 1}});
+  // // result = await client.executeQuery({query: query2});
+  // // result = await client.executeQuery({query: query2});
+  // setTimeout(() => {
+  //   console.log(r2.data.search.results[1].employee === r3.data.search.results[0].employee);
+  //   r3.data.search.results[1].employee.name = 'booger nose';
+  // }, 5000);
+  // // console.log(result);
 }
 
-run();
+// run();
