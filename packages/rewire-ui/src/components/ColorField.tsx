@@ -1,5 +1,5 @@
 import * as React                      from 'react';
-import * as ColorPicker                from 'rc-color-picker';
+import ColorPickerDialog, {IColor}     from './ColorPickerDialog';
 import classNames                      from 'classnames';
 import {TextVariant}                   from './editors';
 import RootRef                         from '@material-ui/core/RootRef';
@@ -8,7 +8,6 @@ import IconButton                      from '@material-ui/core/IconButton';
 import FormControl                     from '@material-ui/core/FormControl';
 import {Theme}                         from '@material-ui/core/styles';
 import {withStyles, WithStyle}         from './styles';
-import 'rc-color-picker/assets/index.css';
 
 const styles = (theme: Theme) => ({
   formControlRoot: {
@@ -27,37 +26,27 @@ const styles = (theme: Theme) => ({
     flex: 1,
   },
   colorPickerTrigger: {
-    width: '1.5em',
-    height: '1.5em',
+    width: '2.5em',
+    height: '1.75em',
     fontSize: '1em',
-    marginTop: '1.5em',
-    padding: '2px',
+    marginTop: '1.3em',
     border: '1px solid #999',
-    display: 'inline-block',
+    display: 'flex',
     borderRadius: '2px',
+    padding: '2px',
+    boxShadow: '0 0 0 2px #fff inset',
     '&.disabled': {
       cursor: 'default',
     }
   },
   colorPickerTriggerOutlined: {
-    marginTop: '1em',
-  },
-  colorPickerPanelContainer: {
-    position: 'fixed',
-    zIndex: '1300',
-    top: 0,
-    left: 0,
-    right: 0,
-    bottom: 0,
-  },
-  colorPickerPanelContainerClosed: {
-    visibility: 'hidden',
+    marginTop: '0.85em',
   },
   colorPickerTriggerRipple: {
-    top: '-30%',
+    top: '-20%',
     left: '-30%',
     width: '160%',
-    height: '160%',
+    height: '140%',
   },
 });
 
@@ -75,6 +64,7 @@ export interface IColorFieldProps {
 
 export interface IColorFieldState {
   open: boolean;
+  color?: string;
 }
 
 type ColorFieldPropsStyled = WithStyle<ReturnType<typeof styles>, IColorFieldProps>;
@@ -82,19 +72,19 @@ type ColorFieldPropsStyled = WithStyle<ReturnType<typeof styles>, IColorFieldPro
 class ColorField extends React.Component<ColorFieldPropsStyled, IColorFieldState> {
   state: IColorFieldState;
   inputLabelRef: React.RefObject<HTMLElement>;
-  colorPickerRef: React.RefObject<HTMLElement>;
+  colorPickerTriggerRef: React.RefObject<HTMLElement>;
   colorPickerPanelContainerRef: React.RefObject<HTMLDivElement>;
   triggerElementActions: any;
-  exitingWithoutSave: boolean;
 
   constructor(props: ColorFieldPropsStyled) {
     super(props);
 
     this.state = {
       open: false,
+      color: props.value,
     };
-    this.exitingWithoutSave           = false;
-    this.colorPickerRef               = React.createRef();
+
+    this.colorPickerTriggerRef        = React.createRef();
     this.colorPickerPanelContainerRef = React.createRef();
   }
 
@@ -115,17 +105,22 @@ class ColorField extends React.Component<ColorFieldPropsStyled, IColorFieldState
     );
   }
 
+  handleChangeComplete = (color: IColor, evt: React.ChangeEvent<any>) => {
+    this.setState({color: color.hex});
+  }
+
   handleOpen = () => {
     this.setState({open: true});
   }
 
-  handleClose = (colors: any) => {
+  handleClose = (evt: object, reason: 'escapeKeyDown' | 'backdropClick') => {
+    this.focusColorPickerTrigger();
     this.setState({open: false}, () => {
-      if (this.exitingWithoutSave) {
-        this.exitingWithoutSave = false;
-        this.forceUpdate();
+      if (reason === 'escapeKeyDown') {
+        this.setState({color: this.props.value});
       } else {
-        this.props.onValueChange(colors.color);
+        // backdrop click
+        this.props.onValueChange(this.state.color);
       }
     });
   }
@@ -133,19 +128,19 @@ class ColorField extends React.Component<ColorFieldPropsStyled, IColorFieldState
   handleKeyDown = (evt: React.KeyboardEvent<any>) => {
     switch (evt.key) {
       case 'Enter':
+      if (!this.state.open) break;
         if (evt.repeat) break;
-        this.focusColorPickerTrigger();
+        this.handleClose(evt, 'backdropClick');
       case ' ':
         if (evt.repeat) break;
         if (this.state.open) {
-          this.focusColorPickerTrigger();
+          this.handleClose(evt, 'backdropClick');
         } else {
-          this.getTriggerElement().click();
+          this.handleOpen();
         }
         break;
       case 'Escape':
         if (evt.repeat) break;
-        this.exitingWithoutSave = true;
         this.focusColorPickerTrigger();
         break;
       default:
@@ -172,54 +167,52 @@ class ColorField extends React.Component<ColorFieldPropsStyled, IColorFieldState
     this.triggerElementActions && this.triggerElementActions.focusVisible();
   }
 
-  getTriggerElement = (): HTMLButtonElement | null => {
-    return this.colorPickerRef.current && (this.colorPickerRef.current.querySelector('.rc-color-picker-trigger') as HTMLButtonElement);
+  getTriggerElement = (): HTMLElement | null => {
+    return this.colorPickerTriggerRef.current;
   }
 
-  getPickerContainerElement = (): HTMLDivElement | null => {
+  getPickerContainerElement = (): HTMLElement | null => {
     return this.colorPickerPanelContainerRef.current;
   }
 
-  renderColorPickerTrigger(value: string): JSX.Element {
-    const {classes, disabled, autoFocus, variant} = this.props;
+  renderColorPickerTrigger(): JSX.Element {
+    const {classes, disabled, autoFocus, variant, value} = this.props;
 
     return (
-      <IconButton
-        className={classNames('rc-color-picker-trigger', classes.colorPickerTrigger, variant === 'outlined' ? classes.colorPickerTriggerOutlined : '', disabled ? 'disabled' : '')}
-        tabIndex={disabled ? undefined : 0}
-        style={{backgroundColor: value}}
-        action={(actions: any) => {
-          this.triggerElementActions = actions;
-          autoFocus && actions.focusVisible();
-        }}
-        TouchRippleProps={{classes: {root: classes.colorPickerTriggerRipple}}}
-      >
-      </IconButton>
+      <RootRef rootRef={this.colorPickerTriggerRef}>
+        <IconButton
+          className={classNames('rc-color-picker-trigger', variant === 'outlined' ? classes.colorPickerTriggerOutlined : '')}
+          classes={{root: classes.colorPickerTrigger}}
+          disabled={disabled}
+          style={{backgroundColor: value, borderColor: disabled ? 'rgba(0, 0, 0, 0.26)' : ''}}
+          action={(actions: any) => {
+            this.triggerElementActions = actions;
+            autoFocus && actions.focusVisible();
+          }}
+          onClick={!disabled ? this.handleOpen : undefined}
+          TouchRippleProps={{classes: {root: classes.colorPickerTriggerRipple}}}
+        >
+        </IconButton>
+      </RootRef>
     );
   }
 
   renderColorPicker(value: string): JSX.Element {
-    const {classes} = this.props;
+    const {className} = this.props;
 
     return (
-      < >
-      <div className={classNames(classes.colorPickerPanelContainer, !this.state.open ? classes.colorPickerPanelContainerClosed : '')} ref={this.colorPickerPanelContainerRef}></div>
-      {this.props.disabled
-        ? this.renderColorPickerTrigger(value)
-        : <RootRef rootRef={this.colorPickerRef}>
-            <ColorPicker
-              className={this.props.className}
-              color={value}
-              enableAlpha={false}
-              getCalendarContainer={this.getPickerContainerElement}
-              onOpen={this.handleOpen}
-              onClose={this.handleClose}
-            >
-              {this.renderColorPickerTrigger(value)}
-            </ColorPicker>
-          </RootRef>
-      }
-      </>
+      <div ref={this.colorPickerPanelContainerRef}>
+        <ColorPickerDialog
+          className={className}
+          color={value}
+          disableAlpha={true}
+          isOpen={this.state.open}
+          anchorEl={this.getPickerContainerElement}
+          onClose={this.handleClose}
+          onChangeComplete={this.handleChangeComplete}
+        />
+        {this.renderColorPickerTrigger()}
+      </div>
     );
   }
 
