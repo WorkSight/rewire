@@ -11,7 +11,7 @@ import CheckField      from './CheckField';
 import SwitchField     from './SwitchField';
 import TimeInputField  from './TimeInputField';
 import AvatarField     from './AvatarField';
-import ColorField      from './ColorField';
+import ColorField      from './ColorField2';
 import MaskField       from './MaskField';
 import {utc}           from 'rewire-common';
 import * as is         from 'is';

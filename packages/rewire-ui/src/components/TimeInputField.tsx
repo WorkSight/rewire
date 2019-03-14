@@ -272,9 +272,10 @@ class TimeInputField extends React.Component<TimeFieldProps, ITimeState> {
         onChange={this.handleChange}
         onBlur={this.handleBlur}
         onFocus={this.handleFocus}
+        autoFocus={autoFocus}
         placeholder={placeholder}
         variant={variant}
-        inputProps={{autoFocus: autoFocus, className: classes.nativeInput, style: {textAlign: align || 'left'}}}
+        inputProps={{spellCheck: false, className: classes.nativeInput, style: {textAlign: align || 'left'}}}
         InputProps={{startAdornment: startAdornment, endAdornment: endAdornment, classes: {root: classes.inputRoot, input: inputClassName, formControl: inputFormControlClassName}}}
         InputLabelProps={{shrink: true, classes: {root: classes.inputLabelRoot, outlined: classes.inputLabelRootShrink}}}
         FormHelperTextProps={{classes: {root: classes.helperTextRoot, contained: classes.helperTextContained}}}
