@@ -33,7 +33,7 @@ export interface IQueryResponse {
 
 export interface IClient {
   cache: ICache;
-  bearer: string;
+  bearer?: string;
 
   executeQuery   (queryObject: IQuery, headers?: object, skipCache?: boolean): Promise<IQueryResponse>;
   query          (query: GQL, variables?: object, headers?: object): Promise<IQueryResponse>;

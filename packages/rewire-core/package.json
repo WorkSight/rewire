@@ -1,6 +1,6 @@
 {
   "name": "rewire-core",
-  "version": "1.0.0-beta.176",
+  "version": "1.0.0-beta.177",
   "description": "A simple library for developing react applications using reactive state and proxies",
   "main": "./es6-lib.js",
   "typings": "./src/index.ts",
