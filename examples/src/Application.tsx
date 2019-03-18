@@ -721,8 +721,8 @@ const _Home = (props: any) => <Observe render={() => (
         </DialogView>
         <div style={{overflow: 'auto', padding: 10, display: 'flex', flexDirection: 'column', alignItems: 'center', justifyContent: 'center'}}>
           <div style={{display: 'flex', alignItems: 'center', justifyContent: 'center'}}>
-            <Button style={{margin: '0px 15px 10px 0px'}} variant='contained' onClick={() => grid.selectCellByPos(0, 4)}>Select Cell</Button>
-            <Button style={{margin: '0px 15px 10px 0px'}} variant='contained' onClick={() => grid.selectCellsByRange(1, 4, 3, 5)}>Select Cells</Button>
+            <Button style={{margin: '0px 15px 10px 0px'}} variant='contained' onClick={() => setTimeout(() => grid.selectCellByPos(0, 4), 0)}>Select Cell</Button>
+            <Button style={{margin: '0px 15px 10px 0px'}} variant='contained' onClick={() => setTimeout(() => grid.selectCellsByRange(1, 4, 3, 5), 0)}>Select Cells</Button>
             <Button style={{margin: '0px 15px 10px 0px'}} variant='contained' onClick={() => {
               grid.addRow({id: 'newRow-' + Math.random() * 2000, data: {column2: 'RC 2-1', column3: 'RC 3-1'}});
               employeesGrid1.addRow({id: 'newRow-' + Math.random() * 2000, data: {name: 'New Employee', email: 'employeeEmail@test.com'}});
@@ -742,20 +742,21 @@ const _Home = (props: any) => <Observe render={() => (
             </Button>
           </div>
           <div style={{display: 'flex', alignItems: 'center', justifyContent: 'center'}}>
+            <Observe render={() => (<Button style={{margin: '0px 15px 10px 0px'}} variant='contained' onClick={() => { grid.column('column1')!.visible = !grid.column('column1')!.visible; }}> Toggle Column</Button>)} />
             <Observe render={() => (<Button style={{margin: '0px 15px 10px 0px'}} variant='contained' disabled={!grid.changed} onClick={() => grid.revert()}>Enabled if has Changes. Reverts Changes</Button>)} />
             <Observe render={() => (<Button style={{margin: '0px 15px 10px 0px'}} variant='contained' disabled={!grid.inError}>Enabled if has Errors</Button>)} />
             <Observe render={() => (<Button style={{margin: '0px 15px 10px 0px'}} variant='contained' onClick={() => console.log(grid.get())}> Save All</Button>)} />
             <Observe render={() => (<Button style={{margin: '0px 0px 10px 0px'}} variant='contained' onClick={() => console.log(grid.getChanges())}> Save Changes</Button>)} />
           </div>
           <Paper style={{padding: 20, width: '80%', display: 'flex', flexDirection: 'column', alignItems: 'center', justifyContent: 'center', marginBottom: '20px'}}>
-            <Observe render={() => (<Grid grid={grid} gridFontSizes={{header: '0.9rem', body: '0.85rem', groupRow: '0.8rem'}} style={{height: '650px'}} />)} />
+            <Observe render={() => (<Grid grid={grid} gridFontSizes={{header: '0.9rem', body: '0.85rem', groupRow: '0.8rem'}} style={{height: '650px'}} onClick={(evt: React.MouseEvent<any>) => { employeesGrid1.clearSelection(); employeesGrid2.clearSelection(); }} />)} />
           </Paper>
           <Paper style={{padding: 20, width: '80%', display: 'flex', flexDirection: 'column', alignItems: 'center', justifyContent: 'center'}}>
             <div style={{display: 'flex', marginBottom: '10px'}}>
               <Button onClick={() => mode.gridMode = 'employees1'} variant='outlined'>Grid 1</Button>
               <Button onClick={() => mode.gridMode = 'employees2'} variant='outlined'>Grid 2</Button>
             </div>
-            <Grid key={mode.gridMode} grid={mode.gridMode === 'employees1' ? employeesGrid1 : employeesGrid2} gridFontSizes={{header: '0.95rem', body: '0.9rem', groupRow: '0.8rem'}} style={{height: '400px'}} />
+            <Grid key={mode.gridMode} grid={mode.gridMode === 'employees1' ? employeesGrid1 : employeesGrid2} gridFontSizes={{header: '0.95rem', body: '0.9rem', groupRow: '0.8rem'}} style={{height: '400px'}} onClick={(evt: React.MouseEvent<any>) => { grid.clearSelection(); mode.gridMode === 'employees1' ? employeesGrid2.clearSelection() : employeesGrid1.clearSelection(); }} />
           </Paper>
         </div>
       </div>
