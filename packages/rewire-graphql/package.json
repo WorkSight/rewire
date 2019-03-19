@@ -22,12 +22,8 @@
   "homepage": "https://github.com/worksight/rewire",
   "dependencies": {
     "is": "^3.3.0",
-<<<<<<< HEAD
     "rewire-core": "^1.0.0-beta.174",
     "subscriptions-transport-ws": "^0.9.16",
     "most": "^1.7.3"
-=======
-    "rewire-core": "^1.0.0-beta.177"
->>>>>>> 3797621975217136d7bd877ea5faee75e7dbeceb
   }
 }
