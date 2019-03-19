@@ -84,6 +84,7 @@ export interface IGrid extends IRows, IDisposable {
   startCell?                : ICell;
   changed                   : boolean;
   inError                   : boolean;
+  clearSelectionOnBlur?     : boolean;
   contentElement?           : HTMLDivElement;
   rowKeybindPermissions     : IGridRowKeybindPermissions;
   staticKeybinds            : IGridStaticKeybinds;
@@ -167,13 +168,14 @@ export interface IGrid extends IRows, IDisposable {
 }
 
 export interface IGridOptions {
-  enabled?             : boolean;
-  readOnly?            : boolean;
-  verticalAlign?       : VerticalAlignment;
-  isDraggable?         : boolean;
-  multiSelect?         : boolean;
-  allowMergeColumns?   : boolean;
-  groupBy?             : string[];
+  enabled?              : boolean;
+  readOnly?             : boolean;
+  verticalAlign?        : VerticalAlignment;
+  isDraggable?          : boolean;
+  multiSelect?          : boolean;
+  allowMergeColumns?    : boolean;
+  clearSelectionOnBlur? : boolean;
+  groupBy?              : string[];
   rowKeybindPermissions?: IGridRowKeybindPermissions;
   variableKeybinds?     : {[keybind: string]: GridKeybindAction};
 }

@@ -35,7 +35,11 @@ export interface IQueryResponse {
 }
 
 export interface IClient {
+<<<<<<< HEAD
   cache:   ICache;
+=======
+  cache: ICache;
+>>>>>>> 3797621975217136d7bd877ea5faee75e7dbeceb
   bearer?: string;
 
   executeQuery   (queryObject: IQuery, headers?: object, skipCache?: boolean): Promise<IQueryResponse>;

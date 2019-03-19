@@ -59,6 +59,8 @@ export interface IGridProps {
   style?: React.CSSProperties;
   gridColors?: IGridColors;
   gridFontSizes?: IGridFontSizes;
+
+  onClick?(evt: React.MouseEvent<any>): void;
 }
 
 type BodyType = {grid: IGrid, columns: IColumn[], scrollY: DataSignal<number>, rowElements?: {[s: string]: HTMLTableRowElement}, fixedRowElements?: {[s: string]: HTMLTableRowElement}, loadMoreRows?: (args: {start: number, end: number}) => Promise<any[]> };
@@ -67,12 +69,14 @@ class Body extends React.PureComponent<BodyType, {offset: number}> {
     super(props);
   }
 
-  render() {
-    let visibleColumns = this.props.columns.reduce((prev, current) => prev = prev + (current.visible ? 1 : 0), 0);
+  get visibleColumns(): number {
+    return  this.props.columns.reduce((prev, current) => prev = prev + (current.visible ? 1 : 0), 0);
+  }
 
+  render() {
     return (
       <tbody role='rowgroup'>
-        <Observe render={() => this.props.grid.rows.map((row, index) => <Row key={row.id} rowElements={this.props.rowElements} fixedRowElements={this.props.fixedRowElements} columns={this.props.columns} Cell={Cell} index={index} visibleColumns={visibleColumns} className={((index % 2) === 1) ? 'alt' : ''} row={row} />)} />
+        <Observe render={() => this.props.grid.rows.map((row, index) => <Row key={row.id} rowElements={this.props.rowElements} fixedRowElements={this.props.fixedRowElements} columns={this.props.columns} Cell={Cell} index={index} visibleColumns={this.visibleColumns} className={((index % 2) === 1) ? 'alt' : ''} row={row} />)} />
       </tbody>
     );
   }
@@ -80,13 +84,15 @@ class Body extends React.PureComponent<BodyType, {offset: number}> {
 
 class VirtualBody extends React.PureComponent<BodyType, {offset: number, loading: boolean}> {
   viewportCount = 0;
-  visibleColumns = 0;
 
   constructor(props: BodyType) {
     super(props);
-    this.state          = {offset: 0, loading: false};
-    this.onScroll       = debounce(this.onScroll, 25, {leading: false});
-    this.visibleColumns = this.props.columns.reduce((prev, current) => prev = prev + (current.visible ? 1 : 0), 0);
+    this.state    = {offset: 0, loading: false};
+    this.onScroll = debounce(this.onScroll, 25, {leading: false});
+  }
+
+  get visibleColumns(): number {
+    return this.props.columns.reduce((prev, current) => prev = prev + (current.visible ? 1 : 0), 0);
   }
 
   async loadMoreRows(offset: number) {
@@ -344,14 +350,6 @@ const GridInternal = withStyles(styles, class extends React.PureComponent<GridPr
 
   constructor(props: GridProps) {
     super(props);
-    // this.addShortcut({shortcutKey:'ctrl+c',  preventDefault:false, action:this.props.controller.copy.bind(this.props.controller)});
-    // this.addShortcut({shortcutKey:'ctrl+v',  preventDefault:false, action:this.props.controller.paste.bind(this.props.controller)});
-    // this.addShortcut({shortcutKey:'home',  preventDefault:false, action:() => {
-    //   this.props.controller.selectCell(this.rows[0].cells[0]);
-    // }});
-    // this.addShortcut({shortcutKey:'end',  preventDefault:false, action:() => {
-    //   this.props.controller.selectCell(this.rows[this.rows.length - 1].cells[0]);
-    // }});
     this.grid = props.grid;
     this.grid.originalDataRowsByPosition = this.grid.dataRowsByPosition.slice();
     this._rowElements      = {};
@@ -380,7 +378,19 @@ const GridInternal = withStyles(styles, class extends React.PureComponent<GridPr
     });
   }
 
-  handleMouseUp = (evt: React.MouseEvent<any>) => {
+  get visibleFixedColumnCount(): number {
+    return this.props.grid.fixedColumns.reduce((prev, current) => prev = prev + (current.visible ? 1 : 0), 0);
+  }
+
+  get visibleStandardColumnCount(): number {
+    return this.props.grid.standardColumns.reduce((prev, current) => prev = prev + (current.visible ? 1 : 0), 0);
+  }
+
+  handleExternalClick = (evt: React.MouseEvent) => {
+    this.grid.clearSelection();
+  }
+
+  handleMouseUp = (evt: React.MouseEvent) => {
     this.grid.isMouseDown = false;
   }
 
@@ -446,8 +456,18 @@ const GridInternal = withStyles(styles, class extends React.PureComponent<GridPr
     evt.stopPropagation();
   }
 
+  handleClick = (evt: React.MouseEvent<any>) => {
+    this.props.onClick && this.props.onClick(evt);
+
+    evt.stopPropagation();
+    evt.nativeEvent.stopImmediatePropagation();
+  }
+
   componentDidMount() {
     this.updateForScrollbars();
+    if (this.grid.clearSelectionOnBlur) {
+      document.addEventListener('click', this.handleExternalClick);
+    }
     if (this.grid.multiSelect) {
       document.addEventListener('mouseup', this.handleMouseUp);
     }
@@ -459,6 +479,9 @@ const GridInternal = withStyles(styles, class extends React.PureComponent<GridPr
   }
 
   componentWillUnmount() {
+    if (this.grid.clearSelectionOnBlur) {
+      document.removeEventListener('click', this.handleExternalClick);
+    }
     if (this.grid.multiSelect) {
       this.grid.isMouseDown = false;
       document.removeEventListener('mouseup', this.handleMouseUp);
@@ -528,7 +551,7 @@ const GridInternal = withStyles(styles, class extends React.PureComponent<GridPr
           {this.renderColumnGroups(true)}
           <thead role='rowgroup'>
             <Observe render={() => (
-              this.props.grid.fixedRows.map((row, index) => <Row key={row.id} Cell={Column} columns={this.props.grid.fixedColumns} index={index} visibleColumns={this.props.grid.fixedColumns.length} row={row} />)
+              this.props.grid.fixedRows.map((row, index) => <Row key={row.id} Cell={Column} columns={this.props.grid.fixedColumns} index={index} visibleColumns={this.visibleFixedColumnCount} row={row} />)
             )} />
           </thead>
         </table>
@@ -564,13 +587,12 @@ const GridInternal = withStyles(styles, class extends React.PureComponent<GridPr
       return null;
     }
 
-    let visibleColumns = this.props.grid.fixedColumns.reduce((prev, current) => prev = prev + (current.visible ? 1 : 0), 0);
     return (
       <div className={classNames('left-labels', this.props.classes.leftLabels)} ref={this.setLeftLabelsRef} onWheel={this.handleFixedWheel} onKeyDown={this.handleFixedKeyDown}>
         <table role='grid' style={{width: this.props.grid.fixedWidth, marginBottom: '17px'}}>
           {this.renderColumnGroups(true)}
           <tbody role='rowgroup'>
-            {this.props.grid.rows.map((row, index) => <Row key={row.id} row={row} rowElements={this._rowElements} fixedRowElements={this._fixedRowElements} Cell={Cell} columns={this.props.grid.fixedColumns} isFixedColumnsRow={true} index={index} visibleColumns={visibleColumns} className={((index % 2) === 1) ? 'alt' : ''} />)}
+            {this.props.grid.rows.map((row, index) => <Row key={row.id} row={row} rowElements={this._rowElements} fixedRowElements={this._fixedRowElements} Cell={Cell} columns={this.props.grid.fixedColumns} isFixedColumnsRow={true} index={index} visibleColumns={this.visibleFixedColumnCount} className={((index % 2) === 1) ? 'alt' : ''} />)}
           </tbody>
         </table>
       </div>
@@ -587,7 +609,7 @@ const GridInternal = withStyles(styles, class extends React.PureComponent<GridPr
             {this.renderColumnGroups(false)}
             <thead role='rowgroup'>
               <Observe render={() => (
-                this.props.grid.fixedRows.map((row, index) => <Row key={row.id} Cell={Column} columns={this.props.grid.standardColumns} index={index} visibleColumns={this.props.grid.standardColumns.length} row={row} />)
+                this.props.grid.fixedRows.map((row, index) => <Row key={row.id} Cell={Column} columns={this.props.grid.standardColumns} index={index} visibleColumns={this.visibleStandardColumnCount} row={row} />)
               )} />
             </thead>
           </table>
@@ -631,7 +653,7 @@ const GridInternal = withStyles(styles, class extends React.PureComponent<GridPr
     const maxHeight = style && style.height !== undefined ? style.height : undefined;
 
     return (
-      <div className={classNames('ws-grid', className, classes.wsGrid)} style={{maxHeight: maxHeight, ...style}}>
+      <div className={classNames('ws-grid', className, classes.wsGrid)} style={{maxHeight: maxHeight, ...style}} onClick={this.handleClick}>
         {this.renderHeaders()}
         {this.renderData()}
       </div>

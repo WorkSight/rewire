@@ -72,6 +72,7 @@ class GridModel implements IGrid, IDisposable {
   multiSelect               : boolean;
   allowMergeColumns         : boolean;
   isMouseDown               : boolean;
+  clearSelectionOnBlur      : boolean;
   rowKeybindPermissions     : IGridRowKeybindPermissions;
   staticKeybinds            : IGridStaticKeybinds;
   variableKeybinds          : IGridVariableKeybinds;
@@ -104,6 +105,7 @@ class GridModel implements IGrid, IDisposable {
     this.isDraggable                = options && options.isDraggable !== undefined ? options.isDraggable : false;
     this.multiSelect                = options && options.multiSelect !== undefined ? options.multiSelect : false;
     this.allowMergeColumns          = options && options.allowMergeColumns !== undefined ? options.allowMergeColumns : false;
+    this.clearSelectionOnBlur       = options && options.clearSelectionOnBlur !== undefined ? options.clearSelectionOnBlur : true;
     this.clipboard                  = [];
     this.isMouseDown                = false;
     this.startCell                  = undefined;
@@ -1014,6 +1016,7 @@ class GridModel implements IGrid, IDisposable {
     let currentCells = this.selectedCells;
 
     if (currentCells.length <= 0 && cells.length <= 0) {
+      this.focusedCell && this.focusedCell.setFocus(false);
       return;
     }
     // let firstGroupRow = this.rows[0];
@@ -1068,8 +1071,9 @@ class GridModel implements IGrid, IDisposable {
     });
 
     if (this.selectedCells.length <= 0) {
+      this.focusedCell && this.focusedCell.setFocus(false);
       return;
-      }
+    }
 
     let cToFocus: ICell | undefined = cellToFocus ? cellToFocus : cellsToSelect[cellsToSelect.length - 1];
 
