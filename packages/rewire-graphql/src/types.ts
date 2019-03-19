@@ -1,3 +1,6 @@
+import { Stream }          from 'most';
+import { ExecutionResult } from 'graphql';
+
 export interface ICache {
   write        (queryId: string | undefined, data: any): any;
   read         (queryId: string): any;
@@ -32,11 +35,12 @@ export interface IQueryResponse {
 }
 
 export interface IClient {
-  cache: ICache;
-  bearer: string;
+  cache:   ICache;
+  bearer?: string;
 
   executeQuery   (queryObject: IQuery, headers?: object, skipCache?: boolean): Promise<IQueryResponse>;
   query          (query: GQL, variables?: object, headers?: object): Promise<IQueryResponse>;
   executeMutation(mutationObject: IMutation, headers?: object): Promise<IQueryResponse>;
   mutation       (query: GQL, variables: object, headers?: object): Promise<IQueryResponse>;
+  subscribe<T>   (query: GQL, variables?: object): Stream<ExecutionResult<T>>;
 }

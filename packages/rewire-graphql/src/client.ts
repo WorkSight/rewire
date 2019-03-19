@@ -7,16 +7,20 @@ import {
   IClient,
   isGQL,
   GQL
-}                          from './types';
-import { hashString }      from './hash';
-import { ObservableCache } from './ObservableCache';
+}                             from './types';
+import { hashString }         from './hash';
+import { ObservableCache }    from './ObservableCache';
+import { SubscriptionClient } from 'subscriptions-transport-ws';
+import { from, Stream }       from 'most';
+import { ExecutionResult }    from 'graphql';
 
 class Client implements IClient {
-  url          : string; // Graphql API URL
-  bearer?      : string; // bearer token
-  fetchOptions : object | (() => object); // Options for fetch call
-  cache        : ICache; // Cache object
-  running      : {[idx: string]: Promise<IQueryResponse>} = {};
+  url                : string; // Graphql API URL
+  bearer?            : string; // bearer token
+  fetchOptions       : object | (() => object); // Options for fetch call
+  cache              : ICache; // Cache object
+  running            : {[idx: string]: Promise<IQueryResponse>} = {};
+  subscriptionClient?: SubscriptionClient;
 
   constructor(opts?: IClientOptions) {
     if (!opts) {
@@ -83,6 +87,17 @@ class Client implements IClient {
     });
 
     return promise;
+  }
+
+  subscribe<T>(query: GQL, variables?: object): Stream<ExecutionResult<T>> {
+    if (!this.subscriptionClient) {
+      const url = new URL(this.url);
+      this.subscriptionClient = new SubscriptionClient(`ws://${url.host}/subscriptions`, {reconnect: true, lazy: true});
+    }
+
+    return from(this.subscriptionClient!.request(
+      {query: (isGQL(query)) ? query.loc.source.body : query, variables}
+    )) as Stream<ExecutionResult<T>>;
   }
 
   query(query: GQL, variables?: object, headers?: object, mutate: boolean = false): Promise<IQueryResponse> {

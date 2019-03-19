@@ -1,7 +1,7 @@
-import gql                from 'graphql-tag';
-import { watch }          from 'rewire-core';
-import {client as create} from 'rewire-graphql';
-const client = create('http://localhost:3010/graphql');
+import gql                   from 'graphql-tag';
+import { watch }            from 'rewire-core';
+import {client as create}   from 'rewire-graphql';
+const client = create('http://pgdev:30109/graphql');
 
 const query = gql`
   query($size: Int!) {
@@ -24,6 +24,14 @@ const query = gql`
   }
 `;
 
+export const subscriptionQuery = gql`
+subscription s {
+  timecardChanges(groupIds: "cc3246fa-85ef-4348-b85c-209ecc8e5d37", effective: "[2012,2018]") {
+    operation
+    timecard
+  }
+}`;
+
 const mutation = gql`
   mutation($text: String!) {
     addTodo(text: $text) {
@@ -44,7 +52,11 @@ const employees = gql`
 `;
 
 async function run() {
-  client.bearer = '21a3f18381323e5739ac79b6fc6ad426329b7becf1a775f5';
+  client.bearer = 'a6307af210f61eccc89e232d702da1eafedef6a9ebb78147';
+  const r = client.subscribe(subscriptionQuery);
+  r.observe((data) => {
+    console.log(data);
+  })
   let r2: any = await client.query(employees);
   console.log(r2);
   // r2 = await client.query(query, {size: 2});
@@ -72,4 +84,4 @@ async function run() {
   // // console.log(result);
 }
 
-// run();
+run();
