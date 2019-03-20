@@ -2,7 +2,7 @@ import * as is             from 'is';
 import { EditorType }      from 'rewire-ui';
 import { SearchFn, MapFn } from 'rewire-ui';
 import { IValidateFnData } from './Validator';
-import merge               from 'deepmerge';
+import * as merge          from 'deepmerge';
 export { EditorType };
 
 export interface IRows {

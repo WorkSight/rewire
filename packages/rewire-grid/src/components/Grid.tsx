@@ -12,7 +12,7 @@ import {
   DataSignal
 } from 'rewire-core';
 import {debounce}                from 'rewire-common';
-import Color                     from 'color';
+import * as Color                from 'color';
 import {MuiThemeProvider, Theme} from '@material-ui/core/styles';
 import {WithStyle, withStyles}   from 'rewire-ui';
 import createGridTheme           from './GridTheme';

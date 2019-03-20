@@ -32,7 +32,7 @@ import createRow, {RowModel}   from './RowModel';
 import {ColumnModel}           from './ColumnModel';
 import {CellModel}             from './CellModel';
 import * as is                 from 'is';
-import merge                   from 'deepmerge';
+import * as merge              from 'deepmerge';
 import {
   observable,
   computed,

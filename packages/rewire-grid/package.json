@@ -1,6 +1,6 @@
 {
   "name": "rewire-grid",
-  "version": "1.0.0-beta.177",
+  "version": "1.0.4",
   "description": "A lightweight reactive grid implementation built using rewire-core.",
   "repository": {
     "type": "git",
@@ -10,10 +10,15 @@
     "rewire",
     "grid"
   ],
-  "main": "./es6-lib.js",
+  "main": "./index.js",
   "typings": "./src/index.ts",
   "ts:main": "./src/index.ts",
   "author": "Sandy Place, Ryan Osler",
+  "alias": {
+    "rewire-core": "../rewire-core/dist",
+    "rewire-ui": "../rewire-ui/dist",
+    "rewire-common": "../rewire-common/dist"
+  },
   "license": "MIT",
   "bugs": {
     "url": "https://github.com/worksight/rewire/issues"
@@ -30,8 +35,13 @@
     "nanoid": "^2.0.1",
     "react": "^16.8.4",
     "resize-observer-polyfill": "^1.5.1",
-    "rewire-common": "^1.0.0-beta.177",
-    "rewire-core": "^1.0.0-beta.177",
-    "rewire-ui": "^1.0.0-beta.177"
+    "rewire-common": "^1.0.0",
+    "rewire-core": "^1.0.0",
+    "rewire-ui": "^1.0.0",
+    "sass": "^1.17.3"
+  },
+  "devDependencies": {
+    "@babel/core": "^7.0.0-0",
+    "@babel/preset-env": "^7.4.1"
   }
 }
