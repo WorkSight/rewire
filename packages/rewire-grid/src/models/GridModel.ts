@@ -17,13 +17,21 @@ import {
   cloneValue,
   IGridOptions,
   VerticalAlignment,
+  IGridRowKeybindPermissions,
+  IGridStaticKeybinds,
+  IGridVariableKeybinds,
   ICellDataMap,
   IRowOptions,
   IRowData,
-}                    from './GridTypes';
-import createRow     from './RowModel';
-import {ColumnModel} from './ColumnModel';
-import {CellModel}   from './CellModel';
+}                              from './GridTypes';
+import createRow               from './RowModel';
+import {ColumnModel}           from './ColumnModel';
+import {CellModel}             from './CellModel';
+import {
+  gridStaticKeybinds,
+  gridDefaultVariableKeybinds
+}                              from './GridKeybinds';
+import merge                   from 'deepmerge';
 import {
   observable,
   computed,
@@ -63,6 +71,10 @@ class GridModel implements IGrid, IDisposable {
   multiSelect               : boolean;
   allowMergeColumns         : boolean;
   isMouseDown               : boolean;
+  clearSelectionOnBlur      : boolean;
+  rowKeybindPermissions     : IGridRowKeybindPermissions;
+  staticKeybinds            : IGridStaticKeybinds;
+  variableKeybinds          : IGridVariableKeybinds;
   startCell?                : ICell;
   changed                   : boolean;
   inError                   : boolean;
@@ -92,17 +104,26 @@ class GridModel implements IGrid, IDisposable {
     this.isDraggable                = options && options.isDraggable !== undefined ? options.isDraggable : false;
     this.multiSelect                = options && options.multiSelect !== undefined ? options.multiSelect : false;
     this.allowMergeColumns          = options && options.allowMergeColumns !== undefined ? options.allowMergeColumns : false;
+    this.clearSelectionOnBlur       = options && options.clearSelectionOnBlur !== undefined ? options.clearSelectionOnBlur : true;
     this.clipboard                  = [];
     this.isMouseDown                = false;
     this.startCell                  = undefined;
     this.changed                    = false;
     this.inError                    = false;
+
+    this.rowKeybindPermissions = {
+      insertRow:    options && options.rowKeybindPermissions && options.rowKeybindPermissions.insertRow !== undefined ? options.rowKeybindPermissions.insertRow : true,
+      duplicateRow: options && options.rowKeybindPermissions && options.rowKeybindPermissions.duplicateRow !== undefined ? options.rowKeybindPermissions.duplicateRow : true,
+      deleteRow:    options && options.rowKeybindPermissions && options.rowKeybindPermissions.deleteRow !== undefined ? options.rowKeybindPermissions.deleteRow : true,
+    };
+
+    this.staticKeybinds   = Object.assign({}, gridStaticKeybinds);
+    this.variableKeybinds = merge(gridDefaultVariableKeybinds, options && options.variableKeybinds || {}) as IGridVariableKeybinds;
   }
 
   setContentElement(element: HTMLDivElement | undefined) {
     this._contentElement(element);
   }
-
   get contentElement(): HTMLDivElement | undefined {
     return this._contentElement();
   }
@@ -144,6 +165,11 @@ class GridModel implements IGrid, IDisposable {
       copiedCells.push(cell.clone(cell.row));
     });
     this.clipboard = copiedCells;
+  }
+
+  cut() {
+    this.copy();
+    this.selectedCells.forEach(cell => cell.clear());
   }
 
   get(): ICellDataMap[] {
@@ -483,6 +509,16 @@ class GridModel implements IGrid, IDisposable {
       selectedRow.mergeAllColumns();
     });
     this.changed = this.hasChanges();
+  }
+
+  clear() {
+    this.dataRowsByPosition.forEach((row: IRow) => {
+      row.clear();
+    });
+  }
+
+  clearSelectedCells() {
+    this.selectedCells.forEach(cell => cell.clear());
   }
 
   _removeGroupRow(iterator: IterableIterator<IRowIteratorResult>, id: string): void {
@@ -979,6 +1015,7 @@ class GridModel implements IGrid, IDisposable {
     let currentCells = this.selectedCells;
 
     if (currentCells.length <= 0 && cells.length <= 0) {
+      this.focusedCell && this.focusedCell.setFocus(false);
       return;
     }
     // let firstGroupRow = this.rows[0];
@@ -1033,8 +1070,9 @@ class GridModel implements IGrid, IDisposable {
     });
 
     if (this.selectedCells.length <= 0) {
+      this.focusedCell && this.focusedCell.setFocus(false);
       return;
-      }
+    }
 
     let cToFocus: ICell | undefined = cellToFocus ? cellToFocus : cellsToSelect[cellsToSelect.length - 1];
 

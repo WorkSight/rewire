@@ -369,7 +369,6 @@ const confirmationNoAction: ActionFn = () => {
   return true;
 };
 
-
 const yesAction: ActionFn = () => {
   confirmationModel.open();
   return false;

@@ -9,7 +9,6 @@ import * as React              from 'react';
 import * as is                 from 'is';
 import cc                      from 'classcat';
 import classNames              from 'classnames';
-// import {Observe, watch, observe, disposeOnUnmount} from 'rewire-core';
 import {Observe}               from 'rewire-core';
 import {withStyles, WithStyle} from 'rewire-ui';
 import {Theme}                 from '@material-ui/core/styles';
@@ -124,7 +123,6 @@ class Cell extends React.PureComponent<CellProps, {}> {
   row: IRow;
   column: IColumn;
   grid: IGrid;
-  keyForEdit?: string;
 
   constructor(props: CellProps) {
     super(props);
@@ -132,7 +130,6 @@ class Cell extends React.PureComponent<CellProps, {}> {
     this.row        = this.cell.row;
     this.column     = this.cell.column;
     this.grid       = this.cell.grid;
-    this.keyForEdit = undefined;
   }
 
   handleDoubleClick = (evt: React.MouseEvent<any>) => {
@@ -140,262 +137,21 @@ class Cell extends React.PureComponent<CellProps, {}> {
       return;
     }
 
-    this.keyForEdit = undefined;
+    this.cell.keyForEdit = undefined;
     this.grid.editCell(this.cell);
   }
 
   handleKeyDown = (evt: React.KeyboardEvent<any>) => {
-    if (evt.keyCode === 67) { evt.key = 'C'; }
-    if (evt.keyCode === 68) { evt.key = 'D'; }
-    if (evt.keyCode === 82) { evt.key = 'R'; }
-    if (evt.keyCode === 85) { evt.key = 'U'; }
-    if (evt.keyCode === 86) { evt.key = 'V'; }
-    if (evt.keyCode === 88) { evt.key = 'X'; }
-    switch (evt.key) {
-      case 'R':
-        if (this.cell.editing || !evt.ctrlKey) {
-          return;
-        }
-        this.grid.revertSelectedCells();
-        break;
-      case 'U':
-        if (this.cell.editing || !evt.ctrlKey) {
-          return;
-        }
-        if (evt.shiftKey) {
-          this.grid.revert();
-        } else {
-        this.grid.revertSelectedRows();
-        }
-        break;
-      case 'C':
-        if (this.cell.editing || !evt.ctrlKey) {
-          return;
-        }
-        this.grid.copy();
-        break;
-      case 'X':
-        if (this.cell.editing || !evt.ctrlKey) {
-          return;
-        }
-        this.grid.copy();
-        this.grid.selectedCells.forEach(cell => cell.clear());
-        break;
-      case 'V':
-        if (this.cell.editing || !evt.ctrlKey) {
-          return;
-        }
-        this.grid.paste();
-        break;
-      case 'Escape':
-        if (this.cell.editing) {
-          this.grid.editCell(undefined);
-          setTimeout(() => {
-            this.cell.setFocus();
-          }, 0);
-        } else {
-          this.grid.selectCells([]);
-          this.cell.setFocus(false);
-        }
-        break;
+    if (evt.key === 'Shift' || evt.key === 'Control' || evt.key === 'Alt') return;
 
-      case 'Insert':
-        if (this.cell.editing || !evt.ctrlKey) {
-          return;
+    if (evt.keyCode >= 65 && evt.keyCode <= 90) {
+      evt.key = evt.key.toUpperCase();
         }
-        // insert row
-        this.grid.insertRowAtSelection();
-        break;
+    if (evt.shiftKey) { evt.key = 'Shift+' + evt.key; }
+    if (evt.ctrlKey)  { evt.key = 'Ctrl+' + evt.key; }
+    if (evt.altKey)   { evt.key = 'Alt+' + evt.key; }
 
-      case 'D':
-        if (this.cell.editing || !evt.ctrlKey) {
-          return;
-        }
-        // duplcate row(s)
-        this.grid.duplicateSelectedRows();
-        break;
-
-      case 'Delete':
-        if (this.cell.editing) {
-          return;
-        }
-        if (evt.ctrlKey) {
-          // delete row(s)
-          this.grid.removeSelectedRows();
-          break;
-        }
-        this.grid.selectedCells.forEach(cell => cell.clear());
-        break;
-
-      case 'Enter':
-        if (this.column.type === 'multiselect') {
-          break;
-        }
-        this.grid.editCell(undefined);
-        this.cell.setFocus();
-        break;
-
-      case 'F2':
-        if (this.cell.enabled && !this.cell.readOnly && this.cell.editable && this.column.editor) {
-          this.keyForEdit = undefined;
-          this.grid.editCell(this.cell);
-        }
-        break;
-
-      case 'ArrowUp':
-        let upCell = this.grid.adjacentTopCell(this.cell, true);
-        if (!upCell) {
-          break;
-        }
-        if (!evt.shiftKey || !this.grid.multiSelect) {
-          this.grid.startCell = upCell;
-          this.grid.selectCells([upCell]);
-        } else {
-          // keyboard multi-select using shift key
-          if (!this.grid.startCell) {
-            this.grid.startCell = this.cell;
-          }
-          this.grid.selectCellsTo(upCell);
-        }
-        break;
-
-      case 'ArrowDown':
-        let downCell = this.grid.adjacentBottomCell(this.cell, true);
-        if (!downCell) {
-          break;
-        }
-        if (!evt.shiftKey || !this.grid.multiSelect) {
-          this.grid.startCell = downCell;
-          this.grid.selectCells([downCell]);
-        } else {
-          // keyboard multi-select using shift key
-          if (!this.grid.startCell) {
-            this.grid.startCell = this.cell;
-          }
-          this.grid.selectCellsTo(downCell);
-        }
-        break;
-
-      case 'ArrowLeft':
-        if (this.cell.editing) {
-          evt.stopPropagation();
-          if (this.column.type === 'select' || this.column.type === 'multiselect' || this.column.type === 'checked') {
-            evt.preventDefault();
-          }
-          return;
-        }
-
-        let prevCell: ICell | undefined;
-        if (!evt.shiftKey || !this.grid.multiSelect) {
-          prevCell = this.grid.previousCell(this.cell, true);
-          if (!prevCell) {
-            break;
-          }
-          this.grid.startCell = prevCell;
-          this.grid.selectCells([prevCell]);
-        } else {
-          // keyboard multi-select using shift key
-          prevCell = this.grid.adjacentLeftCell(this.cell, true);
-          if (!prevCell) {
-            break;
-          }
-          if (!this.grid.startCell) {
-            this.grid.startCell = this.cell;
-          }
-          this.grid.selectCellsTo(prevCell);
-        }
-        break;
-
-      case 'ArrowRight':
-        if (this.cell.editing) {
-          evt.stopPropagation();
-          if (this.column.type === 'select' || this.column.type === 'multiselect' || this.column.type === 'checked') {
-            evt.preventDefault();
-          }
-          return;
-        }
-
-        let nextCell: ICell | undefined;
-        if (!evt.shiftKey || !this.grid.multiSelect) {
-          nextCell = this.grid.nextCell(this.cell, true);
-          if (!nextCell) {
-            break;
-          }
-          this.grid.startCell = nextCell;
-          this.grid.selectCells([nextCell]);
-        } else {
-          // keyboard multi-select using shift key
-          nextCell = this.grid.adjacentRightCell(this.cell, true);
-          if (!nextCell) {
-            break;
-          }
-          if (!this.grid.startCell) {
-            this.grid.startCell = this.cell;
-          }
-          this.grid.selectCellsTo(nextCell);
-        }
-        break;
-
-      case 'Tab':
-        if (!evt.shiftKey) {
-          let nextCell = this.grid.nextCell(this.cell, true);
-          if (!nextCell) {
-            break;
-          }
-          this.grid.startCell = nextCell;
-          this.grid.selectCells([nextCell]);
-        } else {
-          let prevCell = this.grid.previousCell(this.cell, true);
-          if (!prevCell) {
-            break;
-          }
-          this.grid.startCell = prevCell;
-          this.grid.selectCells([prevCell]);
-        }
-        break;
-
-      case 'Home':
-        if (this.cell.editing) {
-          return;
-        }
-
-        if (!evt.ctrlKey) {
-          let firstCellInRow = this.grid.firstCellInRow(this.row, true);
-          if (firstCellInRow) {
-            this.grid.selectCells([firstCellInRow]);
-          }
-        } else {
-          let firstCell = this.grid.firstCell(true);
-          if (firstCell) {
-            this.grid.selectCells([firstCell]);
-          }
-        }
-        break;
-
-      case 'End':
-        if (this.cell.editing) {
-        return;
-        }
-
-        if (!evt.ctrlKey) {
-          let lastCellInRow = this.grid.lastCellInRow(this.row, true);
-          if (lastCellInRow) {
-            this.grid.selectCells([lastCellInRow]);
-          }
-        } else {
-          let lastCell = this.grid.lastCell(true);
-          if (lastCell) {
-            this.grid.selectCells([lastCell]);
-          }
-        }
-        break;
-
-      default:
-        return;
-    }
-
-    evt.preventDefault();
-    evt.stopPropagation();
+    this.cell.performKeybindAction(evt);
   }
 
   handleMouseDown = (evt: React.MouseEvent<any>) => {
@@ -441,12 +197,19 @@ class Cell extends React.PureComponent<CellProps, {}> {
     } else {
       this.grid.selectCells([this.cell]);
     }
-
-    evt.stopPropagation();
   }
 
   handleFocus = (evt: React.FocusEvent<any>) => {
     evt.stopPropagation();
+    if (!this.grid.focusedCell && this.grid.selectedCells.length <= 0) {
+      this.grid.selectCells([this.cell]);
+    } else {
+      this.grid.focusedCell = this.cell;
+    }
+  }
+
+  handleBlur = (evt: React.FocusEvent<any>) => {
+    this.grid.focusedCell = undefined;
   }
 
   handleKeyDownToEnterEditMode = (evt: React.KeyboardEvent<any>) => {
@@ -462,7 +225,7 @@ class Cell extends React.PureComponent<CellProps, {}> {
     // }
 
     if (this.column.type !== 'select' && this.column.type !== 'multiselect') {
-    this.keyForEdit       = evt.key;
+      this.cell.keyForEdit = evt.key;
     }
     this.grid.editCell(this.cell);
     if (!this.grid.editingCell) {
@@ -565,8 +328,8 @@ class Cell extends React.PureComponent<CellProps, {}> {
       let selectOnFocus         = true;
       let cursorPositionOnFocus = undefined;
       let value                 = cell.value;
-      if (this.keyForEdit) {
-        value            = this.keyForEdit;
+      if (this.cell.keyForEdit) {
+        value            = this.cell.keyForEdit;
         endOfTextOnFocus = true;
         selectOnFocus    = false;
         if (cellType === 'number') {
@@ -574,7 +337,7 @@ class Cell extends React.PureComponent<CellProps, {}> {
           cursorPositionOnFocus = 1;
         }
         if (cellType === 'auto-complete') {
-          additionalProps['initialInputValue'] = this.keyForEdit;
+          additionalProps['initialInputValue'] = this.cell.keyForEdit;
         }
       }
       let editorClasses = undefined;
@@ -582,7 +345,7 @@ class Cell extends React.PureComponent<CellProps, {}> {
         editorClasses = {inputRoot: this.props.classes.editorSelectInputRoot, select: this.props.classes.editorSelectSelect};
       } else if (cellType === 'checked') {
         editorClasses = {checkboxRoot: this.props.classes.editorCheckboxRoot};
-      } else if (cellType === 'text' || cellType === 'date' || cellType === 'email' || cellType === 'password' || cellType === 'time' || cellType === 'number' || cellType === 'phone' || cellType === 'auto-complete') {
+      } else if (cellType === 'text' || cellType === 'date' || cellType === 'email' || cellType === 'password' || cellType === 'time' || cellType === 'number' || cellType === 'phone' || cellType === 'auto-complete' || 'mask') {
         editorClasses = {formControlRoot: this.props.classes.editorFormControlRoot, inputRoot: this.props.classes.editorInputRoot};
       }
 
@@ -685,6 +448,7 @@ class Cell extends React.PureComponent<CellProps, {}> {
           colSpan={colSpan}
           rowSpan={rowSpan}
           onFocus={this.handleFocus}
+          onBlur={this.handleBlur}
           onKeyPress={this.handleKeyDownToEnterEditMode}
           onKeyDown={this.handleKeyDown}
           ref={this.setCellRef}

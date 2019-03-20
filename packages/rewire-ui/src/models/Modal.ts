@@ -1,15 +1,17 @@
-import {observable} from 'rewire-core';
+import {observable}  from 'rewire-core';
+import {ButtonProps} from '@material-ui/core/Button';
 
 export interface ActionOptions {
   type?    : 'submit';
   color?   : 'primary' | 'secondary';
   icon?    : string;
+  variant? : ButtonProps['variant'];
   disabled?: () => boolean;
 }
 
 const disabled         = () => false;
 export type ActionFn   = () => (Promise<boolean> | boolean);
-export type ActionType = {action: () => (Promise<void> | void), type?: 'submit', icon?: string, color?: 'primary' | 'secondary', disabled: () => boolean};
+export type ActionType = {action: () => (Promise<void> | void), type?: 'submit', icon?: string, color?: 'primary' | 'secondary', variant?: ButtonProps['variant'], disabled: () => boolean};
 
 export interface IModalState {
   open: boolean;

@@ -56,6 +56,12 @@ let styles = (theme: Theme) => ({
     margin: '0px',
     height: '1px',
   },
+  buttonRoot: {
+  },
+  buttonIcon: {
+  },
+  buttonLabel: {
+  },
 });
 
 export interface IDefaultActionRendererStyles {
@@ -66,7 +72,7 @@ export interface IDefaultActionRendererStyles {
 export type ActionRenderType = (props: {label: string, action: ActionType, isDisabled: boolean, variant?: ButtonProps['variant'], classes?: IDefaultActionRendererStyles}) => JSX.Element;
 export const DefaultActionRenderer: ActionRenderType = ({label, action, isDisabled, variant, classes}) => (
   <Observe render={() => (
-    <Button className={classes && classes.button} type={action.type} color={action.type ? 'primary' : action.color} variant={variant} disabled={isDisabled || action.disabled()} onClick={action.action}>
+    <Button className={classes && classes.root} type={action.type} color={action.type ? 'primary' : action.color} variant={action.variant || variant} disabled={isDisabled || action.disabled()} onClick={action.action}>
       {action.icon && <Icon className={classes && classes.icon} style={{marginRight: '8px'}}>{action.icon}</Icon>}
       <span className={classes && classes.label}>{label}</span>
     </Button>
@@ -89,6 +95,7 @@ export interface IDialogProps {
   transitionDuration?   : number;
   title?                : (dialog: Modal) => JSX.Element;
   maxWidth?             : 'xs' | 'sm' | 'md' | 'lg' | false;
+  buttonVariant?        : ButtonProps['variant'];
   ButtonRenderer?       : ActionRenderType;
 }
 
@@ -97,6 +104,9 @@ type DialogProps = WithStyle<ReturnType<typeof styles>, IDialogProps>;
 class DialogInternal extends React.Component<DialogProps> {
   render() {
     const {classes, children, dialog, ButtonRenderer, fullWidth, fullScreen, maxWidth, title, disableEscapeKeyDown, hideBackdrop, transition, transitionDuration, disableTransition} = this.props;
+    // const {classes, children, dialog, ButtonRenderer, fullScreen, maxWidth, title, disableEscapeKeyDown, hideBackdrop, transition, transitionDuration, disableTransition, buttonVariant} = this.props;
+    const {buttonRoot, buttonIcon, buttonLabel, ...rest} = classes;
+    const buttonClasses           = {root: buttonRoot, icon: buttonIcon, label: buttonLabel};
     const escapeAction            = disableEscapeKeyDown ? undefined : () => dialog.close();
     const transitionToUse         = transition ? transition : Transition;
     const transitionDurationToUse = transitionDuration !== undefined ? transitionDuration : TRANSITION_TIMEOUT;
@@ -119,7 +129,7 @@ class DialogInternal extends React.Component<DialogProps> {
             </div>
           {hasDivider && <Divider className={classes.divider} />}
           {hasActions && <div className={classes.buttons}>{
-              Object.keys(dialog.actions).map(label => ((ButtonRenderer && <ButtonRenderer key={label} label={label} action={dialog.actions[label]} isDisabled={dialog.isDisabled} />) || <DefaultActionRenderer key={label} label={label} action={dialog.actions[label]} isDisabled={dialog.isDisabled} />))
+              Object.keys(dialog.actions).map(label => ((ButtonRenderer && <ButtonRenderer key={label} classes={buttonClasses} label={label} action={dialog.actions[label]} isDisabled={dialog.isDisabled} variant={buttonVariant} />) || <DefaultActionRenderer key={label} classes={buttonClasses} label={label} action={dialog.actions[label]} isDisabled={dialog.isDisabled} variant={buttonVariant} />))
           }</div>}
         </Dialog>
       )} />

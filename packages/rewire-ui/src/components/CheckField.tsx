@@ -1,4 +1,5 @@
 import * as React                from 'react';
+import classNames                from 'classnames';
 import Checkbox, {CheckboxProps} from '@material-ui/core/Checkbox';
 import FormControlLabel          from '@material-ui/core/FormControlLabel';
 import {Theme}                   from '@material-ui/core/styles';
@@ -63,12 +64,12 @@ class CheckboxInternal extends React.Component<CheckboxPropsStyled> {
     if (this.props.label !== undefined) {
       return (
         <FormControlLabel
+          className={this.props.className}
           control={
             <Checkbox
-              className={this.props.className}
               autoFocus={this.props.autoFocus}
               disabled={this.props.disabled}
-              inputProps={{autoFocus: this.props.autoFocus}}
+              inputProps={{}}
               checked={this.props.value}
               onChange={(evt: React.ChangeEvent<HTMLInputElement>) => this.props.onValueChange(evt.target.checked)}
               classes={{root: this.props.classes.checkboxRoot}}
@@ -82,12 +83,11 @@ class CheckboxInternal extends React.Component<CheckboxPropsStyled> {
     }
 
     return (
-      <div className={this.props.classes.checkboxContainerNoLabel}>
+      <div className={classNames(this.props.className, this.props.classes.checkboxContainerNoLabel)}>
         <Checkbox
-          className={this.props.className}
           autoFocus={this.props.autoFocus}
           disabled={this.props.disabled}
-          inputProps={{autoFocus: this.props.autoFocus}}
+          inputProps={{}}
           checked={this.props.value}
           onChange={(evt: React.ChangeEvent<HTMLInputElement>) => this.props.onValueChange(evt.target.checked)}
           classes={{root: this.props.classes.checkboxRoot}}

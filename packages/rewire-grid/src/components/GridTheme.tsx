@@ -28,81 +28,97 @@ declare module '@material-ui/core/styles/createPalette' {
       light: string,
       main: string,
       dark: string,
+      contrastText: string,
     };
     headerText: {
       light: string,
       main: string,
       dark: string,
+      contrastText: string,
     };
     headerBorder: {
       light: string,
       main: string,
       dark: string,
+      contrastText: string,
     };
     gridBackground: {
       light: string,
       main: string,
       dark: string,
+      contrastText: string,
     };
     gridText: {
       light: string,
       main: string,
       dark: string,
+      contrastText: string,
     };
     gridBorder: {
       light: string,
       main: string,
       dark: string,
+      contrastText: string,
     };
     gridBorderSelected: {
       light: string,
       main: string,
       dark: string,
+      contrastText: string,
     };
     groupRowBackground: {
       light: string,
       main: string,
       dark: string,
+      contrastText: string,
     };
     rowSelectedBackground: {
       light: string,
       main: string,
       dark: string,
+      contrastText: string,
     };
     rowSelectedBorder: {
       light: string,
       main: string,
       dark: string,
+      contrastText: string,
     };
     cellSelectedBackground: {
       light: string,
       main: string,
       dark: string,
+      contrastText: string,
     };
     rowSelectedText: {
       light: string,
       main: string,
       dark: string,
+      contrastText: string,
     };
     rowStripedBackground: {
       light: string,
       main: string,
       dark: string,
+      contrastText: string,
     };
     rowStripedSelectedBackground: {
       light: string,
       main: string,
       dark: string,
+      contrastText: string,
     };
     leftLabelBackground: {
       light: string,
       main: string,
       dark: string,
+      contrastText: string,
     };
     cellOutline: {
       light: string,
       main: string,
       dark: string,
+      contrastText: string,
     };
   }
   interface PaletteOptions {
@@ -110,81 +126,97 @@ declare module '@material-ui/core/styles/createPalette' {
       light?: string,
       main?: string,
       dark?: string,
+      contrastText?: string,
     };
     headerText: {
       light?: string,
       main?: string,
       dark?: string,
+      contrastText?: string,
     };
     headerBorder: {
       light?: string,
       main?: string,
       dark?: string,
+      contrastText?: string,
     };
     gridBackground: {
       light?: string,
       main?: string,
       dark?: string,
+      contrastText?: string,
     };
     gridText: {
       light?: string,
       main?: string,
       dark?: string,
+      contrastText?: string,
     };
     gridBorder: {
       light?: string,
       main?: string,
       dark?: string,
+      contrastText?: string,
     };
     gridBorderSelected: {
       light?: string,
       main?: string,
       dark?: string,
+      contrastText?: string,
     };
     groupRowBackground: {
       light?: string,
       main?: string,
       dark?: string,
+      contrastText?: string,
     };
     rowSelectedBackground: {
       light?: string,
       main?: string,
       dark?: string,
+      contrastText?: string,
     };
     rowSelectedBorder: {
       light?: string,
       main?: string,
       dark?: string,
+      contrastText?: string,
     };
     cellSelectedBackground: {
       light?: string,
       main?: string,
       dark?: string,
+      contrastText?: string,
     };
     rowSelectedText: {
       light?: string,
       main?: string,
       dark?: string,
+      contrastText?: string,
     };
     rowStripedBackground: {
       light?: string,
       main?: string,
       dark?: string,
+      contrastText?: string,
     };
     rowStripedSelectedBackground: {
       light?: string,
       main?: string,
       dark?: string,
+      contrastText?: string,
     };
     leftLabelBackground: {
       light?: string,
       main?: string,
       dark?: string,
+      contrastText?: string,
     };
     cellOutline: {
       light?: string,
       main?: string,
       dark?: string,
+      contrastText?: string,
     };
   }
 }
@@ -200,7 +232,7 @@ const defaultGridColors: IGridColors = {
   rowSelectedText: '#000000',
   rowStripedBackground: '#F5F8FA',
   rowStripedSelectedBackground: '#D0DEE8',
-  leftLabelBackground: '#F5F8FA',
+  leftLabelBackground: '#FFFFFF',
   cellOutline: '#1976D2',
 };
 

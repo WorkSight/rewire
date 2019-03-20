@@ -31,6 +31,7 @@ export class CellModel implements ICell {
   isRightMostSelection : boolean;
   isBottomMostSelection: boolean;
   isLeftMostSelection  : boolean;
+  keyForEdit?          : string;
 
   static positionCompare(a: ICell, b: ICell): number {
     return a.rowPosition < b.rowPosition ? -1 : a.rowPosition > b.rowPosition ? 1 : a.columnPosition < b.columnPosition ? -1 : a.columnPosition > b.columnPosition ? 1 : 0;
@@ -62,6 +63,7 @@ export class CellModel implements ICell {
     this.isRightMostSelection  = false;
     this.isBottomMostSelection = false;
     this.isLeftMostSelection   = false;
+    this.keyForEdit            = undefined;
   }
 
   set enabled(value: boolean) {
@@ -219,10 +221,8 @@ export class CellModel implements ICell {
   setFocus(focus: boolean = true) {
     if (focus && this.canFocus()) {
       this.element!.focus();
-      this.grid.focusedCell = this;
     } else if (!focus && this.canBlur()) {
       this.element!.blur();
-      this.grid.focusedCell = undefined;
     }
   }
 
@@ -307,6 +307,16 @@ export class CellModel implements ICell {
     }
 
     return newCellToSelect;
+  }
+
+  performKeybindAction(evt: React.KeyboardEvent<any>): void {
+    let action = this.grid.staticKeybinds[evt.key];
+    if (!action) {
+      action = this.grid.variableKeybinds[evt.key];
+    }
+    if (action) {
+      action(evt, this);
+    }
   }
 }
 

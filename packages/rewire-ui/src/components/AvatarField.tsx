@@ -17,6 +17,7 @@ const avatarFieldStyles = () => ({
 });
 
 export interface IAvatarFieldProps {
+  className?     : string;
   visible?       : boolean;
   classes?       : React.CSSProperties;
   value?         : string;
@@ -114,7 +115,7 @@ class AvatarField extends React.Component<AvatarFieldProps, IAvatarFieldState> {
     }
 
     return (
-      <div className={classes.avatarContainer}>
+      <div className={classNames(this.props.className, classes.avatarContainer)}>
         <InnerAvatar classes={otherClasses} buttonSize={bSize} avatarDiameter={avatarDiameter} mimeTypes={mimeTypes} label={label} onFileLoad={onFileLoad} onImageLoad={this.onImageLoad} value={this.state.value} />
         {avatarCropperElement}
       </div>

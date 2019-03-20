@@ -23,7 +23,7 @@ import editor, {
 import { and, isEmail, isRegEx } from './Validator';
 import { defaultPhoneFormat }    from '../components/PhoneField';
 
-export type IFieldTypes = 'string' | 'multistring' | 'static' | 'reference' | 'select' | 'multiselect' | 'number' | 'boolean' | 'switch' | 'date' | 'time' | 'avatar' | 'password' | 'email' | 'phone' | 'color';
+export type IFieldTypes = 'string' | 'multistring' | 'static' | 'reference' | 'select' | 'multiselect' | 'number' | 'boolean' | 'switch' | 'date' | 'time' | 'avatar' | 'password' | 'email' | 'phone' | 'color' | 'mask';
 
 export interface IFieldDefn {
   label(text: string):                                            IFieldDefn;
@@ -284,6 +284,7 @@ export default class Form {
     'number'     : 'number',
     'avatar'     : 'avatar',
     'color'      : 'color',
+    'mask'       : 'mask',
   };
 
   private createEditor(editorType: EditorType | undefined, field: IEditorField, editProps?: any): React.SFC<any> {
@@ -564,5 +565,9 @@ export default class Form {
 
   static color(editProps?: any): IFieldDefn {
     return new BaseField('color', editProps);
+  }
+
+  static mask(editProps?: any): IFieldDefn {
+    return new BaseField('mask', editProps);
   }
 }

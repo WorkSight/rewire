@@ -7,15 +7,20 @@ import {
   IClient,
   isGQL,
   GQL
-}                          from './types';
-import { hashString }      from './hash';
-import { ObservableCache } from './ObservableCache';
+}                             from './types';
+import { hashString }         from './hash';
+import { ObservableCache }    from './ObservableCache';
+import { SubscriptionClient } from 'subscriptions-transport-ws';
+import { from, Stream }       from 'most';
+import { ExecutionResult }    from 'graphql';
 
 class Client implements IClient {
-  url          : string; // Graphql API URL
-  fetchOptions : object | (() => object); // Options for fetch call
-  cache        : ICache; // Cache object
-  running      : {[idx: string]: Promise<IQueryResponse>} = {};
+  url                : string; // Graphql API URL
+  bearer?            : string; // bearer token
+  fetchOptions       : object | (() => object); // Options for fetch call
+  cache              : ICache; // Cache object
+  running            : {[idx: string]: Promise<IQueryResponse>} = {};
+  subscriptionClient?: SubscriptionClient;
 
   constructor(opts?: IClientOptions) {
     if (!opts) {
@@ -26,6 +31,7 @@ class Client implements IClient {
       throw new Error('Please provide a URL for your GraphQL API');
     }
 
+    this.bearer       = opts.bearer;
     this.url          = opts.url;
     this.fetchOptions = opts.fetchOptions || {};
     this.cache        = opts.cache || new ObservableCache();
@@ -56,19 +62,15 @@ class Client implements IClient {
         let reqInit = {
           body: body,
           headers: {
-            'Content-Type':                   'application/json',
-            'Accept':                         '*/*',
-            'Access-Control-Allow-Origin':    'http://localhost:3000',
-            'Access-Control-Request-Method':  'post',
-            'Access-Control-Request-Headers': 'authorization, content-type',
+            'Content-Type': 'application/json',
             ...headers
           },
-          method:      'POST',
-          mode:        'cors',
-          credentials: 'include',
+          method: 'POST',
+          mode:   'cors',
           ...fetchOptions,
         };
-        let res      = await fetch(this.url, reqInit);
+        if (this.bearer) reqInit.headers.Authorization = 'Bearer ' + this.bearer;
+        let res = await fetch(this.url, reqInit);
         let response = await res.json();
         if (res.ok) {
           resolve({
@@ -85,6 +87,17 @@ class Client implements IClient {
     });
 
     return promise;
+  }
+
+  subscribe<T>(query: GQL, variables?: object): Stream<ExecutionResult<T>> {
+    if (!this.subscriptionClient) {
+      const url = new URL(this.url);
+      this.subscriptionClient = new SubscriptionClient(`ws://${url.host}/subscriptions`, {reconnect: true, lazy: true});
+    }
+
+    return from(this.subscriptionClient!.request(
+      {query: (isGQL(query)) ? query.loc.source.body : query, variables}
+    )) as Stream<ExecutionResult<T>>;
   }
 
   query(query: GQL, variables?: object, headers?: object, mutate: boolean = false): Promise<IQueryResponse> {

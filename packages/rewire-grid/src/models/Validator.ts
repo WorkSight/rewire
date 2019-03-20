@@ -213,12 +213,12 @@ export const isDifferenceOfOthers = (otherColumnNames: string[], text?: string):
       let errorMsg: string             = '';
       let errorSeverity: ErrorSeverity = ErrorSeverity.Error;
       let otherValues: any[]           = otherColumnNames.map((otherColumnName: string) => row.cells[otherColumnName] && row.cells[otherColumnName].value) || [];
-      if (otherValues.every(value => value === undefined || value === null || !is.number(value))) {
+      if (otherValues.find(value => value === undefined || value === null || !is.number(value))) {
         return undefined;
       }
-      let difference                   = otherValues.reduce((totalValue: number, currValue: number) => {
-        let value = (totalValue || 0) - (currValue || 0);
-        return is.number(value) ? value : 0;
+      let difference = otherValues.reduce((totalValue: number, currValue: number) => {
+        let value = totalValue - currValue;
+        return value;
       });
       if (value !== difference) {
         if (text) {
@@ -245,12 +245,12 @@ export const isSumOfOthers = (otherColumnNames: string[], text?: string): IValid
       let errorMsg: string             = '';
       let errorSeverity: ErrorSeverity = ErrorSeverity.Error;
       let otherValues: any[]           = otherColumnNames.map((otherColumnName: string) => row.cells[otherColumnName] && row.cells[otherColumnName].value) || [];
-      if (otherValues.every(value => value === undefined || value === null || !is.number(value))) {
+      if (otherValues.find(value => value === undefined || value === null || !is.number(value))) {
         return undefined;
       }
-      let sum                          = otherValues.reduce((totalValue: number, currValue: number) => {
-        let value = (totalValue || 0) + (currValue || 0);
-        return is.number(value) ? value : 0;
+      let sum = otherValues.reduce((totalValue: number, currValue: number) => {
+        let value = totalValue + currValue;
+        return value;
       });
       if (value !== sum) {
         if (text) {

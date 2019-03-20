@@ -203,7 +203,7 @@ class TextFieldInternal extends React.Component<TextFieldPropsStyled> {
         onBlur={this.props.onBlur}
         onKeyDown={this.handleKeyDown}
         onChange={(evt: React.ChangeEvent<HTMLInputElement>) => this.props.onValueChange(evt.target.value)}
-        inputProps={{autoFocus: this.props.autoFocus, className: classes.nativeInput, style: {textAlign: this.props.align || 'left'}}}
+        inputProps={{spellCheck: !!multiline, className: classes.nativeInput, style: {textAlign: this.props.align || 'left'}}}
         InputProps={{startAdornment: startAdornment, endAdornment: endAdornment, classes: {root: classes.inputRoot, multiline: multilineClassName, input: inputClassName, inputType: inputTypeClassName, formControl: inputFormControlClassName}}}
         InputLabelProps={{shrink: true, classes: {root: classes.inputLabelRoot, outlined: classes.inputLabelRootShrink}}}
         FormHelperTextProps={{classes: {root: classes.helperTextRoot, contained: classes.helperTextContained}}}
@@ -232,8 +232,8 @@ class TextFieldInternal extends React.Component<TextFieldPropsStyled> {
           onBlur={props.onBlur}
           onKeyDown={this.handleKeyDown}
           onChange={props.onChange}
-          inputProps={{autoFocus: props.autoFocus, className: classes.nativeInput, style: {textAlign: props.align || 'left'}}}
-          InputProps={{startAdornment: startAdornment, endAdornment: endAdornment, classes: {root: classes.inputRoot, multiline: multilineClassName, input: inputClassName, formControl: inputFormControlClassName}}}
+          inputProps={{spellCheck: !!multiline, className: classes.nativeInput, style: {textAlign: props.align || 'left'}}}
+          InputProps={{startAdornment: startAdornment, endAdornment: endAdornment, classes: {root: classes.inputRoot, multiline: multilineClassName, input: inputClassName, inputType: inputTypeClassName, formControl: inputFormControlClassName}}}
           InputLabelProps={{shrink: true, classes: {root: classes.inputLabelRoot, outlined: classes.inputLabelRootShrink}}}
           FormHelperTextProps={{classes: {root: classes.helperTextRoot, contained: classes.helperTextContained}}}
         />

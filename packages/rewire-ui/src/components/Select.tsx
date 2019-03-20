@@ -146,7 +146,7 @@ class SelectInternal<T> extends React.Component<SelectInternalProps<T>, any> {
     }
 
     return (
-      <MenuItem key={index} value={displayName} style={s} classes={{root: this.props.classes.selectMenuItem}}>{displayName}</MenuItem>
+      <MenuItem key={index} component='div' value={displayName} style={s} classes={{root: this.props.classes.selectMenuItem}}><span>{displayName}</span></MenuItem>
     );
   }
 

@@ -174,8 +174,8 @@ class PasswordFieldInternal extends React.Component<PasswordFieldPropsStyled, IP
           onBlur={this.props.onBlur}
           onKeyDown={this.props.onKeyDown}
           onChange={(evt: React.ChangeEvent<HTMLInputElement>) => this.props.onValueChange(evt.target.value)}
-          inputProps={{autoFocus: this.props.autoFocus, className: this.props.classes.nativeInput, style: {textAlign: this.props.align || 'left'}}}
-          InputProps={{endAdornment: adornment, classes: {root: this.props.classes.inputRoot, input: inputClassName, formControl: inputFormControlClassName}}}
+          inputProps={{spellCheck: false, className: this.props.classes.nativeInput, style: {textAlign: this.props.align || 'left'}}}
+          InputProps={{endAdornment: adornment, classes: {root: this.props.classes.inputRoot, input: inputClassName, inputType: this.props.classes.inputType, formControl: inputFormControlClassName}}}
           InputLabelProps={{shrink: true, classes: {root: this.props.classes.inputLabelRoot, outlined: this.props.classes.inputLabelRootShrink}}}
           FormHelperTextProps={{classes: {root: this.props.classes.helperTextRoot, contained: this.props.classes.helperTextContained}}}
         />
@@ -201,7 +201,7 @@ class PasswordFieldInternal extends React.Component<PasswordFieldPropsStyled, IP
             onBlur={props.onBlur}
             onKeyDown={props.onKeyDown}
             onChange={props.onChange}
-            inputProps={{autoFocus: props.autoFocus, className: props.classes.nativeInput, style: {textAlign: props.align || 'left'}}}
+            inputProps={{spellCheck: false, className: props.classes.nativeInput, style: {textAlign: props.align || 'left'}}}
             InputProps={{endAdornment: adornment, classes: {root: props.classes.inputRoot, input: inputClassName, inputType: props.classes.inputType, formControl: inputFormControlClassName}}}
             InputLabelProps={{shrink: true, classes: {root: props.classes.inputLabelRoot, outlined: props.classes.inputLabelRootShrink}}}
             FormHelperTextProps={{classes: {root: props.classes.helperTextRoot, contained: props.classes.helperTextContained}}}
