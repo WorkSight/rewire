@@ -1,6 +1,6 @@
 {
   "name": "rewire-core",
-  "version": "1.0.0-beta.177",
+  "version": "1.0.0",
   "description": "A simple library for developing react applications using reactive state and proxies",
   "main": "./es6-lib.js",
   "typings": "./src/index.ts",
@@ -26,5 +26,9 @@
   "dependencies": {
     "react": "^16.8.4",
     "s-js": "^0.4.9"
+  },
+  "devDependencies": {
+    "@babel/core": "^7.0.0-0",
+    "@babel/preset-env": "^7.4.1"
   }
 }
