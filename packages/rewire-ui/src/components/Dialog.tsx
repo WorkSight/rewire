@@ -103,8 +103,7 @@ type DialogProps = WithStyle<ReturnType<typeof styles>, IDialogProps>;
 
 class DialogInternal extends React.Component<DialogProps> {
   render() {
-    const {classes, children, dialog, ButtonRenderer, fullWidth, fullScreen, maxWidth, title, disableEscapeKeyDown, hideBackdrop, transition, transitionDuration, disableTransition} = this.props;
-    // const {classes, children, dialog, ButtonRenderer, fullScreen, maxWidth, title, disableEscapeKeyDown, hideBackdrop, transition, transitionDuration, disableTransition, buttonVariant} = this.props;
+    const {classes, children, dialog, ButtonRenderer, fullWidth, fullScreen, maxWidth, title, disableEscapeKeyDown, hideBackdrop, transition, transitionDuration, disableTransition, buttonVariant} = this.props;
     const {buttonRoot, buttonIcon, buttonLabel, ...rest} = classes;
     const buttonClasses           = {root: buttonRoot, icon: buttonIcon, label: buttonLabel};
     const escapeAction            = disableEscapeKeyDown ? undefined : () => dialog.close();
