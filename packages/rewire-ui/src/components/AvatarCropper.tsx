@@ -1,12 +1,12 @@
 
 import * as React from 'react';
-import Konva      from 'konva/src/Core';
-import 'konva/src/shapes/Image';
-import 'konva/src/shapes/Circle';
-import 'konva/src/shapes/Rect';
-import 'konva/src/shapes/Path';
-import 'konva/src/Animation';
-import 'konva/src/DragAndDrop';
+import * as Konva from 'konva';
+// import 'konva/src/shapes/Image';
+// import 'konva/src/shapes/Circle';
+// import 'konva/src/shapes/Rect';
+// import 'konva/src/shapes/Path';
+// import 'konva/src/Animation';
+// import 'konva/src/DragAndDrop';
 import Button                  from '@material-ui/core/Button';
 import Dialog                  from '@material-ui/core/Dialog';
 import {withStyles, WithStyle} from './styles';

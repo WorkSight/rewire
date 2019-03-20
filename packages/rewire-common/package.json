@@ -1,8 +1,8 @@
 {
   "name": "rewire-common",
-  "version": "1.0.0-beta.177",
+  "version": "1.0.4",
   "description": "Common utilities used by the rewire suite of reactive components",
-  "main": "./es6-lib.js",
+  "main": "./index.js",
   "typings": "./src/index.ts",
   "ts:main": "./src/index.ts",
   "repository": {
@@ -21,5 +21,10 @@
   "homepage": "https://github.com/worksight/rewire",
   "dependencies": {
     "query-string": "^6.3.0"
+  },
+  "devDependencies": {
+    "@babel/core": "^7.0.0-0",
+    "@babel/preset-env": "^7.4.1",
+    "babel-preset-env": "^1.7.0"
   }
 }

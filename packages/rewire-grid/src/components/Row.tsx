@@ -11,7 +11,7 @@ import * as React              from 'react';
 import ResizeObserver          from 'resize-observer-polyfill';
 import cc                      from 'classcat';
 import classNames              from 'classnames';
-import Color                   from 'color';
+import * as Color              from 'color';
 import {Observe}               from 'rewire-core';
 import {Theme}                 from '@material-ui/core/styles';
 import {WithStyle, withStyles} from 'rewire-ui';

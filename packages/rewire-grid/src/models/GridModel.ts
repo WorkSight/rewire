@@ -31,7 +31,7 @@ import {
   gridStaticKeybinds,
   gridDefaultVariableKeybinds
 }                              from './GridKeybinds';
-import merge                   from 'deepmerge';
+import * as merge              from 'deepmerge';
 import {
   observable,
   computed,

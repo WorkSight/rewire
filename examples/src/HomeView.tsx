@@ -103,32 +103,33 @@ const ComplexCell: React.SFC<ICell> = (cell) => {
 };
 
 function createTestGrid(nRows: number, nColumns: number) {
-  // console.time('start tester');
+  console.time('start tester');
   // make sure we have enough columns passed.
-  if (nColumns < 10) throw new Error(`add some more columns (need 10, only ${nColumns} requested)!`);
+  if (nColumns < 10) throw new Error('add some more columns!');
 
   // create some random sized columns!
   let cols = [];
   for (let col = 0; col < nColumns; col++) {
-    cols.push(createColumn('column' + col, 'Header# ' + col, {type: 'text', width: Math.trunc(Math.random() * 250 + 50) + 'px'}));
+    cols.push(createColumn('column' + col, 'Header# ' + col, { type: 'text', width: Math.trunc(Math.random() * 250 + 50) + 'px' }));
   }
   cols[5].title = 'Sales';
   cols[6].title = 'Sales';
 
   let timeOutOnValueChange = (cell: ICell, value: any) => cell.row.cells['differenceColumn'].setValue((cell.row.cells['timeInColumn'].value || 0) - (value || 0));
-  let timeInOnValueChange  = (cell: ICell, value: any) => cell.row.cells['differenceColumn'].setValue((value || 0) - (cell.row.cells['timeOutColumn'].value || 0));
+  let timeInOnValueChange = (cell: ICell, value: any) => cell.row.cells['differenceColumn'].setValue((value || 0) - (cell.row.cells['timeOutColumn'].value || 0));
 
-  cols.push(createColumn('phoneColumn',        'Phone',           {type: {type: 'phone'}, width: Math.trunc(Math.random() * 250 + 50) + 'px'}));
-  cols.push(createColumn('numberColumn',       'Number',          {type: {type: 'number', options: {decimals: 2, fixed: true, thousandSeparator: false}}, validator: gridIsRequired, width: Math.trunc(Math.random() * 250 + 50) + 'px'}));
-  cols.push(createColumn('dateColumn',         'Date',            {type: 'date', width: Math.trunc(Math.random() * 250 + 50) + 'px'}));
-  cols.push(createColumn('timeOutColumn',      'Time Out',        {type: {type: 'time'}, onValueChange: timeOutOnValueChange, width: Math.trunc(Math.random() * 250 + 50) + 'px'}));
-  cols.push(createColumn('timeInColumn',       'Time In',         {type: {type: 'time'}, validator: gridIsGreaterThan('timeOutColumn'), onValueChange: timeInOnValueChange, width: Math.trunc(Math.random() * 250 + 50) + 'px'}));
-  cols.push(createColumn('differenceColumn',   'Time Difference', {type: {type: 'number', options: {decimals: 2}}, validator: gridIsDifferenceOfOthers(['timeInColumn', 'timeOutColumn']), width: Math.trunc(Math.random() * 250 + 50) + 'px'}));
-  cols.push(createColumn('sumColumn',          'Time Sum',        {type: {type: 'number', options: {decimals: 2}}, validator: gridIsSumOfOthers(['timeInColumn', 'timeOutColumn']), width: Math.trunc(Math.random() * 250 + 50) + 'px'}));
-  cols.push(createColumn('autoCompleteColumn', 'Auto Complete',   {type: {type: 'auto-complete', options: countries}, width: Math.trunc(Math.random() * 250 + 50) + 'px'}));
-  cols.push(createColumn('selectColumn',       'Select',          {type: {type: 'select', options: countries}, width: Math.trunc(Math.random() * 250 + 50) + 'px'}));
-  cols.push(createColumn('multiselectColumn',  'MultiSelect',     {type: {type: 'multiselect', options: countries}, width: Math.trunc(Math.random() * 250 + 50) + 'px'}));
-  cols.push(createColumn('checkedColumn',      'Checked',         {type: 'checked', width: Math.trunc(Math.random() * 250 + 50) + 'px'}));
+  cols.push(createColumn('maskColumn', 'Mask', { type: { type: 'mask', options: { mask: ['(', /[1-9]/, /\d/, /\d/, ')', ' ', /\d/, /\d/, /\d/, '-', /\d/, /\d/, /\d/, /\d/] } }, width: Math.trunc(Math.random() * 250 + 50) + 'px' }));
+  cols.push(createColumn('phoneColumn', 'Phone', { type: { type: 'phone' }, width: Math.trunc(Math.random() * 250 + 50) + 'px' }));
+  cols.push(createColumn('numberColumn', 'Number', { type: { type: 'number', options: { decimals: 2, fixed: true, thousandSeparator: false } }, validator: gridIsRequired, width: Math.trunc(Math.random() * 250 + 50) + 'px' }));
+  cols.push(createColumn('dateColumn', 'Date', { type: 'date', width: Math.trunc(Math.random() * 250 + 50) + 'px' }));
+  cols.push(createColumn('timeOutColumn', 'Time Out', { type: { type: 'time' }, onValueChange: timeOutOnValueChange, width: Math.trunc(Math.random() * 250 + 50) + 'px' }));
+  cols.push(createColumn('timeInColumn', 'Time In', { type: { type: 'time' }, validator: gridIsGreaterThan('timeOutColumn'), onValueChange: timeInOnValueChange, width: Math.trunc(Math.random() * 250 + 50) + 'px' }));
+  cols.push(createColumn('differenceColumn', 'Time Difference', { type: { type: 'number', options: { decimals: 2 } }, validator: gridIsDifferenceOfOthers(['timeInColumn', 'timeOutColumn']), width: Math.trunc(Math.random() * 250 + 50) + 'px' }));
+  cols.push(createColumn('sumColumn', 'Time Sum', { type: { type: 'number', options: { decimals: 2 } }, validator: gridIsSumOfOthers(['timeInColumn', 'timeOutColumn']), width: Math.trunc(Math.random() * 250 + 50) + 'px' }));
+  cols.push(createColumn('autoCompleteColumn', 'Auto Complete', { type: { type: 'auto-complete', options: countries }, width: Math.trunc(Math.random() * 250 + 50) + 'px' }));
+  cols.push(createColumn('selectColumn', 'Select', { type: { type: 'select', options: countries }, width: Math.trunc(Math.random() * 250 + 50) + 'px' }));
+  cols.push(createColumn('multiselectColumn', 'MultiSelect', { type: { type: 'multiselect', options: countries }, width: Math.trunc(Math.random() * 250 + 50) + 'px' }));
+  cols.push(createColumn('checkedColumn', 'Checked', { type: 'checked', width: Math.trunc(Math.random() * 250 + 50) + 'px' }));
 
   let complexColumnValidator = {
     linkedColumnNames: [],
@@ -138,20 +139,20 @@ function createTestGrid(nRows: number, nColumns: number) {
       }
 
       let error: IError | undefined;
-      let errorMsg: string             = '';
+      let errorMsg: string = '';
       let errorSeverity: ErrorSeverity = ErrorSeverity.Error;
       if (value.name === 'Homer') {
-        errorMsg      = 'No Homers allowed!';
+        errorMsg = 'No Homers allowed!';
         errorSeverity = ErrorSeverity.Critical;
       }
-      error = errorMsg ? {messageText: errorMsg, severity: errorSeverity} : undefined;
+      error = errorMsg ? { messageText: errorMsg, severity: errorSeverity } : undefined;
       return error;
     }
   };
 
-  cols.push(createColumn('complexColumn', 'Complex', {type: 'none', renderer: ComplexCell, compare: ComplexCellData.compare, validator: complexColumnValidator, width: Math.trunc(Math.random() * 250 + 50) + 'px'}));
+  cols.push(createColumn('complexColumn', 'Complex', { type: 'none', renderer: ComplexCell, compare: ComplexCellData.compare, validator: complexColumnValidator, width: Math.trunc(Math.random() * 250 + 50) + 'px' }));
   // Override and set some columns to be number!
-  cols[5].setEditor({type: 'number', options: {decimals: 2, thousandSeparator: true}});
+  cols[5].setEditor({ type: 'number', options: { decimals: 2, thousandSeparator: true } });
   cols[5].validator = {
     linkedColumnNames: [],
     fn: (row: IRow, value: any): IError | undefined => {
@@ -160,42 +161,43 @@ function createTestGrid(nRows: number, nColumns: number) {
       }
 
       let error: IError | undefined;
-      let errorMsg: string             = '';
+      let errorMsg: string = '';
       let errorSeverity: ErrorSeverity = ErrorSeverity.Error;
       if (value < 2000) {
-        errorMsg      = 'Less than 2000';
+        errorMsg = 'Less than 2000';
         errorSeverity = ErrorSeverity.Warning;
       } else if (value > 7000) {
-        errorMsg      = 'Greater than 7000';
+        errorMsg = 'Greater than 7000';
         errorSeverity = ErrorSeverity.Critical;
       } else if (value > 4000) {
-        errorMsg      = 'Greater than 4000';
+        errorMsg = 'Greater than 4000';
         errorSeverity = ErrorSeverity.Error;
       } else if (value >= 2000 && value <= 4000) {
-        errorMsg      = 'Between 2000 and 4000';
+        errorMsg = 'Between 2000 and 4000';
         errorSeverity = ErrorSeverity.Info;
       }
-      error = errorMsg ? {messageText: errorMsg, severity: errorSeverity} : undefined;
+      error = errorMsg ? { messageText: errorMsg, severity: errorSeverity } : undefined;
       return error;
     }
   };
-  cols[6].setEditor({type: 'number', options: {decimals: 3, thousandSeparator: true}});
+  cols[6].setEditor({ type: 'number', options: { decimals: 3, thousandSeparator: true } });
 
   // add some cell data!
   let rows: IRowData[] = [];
   for (let row = 0; row < nRows; row++) {
-    let r: IRowData = {id: `${row}`, data: {}};
+    let r: IRowData = { id: `${row}`, data: {} };
     for (let column = 0; column < cols.length; column++) {
-      let v: any  = `RC ${column}-${row % 5}`;
+      let v: any = `RC ${column}-${row % 5}`;
       let colName = cols[column].name;
       if ((column <= 1 || column >= 4) && row === 1) v = undefined;
-      else if ((colName === 'autoCompleteColumn') || (colName === 'selectColumn')) v = {id: '14', name: 'Austria'};
-      else if (colName === 'multiselectColumn') v = [{id: '14', name: 'Austria'}];
+      else if ((colName === 'autoCompleteColumn') || (colName === 'selectColumn')) v = { id: '14', name: 'Austria' };
+      else if (colName === 'multiselectColumn') v = [{ id: '14', name: 'Austria' }];
       else if (colName === 'checkedColumn') v = true;
       else if (colName === 'timeOutColumn') v = 7.5;
       else if (colName === 'timeInColumn') v = 11.5;
       else if (colName === 'differenceColumn') v = 4;
       else if (colName === 'sumColumn') v = 19;
+      else if (colName === 'maskColumn') v = undefined;
       else if (colName === 'dateColumn') v = '2018-11-11';
       else if (colName === 'complexColumn') v = row > 3 ? new ComplexCellData(nanoid(10), 'Homer', 45) : undefined;
       else if (colName === 'phoneColumn') v = Number.parseInt('1250' + Math.round(Math.random() * 100000000).toString());
@@ -205,20 +207,20 @@ function createTestGrid(nRows: number, nColumns: number) {
     rows.push(r);
   }
   // Some fixed columns to the left
-  cols[0].fixed   = true;
-  cols[0].width   = '128px';
-  cols[0].align   = 'center';
-  cols[1].fixed   = true;
-  cols[1].width   = '65px';
-  cols[1].align   = 'right';
+  cols[0].fixed = true;
+  cols[0].width = '128px';
+  cols[0].align = 'center';
+  cols[1].fixed = true;
+  cols[1].width = '65px';
+  cols[1].align = 'right';
   // create the grid model and group by 'column2' and 'column3'
-  let grid = createGrid(rows, cols, {groupBy: ['column2', 'column3'], multiSelect: true, allowMergeColumns: true});
+  let grid = createGrid(rows, cols, { groupBy: ['column2', 'column3'], multiSelect: true, allowMergeColumns: true });
 
-  grid.addFixedRow({data: {column5: '2017', column6: '2018'}});
+  grid.addFixedRow({ data: { column5: '2017', column6: '2018' } });
 
   // sort first by  column7 then by column6
   grid.addSort(grid.columnByPos(7)!, 'ascending')
-      .addSort(grid.columnByPos(6)!, 'descending');
+    .addSort(grid.columnByPos(6)!, 'descending');
 
   // test changing colum and cell properties
   // setTimeout(() => {
@@ -246,7 +248,7 @@ function createTestGrid(nRows: number, nColumns: number) {
   // grid.cellByPos(0, 6).readOnly = false;
   // grid.cellByPos(0, 8).renderer = (cell) => <div>{cell.value + ' Cell'}</div>;
 
-  // console.timeEnd('start tester'); // how long did it take to create the reactive model?
+  console.timeEnd('start tester'); // how long did it take to create the reactive model?
   return grid;
 }
 
