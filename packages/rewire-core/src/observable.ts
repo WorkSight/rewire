@@ -25,8 +25,6 @@ export function version(value: ObjectType) {
   return ((value !== undefined) && (value !== null) && value[versionProperty]);
 }
 
-// export function track()
-
 function wrap(fn: any) {
   let f: any = function(this: any) {
     let result: any = undefined;
@@ -62,10 +60,6 @@ const arrayPrototype = Object.create(Array.prototype);
 ['copyWithin', 'fill', 'set', 'pop', 'push', 'reverse', 'shift', 'slice', 'sort', 'splice', 'unshift'].forEach(m => arrayPrototype[m] = wrap(arrayPrototype[m]));
 
 function observable_array(value: ObjectType, eq: EQType, parent?: () => void) {
-  // if (is_proxy(value)) {
-  //   return value;
-  // }
-
   Object.setPrototypeOf(value, arrayPrototype);
   let version = S.data(0);
   function incrementVersion() {
@@ -253,7 +247,7 @@ export function replace(obs: any, ...obj: any[]) {
 
 /**
  * The computed method creates a computed property. The function takes a dependency on a signal or a watched function and will run the action returning a computed result.
- * The action result is cached and will only be recalculated when the dependency changes so getting the value of the comptued property is fast.
+ * The action result is cached and will only be recalculated when the dependency changes so getting the value of the computed property is fast.
  * @export
  * @template T the return type
  * @param {() => void} fn another signal or dependency function
@@ -265,4 +259,3 @@ export function replace(obs: any, ...obj: any[]) {
 export function computed<T = any>(fn: () => void, action: () => T, seed?: T, doAction: boolean = false): () => T {
   return S.on<T>(fn, action, seed as any, !doAction) as () => T;
 }
-

@@ -1,16 +1,16 @@
-import * as React            from 'react';
-import Modal, { ActionType } from '../models/Modal';
-import classNames            from 'classnames';
-import {Observe}             from 'rewire-core';
-import Typography            from '@material-ui/core/Typography';
-import Dialog                from '@material-ui/core/Dialog';
-import Button, {ButtonProps} from '@material-ui/core/Button';
-import Divider               from '@material-ui/core/Divider';
-import Icon                  from '@material-ui/core/Icon';
-import Grow                  from '@material-ui/core/Grow';
-import {Theme}               from '@material-ui/core/styles';
+import * as React                from 'react';
+import Modal, { ActionType }     from '../models/Modal';
+import classNames                from 'classnames';
+import { Observe }               from 'rewire-core';
+import Typography                from '@material-ui/core/Typography';
+import Dialog                    from '@material-ui/core/Dialog';
+import Button, { ButtonProps }   from '@material-ui/core/Button';
+import Divider                   from '@material-ui/core/Divider';
+import Icon                      from '@material-ui/core/Icon';
+import Grow                      from '@material-ui/core/Grow';
+import { Theme }                 from '@material-ui/core/styles';
+import { WithStyle, withStyles } from './styles';
 import './Dialog.css';
-import {WithStyle, withStyles} from './styles';
 
 let styles = (theme: Theme) => ({
   root: {
@@ -60,8 +60,8 @@ let styles = (theme: Theme) => ({
 
 export interface IDefaultActionRendererStyles {
   button?: string;
-  icon?: string;
-  label?: string;
+  icon?:   string;
+  label?:  string;
 }
 export type ActionRenderType = (props: {label: string, action: ActionType, isDisabled: boolean, variant?: ButtonProps['variant'], classes?: IDefaultActionRendererStyles}) => JSX.Element;
 export const DefaultActionRenderer: ActionRenderType = ({label, action, isDisabled, variant, classes}) => (
@@ -105,8 +105,6 @@ class DialogInternal extends React.Component<DialogProps> {
     const hasTitle                = dialog.title || title;
     const hasActions              = dialog.actions && Object.keys(dialog.actions).length > 0;
     const hasDivider              = hasActions && this.props.hasDivider !== undefined ? this.props.hasDivider : true;
-
-    console.log(fullWidth, fullScreen, maxWidth);
 
     return (
       <Observe render={() => (

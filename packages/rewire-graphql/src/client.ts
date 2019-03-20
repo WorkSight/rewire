@@ -56,19 +56,19 @@ class Client implements IClient {
         let reqInit = {
           body: body,
           headers: {
-            'Content-Type': 'application/json',
-            'Accept': '*/*',
-            'Access-Control-Allow-Origin': 'http://localhost:3000',
-            'Access-Control-Request-Method': 'post',
-            'Access-Control-Request-Headers' : 'authorization, content-type',
+            'Content-Type':                   'application/json',
+            'Accept':                         '*/*',
+            'Access-Control-Allow-Origin':    'http://localhost:3000',
+            'Access-Control-Request-Method':  'post',
+            'Access-Control-Request-Headers': 'authorization, content-type',
             ...headers
           },
-          method: 'POST',
-          mode: 'cors',
+          method:      'POST',
+          mode:        'cors',
           credentials: 'include',
           ...fetchOptions,
         };
-        let res = await fetch(this.url, reqInit);
+        let res      = await fetch(this.url, reqInit);
         let response = await res.json();
         if (res.ok) {
           resolve({

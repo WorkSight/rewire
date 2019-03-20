@@ -1,4 +1,3 @@
-import * as deepEqual from 'fast-deep-equal';
 import {
   IGrid,
   IColumn,
@@ -15,12 +14,11 @@ import {
   isGroupRow,
   cloneValue,
   allRows,
-  findRowById,
   IRowData,
 }                              from './GridTypes';
 import createCell, {CellModel} from './CellModel';
-import * as is from 'is';
-import * as nanoid  from 'nanoid';
+import * as nanoid             from 'nanoid';
+import * as deepEqual          from 'fast-deep-equal';
 
 const EmptyFn = () => {};
 

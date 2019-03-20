@@ -1,5 +1,5 @@
 import * as React from 'react';
-import S from 's-js';
+import S          from 's-js';
 
 export default class Observe extends React.Component<{render: (observableChanged: boolean) => JSX.Element | JSX.Element[] | null}> {
   private dispose: any;

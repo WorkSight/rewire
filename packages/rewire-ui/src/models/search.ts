@@ -5,7 +5,7 @@ export interface ISearchOptions {
   parentId?: string;
 }
 
-export type MapFn<T> = (item?: T) => string;
+export type MapFn<T>    = (item?: T) => string;
 export type SearchFn<T> = (searchText: string, options?: ISearchOptions) => Promise<T[]>;
 
 export function defaultMap<T extends string>(item?: T): string {
@@ -68,7 +68,6 @@ export function documentSearch(documentType: string) {
   };
 }
 
-
 export type RenderSuggestionFn<T> = (suggestion: T, {theme, isHighlighted}: any) => JSX.Element;
 
 export interface ICustomProps<T> {
@@ -88,4 +87,3 @@ export interface ICustomProps<T> {
   options?              : ISearchOptions;
   renderSuggestion?     : RenderSuggestionFn<T>;
 }
-

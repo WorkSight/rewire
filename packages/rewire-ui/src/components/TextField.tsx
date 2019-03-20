@@ -233,7 +233,7 @@ class TextFieldInternal extends React.Component<TextFieldPropsStyled> {
           onKeyDown={this.handleKeyDown}
           onChange={props.onChange}
           inputProps={{autoFocus: props.autoFocus, className: classes.nativeInput, style: {textAlign: props.align || 'left'}}}
-          InputProps={{startAdornment: startAdornment, endAdornment: endAdornment, classes: {root: classes.inputRoot, multiline: multilineClassName, input: inputClassName, inputType: inputTypeClassName, formControl: inputFormControlClassName}}}
+          InputProps={{startAdornment: startAdornment, endAdornment: endAdornment, classes: {root: classes.inputRoot, multiline: multilineClassName, input: inputClassName, formControl: inputFormControlClassName}}}
           InputLabelProps={{shrink: true, classes: {root: classes.inputLabelRoot, outlined: classes.inputLabelRootShrink}}}
           FormHelperTextProps={{classes: {root: classes.helperTextRoot, contained: classes.helperTextContained}}}
         />

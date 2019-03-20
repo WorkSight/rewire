@@ -67,7 +67,7 @@ async function run() {
     client.mutation(mutation, {text: 'booga'})
   ]);
   // let r  = client.executeQuery({query, variables: {size: 2}});
-  let r = await client.executeMutation({query: mutation, variables: {text: 'todo'}});
+  // let r = await client.executeMutation({query: mutation, variables: {text: 'todo'}});
   // let firstResult: any = result;
   console.log(r2);
   watch(() => r2.data.search.results[0].employee.name, () => console.log('changed'));

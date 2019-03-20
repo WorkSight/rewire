@@ -6,7 +6,7 @@ import {
   computed,
   root,
   observe
-} from 'rewire-core';
+}                      from 'rewire-core';
 import MailOutlineIcon from '@material-ui/icons/MailOutline';
 import PhoneIcon       from '@material-ui/icons/Phone';
 import AccessTimeIcon  from '@material-ui/icons/AccessTime';
@@ -19,10 +19,9 @@ import editor, {
   TextAlignment,
   TextVariant,
   IField,
-} from '../components/editors';
-import {and, isEmail, isRegEx} from './Validator';
-import {defaultPhoneFormat}    from '../components/PhoneField';
-import { createElement }       from 'react';
+}                                from '../components/editors';
+import { and, isEmail, isRegEx } from './Validator';
+import { defaultPhoneFormat }    from '../components/PhoneField';
 
 export type IFieldTypes = 'string' | 'multistring' | 'static' | 'reference' | 'select' | 'multiselect' | 'number' | 'boolean' | 'switch' | 'date' | 'time' | 'avatar' | 'password' | 'email' | 'phone' | 'color';
 
@@ -44,9 +43,9 @@ export interface IFieldDefn {
 }
 
 export interface IEditorField extends IField {
-  Editor: React.SFC<any>;
-  type: IFieldTypes;
-  updateOnChange: boolean;
+  Editor:           React.FunctionComponent<any>;
+  type:             IFieldTypes;
+  updateOnChange:   boolean;
   validateOnUpdate: boolean;
   linkedFieldNames: string[];
 
@@ -301,7 +300,7 @@ export default class Form {
       this.setFieldValue(field.name, value);
     };
 
-    return (props) => createElement(editor(editorType!, editProps), {...props, field: field, onValueChange});
+    return (props) => React.createElement(editor(editorType!, editProps), {...props, field: field, onValueChange});
   }
 
   private createField(name: string, fieldDefn: BaseField): IEditorField {
@@ -328,19 +327,19 @@ export default class Form {
       // add default end adornment to field depending on field type if using defaults, and it wasn't explicitly set to something (including undefined)
       switch (this.field[name].type) {
         case 'date':
-          this.field[name].endAdornment = () => createElement(DateRangeIcon, undefined, undefined);
+          this.field[name].endAdornment = () => React.createElement(DateRangeIcon, undefined, undefined);
           break;
         case 'time':
-          this.field[name].endAdornment = () => createElement(AccessTimeIcon, undefined, undefined);
+          this.field[name].endAdornment = () => React.createElement(AccessTimeIcon, undefined, undefined);
           break;
         case 'email':
-          this.field[name].endAdornment = () => createElement(MailOutlineIcon, undefined, undefined);
+          this.field[name].endAdornment = () => React.createElement(MailOutlineIcon, undefined, undefined);
           break;
         case 'phone':
-          this.field[name].endAdornment = () => createElement(PhoneIcon, {style: {transform: 'scaleX(-1)'}}, undefined);
+          this.field[name].endAdornment = () => React.createElement(PhoneIcon, {style: {transform: 'scaleX(-1)'}}, undefined);
           break;
         case 'password':
-          this.field[name].endAdornment = () => createElement('span', undefined, undefined);
+          this.field[name].endAdornment = () => React.createElement('span', undefined, undefined);
           break;
       }
     }

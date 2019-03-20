@@ -20,11 +20,10 @@ import {
   ICellDataMap,
   IRowOptions,
   IRowData,
-}                              from './GridTypes';
-import createRow, {RowModel}   from './RowModel';
-import {ColumnModel}           from './ColumnModel';
-import {CellModel}             from './CellModel';
-import * as is                 from 'is';
+}                    from './GridTypes';
+import createRow     from './RowModel';
+import {ColumnModel} from './ColumnModel';
+import {CellModel}   from './CellModel';
 import {
   observable,
   computed,

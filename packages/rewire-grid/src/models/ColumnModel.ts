@@ -1,10 +1,29 @@
-import { IColumn, ICell, IColumnOptions, EditorType, IColumnEditor, SortDirection, IGrid, TextAlignment, VerticalAlignment, IError} from './GridTypes';
-import {IValidateFnData} from './Validator';
-import {editor, compare, defaultPhoneFormat, defaultPhoneMask} from 'rewire-ui';
-import {freeze, DataSignal, property} from 'rewire-core';
-import * as is from 'is';
+import {
+  IColumn,
+  ICell,
+  IColumnOptions,
+  EditorType,
+  IColumnEditor,
+  SortDirection,
+  IGrid,
+  TextAlignment,
+  VerticalAlignment
+} from './GridTypes';
+import {
+  editor,
+  compare,
+  defaultPhoneFormat,
+  defaultPhoneMask
+} from 'rewire-ui';
+import {
+  freeze,
+  DataSignal,
+  property
+} from 'rewire-core';
+import { IValidateFnData } from './Validator';
+import * as is             from 'is';
 
-let id = 0;
+let id            = 0;
 const toLowerCase = (value: string) => String(value).toLowerCase();
 
 export class ColumnModel implements IColumn {
@@ -12,27 +31,27 @@ export class ColumnModel implements IColumn {
   private _readOnly     : DataSignal<boolean | undefined>;
   private _verticalAlign: DataSignal<VerticalAlignment | undefined>;
 
-  id            : number;
-  grid          : IGrid;
-  name          : string;
-  title         : string;
-  editable      : boolean;
-  fixed         : boolean;
-  width?        : string;
-  visible       : boolean;
-  align?        : TextAlignment;
-  colSpan       : number;
-  rowSpan       : number;
-  position      : number;
-  sort?         : SortDirection;
-  canSort       : boolean;
-  tooltip?      : string;
-  cls?          : any;
-  typeOptions?  : any;
-  type          : EditorType;
-  renderer?     : React.SFC<any>;
-  editor?       : React.SFC<any>;
-  validator?    : IValidateFnData;
+  id           : number;
+  grid         : IGrid;
+  name         : string;
+  title        : string;
+  editable     : boolean;
+  fixed        : boolean;
+  width?       : string;
+  visible      : boolean;
+  align?       : TextAlignment;
+  colSpan      : number;
+  rowSpan      : number;
+  position     : number;
+  sort?        : SortDirection;
+  canSort      : boolean;
+  tooltip?     : string;
+  cls?         : any;
+  typeOptions? : any;
+  type         : EditorType;
+  renderer?    : React.SFC<any>;
+  editor?      : React.SFC<any>;
+  validator?   : IValidateFnData;
 
   onValueChange?(cell: ICell, v: any): void;
   map?(value: any): string;
@@ -188,7 +207,7 @@ function getNumberString(value: any): string {
 function splitDecimal(numStr: string): any {
   const hasNagation = numStr[0] === '-';
   const addNegation = hasNagation;
-  numStr = numStr.replace('-', '');
+  numStr            = numStr.replace('-', '');
 
   const parts         = numStr.split('.');
   const beforeDecimal = parts[0];

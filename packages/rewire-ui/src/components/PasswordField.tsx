@@ -175,7 +175,7 @@ class PasswordFieldInternal extends React.Component<PasswordFieldPropsStyled, IP
           onKeyDown={this.props.onKeyDown}
           onChange={(evt: React.ChangeEvent<HTMLInputElement>) => this.props.onValueChange(evt.target.value)}
           inputProps={{autoFocus: this.props.autoFocus, className: this.props.classes.nativeInput, style: {textAlign: this.props.align || 'left'}}}
-          InputProps={{endAdornment: adornment, classes: {root: this.props.classes.inputRoot, input: inputClassName, inputType: this.props.classes.inputType, formControl: inputFormControlClassName}}}
+          InputProps={{endAdornment: adornment, classes: {root: this.props.classes.inputRoot, input: inputClassName, formControl: inputFormControlClassName}}}
           InputLabelProps={{shrink: true, classes: {root: this.props.classes.inputLabelRoot, outlined: this.props.classes.inputLabelRootShrink}}}
           FormHelperTextProps={{classes: {root: this.props.classes.helperTextRoot, contained: this.props.classes.helperTextContained}}}
         />
