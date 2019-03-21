@@ -6,47 +6,46 @@ import {
   computed,
   root,
   observe
-} from 'rewire-core';
+}                      from 'rewire-core';
 import MailOutlineIcon from '@material-ui/icons/MailOutline';
 import PhoneIcon       from '@material-ui/icons/Phone';
 import AccessTimeIcon  from '@material-ui/icons/AccessTime';
 import DateRangeIcon   from '@material-ui/icons/DateRange';
 import Validator, {
   ValidationResult,
-  IValidateFnData} from './Validator';
+  IValidateFnData}     from './Validator';
 import editor, {
   EditorType,
   TextAlignment,
   TextVariant,
   IField,
-} from '../components/editors';
-import {and, isEmail, isRegEx} from './Validator';
-import {defaultPhoneFormat} from '../components/PhoneField';
-import { createElement } from 'react';
+}                                from '../components/editors';
+import { and, isEmail, isRegEx } from './Validator';
+import { defaultPhoneFormat }    from '../components/PhoneField';
 
 export type IFieldTypes = 'string' | 'multistring' | 'static' | 'reference' | 'select' | 'multiselect' | 'number' | 'boolean' | 'switch' | 'date' | 'time' | 'avatar' | 'password' | 'email' | 'phone' | 'color' | 'mask';
 
 export interface IFieldDefn {
-  label(text: string): IFieldDefn;
-  placeholder(text: string): IFieldDefn;
-  align(text: TextAlignment): IFieldDefn;
-  variant(text: TextVariant): IFieldDefn;
-  autoFocus(): IFieldDefn;
-  disabled(action: (field: IEditorField) => boolean): IFieldDefn;
-  disableErrors(disableErrors?: boolean): IFieldDefn;
-  startAdornment(adornment?: () => JSX.Element): IFieldDefn;
-  endAdornment(adornment?: () => JSX.Element): IFieldDefn;
-  editor(editorType: EditorType, editProps?: any): IFieldDefn;
-  updateOnChange(updateOnChange?: boolean): IFieldDefn;
-  validateOnUpdate(validateOnUpdate?: boolean): IFieldDefn;
-  validators(fnData: IValidateFnData): IFieldDefn;
+  label(text: string):                                            IFieldDefn;
+  placeholder(text: string):                                      IFieldDefn;
+  align(text: TextAlignment):                                     IFieldDefn;
+  variant(text: TextVariant):                                     IFieldDefn;
+  autoFocus():                                                    IFieldDefn;
+  disabled(action: (field: IEditorField) => boolean):             IFieldDefn;
+  disableErrors(disableErrors?: boolean):                         IFieldDefn;
+  startAdornment(adornment?: () => JSX.Element):                  IFieldDefn;
+  endAdornment(adornment?: () => JSX.Element):                    IFieldDefn;
+  editor(editorType: EditorType, editProps?: any):                IFieldDefn;
+  updateOnChange(updateOnChange?: boolean):                       IFieldDefn;
+  validateOnUpdate(validateOnUpdate?: boolean):                   IFieldDefn;
+  validators(fnData: IValidateFnData):                            IFieldDefn;
   onValueChange(handleValueChange: (form: Form, v: any) => void): IFieldDefn;
 }
 
 export interface IEditorField extends IField {
-  Editor: React.SFC<any>;
-  type: IFieldTypes;
-  updateOnChange: boolean;
+  Editor:           React.FunctionComponent<any>;
+  type:             IFieldTypes;
+  updateOnChange:   boolean;
   validateOnUpdate: boolean;
   linkedFieldNames: string[];
 
@@ -77,7 +76,7 @@ interface IBaseFieldDefn {
 
   onValueChange?(form: Form, v: any): void;
   startAdornment?(): JSX.Element;
-  endAdornment?(): JSX.Element;
+  endAdornment?():   JSX.Element;
 }
 
 class BaseField implements IFieldDefn {
@@ -168,29 +167,29 @@ class BaseField implements IFieldDefn {
 export type IInitialValuesValidationModeType = 'all' | 'withValues' | 'none';
 
 export interface IFormOptions {
-  defaultAdornmentsEnabled?: boolean;
+  defaultAdornmentsEnabled?:    boolean;
   initialValuesValidationMode?: IInitialValuesValidationModeType;
-  disableErrors?: boolean;
-  variant?: TextVariant;
-  updateOnChange?: boolean;
-  validateOnUpdate?: boolean;
+  disableErrors?:               boolean;
+  variant?:                     TextVariant;
+  updateOnChange?:              boolean;
+  validateOnUpdate?:            boolean;
 }
 
 export default class Form {
-  private _value             : ObjectType;
-  private dispose            : () => void;
-  private _hasChanges        : () => boolean;
-  private _hasErrors         : () => boolean;
-  private _initial           : ObjectType;
-  defaultAdornmentsEnabled   : boolean;
+  private _value:              ObjectType;
+  private dispose:             () => void;
+  private _hasChanges:         () => boolean;
+  private _hasErrors:          () => boolean;
+  private _initial:            ObjectType;
+  defaultAdornmentsEnabled:    boolean;
   initialValuesValidationMode: IInitialValuesValidationModeType;
-  disableErrors              : boolean;
-  variant                    : TextVariant;
-  updateOnChange             : boolean;
-  validateOnUpdate           : boolean;
-  fields                     : IEditorField[];
-  validator                  : Validator;
-  field                      : {[index: string]: IEditorField};
+  disableErrors:               boolean;
+  variant:                     TextVariant;
+  updateOnChange:              boolean;
+  validateOnUpdate:            boolean;
+  fields:                      IEditorField[];
+  validator:                   Validator;
+  field:                       { [index: string]: IEditorField };
 
   private constructor(fields: IFieldDefns, initial?: ObjectType, options?: IFormOptions) {
     this.field                       = observable({});
@@ -302,46 +301,46 @@ export default class Form {
       this.setFieldValue(field.name, value);
     };
 
-    return (props) => createElement(editor(editorType!, editProps), {...props, field: field, onValueChange});
+    return (props) => React.createElement(editor(editorType!, editProps), {...props, field: field, onValueChange});
   }
 
   private createField(name: string, fieldDefn: BaseField): IEditorField {
     this.field[name] = {
       name,
-      autoFocus: fieldDefn.typeDefn.autoFocus,
-      type: fieldDefn.typeDefn.type,
-      placeholder: fieldDefn.typeDefn.placeholder,
-      align: fieldDefn.typeDefn.align,
-      label: fieldDefn.typeDefn.label,
-      disabled: fieldDefn.typeDefn.disabled,
-      disableErrors: fieldDefn.typeDefn.disableErrors !== undefined ? fieldDefn.typeDefn.disableErrors : this.disableErrors,
-      variant: fieldDefn.typeDefn.variant || this.variant,
-      updateOnChange: fieldDefn.typeDefn.updateOnChange !== undefined ? fieldDefn.typeDefn.updateOnChange : this.updateOnChange,
+      autoFocus:        fieldDefn.typeDefn.autoFocus,
+      type:             fieldDefn.typeDefn.type,
+      placeholder:      fieldDefn.typeDefn.placeholder,
+      align:            fieldDefn.typeDefn.align,
+      label:            fieldDefn.typeDefn.label,
+      disabled:         fieldDefn.typeDefn.disabled,
+      disableErrors:    fieldDefn.typeDefn.disableErrors !== undefined ? fieldDefn.typeDefn.disableErrors : this.disableErrors,
+      variant:          fieldDefn.typeDefn.variant || this.variant,
+      updateOnChange:   fieldDefn.typeDefn.updateOnChange !== undefined ? fieldDefn.typeDefn.updateOnChange : this.updateOnChange,
       validateOnUpdate: fieldDefn.typeDefn.validateOnUpdate !== undefined ? fieldDefn.typeDefn.validateOnUpdate : this.validateOnUpdate,
-      visible: true,
-      startAdornment: fieldDefn.typeDefn.startAdornment,
-      endAdornment: fieldDefn.typeDefn.endAdornment,
+      visible:          true,
+      startAdornment:   fieldDefn.typeDefn.startAdornment,
+      endAdornment:     fieldDefn.typeDefn.endAdornment,
       linkedFieldNames: fieldDefn.typeDefn.validators && fieldDefn.typeDefn.validators.linkedFieldNames || [],
-      onValueChange: fieldDefn.typeDefn.onValueChange,
+      onValueChange:    fieldDefn.typeDefn.onValueChange,
     } as IEditorField;
 
     if (this.defaultAdornmentsEnabled && !Object.prototype.hasOwnProperty.call(fieldDefn.typeDefn, 'endAdornment')) {
       // add default end adornment to field depending on field type if using defaults, and it wasn't explicitly set to something (including undefined)
       switch (this.field[name].type) {
         case 'date':
-          this.field[name].endAdornment = () => createElement(DateRangeIcon, undefined, undefined);
+          this.field[name].endAdornment = () => React.createElement(DateRangeIcon, undefined, undefined);
           break;
         case 'time':
-          this.field[name].endAdornment = () => createElement(AccessTimeIcon, undefined, undefined);
+          this.field[name].endAdornment = () => React.createElement(AccessTimeIcon, undefined, undefined);
           break;
         case 'email':
-          this.field[name].endAdornment = () => createElement(MailOutlineIcon, undefined, undefined);
+          this.field[name].endAdornment = () => React.createElement(MailOutlineIcon, undefined, undefined);
           break;
         case 'phone':
-          this.field[name].endAdornment = () => createElement(PhoneIcon, {style: {transform: 'scaleX(-1)'}}, undefined);
+          this.field[name].endAdornment = () => React.createElement(PhoneIcon, {style: {transform: 'scaleX(-1)'}}, undefined);
           break;
         case 'password':
-          this.field[name].endAdornment = () => createElement('span', undefined, undefined);
+          this.field[name].endAdornment = () => React.createElement('span', undefined, undefined);
           break;
       }
     }
@@ -399,7 +398,7 @@ export default class Form {
     }, {});
   }
 
-  private toObject(): ObjectType {
+  public toObject(): ObjectType {
     return this.fields.reduce((prev: ObjectType, current) => {
       prev[current.name] = current;
       return prev;
@@ -445,7 +444,6 @@ export default class Form {
         fld.error = result.errors[fieldName];
       }
     });
-
     return result;
   }
 
@@ -465,7 +463,6 @@ export default class Form {
         fld.error = result.errors[fieldName];
       }
     });
-
     return result;
   }
 

@@ -1,6 +1,6 @@
-import gql                   from 'graphql-tag';
-import { watch }            from 'rewire-core';
-import {client as create}   from 'rewire-graphql';
+import gql                from 'graphql-tag';
+import {client as create} from 'rewire-graphql';
+
 const client = create('http://pgdev:30109/graphql');
 
 const query = gql`
@@ -54,9 +54,9 @@ const employees = gql`
 async function run() {
   client.bearer = 'a6307af210f61eccc89e232d702da1eafedef6a9ebb78147';
   const r = client.subscribe(subscriptionQuery);
-  r.observe((data) => {
+  r.observe((data: any) => {
     console.log(data);
-  })
+  });
   let r2: any = await client.query(employees);
   console.log(r2);
   // r2 = await client.query(query, {size: 2});
@@ -84,4 +84,4 @@ async function run() {
   // // console.log(result);
 }
 
-run();
+// run();

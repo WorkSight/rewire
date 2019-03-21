@@ -45,7 +45,6 @@ export class UTC {
   }
 
   toTimestampString() {
-    let d       = new Date(this._dt);
     return `${this.toDateString()} ${this.toTimeString()}`;
   }
 

@@ -135,7 +135,7 @@ class SelectInternal<T> extends React.Component<SelectInternalProps<T>, any> {
     const { suggestion, index, isHighlighted, displayName, fontSize} = params;
     if (this.props.renderSuggestion) {
       return (
-        <MenuItem value={displayName} component='div' key={index} classes={{root: this.props.classes.selectMenuItem}} style={{fontSize: fontSize}}>
+        <MenuItem value={displayName} key={index} classes={{root: this.props.classes.selectMenuItem}} style={{fontSize: fontSize}}>
           {this.props.renderSuggestion(suggestion, {isHighlighted, displayName, index})}
         </MenuItem>
       );
@@ -238,21 +238,21 @@ class SelectInternal<T> extends React.Component<SelectInternalProps<T>, any> {
 
   shouldComponentUpdate(nextProps: ICustomProps<T> & React.InputHTMLAttributes<any>, nextState: any, nextContext: any) {
     return (
-        (nextProps.selectedItem !== this.props.selectedItem) ||
-        (nextProps.error !== this.props.error) ||
-        (nextProps.disabled !== this.props.disabled) ||
-        (nextProps.visible !== this.props.visible) ||
-        (nextState.suggestions !== this.state.suggestions) ||
-        (nextState.isOpen !== this.state.isOpen) ||
-        (nextProps.label !== this.props.label) ||
-        (nextProps.placeholder !== this.props.placeholder) ||
-        (nextProps.align !== this.props.align) ||
-        (nextProps.variant !== this.props.variant) ||
-        (nextProps.multiple !== this.props.multiple) ||
-        (nextProps.disableErrors !== this.props.disableErrors) ||
+        (nextProps.selectedItem   !== this.props.selectedItem)   ||
+        (nextProps.error          !== this.props.error)          ||
+        (nextProps.disabled       !== this.props.disabled)       ||
+        (nextProps.visible        !== this.props.visible)        ||
+        (nextState.suggestions    !== this.state.suggestions)    ||
+        (nextState.isOpen         !== this.state.isOpen)         ||
+        (nextProps.label          !== this.props.label)          ||
+        (nextProps.placeholder    !== this.props.placeholder)    ||
+        (nextProps.align          !== this.props.align)          ||
+        (nextProps.variant        !== this.props.variant)        ||
+        (nextProps.multiple       !== this.props.multiple)       ||
+        (nextProps.disableErrors  !== this.props.disableErrors)  ||
         (nextProps.startAdornment !== this.props.startAdornment) ||
-        (nextProps.endAdornment !== this.props.endAdornment) ||
-        (nextState.labelWidth !== this.state.labelWidth)
+        (nextProps.endAdornment   !== this.props.endAdornment)   ||
+        (nextState.labelWidth     !== this.state.labelWidth)
       );
   }
 

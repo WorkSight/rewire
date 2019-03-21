@@ -1,20 +1,20 @@
-import * as React      from 'react';
-import AutoComplete    from './AutoComplete';
-import Select          from './Select';
-import {Observe}       from 'rewire-core';
-import TextField       from './TextField';
-import PasswordField   from './PasswordField';
-import StaticField     from './StaticField';
-import NumberField     from './NumberField';
-import PhoneField      from './PhoneField';
-import CheckField      from './CheckField';
-import SwitchField     from './SwitchField';
-import TimeInputField  from './TimeInputField';
-import AvatarField     from './AvatarField';
-import ColorField      from './ColorField';
-import MaskField       from './MaskField';
-import {utc}           from 'rewire-common';
-import * as is         from 'is';
+import * as React     from'react';
+import AutoComplete   from'./AutoComplete';
+import Select         from'./Select';
+import {Observe}      from'rewire-core';
+import TextField      from'./TextField';
+import PasswordField  from'./PasswordField';
+import StaticField    from'./StaticField';
+import NumberField    from'./NumberField';
+import PhoneField     from'./PhoneField';
+import CheckField     from'./CheckField';
+import SwitchField    from'./SwitchField';
+import TimeInputField from'./TimeInputField';
+import AvatarField    from'./AvatarField';
+import ColorField     from'./ColorField';
+import MaskField      from'./MaskField';
+import {utc}          from'rewire-common';
+import * as is        from'is';
 
 export interface IField {
   name           : string;
@@ -30,14 +30,12 @@ export interface IField {
   disableErrors? : boolean;
 
   startAdornment?(): JSX.Element;
-  endAdornment?(): JSX.Element;
+  endAdornment?():   JSX.Element;
 }
 
-export type EditorType = 'text' | 'multitext' | 'static' | 'auto-complete' | 'select' | 'multiselect' | 'date' | 'time' | 'number' | 'checked' | 'switch' | 'password' | 'email' | 'phone' | 'avatar' | 'color' | 'mask' | 'none';
-
+export type EditorType    = 'text' | 'multitext' | 'static' | 'auto-complete' | 'select' | 'multiselect' | 'date' | 'time' | 'number' | 'checked' | 'switch' | 'password' | 'email' | 'phone' | 'avatar' | 'color' | 'mask' | 'none';
 export type TextAlignment = 'left' | 'right' | 'center';
-
-export type TextVariant = 'standard' | 'outlined';
+export type TextVariant   = 'standard' | 'outlined';
 
 export function compare<T>(x?: T, y?: T) {
   if (x && !y) {
@@ -68,13 +66,13 @@ export function compare<T>(x?: T, y?: T) {
 }
 
 export type TextEditorProps = {
-  field: IField,
-  className?: string,
-  classes?: React.CSSProperties,
-  selectOnFocus?   : boolean,
-  endOfTextOnFocus?: boolean,
+  field                 : IField,
+  className?            : string,
+  classes?              : React.CSSProperties,
+  selectOnFocus?        : boolean,
+  endOfTextOnFocus?     : boolean,
   cursorPositionOnFocus?: number,
-  onValueChange: (v: any) => void,
+  onValueChange         : (v: any) => void,
 };
 
 export default function editor(type: EditorType, propsForEdit?: any): React.SFC<TextEditorProps> {

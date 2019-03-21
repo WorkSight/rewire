@@ -34,7 +34,6 @@ export class Fetch {
       return body;
     }
 
-
     if ((response.status >= 200) && (response.status < 300)) {
       if (response.status === 200) {
         let v = await response.text();
@@ -51,7 +50,6 @@ export class Fetch {
     } catch (ex)  {
       // messages.channel('ui-messages').action('error').post('unknown error occurred');
     }
-
     throw new Error('exception');
   }
 
@@ -68,7 +66,6 @@ export class Fetch {
       }
       return undefined;
     }
-
     throw new Error('exception');
   }
 
@@ -79,12 +76,12 @@ export class Fetch {
     };
     if (this.server.cors) {
       opts.mode    = 'cors';
-      // Object.assign(opts.headers, {
-      //   'Accept': '*/*',
-      //   'Access-Control-Allow-Origin': 'http://localhost:3000',
-      //   'Access-Control-Request-Method': opts.method || 'get',
-      //   'Access-Control-Request-Headers' : 'authorization,content-type'
-      // });
+      Object.assign(opts.headers, {
+        'Accept':                          '*/*',
+        'Access-Control-Allow-Origin':     'http://localhost:3000',
+        'Access-Control-Request-Method':   opts.method || 'get',
+        'Access-Control-Request-Headers' : 'authorization,content-type'
+      });
     }
     if (isBlob) return this.blob(await Promise.race([timeout(ms), fetch(url, opts)]));
     return this.json(await Promise.race([timeout(ms), fetch(url, opts)]));

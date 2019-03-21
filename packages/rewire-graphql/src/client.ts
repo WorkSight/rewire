@@ -66,7 +66,7 @@ class Client implements IClient {
             ...headers
           },
           method: 'POST',
-          mode: 'cors',
+          mode:   'cors',
           ...fetchOptions,
         };
         if (this.bearer) reqInit.headers.Authorization = 'Bearer ' + this.bearer;

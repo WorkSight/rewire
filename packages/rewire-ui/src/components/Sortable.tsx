@@ -11,7 +11,11 @@ import {
   DraggableProvided,
   DraggableStateSnapshot,
 }                 from 'react-beautiful-dnd';
-import { StyleProps, WithStyle, withStyles }  from './styles';
+import {
+  StyleProps,
+  WithStyle,
+  withStyles
+}                 from './styles';
 import {Observe}  from 'rewire-core';
 import Icon       from '@material-ui/core/Icon';
 import {omit}     from 'rewire-common';
@@ -26,11 +30,10 @@ import {omit}     from 'rewire-common';
 //   return '#' + (0x1000000 + (Math.round((t - R) * p) + R) * 0x10000 + (Math.round((t - G) * p) + G) * 0x100 + (Math.round((t - B) * p) + B)).toString(16).slice(1);
 // }
 
-
 const styles = {
   'item-container': {
-    display: 'flex',
-    flex: '1',
+    display:    'flex',
+    flex:       '1',
     // height: 48,
     alignItems: 'center',
   },
@@ -41,21 +44,21 @@ const styles = {
     margin     : 0,
     // paddingLeft: '8px',
     '& .drag-handle': {
-      height: 24,
+      height:       24,
       paddingRight: 4,
-      color: '#0002',
+      color:        '#0002',
     },
     '&:focus': {
       backgroundColor: '#ccc2',
-      outline: 'none',
+      outline:         'none',
     },
   },
   'droppable-container': {
-    display: 'flex',
+    display:       'flex',
     flexDirection: 'column',
-    overflow: 'hidden',
-    transition: 'background-color 0.1s ease, opacity 0.1s ease',
-    userSelect: 'none',
+    overflow:      'hidden',
+    transition:    'background-color 0.1s ease, opacity 0.1s ease',
+    userSelect:    'none',
     '&.is-dragging-over': {
       // filter: 'brightness(110%)',
     },
@@ -67,7 +70,7 @@ const styles = {
     padding: '0px',
   },
   'scroll-container': {
-    position: 'relative',
+    position:  'relative',
     overflowX: 'hidden',
     overflowY: 'auto',
   },

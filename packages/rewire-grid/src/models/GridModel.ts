@@ -24,14 +24,13 @@ import {
   IRowOptions,
   IRowData,
 }                              from './GridTypes';
+import createRow               from './RowModel';
+import {ColumnModel}           from './ColumnModel';
+import {CellModel}             from './CellModel';
 import {
   gridStaticKeybinds,
   gridDefaultVariableKeybinds
 }                              from './GridKeybinds';
-import createRow, {RowModel}   from './RowModel';
-import {ColumnModel}           from './ColumnModel';
-import {CellModel}             from './CellModel';
-import * as is                 from 'is';
 import * as merge              from 'deepmerge';
 import {
   observable,

@@ -1,16 +1,16 @@
-import * as React            from 'react';
-import Modal, { ActionType } from '../models/Modal';
-import classNames            from 'classnames';
-import {Observe}             from 'rewire-core';
-import Typography            from '@material-ui/core/Typography';
-import Dialog                from '@material-ui/core/Dialog';
-import Button, {ButtonProps} from '@material-ui/core/Button';
-import Divider               from '@material-ui/core/Divider';
-import Icon                  from '@material-ui/core/Icon';
-import Grow                  from '@material-ui/core/Grow';
-import {Theme}               from '@material-ui/core/styles';
+import * as React                from 'react';
+import Modal, { ActionType }     from '../models/Modal';
+import classNames                from 'classnames';
+import { Observe }               from 'rewire-core';
+import Typography                from '@material-ui/core/Typography';
+import Dialog                    from '@material-ui/core/Dialog';
+import Button, { ButtonProps }   from '@material-ui/core/Button';
+import Divider                   from '@material-ui/core/Divider';
+import Icon                      from '@material-ui/core/Icon';
+import Grow                      from '@material-ui/core/Grow';
+import { Theme }                 from '@material-ui/core/styles';
+import { WithStyle, withStyles } from './styles';
 import './Dialog.css';
-import {WithStyle, withStyles} from './styles';
 
 let styles = (theme: Theme) => ({
   root: {
@@ -65,9 +65,9 @@ let styles = (theme: Theme) => ({
 });
 
 export interface IDefaultActionRendererStyles {
-  root?: string;
-  icon?: string;
-  label?: string;
+  button?: string;
+  icon?:   string;
+  label?:  string;
 }
 export type ActionRenderType = (props: {label: string, action: ActionType, isDisabled: boolean, variant?: ButtonProps['variant'], classes?: IDefaultActionRendererStyles}) => JSX.Element;
 export const DefaultActionRenderer: ActionRenderType = ({label, action, isDisabled, variant, classes}) => (
@@ -85,6 +85,7 @@ const Transition = (props: any) => <Grow {...props} timeout={TRANSITION_TIMEOUT}
 export interface IDialogProps {
   dialog                : Modal;
   classes?              : React.CSSProperties;
+  fullWidth?            : boolean;
   fullScreen?           : boolean;
   disableEscapeKeyDown? : boolean;
   hideBackdrop?         : boolean;
@@ -102,8 +103,8 @@ type DialogProps = WithStyle<ReturnType<typeof styles>, IDialogProps>;
 
 class DialogInternal extends React.Component<DialogProps> {
   render() {
-    const {classes, children, dialog, ButtonRenderer, fullScreen, maxWidth, title, disableEscapeKeyDown, hideBackdrop, transition, transitionDuration, disableTransition, buttonVariant} = this.props;
-    const {buttonRoot, buttonIcon, buttonLabel, ...rest} = classes;
+    const {classes, children, dialog, ButtonRenderer, fullWidth, fullScreen, maxWidth, title, disableEscapeKeyDown, hideBackdrop, transition, transitionDuration, disableTransition, buttonVariant} = this.props;
+    const {buttonRoot, buttonIcon, buttonLabel} = classes;
     const buttonClasses           = {root: buttonRoot, icon: buttonIcon, label: buttonLabel};
     const escapeAction            = disableEscapeKeyDown ? undefined : () => dialog.close();
     const transitionToUse         = transition ? transition : Transition;
@@ -116,7 +117,7 @@ class DialogInternal extends React.Component<DialogProps> {
 
     return (
       <Observe render={() => (
-        <Dialog classes={{paper: classes.root, paperScrollPaper: classes.scrollPaper}} open={dialog.isOpen} fullWidth maxWidth={maxWidth} hideBackdrop={hideBackdrop} transitionDuration={transitionTime} TransitionComponent={transitionAction} fullScreen={fullScreen} disableEscapeKeyDown={disableEscapeKeyDown} onEscapeKeyDown={escapeAction}>
+        <Dialog classes={{paper: classes.root, paperScrollPaper: classes.scrollPaper}} open={dialog.isOpen} maxWidth={maxWidth} hideBackdrop={hideBackdrop} transitionDuration={transitionTime} TransitionComponent={transitionAction} fullWidth={fullWidth} fullScreen={fullScreen} disableEscapeKeyDown={disableEscapeKeyDown} onEscapeKeyDown={escapeAction}>
           {hasTitle &&
             <div className={classes.heading}>
               <Typography variant='h6'>{(title && title(dialog)) || dialog.title}</Typography>
