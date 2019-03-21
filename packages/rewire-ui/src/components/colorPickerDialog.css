@@ -1,0 +1,7 @@
+/*
+  Necessary css styling because React-Color does not provide a proper way to get at all of the inner component styles.
+*/
+
+.sketch-picker span, .sketch-picker input {
+    font-size: 13px !important;
+}

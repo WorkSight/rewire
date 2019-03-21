@@ -483,7 +483,7 @@ class GridModel implements IGrid, IDisposable {
     if (this.focusedCell) {
       this.focusedCell.setFocus();
     }
-        }
+  }
 
   revertSelectedCells() {
     if (this.selectedCells.length <= 0) return;
@@ -1231,6 +1231,7 @@ class GridModel implements IGrid, IDisposable {
   }
 
   clearSelection() {
+    this.startCell = undefined;
     this.editCell(undefined);
     this.selectCells([]);
   }

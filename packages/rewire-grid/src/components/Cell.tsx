@@ -159,13 +159,9 @@ class Cell extends React.PureComponent<CellProps, {}> {
       return;
     }
 
-    this.grid.isMouseDown = true;
     if (!evt.shiftKey || !this.grid.startCell) {
       this.grid.startCell = this.cell;
     }
-
-    evt.preventDefault();
-    evt.stopPropagation();
   }
 
   handleMouseEnter = (evt: React.MouseEvent<any>) => {
@@ -173,6 +169,9 @@ class Cell extends React.PureComponent<CellProps, {}> {
       return;
     }
 
+    if (!this.grid.startCell) {
+      this.grid.startCell = this.cell;
+    }
     this.grid.selectCellsTo(this.cell, evt.ctrlKey);
   }
 
@@ -197,6 +196,8 @@ class Cell extends React.PureComponent<CellProps, {}> {
     } else {
       this.grid.selectCells([this.cell]);
     }
+
+    evt.stopPropagation();
   }
 
   handleFocus = (evt: React.FocusEvent<any>) => {
