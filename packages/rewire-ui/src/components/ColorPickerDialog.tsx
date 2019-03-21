@@ -3,6 +3,7 @@ import {SketchPicker}          from 'react-color';
 import Popover                 from '@material-ui/core/Popover';
 import {Theme}                 from '@material-ui/core/styles';
 import {WithStyle, withStyles} from './styles';
+import './colorPickerDialog.css';
 
 const styles = (theme: Theme) => ({
 });

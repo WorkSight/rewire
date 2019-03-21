@@ -223,6 +223,7 @@ class AutoComplete<T> extends React.Component<AutoCompleteProps<T>, any> {
     const { getMenuProps, isOpen, children, classes } = options;
     const menuProps = {
       onMouseDown: this.handleMenuMouseDown,
+      onMouseUp: this.handleMenuMouseUp,
       onClick: this.handleMenuClick,
       onDoubleClick: this.handleMenuDoubleClick,
     };
@@ -288,8 +289,9 @@ class AutoComplete<T> extends React.Component<AutoCompleteProps<T>, any> {
             });
             return;
           }
-          event.stopPropagation();
           event.preventDefault();
+          event.stopPropagation();
+          event.nativeEvent.stopImmediatePropagation();
         }
         break;
       case 37:
@@ -298,24 +300,34 @@ class AutoComplete<T> extends React.Component<AutoCompleteProps<T>, any> {
       case 40:
         if (this.state.suggestions.length > 0) {
           event.stopPropagation();
+          event.nativeEvent.stopImmediatePropagation();
         }
         break;
     }
   }
 
   handleMenuMouseDown = (event: React.MouseEvent<any>) => {
-    event.stopPropagation();
     event.preventDefault();
+    event.stopPropagation();
+    event.nativeEvent.stopImmediatePropagation();
+  }
+
+  handleMenuMouseUp = (event: React.MouseEvent<any>) => {
+    event.preventDefault();
+    event.stopPropagation();
+    event.nativeEvent.stopImmediatePropagation();
   }
 
   handleMenuClick = (event: React.MouseEvent<any>) => {
-    event.stopPropagation();
     event.preventDefault();
+    event.stopPropagation();
+    event.nativeEvent.stopImmediatePropagation();
   }
 
   handleMenuDoubleClick = (event: React.MouseEvent<any>) => {
-    event.stopPropagation();
     event.preventDefault();
+    event.stopPropagation();
+    event.nativeEvent.stopImmediatePropagation();
   }
 
   componentWillReceiveProps (nextProps: ICustomProps<T>) {
