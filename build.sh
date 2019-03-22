@@ -59,14 +59,10 @@ do
   tsc
   rm tsconfig.json
 
-  # NODE_ENV=development parcel build src/index.ts --no-minify --target node
   if [ ! -z $PUBLISH ];
   then
-    # yarn version --patch --no-git-tag-version
     npm publish --registry https://npm.worksight.services/ --force
     sleep 3s
   fi
   cd ../..
 done
-
-# jq ".main |= \"index.js\" | .typings |=  \"index.js\" | .\"ts:main\" |=  \"ooga.js\"" package.json

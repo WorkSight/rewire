@@ -122,7 +122,7 @@ class AutoComplete<T> extends React.Component<AutoCompleteProps<T>, any> {
     });
   }
 
-  renderInput = (classes: Record<IStyleClasses, string>, error: string | undefined, inputProps: any, InputProps: any, ref: (node: any) => any) => {
+  renderInput = (classes: Record<any, string>, error: string | undefined, inputProps: any, InputProps: any, ref: (node: any) => any) => {
     const {label, disabled, autoFocus, value, ...other}                 = inputProps;
     const {startAdornment, endAdornment, align, variant, disableErrors} = InputProps;
     const inputClassName            = variant === 'outlined' ? classes.inputOutlinedInput : classes.inputInput;
