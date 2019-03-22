@@ -235,6 +235,11 @@ const styles = (theme: Theme) => {
   let cellContainerLineHeight = `${2 * Math.round(bodyFontSizeDigits)}px`;
 
   let styleObj = {
+    root: {
+      display: 'flex',
+      flexDirection: 'column',
+      width: '100%',
+    },
     leftLabels: {
       backgroundColor: theme.palette.leftLabelBackground.main,
       '& tr.alt': {
@@ -457,6 +462,10 @@ const GridInternal = withStyles(styles, class extends React.PureComponent<GridPr
   handleMouseDown = (evt: React.MouseEvent<any>) => {
     this.grid.isMouseDown = true;
 
+    if (!evt.shiftKey) {
+      this.grid.startCell = undefined;
+    }
+
     evt.preventDefault();
     evt.stopPropagation();
   }
@@ -642,12 +651,13 @@ const GridInternal = withStyles(styles, class extends React.PureComponent<GridPr
 
   render() {
     const {style, className, classes} = this.props;
-    const maxHeight = style && style.height !== undefined ? style.height : undefined;
 
     return (
-      <div className={classNames('ws-grid', className, classes.wsGrid)} style={{maxHeight: maxHeight, ...style}} onMouseDown={(this.grid.multiSelect || this.grid.clearSelectionOnBlur) ? this.handleMouseDown : undefined}>
-        {this.renderHeaders()}
-        {this.renderData()}
+      <div className={classNames(classes.root, className)} style={{...style}}>
+        <div className={classNames('ws-grid', classes.wsGrid)} onMouseDown={(this.grid.multiSelect || this.grid.clearSelectionOnBlur) ? this.handleMouseDown : undefined}>
+          {this.renderHeaders()}
+          {this.renderData()}
+        </div>
       </div>
     );
   }

@@ -242,7 +242,6 @@ class SelectInternal<T> extends React.Component<SelectInternalProps<T>, any> {
         let values = this.state.suggestions.filter((v: any) => event.target.value && event.target.value.includes(this.map(v)));
         values = values.length <= 0 ? undefined : values;
         this.props.onSelectItem(values);
-        // this.props.onSelectItem(this.state.suggestions.filter((v: any) => event.target.value && event.target.value.includes(this.map(v))));
       } else {
         this.props.onSelectItem(this.state.suggestions.find((v: any) => event.target.value === this.map(v)));
       }
