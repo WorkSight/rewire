@@ -3620,6 +3620,7 @@ ee-first@1.1.1:
   integrity sha1-WQxhFWsK4vTwJVcyoViyZrxWsh0=
 
 electron-to-chromium@^1.3.116, electron-to-chromium@^1.3.47:
+<<<<<<< HEAD
   version "1.3.119"
   resolved "https://npm.worksight.services/electron-to-chromium/-/electron-to-chromium-1.3.119.tgz#9a7770da667252aeb81f667853f67c2b26e00197"
   integrity sha512-3mtqcAWa4HgG+Djh/oNXlPH0cOH6MmtwxN1nHSaReb9P0Vn51qYPqYwLeoSuAX9loU1wrOBhFbiX3CkeIxPfgg==
@@ -3628,6 +3629,11 @@ encodeurl@~1.0.2:
   version "1.0.2"
   resolved "https://npm.worksight.services/encodeurl/-/encodeurl-1.0.2.tgz#ad3ff4c86ec2d029322f5a02c3a9a606c95b3f59"
   integrity sha1-rT/0yG7C0CkyL1oCw6mmBslbP1k=
+=======
+  version "1.3.118"
+  resolved "https://npm.worksight.services/electron-to-chromium/-/electron-to-chromium-1.3.118.tgz#5c82b0445a40934e6cae9c2f40bfaaa986ea44a3"
+  integrity sha512-/1FpHvmKmKo2Z6CCza2HfkrKvKhU7Rq4nvyX1FOherdTrdTufhVrJbCrcrIqgqUCI+BG6JC2rlY4z5QA1G0NOw==
+>>>>>>> b2d8febc4d60b4e9e071a76a731a5c70ad4bd3b5
 
 encoding@^0.1.11:
   version "0.1.12"

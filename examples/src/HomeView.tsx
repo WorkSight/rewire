@@ -414,6 +414,7 @@ export const HomeView = (props: any) => <Observe render={() => (
         </Button>
       </div>
       <div style={{display: 'flex', alignItems: 'center', justifyContent: 'center'}}>
+        <Observe render={() => (<Button style={{margin: '0px 15px 10px 0px'}} variant='contained' onClick={() => { grid.column('column1')!.visible = !grid.column('column1')!.visible; }}> Toggle Column</Button>)} />
         <Observe render={() => (<Button style={{margin: '0px 15px 10px 0px'}} variant='contained' disabled={!grid.changed} onClick={() => grid.revert()}>Enabled if has Changes. Reverts Changes</Button>)} />
         <Observe render={() => (<Button style={{margin: '0px 15px 10px 0px'}} variant='contained' disabled={!grid.inError}>Enabled if has Errors</Button>)} />
         <Observe render={() => (<Button style={{margin: '0px 15px 10px 0px'}} variant='contained' onClick={() => console.log(grid.get())}> Save All</Button>)} />
@@ -429,7 +430,7 @@ export const HomeView = (props: any) => <Observe render={() => (
           <Button onClick={() => mode.gridMode = 'employees1'} style={{marginRight: '10px'}} variant='outlined'>Grid 1</Button>
           <Button onClick={() => mode.gridMode = 'employees2'}                               variant='outlined'>Grid 2</Button>
         </div>
-          <Grid key={mode.gridMode} grid={mode.gridMode === 'employees1' ? employeesGrid1 : employeesGrid2} gridFontSizes={{header: '0.95rem', body: '0.9rem', groupRow: '0.8rem'}} style={{height: '400px'}} />
+        <Grid key={mode.gridMode} grid={mode.gridMode === 'employees1' ? employeesGrid1 : employeesGrid2} gridFontSizes={{header: '0.95rem', body: '0.9rem', groupRow: '0.8rem'}} style={{height: '400px'}} />
       </Paper>
     </div>
   </div>

@@ -59,8 +59,6 @@ export interface IGridProps {
   style?: React.CSSProperties;
   gridColors?: IGridColors;
   gridFontSizes?: IGridFontSizes;
-
-  onClick?(evt: React.MouseEvent<any>): void;
 }
 
 type BodyType = {grid: IGrid, columns: IColumn[], scrollY: DataSignal<number>, rowElements?: {[s: string]: HTMLTableRowElement}, fixedRowElements?: {[s: string]: HTMLTableRowElement}, loadMoreRows?: (args: {start: number, end: number}) => Promise<any[]> };
@@ -386,11 +384,11 @@ const GridInternal = withStyles(styles, class extends React.PureComponent<GridPr
     return this.props.grid.standardColumns.reduce((prev, current) => prev = prev + (current.visible ? 1 : 0), 0);
   }
 
-  handleExternalClick = (evt: React.MouseEvent) => {
-    this.grid.clearSelection();
-  }
+  handleExternalMouseUp = (evt: React.MouseEvent) => {
+    if (this.grid.clearSelectionOnBlur && !this.grid.isMouseDown) {
+      this.grid.clearSelection();
+    }
 
-  handleMouseUp = (evt: React.MouseEvent) => {
     this.grid.isMouseDown = false;
   }
 
@@ -456,20 +454,17 @@ const GridInternal = withStyles(styles, class extends React.PureComponent<GridPr
     evt.stopPropagation();
   }
 
-  handleClick = (evt: React.MouseEvent<any>) => {
-    this.props.onClick && this.props.onClick(evt);
+  handleMouseDown = (evt: React.MouseEvent<any>) => {
+    this.grid.isMouseDown = true;
 
+    evt.preventDefault();
     evt.stopPropagation();
-    evt.nativeEvent.stopImmediatePropagation();
   }
 
   componentDidMount() {
     this.updateForScrollbars();
-    if (this.grid.clearSelectionOnBlur) {
-      document.addEventListener('click', this.handleExternalClick);
-    }
-    if (this.grid.multiSelect) {
-      document.addEventListener('mouseup', this.handleMouseUp);
+    if (this.grid.multiSelect || this.grid.clearSelectionOnBlur) {
+      document.addEventListener('mouseup', this.handleExternalMouseUp);
     }
     if (Object.keys(this._rowElements).length <= 0) {
       return;
@@ -479,13 +474,10 @@ const GridInternal = withStyles(styles, class extends React.PureComponent<GridPr
   }
 
   componentWillUnmount() {
-    if (this.grid.clearSelectionOnBlur) {
-      document.removeEventListener('click', this.handleExternalClick);
+    if (this.grid.multiSelect || this.grid.clearSelectionOnBlur) {
+      document.removeEventListener('mouseup', this.handleExternalMouseUp);
     }
-    if (this.grid.multiSelect) {
-      this.grid.isMouseDown = false;
-      document.removeEventListener('mouseup', this.handleMouseUp);
-    }
+    this.grid.isMouseDown = false;
   }
 
   componentWillReceiveProps(nextProps: GridProps) {
@@ -653,7 +645,7 @@ const GridInternal = withStyles(styles, class extends React.PureComponent<GridPr
     const maxHeight = style && style.height !== undefined ? style.height : undefined;
 
     return (
-      <div className={classNames('ws-grid', className, classes.wsGrid)} style={{maxHeight: maxHeight, ...style}} onClick={this.handleClick}>
+      <div className={classNames('ws-grid', className, classes.wsGrid)} style={{maxHeight: maxHeight, ...style}} onMouseDown={(this.grid.multiSelect || this.grid.clearSelectionOnBlur) ? this.handleMouseDown : undefined}>
         {this.renderHeaders()}
         {this.renderData()}
       </div>
