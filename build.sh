@@ -57,7 +57,7 @@ do
   cp ../../tsconfig-build.json dist/tsconfig.json
   cd dist
   tsc
-  rm dist/tsconfig.json
+  rm tsconfig.json
 
   # NODE_ENV=development parcel build src/index.ts --no-minify --target node
   if [ ! -z $PUBLISH ];
