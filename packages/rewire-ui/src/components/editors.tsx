@@ -1,20 +1,21 @@
-import * as React     from'react';
-import AutoComplete   from'./AutoComplete';
-import Select         from'./Select';
-import {Observe}      from'rewire-core';
-import TextField      from'./TextField';
-import PasswordField  from'./PasswordField';
-import StaticField    from'./StaticField';
-import NumberField    from'./NumberField';
-import PhoneField     from'./PhoneField';
-import CheckField     from'./CheckField';
-import SwitchField    from'./SwitchField';
-import TimeInputField from'./TimeInputField';
-import AvatarField    from'./AvatarField';
-import ColorField     from'./ColorField';
-import MaskField      from'./MaskField';
-import {utc}          from'rewire-common';
-import * as is        from'is';
+import * as React              from 'react';
+import AutoComplete            from './AutoComplete';
+import Select                  from './Select';
+import {Observe}               from 'rewire-core';
+import TextField               from './TextField';
+import PasswordField           from './PasswordField';
+import StaticField             from './StaticField';
+import NumberField             from './NumberField';
+import PhoneField              from './PhoneField';
+import CheckField              from './CheckField';
+import SwitchField             from './SwitchField';
+import TimeInputField          from './TimeInputField';
+import AvatarField             from './AvatarField';
+import ColorField              from './ColorField';
+import MaskField               from './MaskField';
+import DownshiftMultiple       from './DownshiftMultiple';
+import {utc}                   from 'rewire-common';
+import * as is                 from 'is';
 
 export interface IField {
   name           : string;
@@ -33,7 +34,7 @@ export interface IField {
   endAdornment?():   JSX.Element;
 }
 
-export type EditorType    = 'text' | 'multitext' | 'static' | 'auto-complete' | 'select' | 'multiselect' | 'date' | 'time' | 'number' | 'checked' | 'switch' | 'password' | 'email' | 'phone' | 'avatar' | 'color' | 'mask' | 'none';
+export type EditorType    = 'text' | 'multitext' | 'static' | 'auto-complete' | 'select' | 'multiselect' | 'date' | 'time' | 'number' | 'checked' | 'switch' | 'password' | 'email' | 'phone' | 'avatar' | 'color' | 'mask' | 'none' | 'multiselectautocomplete';
 export type TextAlignment = 'left' | 'right' | 'center';
 export type TextVariant   = 'standard' | 'outlined';
 
@@ -103,32 +104,61 @@ export default function editor(type: EditorType, propsForEdit?: any): React.SFC<
         )} />
       );
 
+    case 'multiselectautocomplete':
+      return ({ field, className, classes, onValueChange, endOfTextOnFocus, selectOnFocus, cursorPositionOnFocus, initialInputValue }: TextEditorProps) => (
+        <Observe render={() => (
+          <DownshiftMultiple
+            placeholder={field.placeholder}
+            label={field.label}
+            endOfTextOnFocus={endOfTextOnFocus}
+            selectOnFocus={selectOnFocus}
+            cursorPositionOnFocus={cursorPositionOnFocus}
+            initialInputValue={initialInputValue}
+            onValueChange={onValueChange}
+            error={field.error}
+            autoFocus={field.autoFocus}
+            disabled={field.disabled && field.disabled(field)}
+            visible={field.visible}
+            disableErrors={field.disableErrors}
+            align={field.align || 'left'}
+            variant={field.variant}
+            selectedItem={field.value}
+            onSelectItem={onValueChange}
+            className={className}
+            classes={classes}
+            startAdornment={field.startAdornment && field.startAdornment()}
+            endAdornment={field.endAdornment && field.endAdornment()}
+            {...propsForEdit}
+          />
+        )} />
+      );
+
     case 'multiselect':
-    return ({field, className, classes, onValueChange}: TextEditorProps) => (
-      <Observe render={() => (
-        <Select
-          multiple={true}
-          label={field.label}
-          onValueChange={onValueChange}
-          placeholder={field.placeholder}
-          autoFocus={field.autoFocus}
-          error={field.error}
-          disabled={field.disabled && field.disabled(field)}
-          visible={field.visible}
-          disableErrors={field.disableErrors}
-          style={{width: '100%', minWidth: '120px', textAlign: field.align || 'left'}}
-          align={field.align || 'left'}
-          variant={field.variant}
-          selectedItem={field.value || []}
-          onSelectItem={onValueChange}
-          className={className}
-          classes={classes}
-          startAdornment={field.startAdornment && field.startAdornment()}
-          endAdornment={field.endAdornment && field.endAdornment()}
-          {...propsForEdit}
-        />
-      )} />
-    );
+      return ({field, className, classes, onValueChange}: TextEditorProps) => (
+        <Observe render={() => (
+          <Select
+            multiple={true}
+            label={field.label}
+            onValueChange={onValueChange}
+            placeholder={field.placeholder}
+            autoFocus={field.autoFocus}
+            error={field.error}
+            disabled={field.disabled && field.disabled(field)}
+            visible={field.visible}
+            disableErrors={field.disableErrors}
+            style={{width: '100%', minWidth: '120px', textAlign: field.align || 'left'}}
+            align={field.align || 'left'}
+            variant={field.variant}
+            selectedItem={field.value || []}
+            onSelectItem={onValueChange}
+            className={className}
+            classes={classes}
+            startAdornment={field.startAdornment && field.startAdornment()}
+            endAdornment={field.endAdornment && field.endAdornment()}
+            {...propsForEdit}
+          />
+        )} />
+      );
 
     case 'date':
       return ({field, className, classes, onValueChange, endOfTextOnFocus, selectOnFocus, cursorPositionOnFocus}: TextEditorProps) => (
@@ -254,7 +284,7 @@ export default function editor(type: EditorType, propsForEdit?: any): React.SFC<
             {...propsForEdit}
           />
         )} />
-    );
+      );
 
     case 'password':
       return ({field, className, classes, onValueChange, endOfTextOnFocus, selectOnFocus, cursorPositionOnFocus}: TextEditorProps) => (
@@ -337,38 +367,38 @@ export default function editor(type: EditorType, propsForEdit?: any): React.SFC<
       );
 
     case 'checked':
-    return ({field, className, classes, onValueChange}: TextEditorProps) => (
-      <Observe render={() => (
-        <CheckField
-          label={field.label}
-          value={field.value}
-          onValueChange={onValueChange}
-          autoFocus={field.autoFocus}
-          disabled={field.disabled && field.disabled(field)}
-          visible={field.visible}
-          className={className}
-          classes={classes}
-          {...propsForEdit}
-        />
-      )} />
-    );
+      return ({field, className, classes, onValueChange}: TextEditorProps) => (
+        <Observe render={() => (
+          <CheckField
+            label={field.label}
+            value={field.value}
+            onValueChange={onValueChange}
+            autoFocus={field.autoFocus}
+            disabled={field.disabled && field.disabled(field)}
+            visible={field.visible}
+            className={className}
+            classes={classes}
+            {...propsForEdit}
+          />
+        )} />
+      );
 
     case 'switch':
-    return ({field, className, classes, onValueChange}: TextEditorProps) => (
-      <Observe render={() => (
-        <SwitchField
-          label={field.label}
-          value={field.value}
-          onValueChange={onValueChange}
-          autoFocus={field.autoFocus}
-          disabled={field.disabled && field.disabled(field)}
-          visible={field.visible}
-          className={className}
-          classes={classes}
-          {...propsForEdit}
-        />
-      )} />
-    );
+      return ({field, className, classes, onValueChange}: TextEditorProps) => (
+        <Observe render={() => (
+          <SwitchField
+            label={field.label}
+            value={field.value}
+            onValueChange={onValueChange}
+            autoFocus={field.autoFocus}
+            disabled={field.disabled && field.disabled(field)}
+            visible={field.visible}
+            className={className}
+            classes={classes}
+            {...propsForEdit}
+          />
+        )} />
+      );
 
     case 'auto-complete':
       return ({field, className, classes, onValueChange, endOfTextOnFocus, selectOnFocus, cursorPositionOnFocus, initialInputValue}: TextEditorProps) => (
@@ -398,6 +428,7 @@ export default function editor(type: EditorType, propsForEdit?: any): React.SFC<
           />
         )} />
       );
+
     case 'avatar':
       return ({field, className, classes, onValueChange}: TextEditorProps) => (
         <Observe render={() => (
@@ -412,6 +443,7 @@ export default function editor(type: EditorType, propsForEdit?: any): React.SFC<
           />
         )} />
       );
+
     case 'color':
       return ({field, className, classes, onValueChange}: TextEditorProps) => (
         <Observe render={() => (
@@ -455,6 +487,7 @@ export default function editor(type: EditorType, propsForEdit?: any): React.SFC<
           />
         )} />
       );
+
     case 'none':
       return () => null;
   }
