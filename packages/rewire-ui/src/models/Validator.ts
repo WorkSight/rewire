@@ -1,7 +1,7 @@
 import {defaultEquals} from 'rewire-core';
 import * as is from 'is';
 
-export function defaultGreaterThan(v1: any, v2: any) {
+export function defaultGreaterThan(v1: any, v2: any): boolean {
   if (v1 === undefined || v1 === null || v2 === undefined || v2 === null) {
     return true;
   }
@@ -15,7 +15,7 @@ export function defaultGreaterThan(v1: any, v2: any) {
   return true;
 }
 
-export function defaultLessThan(v1: any, v2: any) {
+export function defaultLessThan(v1: any, v2: any): boolean {
   if (v1 === undefined || v1 === null || v2 === undefined || v2 === null) {
     return true;
   }
@@ -29,10 +29,10 @@ export function defaultLessThan(v1: any, v2: any) {
   return true;
 }
 
-export function isNull(value?: any) {
+export function isNull(value?: any): boolean {
   if ((value === undefined) || (value === null)) return true;
-  if (typeof(value) === 'string') return !value;
-  return ((value.id !== undefined) && !value.id);
+  if (typeof(value) === 'string') return value.length === 0;
+  return ((value.id !== undefined) && isNull(value.id));
 }
 
 export type IValidateFn     = (obj: ObjectType, fieldName: string, label: string | undefined, value: any) => string | undefined;

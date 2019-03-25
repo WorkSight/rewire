@@ -27,10 +27,34 @@ class FormView extends React.Component<FormViewProps> {
     );
   }
 
+  submitForm() {
+    const {form, onSubmit} = this.props;
+
+    if (form.submit()) {
+      onSubmit(form);
+    }
+  }
+
+  handleKeyDown = (evt: React.KeyboardEvent<any>) => {
+    if (evt.keyCode === 13) {
+      let activeElement = document.activeElement as HTMLElement;
+      if (activeElement) {
+        activeElement.blur();
+        activeElement.focus();
+      }
+      this.submitForm();
+    }
+  }
+
+  handleSubmit = (evt: any) => {
+    evt.preventDefault();
+    this.submitForm();
+  }
+
   render() {
-    const {style, className, classes, form, onSubmit, children} = this.props;
+    const {style, className, classes, children} = this.props;
     return (
-      <form autoComplete='off' className={classNames(classes.form, className)} style={style} onKeyDown={(evt) => evt.keyCode === 13 && form.submit() && onSubmit(form)} onSubmit={(evt) => { evt.preventDefault(); form.submit() && onSubmit(form); }}>
+      <form autoComplete='off' className={classNames(classes.form, className)} style={style} onKeyDown={this.handleKeyDown} onSubmit={this.handleSubmit}>
         {children}
       </form>
     );

@@ -14,7 +14,7 @@ import { countries } from './demo-data';
 export class SampleModel extends Modal {
   form: Form = Form.create(
     {
-      email:                 Form.email().label('Email').validators(isRequired).placeholder('enter a valid email').onValueChange((form: Form, v: any) => form.setFieldValues({ money: 5, password: '123', password_confirmation: '123' })).autoFocus(),
+      email:                 Form.email().label('Email').validators(isRequired).placeholder('enter a valid email').autoFocus(),
       password:              Form.password().label('Password').validators(and(isRequired, isSameAsOther('password_confirmation', 'passwords are not the same'))).placeholder('enter a password'),
       password_confirmation: Form.password().label('Confirm Password').placeholder('confirm your password'),
       country:               Form.reference(countries).label('Country').validators(isRequired).placeholder('type to lookup'),
@@ -26,12 +26,12 @@ export class SampleModel extends Modal {
       multi:                 Form.multistring({ rows: 1 }).label('Multiline').placeholder('enter multistring').validators(isRequired),
       color:                 Form.color().label('Color'),
       phone:                 Form.phone().label('Phone'),
-      mask:                  Form.mask({mask: ['(', /[1-9]/, /\d/, /\d/, ')', ' ', /\d/, /\d/, /\d/, '-', /\d/, /\d/, /\d/, /\d/]}).label('MyMask').validators(isRequired).autoFocus(),
+      mask:                  Form.mask({mask: ['(', /[1-9]/, /\d/, /\d/, ')', ' ', /\d/, /\d/, /\d/, '-', /\d/, /\d/, /\d/, /\d/]}).label('MyMask').validators(isRequired),
       trigger:               Form.string().label('Trigger').placeholder('Change me to trigger handler').onValueChange((form: Form, v: any) => {form.setFieldValue('email', 'Triggered!@hotmail.com'); form.setFieldValue('money', 1337); }),
     }, {
       email:                 'my_email@gmail.com',
-      country:               'Albania',
-      selectCountry:         'Afghanistan',
+      country:               {id: 2, name: 'Albania'},
+      selectCountry:         {id: 0, name: 'Afghanistan'},
       time:                  '10:30',
       password:              '384lalxk#44',
       // password_confirmation: '384lalxk#44', // not providing a matching value causes form validation to fail and Submit button to become disabled
