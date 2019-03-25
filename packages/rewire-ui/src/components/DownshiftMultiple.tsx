@@ -15,7 +15,6 @@ import {
 }                                from '../models/search';
 import { withStyles, WithStyle } from './styles';
 import { SelectProps }           from '@material-ui/core/Select';
-// import { withStyles } from '@material-ui/core/styles';
 
 const styles = (theme: Theme) => ({
   root: {
