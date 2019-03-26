@@ -14,20 +14,21 @@ import { countries } from './demo-data';
 export class SampleModel extends Modal {
   form: Form = Form.create(
     {
-      email:                 Form.email().label('Email').validators(isRequired).placeholder('enter a valid email').autoFocus(),
-      password:              Form.password().label('Password').validators(and(isRequired, isSameAsOther('password_confirmation', 'passwords are not the same'))).placeholder('enter a password'),
-      password_confirmation: Form.password().label('Confirm Password').placeholder('confirm your password'),
-      country:               Form.reference(countries).label('Country').validators(isRequired).placeholder('type to lookup'),
-      time:                  Form.time().label('Time').validators(isRequired).onValueChange((form: Form, v: any) => form.setFieldValue('email', 'hi@hi.com')),
-      multiselectCountry:    Form.multiselect(countries).label('Multiselect Country').validators(isRequired).placeholder('select countries'),
-      selectCountry:         Form.select(countries).label('Select Country').validators(isRequired).placeholder('click to select'),
-      money:                 Form.number().label('Show Me').validators(isRequired).placeholder('The Money'),
-      date:                  Form.date().label('Date').validators(isRequired),
-      multi:                 Form.multistring({ rows: 1 }).label('Multiline').placeholder('enter multistring').validators(isRequired),
-      color:                 Form.color().label('Color'),
-      phone:                 Form.phone().label('Phone'),
-      mask:                  Form.mask({mask: ['(', /[1-9]/, /\d/, /\d/, ')', ' ', /\d/, /\d/, /\d/, '-', /\d/, /\d/, /\d/, /\d/]}).label('MyMask').validators(isRequired),
-      trigger:               Form.string().label('Trigger').placeholder('Change me to trigger handler').onValueChange((form: Form, v: any) => {form.setFieldValue('email', 'Triggered!@hotmail.com'); form.setFieldValue('money', 1337); }),
+      email:                   Form.email().label('Email').validators(isRequired).placeholder('enter a valid email').autoFocus(),
+      password:                Form.password().label('Password').validators(and(isRequired, isSameAsOther('password_confirmation', 'passwords are not the same'))).placeholder('enter a password'),
+      password_confirmation:   Form.password().label('Confirm Password').placeholder('confirm your password'),
+      country:                 Form.reference(countries).label('Country').validators(isRequired).placeholder('type to lookup'),
+      time:                    Form.time().label('Time').validators(isRequired).onValueChange((form: Form, v: any) => form.setFieldValue('email', 'hi@hi.com')),
+      multiselectAutoComplete: Form.multiselectautocomplete(countries, { chipLimit: 2 }).label('Multiselect AutoComplete Country').validators(isRequired).placeholder('select all that apply'),
+      multiselectCountry:      Form.multiselect(countries).label('Multiselect Country').validators(isRequired).placeholder('select countries'),
+      selectCountry:           Form.select(countries).label('Select Country').validators(isRequired).placeholder('click to select'),
+      money:                   Form.number().label('Show Me').validators(isRequired).placeholder('The Money'),
+      date:                    Form.date().label('Date').validators(isRequired),
+      multi:                   Form.multistring({ rows: 1 }).label('Multiline').placeholder('enter multistring').validators(isRequired),
+      color:                   Form.color().label('Color'),
+      phone:                   Form.phone().label('Phone'),
+      mask:                    Form.mask({mask: ['(', /[1-9]/, /\d/, /\d/, ')', ' ', /\d/, /\d/, /\d/, '-', /\d/, /\d/, /\d/, /\d/]}).label('MyMask').validators(isRequired),
+      trigger:                 Form.string().label('Trigger').placeholder('Change me to trigger handler').onValueChange((form: Form, v: any) => {form.setFieldValue('email', 'Triggered!@hotmail.com'); form.setFieldValue('money', 1337); }),
     }, {
       email:                 'my_email@gmail.com',
       country:               {id: 2, name: 'Albania'},
@@ -38,7 +39,8 @@ export class SampleModel extends Modal {
       money:                 '100.50',
       date:                  '2018-03-05',
       multi:                 `this is line 1\r\nthis is line 2\r\nand this is line 3`,
-      color:                 '#ffeedd'
+      color:                 '#ffeedd',
+      multiselectAutoComplete: [{ id: '0', name: 'Afghanistan' }, { id: '23', name: 'Benin' }, { id: '24', name: 'Bermuda' }]
     }
   );
 
@@ -79,6 +81,9 @@ const SampleFormView = ({ form }: { form: typeof sampleModel.form }) => (
         <form.field.multi.Editor />
         <form.field.trigger.Editor />
         <form.field.color.Editor />
+      </div>
+      <div className='content'>
+        <form.field.multiselectAutoComplete.Editor />
       </div>
     </FormView>
   </div>
