@@ -45,14 +45,24 @@ do
     rm -rf build
   fi
   echo building $module
-  parcel build src/index.ts
   if [ ! -z $PUBLISH ];
   then
     yarn version --patch --no-git-tag-version
-    cp package.json dist
-    npm publish dist
   fi
-  cd ..
-done
 
-# jq ".main |= \"index.js\" | .typings |=  \"index.js\" | .\"ts:main\" |=  \"ooga.js\"" package.json
+  mkdir dist
+  mkdir dist/src
+  cp -r src/* dist/src
+  jq ".main |= \"src/index.js\" | del(.alias)" package.json > dist/package.json
+  cp ../../tsconfig-build.json dist/tsconfig.json
+  cd dist
+  tsc
+  rm tsconfig.json
+
+  if [ ! -z $PUBLISH ];
+  then
+    npm publish --registry https://npm.worksight.services/ --force
+    sleep 3s
+  fi
+  cd ../..
+done

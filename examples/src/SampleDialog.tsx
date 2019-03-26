@@ -39,7 +39,8 @@ export class SampleModel extends Modal {
       money:                 '100.50',
       date:                  '2018-03-05',
       multi:                 `this is line 1\r\nthis is line 2\r\nand this is line 3`,
-      color:                 '#ffeedd'
+      color:                 '#ffeedd',
+      multiselectAutoComplete: [{ id: '0', name: 'Afghanistan' }, { id: '23', name: 'Benin' }, { id: '24', name: 'Bermuda' }]
     }
   );
 

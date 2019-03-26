@@ -1,21 +1,21 @@
-import * as React              from 'react';
-import AutoComplete            from './AutoComplete';
-import Select                  from './Select';
-import {Observe}               from 'rewire-core';
-import TextField               from './TextField';
-import PasswordField           from './PasswordField';
-import StaticField             from './StaticField';
-import NumberField             from './NumberField';
-import PhoneField              from './PhoneField';
-import CheckField              from './CheckField';
-import SwitchField             from './SwitchField';
-import TimeInputField          from './TimeInputField';
-import AvatarField             from './AvatarField';
-import ColorField              from './ColorField';
-import MaskField               from './MaskField';
-import DownshiftMultiple       from './DownshiftMultiple';
-import {utc}                   from 'rewire-common';
-import * as is                 from 'is';
+import * as React            from'react';
+import AutoComplete          from'./AutoComplete';
+import Select                from'./Select';
+import {Observe}             from'rewire-core';
+import TextField             from'./TextField';
+import PasswordField         from'./PasswordField';
+import StaticField           from'./StaticField';
+import NumberField           from'./NumberField';
+import PhoneField            from'./PhoneField';
+import CheckField            from'./CheckField';
+import SwitchField           from'./SwitchField';
+import TimeInputField        from'./TimeInputField';
+import AvatarField           from'./AvatarField';
+import ColorField            from'./ColorField';
+import MaskField             from'./MaskField';
+import DownshiftMultiple     from'./DownshiftMultiple';
+import {utc}                 from'rewire-common';
+import * as is               from'is';
 
 export interface IField {
   name           : string;
@@ -122,7 +122,7 @@ export default function editor(type: EditorType, propsForEdit?: any): React.SFC<
             disableErrors={field.disableErrors}
             align={field.align || 'left'}
             variant={field.variant}
-            selectedItem={field.value}
+            selectedItems={field.value || []}
             onSelectItem={onValueChange}
             className={className}
             classes={classes}

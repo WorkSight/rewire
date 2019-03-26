@@ -186,41 +186,54 @@ class SelectInternal<T> extends React.Component<SelectInternalProps<T>, any> {
           this.props.onSelectItem && this.props.onSelectItem(valueToSelect);
         }
         this.setState({isOpen: false});
-        event.stopPropagation();
         event.preventDefault();
+        event.stopPropagation();
+        event.nativeEvent.stopImmediatePropagation();
       case 13:
       case 37:
       case 38:
       case 39:
       case 40:
         event.stopPropagation();
+        event.nativeEvent.stopImmediatePropagation();
         break;
     }
   }
 
   handleMenuKeyPress = (event: React.KeyboardEvent<any>) => {
-    event.stopPropagation();
     event.preventDefault();
+    event.stopPropagation();
+    event.nativeEvent.stopImmediatePropagation();
   }
 
   handleMenuMouseEnter = (event: React.MouseEvent<any>) => {
-    event.stopPropagation();
     event.preventDefault();
+    event.stopPropagation();
+    event.nativeEvent.stopImmediatePropagation();
   }
 
   handleMenuMouseDown = (event: React.MouseEvent<any>) => {
-    event.stopPropagation();
     event.preventDefault();
+    event.stopPropagation();
+    event.nativeEvent.stopImmediatePropagation();
+  }
+
+  handleMenuMouseUp = (event: React.MouseEvent<any>) => {
+    event.preventDefault();
+    event.stopPropagation();
+    event.nativeEvent.stopImmediatePropagation();
   }
 
   handleMenuClick = (event: React.MouseEvent<any>) => {
-    event.stopPropagation();
     event.preventDefault();
+    event.stopPropagation();
+    event.nativeEvent.stopImmediatePropagation();
   }
 
   handleMenuDoubleClick = (event: React.MouseEvent<any>) => {
-    event.stopPropagation();
     event.preventDefault();
+    event.stopPropagation();
+    event.nativeEvent.stopImmediatePropagation();
   }
 
   handleChanged = (event: ChangeEvent<any>) => {
@@ -229,7 +242,6 @@ class SelectInternal<T> extends React.Component<SelectInternalProps<T>, any> {
         let values = this.state.suggestions.filter((v: any) => event.target.value && event.target.value.includes(this.map(v)));
         values = values.length <= 0 ? undefined : values;
         this.props.onSelectItem(values);
-        // this.props.onSelectItem(this.state.suggestions.filter((v: any) => event.target.value && event.target.value.includes(this.map(v))));
       } else {
         this.props.onSelectItem(this.state.suggestions.find((v: any) => event.target.value === this.map(v)));
       }
@@ -266,6 +278,7 @@ class SelectInternal<T> extends React.Component<SelectInternalProps<T>, any> {
       onKeyPress: this.handleMenuKeyPress,
       onMouseEnter: this.handleMenuMouseEnter,
       onMouseDown: this.handleMenuMouseDown,
+      onMouseUp: this.handleMenuMouseUp,
       onClick: this.handleMenuClick,
       onDoubleClick: this.handleMenuDoubleClick,
     };

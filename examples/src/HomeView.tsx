@@ -7,7 +7,7 @@ import { hotkeysModel, HotKeysDialog }           from './HotKeys';
 import { YesNoModel, YesNoDialog }               from './YesNoDialog';
 import { ConfirmationModel, ConfirmationDialog } from './YesNoDialog';
 import { Observe, observable }                   from 'rewire-core';
-import { ActionFn }                              from 'rewire-ui';
+import { ActionFn, WithStyle, withStyles}        from 'rewire-ui';
 import {
   createGrid,
   createColumn,
@@ -21,11 +21,10 @@ import {
   isRequired           as gridIsRequired,
   isSumOfOthers        as gridIsSumOfOthers,
   isDifferenceOfOthers as gridIsDifferenceOfOthers,
-}                        from 'rewire-grid';
-import Paper             from '@material-ui/core/Paper';
-import Button            from '@material-ui/core/Button';
-import Typography        from '@material-ui/core/Typography';
-// import DownShiftMultiple from './DownShiftMultiple';
+}                 from 'rewire-grid';
+import Paper      from '@material-ui/core/Paper';
+import Button     from '@material-ui/core/Button';
+import Typography from '@material-ui/core/Typography';
 
 interface IDocument {
   id:    string;
@@ -380,60 +379,113 @@ const yesAction: ActionFn = () => {
 const yesNoModel        = new YesNoModel({ title: 'Confirmation Required', action: yesAction });
 const confirmationModel = new ConfirmationModel({ title: 'Secondary Confirmation', yesAction: confirmationYesAction, noAction: confirmationNoAction});
 
-export const HomeView = (props: any) => <Observe render={() => (
-  <TransitionWrapper>
-    <div>
-      <Button color='primary' variant='contained' style={{marginRight: '15px'}} onClick={() => sampleModel.open()}>Load Dialog Test</Button>
-      <Button color='primary' variant='contained' style={{marginRight: '15px'}} onClick={() => hotkeysModel.open()}>Load Grid Hotkeys List</Button>
-      <Button color='primary' variant='contained'                               onClick={() => yesNoModel.open()}>Load Confirmation Dialog</Button>
-      {/* <DownShiftMultiple label='Countries' placeholder='select all that apply' /> */}
+const styles = () => ({
+  openDialogButton: {
+    marginRight: '15px',
+  },
+  gridsSection: {
+    overflow: 'auto',
+    padding: '10px',
+    display: 'flex',
+    flexDirection: 'column',
+    alignItems: 'center',
+    justifyContent: 'center',
+    marginTop: '10px',
+  },
+  gridActionButtonsContainer: {
+    display: 'flex',
+    alignItems: 'center',
+    justifyContent: 'center',
+  },
+  gridActionButton: {
+    margin: '0px 15px 10px 0px',
+  },
+  gridContainer: {
+    padding: '20px',
+    width: '80%',
+    display: 'flex',
+    flexDirection: 'column',
+    alignItems: 'center',
+    justifyContent: 'center',
+    marginBottom: '20px',
+  },
+  employeesGridButtonsContainer: {
+    display: 'flex',
+    marginBottom: '10px',
+  },
+  employeesGridButton: {
+    marginRight: '10px',
+  },
+  dataGrid: {
+    height: '650px',
+  },
+  employeeGrid: {
+    height: '400px',
+  },
+});
 
-      <SampleDialog />
-      <HotKeysDialog />
-      <ConfirmationDialog viewModel={confirmationModel} />
+type HomeViewProps = WithStyle<ReturnType<typeof styles>>;
 
-      <YesNoDialog viewModel={yesNoModel}>
-        <Typography variant='h5'>Do you wish to delete your entire hard drive?</Typography>
-        <Typography variant='h6'>Please think before you answer</Typography>
-      </YesNoDialog>
+export const HomeView = withStyles(styles, (props: HomeViewProps) => {
+  const {classes} = props;
 
-      <div style={{overflow: 'auto', padding: 10, display: 'flex', flexDirection: 'column', alignItems: 'center', justifyContent: 'center'}}>
-        <div style={{display: 'flex', alignItems: 'center', justifyContent: 'center'}}>
-          <Button style={{margin: '0px 15px 10px 0px'}} variant='contained' onClick={() => grid.selectCellByPos(0, 4)}>Select Cell</Button>
-          <Button style={{margin: '0px 15px 10px 0px'}} variant='contained' onClick={() => grid.selectCellsByRange(1, 4, 3, 5)}>Select Cells</Button>
-          <Button style={{margin: '0px 15px 10px 0px'}} variant='contained' onClick={() => {
-            grid.addRow({id: 'newRow-' + Math.random() * 2000, data: {column2: 'RC 2-1', column3: 'RC 3-1'}});
-            employeesGrid1.addRow({id: 'newRow-' + Math.random() * 2000, data: {name: 'New Employee', email: 'employeeEmail@test.com'}});
-          }}>
-            Add Row
-          </Button>
-          <Button style={{margin: '0px 15px 10px 0px'}} variant='contained' onClick={() => grid.removeRow(grid.dataRowsByPosition[grid.dataRowsByPosition.length - 1].id)}>Remove Row</Button>
-          <Button style={{margin: '0px 15px 10px 0px'}} variant='contained' onClick={() => grid.dataRowsByPosition.forEach(row => row.cells['numberColumn'].setValue(1337))}>Change Number Cell Value</Button>
-          <Button style={{margin: '0px 15px 10px 0px'}} variant='contained' onClick={() => grid.dataRowsByPosition.forEach(row => row.setValue({'numberColumn': 2222, 'dateColumn': '1985-11-26'}))}>Change Number And Date Cells</Button>
-          <Button style={{margin: '0px 15px 10px 0px'}} variant='contained' onClick={() => grid.dataRowsByPosition.forEach(row => row.clear(['numberColumn', 'dateColumn']))}>Clear Number And Date</Button>
-          <Button style={{margin: '0px 15px 10px 0px'}} variant='contained' onClick={() => grid.dataRowsByPosition.forEach(row => row.cells['complexColumn'].setValue(new ComplexCellData('smithers027', 'Smithers', 57)))}>
-            Change Complex Cell Value
-          </Button>
-        </div>
-        <div style={{display: 'flex', alignItems: 'center', justifyContent: 'center'}}>
-          <Observe render={() => (<Button style={{margin: '0px 15px 10px 0px'}} variant='contained' disabled={!grid.changed} onClick={() => grid.revert()}>Enabled if has Changes. Reverts Changes</Button>)} />
-          <Observe render={() => (<Button style={{margin: '0px 15px 10px 0px'}} variant='contained' disabled={!grid.inError}>Enabled if has Errors</Button>)} />
-          <Observe render={() => (<Button style={{margin: '0px 15px 10px 0px'}} variant='contained' onClick={() => console.log(grid.get())}> Save All</Button>)} />
-          <Observe render={() => (<Button style={{margin: '0px 0px 10px 0px'}}  variant='contained' onClick={() => console.log(grid.getChanges())}> Save Changes</Button>)} />
-        </div>
+  return (
+    <Observe render={() => (
+      <TransitionWrapper>
+      <div>
+        <Button className={classes.openDialogButton} color='primary' variant='contained' onClick={() => sampleModel.open()}>Load Dialog Test</Button>
+        <Button className={classes.openDialogButton} color='primary' variant='contained' onClick={() => hotkeysModel.open()}>Load Grid Hotkeys List</Button>
+        <Button className={classes.openDialogButton} color='primary' variant='contained' onClick={() => yesNoModel.open()}>Load Confirmation Dialog</Button>
 
-        <Paper style={{padding: 20, width: '80%', display: 'flex', flexDirection: 'column', alignItems: 'center', justifyContent: 'center', marginBottom: '20px'}}>
-          <Observe render={() => (<Grid grid={grid} gridFontSizes={{header: '0.9rem', body: '0.85rem', groupRow: '0.8rem'}} style={{height: '650px'}} />)} />
-        </Paper>
+        <SampleDialog />
+        <HotKeysDialog />
 
-        <Paper style={{padding: 20, width: '80%', display: 'flex', flexDirection: 'column', alignItems: 'center', justifyContent: 'center'}}>
-          <div style={{display: 'flex', marginBottom: '10px'}}>
-            <Button onClick={() => mode.gridMode = 'employees1'} style={{marginRight: '10px'}} variant='outlined'>Grid 1</Button>
-            <Button onClick={() => mode.gridMode = 'employees2'}                               variant='outlined'>Grid 2</Button>
+        <ConfirmationDialog viewModel={confirmationModel} />
+        <YesNoDialog viewModel={yesNoModel}>
+          <Typography variant='h5'>Do you wish to delete your entire hard drive?</Typography>
+          <Typography variant='h6'>Please think before you answer</Typography>
+        </YesNoDialog>
+
+        <div className={classes.gridsSection}>
+          <div className={classes.gridActionButtonsContainer}>
+            <Button className={classes.gridActionButton} variant='contained' onClick={() => grid.selectCellByPos(0, 4)}>Select Cell</Button>
+            <Button className={classes.gridActionButton} variant='contained' onClick={() => grid.selectCellsByRange(1, 4, 3, 5)}>Select Cells</Button>
+            <Button className={classes.gridActionButton} variant='contained' onClick={() => {
+              grid.addRow({id: 'newRow-' + Math.random() * 2000, data: {column2: 'RC 2-1', column3: 'RC 3-1'}});
+              employeesGrid1.addRow({id: 'newRow-' + Math.random() * 2000, data: {name: 'New Employee', email: 'employeeEmail@test.com'}});
+            }}>
+              Add Row
+            </Button>
+            <Button className={classes.gridActionButton} variant='contained' onClick={() => grid.removeRow(grid.dataRowsByPosition[grid.dataRowsByPosition.length - 1].id)}>Remove Row</Button>
+            <Button className={classes.gridActionButton} variant='contained' onClick={() => grid.dataRowsByPosition.forEach(row => row.cells['numberColumn'].setValue(1337))}>Change Number Cell Value</Button>
+            <Button className={classes.gridActionButton} variant='contained' onClick={() => grid.dataRowsByPosition.forEach(row => row.setValue({'numberColumn': 2222, 'dateColumn': '1985-11-26'}))}>Change Number And Date Cells</Button>
+            <Button className={classes.gridActionButton} variant='contained' onClick={() => grid.dataRowsByPosition.forEach(row => row.clear(['numberColumn', 'dateColumn']))}>Clear Number And Date</Button>
+            <Button className={classes.gridActionButton} variant='contained' onClick={() => grid.dataRowsByPosition.forEach(row => row.cells['complexColumn'].setValue(new ComplexCellData('smithers027', 'Smithers', 57)))}>
+              Change Complex Cell Value
+            </Button>
           </div>
-            <Grid key={mode.gridMode} grid={mode.gridMode === 'employees1' ? employeesGrid1 : employeesGrid2} gridFontSizes={{header: '0.95rem', body: '0.9rem', groupRow: '0.8rem'}} style={{height: '400px'}} />
-        </Paper>
+          <div className={classes.gridActionButtonsContainer}>
+            <Observe render={() => (<Button className={classes.gridActionButton} variant='contained' onClick={() => { grid.column('column1')!.visible = !grid.column('column1')!.visible; }}> Toggle Column</Button>)} />
+            <Observe render={() => (<Button className={classes.gridActionButton} variant='contained' disabled={!grid.changed} onClick={() => grid.revert()}>Enabled if has Changes. Reverts Changes</Button>)} />
+            <Observe render={() => (<Button className={classes.gridActionButton} variant='contained' disabled={!grid.inError}>Enabled if has Errors</Button>)} />
+            <Observe render={() => (<Button className={classes.gridActionButton} variant='contained' onClick={() => console.log(grid.get())}> Save All</Button>)} />
+            <Observe render={() => (<Button className={classes.gridActionButton} variant='contained' onClick={() => console.log(grid.getChanges())}> Save Changes</Button>)} />
+          </div>
+
+          <Paper className={classes.gridContainer}>
+            <Observe render={() => (<Grid grid={grid} gridFontSizes={{header: '0.9rem', body: '0.85rem', groupRow: '0.8rem'}} className={classes.dataGrid} />)} />
+          </Paper>
+
+          <Paper className={classes.gridContainer}>
+            <div className={classes.employeesGridButtonsContainer}>
+              <Button className={classes.employeesGridButton} onClick={() => mode.gridMode = 'employees1'} variant='outlined'>Grid 1</Button>
+              <Button className={classes.employeesGridButton} onClick={() => mode.gridMode = 'employees2'} variant='outlined'>Grid 2</Button>
+            </div>
+            <Grid key={mode.gridMode} grid={mode.gridMode === 'employees1' ? employeesGrid1 : employeesGrid2} gridFontSizes={{header: '0.95rem', body: '0.9rem', groupRow: '0.8rem'}} className={classes.employeeGrid} />
+          </Paper>
+        </div>
       </div>
-    </div>
-  </TransitionWrapper>
-)} />;
+      </TransitionWrapper>
+    )} />
+  );
+});

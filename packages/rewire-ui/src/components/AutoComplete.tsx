@@ -9,8 +9,7 @@ import Popper                  from '@material-ui/core/Popper';
 import MenuItem                from '@material-ui/core/MenuItem';
 import InputAdornment          from '@material-ui/core/InputAdornment';
 import {Theme}                 from '@material-ui/core/styles';
-import {debounce}              from 'rewire-common';
-import {match}                 from 'rewire-common';
+import {debounce, match}       from 'rewire-common';
 import {withStyles, WithStyle} from './styles';
 import {
   ICustomProps,
@@ -122,7 +121,7 @@ class AutoComplete<T> extends React.Component<AutoCompleteProps<T>, any> {
     });
   }
 
-  renderInput = (classes: Record<IStyleClasses, string>, error: string | undefined, inputProps: any, InputProps: any, ref: (node: any) => any) => {
+  renderInput = (classes: Record<any, string>, error: string | undefined, inputProps: any, InputProps: any, ref: (node: any) => any) => {
     const {label, disabled, autoFocus, value, ...other}                 = inputProps;
     const {startAdornment, endAdornment, align, variant, disableErrors} = InputProps;
     const inputClassName            = variant === 'outlined' ? classes.inputOutlinedInput : classes.inputInput;
@@ -223,6 +222,7 @@ class AutoComplete<T> extends React.Component<AutoCompleteProps<T>, any> {
     const { getMenuProps, isOpen, children, classes } = options;
     const menuProps = {
       onMouseDown: this.handleMenuMouseDown,
+      onMouseUp: this.handleMenuMouseUp,
       onClick: this.handleMenuClick,
       onDoubleClick: this.handleMenuDoubleClick,
     };
@@ -288,8 +288,9 @@ class AutoComplete<T> extends React.Component<AutoCompleteProps<T>, any> {
             });
             return;
           }
-          event.stopPropagation();
           event.preventDefault();
+          event.stopPropagation();
+          event.nativeEvent.stopImmediatePropagation();
         }
         break;
       case 37:
@@ -298,24 +299,34 @@ class AutoComplete<T> extends React.Component<AutoCompleteProps<T>, any> {
       case 40:
         if (this.state.suggestions.length > 0) {
           event.stopPropagation();
+          event.nativeEvent.stopImmediatePropagation();
         }
         break;
     }
   }
 
   handleMenuMouseDown = (event: React.MouseEvent<any>) => {
-    event.stopPropagation();
     event.preventDefault();
+    event.stopPropagation();
+    event.nativeEvent.stopImmediatePropagation();
+  }
+
+  handleMenuMouseUp = (event: React.MouseEvent<any>) => {
+    event.preventDefault();
+    event.stopPropagation();
+    event.nativeEvent.stopImmediatePropagation();
   }
 
   handleMenuClick = (event: React.MouseEvent<any>) => {
-    event.stopPropagation();
     event.preventDefault();
+    event.stopPropagation();
+    event.nativeEvent.stopImmediatePropagation();
   }
 
   handleMenuDoubleClick = (event: React.MouseEvent<any>) => {
-    event.stopPropagation();
     event.preventDefault();
+    event.stopPropagation();
+    event.nativeEvent.stopImmediatePropagation();
   }
 
   componentWillReceiveProps (nextProps: ICustomProps<T>) {

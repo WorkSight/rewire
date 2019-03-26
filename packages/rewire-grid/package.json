@@ -1,6 +1,6 @@
 {
   "name": "rewire-grid",
-  "version": "1.0.4",
+  "version": "1.0.14",
   "description": "A lightweight reactive grid implementation built using rewire-core.",
   "repository": {
     "type": "git",
@@ -10,14 +10,14 @@
     "rewire",
     "grid"
   ],
-  "main": "./index.js",
+  "main": "./src/index.ts",
   "typings": "./src/index.ts",
   "ts:main": "./src/index.ts",
   "author": "Sandy Place, Ryan Osler",
   "alias": {
-    "rewire-core": "../rewire-core/dist",
-    "rewire-ui": "../rewire-ui/dist",
-    "rewire-common": "../rewire-common/dist"
+    "rewire-core": "../rewire-core",
+    "rewire-ui": "../rewire-ui",
+    "rewire-common": "../rewire-common"
   },
   "license": "MIT",
   "bugs": {

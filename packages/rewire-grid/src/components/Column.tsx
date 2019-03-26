@@ -40,7 +40,6 @@ export default class Column extends React.PureComponent<IColumnCellProps> {
     document.addEventListener('mouseup', this.handleMouseUp, true);
     document.addEventListener('mousemove', this.handleMouseMove, true);
     evt.preventDefault();
-    evt.stopPropagation();
   }
 
   handleMouseMove = (evt: MouseEvent) => {
