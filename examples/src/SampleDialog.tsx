@@ -19,7 +19,7 @@ export class SampleModel extends Modal {
       password_confirmation:   Form.password().label('Confirm Password').placeholder('confirm your password'),
       country:                 Form.reference(countries).label('Country').validators(isRequired).placeholder('type to lookup'),
       time:                    Form.time().label('Time').validators(isRequired).onValueChange((form: Form, v: any) => form.setFieldValue('email', 'hi@hi.com')),
-      multiselectAutoComplete: Form.multiselectautocomplete(countries).label('Multiselect AutoComplete Country').validators(isRequired).placeholder('select all that apply'),
+      multiselectAutoComplete: Form.multiselectautocomplete(countries, { chipLimit: 2 }).label('Multiselect AutoComplete Country').validators(isRequired).placeholder('select all that apply'),
       multiselectCountry:      Form.multiselect(countries).label('Multiselect Country').validators(isRequired).placeholder('select countries'),
       selectCountry:           Form.select(countries).label('Select Country').validators(isRequired).placeholder('click to select'),
       money:                   Form.number().label('Show Me').validators(isRequired).placeholder('The Money'),

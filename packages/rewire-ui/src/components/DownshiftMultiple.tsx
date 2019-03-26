@@ -36,7 +36,9 @@ const styles = (theme: Theme) => ({
     width: '100%',
   },
   chip: {
-    margin: `${theme.spacing.unit / 2}px ${theme.spacing.unit / 4}px`,
+    fontSize: '0.8em',
+    height: '24px',
+    margin: `${theme.spacing.unit / 2}px ${theme.spacing.unit / 8}px`,
   },
   inputRoot: {
     lineHeight: 'inherit',
@@ -95,6 +97,7 @@ interface IDownshiftMultipleProps {
   cursorPositionOnFocus?: number;
   initialInputValue?:     any;
   selectedItems:          any[];
+  chipLimit?:             number;
 }
 
 export type DownshiftMultipleProps<T> = WithStyle<ReturnType<typeof styles>, IDownshiftMultipleProps & ICustomProps<T> & React.InputHTMLAttributes<any>>;
@@ -400,8 +403,9 @@ class DownshiftMultiple<T> extends React.Component<DownshiftMultipleProps<T>, an
   }
 
   renderChips(classes: Record<any, string>) {
-    return (
-      this.props.selectedItems.map((item: any, index: number) => (
+    const chipLimit     = this.props.chipLimit || 4;
+    const itemsToRender = this.props.selectedItems.slice(0, chipLimit);
+    const returnValue   = itemsToRender.map((item: any, index: number) => (
         <Chip
           key={this.map(item)}
           tabIndex={-1}
@@ -409,7 +413,18 @@ class DownshiftMultiple<T> extends React.Component<DownshiftMultipleProps<T>, an
           className={classes.chip}
           onDelete={this.handleDelete(item)}
         />
-    )));
+    ));
+    const showMore = this.props.selectedItems.length > itemsToRender.length;
+    if (showMore) {
+      returnValue.push(
+        <Chip
+          key='...'
+          label='...'
+          className={classes.chip}
+        />
+      );
+    }
+    return returnValue;
   }
 
   render() {
