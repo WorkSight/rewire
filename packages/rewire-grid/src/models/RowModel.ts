@@ -177,6 +177,10 @@ export class RowModel implements IRow, IDisposable {
       }
     }
 
+    if (cellsToSelect.length <= 0) {
+      return;
+    }
+
     cellsToSelect = cellsToSelect.filter(cell => !this.grid.selectedCells.includes(cell));
     if (cellsToSelect.length > 0) {
       setTimeout(() => this.grid.selectCells(cellsToSelect, focusedCell, true, true), 0);
