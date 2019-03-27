@@ -1,5 +1,4 @@
 import * as React              from 'react';
-import TransitionWrapper       from './TransitionWrapper';
 import { delay }               from 'rewire-common';
 import { countries, searcher } from './demo-data';
 import { Observe }             from 'rewire-core';
@@ -7,6 +6,7 @@ import {
   Form,
   FormView,
   Modal,
+  TransitionWrapper,
   isRequired,
   and,
   isSameAsOther,

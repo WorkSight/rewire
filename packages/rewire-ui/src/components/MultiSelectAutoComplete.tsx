@@ -137,8 +137,6 @@ class MultiSelectAutoComplete<T> extends React.Component<MultiSelectAutoComplete
     const inputClassName            = variant === 'outlined' ? classes.inputOutlinedInput : classes.inputInput;
     const inputFormControlClassName = variant === 'standard' && this.props.label ? classes.inputFormControlWithLabel : undefined;
 
-    console.log(value);
-
     return (
       <TextField
         className={classes.textField}
@@ -266,7 +264,6 @@ class MultiSelectAutoComplete<T> extends React.Component<MultiSelectAutoComplete
   }
 
   handleInputChanged = (inputValue: string, helpers: ControllerStateAndHelpers<any>) => {
-    console.log(inputValue);
     if (helpers.isOpen) {
       this.performSearch(inputValue);
     }

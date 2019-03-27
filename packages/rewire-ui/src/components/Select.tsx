@@ -101,6 +101,7 @@ export type ISelectInternalProps<T> = ICustomProps<T> & React.InputHTMLAttribute
 type SelectInternalProps<T>         = WithStyle<ReturnType<typeof styles>, ISelectInternalProps<T>>;
 
 class SelectInternal<T> extends React.Component<SelectInternalProps<T>, any> {
+  private _isMounted: boolean;
   private InputLabelRef: React.RefObject<HTMLElement>;
   private SelectRef: React.RefObject<HTMLElement>;
   state : any;
@@ -109,6 +110,7 @@ class SelectInternal<T> extends React.Component<SelectInternalProps<T>, any> {
 
   constructor(props: SelectInternalProps<T>) {
     super(props);
+    this._isMounted    = false;
     this.state         = {suggestions: [], isOpen: false, labelWidth: 0};
     this.search        = props.search;
     this.map           = props.map || defaultMap;
@@ -124,9 +126,12 @@ class SelectInternal<T> extends React.Component<SelectInternalProps<T>, any> {
         labelWidth: labelElement.offsetWidth,
       });
     }
+    this._isMounted = true;
   }
 
   performSearch = async () => {
+    if (!this._isMounted) return;
+
     const suggestions = await this.search('', this.props.options);
     this.setState({suggestions: suggestions});
   }
