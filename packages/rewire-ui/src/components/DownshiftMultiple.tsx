@@ -2,8 +2,10 @@ import * as React              from 'react';
 import * as is                 from 'is';
 import Downshift, {
   ControllerStateAndHelpers,
-  StateChangeOptions }         from 'downshift';
+  StateChangeOptions
+}                              from 'downshift';
 import TextField               from '@material-ui/core/TextField';
+import Chip                    from '@material-ui/core/Chip';
 import Paper                   from '@material-ui/core/Paper';
 import Popper                  from '@material-ui/core/Popper';
 import MenuItem                from '@material-ui/core/MenuItem';
@@ -32,6 +34,11 @@ const styles = (theme: Theme) => ({
   },
   textField: {
     width: '100%',
+  },
+  chip: {
+    fontSize: '0.8em',
+    height: '24px',
+    margin: `${theme.spacing.unit / 2}px ${theme.spacing.unit / 8}px`,
   },
   inputRoot: {
     lineHeight: 'inherit',
@@ -84,23 +91,25 @@ const styles = (theme: Theme) => ({
   },
 });
 
-interface IAutoCompleteProps {
-  selectOnFocus?   : boolean;
-  endOfTextOnFocus?: boolean;
+interface IDownshiftMultipleProps {
+  selectOnFocus?   :      boolean;
+  endOfTextOnFocus?:      boolean;
   cursorPositionOnFocus?: number;
-  initialInputValue?: any;
+  initialInputValue?:     any;
+  selectedItems:          any[];
+  chipLimit?:             number;
 }
 
-export type AutoCompleteProps<T> = WithStyle<ReturnType<typeof styles>, IAutoCompleteProps & ICustomProps<T> & React.InputHTMLAttributes<any>>;
+export type DownshiftMultipleProps<T> = WithStyle<ReturnType<typeof styles>, IDownshiftMultipleProps & ICustomProps<T> & React.InputHTMLAttributes<any>>;
 
-class AutoComplete<T> extends React.Component<AutoCompleteProps<T>, any> {
+class DownshiftMultiple<T> extends React.Component<DownshiftMultipleProps<T>, any> {
   state = {suggestions: []};
   downShift: any;
   search: SearchFn<T>;
   map: MapFn<T>;
   suggestionsContainerNode: HTMLElement;
 
-  constructor(props: AutoCompleteProps<T>) {
+  constructor(props: DownshiftMultipleProps<T>) {
     super(props);
     this.search = props.search;
     if (props.debounce) {
@@ -126,6 +135,8 @@ class AutoComplete<T> extends React.Component<AutoCompleteProps<T>, any> {
     const {startAdornment, endAdornment, align, variant, disableErrors} = InputProps;
     const inputClassName            = variant === 'outlined' ? classes.inputOutlinedInput : classes.inputInput;
     const inputFormControlClassName = variant === 'standard' && this.props.label ? classes.inputFormControlWithLabel : undefined;
+
+    console.log(value);
 
     return (
       <TextField
@@ -254,6 +265,7 @@ class AutoComplete<T> extends React.Component<AutoCompleteProps<T>, any> {
   }
 
   handleInputChanged = (inputValue: string, helpers: ControllerStateAndHelpers<any>) => {
+    console.log(inputValue);
     if (helpers.isOpen) {
       this.performSearch(inputValue);
     }
@@ -263,8 +275,25 @@ class AutoComplete<T> extends React.Component<AutoCompleteProps<T>, any> {
     if (!options) {
       return;
     }
+
     if (options.hasOwnProperty('selectedItem')) {
-      this.props.onSelectItem(options.selectedItem);
+      if (!options.selectedItem) {
+        return;
+      }
+
+      if (this.props.selectedItems.map(item => this.map(item)).includes(this.map(options.selectedItem))) {
+        return;
+      }
+
+      const newItems = [...this.props.selectedItems, options.selectedItem];
+      this.props.onSelectItem && this.props.onSelectItem(newItems);
+      setTimeout(() => {
+        this.downShift.setState({
+          inputValue: '',
+          highlightedIndex: null,
+          selectedItem: null
+        });
+      }, 0);
     }
   }
 
@@ -274,6 +303,13 @@ class AutoComplete<T> extends React.Component<AutoCompleteProps<T>, any> {
     }
 
     switch (event.keyCode) {
+      case 8:
+        const {inputValue, isOpen} = this.downShift.getState();
+        const {selectedItems}      = this.props;
+        if (!isOpen && selectedItems.length && (!inputValue || !inputValue.length) && event.key === 'Backspace') {
+          this.props.onSelectItem && this.props.onSelectItem(selectedItems.slice(0, selectedItems.length - 1));
+        }
+        break;
       case 9:
       case 13:
         const state = this.downShift.getState();
@@ -303,6 +339,13 @@ class AutoComplete<T> extends React.Component<AutoCompleteProps<T>, any> {
         }
         break;
     }
+  }
+
+  handleDelete = (item: any) => () => {
+    const selectedItems = [...this.props.selectedItems];
+    const selectedItem  = this.map(item);
+    selectedItems.splice(selectedItems.findIndex(i => this.map(i) === selectedItem), 1);
+    this.props.onSelectItem && this.props.onSelectItem(selectedItems);
   }
 
   handleMenuMouseDown = (event: React.MouseEvent<any>) => {
@@ -342,20 +385,46 @@ class AutoComplete<T> extends React.Component<AutoCompleteProps<T>, any> {
   }
 
   shouldComponentUpdate(nextProps: ICustomProps<T> & React.InputHTMLAttributes<any>, nextState: any, nextContext: any) {
-    return (
-        (nextProps.selectedItem !== this.props.selectedItem) ||
-        (nextProps.error !== this.props.error) ||
-        (nextProps.disabled !== this.props.disabled) ||
-        (nextProps.visible !== this.props.visible) ||
-        (nextState.suggestions !== this.state.suggestions) ||
-        (nextProps.label !== this.props.label) ||
-        (nextProps.placeholder !== this.props.placeholder) ||
-        (nextProps.align !== this.props.align) ||
-        (nextProps.variant !== this.props.variant) ||
-        (nextProps.disableErrors !== this.props.disableErrors) ||
-        (nextProps.startAdornment !== this.props.startAdornment) ||
-        (nextProps.endAdornment !== this.props.endAdornment)
+    return true;
+    // return (
+    //     (nextProps.selectedItem !== this.props.selectedItem) ||
+    //     (nextProps.error !== this.props.error) ||
+    //     (nextProps.disabled !== this.props.disabled) ||
+    //     (nextProps.visible !== this.props.visible) ||
+    //     (nextState.suggestions !== this.state.suggestions) ||
+    //     (nextProps.label !== this.props.label) ||
+    //     (nextProps.placeholder !== this.props.placeholder) ||
+    //     (nextProps.align !== this.props.align) ||
+    //     (nextProps.variant !== this.props.variant) ||
+    //     (nextProps.disableErrors !== this.props.disableErrors) ||
+    //     (nextProps.startAdornment !== this.props.startAdornment) ||
+    //     (nextProps.endAdornment !== this.props.endAdornment)
+    //   );
+  }
+
+  renderChips(classes: Record<any, string>) {
+    const chipLimit     = this.props.chipLimit || 4;
+    const itemsToRender = this.props.selectedItems.slice(0, chipLimit);
+    const returnValue   = itemsToRender.map((item: any, index: number) => (
+        <Chip
+          key={this.map(item)}
+          tabIndex={-1}
+          label={this.map(item)}
+          className={classes.chip}
+          onDelete={this.handleDelete(item)}
+        />
+    ));
+    const showMore = this.props.selectedItems.length > itemsToRender.length;
+    if (showMore) {
+      returnValue.push(
+        <Chip
+          key='...'
+          label='...'
+          className={classes.chip}
+        />
       );
+    }
+    return returnValue;
   }
 
   render() {
@@ -364,8 +433,7 @@ class AutoComplete<T> extends React.Component<AutoCompleteProps<T>, any> {
       return null;
     }
 
-    const startAdornment = this.props.startAdornment ? <InputAdornment position='start' classes={{root: classes.inputAdornmentRoot}}>{this.props.startAdornment}</InputAdornment> : undefined;
-    const endAdornment   = this.props.endAdornment ? <InputAdornment position='end' classes={{root: classes.inputAdornmentRoot}}>{this.props.endAdornment}</InputAdornment> : undefined;
+    const endAdornment = this.props.endAdornment ? <InputAdornment position='end' classes={{root: classes.inputAdornmentRoot}}>{this.props.endAdornment}</InputAdornment> : undefined;
 
     return (
       <Downshift
@@ -396,7 +464,13 @@ class AutoComplete<T> extends React.Component<AutoCompleteProps<T>, any> {
                   label: label,
                   placeholder: placeholder,
                 }),
-                {align: align, variant, disableErrors: disableErrors, startAdornment: startAdornment, endAdornment: endAdornment},
+                {
+                  align: align,
+                  variant,
+                  disableErrors: disableErrors,
+                  startAdornment: this.renderChips(classes),
+                  endAdornment: endAdornment
+                },
                 (node => {
                   this.suggestionsContainerNode = node;
                 }),
@@ -426,4 +500,4 @@ class AutoComplete<T> extends React.Component<AutoCompleteProps<T>, any> {
   }
 }
 
-export default withStyles(styles, AutoComplete);
+export default withStyles(styles, DownshiftMultiple);

@@ -14,7 +14,7 @@ import {
   isSumOfOthers,
   isLessThan,
   requiredWhenOtherIsNotNull,
-  requiredWhenOtherIsValue,
+  requiredWhenOtherIsValue
 }                        from 'rewire-ui';
 import AccessibilityIcon from '@material-ui/icons/Accessibility';
 import AddIcon           from '@material-ui/icons/Add';

@@ -23,7 +23,7 @@ import editor, {
 import { and, isEmail, isRegEx } from './Validator';
 import { defaultPhoneFormat }    from '../components/PhoneField';
 
-export type IFieldTypes = 'string' | 'multistring' | 'static' | 'reference' | 'select' | 'multiselect' | 'number' | 'boolean' | 'switch' | 'date' | 'time' | 'avatar' | 'password' | 'email' | 'phone' | 'color' | 'mask';
+export type IFieldTypes = 'string' | 'multistring' | 'static' | 'reference' | 'select' | 'multiselect' | 'number' | 'boolean' | 'switch' | 'date' | 'time' | 'avatar' | 'password' | 'email' | 'phone' | 'color' | 'mask' | 'multiselectautocomplete';
 
 export interface IFieldDefn {
   label(text: string):                                            IFieldDefn;
@@ -268,23 +268,24 @@ export default class Form {
   }
 
   private static editorDefaults: {[K in IFieldTypes]: EditorType} = {
-    'string'     : 'text',
-    'multistring': 'multitext',
-    'static'     : 'static',
-    'select'     : 'select',
-    'multiselect': 'multiselect',
-    'reference'  : 'auto-complete',
-    'boolean'    : 'checked',
-    'switch'     : 'switch',
-    'date'       : 'date',
-    'time'       : 'time',
-    'password'   : 'password',
-    'email'      : 'email',
-    'phone'      : 'phone',
-    'number'     : 'number',
-    'avatar'     : 'avatar',
-    'color'      : 'color',
-    'mask'       : 'mask',
+    'string'                  : 'text',
+    'multistring'             : 'multitext',
+    'static'                  : 'static',
+    'select'                  : 'select',
+    'multiselect'             : 'multiselect',
+    'reference'               : 'auto-complete',
+    'boolean'                 : 'checked',
+    'switch'                  : 'switch',
+    'date'                    : 'date',
+    'time'                    : 'time',
+    'password'                : 'password',
+    'email'                   : 'email',
+    'phone'                   : 'phone',
+    'number'                  : 'number',
+    'avatar'                  : 'avatar',
+    'color'                   : 'color',
+    'mask'                    : 'mask',
+    'multiselectautocomplete' : 'multiselectautocomplete'
   };
 
   private createEditor(editorType: EditorType | undefined, field: IEditorField, editProps?: any): React.SFC<any> {
@@ -552,6 +553,11 @@ export default class Form {
   static multiselect(searcher: any, editProps?: any): IFieldDefn {
     let eProps = Object.assign({}, searcher, editProps);
     return new BaseField('multiselect', eProps);
+  }
+
+  static multiselectautocomplete(searcher: any, editProps?: any): IFieldDefn {
+    let eProps = Object.assign({}, searcher, editProps);
+    return new BaseField('multiselectautocomplete', eProps);
   }
 
   static reference(searcher: any, editProps?: any): IFieldDefn {

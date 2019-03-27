@@ -1,4 +1,6 @@
+import * as React              from 'react';
 import { ChangeEvent }         from 'react';
+import {disposeOnUnmount}      from 'rewire-core';
 import classNames              from 'classnames';
 import RootRef                 from '@material-ui/core/RootRef';
 import {Theme}                 from '@material-ui/core/styles';
@@ -8,7 +10,6 @@ import Input                   from '@material-ui/core/Input';
 import OutlinedInput           from '@material-ui/core/OutlinedInput';
 import InputLabel              from '@material-ui/core/InputLabel';
 import MenuItem                from '@material-ui/core/MenuItem';
-import * as React              from 'react';
 import Select, {SelectProps}   from '@material-ui/core/Select';
 import InputAdornment          from '@material-ui/core/InputAdornment';
 import {
@@ -16,8 +17,7 @@ import {
   SearchFn,
   MapFn,
   defaultMap
-} from '../models/search';
-import {disposeOnUnmount}      from 'rewire-core';
+}                              from '../models/search';
 import {withStyles, WithStyle} from './styles';
 
 const styles = (theme: Theme) => ({

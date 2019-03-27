@@ -28,7 +28,6 @@ export function arraySearch<T>(suggestions: T[], map?: (item?: T) => string, val
           if (keep) {
             count += 1;
           }
-
           return keep;
         });
   }
