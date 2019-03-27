@@ -1,5 +1,5 @@
 import * as React              from 'react';
-import TransitionWrapper       from './TransitionWrapper';
+import { TransitionWrapper }   from 'rewire-ui';
 import { delay }               from 'rewire-common';
 import { countries, searcher } from './demo-data';
 import { Observe }             from 'rewire-core';
@@ -71,7 +71,6 @@ class TestDialog extends Modal {
 const testDialog   = new TestDialog();
 const TestFormView = ({form}: {form: typeof testDialog.form}) => (
   <Observe render={() => (
-    <TransitionWrapper>
     <div style={{fontSize: '16px'}}>
     <FormView form={form} onSubmit={testDialog.actionFn('login')}>
       <div className='content'>
@@ -118,14 +117,15 @@ const TestFormView = ({form}: {form: typeof testDialog.form}) => (
       </div>
     </FormView>
     </div>
-    </TransitionWrapper>
   )} />
 );
 
 export const AboutView = (props: any) => (
-  <div>
-    <h2>About</h2>
-    <TestFormView form={testDialog.form} />
-  </div>
+  <TransitionWrapper>
+    <div>
+      <h2>About</h2>
+      <TestFormView form={testDialog.form} />
+    </div>
+  </TransitionWrapper>
 );
 
