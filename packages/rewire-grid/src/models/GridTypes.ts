@@ -261,6 +261,7 @@ export type IColumnEditor =
   'text' | 'date' | 'checked' | 'none' |
   {type: 'time', options?: {rounding?: number}} |
   {type: 'auto-complete', options: {search: SearchFn<any>, map: MapFn<any>}} |
+  {type: 'multiselectautocomplete', options: {search: SearchFn<any>, map: MapFn<any>}} |
   {type: 'select', options: {search: SearchFn<any>, map: MapFn<any>}} |
   {type: 'multiselect', options: {search: SearchFn<any>, map: MapFn<any>}} |
   {type: 'number', options?: {decimals?: number, thousandSeparator?: boolean, fixed?: boolean, allowNegative?: boolean}} |

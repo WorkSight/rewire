@@ -126,6 +126,7 @@ function createTestGrid(nRows: number, nColumns: number) {
   cols.push(createColumn('differenceColumn', 'Time Difference', { type: { type: 'number', options: { decimals: 2 } }, validator: gridIsDifferenceOfOthers(['timeInColumn', 'timeOutColumn']), width: Math.trunc(Math.random() * 250 + 50) + 'px' }));
   cols.push(createColumn('sumColumn', 'Time Sum', { type: { type: 'number', options: { decimals: 2 } }, validator: gridIsSumOfOthers(['timeInColumn', 'timeOutColumn']), width: Math.trunc(Math.random() * 250 + 50) + 'px' }));
   cols.push(createColumn('autoCompleteColumn', 'Auto Complete', { type: { type: 'auto-complete', options: countries }, width: Math.trunc(Math.random() * 250 + 50) + 'px' }));
+  cols.push(createColumn('multiAutoCompleteColumn', 'Multi Auto Complete', {type: {type: 'multiselectautocomplete', options: countries}, width: '250px'}));
   cols.push(createColumn('selectColumn', 'Select', { type: { type: 'select', options: countries }, width: Math.trunc(Math.random() * 250 + 50) + 'px' }));
   cols.push(createColumn('multiselectColumn', 'MultiSelect', { type: { type: 'multiselect', options: countries }, width: Math.trunc(Math.random() * 250 + 50) + 'px' }));
   cols.push(createColumn('checkedColumn', 'Checked', { type: 'checked', width: Math.trunc(Math.random() * 250 + 50) + 'px' }));
@@ -189,8 +190,8 @@ function createTestGrid(nRows: number, nColumns: number) {
       let v: any = `RC ${column}-${row % 5}`;
       let colName = cols[column].name;
       if ((column <= 1 || column >= 4) && row === 1) v = undefined;
-      else if ((colName === 'autoCompleteColumn') || (colName === 'selectColumn')) v = { id: '14', name: 'Austria' };
-      else if (colName === 'multiselectColumn') v = [{ id: '14', name: 'Austria' }];
+      else if (colName === 'autoCompleteColumn' || colName === 'selectColumn') v = { id: '14', name: 'Austria' };
+      else if (colName === 'multiAutoCompleteColumn' || colName === 'multiselectColumn') v = [{id: '18', name: 'Bangladesh'}, {id: '19', name: 'Barbados'}];
       else if (colName === 'checkedColumn') v = true;
       else if (colName === 'timeOutColumn') v = 7.5;
       else if (colName === 'timeInColumn') v = 11.5;
@@ -273,13 +274,14 @@ function createEmployeesGrid1() {
   let cols = [];
 
   // add header columns
-  cols.push(createColumn('name',                'Employee',       {type: 'text', width: '120px'}));
-  cols.push(createColumn('email',               'Email',          {type: 'text', width: '120px'}));
-  cols.push(createColumn('isActive',            'IsActive',       {type: 'checked', width: '150px'}));
-  cols.push(createColumn('timeColumn',          'Time',           {type: {type: 'time'}, width: '150px'}));
-  cols.push(createColumn('selectColumn',        'Select',         {type: {type: 'select', options: countries}, width: '150px'}));
-  cols.push(createColumn('multiselectColumn',   'Multiselect',    {type: {type: 'multiselect', options: countries}, width: '150px'}));
-  cols.push(createColumn('autoCompleteColumn',  'Auto Complete',  {type: {type: 'auto-complete', options: countries}, width: '150px'}));
+  cols.push(createColumn('name',                    'Employee',            {type: 'text', width: '120px'}));
+  cols.push(createColumn('email',                   'Email',               {type: 'text', width: '120px'}));
+  cols.push(createColumn('isActive',                'IsActive',            {type: 'checked', width: '75px'}));
+  cols.push(createColumn('timeColumn',              'Time',                {type: {type: 'time'}, width: '150px'}));
+  cols.push(createColumn('selectColumn',            'Select',              {type: {type: 'select', options: countries}, width: '150px'}));
+  cols.push(createColumn('multiselectColumn',       'Multiselect',         {type: {type: 'multiselect', options: countries}, width: '150px'}));
+  cols.push(createColumn('autoCompleteColumn',      'Auto Complete',       {type: {type: 'auto-complete', options: countries}, width: '150px'}));
+  cols.push(createColumn('multiAutoCompleteColumn', 'Multi Auto Complete', {type: {type: 'multiselectautocomplete', options: countries}, width: '250px'}));
 
   // add employee rows
   let rows: IRowData[] = [];
@@ -291,7 +293,9 @@ function createEmployeesGrid1() {
       if (fieldName === 'name') {
         v = employees[row][fieldName]; // somehow make into a button that opens a dialog on click???
       } else if (fieldName === 'multiselectColumn') {
-        v = [{id: '14', name: 'Austria'}];
+        v = [{id: '14', name: 'Austria'}, {id: '21', name: 'Belgium'}];
+      } else if (fieldName === 'multiAutoCompleteColumn') {
+        v = [{id: '18', name: 'Bangladesh'}, {id: '19', name: 'Barbados'}];
       } else {
         v = employees[row][fieldName];
       }
@@ -312,16 +316,17 @@ function createEmployeesGrid2() {
   let cols = [];
 
   // add header columns
-  cols.push(createColumn('name',               'Employee',        {type: 'text',    width: '120px'}));
-  cols.push(createColumn('email',              'Email',           {type: 'text'   , width: '120px'}));
-  cols.push(createColumn('isActive',           'IsActive',        {type: 'checked', width: '250px'}));
-  cols.push(createColumn('timeColumn',         'Time',            {type: {type: 'time'}, width: '250px'}));
-  cols.push(createColumn('selectColumn',       'Select',          {type: {type: 'select', options: countries}, width: '250px'}));
-  cols.push(createColumn('multiselectColumn',  'Multiselect',     {type: {type: 'multiselect', options: countries}, width: '100px'}));
-  cols.push(createColumn('autoCompleteColumn', 'Auto Complete',   {type: {type: 'auto-complete', options: countries}, width: '100px'}));
-  cols.push(createColumn('numberColumn1',      'Number Column 1', {type: {type: 'number', options: {}}, width: '250px'}));
-  cols.push(createColumn('numberColumn2',      'Number Column 2', {type: {type: 'number', options: {}}, width: '250px'}));
-  cols.push(createColumn('numberColumn3',      'Number Column 3', {type: {type: 'number', options: {}}, width: '250px'}));
+  cols.push(createColumn('name',                    'Employee',            {type: 'text', width: '120px'}));
+  cols.push(createColumn('email',                   'Email',               {type: 'text', width: '120px'}));
+  cols.push(createColumn('isActive',                'IsActive',            {type: 'checked', width: '75px'}));
+  cols.push(createColumn('timeColumn',              'Time',                {type: {type: 'time'}, width: '150px'}));
+  cols.push(createColumn('selectColumn',            'Select',              {type: {type: 'select', options: countries}, width: '100px'}));
+  cols.push(createColumn('multiselectColumn',       'Multiselect',         {type: {type: 'multiselect', options: countries}, width: '250px'}));
+  cols.push(createColumn('autoCompleteColumn',      'Auto Complete',       {type: {type: 'auto-complete', options: countries}, width: '100px'}));
+  cols.push(createColumn('multiAutoCompleteColumn', 'Multi Auto Complete', {type: {type: 'multiselectautocomplete', options: countries}, width: '250px'}));
+  cols.push(createColumn('numberColumn1',           'Number Column 1',     {type: {type: 'number', options: {}}, width: '120px'}));
+  cols.push(createColumn('numberColumn2',           'Number Column 2',     {type: {type: 'number', options: {}}, width: '120px'}));
+  cols.push(createColumn('numberColumn3',           'Number Column 3',     {type: {type: 'number', options: {}}, width: '120px'}));
 
   // add employee rows
   let rows: IRowData[] = [];
@@ -333,7 +338,9 @@ function createEmployeesGrid2() {
       if (fieldName === 'name') {
         v = employees[row][fieldName]; // somehow make into a button that opens a dialog on click???
       } else if (fieldName === 'multiselectColumn') {
-        v = [{id: '14', name: 'Austria'}];
+        v = [{id: '14', name: 'Austria'}, {id: '21', name: 'Belgium'}];
+      } else if (fieldName === 'multiAutoCompleteColumn') {
+        v = [{id: '18', name: 'Bangladesh'}, {id: '19', name: 'Barbados'}];
       } else {
         v = employees[row][fieldName];
       }
@@ -343,7 +350,7 @@ function createEmployeesGrid2() {
   }
 
   // create the grid model
-  let grid = createGrid(rows, cols, {multiSelect: true});
+  let grid = createGrid(rows, cols, {multiSelect: true, allowMergeColumns: true});
   // sort by employee names
   grid.addSort(grid.columnByPos(0)!, 'ascending');
 

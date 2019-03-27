@@ -281,19 +281,16 @@ class DownshiftMultiple<T> extends React.Component<DownshiftMultipleProps<T>, an
         return;
       }
 
-      if (this.props.selectedItems.map(item => this.map(item)).includes(this.map(options.selectedItem))) {
-        return;
+      if (!this.props.selectedItems.map(item => this.map(item)).includes(this.map(options.selectedItem))) {
+        const newItems = [...this.props.selectedItems, options.selectedItem];
+        this.props.onSelectItem && this.props.onSelectItem(newItems);
       }
 
-      const newItems = [...this.props.selectedItems, options.selectedItem];
-      this.props.onSelectItem && this.props.onSelectItem(newItems);
-      setTimeout(() => {
         this.downShift.setState({
           inputValue: '',
           highlightedIndex: null,
           selectedItem: null
         });
-      }, 0);
     }
   }
 
@@ -372,8 +369,8 @@ class DownshiftMultiple<T> extends React.Component<DownshiftMultipleProps<T>, an
     event.nativeEvent.stopImmediatePropagation();
   }
 
-  componentWillReceiveProps (nextProps: ICustomProps<T>) {
-    if (nextProps.selectedItem === undefined && (nextProps.selectedItem !== this.props.selectedItem) && this.downShift) {
+  componentWillReceiveProps (nextProps: any) {
+    if (nextProps.selectedItems === undefined && (nextProps.selectedItems !== this.props.selectedItems) && this.downShift) {
       this.downShift.clearSelection();
     }
 
@@ -403,7 +400,7 @@ class DownshiftMultiple<T> extends React.Component<DownshiftMultipleProps<T>, an
   }
 
   renderChips(classes: Record<any, string>) {
-    const chipLimit     = this.props.chipLimit || 4;
+    const chipLimit     = this.props.chipLimit || 3;
     const itemsToRender = this.props.selectedItems.slice(0, chipLimit);
     const returnValue   = itemsToRender.map((item: any, index: number) => (
         <Chip
@@ -440,7 +437,7 @@ class DownshiftMultiple<T> extends React.Component<DownshiftMultipleProps<T>, an
         defaultHighlightedIndex={0}
         initialInputValue={initialInputValue}
         initialIsOpen={initialInputValue !== undefined}
-        selectedItem={this.props.selectedItem || null}
+        selectedItem={this.props.selectedItems}
         itemToString={this.map}
         onInputValueChange={this.handleInputChanged}
         onUserAction={this.handleItemChanged}
