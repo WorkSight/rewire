@@ -213,7 +213,7 @@ export const isDifferenceOfOthers = (otherColumnNames: string[], text?: string):
       let errorMsg: string             = '';
       let errorSeverity: ErrorSeverity = ErrorSeverity.Error;
       let otherValues: any[]           = otherColumnNames.map((otherColumnName: string) => row.cells[otherColumnName] && row.cells[otherColumnName].value) || [];
-      if (otherValues.find(value => value === undefined || value === null || !is.number(value))) {
+      if (otherValues.findIndex(value => value === undefined || value === null || !is.number(value)) >= 0) {
         return undefined;
       }
       let difference = otherValues.reduce((totalValue: number, currValue: number) => {
@@ -245,7 +245,7 @@ export const isSumOfOthers = (otherColumnNames: string[], text?: string): IValid
       let errorMsg: string             = '';
       let errorSeverity: ErrorSeverity = ErrorSeverity.Error;
       let otherValues: any[]           = otherColumnNames.map((otherColumnName: string) => row.cells[otherColumnName] && row.cells[otherColumnName].value) || [];
-      if (otherValues.find(value => value === undefined || value === null || !is.number(value))) {
+      if (otherValues.findIndex(value => value === undefined || value === null || !is.number(value)) >= 0) {
         return undefined;
       }
       let sum = otherValues.reduce((totalValue: number, currValue: number) => {

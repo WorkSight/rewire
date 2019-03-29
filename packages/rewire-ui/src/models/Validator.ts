@@ -185,7 +185,7 @@ export const isDifferenceOfOthers = (otherFieldNames: string[], text?: string): 
     linkedFieldNames: otherFieldNames,
     fn: (obj: ObjectType, fieldName: string, label: string | undefined, value: any): string | undefined => {
       let otherValues: any[] = otherFieldNames.map((otherFieldName: string) => obj[otherFieldName] && obj[otherFieldName].value) || [];
-      if (otherValues.find(value => value === undefined || value === null || !is.number(value))) {
+      if (otherValues.findIndex(value => value === undefined || value === null || !is.number(value)) >= 0) {
         return undefined;
       }
       let difference = otherValues.reduce((totalValue: number, currValue: number) => totalValue - currValue);
@@ -207,7 +207,7 @@ export const isSumOfOthers = (otherFieldNames: string[], text?: string): IValida
     linkedFieldNames: otherFieldNames,
     fn: (obj: ObjectType, fieldName: string, label: string | undefined, value: any): string | undefined => {
       let otherValues: any[] = otherFieldNames.map((otherFieldName: string) => obj[otherFieldName] && obj[otherFieldName].value) || [];
-      if (otherValues.find(value => value === undefined || value === null || !is.number(value))) {
+      if (otherValues.findIndex(value => value === undefined || value === null || !is.number(value)) >= 0) {
         return undefined;
       }
       let sum = otherValues.reduce((totalValue: number, currValue: number) => totalValue + currValue);
