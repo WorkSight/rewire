@@ -41,7 +41,7 @@ export class SampleModel extends Modal {
       multi:                 `this is line 1\r\nthis is line 2\r\nand this is line 3`,
       color:                 '#ffeedd',
       multiselectAutoComplete: [{ id: '0', name: 'Afghanistan' }, { id: '23', name: 'Benin' }, { id: '24', name: 'Bermuda' }]
-    }
+    }, {initialValuesValidationMode: 'all'}
   );
 
   constructor() {

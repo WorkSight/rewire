@@ -29,10 +29,7 @@ class FormView extends React.Component<FormViewProps> {
 
   submitForm() {
     const {form, onSubmit} = this.props;
-
-    if (form.submit()) {
-      onSubmit(form);
-    }
+    onSubmit(form);
   }
 
   handleKeyDown = (evt: React.KeyboardEvent<any>) => {

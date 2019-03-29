@@ -31,7 +31,7 @@ class LoginDialog extends Modal {
     phone                : Form.phone().label('Phone'),
     mask                 : Form.mask({mask: ['(', /[1-9]/, /\d/, /\d/, ')', ' ', /\d/, /\d/, /\d/, '-', /\d/, /\d/, /\d/, /\d/]}).label('MyMask').validators(isRequired).autoFocus(),
     trigger              : Form.string().label('Trigger').placeholder('Change me to trigger handler').onValueChange((form: Form, v: any) => {form.setFieldValue('email', 'Triggered!@hotmail.com'); form.setFieldValue('money', 1337); }),
-  });
+  }, {}, {initialValuesValidationMode: 'all'});
 
   constructor() {
     super('');
