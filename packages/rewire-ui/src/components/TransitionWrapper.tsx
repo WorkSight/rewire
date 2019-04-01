@@ -8,7 +8,7 @@ export interface ITransitionWrapperProps {
   children:    JSX.Element;
 }
 
-const defaultTimeout: number = 1500;
+const defaultTimeout: number = 600;
 
 export default class TransitionWrapper extends React.Component<ITransitionWrapperProps> {
   render() {
