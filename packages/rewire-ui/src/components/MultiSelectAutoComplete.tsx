@@ -24,6 +24,7 @@ const styles = (theme: Theme) => ({
   container: {
     flexGrow: 1,
     position: 'relative',
+    overflow: 'hidden'
   },
   popper: {
     minWidth: '225px',
@@ -91,7 +92,7 @@ const styles = (theme: Theme) => ({
   },
 });
 
-interface IDownshiftMultipleProps {
+interface IMultiSelectAutoCompleteProps {
   selectOnFocus?   :      boolean;
   endOfTextOnFocus?:      boolean;
   cursorPositionOnFocus?: number;
@@ -100,16 +101,16 @@ interface IDownshiftMultipleProps {
   chipLimit?:             number;
 }
 
-export type DownshiftMultipleProps<T> = WithStyle<ReturnType<typeof styles>, IDownshiftMultipleProps & ICustomProps<T> & React.InputHTMLAttributes<any>>;
+export type MultiSelectAutoCompleteProps<T> = WithStyle<ReturnType<typeof styles>, IMultiSelectAutoCompleteProps & ICustomProps<T> & React.InputHTMLAttributes<any>>;
 
-class DownshiftMultiple<T> extends React.Component<DownshiftMultipleProps<T>, any> {
+class MultiSelectAutoComplete<T> extends React.Component<MultiSelectAutoCompleteProps<T>, any> {
   state = {suggestions: []};
-  downShift: any;
-  search: SearchFn<T>;
-  map: MapFn<T>;
+  downShift:                any;
+  search:                   SearchFn<T>;
+  map:                      MapFn<T>;
   suggestionsContainerNode: HTMLElement;
 
-  constructor(props: DownshiftMultipleProps<T>) {
+  constructor(props: MultiSelectAutoCompleteProps<T>) {
     super(props);
     this.search = props.search;
     if (props.debounce) {
@@ -135,8 +136,6 @@ class DownshiftMultiple<T> extends React.Component<DownshiftMultipleProps<T>, an
     const {startAdornment, endAdornment, align, variant, disableErrors} = InputProps;
     const inputClassName            = variant === 'outlined' ? classes.inputOutlinedInput : classes.inputInput;
     const inputFormControlClassName = variant === 'standard' && this.props.label ? classes.inputFormControlWithLabel : undefined;
-
-    console.log(value);
 
     return (
       <TextField
@@ -265,7 +264,6 @@ class DownshiftMultiple<T> extends React.Component<DownshiftMultipleProps<T>, an
   }
 
   handleInputChanged = (inputValue: string, helpers: ControllerStateAndHelpers<any>) => {
-    console.log(inputValue);
     if (helpers.isOpen) {
       this.performSearch(inputValue);
     }
@@ -497,4 +495,4 @@ class DownshiftMultiple<T> extends React.Component<DownshiftMultipleProps<T>, an
   }
 }
 
-export default withStyles(styles, DownshiftMultiple);
+export default withStyles(styles, MultiSelectAutoComplete);

@@ -104,6 +104,8 @@ const _invalidProperties = {
   '__proto__': true
 };
 
+const _objectProto = Object.getPrototypeOf(new Object());
+
 function createHandler(eq: EQType, parent?: () => void) {
   let dependencyCache: ObjectType = {};
   let version = S.data(0);
@@ -132,10 +134,13 @@ function createHandler(eq: EQType, parent?: () => void) {
 
       if (!target.hasOwnProperty(property)) {
         // for getters
-        let proto    = Object.getPrototypeOf(target);
-        let propDesc = Object.getOwnPropertyDescriptor(proto, property);
-        if (propDesc && propDesc.get && typeof propDesc.get === 'function') {
-          return value;
+        let proto = Object.getPrototypeOf(target);
+        while (proto !== _objectProto) {
+          let propDesc = Object.getOwnPropertyDescriptor(proto, property);
+          if (propDesc && propDesc.get && typeof propDesc.get === 'function') {
+            return value;
+          }
+          proto = Object.getPrototypeOf(proto);
         }
       }
 

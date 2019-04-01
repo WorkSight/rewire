@@ -23,6 +23,7 @@ export * from './components/styles';
 export * from './components/SwitchField';
 export * from './components/TextField';
 export * from './components/TimeInputField';
+export * from './components/TransitionWrapper';
 
 export {default as Form}               from './models/Form';
 export {default as Modal}              from './models/Modal';
@@ -48,3 +49,4 @@ export {default as decorate}           from './components/styles';
 export {default as SwitchField}        from './components/SwitchField';
 export {default as TextField}          from './components/TextField';
 export {default as TimeInputField}     from './components/TimeInputField';
+export {default as TransitionWrapper}  from './components/TransitionWrapper';

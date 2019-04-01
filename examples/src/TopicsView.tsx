@@ -7,10 +7,10 @@ import {
 import {
   Sortable,
   SortableList,
-  IItem
-}                            from 'rewire-ui';
-import { observable }        from 'rewire-core';
-import { TransitionWrapper } from 'rewire-ui';
+  IItem,
+  TransitionWrapper
+}                        from 'rewire-ui';
+import { observable }    from 'rewire-core';
 
 import Paper      from '@material-ui/core/Paper';
 import ListItem   from '@material-ui/core/ListItem';

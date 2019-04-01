@@ -1,12 +1,17 @@
-import * as React                                            from 'react';
-import * as nanoid                                           from 'nanoid';
-import { countries, employees }                              from './demo-data';
-import { sampleModel, SampleDialog }                         from './SampleDialog';
-import { hotkeysModel, HotKeysDialog }                       from './HotKeys';
-import { YesNoModel, YesNoDialog }                           from './YesNoDialog';
-import { ConfirmationModel, ConfirmationDialog }             from './YesNoDialog';
-import { Observe, observable }                               from 'rewire-core';
-import { ActionFn, WithStyle, withStyles, TransitionWrapper} from 'rewire-ui';
+import * as React                                from 'react';
+import * as nanoid                               from 'nanoid';
+import { countries, employees }                  from './demo-data';
+import { sampleModel, SampleDialog }             from './SampleDialog';
+import { hotkeysModel, HotKeysDialog }           from './HotKeys';
+import { YesNoModel, YesNoDialog }               from './YesNoDialog';
+import { ConfirmationModel, ConfirmationDialog } from './YesNoDialog';
+import { Observe, observable }                   from 'rewire-core';
+import {
+  ActionFn,
+  TransitionWrapper,
+  WithStyle,
+  withStyles,
+} from 'rewire-ui';
 import {
   createGrid,
   createColumn,

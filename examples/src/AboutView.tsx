@@ -1,5 +1,4 @@
 import * as React              from 'react';
-import { TransitionWrapper }   from 'rewire-ui';
 import { delay }               from 'rewire-common';
 import { countries, searcher } from './demo-data';
 import { Observe }             from 'rewire-core';
@@ -7,6 +6,7 @@ import {
   Form,
   FormView,
   Modal,
+  TransitionWrapper,
   isRequired,
   and,
   isSameAsOther,
@@ -71,52 +71,54 @@ class TestDialog extends Modal {
 const testDialog   = new TestDialog();
 const TestFormView = ({form}: {form: typeof testDialog.form}) => (
   <Observe render={() => (
-    <div style={{fontSize: '16px'}}>
-    <FormView form={form} onSubmit={testDialog.actionFn('login')}>
-      <div className='content'>
-        <form.field.date.Editor    className='span4' />
-        <form.field.dollars.Editor className='span4' />
-        <form.field.shouldI.Editor className='span4' />
+    <TransitionWrapper>
+      <div style={{fontSize: '16px'}}>
+        <FormView form={form} onSubmit={testDialog.actionFn('login')}>
+          <div className='content'>
+            <form.field.date.Editor    className='span4' />
+            <form.field.dollars.Editor className='span4' />
+            <form.field.shouldI.Editor className='span4' />
+          </div>
+          <div className='content'>
+            <form.field.noLabel.Editor  className='span4' />
+            <form.field.disabled.Editor className='span4' />
+            <form.field.email.Editor    className='span4' />
+            <form.field.name.Editor     className='span4' />
+          </div>
+          <div className='content'>
+            <form.field.password.Editor />
+            <form.field.password_confirmation.Editor />
+            <form.field.phone.Editor />
+            <form.field.phoneCustom.Editor />
+          </div>
+          <div className='content'>
+            <form.field.timeOut.Editor className='span4' />
+            <form.field.timeIn.Editor  className='span4' />
+            <form.field.isGreat.Editor className='span4' />
+          </div>
+          <div className='content'>
+            <form.field.difference.Editor className='span1' />
+            <form.field.sum.Editor        className='span1' />
+            <form.field.multi.Editor      className='span1' />
+          </div>
+          {/* <Slide in={true} timeout={2000} direction='up' mountOnEnter unmountOnExit> */}
+          <div className='content'>
+            <form.field.switch1.Editor className='span1' />
+            <form.field.switch2.Editor className='span1' />
+            <form.field.color.Editor   className='span1' />
+            <form.field.country.Editor className='span4' />
+          </div>
+          {/* </Slide> */}
+          <div className='content'>
+            <form.field.avatar.Editor />
+          </div>
+          <div className='content'>
+            <Button style={{height: '30px'}} value='Submit' variant='contained' onClick={testDialog.actionFn('login')}>Submit</Button>
+            <Button style={{height: '30px'}} value='Cancel' variant='contained' onClick={testDialog.actionFn('cancel')}>Cancel</Button>
+          </div>
+        </FormView>
       </div>
-      <div className='content'>
-        <form.field.noLabel.Editor  className='span4' />
-        <form.field.disabled.Editor className='span4' />
-        <form.field.email.Editor    className='span4' />
-        <form.field.name.Editor     className='span4' />
-      </div>
-      <div className='content'>
-        <form.field.password.Editor />
-        <form.field.password_confirmation.Editor />
-        <form.field.phone.Editor />
-        <form.field.phoneCustom.Editor />
-      </div>
-      <div className='content'>
-        <form.field.timeOut.Editor className='span4' />
-        <form.field.timeIn.Editor  className='span4' />
-        <form.field.isGreat.Editor className='span4' />
-      </div>
-      <div className='content'>
-        <form.field.difference.Editor className='span1' />
-        <form.field.sum.Editor        className='span1' />
-        <form.field.multi.Editor      className='span1' />
-      </div>
-      {/* <Slide in={true} timeout={2000} direction='up' mountOnEnter unmountOnExit> */}
-      <div className='content'>
-        <form.field.switch1.Editor className='span1' />
-        <form.field.switch2.Editor className='span1' />
-        <form.field.color.Editor   className='span1' />
-        <form.field.country.Editor className='span4' />
-      </div>
-      {/* </Slide> */}
-      <div className='content'>
-        <form.field.avatar.Editor />
-      </div>
-      <div className='content'>
-        <Button style={{height: '30px'}} value='Submit' variant='contained' onClick={testDialog.actionFn('login')}>Submit</Button>
-        <Button style={{height: '30px'}} value='Cancel' variant='contained' onClick={testDialog.actionFn('cancel')}>Cancel</Button>
-      </div>
-    </FormView>
-    </div>
+    </TransitionWrapper>
   )} />
 );
 
