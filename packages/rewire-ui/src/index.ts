@@ -49,4 +49,3 @@ export {default as decorate}           from './components/styles';
 export {default as SwitchField}        from './components/SwitchField';
 export {default as TextField}          from './components/TextField';
 export {default as TimeInputField}     from './components/TimeInputField';
-export {default as TransitionWrapper}  from './components/TransitionWrapper';
