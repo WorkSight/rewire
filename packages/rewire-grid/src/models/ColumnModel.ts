@@ -149,13 +149,13 @@ export class ColumnModel implements IColumn {
           this.typeOptions.mask = defaultPhoneMask;
         }
         this.map = getPhoneString;
-      } else if (t === 'multiselect') {
+      } else if (t === 'multiselect' || t === 'multiselectautocomplete') {
         this.map       = getArrayString(this.typeOptions.map);
         this.predicate = (value: any, filter: any) => toLowerCase(this.map!(value)).includes(toLowerCase(filter.value));
         this.compare   = arrayCompare(this.typeOptions);
       }
 
-      if (this.typeOptions.map && t !== 'multiselect') {
+      if (this.typeOptions.map && t !== 'multiselect' && t !== 'multiselectautocomplete') {
         this.map       = (value: any) => this.typeOptions.map(value);
         this.predicate = (value: any, filter: any) => toLowerCase(this.typeOptions.map(value)).includes(toLowerCase(filter.value));
         if (this.compare) {

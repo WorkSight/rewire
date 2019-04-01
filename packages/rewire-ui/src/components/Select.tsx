@@ -241,6 +241,23 @@ class SelectInternal<T> extends React.Component<SelectInternalProps<T>, any> {
     event.nativeEvent.stopImmediatePropagation();
   }
 
+  handleKeyDown = (evt: React.KeyboardEvent<any>) => {
+    this.props.onKeyDown && this.props.onKeyDown(evt);
+
+    switch (evt.key) {
+      case 'ArrowUp':
+      case 'ArrowDown':
+      case ' ':
+        evt.preventDefault();
+        this.setState({isOpen: true});
+      case 'Enter':
+        break;
+
+      default:
+        break;
+    }
+  }
+
   handleChanged = (event: ChangeEvent<any>) => {
     if (this.props.onSelectItem) {
       if (this.props.multiple) {
@@ -318,6 +335,7 @@ class SelectInternal<T> extends React.Component<SelectInternalProps<T>, any> {
           className={cls}
           style={style}
           classes={{root: selectRootClasses, select: classes.select}}
+          SelectDisplayProps={{onKeyDown: this.handleKeyDown}}
           MenuProps={{classes: {paper: classes.selectMenuPaper}, MenuListProps: menuListProps}}
           input={<InputToUse startAdornment={startAdornment} endAdornment={endAdornment} autoFocus={autoFocus} classes={{root: classes.inputRoot, input: inputClassName, formControl: inputFormControlClassName}} {...additionalProps} />}
           renderValue={() => (

@@ -1,3 +1,4 @@
+    import * as React from 'react';
     import {
       ICell,
       IGridStaticKeybinds,
@@ -282,9 +283,6 @@
         // Exit editing mode with changes, and re-select cell
         evt.preventDefault();
         evt.stopPropagation();
-        if (cell.column.type === 'multiselect') {
-          return;
-        }
         cell.grid.editCell(undefined);
         cell.setFocus();
       },

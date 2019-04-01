@@ -296,8 +296,9 @@ class Cell extends React.PureComponent<CellProps, {}> {
 
   onValueChange = (v: any) => {
     let value = v === undefined || v === null || v === '' ? undefined : v;
+    this.cell.keyForEdit = undefined;
     this.cell.setValue(value);
-    if (this.column.type === 'multiselect') {
+    if (this.column.type === 'multiselect' || this.column.type === 'multiselectautocomplete') {
       return;
     }
     this.grid.editCell(undefined);
@@ -342,7 +343,8 @@ class Cell extends React.PureComponent<CellProps, {}> {
           endOfTextOnFocus      = false;
           cursorPositionOnFocus = 1;
         }
-        if (cellType === 'auto-complete') {
+        if (cellType === 'auto-complete' || cellType === 'multiselectautocomplete') {
+          value                                = undefined;
           additionalProps['initialInputValue'] = this.cell.keyForEdit;
         }
       }
@@ -355,7 +357,7 @@ class Cell extends React.PureComponent<CellProps, {}> {
         editorClasses = {formControlRoot: this.props.classes.editorFormControlRoot, inputRoot: this.props.classes.editorInputRoot};
       }
 
-      if (cellType === 'auto-complete') {
+      if (cellType === 'auto-complete' || cellType === 'multiselectautocomplete') {
         Object.assign(editorClasses, {container: this.props.classes.editorAutoCompleteContainer});
       }
 
