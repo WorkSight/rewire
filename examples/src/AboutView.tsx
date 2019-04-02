@@ -19,6 +19,7 @@ import {
 import AccessibilityIcon from '@material-ui/icons/Accessibility';
 import AddIcon           from '@material-ui/icons/Add';
 import Button            from '@material-ui/core/Button';
+// import Slide             from '@material-ui/core/Slide';
 
 import './graphqltest';
 
@@ -71,7 +72,6 @@ class TestDialog extends Modal {
 const testDialog   = new TestDialog();
 const TestFormView = ({form}: {form: typeof testDialog.form}) => (
   <Observe render={() => (
-    <TransitionWrapper>
       <div style={{fontSize: '16px'}}>
         <FormView form={form} onSubmit={testDialog.actionFn('login')}>
           <div className='content'>
@@ -118,7 +118,6 @@ const TestFormView = ({form}: {form: typeof testDialog.form}) => (
           </div>
         </FormView>
       </div>
-    </TransitionWrapper>
   )} />
 );
 
