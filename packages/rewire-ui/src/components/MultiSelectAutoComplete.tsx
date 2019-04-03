@@ -24,7 +24,6 @@ const styles = (theme: Theme) => ({
   container: {
     flexGrow: 1,
     position: 'relative',
-    overflow: 'hidden'
   },
   popper: {
     minWidth: '225px',
@@ -44,6 +43,7 @@ const styles = (theme: Theme) => ({
   inputRoot: {
     lineHeight: 'inherit',
     fontSize: 'inherit',
+    overflow: 'hidden'
   },
   inputInput: {
     paddingTop: '0.375em',
