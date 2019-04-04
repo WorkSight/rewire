@@ -201,8 +201,8 @@ class Cell extends React.PureComponent<CellProps, {}> {
     } else {
       this.grid.selectCells([this.cell]);
     }
-
-    evt.stopPropagation();
+    // commented out to allow row click handling
+    // evt.stopPropagation();
   }
 
   handleFocus = (evt: React.FocusEvent<any>) => {
