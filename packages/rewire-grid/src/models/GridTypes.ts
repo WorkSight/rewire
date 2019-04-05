@@ -370,8 +370,8 @@ export interface ICell extends ICellProperties {
   canFocus(): boolean;
   setFocus(focus?: boolean): void;
   setElement(element: HTMLTableDataCellElement | undefined): void;
-  _setValue(v: any, triggerOnValueChangeHandler?: boolean): boolean;
-  setValue(v: any, triggerOnValueChangeHandler?: boolean): boolean;
+  _setValue(v?: any, triggerOnValueChangeHandler?: boolean): boolean;
+  setValue(v?: any, triggerOnValueChangeHandler?: boolean): boolean;
   validate(): void;
   _revert(): void;
   revert(): void;

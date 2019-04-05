@@ -140,7 +140,7 @@ export class CellModel implements ICell {
     return this.column.position;
   }
 
-  _setValue(value: any, triggerOnValueChangeHandler: boolean = true): boolean {
+  _setValue(value?: any, triggerOnValueChangeHandler: boolean = true): boolean {
     if (is.object(this.value) && is.object(value)) {
       if (deepEqual(this.value, value)) return false;
       freeze(() => {
@@ -159,7 +159,7 @@ export class CellModel implements ICell {
     return true;
   }
 
-  setValue(value: any, triggerOnValueChangeHandler: boolean = true): boolean {
+  setValue(value?: any, triggerOnValueChangeHandler: boolean = true): boolean {
     if (this._setValue(value, triggerOnValueChangeHandler)) {
       this.validate();
 

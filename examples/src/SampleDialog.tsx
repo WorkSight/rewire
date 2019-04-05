@@ -8,6 +8,7 @@ import {
   and,
   isSameAsOther
 }                    from 'rewire-ui';
+import { Observe }   from 'rewire-core';
 import { delay }     from 'rewire-common';
 import { countries } from './demo-data';
 
@@ -59,35 +60,37 @@ export class SampleModel extends Modal {
 }
 
 export const sampleModel = new SampleModel();
-const SampleFormView = ({ form }: { form: typeof sampleModel.form }) => (
-  <div style={{ fontSize: '16px' }}>
-    <FormView form={form} onSubmit={sampleModel.actionFn('login')}>
-      <div className='content'>
-        <form.field.email.Editor />
-        <form.field.country.Editor />
-        <form.field.selectCountry.Editor />
-        <form.field.multiselectCountry.Editor />
-      </div>
-      <div className='content'>
-        <form.field.password.Editor />
-        <form.field.password_confirmation.Editor />
-        <form.field.money.Editor />
-        <form.field.phone.Editor />
-        <form.field.mask.Editor />
-      </div>
-      <div className='content'>
-        <form.field.date.Editor />
-        <form.field.time.Editor />
-        <form.field.multi.Editor />
-        <form.field.trigger.Editor />
-        <form.field.color.Editor />
-      </div>
-      <div className='content'>
-        <form.field.multiselectAutoComplete.Editor />
-      </div>
-    </FormView>
-  </div>
-);
+const SampleFormView = React.memo(({ form }: { form: typeof sampleModel.form }) => (
+  <Observe render={() => (
+    <div style={{ fontSize: '16px' }}>
+      <FormView form={form} onSubmit={sampleModel.actionFn('login')}>
+        <div className='content'>
+          <form.field.email.Editor />
+          <form.field.country.Editor />
+          <form.field.selectCountry.Editor />
+          <form.field.multiselectCountry.Editor />
+        </div>
+        <div className='content'>
+          <form.field.password.Editor />
+          <form.field.password_confirmation.Editor />
+          <form.field.money.Editor />
+          <form.field.phone.Editor />
+          <form.field.mask.Editor />
+        </div>
+        <div className='content'>
+          <form.field.date.Editor />
+          <form.field.time.Editor />
+          <form.field.multi.Editor />
+          <form.field.trigger.Editor />
+          <form.field.color.Editor />
+        </div>
+        <div className='content'>
+          <form.field.multiselectAutoComplete.Editor />
+        </div>
+      </FormView>
+    </div>
+  )} />
+));
 
 // override title
 const getTitle = (dialog: Modal): JSX.Element => <span>Dialog Title</span>;
