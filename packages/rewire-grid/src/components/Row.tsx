@@ -123,7 +123,9 @@ const Row = withStyles(styles, class extends PureComponent<RowProps, {}> {
   }
 
   handleRowClick = () => {
-    // this.props.row.grid.selectRows([this.props.row]);
+    if (this.props.row.onClick) {
+      this.props.row.onClick(this.props.row);
+    }
   }
 
   handleGroupRowClick = (groupRow: IGroupRow) => () => {
@@ -153,7 +155,7 @@ const Row = withStyles(styles, class extends PureComponent<RowProps, {}> {
       let cell = this.props.row.cells[column.name];
       let Cell = this.props.Cell;
       if ((cell.colSpan ===  0) || (cell.rowSpan === 0)) return;
-        cells.push(<Cell key={cell.id} cell={cell} />);
+        cells.push(<Cell key={cell.id} cell={cell} onClick={this.handleRowClick} />);
     });
     return cells;
   }

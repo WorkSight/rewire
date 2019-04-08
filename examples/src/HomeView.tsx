@@ -106,6 +106,10 @@ const ComplexCell: React.SFC<ICell> = (cell) => {
   );
 };
 
+function handleRowClick(row: IRow) {
+  console.log('row clicked', row);
+}
+
 function createTestGrid(nRows: number, nColumns: number) {
   console.time('start tester');
   // make sure we have enough columns passed.
@@ -190,7 +194,7 @@ function createTestGrid(nRows: number, nColumns: number) {
   // add some cell data!
   let rows: IRowData[] = [];
   for (let row = 0; row < nRows; row++) {
-    let r: IRowData = { id: `${row}`, data: {} };
+    let r: IRowData = { id: `${row}`, data: {}, options: {onClick: handleRowClick}};
     for (let column = 0; column < cols.length; column++) {
       let v: any = `RC ${column}-${row % 5}`;
       let colName = cols[column].name;
@@ -291,7 +295,7 @@ function createEmployeesGrid1() {
   // add employee rows
   let rows: IRowData[] = [];
   for (let row = 0; row < employees.length; row++) {
-    let r: IRowData = {id: `${row}`, data: {}};
+    let r: IRowData = { id: `${row}`, data: {}, options: { onClick: handleRowClick }};
     for (let column = 0; column < cols.length; column++) {
       let fieldName: string = cols[column].name;
       let v: any;

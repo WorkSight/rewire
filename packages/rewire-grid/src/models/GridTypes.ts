@@ -210,6 +210,8 @@ export interface IRowOptions {
   visible?: boolean;
   fixed?: boolean;
   allowMergeColumns?: boolean;
+
+  onClick?(row: IRow, v: any): void;
 }
 
 export interface IRowData {
