@@ -151,6 +151,7 @@ export interface IGrid extends IRows, IDisposable {
   addFixedRow(data?: IRowData, position?: number): IRow;
   removeFixedRow(id: string): void;
 
+  setRowPositions(): void;
   _removeRow(rows: IterableIterator<IRowIteratorResult>, id: string): void;
   _removeGroupRow(rows: IterableIterator<IRowIteratorResult>, id: string): void;
   removeRow(id: string): void;
@@ -211,7 +212,7 @@ export interface IRowOptions {
   fixed?: boolean;
   allowMergeColumns?: boolean;
 
-  onClick?(row: IRow, v: any): void;
+  onClick?(row: IRow): void;
 }
 
 export interface IRowData {
@@ -234,6 +235,7 @@ export interface IRow extends IDisposable {
   visible              : boolean;
   fixed                : boolean;
 
+  onClick?(row: IRow): void;
   hasChanges(): boolean;
   hasErrors(): boolean;
   getErrors(): IErrorData[];
@@ -271,14 +273,14 @@ export type IColumnEditor =
   {type: 'mask', options?: {mask?: MaskType | (() => MaskType), guide?: boolean, placeholderChar?: string, showMask?: boolean}};
 
 export interface ICellProperties {
-  id       : number;
-  grid     : IGrid;
-  cls?     : any;
-  editable : boolean;
-  align?   : TextAlignment;
-  renderer?: React.SFC<any>;
-  colSpan  : number;
-  rowSpan  : number;
+  id        : number;
+  grid      : IGrid;
+  cls?      : any;
+  editable  : boolean;
+  align?    : TextAlignment;
+  renderer? : React.SFC<any>;
+  colSpan   : number;
+  rowSpan   : number;
 
   onValueChange?(cell: ICell, v: any): void;
 }
@@ -293,7 +295,7 @@ export interface IColumnOptions {
   visible?      : boolean;
   align?        : TextAlignment;
   verticalAlign?: VerticalAlignment;
-  rowSpan? : number;
+  rowSpan?      : number;
   colSpan?      : number;
   tooltip?      : string;
   width?        : string;

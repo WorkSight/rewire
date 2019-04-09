@@ -26,18 +26,18 @@ export class RowModel implements IRow, IDisposable {
   private _parentRow?        : IGroupRow;
   private _allowMergeColumns?: boolean;
 
-  id                         : string;
-  grid                       : IGrid;
-  cells                      : ICellMap;
-  originalData               : ICellDataMap;
-  cellsByColumnPosition      : ICell[];
-  selected                   : boolean;
-  cls?                       : string;
-  visible                    : boolean;
-  fixed                      : boolean;
-  position                   : number;
-  onClick?(row: IRow, v: any): void;
+  id                    : string;
+  grid                  : IGrid;
+  cells                 : ICellMap;
+  originalData          : ICellDataMap;
+  cellsByColumnPosition : ICell[];
+  selected              : boolean;
+  cls?                  : string;
+  visible               : boolean;
+  fixed                 : boolean;
+  position              : number;
 
+  onClick?(row: IRow): void;
   dispose: () => void = EmptyFn;
 
   static positionCompare(a: IRow, b: IRow): number {

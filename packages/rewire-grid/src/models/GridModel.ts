@@ -24,7 +24,7 @@ import {
   IRowOptions,
   IRowData,
 }                              from './GridTypes';
-import createRow               from './RowModel';
+import createRow, {RowModel}   from './RowModel';
 import {ColumnModel}           from './ColumnModel';
 import {CellModel}             from './CellModel';
 import {
@@ -844,7 +844,7 @@ class GridModel implements IGrid, IDisposable {
   duplicateSelectedRows(): IRow[] {
     if (this.selectedRows.length <= 0) return [];
 
-    return this.duplicateRows(this.selectedRows.map(row => row.id), Math.max(...this.selectedRows.map(row => row.position)) + 1);
+    return this.duplicateRows(this.selectedRows.sort(RowModel.positionCompare).map(row => row.id), Math.max(...this.selectedRows.map(row => row.position)) + 1);
   }
 
   insertRowAtSelection(data?: IRowData): IRow {
