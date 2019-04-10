@@ -54,6 +54,12 @@ declare module '@material-ui/core/styles/createPalette' {
       dark: string,
       contrastText: string,
     };
+    gridSettingsIcon: {
+      light: string,
+      main: string,
+      dark: string,
+      contrastText: string,
+    };
     gridBorder: {
       light: string,
       main: string,
@@ -152,6 +158,12 @@ declare module '@material-ui/core/styles/createPalette' {
       dark?: string,
       contrastText?: string,
     };
+    gridSettingsIcon: {
+      light?: string,
+      main?: string,
+      dark?: string,
+      contrastText?: string,
+    };
     gridBorder: {
       light?: string,
       main?: string,
@@ -226,6 +238,7 @@ const defaultGridColors: IGridColors = {
   headerText: '#FFFFFF',
   gridBackground: '#FFFFFF',
   gridText: '#2e2e2e',
+  gridSettingsIcon: '#fff',
   gridBorder: '#e5e5e5',
   groupRowBackground: '#8AC0CE',
   rowSelectedBackground: '#D0DEE8',

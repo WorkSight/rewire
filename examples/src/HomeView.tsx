@@ -322,7 +322,7 @@ function createEmployeesGrid1() {
   }
 
   // create the grid model
-  let grid = createGrid(rows, cols, {multiSelect: true, allowMergeColumns: true});
+  let grid = createGrid(rows, cols, {multiSelect: true, allowMergeColumns: true, toggleableColumns: ['timeColumn', 'email', 'autoCompleteColumn']});
   // sort by employee names
   grid.addSort(grid.columnByPos(0)!, 'ascending');
 
@@ -432,9 +432,9 @@ const HomeToggleMenu = (props: any) => {
   const anchorOrigin: PopoverOrigin = {vertical: 'top', horizontal: 'left'};
   const transformOrigin             = anchorOrigin;
   const items: IToggleMenuItem[]    = observable([
-    {name: 'name',  title: 'Name',  visible: true},
-    {name: 'title', title: 'Title', visible: true},
-    {name: 'phone', title: 'Phone', visible: true},
+    {name: 'toggle1', title: 'Toggle 1', visible: true},
+    {name: 'toggle2', title: 'Toggle 2', visible: true},
+    {name: 'toggle3', title: 'Toggle 3', visible: true},
   ]);
   return (
     <ToggleMenu

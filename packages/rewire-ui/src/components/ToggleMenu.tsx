@@ -94,7 +94,7 @@ class ToggleMenu extends React.Component<ToggleMenuProps, IToggleMenuState> {
   });
 
   render() {
-    const {classes, menuId, buttonContent, buttonProps, items, onItemClick, ...restProps} = this.props;
+    const {classes, menuId, buttonContent, buttonProps, items, onItemClick, marginThreshold, MenuListProps, ...restProps} = this.props;
     const {anchorEl} = this.state;
 
     return <Observe render={() => (
@@ -114,7 +114,8 @@ class ToggleMenu extends React.Component<ToggleMenuProps, IToggleMenuState> {
           anchorEl={anchorEl}
           open={Boolean(anchorEl)}
           onClose={this.handleMenuClose}
-          marginThreshold={8}
+          marginThreshold={marginThreshold !== undefined ? marginThreshold : 8}
+          MenuListProps={{dense: true, disablePadding: true, ...MenuListProps}}
           {...restProps}
         >
           <this.renderMenuContent />

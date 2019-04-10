@@ -58,6 +58,7 @@ class GridModel implements IGrid, IDisposable {
   rows                      : IRow[];
   fixedRows                 : IRow[];
   columns                   : IColumn[];
+  toggleableColumns         : IColumn[];
   dataRowsByPosition        : IRow[];
   originalDataRowsByPosition: IRow[];
   editingCell?              : ICell;
@@ -732,6 +733,10 @@ class GridModel implements IGrid, IDisposable {
     }
   }
 
+  get hasToggleableColumns(): boolean {
+    return this.toggleableColumns.length > 0;
+  }
+
   addColumn(column: IColumn): IColumn {
     column.grid     = this;
     column.position = this.columns.length;
@@ -1277,7 +1282,13 @@ export default function create(rows: any[], columns: IColumn[], options?: IGridO
       let headerRow = columns.reduce((previous: any, current: any) => (previous[current.name] = current.title, previous), {});
       grid.addFixedRow({data: headerRow});
       let groupBy = options && options.groupBy;
-      if (groupBy) grid.groupBy = groupBy.map(name => findColumnByName(grid.columns, name)!);
+      if (groupBy) {
+        grid.groupBy = groupBy.map((name: string) => grid.column(name)).filter((column: IColumn | undefined) => column !== undefined) as IColumn[];
+      }
+      let toggleableColumns  = options && options.toggleableColumns;
+      grid.toggleableColumns = toggleableColumns
+                                 ? toggleableColumns.map((name: string) => grid.column(name)).filter((column: IColumn | undefined) => column !== undefined && !column.isGroupByColumn) as IColumn[]
+                                 : [];
       grid._addRows(rows);
     });
     grid.loading = false;

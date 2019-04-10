@@ -77,6 +77,8 @@ export interface IGrid extends IRows, IDisposable {
   addedRows                 : IRowIteratorResult[];
   removedRows               : IRowIteratorResult[];
   groupBy                   : IColumn[];
+  toggleableColumns         : IColumn[];
+  hasToggleableColumns      : boolean;
   clipboard                 : ICell[];
   isMouseDown               : boolean;
   multiSelect               : boolean;
@@ -177,6 +179,7 @@ export interface IGridOptions {
   allowMergeColumns?    : boolean;
   clearSelectionOnBlur? : boolean;
   groupBy?              : string[];
+  toggleableColumns?    : string[];
   rowKeybindPermissions?: IGridRowKeybindPermissions;
   variableKeybinds?     : {[keybind: string]: GridKeybindAction};
 }
@@ -186,6 +189,7 @@ export interface IGridColors {
   headerText?: string;
   headerBorder?: string;
   gridBackground?: string;
+  gridSettingsIcon?: string;
   gridText?: string;
   gridBorder?: string;
   gridBorderSelected?: string;
@@ -327,6 +331,7 @@ export interface IColumn extends ICellProperties {
   position      : number;
   sort?         : SortDirection;
   canSort       : boolean;
+  isGroupByColumn: boolean;
   typeOptions?  : any;
   editor?       : React.SFC<any>;
   validator?    : IValidateFnData;

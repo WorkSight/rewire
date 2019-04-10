@@ -102,7 +102,7 @@ class ActionMenu extends React.Component<ActionMenuProps, IActionMenuState> {
   });
 
   render() {
-    const {classes, menuId, buttonContent, buttonProps, items, ...restProps} = this.props;
+    const {classes, menuId, buttonContent, buttonProps, items, marginThreshold, MenuListProps, ...restProps} = this.props;
     const {anchorEl} = this.state;
 
     return <Observe render={() => (
@@ -122,8 +122,9 @@ class ActionMenu extends React.Component<ActionMenuProps, IActionMenuState> {
           anchorEl={anchorEl}
           open={Boolean(anchorEl)}
           onClose={this.handleMenuClose}
-          marginThreshold={5}
+          marginThreshold={marginThreshold !== undefined ? marginThreshold : 5}
           disableEnforceFocus={true}
+          MenuListProps={{dense: true, disablePadding: true, ...MenuListProps}}
           {...restProps}
         >
           <this.renderMenuContent />
