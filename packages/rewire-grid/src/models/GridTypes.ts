@@ -72,6 +72,7 @@ export interface IGrid extends IRows, IDisposable {
   loading                   : boolean;
   readonly fixedColumns     : IColumn[];
   readonly standardColumns  : IColumn[];
+  readonly columnsByPosition: IColumn[];
   dataRowsByPosition        : IRow[];
   originalDataRowsByPosition: IRow[];
   addedRows                 : IRowIteratorResult[];
@@ -149,6 +150,7 @@ export interface IGrid extends IRows, IDisposable {
   set(data: (IRowData | undefined)[]): void;
 
   addColumn(column: IColumn): IColumn;
+  setColumnPositions(): void;
 
   addFixedRow(data?: IRowData, position?: number): IRow;
   removeFixedRow(id: string): void;
@@ -226,18 +228,18 @@ export interface IRowData {
 }
 
 export interface IRow extends IDisposable {
-  id                   : string;
-  grid                 : IGrid;
-  cells                : ICellMap;
-  selected             : boolean;
-  cls?                 : string;
-  allowMergeColumns?   : boolean;
-  position             : number;
-  readonly originalData: ICellDataMap;
+  id                            : string;
+  grid                          : IGrid;
+  cells                         : ICellMap;
+  selected                      : boolean;
+  cls?                          : string;
+  allowMergeColumns?            : boolean;
+  position                      : number;
+  readonly originalData         : ICellDataMap;
   cellsByColumnPosition: ICell[];
-  parentRow?           : IGroupRow;
-  visible              : boolean;
-  fixed                : boolean;
+  parentRow?                    : IGroupRow;
+  visible                       : boolean;
+  fixed                         : boolean;
 
   onClick?(row: IRow): void;
   hasChanges(): boolean;
@@ -318,23 +320,23 @@ export interface IColumnData {
 }
 
 export interface IColumn extends ICellProperties {
-  name          : string;
-  title         : string;
-  type          : EditorType;
-  tooltip?      : string;
-  width?        : string;
-  fixed         : boolean;
-  visible       : boolean;
-  verticalAlign : VerticalAlignment;
-  enabled       : boolean;
-  readOnly      : boolean;
-  position      : number;
-  sort?         : SortDirection;
-  canSort       : boolean;
+  name           : string;
+  title          : string;
+  type           : EditorType;
+  tooltip?       : string;
+  width?         : string;
+  fixed          : boolean;
+  visible        : boolean;
+  verticalAlign  : VerticalAlignment;
+  enabled        : boolean;
+  readOnly       : boolean;
+  position       : number;
+  sort?          : SortDirection;
+  canSort        : boolean;
   isGroupByColumn: boolean;
-  typeOptions?  : any;
-  editor?       : React.SFC<any>;
-  validator?    : IValidateFnData;
+  typeOptions?   : any;
+  editor?        : React.SFC<any>;
+  validator?     : IValidateFnData;
 
   map?(value: any): string;
   predicate?(value: any, filter: {value: any}): boolean;

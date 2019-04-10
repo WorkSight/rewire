@@ -474,6 +474,8 @@ class MultiSelectAutoComplete<T> extends React.Component<MultiSelectAutoComplete
                 getMenuProps: getMenuProps,
                 isOpen: isOpen,
                 classes: classes,
+                /* This would not show any currently selected items in the suggestions container */
+                // children: this.state.suggestions.filter(suggestion => !selectedItemsNames.includes(this.map(suggestion))).map((suggestion, index) =>
                 children: this.state.suggestions.map((suggestion, index) =>
                   this.renderSuggestion({
                     suggestion,
