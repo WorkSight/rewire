@@ -72,11 +72,14 @@ export interface IGrid extends IRows, IDisposable {
   loading                   : boolean;
   readonly fixedColumns     : IColumn[];
   readonly standardColumns  : IColumn[];
+  readonly columnsByPosition: IColumn[];
   dataRowsByPosition        : IRow[];
   originalDataRowsByPosition: IRow[];
   addedRows                 : IRowIteratorResult[];
   removedRows               : IRowIteratorResult[];
   groupBy                   : IColumn[];
+  toggleableColumns         : IColumn[];
+  hasToggleableColumns      : boolean;
   clipboard                 : ICell[];
   isMouseDown               : boolean;
   multiSelect               : boolean;
@@ -147,10 +150,12 @@ export interface IGrid extends IRows, IDisposable {
   set(data: (IRowData | undefined)[]): void;
 
   addColumn(column: IColumn): IColumn;
+  setColumnPositions(): void;
 
   addFixedRow(data?: IRowData, position?: number): IRow;
   removeFixedRow(id: string): void;
 
+  setRowPositions(): void;
   _removeRow(rows: IterableIterator<IRowIteratorResult>, id: string): void;
   _removeGroupRow(rows: IterableIterator<IRowIteratorResult>, id: string): void;
   removeRow(id: string): void;
@@ -176,6 +181,7 @@ export interface IGridOptions {
   allowMergeColumns?    : boolean;
   clearSelectionOnBlur? : boolean;
   groupBy?              : string[];
+  toggleableColumns?    : string[];
   rowKeybindPermissions?: IGridRowKeybindPermissions;
   variableKeybinds?     : {[keybind: string]: GridKeybindAction};
 }
@@ -185,6 +191,7 @@ export interface IGridColors {
   headerText?: string;
   headerBorder?: string;
   gridBackground?: string;
+  gridSettingsIcon?: string;
   gridText?: string;
   gridBorder?: string;
   gridBorderSelected?: string;
@@ -211,7 +218,7 @@ export interface IRowOptions {
   fixed?: boolean;
   allowMergeColumns?: boolean;
 
-  onClick?(row: IRow, v: any): void;
+  onClick?(row: IRow): void;
 }
 
 export interface IRowData {
@@ -221,19 +228,20 @@ export interface IRowData {
 }
 
 export interface IRow extends IDisposable {
-  id                   : string;
-  grid                 : IGrid;
-  cells                : ICellMap;
-  selected             : boolean;
-  cls?                 : string;
-  allowMergeColumns?   : boolean;
-  position             : number;
-  readonly originalData: ICellDataMap;
+  id                            : string;
+  grid                          : IGrid;
+  cells                         : ICellMap;
+  selected                      : boolean;
+  cls?                          : string;
+  allowMergeColumns?            : boolean;
+  position                      : number;
+  readonly originalData         : ICellDataMap;
   cellsByColumnPosition: ICell[];
-  parentRow?           : IGroupRow;
-  visible              : boolean;
-  fixed                : boolean;
+  parentRow?                    : IGroupRow;
+  visible                       : boolean;
+  fixed                         : boolean;
 
+  onClick?(row: IRow): void;
   hasChanges(): boolean;
   hasErrors(): boolean;
   getErrors(): IErrorData[];
@@ -271,14 +279,14 @@ export type IColumnEditor =
   {type: 'mask', options?: {mask?: MaskType | (() => MaskType), guide?: boolean, placeholderChar?: string, showMask?: boolean}};
 
 export interface ICellProperties {
-  id       : number;
-  grid     : IGrid;
-  cls?     : any;
-  editable : boolean;
-  align?   : TextAlignment;
-  renderer?: React.SFC<any>;
-  colSpan  : number;
-  rowSpan  : number;
+  id        : number;
+  grid      : IGrid;
+  cls?      : any;
+  editable  : boolean;
+  align?    : TextAlignment;
+  renderer? : React.SFC<any>;
+  colSpan   : number;
+  rowSpan   : number;
 
   onValueChange?(cell: ICell, v: any): void;
 }
@@ -293,7 +301,7 @@ export interface IColumnOptions {
   visible?      : boolean;
   align?        : TextAlignment;
   verticalAlign?: VerticalAlignment;
-  rowSpan? : number;
+  rowSpan?      : number;
   colSpan?      : number;
   tooltip?      : string;
   width?        : string;
@@ -312,22 +320,23 @@ export interface IColumnData {
 }
 
 export interface IColumn extends ICellProperties {
-  name          : string;
-  title         : string;
-  type          : EditorType;
-  tooltip?      : string;
-  width?        : string;
-  fixed         : boolean;
-  visible       : boolean;
-  verticalAlign : VerticalAlignment;
-  enabled       : boolean;
-  readOnly      : boolean;
-  position      : number;
-  sort?         : SortDirection;
-  canSort       : boolean;
-  typeOptions?  : any;
-  editor?       : React.SFC<any>;
-  validator?    : IValidateFnData;
+  name           : string;
+  title          : string;
+  type           : EditorType;
+  tooltip?       : string;
+  width?         : string;
+  fixed          : boolean;
+  visible        : boolean;
+  verticalAlign  : VerticalAlignment;
+  enabled        : boolean;
+  readOnly       : boolean;
+  position       : number;
+  sort?          : SortDirection;
+  canSort        : boolean;
+  isGroupByColumn: boolean;
+  typeOptions?   : any;
+  editor?        : React.SFC<any>;
+  validator?     : IValidateFnData;
 
   map?(value: any): string;
   predicate?(value: any, filter: {value: any}): boolean;

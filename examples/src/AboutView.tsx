@@ -30,7 +30,7 @@ const confirmation = new Modal('Please confirm your request')
 class TestDialog extends Modal {
   constructor() {
     super('Test Form');
-    this.action('login', this.submit, {type: 'submit', disabled: () => !this.form.hasChanges})
+    this.action('login', this.submit, {type: 'submit', disabled: () => this.form.hasErrors})
         .action('cancel', {color: 'secondary', icon: 'cancel'});
   }
 
@@ -113,8 +113,8 @@ const TestFormView = ({form}: {form: typeof testDialog.form}) => (
             <form.field.avatar.Editor />
           </div>
           <div className='content'>
-            <Button style={{height: '30px'}} value='Submit' variant='contained' onClick={testDialog.actionFn('login')}>Submit</Button>
-            <Button style={{height: '30px'}} value='Cancel' variant='contained' onClick={testDialog.actionFn('cancel')}>Cancel</Button>
+            <Observe render={() => <Button value='Submit' variant='contained' disabled={testDialog.isDisabled || testDialog.actions['login'].disabled()} onClick={testDialog.actionFn('login')}>Submit</Button>} />
+            <Button value='Cancel' variant='contained' onClick={testDialog.actionFn('cancel')}>Cancel</Button>
           </div>
         </FormView>
       </div>

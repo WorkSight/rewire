@@ -336,7 +336,7 @@ class Cell extends React.PureComponent<CellProps, {}> {
       let cursorPositionOnFocus = undefined;
       let value                 = cell.value;
       if (this.cell.keyForEdit) {
-        value            = this.cell.keyForEdit;
+        value            = cell.keyForEdit;
         endOfTextOnFocus = true;
         selectOnFocus    = false;
         if (cellType === 'number') {
@@ -345,7 +345,7 @@ class Cell extends React.PureComponent<CellProps, {}> {
         }
         if (cellType === 'auto-complete' || cellType === 'multiselectautocomplete') {
           value                                = undefined;
-          additionalProps['initialInputValue'] = this.cell.keyForEdit;
+          additionalProps['initialInputValue'] = cell.keyForEdit;
         }
       }
       let editorClasses = undefined;
@@ -465,7 +465,7 @@ class Cell extends React.PureComponent<CellProps, {}> {
           onMouseDown={this.grid.multiSelect ? this.handleMouseDown : undefined}
           onMouseEnter={this.grid.multiSelect ? this.handleMouseEnter : undefined}
           className={tdClasses}
-          data-column-position={this.cell.columnPosition}>
+         >
             {cellContent}
         </td>
       );

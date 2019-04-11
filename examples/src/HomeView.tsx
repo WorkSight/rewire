@@ -11,6 +11,10 @@ import {
   TransitionWrapper,
   WithStyle,
   withStyles,
+  ActionMenu,
+  IActionMenuItem,
+  ToggleMenu,
+  IToggleMenuItem,
 } from 'rewire-ui';
 import {
   createGrid,
@@ -25,10 +29,14 @@ import {
   isRequired           as gridIsRequired,
   isSumOfOthers        as gridIsSumOfOthers,
   isDifferenceOfOthers as gridIsDifferenceOfOthers,
-}                 from 'rewire-grid';
-import Paper      from '@material-ui/core/Paper';
-import Button     from '@material-ui/core/Button';
-import Typography from '@material-ui/core/Typography';
+}                            from 'rewire-grid';
+import {PopoverOrigin}       from '@material-ui/core/Popover';
+import Paper                 from '@material-ui/core/Paper';
+import Button, {ButtonProps} from '@material-ui/core/Button';
+import Typography            from '@material-ui/core/Typography';
+import DeleteIcon            from '@material-ui/icons/DeleteOutlined';
+import ArchiveIcon           from '@material-ui/icons/ArchiveOutlined';
+import UnarchiveIcon         from '@material-ui/icons/UnarchiveOutlined';
 
 interface IDocument {
   id:    string;
@@ -314,7 +322,7 @@ function createEmployeesGrid1() {
   }
 
   // create the grid model
-  let grid = createGrid(rows, cols, {multiSelect: true, allowMergeColumns: true});
+  let grid = createGrid(rows, cols, {multiSelect: true, allowMergeColumns: true, toggleableColumns: ['timeColumn', 'email', 'autoCompleteColumn']});
   // sort by employee names
   grid.addSort(grid.columnByPos(0)!, 'ascending');
 
@@ -394,6 +402,53 @@ const yesAction: ActionFn = () => {
 const yesNoModel        = new YesNoModel({ title: 'Confirmation Required', action: yesAction });
 const confirmationModel = new ConfirmationModel({ title: 'Secondary Confirmation', yesAction: confirmationYesAction, noAction: confirmationNoAction});
 
+const HomeActionMenu = (props: any) => {
+  const buttonContent               = <span>Action Menu</span>;
+  const buttonProps: ButtonProps    = {color: 'primary', variant: 'contained'};
+  const anchorOrigin: PopoverOrigin = {vertical: 'top', horizontal: 'left'};
+  const transformOrigin             = anchorOrigin;
+  const items: IActionMenuItem[]    = [
+    {name: 'delete',    title: 'Delete',    icon: DeleteIcon,    onClick: () => { console.log('Performing Delete Action...'); },    closeOnClick: true},
+    {name: 'archive',   title: 'Archive',   icon: ArchiveIcon,   onClick: () => { console.log('Performing Archive Action...'); },   closeOnClick: true},
+    {name: 'unarchive', title: 'Unarchive', icon: UnarchiveIcon, onClick: () => { console.log('Performing Unarchive Action...'); }, closeOnClick: true},
+  ];
+
+  return (
+    <ActionMenu
+      menuId='home-action-menu'
+      items={items}
+      buttonContent={buttonContent}
+      buttonProps={buttonProps}
+      anchorOrigin={anchorOrigin}
+      transformOrigin={transformOrigin}
+      classes={{menuButton: props.classes.menuButton}}
+    />
+  );
+};
+
+const HomeToggleMenu = (props: any) => {
+  const buttonContent               = <span>Toggle Menu</span>;
+  const buttonProps: ButtonProps    = {color: 'primary', variant: 'contained'};
+  const anchorOrigin: PopoverOrigin = {vertical: 'top', horizontal: 'left'};
+  const transformOrigin             = anchorOrigin;
+  const items: IToggleMenuItem[]    = observable([
+    {name: 'toggle1', title: 'Toggle 1', visible: true},
+    {name: 'toggle2', title: 'Toggle 2', visible: true},
+    {name: 'toggle3', title: 'Toggle 3', visible: true},
+  ]);
+  return (
+    <ToggleMenu
+      menuId='home-toggle-menu'
+      buttonContent={buttonContent}
+      buttonProps={buttonProps}
+      anchorOrigin={anchorOrigin}
+      transformOrigin={transformOrigin}
+      items={items}
+      classes={{menuButton: props.classes.menuButton}}
+    />
+  );
+};
+
 const styles = () => ({
   openDialogButton: {
     marginRight: '15px',
@@ -451,6 +506,8 @@ export const HomeView = withStyles(styles, (props: HomeViewProps) => {
         <Button className={classes.openDialogButton} color='primary' variant='contained' onClick={() => sampleModel.open()}>Load Dialog Test</Button>
         <Button className={classes.openDialogButton} color='primary' variant='contained' onClick={() => hotkeysModel.open()}>Load Grid Hotkeys List</Button>
         <Button className={classes.openDialogButton} color='primary' variant='contained' onClick={() => yesNoModel.open()}>Load Confirmation Dialog</Button>
+        <HomeActionMenu classes={{menuButton: classes.openDialogButton}} />
+        <HomeToggleMenu classes={{menuButton: classes.openDialogButton}} />
 
         <SampleDialog />
         <HotKeysDialog />

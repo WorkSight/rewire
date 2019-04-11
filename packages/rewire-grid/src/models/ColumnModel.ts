@@ -110,6 +110,10 @@ export class ColumnModel implements IColumn {
     return this._verticalAlign() || this.grid.verticalAlign;
   }
 
+  get isGroupByColumn(): boolean {
+    return this.grid.groupBy.findIndex((column: IColumn) => column.id === this.id) >= 0;
+  }
+
   setEditor(type?: IColumnEditor) {
     let typeOptions: any;
     let t: EditorType;
