@@ -126,7 +126,7 @@ function createTestGrid(nRows: number, nColumns: number) {
   if (nColumns < 10) throw new Error('add some more columns!');
 
   // create some random sized columns!
-  let cols = observable([]);
+  let cols: IColumn[] = observable([]);
   for (let col = 0; col < nColumns; col++) {
     cols.push(createColumn('column' + col, 'Header# ' + col, { type: 'text', width: Math.trunc(Math.random() * 250 + 50) + 'px' }));
   }
@@ -303,7 +303,7 @@ function toggleMenuHandleItemClick(item: IToggleMenuItem) {
 }
 
 function createEmployeesGrid1() {
-  let cols = [];
+  let cols: IColumn[] = observable([]);
 
   // add header columns
   cols.push(createColumn('name',                    'Employee',            {type: 'text', width: '120px'}));
@@ -339,13 +339,13 @@ function createEmployeesGrid1() {
   // create the grid model
   let grid = createGrid(rows, cols, {multiSelect: true, allowMergeColumns: true, toggleableColumns: ['timeColumn', 'email', 'isActive', 'autoCompleteColumn'], toggleableColumnsOptions: {onItemClick: toggleMenuHandleItemClick} as IToggleableColumnsOptions });
   // sort by employee names
-  grid.addSort(grid.columnByPos(0)!, 'ascending');
+  grid.addSort(cols[0], 'ascending');
 
   return grid;
 }
 
 function createEmployeesGrid2() {
-  let cols = [];
+  let cols: IColumn[] = observable([]);
 
   // add header columns
   cols.push(createColumn('name',                    'Employee',            {type: 'text', width: '120px'}));
@@ -384,7 +384,7 @@ function createEmployeesGrid2() {
   // create the grid model
   let grid = createGrid(rows, cols, {multiSelect: true, allowMergeColumns: true});
   // sort by employee names
-  grid.addSort(grid.columnByPos(0)!, 'ascending');
+  grid.addSort(cols[0], 'ascending');
 
   return grid;
 }
