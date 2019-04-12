@@ -29,6 +29,8 @@ import {
   isRequired           as gridIsRequired,
   isSumOfOthers        as gridIsSumOfOthers,
   isDifferenceOfOthers as gridIsDifferenceOfOthers,
+  IToggleableColumnsOptions,
+  IColumn,
 }                            from 'rewire-grid';
 import {PopoverOrigin}       from '@material-ui/core/Popover';
 import Paper                 from '@material-ui/core/Paper';
@@ -287,6 +289,19 @@ grid.cell('3', 'column8')!.value = 'ooga booga boa';
 // setTimeout(() => grid.columns[3].visible = false, 7000);
 // setTimeout(() => grid.columns[3].visible = true, 8000);
 
+function toggleMenuHandleItemClick(item: IToggleMenuItem) {
+  const column   = item as IColumn;
+  column.visible = !column.visible;
+
+  if (column.name === 'email') {
+    let isActiveColumn      = column.grid.column('isActive');
+    isActiveColumn!.visible = !isActiveColumn!.visible;
+  } else if (column.name === 'isActive') {
+    let emailColumn      = column.grid.column('email');
+    emailColumn!.visible = !emailColumn!.visible;
+  }
+}
+
 function createEmployeesGrid1() {
   let cols = [];
 
@@ -322,7 +337,7 @@ function createEmployeesGrid1() {
   }
 
   // create the grid model
-  let grid = createGrid(rows, cols, {multiSelect: true, allowMergeColumns: true, toggleableColumns: ['timeColumn', 'email', 'autoCompleteColumn']});
+  let grid = createGrid(rows, cols, {multiSelect: true, allowMergeColumns: true, toggleableColumns: ['timeColumn', 'email', 'isActive', 'autoCompleteColumn'], toggleableColumnsOptions: {onItemClick: toggleMenuHandleItemClick} as IToggleableColumnsOptions });
   // sort by employee names
   grid.addSort(grid.columnByPos(0)!, 'ascending');
 
