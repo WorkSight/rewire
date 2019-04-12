@@ -1,6 +1,10 @@
-import * as is             from 'is';
-import { EditorType }      from 'rewire-ui';
-import { SearchFn, MapFn } from 'rewire-ui';
+import * as is from 'is';
+import {
+  EditorType,
+  SearchFn,
+  MapFn,
+  IToggleMenuItem,
+} from 'rewire-ui';
 import { IValidateFnData } from './Validator';
 import * as merge          from 'deepmerge';
 export { EditorType };
@@ -79,6 +83,7 @@ export interface IGrid extends IRows, IDisposable {
   removedRows               : IRowIteratorResult[];
   groupBy                   : IColumn[];
   toggleableColumns         : IColumn[];
+  toggleableColumnsOptions? : IToggleableColumnsOptions;
   hasToggleableColumns      : boolean;
   clipboard                 : ICell[];
   isMouseDown               : boolean;
@@ -173,17 +178,18 @@ export interface IGrid extends IRows, IDisposable {
 }
 
 export interface IGridOptions {
-  enabled?              : boolean;
-  readOnly?             : boolean;
-  verticalAlign?        : VerticalAlignment;
-  isDraggable?          : boolean;
-  multiSelect?          : boolean;
-  allowMergeColumns?    : boolean;
-  clearSelectionOnBlur? : boolean;
-  groupBy?              : string[];
-  toggleableColumns?    : string[];
-  rowKeybindPermissions?: IGridRowKeybindPermissions;
-  variableKeybinds?     : {[keybind: string]: GridKeybindAction};
+  enabled?                 : boolean;
+  readOnly?                : boolean;
+  verticalAlign?           : VerticalAlignment;
+  isDraggable?             : boolean;
+  multiSelect?             : boolean;
+  allowMergeColumns?       : boolean;
+  clearSelectionOnBlur?    : boolean;
+  groupBy?                 : string[];
+  toggleableColumns?       : string[];
+  toggleableColumnsOptions?: IToggleableColumnsOptions;
+  rowKeybindPermissions?   : IGridRowKeybindPermissions;
+  variableKeybinds?        : {[keybind: string]: GridKeybindAction};
 }
 
 export interface IGridColors {
@@ -210,6 +216,10 @@ export interface IGridFontSizes {
   header?: string;
   body?: string;
   groupRow?: string;
+}
+
+export interface IToggleableColumnsOptions {
+  onItemClick?(item: IToggleMenuItem): () => void;
 }
 
 export interface IRowOptions {

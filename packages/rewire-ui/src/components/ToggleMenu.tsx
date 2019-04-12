@@ -60,7 +60,7 @@ class ToggleMenu extends React.Component<ToggleMenuProps, IToggleMenuState> {
     super(props);
   }
 
-  handleItemClick = (item: IToggleMenuItem) => () => {
+  handleItemClick = (item: IToggleMenuItem) => {
     item.visible = !item.visible;
   }
 
@@ -78,7 +78,7 @@ class ToggleMenu extends React.Component<ToggleMenuProps, IToggleMenuState> {
     return <Observe render={() => (
       < >
       {items.map((item: IToggleMenuItem) =>
-        <MenuItem key={item.name} classes={{root: classes.menuItem, selected: classes.menuItemSelected}} onClick={onItemClick ? onItemClick(item) : this.handleItemClick(item)}>
+        <MenuItem key={item.name} classes={{root: classes.menuItem, selected: classes.menuItemSelected}} onClick={onItemClick ? () => onItemClick(item) : () => this.handleItemClick(item)}>
           <ListItemText className={classes.listItemText} primary={item.title} />
           <Observe render={() => (
             item.visible

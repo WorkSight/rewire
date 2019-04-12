@@ -29,6 +29,8 @@ import {
   isRequired           as gridIsRequired,
   isSumOfOthers        as gridIsSumOfOthers,
   isDifferenceOfOthers as gridIsDifferenceOfOthers,
+  IToggleableColumnsOptions,
+  IColumn,
 }                            from 'rewire-grid';
 import {PopoverOrigin}       from '@material-ui/core/Popover';
 import Paper                 from '@material-ui/core/Paper';
@@ -124,7 +126,7 @@ function createTestGrid(nRows: number, nColumns: number) {
   if (nColumns < 10) throw new Error('add some more columns!');
 
   // create some random sized columns!
-  let cols = [];
+  let cols: IColumn[] = observable([]);
   for (let col = 0; col < nColumns; col++) {
     cols.push(createColumn('column' + col, 'Header# ' + col, { type: 'text', width: Math.trunc(Math.random() * 250 + 50) + 'px' }));
   }
@@ -236,8 +238,8 @@ function createTestGrid(nRows: number, nColumns: number) {
   grid.addFixedRow({ data: { column5: '2017', column6: '2018' } });
 
   // sort first by  column7 then by column6
-  grid.addSort(grid.columnByPos(7)!, 'ascending')
-    .addSort(grid.columnByPos(6)!, 'descending');
+  grid.addSort(cols[7], 'ascending')
+  .addSort(cols[6], 'descending');
 
   // test changing colum and cell properties
   // setTimeout(() => {
@@ -287,8 +289,21 @@ grid.cell('3', 'column8')!.value = 'ooga booga boa';
 // setTimeout(() => grid.columns[3].visible = false, 7000);
 // setTimeout(() => grid.columns[3].visible = true, 8000);
 
+function toggleMenuHandleItemClick(item: IToggleMenuItem) {
+  const column   = item as IColumn;
+  column.visible = !column.visible;
+
+  if (column.name === 'email') {
+    let isActiveColumn      = column.grid.column('isActive');
+    isActiveColumn!.visible = !isActiveColumn!.visible;
+  } else if (column.name === 'isActive') {
+    let emailColumn      = column.grid.column('email');
+    emailColumn!.visible = !emailColumn!.visible;
+  }
+}
+
 function createEmployeesGrid1() {
-  let cols = [];
+  let cols: IColumn[] = observable([]);
 
   // add header columns
   cols.push(createColumn('name',                    'Employee',            {type: 'text', width: '120px'}));
@@ -322,15 +337,15 @@ function createEmployeesGrid1() {
   }
 
   // create the grid model
-  let grid = createGrid(rows, cols, {multiSelect: true, allowMergeColumns: true, toggleableColumns: ['timeColumn', 'email', 'autoCompleteColumn']});
+  let grid = createGrid(rows, cols, {multiSelect: true, allowMergeColumns: true, toggleableColumns: ['timeColumn', 'email', 'isActive', 'autoCompleteColumn'], toggleableColumnsOptions: {onItemClick: toggleMenuHandleItemClick} as IToggleableColumnsOptions });
   // sort by employee names
-  grid.addSort(grid.columnByPos(0)!, 'ascending');
+  grid.addSort(cols[0], 'ascending');
 
   return grid;
 }
 
 function createEmployeesGrid2() {
-  let cols = [];
+  let cols: IColumn[] = observable([]);
 
   // add header columns
   cols.push(createColumn('name',                    'Employee',            {type: 'text', width: '120px'}));
@@ -369,7 +384,7 @@ function createEmployeesGrid2() {
   // create the grid model
   let grid = createGrid(rows, cols, {multiSelect: true, allowMergeColumns: true});
   // sort by employee names
-  grid.addSort(grid.columnByPos(0)!, 'ascending');
+  grid.addSort(cols[0], 'ascending');
 
   return grid;
 }

@@ -23,6 +23,7 @@ import {
   ICellDataMap,
   IRowOptions,
   IRowData,
+  IToggleableColumnsOptions,
 }                              from './GridTypes';
 import createRow, {RowModel}   from './RowModel';
 import {ColumnModel}           from './ColumnModel';
@@ -60,6 +61,7 @@ class GridModel implements IGrid, IDisposable {
   fixedRows                 : IRow[];
   columns                   : IColumn[];
   toggleableColumns         : IColumn[];
+  toggleableColumnsOptions? : IToggleableColumnsOptions;
   dataRowsByPosition        : IRow[];
   originalDataRowsByPosition: IRow[];
   editingCell?              : ICell;
@@ -107,6 +109,7 @@ class GridModel implements IGrid, IDisposable {
     this.multiSelect                = options && options.multiSelect !== undefined ? options.multiSelect : false;
     this.allowMergeColumns          = options && options.allowMergeColumns !== undefined ? options.allowMergeColumns : false;
     this.clearSelectionOnBlur       = options && options.clearSelectionOnBlur !== undefined ? options.clearSelectionOnBlur : true;
+    this.toggleableColumnsOptions   = options && options.toggleableColumnsOptions;
     this.clipboard                  = [];
     this.isMouseDown                = false;
     this.startCell                  = undefined;
@@ -741,7 +744,7 @@ class GridModel implements IGrid, IDisposable {
   }
 
   get hasToggleableColumns(): boolean {
-    return this.toggleableColumns.length > 0;
+    return this.toggleableColumns && this.toggleableColumns.length > 0;
   }
 
   addColumn(column: IColumn): IColumn {
