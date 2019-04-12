@@ -126,7 +126,7 @@ function createTestGrid(nRows: number, nColumns: number) {
   if (nColumns < 10) throw new Error('add some more columns!');
 
   // create some random sized columns!
-  let cols = [];
+  let cols = observable([]);
   for (let col = 0; col < nColumns; col++) {
     cols.push(createColumn('column' + col, 'Header# ' + col, { type: 'text', width: Math.trunc(Math.random() * 250 + 50) + 'px' }));
   }
@@ -238,8 +238,8 @@ function createTestGrid(nRows: number, nColumns: number) {
   grid.addFixedRow({ data: { column5: '2017', column6: '2018' } });
 
   // sort first by  column7 then by column6
-  grid.addSort(grid.columnByPos(7)!, 'ascending')
-    .addSort(grid.columnByPos(6)!, 'descending');
+  grid.addSort(cols[7], 'ascending')
+  .addSort(cols[6], 'descending');
 
   // test changing colum and cell properties
   // setTimeout(() => {
