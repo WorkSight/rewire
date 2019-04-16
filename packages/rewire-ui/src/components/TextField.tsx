@@ -114,8 +114,16 @@ class TextFieldInternal extends React.Component<TextFieldPropsStyled> {
   }
 
   shouldComponentUpdate(nextProps: TextFieldPropsStyled) {
+    let equalValue: boolean;
+
+    if (nextProps.multiline && nextProps.value && this.props.value) {
+      equalValue = nextProps.value.localeCompare(this.props.value) === 0;
+    } else {
+      equalValue = nextProps.value === this.props.value;
+    }
+
     return (
-      (nextProps.value !== this.props.value) ||
+      !equalValue ||
       (nextProps.disabled !== this.props.disabled) ||
       (nextProps.visible !== this.props.visible) ||
       (nextProps.error !== this.props.error) ||

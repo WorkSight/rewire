@@ -1,18 +1,22 @@
-import * as React              from 'react';
-import * as is                 from 'is';
+import * as React                       from 'react';
+import * as is                          from 'is';
+import classNames                       from 'classnames';
 import Downshift, {
   ControllerStateAndHelpers,
   StateChangeOptions
-}                              from 'downshift';
-import TextField               from '@material-ui/core/TextField';
-import Chip                    from '@material-ui/core/Chip';
-import Paper                   from '@material-ui/core/Paper';
-import Popper                  from '@material-ui/core/Popper';
-import MenuItem                from '@material-ui/core/MenuItem';
-import InputAdornment          from '@material-ui/core/InputAdornment';
-import {Theme}                 from '@material-ui/core/styles';
-import {debounce, match}       from 'rewire-common';
-import {withStyles, WithStyle} from './styles';
+}                                       from 'downshift';
+import TextField                        from '@material-ui/core/TextField';
+import Chip                             from '@material-ui/core/Chip';
+import Paper                            from '@material-ui/core/Paper';
+import Popper                           from '@material-ui/core/Popper';
+import MenuItem                         from '@material-ui/core/MenuItem';
+import InputAdornment                   from '@material-ui/core/InputAdornment';
+import Typography                       from '@material-ui/core/Typography';
+import Fade                             from '@material-ui/core/Fade';
+import {Theme}                          from '@material-ui/core/styles';
+import {debounce, match}                from 'rewire-common';
+import {withStyles, WithStyle}          from './styles';
+import {ISuggestionsContainerComponent} from './AutoComplete';
 import {
   ICustomProps,
   SearchFn,
@@ -26,11 +30,26 @@ const styles = (theme: Theme) => ({
     position: 'relative',
   },
   popper: {
-    minWidth: '225px',
+    zIndex: 1300,
+  },
+  suggestionsPaper: {
+  },
+  suggestionsPaperContained: {
+    padding: '15px',
+  },
+  suggestions: {
     overflowY: 'auto',
     maxHeight: 'calc(50vh - 20px)',
-    boxShadow: theme.shadows[7],
-    zIndex: 1300,
+  },
+  suggestionsContained: {
+    maxHeight: 'calc(50vh - 150px)',
+    border: `1px solid ${theme.palette.common.black}`,
+  },
+  suggestionsHasHeader: {
+    marginTop: '15px',
+  },
+  suggestionsHasFooter: {
+    marginBottom: '15px',
   },
   textField: {
     width: '100%',
@@ -82,6 +101,9 @@ const styles = (theme: Theme) => ({
     height: 'auto',
     lineHeight: '1em',
   },
+  noResults: {
+    padding: '11px 16px',
+  },
   helperTextRoot: {
     marginTop: '6px',
     fontSize: '0.8em',
@@ -99,6 +121,13 @@ interface IMultiSelectAutoCompleteProps {
   initialInputValue?:     any;
   selectedItems:          any[];
   chipLimit?:             number;
+  openOnFocus?          : boolean;
+  showEmptySuggestions? : boolean;
+  hasTransition?        : boolean;
+  transitionTimeout?    : number;
+
+  suggestionsContainerHeader?: ISuggestionsContainerComponent;
+  suggestionsContainerFooter?: ISuggestionsContainerComponent;
 }
 
 export type MultiSelectAutoCompleteProps<T> = WithStyle<ReturnType<typeof styles>, IMultiSelectAutoCompleteProps & ICustomProps<T> & React.InputHTMLAttributes<any>>;
@@ -195,13 +224,13 @@ class MultiSelectAutoComplete<T> extends React.Component<MultiSelectAutoComplete
   }
 
   renderSuggestion = (params: any) => {
-    const { suggestion, index, itemProps, theme, highlightedIndex, inputValue, classes, fontSize } = params;
+    const { suggestion, index, itemProps, theme, highlightedIndex, inputValue, classes } = params;
     const isHighlighted = highlightedIndex === index;
     const name          = this.map(suggestion);
 
     if (this.props.renderSuggestion) {
       return (
-        <MenuItem selected={isHighlighted} component='div' key={index} className={classes.menuItem} style={{fontSize: fontSize}}>
+        <MenuItem selected={isHighlighted} component='div' key={index} className={classes.menuItem} >
           {this.props.renderSuggestion(suggestion, {theme, isHighlighted, inputValue})}
         </MenuItem>
       );
@@ -216,7 +245,6 @@ class MultiSelectAutoComplete<T> extends React.Component<MultiSelectAutoComplete
         selected={isHighlighted}
         component='div'
         className={classes.menuItem}
-        style={{fontSize: fontSize}}
       >{parts.map((part, index) => {
           return part.highlight ? (
             <span key={String(index)} style={{ fontWeight: 700 }} dangerouslySetInnerHTML={{__html: part.text}} />
@@ -228,8 +256,9 @@ class MultiSelectAutoComplete<T> extends React.Component<MultiSelectAutoComplete
     );
   }
 
-  renderSuggestionsContainer = (options: any) => {
-    const { getMenuProps, isOpen, children, classes } = options;
+  renderSuggestionsContainerContents = (props: any) => {
+    const { suggestionsContainerHeader, suggestionsContainerFooter, suggestions, options} = props;
+    const { getMenuProps, isOpen, classes } = options;
     const menuProps = {
       onMouseDown: this.handleMenuMouseDown,
       onMouseUp: this.handleMenuMouseUp,
@@ -237,17 +266,71 @@ class MultiSelectAutoComplete<T> extends React.Component<MultiSelectAutoComplete
       onDoubleClick: this.handleMenuDoubleClick,
     };
 
-    if (!children || children.length <= 0) {
-      return null;
+    let suggestionsPaperClasses: string[] = [classes.suggestionsPaper];
+    let suggestionsClasses: string[]      = [classes.suggestions];
+    if (suggestionsContainerHeader || suggestionsContainerFooter) {
+      suggestionsPaperClasses.push(classes.suggestionsPaperContained);
+      suggestionsClasses.push(classes.suggestionsContained);
+
+      if (suggestionsContainerHeader) {
+        suggestionsClasses.push(classes.suggestionsHasHeader);
+      }
+
+      if (suggestionsContainerFooter) {
+        suggestionsClasses.push(classes.suggestionsHasFooter);
+      }
     }
 
+    let fontSize = window.getComputedStyle(this.suggestionsContainerNode).getPropertyValue('font-size'); // needed to keep the suggestions the same font size as the input
+
     return (
-      <Popper open={isOpen} placement='bottom-start' anchorEl={this.suggestionsContainerNode} className={classes.popper} style={{width: this.suggestionsContainerNode ? this.suggestionsContainerNode.clientWidth : 'auto'}}>
-        <div {...(isOpen ? getMenuProps({}, {suppressRefError: true}) : {})} {...menuProps}>
-          <Paper>
-            {children}
-          </Paper>
-        </div>
+      <div {...(isOpen ? getMenuProps({}, {suppressRefError: true}) : {})} {...menuProps}>
+        <Paper elevation={4} className={classNames(...suggestionsPaperClasses)}>
+          {suggestionsContainerHeader && suggestionsContainerHeader()}
+          <div className={classNames(...suggestionsClasses)} style={{fontSize: fontSize}}>
+            {suggestions}
+          </div>
+          {suggestionsContainerFooter && suggestionsContainerFooter()}
+        </Paper>
+      </div>
+    );
+  }
+
+  renderSuggestionsContainer = (options: any) => {
+    const { openOnFocus, showEmptySuggestions, suggestionsContainerHeader, suggestionsContainerFooter, hasTransition, transitionTimeout } = this.props;
+    const { isOpen, children, classes } = options;
+
+    let transition  = hasTransition !== undefined ? hasTransition : true;
+    let timeout     = transitionTimeout !== undefined && transitionTimeout >= 0 ? transitionTimeout : 350;
+    let showEmpty   = showEmptySuggestions !== undefined ? showEmptySuggestions : openOnFocus ? true : false;
+    let suggestions = children;
+
+    if (!suggestions || suggestions.length <= 0) {
+      if (showEmpty) {
+       suggestions = <Typography className={classNames(classes.menuItem, classes.noResults)}>No Results</Typography>;
+      } else {
+        return null;
+      }
+    }
+
+    const popperModifiers = {
+      preventOverflow: {
+        boundariesElement: 'viewport',
+      },
+    };
+
+    return (
+      <Popper open={isOpen} placement='bottom-start' anchorEl={this.suggestionsContainerNode} transition={transition} modifiers={popperModifiers} className={classes.popper} style={{minWidth: this.suggestionsContainerNode ? this.suggestionsContainerNode.clientWidth : 'auto'}}>
+        {transition
+          ? ({ TransitionProps }) => (
+              <Fade {...TransitionProps} timeout={timeout}>
+                <div>
+                  <this.renderSuggestionsContainerContents suggestions={suggestions} suggestionsContainerHeader={suggestionsContainerHeader} suggestionsContainerFooter={suggestionsContainerFooter} options={...options} />
+                </div>
+              </Fade>
+            )
+          : <this.renderSuggestionsContainerContents suggestions={suggestions} suggestionsContainerHeader={suggestionsContainerHeader} suggestionsContainerFooter={suggestionsContainerFooter} options={...options} />
+        }
       </Popper>
     );
   }
@@ -260,6 +343,10 @@ class MultiSelectAutoComplete<T> extends React.Component<MultiSelectAutoComplete
     } else if (this.props.cursorPositionOnFocus !== undefined) {
       let cursorPosition = Math.max(0, Math.min(this.props.cursorPositionOnFocus, evt.target.value.length));
       evt.target.setSelectionRange(cursorPosition, cursorPosition);
+    }
+
+    if (this.props.openOnFocus) {
+      this.downShift.openMenu();
     }
   }
 
@@ -486,7 +573,6 @@ class MultiSelectAutoComplete<T> extends React.Component<MultiSelectAutoComplete
                     itemProps: getItemProps({ item: suggestion }),
                     highlightedIndex,
                     selectedItem,
-                    fontSize: window.getComputedStyle(this.suggestionsContainerNode).getPropertyValue('font-size') // needed to make the menu items font-size the same as the shown value,
                   }),
                 ),
               })}
