@@ -4,6 +4,7 @@ import {
   SearchFn,
   MapFn,
   IToggleMenuItem,
+  ISuggestionsContainerComponent,
 } from 'rewire-ui';
 import { IValidateFnData } from './Validator';
 import * as merge          from 'deepmerge';
@@ -280,13 +281,13 @@ export type MaskType = (string | RegExp)[];
 export type IColumnEditor =
   'text' | 'date' | 'checked' | 'none' |
   {type: 'time', options?: {rounding?: number}} |
-  {type: 'auto-complete', options: {search: SearchFn<any>, map: MapFn<any>}} |
-  {type: 'multiselectautocomplete', options: {search: SearchFn<any>, map: MapFn<any>}} |
   {type: 'select', options: {search: SearchFn<any>, map: MapFn<any>}} |
   {type: 'multiselect', options: {search: SearchFn<any>, map: MapFn<any>}} |
   {type: 'number', options?: {decimals?: number, thousandSeparator?: boolean, fixed?: boolean, allowNegative?: boolean}} |
   {type: 'phone', options?: {format?: string, mask?: string}} |
-  {type: 'mask', options?: {mask?: MaskType | (() => MaskType), guide?: boolean, placeholderChar?: string, showMask?: boolean}};
+  {type: 'mask', options?: {mask?: MaskType | (() => MaskType), guide?: boolean, placeholderChar?: string, showMask?: boolean}} |
+  {type: 'auto-complete', options: {search: SearchFn<any>, map: MapFn<any>, openOnFocus?: boolean, showEmptySuggestions?: boolean, suggestionsContainerHeader?: ISuggestionsContainerComponent, suggestionsContainerFooter?: ISuggestionsContainerComponent}} |
+  {type: 'multiselectautocomplete', options: {search: SearchFn<any>, map: MapFn<any>, openOnFocus?: boolean, showEmptySuggestions?: boolean, suggestionsContainerHeader?: ISuggestionsContainerComponent, suggestionsContainerFooter?: ISuggestionsContainerComponent}};
 
 export interface ICellProperties {
   id        : number;

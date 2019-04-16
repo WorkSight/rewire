@@ -15,6 +15,7 @@ import {
   IActionMenuItem,
   ToggleMenu,
   IToggleMenuItem,
+  ISuggestionsContainerComponentProps,
 } from 'rewire-ui';
 import {
   createGrid,
@@ -302,18 +303,36 @@ function toggleMenuHandleItemClick(item: IToggleMenuItem) {
   }
 }
 
+const clickHandler = (props: ISuggestionsContainerComponentProps) => () => {
+  console.log('Add Item!');
+  props.downShift.closeMenu();
+};
+
+const suggestionsContainerHeader = (props: ISuggestionsContainerComponentProps) => (
+  <div>
+    <Typography variant='subtitle1'><strong>Items Title</strong></Typography>
+  </div>
+);
+
+const suggestionsContainerFooter = (props: ISuggestionsContainerComponentProps) => (
+  <div>
+    <Button variant='contained' size='small' onClick={clickHandler(props)}>Add Item</Button>
+  </div>
+);
+
 function createEmployeesGrid1() {
   let cols: IColumn[] = observable([]);
 
   // add header columns
-  cols.push(createColumn('name',                    'Employee',            {type: 'text', width: '120px'}));
-  cols.push(createColumn('email',                   'Email',               {type: 'text', width: '120px'}));
-  cols.push(createColumn('isActive',                'IsActive',            {type: 'checked', width: '75px'}));
-  cols.push(createColumn('timeColumn',              'Time',                {type: {type: 'time'}, width: '150px'}));
-  cols.push(createColumn('selectColumn',            'Select',              {type: {type: 'select', options: countries}, width: '150px'}));
-  cols.push(createColumn('multiselectColumn',       'Multiselect',         {type: {type: 'multiselect', options: countries}, width: '150px'}));
-  cols.push(createColumn('autoCompleteColumn',      'Auto Complete',       {type: {type: 'auto-complete', options: countries}, width: '150px'}));
-  cols.push(createColumn('multiAutoCompleteColumn', 'Multi Auto Complete', {type: {type: 'multiselectautocomplete', options: countries}, width: '250px'}));
+  cols.push(createColumn('name',                       'Employee',               {type: 'text', width: '120px'}));
+  cols.push(createColumn('email',                      'Email',                  {type: 'text', width: '120px'}));
+  cols.push(createColumn('isActive',                   'IsActive',               {type: 'checked', width: '75px'}));
+  cols.push(createColumn('timeColumn',                 'Time',                   {type: {type: 'time'}, width: '150px'}));
+  cols.push(createColumn('selectColumn',               'Select',                 {type: {type: 'select', options: countries}, width: '150px'}));
+  cols.push(createColumn('multiselectColumn',          'Multiselect',            {type: {type: 'multiselect', options: countries}, width: '150px'}));
+  cols.push(createColumn('autoCompleteColumn',         'Auto Complete',          {type: {type: 'auto-complete', options: countries}, width: '150px'}));
+  cols.push(createColumn('advancedAutoCompleteColumn', 'Advanced Auto Complete', {type: {type: 'auto-complete', options: {search: countries.search, map: countries.map, openOnFocus: true, suggestionsContainerHeader: suggestionsContainerHeader, suggestionsContainerFooter: suggestionsContainerFooter}}, width: '150px'}));
+  cols.push(createColumn('multiAutoCompleteColumn',    'Multi Auto Complete',    {type: {type: 'multiselectautocomplete', options: countries}, width: '250px'}));
 
   // add employee rows
   let rows: IRowData[] = [];
@@ -328,6 +347,8 @@ function createEmployeesGrid1() {
         v = [{id: '14', name: 'Austria'}, {id: '21', name: 'Belgium'}];
       } else if (fieldName === 'multiAutoCompleteColumn') {
         v = [{id: '18', name: 'Bangladesh'}, {id: '19', name: 'Barbados'}];
+      } else if (fieldName === 'advancedAutoCompleteColumn') {
+        v = {id: '21', name: 'Belgium'};
       } else {
         v = employees[row][fieldName];
       }
