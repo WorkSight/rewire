@@ -1,5 +1,4 @@
 import {
-  ICache,
   IClientOptions,
   IMutation,
   IQuery,
@@ -9,7 +8,6 @@ import {
   GQL
 }                             from './types';
 import { hashString }         from './hash';
-import { ObservableCache }    from './ObservableCache';
 import { SubscriptionClient } from 'subscriptions-transport-ws';
 import { from, Stream }       from 'most';
 import { ExecutionResult }    from 'graphql';
@@ -18,7 +16,6 @@ class Client implements IClient {
   url                : string; // Graphql API URL
   bearer?            : string; // bearer token
   fetchOptions       : object | (() => object); // Options for fetch call
-  cache              : ICache; // Cache object
   running            : {[idx: string]: Promise<IQueryResponse>} = {};
   subscriptionClient?: SubscriptionClient;
 
@@ -34,16 +31,11 @@ class Client implements IClient {
     this.bearer       = opts.bearer;
     this.url          = opts.url;
     this.fetchOptions = opts.fetchOptions || {};
-    this.cache        = opts.cache || new ObservableCache();
   }
 
   executeQuery(queryObject: IQuery, headers?: object, skipCache: boolean = false, mutate: boolean = false): Promise<IQueryResponse> {
     const body    = JSON.stringify({query: (isGQL(queryObject.query)) ? queryObject.query.loc.source.body : queryObject.query, variables: queryObject.variables});
     const queryId = hashString(body);
-    if (!skipCache && !mutate) {
-      let data = this.cache.read(queryId);
-      if (data) return Promise.resolve({ data, queryId });
-    }
 
     if (!mutate) {
       let running = this.running[queryId];
@@ -73,12 +65,9 @@ class Client implements IClient {
         let res = await fetch(this.url, reqInit);
         let response = await res.json();
         if (res.ok) {
-          resolve({
-            queryId,
-            data: this.cache.write(mutate ? undefined : queryId, response.data)
-          });
+          resolve({data: response.data});
         } else {
-          reject({queryId, error: response});
+          reject({error: response});
         }
       } catch (err) {
         reject(err);
@@ -113,10 +102,9 @@ class Client implements IClient {
   }
 }
 
-export default function client(url: string, fetchOptions?: object | (() => object), cache?: ICache) {
+export default function client(url: string, fetchOptions?: object | (() => object)) {
   return new Client({
     url,
-    fetchOptions,
-    cache
+    fetchOptions
   }) as IClient;
 }

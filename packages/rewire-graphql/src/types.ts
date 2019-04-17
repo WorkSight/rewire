@@ -1,13 +1,6 @@
 import { Stream }          from 'most';
 import { ExecutionResult } from 'graphql';
 
-export interface ICache {
-  write        (queryId: string | undefined, data: any): any;
-  read         (queryId: string): any;
-  invalidate   (queryId: string): void;
-  invalidateAll(): void;
-}
-
 export type GQL = {loc: {source: {body: string}}};
 
 export function isGQL(query: any): query is GQL {
@@ -25,17 +18,15 @@ export interface IClientOptions {
   url          : string;
   bearer?      : string;
   fetchOptions?: object | (() => object);
-  cache?       : ICache;
 }
 
 // Response from executeQuery call
 export interface IQueryResponse {
-  queryId: string;
   data?  : any;
+  error? : any;
 }
 
 export interface IClient {
-  cache:   ICache;
   bearer?: string;
 
   executeQuery   (queryObject: IQuery, headers?: object, skipCache?: boolean): Promise<IQueryResponse>;

@@ -499,7 +499,7 @@ const GridInternal = withStyles(styles, class extends React.PureComponent<GridPr
 
   updateForScrollbars() {
     let columnWrap = this._columnTableWrapper;
-    if (columnWrap.style) {
+    if (columnWrap && columnWrap.style) {
       let node = this.grid.contentElement as HTMLElement;
       if (node) {
         columnWrap.style.paddingRight = (node.clientHeight < node.scrollHeight) ? '17px' : '0';
