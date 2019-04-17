@@ -6,10 +6,31 @@ import {
   Modal,
   isRequired,
   and,
-  isSameAsOther
+  isSameAsOther,
+  ISuggestionsContainerComponentProps
 }                    from 'rewire-ui';
+import { Observe }   from 'rewire-core';
 import { delay }     from 'rewire-common';
+import Typography    from '@material-ui/core/Typography';
+import Button        from '@material-ui/core/Button';
 import { countries } from './demo-data';
+
+const clickHandler = (props: ISuggestionsContainerComponentProps) => () => {
+  console.log('Add Item!');
+  props.downShift.closeMenu();
+};
+
+const suggestionsContainerHeader = (props: ISuggestionsContainerComponentProps) => (
+  <div>
+    <Typography variant='subtitle1'><strong>Items Title</strong></Typography>
+  </div>
+);
+
+const suggestionsContainerFooter = (props: ISuggestionsContainerComponentProps) => (
+  <div>
+    <Button variant='contained' size='small' onClick={clickHandler(props)}>Add Item</Button>
+  </div>
+);
 
 export class SampleModel extends Modal {
   form: Form = Form.create(
@@ -29,6 +50,7 @@ export class SampleModel extends Modal {
       phone:                   Form.phone().label('Phone'),
       mask:                    Form.mask({mask: ['(', /[1-9]/, /\d/, /\d/, ')', ' ', /\d/, /\d/, /\d/, '-', /\d/, /\d/, /\d/, /\d/]}).label('MyMask').validators(isRequired),
       trigger:                 Form.string().label('Trigger').placeholder('Change me to trigger handler').onValueChange((form: Form, v: any) => {form.setFieldValue('email', 'Triggered!@hotmail.com'); form.setFieldValue('money', 1337); }),
+      advancedAutoComplete:    Form.reference(countries, { suggestionsContainerHeader: suggestionsContainerHeader, suggestionsContainerFooter: suggestionsContainerFooter, openOnFocus: true }).label('Advanced AutoComplete').validators(isRequired).placeholder('select a country'),
     }, {
       email:                 'my_email@gmail.com',
       country:               {id: 2, name: 'Albania'},
@@ -40,7 +62,8 @@ export class SampleModel extends Modal {
       date:                  '2018-03-05',
       multi:                 `this is line 1\r\nthis is line 2\r\nand this is line 3`,
       color:                 '#ffeedd',
-      multiselectAutoComplete: [{ id: '0', name: 'Afghanistan' }, { id: '23', name: 'Benin' }, { id: '24', name: 'Bermuda' }]
+      multiselectAutoComplete: [{ id: '0', name: 'Afghanistan' }, { id: '23', name: 'Benin' }, { id: '24', name: 'Bermuda' }],
+      advancedAutoComplete: {id: 0, name: 'Afghanistan'},
     }
   );
 
@@ -59,35 +82,40 @@ export class SampleModel extends Modal {
 }
 
 export const sampleModel = new SampleModel();
-const SampleFormView = ({ form }: { form: typeof sampleModel.form }) => (
-  <div style={{ fontSize: '16px' }}>
-    <FormView form={form} onSubmit={sampleModel.actionFn('login')}>
-      <div className='content'>
-        <form.field.email.Editor />
-        <form.field.country.Editor />
-        <form.field.selectCountry.Editor />
-        <form.field.multiselectCountry.Editor />
-      </div>
-      <div className='content'>
-        <form.field.password.Editor />
-        <form.field.password_confirmation.Editor />
-        <form.field.money.Editor />
-        <form.field.phone.Editor />
-        <form.field.mask.Editor />
-      </div>
-      <div className='content'>
-        <form.field.date.Editor />
-        <form.field.time.Editor />
-        <form.field.multi.Editor />
-        <form.field.trigger.Editor />
-        <form.field.color.Editor />
-      </div>
-      <div className='content'>
-        <form.field.multiselectAutoComplete.Editor />
-      </div>
-    </FormView>
-  </div>
-);
+const SampleFormView = React.memo(({ form }: { form: typeof sampleModel.form }) => (
+  <Observe render={() => (
+    <div style={{ fontSize: '16px' }}>
+      <FormView form={form} onSubmit={sampleModel.actionFn('login')}>
+        <div className='content'>
+          <form.field.email.Editor />
+          <form.field.country.Editor />
+          <form.field.selectCountry.Editor />
+          <form.field.multiselectCountry.Editor className='span2' />
+        </div>
+        <div className='content'>
+          <form.field.password.Editor />
+          <form.field.password_confirmation.Editor />
+          <form.field.money.Editor />
+          <form.field.phone.Editor />
+          <form.field.mask.Editor />
+        </div>
+        <div className='content'>
+          <form.field.date.Editor />
+          <form.field.time.Editor />
+          <form.field.multi.Editor />
+          <form.field.trigger.Editor />
+          <form.field.color.Editor />
+        </div>
+        <div className='content'>
+          <form.field.advancedAutoComplete.Editor />
+        </div>
+        <div className='content'>
+          <form.field.multiselectAutoComplete.Editor />
+        </div>
+      </FormView>
+    </div>
+  )} />
+));
 
 // override title
 const getTitle = (dialog: Modal): JSX.Element => <span>Dialog Title</span>;

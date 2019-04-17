@@ -52,17 +52,20 @@ export default class Modal {
   action(label: string, options?: ActionOptions):                                    Modal; // the first two are the overloads the implementation does now show in intellisense!!
   action(label: string, action: ActionFn, options?: ActionOptions):                  Modal;
   action(label: string, action?: ActionFn | ActionOptions, options?: ActionOptions): Modal {
+    let disabledFn = options && options.disabled || disabled;
+
     if (action && typeof(action) === 'function') {
-      this.actions[label] = {action: () => this.dispatch(action), disabled, ...options};
+      this.actions[label] = {action: () => this.dispatch(disabledFn, action), disabled: disabledFn, ...options};
       return this;
     }
-    this.actions[label] = {action: () => this.dispatch(undefined), disabled, ...action};
+
+    this.actions[label] = {action: () => this.dispatch(disabledFn, undefined), disabled: disabledFn, ...action};
     return this;
   }
 
-  private async dispatch(action?: ActionFn) {
-    if (!this.state.enable) return;
-    let close = true;
+  private async dispatch(disabled: () => boolean, action?: ActionFn) {
+    if (!this.state.enable || disabled()) return;
+    let close         = true;
     this.state.enable = false;
     try {
       if (action) close = await action();

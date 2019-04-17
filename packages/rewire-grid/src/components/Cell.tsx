@@ -201,8 +201,8 @@ class Cell extends React.PureComponent<CellProps, {}> {
     } else {
       this.grid.selectCells([this.cell]);
     }
-
-    evt.stopPropagation();
+    // commented out to allow row click handling
+    // evt.stopPropagation();
   }
 
   handleFocus = (evt: React.FocusEvent<any>) => {
@@ -296,8 +296,9 @@ class Cell extends React.PureComponent<CellProps, {}> {
 
   onValueChange = (v: any) => {
     let value = v === undefined || v === null || v === '' ? undefined : v;
+    this.cell.keyForEdit = undefined;
     this.cell.setValue(value);
-    if (this.column.type === 'multiselect') {
+    if (this.column.type === 'multiselect' || this.column.type === 'multiselectautocomplete') {
       return;
     }
     this.grid.editCell(undefined);
@@ -335,15 +336,16 @@ class Cell extends React.PureComponent<CellProps, {}> {
       let cursorPositionOnFocus = undefined;
       let value                 = cell.value;
       if (this.cell.keyForEdit) {
-        value            = this.cell.keyForEdit;
+        value            = cell.keyForEdit;
         endOfTextOnFocus = true;
         selectOnFocus    = false;
         if (cellType === 'number') {
           endOfTextOnFocus      = false;
           cursorPositionOnFocus = 1;
         }
-        if (cellType === 'auto-complete') {
-          additionalProps['initialInputValue'] = this.cell.keyForEdit;
+        if (cellType === 'auto-complete' || cellType === 'multiselectautocomplete') {
+          value                                = undefined;
+          additionalProps['initialInputValue'] = cell.keyForEdit;
         }
       }
       let editorClasses = undefined;
@@ -355,7 +357,7 @@ class Cell extends React.PureComponent<CellProps, {}> {
         editorClasses = {formControlRoot: this.props.classes.editorFormControlRoot, inputRoot: this.props.classes.editorInputRoot};
       }
 
-      if (cellType === 'auto-complete') {
+      if (cellType === 'auto-complete' || cellType === 'multiselectautocomplete') {
         Object.assign(editorClasses, {container: this.props.classes.editorAutoCompleteContainer});
       }
 
@@ -463,7 +465,7 @@ class Cell extends React.PureComponent<CellProps, {}> {
           onMouseDown={this.grid.multiSelect ? this.handleMouseDown : undefined}
           onMouseEnter={this.grid.multiSelect ? this.handleMouseEnter : undefined}
           className={tdClasses}
-          data-column-position={this.cell.columnPosition}>
+         >
             {cellContent}
         </td>
       );

@@ -215,16 +215,16 @@ export default class Form {
       field.error = undefined;
     });
 
+    let validationResult: ValidationResult;
     if (this.initialValuesValidationMode === 'all') {
-      this.validateForm();
+      validationResult = this.validateForm();
     } else if (this.initialValuesValidationMode === 'withValues') {
       let fieldsToValidate = this.fields.filter(field => field.value !== undefined);
-      this.validateFields(fieldsToValidate);
+      validationResult = this.validateFields(fieldsToValidate);
     }
 
     root((dispose) => {
       this.dispose        = dispose;
-      const result        = this.validateForm(false);
       const fieldsChanged = observe(() => this.fields.map(f => f.value));
       this._hasChanges    = computed(fieldsChanged, () => {
         if (!this._value) return false;
@@ -235,11 +235,10 @@ export default class Form {
         return false;
       }, false);
 
-      this._hasErrors = computed(fieldsChanged, () => {
-        if (!this._value) return false;
-        const result = this.validateForm(false);
-        return !result.success;
-      }, !result.success);
+      const fieldsErrorsChanged = observe(() => this.fields.map(f => f.error));
+      this._hasErrors = computed(fieldsErrorsChanged, () => {
+        return this.fields.findIndex((field: IEditorField) => !!field.error) >= 0;
+      }, !!validationResult && !validationResult.success);
     });
   }
 
@@ -424,10 +423,10 @@ export default class Form {
     }
   }
 
-  public submit = (enforceValidation: boolean = true): boolean => {
+  public submit = (): boolean => {
     if (!this._value) return false;
     let result = this.validateForm();
-    if (!result.success && enforceValidation) return false;
+    if (!result.success) return false;
     replace(this._value, this.toObjectValues());
     return true;
   }

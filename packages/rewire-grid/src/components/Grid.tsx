@@ -4,6 +4,7 @@ import classNames                                    from 'classnames';
 import Cell                                          from './Cell';
 import Row                                           from './Row';
 import * as React                                    from 'react';
+import * as Color                                    from 'color';
 import {
   Observe,
   disposeOnUnmount,
@@ -11,12 +12,14 @@ import {
   property,
   DataSignal
 } from 'rewire-core';
-import {debounce}                from 'rewire-common';
-import * as Color                from 'color';
-import {MuiThemeProvider, Theme} from '@material-ui/core/styles';
-import {WithStyle, withStyles}   from 'rewire-ui';
-import createGridTheme           from './GridTheme';
-import {scrollBySmooth}          from '../models/SmoothScroll';
+import {debounce}                          from 'rewire-common';
+import {WithStyle, withStyles, ToggleMenu} from 'rewire-ui';
+import {PopoverOrigin}                     from '@material-ui/core/Popover';
+import {ButtonProps}                       from '@material-ui/core/Button';
+import {MuiThemeProvider, Theme}           from '@material-ui/core/styles';
+import SettingsIcon                        from '@material-ui/icons/Settings';
+import createGridTheme                     from './GridTheme';
+import {scrollBySmooth}                    from '../models/SmoothScroll';
 import './data-grid.scss';
 
 interface IColumnProps {
@@ -237,6 +240,7 @@ const styles = (theme: Theme) => {
   let styleObj = {
     root: {
       display: 'flex',
+      position: 'relative',
       flexDirection: 'column',
       width: '100%',
     },
@@ -335,6 +339,25 @@ const styles = (theme: Theme) => {
     gridScroll: {
       fontSize: theme.fontSizes.body,
     },
+    toggleableColumnsContainer: {
+      position: 'absolute',
+      top: '5px',
+      right: '2px',
+      zIndex: 1,
+    },
+    toggleableColumnsButton: {
+      minWidth: '0px',
+      padding: '0px',
+      color: theme.palette.gridSettingsIcon.main,
+      '&:hover, &:active': {
+        background: 'transparent',
+      },
+    },
+    toggleableColumnsMenuItem: {
+      minWidth: '200x',
+      paddingTop: '6px',
+      paddingBottom: '6px',
+    }
   };
   return styleObj;
 };
@@ -541,7 +564,7 @@ const GridInternal = withStyles(styles, class extends React.PureComponent<GridPr
     // this._gridContent(element as HTMLDivElement);
   }
 
-  renderFixedColumnHeaders() {
+  renderFixedColumnHeaders(): JSX.Element | null {
     if (this.props.grid.fixedColumns.length === 0) {
       return null;
     }
@@ -563,7 +586,7 @@ const GridInternal = withStyles(styles, class extends React.PureComponent<GridPr
   _fixedColGroups: JSX.Element | undefined;
   _colGroups: JSX.Element | undefined;
 
-  renderColumnGroups(fixed: boolean) {
+  renderColumnGroups(fixed: boolean): JSX.Element {
     if (fixed && this._fixedColGroups) {
       return this._fixedColGroups;
     } else if (this._colGroups) {
@@ -583,7 +606,7 @@ const GridInternal = withStyles(styles, class extends React.PureComponent<GridPr
     return result;
   }
 
-  renderFixedColumnData() {
+  renderFixedColumnData(): JSX.Element | null {
     if (this.props.grid.fixedColumns.length === 0) {
       return null;
     }
@@ -600,7 +623,7 @@ const GridInternal = withStyles(styles, class extends React.PureComponent<GridPr
     );
   }
 
-  renderHeaders() {
+  renderHeaders(): JSX.Element {
     return (
       <Observe render={() => (
         <div className={classNames('top-labels', this.props.classes.topLabels)}>
@@ -649,16 +672,47 @@ const GridInternal = withStyles(styles, class extends React.PureComponent<GridPr
     );
   }
 
+  renderToggleableColumnsMenu(): JSX.Element | null {
+    if (!this.grid.hasToggleableColumns) {
+      return null;
+    }
+
+    const {classes}                   = this.props;
+    const toggleableColumns           = this.grid.toggleableColumns;
+    const toggleableColumnsOptions    = this.grid.toggleableColumnsOptions;
+    const buttonContent               = <SettingsIcon />;
+    const buttonProps: ButtonProps    = {disableRipple: true};
+    const anchorOrigin: PopoverOrigin = {vertical: 'top', horizontal: 'right'};
+    const transformOrigin             = anchorOrigin;
+    const onItemClick                 = toggleableColumnsOptions && toggleableColumnsOptions.onItemClick;
+
+    return <Observe render={() => (
+      <div className={classes.toggleableColumnsContainer}>
+        <ToggleMenu
+          menuId={`grid${this.grid.id}-toggleable-columns`}
+          buttonContent={buttonContent}
+          buttonProps={buttonProps}
+          items={toggleableColumns}
+          classes={{menuButton: classes.toggleableColumnsButton, menuItem: classes.toggleableColumnsMenuItem}}
+          anchorOrigin={anchorOrigin}
+          transformOrigin={transformOrigin}
+          onItemClick={onItemClick}
+        />
+      </div>
+    )} />;
+  }
+
   render() {
     const {style, className, classes} = this.props;
 
-    return (
+    return <Observe render={() => (
       <div className={classNames(classes.root, className)} style={{...style}}>
+        {this.renderToggleableColumnsMenu()}
         <div className={classNames('ws-grid', classes.wsGrid)} onMouseDown={(this.grid.multiSelect || this.grid.clearSelectionOnBlur) ? this.handleMouseDown : undefined}>
           {this.renderHeaders()}
           {this.renderData()}
         </div>
       </div>
-    );
+    )} />;
   }
 });

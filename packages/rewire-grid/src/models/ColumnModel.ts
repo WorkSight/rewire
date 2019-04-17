@@ -110,6 +110,10 @@ export class ColumnModel implements IColumn {
     return this._verticalAlign() || this.grid.verticalAlign;
   }
 
+  get isGroupByColumn(): boolean {
+    return this.grid.groupBy.findIndex((column: IColumn) => column.id === this.id) >= 0;
+  }
+
   setEditor(type?: IColumnEditor) {
     let typeOptions: any;
     let t: EditorType;
@@ -149,13 +153,13 @@ export class ColumnModel implements IColumn {
           this.typeOptions.mask = defaultPhoneMask;
         }
         this.map = getPhoneString;
-      } else if (t === 'multiselect') {
+      } else if (t === 'multiselect' || t === 'multiselectautocomplete') {
         this.map       = getArrayString(this.typeOptions.map);
         this.predicate = (value: any, filter: any) => toLowerCase(this.map!(value)).includes(toLowerCase(filter.value));
         this.compare   = arrayCompare(this.typeOptions);
       }
 
-      if (this.typeOptions.map && t !== 'multiselect') {
+      if (this.typeOptions.map && t !== 'multiselect' && t !== 'multiselectautocomplete') {
         this.map       = (value: any) => this.typeOptions.map(value);
         this.predicate = (value: any, filter: any) => toLowerCase(this.typeOptions.map(value)).includes(toLowerCase(filter.value));
         if (this.compare) {

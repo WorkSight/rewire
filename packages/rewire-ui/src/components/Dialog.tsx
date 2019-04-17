@@ -88,6 +88,7 @@ export interface IDialogProps {
   fullWidth?            : boolean;
   fullScreen?           : boolean;
   disableEscapeKeyDown? : boolean;
+  disableEnforceFocus?  : boolean;
   hideBackdrop?         : boolean;
   disableTransition?    : boolean;
   hasDivider?           : boolean;
@@ -102,34 +103,51 @@ export interface IDialogProps {
 type DialogProps = WithStyle<ReturnType<typeof styles>, IDialogProps>;
 
 class DialogInternal extends React.Component<DialogProps> {
-  render() {
-    const {classes, children, dialog, ButtonRenderer, fullWidth, fullScreen, maxWidth, title, disableEscapeKeyDown, hideBackdrop, transition, transitionDuration, disableTransition, buttonVariant} = this.props;
+  renderDialogContent = React.memo((): JSX.Element => {
+    const {classes, children, dialog, ButtonRenderer, title, buttonVariant} = this.props;
     const {buttonRoot, buttonIcon, buttonLabel} = classes;
-    const buttonClasses           = {root: buttonRoot, icon: buttonIcon, label: buttonLabel};
+    const buttonClasses                        = {root: buttonRoot, icon: buttonIcon, label: buttonLabel};
+    const hasTitle                             = dialog.title || title;
+    const hasActions                           = dialog.actions && Object.keys(dialog.actions).length > 0;
+    const hasDivider                           = hasActions && this.props.hasDivider !== undefined ? this.props.hasDivider : true;
+
+    return (
+      <Observe render={() => (
+        < >
+        {hasTitle &&
+          <div className={classes.heading}>
+            <Typography variant='h6'>{(title && title(dialog)) || dialog.title}</Typography>
+            <hr/>
+          </div>
+        }
+        <div className={classNames(classes.childrenContainer, hasActions && !hasDivider ? classes.childrenContainerActionsNoDivider : '')}>
+          {children}
+        </div>
+        {hasDivider && <Divider className={classes.divider} />}
+        {hasActions &&
+          <div className={classes.buttons}>
+            <Observe render={() => (
+              Object.keys(dialog.actions).map(label => ((ButtonRenderer && <ButtonRenderer key={label} classes={buttonClasses} label={label} action={dialog.actions[label]} isDisabled={dialog.isDisabled} variant={buttonVariant} />) || <DefaultActionRenderer key={label} classes={buttonClasses} label={label} action={dialog.actions[label]} isDisabled={dialog.isDisabled} variant={buttonVariant} />))
+            )} />
+          </div>
+        }
+        </>
+      )} />
+    );
+  });
+
+  render() {
+    const {classes, dialog, fullWidth, fullScreen, maxWidth, disableEscapeKeyDown, hideBackdrop, transition, transitionDuration, disableTransition, disableEnforceFocus} = this.props;
     const escapeAction            = disableEscapeKeyDown ? undefined : () => dialog.close();
     const transitionToUse         = transition ? transition : Transition;
     const transitionDurationToUse = transitionDuration !== undefined ? transitionDuration : TRANSITION_TIMEOUT;
     const transitionAction        = disableTransition ? undefined : transitionToUse;
     const transitionTime          = disableTransition ? 0 : transitionDurationToUse;
-    const hasTitle                = dialog.title || title;
-    const hasActions              = dialog.actions && Object.keys(dialog.actions).length > 0;
-    const hasDivider              = hasActions && this.props.hasDivider !== undefined ? this.props.hasDivider : true;
 
     return (
       <Observe render={() => (
-        <Dialog classes={{paper: classes.root, paperScrollPaper: classes.scrollPaper}} open={dialog.isOpen} maxWidth={maxWidth} hideBackdrop={hideBackdrop} transitionDuration={transitionTime} TransitionComponent={transitionAction} fullWidth={fullWidth} fullScreen={fullScreen} disableEscapeKeyDown={disableEscapeKeyDown} onEscapeKeyDown={escapeAction}>
-          {hasTitle &&
-            <div className={classes.heading}>
-              <Typography variant='h6'>{(title && title(dialog)) || dialog.title}</Typography>
-              <hr/>
-            </div>}
-            <div className={classNames(classes.childrenContainer, hasActions && !hasDivider ? classes.childrenContainerActionsNoDivider : '')}>
-              {children}
-            </div>
-          {hasDivider && <Divider className={classes.divider} />}
-          {hasActions && <div className={classes.buttons}>{
-              Object.keys(dialog.actions).map(label => ((ButtonRenderer && <ButtonRenderer key={label} classes={buttonClasses} label={label} action={dialog.actions[label]} isDisabled={dialog.isDisabled} variant={buttonVariant} />) || <DefaultActionRenderer key={label} classes={buttonClasses} label={label} action={dialog.actions[label]} isDisabled={dialog.isDisabled} variant={buttonVariant} />))
-          }</div>}
+        <Dialog classes={{paper: classes.root, paperScrollPaper: classes.scrollPaper}} open={dialog.isOpen} disableEnforceFocus={disableEnforceFocus} maxWidth={maxWidth} hideBackdrop={hideBackdrop} transitionDuration={transitionTime} TransitionComponent={transitionAction} fullWidth={fullWidth} fullScreen={fullScreen} disableEscapeKeyDown={disableEscapeKeyDown} onEscapeKeyDown={escapeAction}>
+          <this.renderDialogContent />
         </Dialog>
       )} />
     );

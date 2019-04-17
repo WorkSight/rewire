@@ -1,13 +1,22 @@
 import * as React                                from 'react';
 import * as nanoid                               from 'nanoid';
-import TransitionWrapper                         from './TransitionWrapper';
 import { countries, employees }                  from './demo-data';
 import { sampleModel, SampleDialog }             from './SampleDialog';
 import { hotkeysModel, HotKeysDialog }           from './HotKeys';
 import { YesNoModel, YesNoDialog }               from './YesNoDialog';
 import { ConfirmationModel, ConfirmationDialog } from './YesNoDialog';
 import { Observe, observable }                   from 'rewire-core';
-import { ActionFn, WithStyle, withStyles}        from 'rewire-ui';
+import {
+  ActionFn,
+  TransitionWrapper,
+  WithStyle,
+  withStyles,
+  ActionMenu,
+  IActionMenuItem,
+  ToggleMenu,
+  IToggleMenuItem,
+  ISuggestionsContainerComponentProps,
+} from 'rewire-ui';
 import {
   createGrid,
   createColumn,
@@ -21,10 +30,16 @@ import {
   isRequired           as gridIsRequired,
   isSumOfOthers        as gridIsSumOfOthers,
   isDifferenceOfOthers as gridIsDifferenceOfOthers,
-}                 from 'rewire-grid';
-import Paper      from '@material-ui/core/Paper';
-import Button     from '@material-ui/core/Button';
-import Typography from '@material-ui/core/Typography';
+  IToggleableColumnsOptions,
+  IColumn,
+}                            from 'rewire-grid';
+import {PopoverOrigin}       from '@material-ui/core/Popover';
+import Paper                 from '@material-ui/core/Paper';
+import Button, {ButtonProps} from '@material-ui/core/Button';
+import Typography            from '@material-ui/core/Typography';
+import DeleteIcon            from '@material-ui/icons/DeleteOutlined';
+import ArchiveIcon           from '@material-ui/icons/ArchiveOutlined';
+import UnarchiveIcon         from '@material-ui/icons/UnarchiveOutlined';
 
 interface IDocument {
   id:    string;
@@ -102,13 +117,17 @@ const ComplexCell: React.SFC<ICell> = (cell) => {
   );
 };
 
+function handleRowClick(row: IRow) {
+  console.log('row clicked', row);
+}
+
 function createTestGrid(nRows: number, nColumns: number) {
   console.time('start tester');
   // make sure we have enough columns passed.
   if (nColumns < 10) throw new Error('add some more columns!');
 
   // create some random sized columns!
-  let cols = [];
+  let cols: IColumn[] = observable([]);
   for (let col = 0; col < nColumns; col++) {
     cols.push(createColumn('column' + col, 'Header# ' + col, { type: 'text', width: Math.trunc(Math.random() * 250 + 50) + 'px' }));
   }
@@ -127,6 +146,7 @@ function createTestGrid(nRows: number, nColumns: number) {
   cols.push(createColumn('differenceColumn', 'Time Difference', { type: { type: 'number', options: { decimals: 2 } }, validator: gridIsDifferenceOfOthers(['timeInColumn', 'timeOutColumn']), width: Math.trunc(Math.random() * 250 + 50) + 'px' }));
   cols.push(createColumn('sumColumn', 'Time Sum', { type: { type: 'number', options: { decimals: 2 } }, validator: gridIsSumOfOthers(['timeInColumn', 'timeOutColumn']), width: Math.trunc(Math.random() * 250 + 50) + 'px' }));
   cols.push(createColumn('autoCompleteColumn', 'Auto Complete', { type: { type: 'auto-complete', options: countries }, width: Math.trunc(Math.random() * 250 + 50) + 'px' }));
+  cols.push(createColumn('multiAutoCompleteColumn', 'Multi Auto Complete', {type: {type: 'multiselectautocomplete', options: countries}, width: '250px'}));
   cols.push(createColumn('selectColumn', 'Select', { type: { type: 'select', options: countries }, width: Math.trunc(Math.random() * 250 + 50) + 'px' }));
   cols.push(createColumn('multiselectColumn', 'MultiSelect', { type: { type: 'multiselect', options: countries }, width: Math.trunc(Math.random() * 250 + 50) + 'px' }));
   cols.push(createColumn('checkedColumn', 'Checked', { type: 'checked', width: Math.trunc(Math.random() * 250 + 50) + 'px' }));
@@ -185,13 +205,13 @@ function createTestGrid(nRows: number, nColumns: number) {
   // add some cell data!
   let rows: IRowData[] = [];
   for (let row = 0; row < nRows; row++) {
-    let r: IRowData = { id: `${row}`, data: {} };
+    let r: IRowData = { id: `${row}`, data: {}, options: {onClick: handleRowClick}};
     for (let column = 0; column < cols.length; column++) {
       let v: any = `RC ${column}-${row % 5}`;
       let colName = cols[column].name;
       if ((column <= 1 || column >= 4) && row === 1) v = undefined;
-      else if ((colName === 'autoCompleteColumn') || (colName === 'selectColumn')) v = { id: '14', name: 'Austria' };
-      else if (colName === 'multiselectColumn') v = [{ id: '14', name: 'Austria' }];
+      else if (colName === 'autoCompleteColumn' || colName === 'selectColumn') v = { id: '14', name: 'Austria' };
+      else if (colName === 'multiAutoCompleteColumn' || colName === 'multiselectColumn') v = [{id: '18', name: 'Bangladesh'}, {id: '19', name: 'Barbados'}];
       else if (colName === 'checkedColumn') v = true;
       else if (colName === 'timeOutColumn') v = 7.5;
       else if (colName === 'timeInColumn') v = 11.5;
@@ -219,8 +239,8 @@ function createTestGrid(nRows: number, nColumns: number) {
   grid.addFixedRow({ data: { column5: '2017', column6: '2018' } });
 
   // sort first by  column7 then by column6
-  grid.addSort(grid.columnByPos(7)!, 'ascending')
-    .addSort(grid.columnByPos(6)!, 'descending');
+  grid.addSort(cols[7], 'ascending')
+  .addSort(cols[6], 'descending');
 
   // test changing colum and cell properties
   // setTimeout(() => {
@@ -270,17 +290,96 @@ grid.cell('3', 'column8')!.value = 'ooga booga boa';
 // setTimeout(() => grid.columns[3].visible = false, 7000);
 // setTimeout(() => grid.columns[3].visible = true, 8000);
 
+function toggleMenuHandleItemClick(item: IToggleMenuItem) {
+  const column   = item as IColumn;
+  column.visible = !column.visible;
+
+  if (column.name === 'email') {
+    let isActiveColumn      = column.grid.column('isActive');
+    isActiveColumn!.visible = !isActiveColumn!.visible;
+  } else if (column.name === 'isActive') {
+    let emailColumn      = column.grid.column('email');
+    emailColumn!.visible = !emailColumn!.visible;
+  }
+}
+
+const clickHandler = (props: ISuggestionsContainerComponentProps) => () => {
+  console.log('Add Item!');
+  props.downShift.closeMenu();
+};
+
+const suggestionsContainerHeader = (props: ISuggestionsContainerComponentProps) => (
+  <div>
+    <Typography variant='subtitle1'><strong>Items Title</strong></Typography>
+  </div>
+);
+
+const suggestionsContainerFooter = (props: ISuggestionsContainerComponentProps) => (
+  <div>
+    <Button variant='contained' size='small' onClick={clickHandler(props)}>Add Item</Button>
+  </div>
+);
+
 function createEmployeesGrid1() {
-  let cols = [];
+  let cols: IColumn[] = observable([]);
 
   // add header columns
-  cols.push(createColumn('name',                'Employee',       {type: 'text', width: '120px'}));
-  cols.push(createColumn('email',               'Email',          {type: 'text', width: '120px'}));
-  cols.push(createColumn('isActive',            'IsActive',       {type: 'checked', width: '150px'}));
-  cols.push(createColumn('timeColumn',          'Time',           {type: {type: 'time'}, width: '150px'}));
-  cols.push(createColumn('selectColumn',        'Select',         {type: {type: 'select', options: countries}, width: '150px'}));
-  cols.push(createColumn('multiselectColumn',   'Multiselect',    {type: {type: 'multiselect', options: countries}, width: '150px'}));
-  cols.push(createColumn('autoCompleteColumn',  'Auto Complete',  {type: {type: 'auto-complete', options: countries}, width: '150px'}));
+  cols.push(createColumn('name',                       'Employee',               {type: 'text', width: '120px'}));
+  cols.push(createColumn('email',                      'Email',                  {type: 'text', width: '120px'}));
+  cols.push(createColumn('isActive',                   'IsActive',               {type: 'checked', width: '75px'}));
+  cols.push(createColumn('timeColumn',                 'Time',                   {type: {type: 'time'}, width: '150px'}));
+  cols.push(createColumn('selectColumn',               'Select',                 {type: {type: 'select', options: countries}, width: '150px'}));
+  cols.push(createColumn('multiselectColumn',          'Multiselect',            {type: {type: 'multiselect', options: countries}, width: '150px'}));
+  cols.push(createColumn('autoCompleteColumn',         'Auto Complete',          {type: {type: 'auto-complete', options: countries}, width: '150px'}));
+  cols.push(createColumn('advancedAutoCompleteColumn', 'Advanced Auto Complete', {type: {type: 'auto-complete', options: {search: countries.search, map: countries.map, openOnFocus: true, suggestionsContainerHeader: suggestionsContainerHeader, suggestionsContainerFooter: suggestionsContainerFooter}}, width: '150px'}));
+  cols.push(createColumn('multiAutoCompleteColumn',    'Multi Auto Complete',    {type: {type: 'multiselectautocomplete', options: countries}, width: '250px'}));
+
+  // add employee rows
+  let rows: IRowData[] = [];
+  for (let row = 0; row < employees.length; row++) {
+    let r: IRowData = { id: `${row}`, data: {}, options: { onClick: handleRowClick }};
+    for (let column = 0; column < cols.length; column++) {
+      let fieldName: string = cols[column].name;
+      let v: any;
+      if (fieldName === 'name') {
+        v = employees[row][fieldName]; // somehow make into a button that opens a dialog on click???
+      } else if (fieldName === 'multiselectColumn') {
+        v = [{id: '14', name: 'Austria'}, {id: '21', name: 'Belgium'}];
+      } else if (fieldName === 'multiAutoCompleteColumn') {
+        v = [{id: '18', name: 'Bangladesh'}, {id: '19', name: 'Barbados'}];
+      } else if (fieldName === 'advancedAutoCompleteColumn') {
+        v = {id: '21', name: 'Belgium'};
+      } else {
+        v = employees[row][fieldName];
+      }
+      r.data![fieldName] = v;
+    }
+    rows.push(r);
+  }
+
+  // create the grid model
+  let grid = createGrid(rows, cols, {multiSelect: true, allowMergeColumns: true, toggleableColumns: ['timeColumn', 'email', 'isActive', 'autoCompleteColumn'], toggleableColumnsOptions: {onItemClick: toggleMenuHandleItemClick} as IToggleableColumnsOptions });
+  // sort by employee names
+  grid.addSort(cols[0], 'ascending');
+
+  return grid;
+}
+
+function createEmployeesGrid2() {
+  let cols: IColumn[] = observable([]);
+
+  // add header columns
+  cols.push(createColumn('name',                    'Employee',            {type: 'text', width: '120px'}));
+  cols.push(createColumn('email',                   'Email',               {type: 'text', width: '120px'}));
+  cols.push(createColumn('isActive',                'IsActive',            {type: 'checked', width: '75px'}));
+  cols.push(createColumn('timeColumn',              'Time',                {type: {type: 'time'}, width: '150px'}));
+  cols.push(createColumn('selectColumn',            'Select',              {type: {type: 'select', options: countries}, width: '100px'}));
+  cols.push(createColumn('multiselectColumn',       'Multiselect',         {type: {type: 'multiselect', options: countries}, width: '250px'}));
+  cols.push(createColumn('autoCompleteColumn',      'Auto Complete',       {type: {type: 'auto-complete', options: countries}, width: '100px'}));
+  cols.push(createColumn('multiAutoCompleteColumn', 'Multi Auto Complete', {type: {type: 'multiselectautocomplete', options: countries}, width: '250px'}));
+  cols.push(createColumn('numberColumn1',           'Number Column 1',     {type: {type: 'number', options: {}}, width: '120px'}));
+  cols.push(createColumn('numberColumn2',           'Number Column 2',     {type: {type: 'number', options: {}}, width: '120px'}));
+  cols.push(createColumn('numberColumn3',           'Number Column 3',     {type: {type: 'number', options: {}}, width: '120px'}));
 
   // add employee rows
   let rows: IRowData[] = [];
@@ -292,7 +391,9 @@ function createEmployeesGrid1() {
       if (fieldName === 'name') {
         v = employees[row][fieldName]; // somehow make into a button that opens a dialog on click???
       } else if (fieldName === 'multiselectColumn') {
-        v = [{id: '14', name: 'Austria'}];
+        v = [{id: '14', name: 'Austria'}, {id: '21', name: 'Belgium'}];
+      } else if (fieldName === 'multiAutoCompleteColumn') {
+        v = [{id: '18', name: 'Bangladesh'}, {id: '19', name: 'Barbados'}];
       } else {
         v = employees[row][fieldName];
       }
@@ -304,49 +405,7 @@ function createEmployeesGrid1() {
   // create the grid model
   let grid = createGrid(rows, cols, {multiSelect: true, allowMergeColumns: true});
   // sort by employee names
-  grid.addSort(grid.columnByPos(0)!, 'ascending');
-
-  return grid;
-}
-
-function createEmployeesGrid2() {
-  let cols = [];
-
-  // add header columns
-  cols.push(createColumn('name',               'Employee',        {type: 'text',    width: '120px'}));
-  cols.push(createColumn('email',              'Email',           {type: 'text'   , width: '120px'}));
-  cols.push(createColumn('isActive',           'IsActive',        {type: 'checked', width: '250px'}));
-  cols.push(createColumn('timeColumn',         'Time',            {type: {type: 'time'}, width: '250px'}));
-  cols.push(createColumn('selectColumn',       'Select',          {type: {type: 'select', options: countries}, width: '250px'}));
-  cols.push(createColumn('multiselectColumn',  'Multiselect',     {type: {type: 'multiselect', options: countries}, width: '100px'}));
-  cols.push(createColumn('autoCompleteColumn', 'Auto Complete',   {type: {type: 'auto-complete', options: countries}, width: '100px'}));
-  cols.push(createColumn('numberColumn1',      'Number Column 1', {type: {type: 'number', options: {}}, width: '250px'}));
-  cols.push(createColumn('numberColumn2',      'Number Column 2', {type: {type: 'number', options: {}}, width: '250px'}));
-  cols.push(createColumn('numberColumn3',      'Number Column 3', {type: {type: 'number', options: {}}, width: '250px'}));
-
-  // add employee rows
-  let rows: IRowData[] = [];
-  for (let row = 0; row < employees.length; row++) {
-    let r: IRowData = {id: `${row}`, data: {}};
-    for (let column = 0; column < cols.length; column++) {
-      let fieldName: string = cols[column].name;
-      let v: any;
-      if (fieldName === 'name') {
-        v = employees[row][fieldName]; // somehow make into a button that opens a dialog on click???
-      } else if (fieldName === 'multiselectColumn') {
-        v = [{id: '14', name: 'Austria'}];
-      } else {
-        v = employees[row][fieldName];
-      }
-      r.data![fieldName] = v;
-    }
-    rows.push(r);
-  }
-
-  // create the grid model
-  let grid = createGrid(rows, cols, {multiSelect: true});
-  // sort by employee names
-  grid.addSort(grid.columnByPos(0)!, 'ascending');
+  grid.addSort(cols[0], 'ascending');
 
   return grid;
 }
@@ -378,6 +437,53 @@ const yesAction: ActionFn = () => {
 
 const yesNoModel        = new YesNoModel({ title: 'Confirmation Required', action: yesAction });
 const confirmationModel = new ConfirmationModel({ title: 'Secondary Confirmation', yesAction: confirmationYesAction, noAction: confirmationNoAction});
+
+const HomeActionMenu = (props: any) => {
+  const buttonContent               = <span>Action Menu</span>;
+  const buttonProps: ButtonProps    = {color: 'primary', variant: 'contained'};
+  const anchorOrigin: PopoverOrigin = {vertical: 'top', horizontal: 'left'};
+  const transformOrigin             = anchorOrigin;
+  const items: IActionMenuItem[]    = [
+    {name: 'delete',    title: 'Delete',    icon: DeleteIcon,    onClick: () => { console.log('Performing Delete Action...'); },    closeOnClick: true},
+    {name: 'archive',   title: 'Archive',   icon: ArchiveIcon,   onClick: () => { console.log('Performing Archive Action...'); },   closeOnClick: true},
+    {name: 'unarchive', title: 'Unarchive', icon: UnarchiveIcon, onClick: () => { console.log('Performing Unarchive Action...'); }, closeOnClick: true},
+  ];
+
+  return (
+    <ActionMenu
+      menuId='home-action-menu'
+      items={items}
+      buttonContent={buttonContent}
+      buttonProps={buttonProps}
+      anchorOrigin={anchorOrigin}
+      transformOrigin={transformOrigin}
+      classes={{menuButton: props.classes.menuButton}}
+    />
+  );
+};
+
+const HomeToggleMenu = (props: any) => {
+  const buttonContent               = <span>Toggle Menu</span>;
+  const buttonProps: ButtonProps    = {color: 'primary', variant: 'contained'};
+  const anchorOrigin: PopoverOrigin = {vertical: 'top', horizontal: 'left'};
+  const transformOrigin             = anchorOrigin;
+  const items: IToggleMenuItem[]    = observable([
+    {name: 'toggle1', title: 'Toggle 1', visible: true},
+    {name: 'toggle2', title: 'Toggle 2', visible: true},
+    {name: 'toggle3', title: 'Toggle 3', visible: true},
+  ]);
+  return (
+    <ToggleMenu
+      menuId='home-toggle-menu'
+      buttonContent={buttonContent}
+      buttonProps={buttonProps}
+      anchorOrigin={anchorOrigin}
+      transformOrigin={transformOrigin}
+      items={items}
+      classes={{menuButton: props.classes.menuButton}}
+    />
+  );
+};
 
 const styles = () => ({
   openDialogButton: {
@@ -436,6 +542,8 @@ export const HomeView = withStyles(styles, (props: HomeViewProps) => {
         <Button className={classes.openDialogButton} color='primary' variant='contained' onClick={() => sampleModel.open()}>Load Dialog Test</Button>
         <Button className={classes.openDialogButton} color='primary' variant='contained' onClick={() => hotkeysModel.open()}>Load Grid Hotkeys List</Button>
         <Button className={classes.openDialogButton} color='primary' variant='contained' onClick={() => yesNoModel.open()}>Load Confirmation Dialog</Button>
+        <HomeActionMenu classes={{menuButton: classes.openDialogButton}} />
+        <HomeToggleMenu classes={{menuButton: classes.openDialogButton}} />
 
         <SampleDialog />
         <HotKeysDialog />

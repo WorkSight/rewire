@@ -1,18 +1,22 @@
-import * as React              from 'react';
-import * as is                 from 'is';
+import * as React                       from 'react';
+import * as is                          from 'is';
+import classNames                       from 'classnames';
 import Downshift, {
   ControllerStateAndHelpers,
   StateChangeOptions
-}                              from 'downshift';
-import TextField               from '@material-ui/core/TextField';
-import Chip                    from '@material-ui/core/Chip';
-import Paper                   from '@material-ui/core/Paper';
-import Popper                  from '@material-ui/core/Popper';
-import MenuItem                from '@material-ui/core/MenuItem';
-import InputAdornment          from '@material-ui/core/InputAdornment';
-import {Theme}                 from '@material-ui/core/styles';
-import {debounce, match}       from 'rewire-common';
-import {withStyles, WithStyle} from './styles';
+}                                       from 'downshift';
+import TextField                        from '@material-ui/core/TextField';
+import Chip                             from '@material-ui/core/Chip';
+import Paper                            from '@material-ui/core/Paper';
+import Popper                           from '@material-ui/core/Popper';
+import MenuItem                         from '@material-ui/core/MenuItem';
+import InputAdornment                   from '@material-ui/core/InputAdornment';
+import Typography                       from '@material-ui/core/Typography';
+import Fade                             from '@material-ui/core/Fade';
+import {Theme}                          from '@material-ui/core/styles';
+import {debounce, match}                from 'rewire-common';
+import {withStyles, WithStyle}          from './styles';
+import {ISuggestionsContainerComponent} from './AutoComplete';
 import {
   ICustomProps,
   SearchFn,
@@ -26,11 +30,26 @@ const styles = (theme: Theme) => ({
     position: 'relative',
   },
   popper: {
-    minWidth: '225px',
+    zIndex: 1300,
+  },
+  suggestionsPaper: {
+  },
+  suggestionsPaperContained: {
+    padding: '15px',
+  },
+  suggestions: {
     overflowY: 'auto',
     maxHeight: 'calc(50vh - 20px)',
-    boxShadow: theme.shadows[7],
-    zIndex: 1300,
+  },
+  suggestionsContained: {
+    maxHeight: 'calc(50vh - 150px)',
+    border: `1px solid ${theme.palette.common.black}`,
+  },
+  suggestionsHasHeader: {
+    marginTop: '15px',
+  },
+  suggestionsHasFooter: {
+    marginBottom: '15px',
   },
   textField: {
     width: '100%',
@@ -43,6 +62,7 @@ const styles = (theme: Theme) => ({
   inputRoot: {
     lineHeight: 'inherit',
     fontSize: 'inherit',
+    overflow: 'hidden'
   },
   inputInput: {
     paddingTop: '0.375em',
@@ -81,6 +101,9 @@ const styles = (theme: Theme) => ({
     height: 'auto',
     lineHeight: '1em',
   },
+  noResults: {
+    padding: '11px 16px',
+  },
   helperTextRoot: {
     marginTop: '6px',
     fontSize: '0.8em',
@@ -91,25 +114,32 @@ const styles = (theme: Theme) => ({
   },
 });
 
-interface IDownshiftMultipleProps {
+interface IMultiSelectAutoCompleteProps {
   selectOnFocus?   :      boolean;
   endOfTextOnFocus?:      boolean;
   cursorPositionOnFocus?: number;
   initialInputValue?:     any;
   selectedItems:          any[];
   chipLimit?:             number;
+  openOnFocus?          : boolean;
+  showEmptySuggestions? : boolean;
+  hasTransition?        : boolean;
+  transitionTimeout?    : number;
+
+  suggestionsContainerHeader?: ISuggestionsContainerComponent;
+  suggestionsContainerFooter?: ISuggestionsContainerComponent;
 }
 
-export type DownshiftMultipleProps<T> = WithStyle<ReturnType<typeof styles>, IDownshiftMultipleProps & ICustomProps<T> & React.InputHTMLAttributes<any>>;
+export type MultiSelectAutoCompleteProps<T> = WithStyle<ReturnType<typeof styles>, IMultiSelectAutoCompleteProps & ICustomProps<T> & React.InputHTMLAttributes<any>>;
 
-class DownshiftMultiple<T> extends React.Component<DownshiftMultipleProps<T>, any> {
+class MultiSelectAutoComplete<T> extends React.Component<MultiSelectAutoCompleteProps<T>, any> {
   state = {suggestions: []};
-  downShift: any;
-  search: SearchFn<T>;
-  map: MapFn<T>;
+  downShift:                any;
+  search:                   SearchFn<T>;
+  map:                      MapFn<T>;
   suggestionsContainerNode: HTMLElement;
 
-  constructor(props: DownshiftMultipleProps<T>) {
+  constructor(props: MultiSelectAutoCompleteProps<T>) {
     super(props);
     this.search = props.search;
     if (props.debounce) {
@@ -135,8 +165,6 @@ class DownshiftMultiple<T> extends React.Component<DownshiftMultipleProps<T>, an
     const {startAdornment, endAdornment, align, variant, disableErrors} = InputProps;
     const inputClassName            = variant === 'outlined' ? classes.inputOutlinedInput : classes.inputInput;
     const inputFormControlClassName = variant === 'standard' && this.props.label ? classes.inputFormControlWithLabel : undefined;
-
-    console.log(value);
 
     return (
       <TextField
@@ -196,13 +224,13 @@ class DownshiftMultiple<T> extends React.Component<DownshiftMultipleProps<T>, an
   }
 
   renderSuggestion = (params: any) => {
-    const { suggestion, index, itemProps, theme, highlightedIndex, inputValue, classes, fontSize } = params;
+    const { suggestion, index, itemProps, theme, highlightedIndex, inputValue, classes } = params;
     const isHighlighted = highlightedIndex === index;
     const name          = this.map(suggestion);
 
     if (this.props.renderSuggestion) {
       return (
-        <MenuItem selected={isHighlighted} component='div' key={index} className={classes.menuItem} style={{fontSize: fontSize}}>
+        <MenuItem selected={isHighlighted} component='div' key={index} className={classes.menuItem} >
           {this.props.renderSuggestion(suggestion, {theme, isHighlighted, inputValue})}
         </MenuItem>
       );
@@ -217,7 +245,6 @@ class DownshiftMultiple<T> extends React.Component<DownshiftMultipleProps<T>, an
         selected={isHighlighted}
         component='div'
         className={classes.menuItem}
-        style={{fontSize: fontSize}}
       >{parts.map((part, index) => {
           return part.highlight ? (
             <span key={String(index)} style={{ fontWeight: 700 }} dangerouslySetInnerHTML={{__html: part.text}} />
@@ -229,8 +256,9 @@ class DownshiftMultiple<T> extends React.Component<DownshiftMultipleProps<T>, an
     );
   }
 
-  renderSuggestionsContainer = (options: any) => {
-    const { getMenuProps, isOpen, children, classes } = options;
+  renderSuggestionsContainerContents = (props: any) => {
+    const { suggestionsContainerHeader, suggestionsContainerFooter, suggestions, options} = props;
+    const { getMenuProps, isOpen, classes } = options;
     const menuProps = {
       onMouseDown: this.handleMenuMouseDown,
       onMouseUp: this.handleMenuMouseUp,
@@ -238,17 +266,71 @@ class DownshiftMultiple<T> extends React.Component<DownshiftMultipleProps<T>, an
       onDoubleClick: this.handleMenuDoubleClick,
     };
 
-    if (!children || children.length <= 0) {
-      return null;
+    let suggestionsPaperClasses: string[] = [classes.suggestionsPaper];
+    let suggestionsClasses: string[]      = [classes.suggestions];
+    if (suggestionsContainerHeader || suggestionsContainerFooter) {
+      suggestionsPaperClasses.push(classes.suggestionsPaperContained);
+      suggestionsClasses.push(classes.suggestionsContained);
+
+      if (suggestionsContainerHeader) {
+        suggestionsClasses.push(classes.suggestionsHasHeader);
+      }
+
+      if (suggestionsContainerFooter) {
+        suggestionsClasses.push(classes.suggestionsHasFooter);
+      }
     }
 
+    let fontSize = window.getComputedStyle(this.suggestionsContainerNode).getPropertyValue('font-size'); // needed to keep the suggestions the same font size as the input
+
     return (
-      <Popper open={isOpen} placement='bottom-start' anchorEl={this.suggestionsContainerNode} className={classes.popper} style={{width: this.suggestionsContainerNode ? this.suggestionsContainerNode.clientWidth : 'auto'}}>
-        <div {...(isOpen ? getMenuProps({}, {suppressRefError: true}) : {})} {...menuProps}>
-          <Paper>
-            {children}
-          </Paper>
-        </div>
+      <div {...(isOpen ? getMenuProps({}, {suppressRefError: true}) : {})} {...menuProps}>
+        <Paper elevation={4} className={classNames(...suggestionsPaperClasses)}>
+          {suggestionsContainerHeader && suggestionsContainerHeader()}
+          <div className={classNames(...suggestionsClasses)} style={{fontSize: fontSize}}>
+            {suggestions}
+          </div>
+          {suggestionsContainerFooter && suggestionsContainerFooter()}
+        </Paper>
+      </div>
+    );
+  }
+
+  renderSuggestionsContainer = (options: any) => {
+    const { openOnFocus, showEmptySuggestions, suggestionsContainerHeader, suggestionsContainerFooter, hasTransition, transitionTimeout } = this.props;
+    const { isOpen, children, classes } = options;
+
+    let transition  = hasTransition !== undefined ? hasTransition : true;
+    let timeout     = transitionTimeout !== undefined && transitionTimeout >= 0 ? transitionTimeout : 350;
+    let showEmpty   = showEmptySuggestions !== undefined ? showEmptySuggestions : openOnFocus ? true : false;
+    let suggestions = children;
+
+    if (!suggestions || suggestions.length <= 0) {
+      if (showEmpty) {
+       suggestions = <Typography className={classNames(classes.menuItem, classes.noResults)}>No Results</Typography>;
+      } else {
+        return null;
+      }
+    }
+
+    const popperModifiers = {
+      preventOverflow: {
+        boundariesElement: 'viewport',
+      },
+    };
+
+    return (
+      <Popper open={isOpen} placement='bottom-start' anchorEl={this.suggestionsContainerNode} transition={transition} modifiers={popperModifiers} className={classes.popper} style={{minWidth: this.suggestionsContainerNode ? this.suggestionsContainerNode.clientWidth : 'auto'}}>
+        {transition
+          ? ({ TransitionProps }) => (
+              <Fade {...TransitionProps} timeout={timeout}>
+                <div>
+                  <this.renderSuggestionsContainerContents suggestions={suggestions} suggestionsContainerHeader={suggestionsContainerHeader} suggestionsContainerFooter={suggestionsContainerFooter} options={...options} />
+                </div>
+              </Fade>
+            )
+          : <this.renderSuggestionsContainerContents suggestions={suggestions} suggestionsContainerHeader={suggestionsContainerHeader} suggestionsContainerFooter={suggestionsContainerFooter} options={...options} />
+        }
       </Popper>
     );
   }
@@ -262,10 +344,13 @@ class DownshiftMultiple<T> extends React.Component<DownshiftMultipleProps<T>, an
       let cursorPosition = Math.max(0, Math.min(this.props.cursorPositionOnFocus, evt.target.value.length));
       evt.target.setSelectionRange(cursorPosition, cursorPosition);
     }
+
+    if (this.props.openOnFocus) {
+      this.downShift.openMenu();
+    }
   }
 
   handleInputChanged = (inputValue: string, helpers: ControllerStateAndHelpers<any>) => {
-    console.log(inputValue);
     if (helpers.isOpen) {
       this.performSearch(inputValue);
     }
@@ -281,19 +366,16 @@ class DownshiftMultiple<T> extends React.Component<DownshiftMultipleProps<T>, an
         return;
       }
 
-      if (this.props.selectedItems.map(item => this.map(item)).includes(this.map(options.selectedItem))) {
-        return;
+      if (!this.props.selectedItems.map(item => this.map(item)).includes(this.map(options.selectedItem))) {
+        const newItems = [...this.props.selectedItems, options.selectedItem];
+        this.props.onSelectItem && this.props.onSelectItem(newItems);
       }
 
-      const newItems = [...this.props.selectedItems, options.selectedItem];
-      this.props.onSelectItem && this.props.onSelectItem(newItems);
-      setTimeout(() => {
         this.downShift.setState({
           inputValue: '',
           highlightedIndex: null,
           selectedItem: null
         });
-      }, 0);
     }
   }
 
@@ -372,8 +454,8 @@ class DownshiftMultiple<T> extends React.Component<DownshiftMultipleProps<T>, an
     event.nativeEvent.stopImmediatePropagation();
   }
 
-  componentWillReceiveProps (nextProps: ICustomProps<T>) {
-    if (nextProps.selectedItem === undefined && (nextProps.selectedItem !== this.props.selectedItem) && this.downShift) {
+  componentWillReceiveProps (nextProps: any) {
+    if (nextProps.selectedItems === undefined && (nextProps.selectedItems !== this.props.selectedItems) && this.downShift) {
       this.downShift.clearSelection();
     }
 
@@ -403,7 +485,7 @@ class DownshiftMultiple<T> extends React.Component<DownshiftMultipleProps<T>, an
   }
 
   renderChips(classes: Record<any, string>) {
-    const chipLimit     = this.props.chipLimit || 4;
+    const chipLimit     = this.props.chipLimit || 3;
     const itemsToRender = this.props.selectedItems.slice(0, chipLimit);
     const returnValue   = itemsToRender.map((item: any, index: number) => (
         <Chip
@@ -440,7 +522,7 @@ class DownshiftMultiple<T> extends React.Component<DownshiftMultipleProps<T>, an
         defaultHighlightedIndex={0}
         initialInputValue={initialInputValue}
         initialIsOpen={initialInputValue !== undefined}
-        selectedItem={this.props.selectedItem || null}
+        selectedItem={this.props.selectedItems}
         itemToString={this.map}
         onInputValueChange={this.handleInputChanged}
         onUserAction={this.handleItemChanged}
@@ -479,6 +561,8 @@ class DownshiftMultiple<T> extends React.Component<DownshiftMultipleProps<T>, an
                 getMenuProps: getMenuProps,
                 isOpen: isOpen,
                 classes: classes,
+                /* This would not show any currently selected items in the suggestions container */
+                // children: this.state.suggestions.filter(suggestion => !selectedItemsNames.includes(this.map(suggestion))).map((suggestion, index) =>
                 children: this.state.suggestions.map((suggestion, index) =>
                   this.renderSuggestion({
                     suggestion,
@@ -489,7 +573,6 @@ class DownshiftMultiple<T> extends React.Component<DownshiftMultipleProps<T>, an
                     itemProps: getItemProps({ item: suggestion }),
                     highlightedIndex,
                     selectedItem,
-                    fontSize: window.getComputedStyle(this.suggestionsContainerNode).getPropertyValue('font-size') // needed to make the menu items font-size the same as the shown value,
                   }),
                 ),
               })}
@@ -500,4 +583,4 @@ class DownshiftMultiple<T> extends React.Component<DownshiftMultipleProps<T>, an
   }
 }
 
-export default withStyles(styles, DownshiftMultiple);
+export default withStyles(styles, MultiSelectAutoComplete);
