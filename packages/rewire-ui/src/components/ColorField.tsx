@@ -128,7 +128,7 @@ class ColorField extends React.Component<ColorFieldPropsStyled, IColorFieldState
   handleKeyDown = (evt: React.KeyboardEvent<any>) => {
     switch (evt.key) {
       case 'Enter':
-      if (!this.state.open) break;
+        if (!this.state.open) return;
         if (evt.repeat) break;
         this.handleClose(evt, 'backdropClick');
       case ' ':
@@ -140,6 +140,7 @@ class ColorField extends React.Component<ColorFieldPropsStyled, IColorFieldState
         }
         break;
       case 'Escape':
+        if (!this.state.open) return;
         if (evt.repeat) break;
         this.focusColorPickerTrigger();
         break;

@@ -1,7 +1,7 @@
 import * as React                from 'react';
 import Modal, { ActionType }     from '../models/Modal';
 import classNames                from 'classnames';
-import { Observe }               from 'rewire-core';
+import { Observe, disposeOnUnmount, watch }               from 'rewire-core';
 import Typography                from '@material-ui/core/Typography';
 import Dialog                    from '@material-ui/core/Dialog';
 import Button, { ButtonProps }   from '@material-ui/core/Button';
@@ -103,13 +103,27 @@ export interface IDialogProps {
 type DialogProps = WithStyle<ReturnType<typeof styles>, IDialogProps>;
 
 class DialogInternal extends React.Component<DialogProps> {
+  prevActiveElement?: HTMLElement;
+
+  componentDidMount() {
+    disposeOnUnmount(this, () => {
+      watch(() => this.props.dialog.isOpen, () => {
+        if (this.props.dialog.isOpen) {
+          this.prevActiveElement = document.activeElement as HTMLElement;
+        } else if (this.prevActiveElement) {
+          setTimeout(() => this.prevActiveElement && this.prevActiveElement.focus(), 0);
+        }
+      });
+    });
+  }
+
   renderDialogContent = React.memo((): JSX.Element => {
     const {classes, children, dialog, ButtonRenderer, title, buttonVariant} = this.props;
     const {buttonRoot, buttonIcon, buttonLabel} = classes;
-    const buttonClasses                        = {root: buttonRoot, icon: buttonIcon, label: buttonLabel};
-    const hasTitle                             = dialog.title || title;
-    const hasActions                           = dialog.actions && Object.keys(dialog.actions).length > 0;
-    const hasDivider                           = hasActions && this.props.hasDivider !== undefined ? this.props.hasDivider : true;
+    const buttonClasses                         = {root: buttonRoot, icon: buttonIcon, label: buttonLabel};
+    const hasTitle                              = dialog.title || title;
+    const hasActions                            = dialog.actions && Object.keys(dialog.actions).length > 0;
+    const hasDivider                            = hasActions && this.props.hasDivider !== undefined ? this.props.hasDivider : true;
 
     return (
       <Observe render={() => (

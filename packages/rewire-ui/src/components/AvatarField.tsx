@@ -251,7 +251,7 @@ const InnerAvatar = withStyles(innerAvatarStyles, class extends React.Component<
       this.props.value
         ? < >
             <MuiAvatar src={this.props.value} className={classes.muiAvatar} style={{width: diameterStr, height: diameterStr}} />
-            <Button variant='contained' component='label' size={bSize} className={classNames(classes.button, classes.changeImageButton)}>
+            <Button variant='contained' component='label' size={bSize} tabIndex={-1} className={classNames(classes.button, classes.changeImageButton)}>
               <span>Change Image</span>
               <label className={classes.changeImageButtonInnerLabel} htmlFor={fileInputId} />
               <input {...fileInputProps} />
