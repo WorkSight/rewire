@@ -232,6 +232,25 @@ class AvatarCropper extends React.Component<AvatarCropperProps, IAvatarCropperSt
     this.onSaveCallback(this.getPreview());
   }
 
+  onKeyDown = (evt: React.KeyboardEvent<any>) => {
+    if (evt.altKey || evt.ctrlKey) {
+      return;
+    }
+
+    switch (evt.key) {
+      case 'Escape':
+        this.onCancelClick();
+        evt.stopPropagation();
+        evt.preventDefault();
+        break;
+      case 'Enter':
+        this.onSaveClick();
+        evt.stopPropagation();
+        evt.preventDefault();
+        break;
+    }
+  }
+
   getPreview() {
     const crop = this.state.crop;
 
@@ -504,7 +523,7 @@ class AvatarCropper extends React.Component<AvatarCropperProps, IAvatarCropperSt
 
     return (
       <div className={classes.root}>
-        <Dialog classes={{paper: classes.cropperDialogPaper}} open={true} disableBackdropClick={true} onEscapeKeyDown={this.onCancelClick}>
+        <Dialog classes={{paper: classes.cropperDialogPaper}} open={true} disableBackdropClick={true} onKeyDown={this.onKeyDown}>
           <div className={classes.cropperOuterContainer}>
             <div className={classes.cropperContainer} style={cropperContainerStyle}>
               <div id={this.containerId} />
