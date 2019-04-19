@@ -5,11 +5,13 @@ import {
   IQueryResponse,
   IClient,
   isGQL,
+  GraphQLMiddleware,
   GQL
 }                             from './types';
 import { hashString }         from './hash';
 import { SubscriptionClient } from 'subscriptions-transport-ws';
 import { from, Stream }       from 'most';
+import { extractFiles }       from 'extract-files';
 import { ExecutionResult }    from 'graphql';
 
 class Client implements IClient {
@@ -18,6 +20,7 @@ class Client implements IClient {
   fetchOptions       : object | (() => object); // Options for fetch call
   running            : {[idx: string]: Promise<IQueryResponse>} = {};
   subscriptionClient?: SubscriptionClient;
+  middleware         : GraphQLMiddleware[];
 
   constructor(opts?: IClientOptions) {
     if (!opts) {
@@ -33,7 +36,12 @@ class Client implements IClient {
     this.fetchOptions = opts.fetchOptions || {};
   }
 
-  executeQuery(queryObject: IQuery, headers?: object, skipCache: boolean = false, mutate: boolean = false): Promise<IQueryResponse> {
+  use(middleware: GraphQLMiddleware) {
+    if (!this.middleware) this.middleware = [];
+    this.middleware.push(middleware);
+  }
+
+  executeQuery(queryObject: IQuery, headers?: object, mutate: boolean = false): Promise<IQueryResponse> {
     const body    = JSON.stringify({query: (isGQL(queryObject.query)) ? queryObject.query.loc.source.body : queryObject.query, variables: queryObject.variables});
     const queryId = hashString(body);
 
@@ -54,20 +62,30 @@ class Client implements IClient {
         let reqInit = {
           body: body,
           headers: {
-            'Content-Type': 'application/json',
+            'content-type': 'application/json',
             ...headers
           },
           method: 'POST',
-          mode:   'cors',
           ...fetchOptions,
         };
+
+        if (this.middleware && this.middleware.length > 0) {
+          let i = 0;
+          const next = () => {
+            const fn = this.middleware[i++];
+            if (!fn) return;
+            fn(queryObject, reqInit, next);
+          }
+          next();
+        }
+
         if (this.bearer) reqInit.headers.Authorization = 'Bearer ' + this.bearer;
         let res = await fetch(this.url, reqInit);
         let response = await res.json();
-        if (res.ok) {
+        if (res.ok && !response.errors) {
           resolve({data: response.data});
         } else {
-          reject({error: response});
+          reject({error: response.errors});
         }
       } catch (err) {
         reject(err);
@@ -90,7 +108,7 @@ class Client implements IClient {
   }
 
   query(query: GQL, variables?: object, headers?: object, mutate: boolean = false): Promise<IQueryResponse> {
-    return this.executeQuery({query, variables}, headers, false, mutate);
+    return this.executeQuery({query, variables}, headers, mutate);
   }
 
   mutation(query: GQL, variables: object, headers?: object): Promise<IQueryResponse> {
@@ -98,7 +116,7 @@ class Client implements IClient {
   }
 
   executeMutation(mutationObject: IMutation, headers?: object): Promise<IQueryResponse> {
-    return this.executeQuery(mutationObject, headers, true, true);
+    return this.executeQuery(mutationObject, headers, true);
   }
 }
 
@@ -107,4 +125,31 @@ export default function client(url: string, fetchOptions?: object | (() => objec
     url,
     fetchOptions
   }) as IClient;
+}
+
+export function uploadMiddleware(query: IQuery, request: RequestInit, next: () => void) {
+  if (!query || !query.variables || !request.headers) return next();
+  const { clone, files } = extractFiles({variables: query.variables});
+  if (files.size === 0) return next();
+
+  delete request.headers['content-type'];
+
+  // GraphQL multipart request spec:
+  // https://github.com/jaydenseric/graphql-multipart-request-spec
+  const form = new FormData()
+  form.append('operations', JSON.stringify({query: (isGQL(query.query)) ? query.query.loc.source.body : query.query, variables: clone.variables}));
+
+  const map = {}
+  let i = 0
+  files.forEach((paths: string) => {
+    map[++i] = paths
+  })
+  form.append('map', JSON.stringify(map))
+
+  i = 0;
+  files.forEach((paths: string, file: File) => {
+    form.append(String(++i), file, file.name)
+  })
+
+  request.body = form
 }

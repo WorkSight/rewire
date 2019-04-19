@@ -26,11 +26,14 @@ export interface IQueryResponse {
   error? : any;
 }
 
+export type GraphQLMiddleware = (query: IQuery, request: RequestInit, next: () => void) => void;
+
 export interface IClient {
   bearer?: string;
 
   executeQuery   (queryObject: IQuery, headers?: object, skipCache?: boolean): Promise<IQueryResponse>;
   query          (query: GQL, variables?: object, headers?: object): Promise<IQueryResponse>;
+  use            (middleware: GraphQLMiddleware): void;
   executeMutation(mutationObject: IMutation, headers?: object): Promise<IQueryResponse>;
   mutation       (query: GQL, variables: object, headers?: object): Promise<IQueryResponse>;
   subscribe<T>   (query: GQL, variables?: object): Stream<ExecutionResult<T>>;

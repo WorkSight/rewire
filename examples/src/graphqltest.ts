@@ -1,7 +1,8 @@
 import gql                from 'graphql-tag';
-import {client as create} from 'rewire-graphql';
+import {client as create, uploadMiddleware} from 'rewire-graphql';
 
-const client = create('http://pgdev:30109/graphql');
+const client = create('http://localhost:3010/graphql', {mode: 'cors'});
+// const client = create('http://api.worksight.services:3010/graphql');
 
 const query = gql`
   query($size: Int!) {
@@ -51,14 +52,39 @@ const employees = gql`
   }
 `;
 
+const ping = gql`
+  mutation ping {
+    ping
+  }
+`;
+
+
+const upload = gql`
+  mutation($file: Upload!) {
+    uploadFile(file: $file) {
+      id
+    }
+  }
+`;
+
+export async function uploadFile(file: File) {
+  console.log(await client.mutation(upload, {file}));
+}
+
 async function run() {
-  client.bearer = 'a6307af210f61eccc89e232d702da1eafedef6a9ebb78147';
-  const r = client.subscribe(subscriptionQuery);
-  r.observe((data: any) => {
-    console.log(data);
-  });
-  let r2: any = await client.query(employees);
-  console.log(r2);
+  // client.bearer = '3a38887fece4e7d1e4b7c2b44fd5f9e8518cf9cde8c83a02';
+  client.bearer = '49c28e3d3c4ea320ac409900303fc1458fc2031d40fd720c';
+  client.use(uploadMiddleware);
+  client.use((q, req, next) => {
+    next();
+  })
+  // console.log(await client.query(employees));
+  // const r = client.subscribe(subscriptionQuery);
+  // r.observe((data: any) => {
+  //   console.log(data);
+  // });
+  // let r2: any = await client.query(employees);
+  // console.log(r2);
   // r2 = await client.query(query, {size: 2});
   // let r3: any = await client.query(query2, {size: 2});
   // console.log(await r2);
@@ -85,3 +111,4 @@ async function run() {
 }
 
 // run();
+run();
