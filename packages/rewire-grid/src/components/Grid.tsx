@@ -240,7 +240,6 @@ const styles = (theme: Theme) => {
   let styleObj = {
     root: {
       display: 'flex',
-      position: 'relative',
       flexDirection: 'column',
       width: '100%',
     },
@@ -263,6 +262,7 @@ const styles = (theme: Theme) => {
       backgroundColor: theme.palette.headerBackground.main,
     },
     topLabels: {
+      position: 'relative',
       fontSize: theme.fontSizes.header,
       color: theme.palette.headerText.main,
       borderColor: theme.palette.headerBorder.main,
@@ -341,17 +341,25 @@ const styles = (theme: Theme) => {
     },
     toggleableColumnsContainer: {
       position: 'absolute',
-      top: '5px',
-      right: '2px',
+      display: 'flex',
+      height: '100%',
+      alignItems: 'center',
+      top: '0px',
+      right: '0px',
       zIndex: 1,
     },
     toggleableColumnsButton: {
       minWidth: '0px',
-      padding: '0px',
+      padding: '0px 2px 0px 0px',
+      fontSize: 'inherit',
       color: theme.palette.gridSettingsIcon.main,
+      background: theme.palette.headerBackground.main,
       '&:hover, &:active': {
-        background: 'transparent',
+        background: theme.palette.headerBackground.main,
       },
+    },
+    toggleableColumnsIcon: {
+      fontSize: '1.5em',
     },
     toggleableColumnsMenuItem: {
       minWidth: '200x',
@@ -623,22 +631,53 @@ const GridInternal = withStyles(styles, class extends React.PureComponent<GridPr
     );
   }
 
+  renderToggleableColumnsMenu(): JSX.Element | null {
+    if (!this.grid.hasToggleableColumns) {
+      return null;
+    }
+
+    const {classes}                   = this.props;
+    const toggleableColumns           = this.grid.toggleableColumns;
+    const toggleableColumnsOptions    = this.grid.toggleableColumnsOptions;
+    const buttonContent               = <SettingsIcon classes={{root: classes.toggleableColumnsIcon}}/>;
+    const buttonProps: ButtonProps    = {disableRipple: true};
+    const anchorOrigin: PopoverOrigin = {vertical: 'top', horizontal: 'right'};
+    const transformOrigin             = anchorOrigin;
+    const onItemClick                 = toggleableColumnsOptions && toggleableColumnsOptions.onItemClick;
+
+    return <Observe render={() => (
+      <div className={classes.toggleableColumnsContainer}>
+        <ToggleMenu
+          menuId={`grid${this.grid.id}-toggleable-columns`}
+          buttonContent={buttonContent}
+          buttonProps={buttonProps}
+          items={toggleableColumns}
+          classes={{menuButton: classes.toggleableColumnsButton, menuItem: classes.toggleableColumnsMenuItem}}
+          anchorOrigin={anchorOrigin}
+          transformOrigin={transformOrigin}
+          onItemClick={onItemClick}
+        />
+      </div>
+    )} />;
+  }
+
   renderHeaders(): JSX.Element {
     return (
       <Observe render={() => (
         <div className={classNames('top-labels', this.props.classes.topLabels)}>
-        {this.renderFixedColumnHeaders()}
-        <div className='column-wrapper' ref={this.setColumnTableWrapperRef}>
-          <table role='grid' ref={this.setColumnTableRef}>
-            {this.renderColumnGroups(false)}
-            <thead role='rowgroup'>
-              <Observe render={() => (
-                this.props.grid.fixedRows.map((row, index) => <Row key={row.id} Cell={Column} columns={this.props.grid.standardColumns} index={index} visibleColumns={this.visibleStandardColumnCount} row={row} />)
-              )} />
-            </thead>
-          </table>
+          {this.renderToggleableColumnsMenu()}
+          {this.renderFixedColumnHeaders()}
+          <div className='column-wrapper' ref={this.setColumnTableWrapperRef}>
+            <table role='grid' ref={this.setColumnTableRef}>
+              {this.renderColumnGroups(false)}
+              <thead role='rowgroup'>
+                <Observe render={() => (
+                  this.props.grid.fixedRows.map((row, index) => <Row key={row.id} Cell={Column} columns={this.props.grid.standardColumns} index={index} visibleColumns={this.visibleStandardColumnCount} row={row} />)
+                )} />
+              </thead>
+            </table>
+          </div>
         </div>
-      </div>
       )} />
     );
   }
@@ -672,42 +711,11 @@ const GridInternal = withStyles(styles, class extends React.PureComponent<GridPr
     );
   }
 
-  renderToggleableColumnsMenu(): JSX.Element | null {
-    if (!this.grid.hasToggleableColumns) {
-      return null;
-    }
-
-    const {classes}                   = this.props;
-    const toggleableColumns           = this.grid.toggleableColumns;
-    const toggleableColumnsOptions    = this.grid.toggleableColumnsOptions;
-    const buttonContent               = <SettingsIcon />;
-    const buttonProps: ButtonProps    = {disableRipple: true};
-    const anchorOrigin: PopoverOrigin = {vertical: 'top', horizontal: 'right'};
-    const transformOrigin             = anchorOrigin;
-    const onItemClick                 = toggleableColumnsOptions && toggleableColumnsOptions.onItemClick;
-
-    return <Observe render={() => (
-      <div className={classes.toggleableColumnsContainer}>
-        <ToggleMenu
-          menuId={`grid${this.grid.id}-toggleable-columns`}
-          buttonContent={buttonContent}
-          buttonProps={buttonProps}
-          items={toggleableColumns}
-          classes={{menuButton: classes.toggleableColumnsButton, menuItem: classes.toggleableColumnsMenuItem}}
-          anchorOrigin={anchorOrigin}
-          transformOrigin={transformOrigin}
-          onItemClick={onItemClick}
-        />
-      </div>
-    )} />;
-  }
-
   render() {
     const {style, className, classes} = this.props;
 
     return <Observe render={() => (
       <div className={classNames(classes.root, className)} style={{...style}}>
-        {this.renderToggleableColumnsMenu()}
         <div className={classNames('ws-grid', classes.wsGrid)} onMouseDown={(this.grid.multiSelect || this.grid.clearSelectionOnBlur) ? this.handleMouseDown : undefined}>
           {this.renderHeaders()}
           {this.renderData()}
