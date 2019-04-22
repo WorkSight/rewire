@@ -136,20 +136,20 @@ export function uploadMiddleware(query: IQuery, request: RequestInit, next: () =
 
   // GraphQL multipart request spec:
   // https://github.com/jaydenseric/graphql-multipart-request-spec
-  const form = new FormData()
+  const form = new FormData();
   form.append('operations', JSON.stringify({query: (isGQL(query.query)) ? query.query.loc.source.body : query.query, variables: clone.variables}));
 
-  const map = {}
-  let i = 0
+  const map = {};
+  let i     = 0;
   files.forEach((paths: string) => {
-    map[++i] = paths
-  })
-  form.append('map', JSON.stringify(map))
+    map[++i] = paths;
+  });
+  form.append('map', JSON.stringify(map));
 
   i = 0;
   files.forEach((paths: string, file: File) => {
-    form.append(String(++i), file, file.name)
-  })
+    form.append(String(++i), file, file.name);
+  });
 
-  request.body = form
+  request.body = form;
 }
