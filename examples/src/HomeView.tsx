@@ -40,6 +40,7 @@ import Typography            from '@material-ui/core/Typography';
 import DeleteIcon            from '@material-ui/icons/DeleteOutlined';
 import ArchiveIcon           from '@material-ui/icons/ArchiveOutlined';
 import UnarchiveIcon         from '@material-ui/icons/UnarchiveOutlined';
+import { uploadFile }        from './graphqltest';
 
 interface IDocument {
   id:    string;
@@ -542,6 +543,20 @@ export const HomeView = withStyles(styles, (props: HomeViewProps) => {
         <Button className={classes.openDialogButton} color='primary' variant='contained' onClick={() => sampleModel.open()}>Load Dialog Test</Button>
         <Button className={classes.openDialogButton} color='primary' variant='contained' onClick={() => hotkeysModel.open()}>Load Grid Hotkeys List</Button>
         <Button className={classes.openDialogButton} color='primary' variant='contained' onClick={() => yesNoModel.open()}>Load Confirmation Dialog</Button>
+        <input
+          style={{display: 'none'}}
+          accept="image/*"
+          id="contained-button-file"
+          type="file"
+          onChange={({ target: { validity, files: [file] } }) => {
+            validity.valid && uploadFile(file);
+          }}
+        />
+        <label htmlFor="contained-button-file">
+          <Button variant="contained" component="span" >
+            Upload
+          </Button>
+        </label>
         <HomeActionMenu classes={{menuButton: classes.openDialogButton}} />
         <HomeToggleMenu classes={{menuButton: classes.openDialogButton}} />
 
