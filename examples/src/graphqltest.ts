@@ -1,8 +1,8 @@
 import gql                from 'graphql-tag';
 import {client as create, uploadMiddleware} from 'rewire-graphql';
 
-const client = create('http://localhost:3010/graphql', {mode: 'cors'});
-// const client = create('http://api.worksight.services:3010/graphql');
+// const client = create('http://localhost:3010/graphql', {mode: 'cors'});
+const client = create('http://api.worksight.services:3010/graphql');
 
 const query = gql`
   query($size: Int!) {

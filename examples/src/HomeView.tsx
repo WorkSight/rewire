@@ -235,7 +235,7 @@ function createTestGrid(nRows: number, nColumns: number) {
   cols[1].width = '65px';
   cols[1].align = 'right';
   // create the grid model and group by 'column2' and 'column3'
-  let grid = createGrid(rows, cols, { groupBy: ['column2', 'column3'], multiSelect: true, allowMergeColumns: true });
+  let grid = createGrid(rows, cols, { groupBy: ['column2', 'column3'], toggleableColumns: ['column8', 'column9'], multiSelect: true, allowMergeColumns: true });
 
   grid.addFixedRow({ data: { column5: '2017', column6: '2018' } });
 
@@ -543,22 +543,24 @@ export const HomeView = withStyles(styles, (props: HomeViewProps) => {
         <Button className={classes.openDialogButton} color='primary' variant='contained' onClick={() => sampleModel.open()}>Load Dialog Test</Button>
         <Button className={classes.openDialogButton} color='primary' variant='contained' onClick={() => hotkeysModel.open()}>Load Grid Hotkeys List</Button>
         <Button className={classes.openDialogButton} color='primary' variant='contained' onClick={() => yesNoModel.open()}>Load Confirmation Dialog</Button>
+
+        <HomeActionMenu classes={{menuButton: classes.openDialogButton}} />
+        <HomeToggleMenu classes={{menuButton: classes.openDialogButton}} />
+
         <input
           style={{display: 'none'}}
-          accept="image/*"
-          id="contained-button-file"
-          type="file"
+          accept='image/*'
+          id='contained-button-file'
+          type='file'
           onChange={({ target: { validity, files: [file] } }) => {
             validity.valid && uploadFile(file);
           }}
         />
-        <label htmlFor="contained-button-file">
-          <Button variant="contained" component="span" >
+        <label htmlFor='contained-button-file'>
+          <Button className={classes.openDialogButton} color='primary' variant='contained' component='span'>
             Upload
           </Button>
         </label>
-        <HomeActionMenu classes={{menuButton: classes.openDialogButton}} />
-        <HomeToggleMenu classes={{menuButton: classes.openDialogButton}} />
 
         <SampleDialog />
         <HotKeysDialog />
