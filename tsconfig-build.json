@@ -34,7 +34,7 @@
     "target": "esnext",
     "traceResolution": false
   },
-  "files": ["src/index.ts"],
+  "files": ["src/index.ts", "src/externals.d.ts"],
   "exclude": [
     "node_modules", "test", "tests", "dist", "lib", "build"
   ]
