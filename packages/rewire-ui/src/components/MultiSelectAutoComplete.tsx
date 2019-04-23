@@ -379,7 +379,7 @@ class MultiSelectAutoComplete<T> extends React.Component<MultiSelectAutoComplete
     }
   }
 
-  handleKeyDown = (event: React.KeyboardEvent<any>) => {
+  handleKeyDown = (event: any) => {
     if (event.altKey || event.ctrlKey) {
       return;
     }
@@ -409,6 +409,14 @@ class MultiSelectAutoComplete<T> extends React.Component<MultiSelectAutoComplete
           event.preventDefault();
           event.stopPropagation();
           event.nativeEvent.stopImmediatePropagation();
+        }
+        break;
+      case 27:
+        const st = this.downShift.getState();
+        if (st.isOpen) {
+          event.nativeEvent.preventDownshiftDefault = false;
+        } else {
+          event.nativeEvent.preventDownshiftDefault = true;
         }
         break;
       case 37:

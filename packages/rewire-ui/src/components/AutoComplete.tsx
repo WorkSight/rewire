@@ -364,7 +364,7 @@ class AutoComplete<T> extends React.Component<AutoCompleteProps<T>, any> {
     }
   }
 
-  handleKeyDown = (event: React.KeyboardEvent<any>) => {
+  handleKeyDown = (event: any) => {
     if (event.altKey || event.ctrlKey) {
       return;
     }
@@ -387,6 +387,14 @@ class AutoComplete<T> extends React.Component<AutoCompleteProps<T>, any> {
           event.preventDefault();
           event.stopPropagation();
           event.nativeEvent.stopImmediatePropagation();
+        }
+        break;
+      case 27:
+        const st = this.downShift.getState();
+        if (st.isOpen) {
+          event.nativeEvent.preventDownshiftDefault = false;
+        } else {
+          event.nativeEvent.preventDownshiftDefault = true;
         }
         break;
       case 37:

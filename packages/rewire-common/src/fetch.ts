@@ -72,7 +72,7 @@ export class Fetch {
   async _fetch(url: string, opts: any = {}, ms: number, isBlob: boolean = false) {
     opts.credentials = 'include';
     opts.headers = {
-      'Content-Type': 'application/json'
+      'content-type': 'application/json'
     };
     if (this.server.cors) {
       opts.mode    = 'cors';
