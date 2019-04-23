@@ -95,23 +95,23 @@ class NumberTextField extends React.Component<NumberFieldProps> {
 
   shouldComponentUpdate(nextProps: NumberFieldProps) {
     return (
-      (nextProps.value !== this.props.value) ||
-      (nextProps.disabled !== this.props.disabled) ||
-      (nextProps.visible !== this.props.visible) ||
-      (nextProps.format !== this.props.format) ||
-      (nextProps.mask !== this.props.mask) ||
-      (nextProps.decimals !== this.props.decimals) ||
+      (nextProps.value             !== this.props.value)             ||
+      (nextProps.disabled          !== this.props.disabled)          ||
+      (nextProps.visible           !== this.props.visible)           ||
+      (nextProps.format            !== this.props.format)            ||
+      (nextProps.mask              !== this.props.mask)              ||
+      (nextProps.decimals          !== this.props.decimals)          ||
       (nextProps.thousandSeparator !== this.props.thousandSeparator) ||
-      (nextProps.allowNegative !== this.props.allowNegative) ||
-      (nextProps.fixed !== this.props.fixed) ||
-      (nextProps.error !== this.props.error) ||
-      (nextProps.label !== this.props.label) ||
-      (nextProps.placeholder !== this.props.placeholder) ||
-      (nextProps.align !== this.props.align) ||
-      (nextProps.variant !== this.props.variant) ||
-      (nextProps.disableErrors !== this.props.disableErrors) ||
-      (nextProps.startAdornment !== this.props.startAdornment) ||
-      (nextProps.endAdornment !== this.props.endAdornment)
+      (nextProps.allowNegative     !== this.props.allowNegative)     ||
+      (nextProps.fixed             !== this.props.fixed)             ||
+      (nextProps.error             !== this.props.error)             ||
+      (nextProps.label             !== this.props.label)             ||
+      (nextProps.placeholder       !== this.props.placeholder)       ||
+      (nextProps.align             !== this.props.align)             ||
+      (nextProps.variant           !== this.props.variant)           ||
+      (nextProps.disableErrors     !== this.props.disableErrors)     ||
+      (nextProps.startAdornment    !== this.props.startAdornment)    ||
+      (nextProps.endAdornment      !== this.props.endAdornment)
     );
   }
 

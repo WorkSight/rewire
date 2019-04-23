@@ -67,7 +67,7 @@ class Client implements IClient {
         if (res.ok) {
           resolve({data: response.data});
         } else {
-          reject({error: response});
+          reject(response);
         }
       } catch (err) {
         reject(err);
