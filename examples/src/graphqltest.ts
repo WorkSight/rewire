@@ -77,7 +77,7 @@ async function run() {
   client.use(uploadMiddleware);
   client.use((q, req, next) => {
     next();
-  })
+  });
   // console.log(await client.query(employees));
   // const r = client.subscribe(subscriptionQuery);
   // r.observe((data: any) => {

@@ -129,8 +129,12 @@ const styles = (theme: Theme) => ({
   inputLabelRoot: {
     fontSize: 'inherit',
   },
-  inputLabelRootShrink: {
-    transform: 'translate(14px, -0.375em) scale(0.75) !important',
+  inputLabelOutlined: {
+    '&$inputLabelShrink': {
+      transform: 'translate(14px, -0.375em) scale(0.75)',
+    },
+  },
+  inputLabelShrink: {
   },
   inputFormControlWithLabel: {
     marginTop: '1em !important',
@@ -277,7 +281,7 @@ class TimeInputField extends React.Component<TimeFieldProps, ITimeState> {
         variant={variant}
         inputProps={{spellCheck: false, className: classes.nativeInput, style: {textAlign: align || 'left'}}}
         InputProps={{startAdornment: startAdornment, endAdornment: endAdornment, classes: {root: classes.inputRoot, input: inputClassName, formControl: inputFormControlClassName}}}
-        InputLabelProps={{shrink: true, classes: {root: classes.inputLabelRoot, outlined: classes.inputLabelRootShrink}}}
+        InputLabelProps={{shrink: true, classes: {root: classes.inputLabelRoot, outlined: classes.inputLabelOutlined}}}
         FormHelperTextProps={{classes: {root: classes.helperTextRoot, contained: classes.helperTextContained}}}
       />);
   }

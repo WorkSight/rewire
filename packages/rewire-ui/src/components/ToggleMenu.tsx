@@ -42,7 +42,7 @@ interface IToggleMenuProps {
   buttonProps:   ButtonProps;
   items:         IToggleMenuItem[];
 
-  onItemClick?(item: IToggleMenuItem): () => void;
+  onItemClick?(item: IToggleMenuItem): void;
 }
 
 interface IToggleMenuState {

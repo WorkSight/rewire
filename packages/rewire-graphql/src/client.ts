@@ -75,7 +75,7 @@ class Client implements IClient {
             const fn = this.middleware[i++];
             if (!fn) return;
             fn(queryObject, reqInit, next);
-          }
+          };
           next();
         }
 

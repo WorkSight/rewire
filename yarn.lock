@@ -1365,9 +1365,9 @@
   integrity sha512-shAmDyaQC4H92APFoIaVDHCx5bStIocgvbwQyxPRrbUY20V1EYTbSDchWbuwlMG3V17cprZhA6+78JfB+3DTPw==
 
 "@octokit/endpoint@^4.0.0":
-  version "4.0.0"
-  resolved "https://npm.worksight.services/@octokit%2fendpoint/-/endpoint-4.0.0.tgz#97032a6690ef1cf9576ab1b1582c0ac837e3b5b6"
-  integrity sha512-b8sptNUekjREtCTJFpOfSIL4SKh65WaakcyxWzRcSPOk5RxkZJ/S8884NGZFxZ+jCB2rDURU66pSHn14cVgWVg==
+  version "4.1.1"
+  resolved "https://npm.worksight.services/@octokit%2fendpoint/-/endpoint-4.1.1.tgz#847075b85157c7bd60d0f23c426b23bed8a232dd"
+  integrity sha512-lfphGC9hglBDiIOU84f1xDUzjWE5j3jGkO3Ng/IpDDVARw760A+/x408JOEpdV20ZUj2GRWdDBC0+HPu5qA5gQ==
   dependencies:
     deepmerge "3.2.0"
     is-plain-object "^2.0.4"
@@ -1480,9 +1480,9 @@
   integrity sha512-EaObqwIvayI5a8dCzhFrjKzVwKLxjoG9T6Ppd5CEo07LRKfQ8Yokw54r5+Wq7FaBQ+yXRvQAYPrHwya1/UFt9g==
 
 "@types/express-serve-static-core@*":
-  version "4.16.2"
-  resolved "https://npm.worksight.services/@types%2fexpress-serve-static-core/-/express-serve-static-core-4.16.2.tgz#5ee8a22e602005be6767df6b2cba9879df3f75aa"
-  integrity sha512-qgc8tjnDrc789rAQed8NoiFLV5VGcItA4yWNFphqGU0RcuuQngD00g3LHhWIK3HQ2XeDgVCmlNPDlqi3fWBHnQ==
+  version "4.16.3"
+  resolved "https://npm.worksight.services/@types%2fexpress-serve-static-core/-/express-serve-static-core-4.16.3.tgz#49d9cea50e801f8bf757702060752fe65f169ba7"
+  integrity sha512-HFgBmRDTvdnrRFXqBr2NM2NUCu6fIpzJsUTlRVENF8lxvstof7cl9Fxfwq5S0kJbO/FsPVcjlxpOM3ZxIkn7Rw==
   dependencies:
     "@types/node" "*"
     "@types/range-parser" "*"
@@ -2577,9 +2577,9 @@ caniuse-api@^3.0.0:
     lodash.uniq "^4.5.0"
 
 caniuse-lite@^1.0.0, caniuse-lite@^1.0.30000844, caniuse-lite@^1.0.30000960:
-  version "1.0.30000962"
-  resolved "https://npm.worksight.services/caniuse-lite/-/caniuse-lite-1.0.30000962.tgz#6c10c3ab304b89bea905e66adf98c0905088ee44"
-  integrity sha512-WXYsW38HK+6eaj5IZR16Rn91TGhU3OhbwjKZvJ4HN/XBIABLKfbij9Mnd3pM0VEwZSlltWjoWg3I8FQ0DGgNOA==
+  version "1.0.30000963"
+  resolved "https://npm.worksight.services/caniuse-lite/-/caniuse-lite-1.0.30000963.tgz#5be481d5292f22aff5ee0db4a6c049b65b5798b1"
+  integrity sha512-n4HUiullc7Lw0LyzpeLa2ffP8KxFBGdxqD/8G3bSL6oB758hZ2UE2CVK+tQN958tJIi0/tfpjAc67aAtoHgnrQ==
 
 caseless@~0.12.0:
   version "0.12.0"
@@ -5366,9 +5366,9 @@ nanomatch@^1.2.9:
     to-regex "^3.0.1"
 
 needle@^2.2.1:
-  version "2.3.0"
-  resolved "https://npm.worksight.services/needle/-/needle-2.3.0.tgz#ce3fea21197267bacb310705a7bbe24f2a3a3492"
-  integrity sha512-QBZu7aAFR0522EyaXZM0FZ9GLpq6lvQ3uq8gteiDUp7wKdy0lSd2hPlgFwVuW1CBkfEs9PfDQsQzZghLs/psdg==
+  version "2.3.1"
+  resolved "https://npm.worksight.services/needle/-/needle-2.3.1.tgz#d272f2f4034afb9c4c9ab1379aabc17fc85c9388"
+  integrity sha512-CaLXV3W8Vnbps8ZANqDGz7j4x7Yj1LW4TWF/TQuDfj7Cfx4nAPTvw98qgTevtto1oHDrh3pQkaODbqupXlsWTg==
   dependencies:
     debug "^4.1.0"
     iconv-lite "^0.4.4"
@@ -5454,9 +5454,9 @@ node-pre-gyp@^0.12.0:
     tar "^4"
 
 node-releases@^1.1.14:
-  version "1.1.16"
-  resolved "https://npm.worksight.services/node-releases/-/node-releases-1.1.16.tgz#efcb6615b0e8dc454bfb03bc025aad406ea6dddf"
-  integrity sha512-BOMWCW9CaT4sffMa5S9Mj4vYObvVShyo6JoM9WzzQOKVyNUn1+OVMUaQT3fo2tJKCMwHjqaDW/Pf3/JsYmPD2g==
+  version "1.1.17"
+  resolved "https://npm.worksight.services/node-releases/-/node-releases-1.1.17.tgz#71ea4631f0a97d5cd4f65f7d04ecf9072eac711a"
+  integrity sha512-/SCjetyta1m7YXLgtACZGDYJdCSIBAWorDWkGCGZlydP2Ll7J48l7j/JxNYZ+xsgSPbWfdulVS/aY+GdjUsQ7Q==
   dependencies:
     semver "^5.3.0"
 
@@ -6906,9 +6906,9 @@ resolve-url@^0.2.1:
   integrity sha1-LGN/53yJOv0qZj/iGqkIAGjiBSo=
 
 resolve@^1.10.0, resolve@^1.3.2:
-  version "1.10.0"
-  resolved "https://npm.worksight.services/resolve/-/resolve-1.10.0.tgz#3bdaaeaf45cc07f375656dfd2e54ed0810b101ba"
-  integrity sha512-3sUr9aq5OfSg2S9pNtPA9hL1FVEAjvfOC4leW0SNf/mpnaakz2a9femSd6LqAww2RaFctwyf1lCqnTHuF1rxDg==
+  version "1.10.1"
+  resolved "https://npm.worksight.services/resolve/-/resolve-1.10.1.tgz#664842ac960795bbe758221cdccda61fb64b5f18"
+  integrity sha512-KuIe4mf++td/eFb6wkaPbMDnP6kObCaEtIDuHOUED6MNUo4K670KZUHuuvYPZDxNF0WVLw49n06M2m2dXphEzA==
   dependencies:
     path-parse "^1.0.6"
 
@@ -7652,9 +7652,9 @@ typedarray@^0.0.6:
   integrity sha1-hnrHTjhkGHsdPUfZlqeOxciDB3c=
 
 typescript@^3.3.3333:
-  version "3.4.4"
-  resolved "https://npm.worksight.services/typescript/-/typescript-3.4.4.tgz#aac4a08abecab8091a75f10842ffa0631818f785"
-  integrity sha512-xt5RsIRCEaf6+j9AyOBgvVuAec0i92rgCaS3S+UVf5Z/vF2Hvtsw08wtUTJqp4djwznoAgjSxeCcU4r+CcDBJA==
+  version "3.4.5"
+  resolved "https://npm.worksight.services/typescript/-/typescript-3.4.5.tgz#2d2618d10bb566572b8d7aad5180d84257d70a99"
+  integrity sha512-YycBxUb49UUhdNMU5aJ7z5Ej2XGmaIBL0x34vZ82fn3hGvD+bgrMrVDpatgz2f7YxUMJxMkbWxJZeAvDxVe7Vw==
 
 ua-parser-js@^0.7.18:
   version "0.7.19"
@@ -7670,9 +7670,9 @@ uglify-es@^3.3.9:
     source-map "~0.6.1"
 
 uglify-js@^3.1.4:
-  version "3.5.6"
-  resolved "https://npm.worksight.services/uglify-js/-/uglify-js-3.5.6.tgz#8a5f8a06ee7415ac1fa302f4623bc7344b553da4"
-  integrity sha512-YDKRX8F0Y+Jr7LhoVk0n4G7ltR3Y7qFAj+DtVBthlOgCcIj1hyMigCfousVfn9HKmvJ+qiFlLDwaHx44/e5ZKw==
+  version "3.5.7"
+  resolved "https://npm.worksight.services/uglify-js/-/uglify-js-3.5.7.tgz#1442fda9991a01aa0eb2853876640477109113ff"
+  integrity sha512-GCgJx3BBuaf/QMvBBkhoHDh4SVsHCC3ILEzriPw4FgJJKCuxVBSYLRkDlmT3uhXyGWKs3VN5r0mCkBIZaHWu3w==
   dependencies:
     commander "~2.20.0"
     source-map "~0.6.1"

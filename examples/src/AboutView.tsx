@@ -47,6 +47,7 @@ class TestDialog extends Modal {
     date                 : Form.date().label('Date').validators(isRequired).autoFocus(),
     dollars              : Form.number().label('Dollars').validators(isRequired).placeholder('Show me the money').startAdornment(() => <div style={{display: 'flex', alignItems: 'center'}}><AddIcon /><span>$</span></div>),
     shouldI              : Form.multiselect(searcher).label('Should I?').placeholder('choose!').startAdornment(() => <AccessibilityIcon />).validators(isRequired),
+    static               : Form.static().label('Static'),
     isGreat              : Form.boolean().label('Is Great'),
     noLabel              : Form.boolean(),
     disabled             : Form.boolean().label('Disabled').disabled(() => true),
@@ -66,7 +67,7 @@ class TestDialog extends Modal {
     switch1              : Form.switch().label('Switch 1'),
     switch2              : Form.switch().label('Switch 2'),
     color                : Form.color().disabled(() => false).label('Colour picker'),
-  }, {email: 'splace@worksight.net', isGreat: true, switch2: true, phone: '34232221535'}, {variant: 'outlined', initialValuesValidationMode: 'withValues'});
+  }, {email: 'splace@worksight.net', static: `Can't Change Me`, isGreat: true, switch2: true, phone: '34232221535'}, {variant: 'outlined', initialValuesValidationMode: 'withValues'});
 }
 
 const testDialog   = new TestDialog();
@@ -75,38 +76,39 @@ const TestFormView = ({form}: {form: typeof testDialog.form}) => (
       <div style={{fontSize: '16px'}}>
         <FormView form={form} onSubmit={testDialog.actionFn('login')}>
           <div className='content'>
-            <form.field.date.Editor    className='span4' />
-            <form.field.dollars.Editor className='span4' />
-            <form.field.shouldI.Editor className='span4' />
+            <form.field.date.Editor    className='span1' />
+            <form.field.dollars.Editor className='span1' />
+            <form.field.shouldI.Editor className='span1' />
+            <form.field.static.Editor  className='span1' />
           </div>
           <div className='content'>
-            <form.field.noLabel.Editor  className='span4' />
-            <form.field.disabled.Editor className='span4' />
-            <form.field.email.Editor    className='span4' />
-            <form.field.name.Editor     className='span4' />
+            <form.field.noLabel.Editor  className='span1' />
+            <form.field.disabled.Editor className='span1' />
+            <form.field.email.Editor    className='span1' />
+            <form.field.name.Editor     className='span1' />
           </div>
           <div className='content'>
-            <form.field.password.Editor />
-            <form.field.password_confirmation.Editor />
-            <form.field.phone.Editor />
-            <form.field.phoneCustom.Editor />
+            <form.field.password.Editor              className='span1' />
+            <form.field.password_confirmation.Editor className='span1' />
+            <form.field.phone.Editor                 className='span1' />
+            <form.field.phoneCustom.Editor           className='span1' />
           </div>
           <div className='content'>
-            <form.field.timeOut.Editor className='span4' />
-            <form.field.timeIn.Editor  className='span4' />
-            <form.field.isGreat.Editor className='span4' />
+            <form.field.timeOut.Editor className='span1' />
+            <form.field.timeIn.Editor  className='span1' />
+            <form.field.isGreat.Editor className='span2' />
           </div>
           <div className='content'>
             <form.field.difference.Editor className='span1' />
             <form.field.sum.Editor        className='span1' />
-            <form.field.multi.Editor      className='span1' />
+            <form.field.multi.Editor      className='span2' />
           </div>
           {/* <Slide in={true} timeout={2000} direction='up' mountOnEnter unmountOnExit> */}
           <div className='content'>
             <form.field.switch1.Editor className='span1' />
             <form.field.switch2.Editor className='span1' />
             <form.field.color.Editor   className='span1' />
-            <form.field.country.Editor className='span4' />
+            <form.field.country.Editor className='span1' />
           </div>
           {/* </Slide> */}
           <div className='content'>

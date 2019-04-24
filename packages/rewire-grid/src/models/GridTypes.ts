@@ -220,7 +220,7 @@ export interface IGridFontSizes {
 }
 
 export interface IToggleableColumnsOptions {
-  onItemClick?(item: IToggleMenuItem): () => void;
+  onItemClick?(item: IToggleMenuItem): void;
 }
 
 export interface IRowOptions {
