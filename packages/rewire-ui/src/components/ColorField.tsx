@@ -236,7 +236,7 @@ class ColorField extends React.Component<ColorFieldPropsStyled, IColorFieldState
         onKeyDown={this.handleKeyDown}
         onKeyUp={this.handleKeyUp}
       >
-        {label && <InputLabel htmlFor='rc-color-picker-trigger' shrink={true} variant={variant} classes={{root: classes.inputLabelRoot, outlined: classes.inputLabelOutlined}}>{label}</InputLabel>}
+        {label && <InputLabel htmlFor='rc-color-picker-trigger' shrink={true} variant={variant} classes={{root: classes.inputLabelRoot, outlined: classes.inputLabelOutlined, shrink: classes.inputLabelShrink}}>{label}</InputLabel>}
         {this.renderColorPicker(value)}
       </FormControl>
     );
