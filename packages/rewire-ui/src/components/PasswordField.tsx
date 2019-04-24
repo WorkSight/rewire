@@ -25,8 +25,12 @@ const styles = (theme: Theme) => ({
   inputLabelRoot: {
     fontSize: 'inherit',
   },
-  inputLabelRootShrink: {
-    transform: 'translate(14px, -0.375em) scale(0.75) !important',
+  inputLabelOutlined: {
+    '&$inputLabelShrink': {
+      transform: 'translate(14px, -0.375em) scale(0.75)',
+    },
+  },
+  inputLabelShrink: {
   },
   inputFormControlWithLabel: {
     marginTop: '1em !important',
@@ -176,7 +180,7 @@ class PasswordFieldInternal extends React.Component<PasswordFieldPropsStyled, IP
           onChange={(evt: React.ChangeEvent<HTMLInputElement>) => this.props.onValueChange(evt.target.value)}
           inputProps={{spellCheck: false, className: this.props.classes.nativeInput, style: {textAlign: this.props.align || 'left'}}}
           InputProps={{endAdornment: adornment, classes: {root: this.props.classes.inputRoot, input: inputClassName, inputType: this.props.classes.inputType, formControl: inputFormControlClassName}}}
-          InputLabelProps={{shrink: true, classes: {root: this.props.classes.inputLabelRoot, outlined: this.props.classes.inputLabelRootShrink}}}
+          InputLabelProps={{shrink: true, classes: {root: this.props.classes.inputLabelRoot, outlined: this.props.classes.inputLabelOutlined}}}
           FormHelperTextProps={{classes: {root: this.props.classes.helperTextRoot, contained: this.props.classes.helperTextContained}}}
         />
       );
@@ -203,7 +207,7 @@ class PasswordFieldInternal extends React.Component<PasswordFieldPropsStyled, IP
             onChange={props.onChange}
             inputProps={{spellCheck: false, className: props.classes.nativeInput, style: {textAlign: props.align || 'left'}}}
             InputProps={{endAdornment: adornment, classes: {root: props.classes.inputRoot, input: inputClassName, inputType: props.classes.inputType, formControl: inputFormControlClassName}}}
-            InputLabelProps={{shrink: true, classes: {root: props.classes.inputLabelRoot, outlined: props.classes.inputLabelRootShrink}}}
+            InputLabelProps={{shrink: true, classes: {root: props.classes.inputLabelRoot, outlined: props.classes.inputLabelOutlined}}}
             FormHelperTextProps={{classes: {root: props.classes.helperTextRoot, contained: props.classes.helperTextContained}}}
           />
         }

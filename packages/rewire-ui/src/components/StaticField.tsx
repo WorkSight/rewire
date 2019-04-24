@@ -14,9 +14,11 @@ const styles = (theme: Theme) => ({
   },
   inputLabelRoot: {
     fontSize: 'inherit',
+    '&$inputLabelDisabled': {
+      color: theme.palette.text.secondary,
+    },
   },
-  inputLabelRootShrink: {
-    transform: 'translate(14px, -0.375em) scale(0.75) !important',
+  inputLabelDisabled: {
   },
 });
 
@@ -62,7 +64,7 @@ class StaticFieldInternal extends React.Component<StaticFieldProps> {
         value={value}
         type={this.props.type}
         onChange={(evt: React.ChangeEvent<HTMLInputElement>) => this.props.onValueChange(evt.target.value)}
-        InputLabelProps={{shrink: true, classes: {root: classes.inputLabelRoot, outlined: classes.inputLabelRootShrink}}}
+        InputLabelProps={{shrink: true, classes: {root: classes.inputLabelRoot, disabled: classes.inputLabelDisabled}}}
         InputProps={{style: {color: 'inherit'}, classes: {root: classes.inputRoot}}}
         inputProps={{spellCheck: false, style: {textAlign: this.props.align || 'left'}}}
       />);

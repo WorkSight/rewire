@@ -17,8 +17,12 @@ const styles = (theme: Theme) => ({
   inputLabelRoot: {
     fontSize: 'inherit',
   },
-  inputLabelRootShrink: {
-    transform: 'translate(0, -0.375em) scale(0.75) !important',
+  inputLabelOutlined: {
+    '&$inputLabelShrink': {
+      transform: 'translate(0, -0.375em) scale(0.75)',
+    },
+  },
+  inputLabelShrink: {
   },
   colorFieldContainerNoLabel: {
     display: 'flex',
@@ -232,7 +236,7 @@ class ColorField extends React.Component<ColorFieldPropsStyled, IColorFieldState
         onKeyDown={this.handleKeyDown}
         onKeyUp={this.handleKeyUp}
       >
-        {label && <InputLabel htmlFor='rc-color-picker-trigger' shrink={true} variant={variant} classes={{root: classes.inputLabelRoot, outlined: classes.inputLabelRootShrink}}>{label}</InputLabel>}
+        {label && <InputLabel htmlFor='rc-color-picker-trigger' shrink={true} variant={variant} classes={{root: classes.inputLabelRoot, outlined: classes.inputLabelOutlined}}>{label}</InputLabel>}
         {this.renderColorPicker(value)}
       </FormControl>
     );
