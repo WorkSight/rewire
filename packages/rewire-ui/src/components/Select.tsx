@@ -256,6 +256,9 @@ class SelectInternal<T> extends React.Component<SelectInternalProps<T>, any> {
         this.setState({isOpen: true});
       case 'Enter':
         break;
+      case 'Delete':
+        this.props.onSelectItem(undefined);
+        break;
 
       default:
         break;
