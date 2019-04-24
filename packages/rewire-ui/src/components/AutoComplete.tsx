@@ -8,10 +8,12 @@ import TextField               from '@material-ui/core/TextField';
 import Fade                    from '@material-ui/core/Fade';
 import Paper                   from '@material-ui/core/Paper';
 import Popper                  from '@material-ui/core/Popper';
+import IconButton              from '@material-ui/core/IconButton';
 import MenuItem                from '@material-ui/core/MenuItem';
 import InputAdornment          from '@material-ui/core/InputAdornment';
 import Typography              from '@material-ui/core/Typography';
 import {Theme}                 from '@material-ui/core/styles';
+import CancelIcon              from '@material-ui/icons/Cancel';
 import {debounce, match}       from 'rewire-common';
 import {withStyles, WithStyle} from './styles';
 import {
@@ -107,6 +109,13 @@ const styles = (theme: Theme) => ({
     marginLeft: '14px',
     marginRight: '14px',
   },
+  deleteButton: {
+    padding: '0px',
+    fontSize: 'unset',
+    '& svg': {
+      fontSize: '1.2em',
+    },
+  },
 });
 
 
@@ -130,10 +139,20 @@ export interface IAutoCompleteProps {
   suggestionsContainerFooter?: ISuggestionsContainerComponent;
 }
 
+interface IAutoCompleteState {
+  isFocused: boolean;
+  isHovered: boolean;
+  suggestions: any[];
+}
+
 export type AutoCompleteProps<T> = WithStyle<ReturnType<typeof styles>, IAutoCompleteProps & ICustomProps<T> & React.InputHTMLAttributes<any>>;
 
-class AutoComplete<T> extends React.Component<AutoCompleteProps<T>, any> {
-  state = {suggestions: []};
+class AutoComplete<T> extends React.Component<AutoCompleteProps<T>, IAutoCompleteState> {
+  state = {
+    isFocused: false,
+    isHovered: false,
+    suggestions: [],
+  };
   downShift: any;
   search: SearchFn<T>;
   map: MapFn<T>;
@@ -178,10 +197,9 @@ class AutoComplete<T> extends React.Component<AutoCompleteProps<T>, any> {
         inputRef={ref}
         disabled={disabled}
         autoFocus={autoFocus}
-        onFocus={this.handleFocus}
         inputProps={{spellCheck: false, className: classes.nativeInput, style: {textAlign: align || 'left'}}}
-        InputProps={{startAdornment: startAdornment, endAdornment: endAdornment, classes: {root: classes.inputRoot, input: inputClassName, formControl: inputFormControlClassName}}}
-        InputLabelProps={{shrink: true, classes: {root: classes.inputLabelRoot, outlined: classes.inputLabelOutlined}}}
+        InputProps={{onMouseEnter: this.handleMouseEnter, onMouseLeave: this.handleMouseLeave, startAdornment: startAdornment, endAdornment: endAdornment, classes: {root: classes.inputRoot, input: inputClassName, formControl: inputFormControlClassName}}}
+        InputLabelProps={{shrink: true, classes: {root: classes.inputLabelRoot, outlined: classes.inputLabelOutlined, shrink: classes.inputLabelShrink}}}
         FormHelperTextProps={{classes: {root: classes.helperTextRoot, contained: classes.helperTextContained}}}
         {...other}
       />
@@ -339,6 +357,8 @@ class AutoComplete<T> extends React.Component<AutoCompleteProps<T>, any> {
   }
 
   handleFocus = (evt: React.FocusEvent<HTMLInputElement>) => {
+    this.setState({isFocused: true});
+
     if (this.props.selectOnFocus) {
       evt.target.setSelectionRange(0, evt.target.value.length);
     } else if (this.props.endOfTextOnFocus) {
@@ -351,6 +371,18 @@ class AutoComplete<T> extends React.Component<AutoCompleteProps<T>, any> {
     if (this.props.openOnFocus) {
       setTimeout(() => this.downShift.openMenu(), 0);
     }
+  }
+
+  handleBlur = (evt: React.FocusEvent<HTMLInputElement>) => {
+    this.setState({isFocused: false});
+  }
+
+  handleMouseEnter = (evt: React.PointerEvent<HTMLInputElement>) => {
+    this.setState({isHovered: true});
+  }
+
+  handleMouseLeave = (evt: React.PointerEvent<HTMLInputElement>) => {
+    this.setState({isHovered: false});
   }
 
   handleInputChanged = (inputValue: string, helpers: ControllerStateAndHelpers<any>) => {
@@ -468,8 +500,24 @@ class AutoComplete<T> extends React.Component<AutoCompleteProps<T>, any> {
         (nextProps.openOnFocus !== this.props.openOnFocus) ||
         (nextProps.showEmptySuggestions !== this.props.showEmptySuggestions) ||
         (nextProps.hasTransition !== this.props.hasTransition) ||
-        (nextProps.transitionTimeout !== this.props.transitionTimeout)
+        (nextProps.transitionTimeout !== this.props.transitionTimeout) ||
+        (nextState.isFocused !== this.state.isFocused) ||
+        (nextState.isHovered !== this.state.isHovered)
       );
+  }
+
+  renderDeleteButton(): JSX.Element | null {
+    if (!this.props.selectedItem || (!this.state.isHovered && !this.state.isFocused)) {
+      return null;
+    }
+
+    const {classes} = this.props;
+
+    return (
+      <IconButton className={classes.deleteButton} tabIndex={-1} onClick={() => { this.props.onSelectItem(undefined); this.suggestionsContainerNode.focus(); }}>
+        <CancelIcon />
+      </IconButton>
+    );
   }
 
   render() {
@@ -506,11 +554,19 @@ class AutoComplete<T> extends React.Component<AutoCompleteProps<T>, any> {
                 getInputProps({
                   disabled: disabled,
                   onKeyDown: this.handleKeyDown,
+                  onFocus: this.handleFocus,
+                  onBlur: this.handleBlur,
                   autoFocus: autoFocus,
                   label: label,
                   placeholder: placeholder,
                 }),
-                {align: align, variant, disableErrors: disableErrors, startAdornment: startAdornment, endAdornment: endAdornment},
+                {
+                  align: align,
+                  variant: variant,
+                  disableErrors: disableErrors,
+                  startAdornment: startAdornment,
+                  endAdornment: (< >{this.renderDeleteButton()}{endAdornment}</>)
+                },
                 (node => {
                   this.suggestionsContainerNode = node;
                 }),

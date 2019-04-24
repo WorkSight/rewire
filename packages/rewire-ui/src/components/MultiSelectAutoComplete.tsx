@@ -76,7 +76,7 @@ const styles = (theme: Theme) => ({
     fontSize: 'inherit',
   },
   inputLabelOutlined: {
-    '&$inputlabelShrink': {
+    '&$inputLabelShrink': {
       transform: 'translate(14px, -0.375em) scale(0.75)',
     },
   },
@@ -134,9 +134,13 @@ interface IMultiSelectAutoCompleteProps {
   suggestionsContainerFooter?: ISuggestionsContainerComponent;
 }
 
+interface IMultiSelectAutoCompleteState {
+  suggestions: any[];
+}
+
 export type MultiSelectAutoCompleteProps<T> = WithStyle<ReturnType<typeof styles>, IMultiSelectAutoCompleteProps & ICustomProps<T> & React.InputHTMLAttributes<any>>;
 
-class MultiSelectAutoComplete<T> extends React.Component<MultiSelectAutoCompleteProps<T>, any> {
+class MultiSelectAutoComplete<T> extends React.Component<MultiSelectAutoCompleteProps<T>, IMultiSelectAutoCompleteState> {
   state = {suggestions: []};
   downShift:                any;
   search:                   SearchFn<T>;
@@ -182,10 +186,9 @@ class MultiSelectAutoComplete<T> extends React.Component<MultiSelectAutoComplete
         inputRef={ref}
         disabled={disabled}
         autoFocus={autoFocus}
-        onFocus={this.handleFocus}
         inputProps={{spellCheck: false, className: classes.nativeInput, style: {textAlign: align || 'left'}}}
         InputProps={{startAdornment: startAdornment, endAdornment: endAdornment, classes: {root: classes.inputRoot, input: inputClassName, formControl: inputFormControlClassName}}}
-        InputLabelProps={{shrink: true, classes: {root: classes.inputLabelRoot, outlined: classes.inputLabelOutlined}}}
+        InputLabelProps={{shrink: true, classes: {root: classes.inputLabelRoot, outlined: classes.inputLabelOutlined, shrink: classes.inputLabelShrink}}}
         FormHelperTextProps={{classes: {root: classes.helperTextRoot, contained: classes.helperTextContained}}}
         {...other}
       />
@@ -440,6 +443,7 @@ class MultiSelectAutoComplete<T> extends React.Component<MultiSelectAutoComplete
     const selectedItem  = this.map(item);
     selectedItems.splice(selectedItems.findIndex(i => this.map(i) === selectedItem), 1);
     this.props.onSelectItem && this.props.onSelectItem(selectedItems);
+    this.suggestionsContainerNode.focus();
   }
 
   handleMenuMouseDown = (event: React.MouseEvent<any>) => {
@@ -479,21 +483,20 @@ class MultiSelectAutoComplete<T> extends React.Component<MultiSelectAutoComplete
   }
 
   shouldComponentUpdate(nextProps: ICustomProps<T> & React.InputHTMLAttributes<any>, nextState: any, nextContext: any) {
-    return true;
-    // return (
-    //     (nextProps.selectedItem !== this.props.selectedItem) ||
-    //     (nextProps.error !== this.props.error) ||
-    //     (nextProps.disabled !== this.props.disabled) ||
-    //     (nextProps.visible !== this.props.visible) ||
-    //     (nextState.suggestions !== this.state.suggestions) ||
-    //     (nextProps.label !== this.props.label) ||
-    //     (nextProps.placeholder !== this.props.placeholder) ||
-    //     (nextProps.align !== this.props.align) ||
-    //     (nextProps.variant !== this.props.variant) ||
-    //     (nextProps.disableErrors !== this.props.disableErrors) ||
-    //     (nextProps.startAdornment !== this.props.startAdornment) ||
-    //     (nextProps.endAdornment !== this.props.endAdornment)
-    //   );
+    return (
+        (nextProps.selectedItems !== this.props.selectedItems) ||
+        (nextProps.error !== this.props.error) ||
+        (nextProps.disabled !== this.props.disabled) ||
+        (nextProps.visible !== this.props.visible) ||
+        (nextState.suggestions !== this.state.suggestions) ||
+        (nextProps.label !== this.props.label) ||
+        (nextProps.placeholder !== this.props.placeholder) ||
+        (nextProps.align !== this.props.align) ||
+        (nextProps.variant !== this.props.variant) ||
+        (nextProps.disableErrors !== this.props.disableErrors) ||
+        (nextProps.startAdornment !== this.props.startAdornment) ||
+        (nextProps.endAdornment !== this.props.endAdornment)
+      );
   }
 
   renderChips(classes: Record<any, string>) {
@@ -527,7 +530,8 @@ class MultiSelectAutoComplete<T> extends React.Component<MultiSelectAutoComplete
       return null;
     }
 
-    const endAdornment = this.props.endAdornment ? <InputAdornment position='end' classes={{root: classes.inputAdornmentRoot}}>{this.props.endAdornment}</InputAdornment> : undefined;
+    const startAdornment = this.props.startAdornment ? <InputAdornment position='start' classes={{root: classes.inputAdornmentRoot}}>{this.props.startAdornment}</InputAdornment> : undefined;
+    const endAdornment   = this.props.endAdornment ? <InputAdornment position='end' classes={{root: classes.inputAdornmentRoot}}>{this.props.endAdornment}</InputAdornment> : undefined;
 
     return (
       <Downshift
@@ -554,15 +558,16 @@ class MultiSelectAutoComplete<T> extends React.Component<MultiSelectAutoComplete
                 getInputProps({
                   disabled: disabled,
                   onKeyDown: this.handleKeyDown,
+                  onFocus: this.handleFocus,
                   autoFocus: autoFocus,
                   label: label,
                   placeholder: placeholder,
                 }),
                 {
                   align: align,
-                  variant,
+                  variant: variant,
                   disableErrors: disableErrors,
-                  startAdornment: this.renderChips(classes),
+                  startAdornment: (< >{startAdornment}{this.renderChips(classes)}</>),
                   endAdornment: endAdornment
                 },
                 (node => {

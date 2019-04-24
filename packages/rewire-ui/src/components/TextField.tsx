@@ -217,7 +217,7 @@ class TextFieldInternal extends React.Component<TextFieldPropsStyled> {
         onChange={(evt: React.ChangeEvent<HTMLInputElement>) => this.props.onValueChange(evt.target.value)}
         inputProps={{spellCheck: !!multiline, className: classes.nativeInput, style: {textAlign: this.props.align || 'left'}}}
         InputProps={{startAdornment: startAdornment, endAdornment: endAdornment, classes: {root: classes.inputRoot, multiline: multilineClassName, input: inputClassName, inputType: inputTypeClassName, formControl: inputFormControlClassName}}}
-        InputLabelProps={{shrink: true, classes: {root: classes.inputLabelRoot, outlined: classes.inputLabelOutlined}}}
+        InputLabelProps={{shrink: true, classes: {root: classes.inputLabelRoot, outlined: classes.inputLabelOutlined, shrink: classes.inputLabelShrink}}}
         FormHelperTextProps={{classes: {root: classes.helperTextRoot, contained: classes.helperTextContained}}}
       />);
     }
@@ -246,7 +246,7 @@ class TextFieldInternal extends React.Component<TextFieldPropsStyled> {
           onChange={props.onChange}
           inputProps={{spellCheck: !!multiline, className: classes.nativeInput, style: {textAlign: props.align || 'left'}}}
           InputProps={{startAdornment: startAdornment, endAdornment: endAdornment, classes: {root: classes.inputRoot, multiline: multilineClassName, input: inputClassName, inputType: inputTypeClassName, formControl: inputFormControlClassName}}}
-          InputLabelProps={{shrink: true, classes: {root: classes.inputLabelRoot, outlined: classes.inputLabelOutlined}}}
+          InputLabelProps={{shrink: true, classes: {root: classes.inputLabelRoot, outlined: classes.inputLabelOutlined, shrink: classes.inputLabelShrink}}}
           FormHelperTextProps={{classes: {root: classes.helperTextRoot, contained: classes.helperTextContained}}}
         />
       }

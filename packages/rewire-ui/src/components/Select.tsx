@@ -390,7 +390,7 @@ class SelectInternal<T> extends React.Component<SelectInternalProps<T>, any> {
     let   cls   = (this.props.className || '') + ' select';
     return (
       <FormControl error={!disableErrors && !disabled && !!error} variant={variant} className={classNames(cls, classes.formControlRoot)}>
-        {label && <RootRef rootRef={this.InputLabelRef}><InputLabel htmlFor='name-error' shrink={true} classes={{root: classes.inputLabelRoot, outlined: classes.inputLabelOutlined}}>{label}</InputLabel></RootRef>}
+        {label && <RootRef rootRef={this.InputLabelRef}><InputLabel htmlFor='name-error' shrink={true} classes={{root: classes.inputLabelRoot, outlined: classes.inputLabelOutlined, shrink: classes.inputLabelShrink}}>{label}</InputLabel></RootRef>}
         {this.renderSelect(disabled, '', this.props.selectedItem, this.props.autoFocus, this.props.placeholder)}
         {!disableErrors && <FormHelperText classes={{root: classes.helperTextRoot, contained: classes.helperTextContained}}>{!disabled && error}</FormHelperText>}
       </FormControl>
