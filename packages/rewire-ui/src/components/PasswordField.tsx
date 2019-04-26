@@ -138,7 +138,7 @@ class PasswordFieldInternal extends React.Component<PasswordFieldPropsStyled, IP
 
   handleClickShowPassword = () => {
     this.setState(state => ({showPassword: !state.showPassword}));
-    this.inputRef.current && this.inputRef.current.focus();
+    setTimeout(() => this.inputRef.current && this.inputRef.current.focus(), 0);
   }
 
   render() {

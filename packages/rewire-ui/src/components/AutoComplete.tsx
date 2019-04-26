@@ -369,7 +369,7 @@ class AutoComplete<T> extends React.Component<AutoCompleteProps<T>, IAutoComplet
     }
 
     if (this.props.openOnFocus) {
-      setTimeout(() => this.downShift.openMenu(), 0);
+      this.handleOpenOnFocus();
     }
   }
 
@@ -389,6 +389,11 @@ class AutoComplete<T> extends React.Component<AutoCompleteProps<T>, IAutoComplet
     if (helpers.isOpen) {
       this.performSearch(inputValue);
     }
+  }
+
+  handleOpenOnFocus = async () => {
+    await this.performSearch(this.map(this.props.selectedItem));
+    this.downShift.openMenu();
   }
 
   handleItemChanged = (options: StateChangeOptions<any>, helpers: ControllerStateAndHelpers<any>) => {
@@ -514,7 +519,7 @@ class AutoComplete<T> extends React.Component<AutoCompleteProps<T>, IAutoComplet
     const {classes} = this.props;
 
     return (
-      <IconButton className={classes.deleteButton} tabIndex={-1} onClick={() => { this.props.onSelectItem(undefined); this.suggestionsContainerNode.focus(); }}>
+      <IconButton className={classes.deleteButton} tabIndex={-1} onClick={() => { this.props.onSelectItem(undefined); setTimeout(() => this.suggestionsContainerNode && this.suggestionsContainerNode.focus(), 0); }}>
         <CancelIcon />
       </IconButton>
     );
