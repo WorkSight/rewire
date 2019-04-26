@@ -70,7 +70,7 @@ export interface IAvatarCropperProps {
   mobileScaleSpeed?: number;
   onLoad?: (data: HTMLImageElement) => void;
   onCrop?: (data: string) => void;
-  onSave?: (data: string) => void;
+  onSave?: (data?: string) => void;
   onCancel?: () => void;
 }
 

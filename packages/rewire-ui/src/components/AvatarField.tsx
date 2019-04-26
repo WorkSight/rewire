@@ -12,7 +12,6 @@ const avatarFieldStyles = () => ({
     display: 'flex',
     flexDirection: 'column',
     alignItems: 'center',
-    margin: '0 auto',
   },
 });
 
@@ -25,9 +24,9 @@ export interface IAvatarFieldProps {
   mimeTypes?     : string;
   label?         : string;
 
-  onFileLoad?  : (data: any) => void;
-  onImageLoad? : (data: any) => void;
-  onValueChange: (v: string) => void;
+  onFileLoad?(data: any): void;
+  onImageLoad?(data: any): void;
+  onValueChange(v?: string): void;
 }
 
 interface IAvatarFieldState {
@@ -69,7 +68,7 @@ class AvatarField extends React.Component<AvatarFieldProps, IAvatarFieldState> {
     this.setState({loadedValue: imageSrc}, () => this.props.onImageLoad && this.props.onImageLoad(imageSrc));
   }
 
-  onSave = (imageSrc: string) => {
+  onSave = (imageSrc?: string) => {
     this.props.onValueChange(imageSrc);
     this.setState({value: imageSrc, loadedValue: undefined}, () => this.props.onSave && this.props.onSave(imageSrc));
   }
@@ -116,7 +115,7 @@ class AvatarField extends React.Component<AvatarFieldProps, IAvatarFieldState> {
 
     return (
       <div className={classNames(this.props.className, classes.avatarContainer)}>
-        <InnerAvatar classes={otherClasses} buttonSize={bSize} avatarDiameter={avatarDiameter} mimeTypes={mimeTypes} label={label} onFileLoad={onFileLoad} onImageLoad={this.onImageLoad} value={this.state.value} />
+        <InnerAvatar classes={otherClasses} buttonSize={bSize} avatarDiameter={avatarDiameter} mimeTypes={mimeTypes} label={label} onFileLoad={onFileLoad} onImageLoad={this.onImageLoad} onSave={this.onSave} value={this.state.value} />
         {avatarCropperElement}
       </div>
     );
@@ -133,13 +132,22 @@ const innerAvatarStyles = () => ({
     textAlign: 'center',
   },
   changeImageButton: {
-    margin: '0 auto',
+    margin: '0px 10px 0px 0px',
+    position: 'relative',
+  },
+  deleteImageButton: {
+    margin: '0px',
     position: 'relative',
   },
   muiAvatar: {
     marginBottom: '15px',
   },
+  buttonsContainer: {
+    display: 'flex',
+    justifyContent: 'center',
+  },
   button: {
+    minWidth: '70px',
   },
   changeImageButtonInnerLabel: {
     position: 'absolute',
@@ -174,8 +182,10 @@ export interface IInnerAvatarProps {
   avatarDiameter?: number;
   mimeTypes?     : string;
   label?         : string;
-  onFileLoad?    : (data: any) => void;
-  onImageLoad    : (data: any) => void;
+
+  onFileLoad?(data: any): void;
+  onImageLoad(data: any): void;
+  onSave(v?: string): void;
 }
 
 type InnerAvatarProps = WithStyle<ReturnType<typeof innerAvatarStyles>, IInnerAvatarProps>;
@@ -222,6 +232,10 @@ const InnerAvatar = withStyles(innerAvatarStyles, class extends React.Component<
     }
   }
 
+  deleteImage = (e: React.MouseEvent<any>) => {
+    this.props.onSave();
+  }
+
   render() {
     const {classes, buttonSize, avatarDiameter, label, mimeTypes} = this.props;
     const bSize                = buttonSize || this.defaultInnerAvatarProps.buttonSize;
@@ -251,11 +265,16 @@ const InnerAvatar = withStyles(innerAvatarStyles, class extends React.Component<
       this.props.value
         ? < >
             <MuiAvatar src={this.props.value} className={classes.muiAvatar} style={{width: diameterStr, height: diameterStr}} />
-            <Button variant='contained' component='label' size={bSize} tabIndex={-1} className={classNames(classes.button, classes.changeImageButton)}>
-              <span>Change Image</span>
-              <label className={classes.changeImageButtonInnerLabel} htmlFor={fileInputId} />
-              <input {...fileInputProps} />
-            </Button>
+            <div className={classes.buttonsContainer}>
+              <Button variant='contained' component='label' size={bSize} tabIndex={-1} className={classNames(classes.button, classes.changeImageButton)}>
+                <span>Change</span>
+                <label className={classes.changeImageButtonInnerLabel} htmlFor={fileInputId} />
+                <input {...fileInputProps} />
+              </Button>
+              <Button variant='contained' component='label' size={bSize} tabIndex={-1} className={classNames(classes.button, classes.deleteImageButton)} onClick={this.deleteImage}>
+                <span>Delete</span>
+              </Button>
+            </div>
           </>
         : <div className={classes.loaderContainer} style={loaderContainerStyle}>
             <input {...fileInputProps} />

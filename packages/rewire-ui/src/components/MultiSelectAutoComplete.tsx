@@ -136,12 +136,13 @@ interface IMultiSelectAutoCompleteProps {
 
 interface IMultiSelectAutoCompleteState {
   suggestions: any[];
+  deleting: boolean;
 }
 
 export type MultiSelectAutoCompleteProps<T> = WithStyle<ReturnType<typeof styles>, IMultiSelectAutoCompleteProps & ICustomProps<T> & React.InputHTMLAttributes<any>>;
 
 class MultiSelectAutoComplete<T> extends React.Component<MultiSelectAutoCompleteProps<T>, IMultiSelectAutoCompleteState> {
-  state = {suggestions: []};
+  state = {suggestions: [], deleting: false};
   downShift:                any;
   search:                   SearchFn<T>;
   map:                      MapFn<T>;
@@ -352,9 +353,14 @@ class MultiSelectAutoComplete<T> extends React.Component<MultiSelectAutoComplete
       evt.target.setSelectionRange(cursorPosition, cursorPosition);
     }
 
-    if (this.props.openOnFocus) {
-      this.downShift.openMenu();
+    if (this.props.openOnFocus && !this.state.deleting) {
+      this.handleOpenOnFocus();
     }
+  }
+
+  handleOpenOnFocus = async () => {
+    await this.performSearch('');
+    this.downShift.openMenu();
   }
 
   handleInputChanged = (inputValue: string, helpers: ControllerStateAndHelpers<any>) => {
@@ -443,7 +449,12 @@ class MultiSelectAutoComplete<T> extends React.Component<MultiSelectAutoComplete
     const selectedItem  = this.map(item);
     selectedItems.splice(selectedItems.findIndex(i => this.map(i) === selectedItem), 1);
     this.props.onSelectItem && this.props.onSelectItem(selectedItems);
-    this.suggestionsContainerNode.focus();
+
+    if (this.props.openOnFocus) {
+      this.setState({deleting: true}, () => { this.suggestionsContainerNode.focus(); this.setState({deleting: false}); });
+    } else {
+      this.suggestionsContainerNode.focus();
+    }
   }
 
   handleMenuMouseDown = (event: React.MouseEvent<any>) => {
@@ -578,9 +589,7 @@ class MultiSelectAutoComplete<T> extends React.Component<MultiSelectAutoComplete
                 getMenuProps: getMenuProps,
                 isOpen: isOpen,
                 classes: classes,
-                /* This would not show any currently selected items in the suggestions container */
-                // children: this.state.suggestions.filter(suggestion => !selectedItemsNames.includes(this.map(suggestion))).map((suggestion, index) =>
-                children: this.state.suggestions.map((suggestion, index) =>
+                children: this.state.suggestions.filter(suggestion => !this.props.selectedItems.map((item: any) => this.map(item)).includes(this.map(suggestion))).map((suggestion, index) =>
                   this.renderSuggestion({
                     suggestion,
                     index,
