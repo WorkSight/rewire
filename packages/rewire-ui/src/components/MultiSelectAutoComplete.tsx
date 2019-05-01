@@ -62,7 +62,7 @@ const styles = (theme: Theme) => ({
   inputRoot: {
     lineHeight: 'inherit',
     fontSize: 'inherit',
-    overflow: 'hidden'
+    overflow: 'hidden',
   },
   inputInput: {
     paddingTop: '0.375em',
@@ -493,7 +493,7 @@ class MultiSelectAutoComplete<T> extends React.Component<MultiSelectAutoComplete
     }
   }
 
-  shouldComponentUpdate(nextProps: ICustomProps<T> & React.InputHTMLAttributes<any>, nextState: any, nextContext: any) {
+  shouldComponentUpdate(nextProps: MultiSelectAutoCompleteProps<T>, nextState: any, nextContext: any) {
     return (
         (nextProps.selectedItems !== this.props.selectedItems) ||
         (nextProps.error !== this.props.error) ||
@@ -536,7 +536,7 @@ class MultiSelectAutoComplete<T> extends React.Component<MultiSelectAutoComplete
   }
 
   render() {
-    const {classes, theme, disabled, visible, error, label, placeholder, autoFocus, align, disableErrors, variant, initialInputValue} = this.props;
+    const {classes, theme, disabled, visible, error, label, placeholder, autoFocus, align, disableErrors, variant, initialInputValue, selectedItems} = this.props;
     if (visible === false) {
       return null;
     }
@@ -549,7 +549,7 @@ class MultiSelectAutoComplete<T> extends React.Component<MultiSelectAutoComplete
         defaultHighlightedIndex={0}
         initialInputValue={initialInputValue}
         initialIsOpen={initialInputValue !== undefined}
-        selectedItem={this.props.selectedItems}
+        selectedItem={selectedItems}
         itemToString={this.map}
         onInputValueChange={this.handleInputChanged}
         onUserAction={this.handleItemChanged}
@@ -579,7 +579,7 @@ class MultiSelectAutoComplete<T> extends React.Component<MultiSelectAutoComplete
                   variant: variant,
                   disableErrors: disableErrors,
                   startAdornment: (< >{startAdornment}{this.renderChips(classes)}</>),
-                  endAdornment: endAdornment
+                  endAdornment: endAdornment,
                 },
                 (node => {
                   this.suggestionsContainerNode = node;
@@ -589,7 +589,7 @@ class MultiSelectAutoComplete<T> extends React.Component<MultiSelectAutoComplete
                 getMenuProps: getMenuProps,
                 isOpen: isOpen,
                 classes: classes,
-                children: this.state.suggestions.filter(suggestion => !this.props.selectedItems.map((item: any) => this.map(item)).includes(this.map(suggestion))).map((suggestion, index) =>
+                children: this.state.suggestions.filter(suggestion => !selectedItems.map((item: any) => this.map(item)).includes(this.map(suggestion))).map((suggestion, index) =>
                   this.renderSuggestion({
                     suggestion,
                     index,
