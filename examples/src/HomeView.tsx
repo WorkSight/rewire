@@ -487,6 +487,12 @@ const HomeToggleMenu = (props: any) => {
 };
 
 const styles = () => ({
+  dialogButtonsContainer: {
+    display: 'flex',
+    alignItems: 'center',
+    justifyContent: 'center',
+    marginTop: '10px',
+  },
   openDialogButton: {
     marginRight: '15px',
   },
@@ -540,6 +546,7 @@ export const HomeView = withStyles(styles, (props: HomeViewProps) => {
     <Observe render={() => (
       <TransitionWrapper>
       <div>
+        <div className={classes.dialogButtonsContainer}>
         <Button className={classes.openDialogButton} color='primary' variant='contained' onClick={() => sampleModel.open()}>Load Dialog Test</Button>
         <Button className={classes.openDialogButton} color='primary' variant='contained' onClick={() => hotkeysModel.open()}>Load Grid Hotkeys List</Button>
         <Button className={classes.openDialogButton} color='primary' variant='contained' onClick={() => yesNoModel.open()}>Load Confirmation Dialog</Button>
@@ -561,6 +568,7 @@ export const HomeView = withStyles(styles, (props: HomeViewProps) => {
             Upload
           </Button>
         </label>
+        </div>
 
         <SampleDialog />
         <HotKeysDialog />

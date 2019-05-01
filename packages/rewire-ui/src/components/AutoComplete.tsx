@@ -156,11 +156,13 @@ class AutoComplete<T> extends React.Component<AutoCompleteProps<T>, IAutoComplet
   downShift: any;
   search: SearchFn<T>;
   map: MapFn<T>;
-  suggestionsContainerNode: HTMLElement;
+  inputRef: React.RefObject<HTMLElement>;
 
   constructor(props: AutoCompleteProps<T>) {
     super(props);
-    this.search = props.search;
+
+    this.inputRef = React.createRef();
+    this.search    = props.search;
     if (props.debounce) {
       const wait = is.number(props.debounce) ? props.debounce as number : 150;
       this.search = debounce(this.search, wait);
@@ -179,7 +181,7 @@ class AutoComplete<T> extends React.Component<AutoCompleteProps<T>, IAutoComplet
     });
   }
 
-  renderInput = (classes: Record<any, string>, error: string | undefined, inputProps: any, InputProps: any, ref: (node: any) => any) => {
+  renderInput = (classes: Record<any, string>, error: string | undefined, inputProps: any, InputProps: any) => {
     const {label, disabled, autoFocus, value, ...other}                 = inputProps;
     const {startAdornment, endAdornment, align, variant, disableErrors} = InputProps;
     const inputClassName            = variant === 'outlined' ? classes.inputOutlinedInput : classes.inputInput;
@@ -194,7 +196,7 @@ class AutoComplete<T> extends React.Component<AutoCompleteProps<T>, IAutoComplet
         variant={variant}
         error={!disableErrors && !disabled && !!error}
         helperText={!disableErrors && <span>{(!disabled && error) || ''}</span>}
-        inputRef={ref}
+        inputRef={this.inputRef}
         disabled={disabled}
         autoFocus={autoFocus}
         inputProps={{spellCheck: false, className: classes.nativeInput, style: {textAlign: align || 'left'}}}
@@ -299,7 +301,7 @@ class AutoComplete<T> extends React.Component<AutoCompleteProps<T>, IAutoComplet
       }
     }
 
-    let fontSize = window.getComputedStyle(this.suggestionsContainerNode).getPropertyValue('font-size'); // needed to keep the suggestions the same font size as the input
+    let fontSize = window.getComputedStyle(this.inputRef.current!).getPropertyValue('font-size'); // needed to keep the suggestions the same font size as the input
     let suggestionsContainerComponentProps: ISuggestionsContainerComponentProps = {
       downShift: this.downShift,
     };
@@ -341,7 +343,7 @@ class AutoComplete<T> extends React.Component<AutoCompleteProps<T>, IAutoComplet
     };
 
     return (
-      <Popper open={isOpen} placement='bottom-start' anchorEl={this.suggestionsContainerNode} transition={transition} modifiers={popperModifiers} className={classes.popper} style={{minWidth: this.suggestionsContainerNode ? this.suggestionsContainerNode.clientWidth : 'auto'}}>
+      <Popper open={isOpen} placement='bottom-start' anchorEl={this.inputRef.current} transition={transition} modifiers={popperModifiers} className={classes.popper} style={{minWidth: this.inputRef.current ? this.inputRef.current.clientWidth : 'auto'}}>
         {transition
           ? ({ TransitionProps }) => (
               <Fade {...TransitionProps} timeout={timeout}>
@@ -519,7 +521,7 @@ class AutoComplete<T> extends React.Component<AutoCompleteProps<T>, IAutoComplet
     const {classes} = this.props;
 
     return (
-      <IconButton className={classes.deleteButton} tabIndex={-1} onClick={() => { this.props.onSelectItem(undefined); setTimeout(() => this.suggestionsContainerNode && this.suggestionsContainerNode.focus(), 0); }}>
+      <IconButton className={classes.deleteButton} tabIndex={-1} onClick={() => { this.props.onSelectItem(undefined); setTimeout(() => this.inputRef.current && this.inputRef.current.focus(), 0); }}>
         <CancelIcon />
       </IconButton>
     );
@@ -572,9 +574,6 @@ class AutoComplete<T> extends React.Component<AutoCompleteProps<T>, IAutoComplet
                   startAdornment: startAdornment,
                   endAdornment: (< >{this.renderDeleteButton()}{endAdornment}</>)
                 },
-                (node => {
-                  this.suggestionsContainerNode = node;
-                }),
               )}
               {this.renderSuggestionsContainer({
                 getMenuProps: getMenuProps,

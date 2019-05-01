@@ -1,5 +1,7 @@
 import * as React     from 'react';
 import * as ReactDOM  from 'react-dom';
+import CssBaseline    from '@material-ui/core/CssBaseline';
+import Divider        from '@material-ui/core/Divider';
 import { HomeView }   from './HomeView';
 import { AboutView }  from './AboutView';
 import { TopicsView } from './TopicsView';
@@ -11,17 +13,25 @@ import {
 import { MuiThemeProvider, createMuiTheme } from '@material-ui/core/styles';
 
 const listStyle = ({
-  listStyleType: 'none'
+  listStyleType: 'none',
+  margin: '0px',
+  padding: '20px',
 });
 
 const listItemStyle = {
-  display:      'inline',
+  display: 'inline',
   paddingLeft:  '10px',
   paddingRight: '10px'
 };
 
+const contentContainerStyle = {
+  padding: '0px 20px',
+};
+
 const BasicExample = (props: any) => {
   return (
+    < >
+    <CssBaseline />
     <Router>
       <div>
         <ul style={listStyle}>
@@ -29,12 +39,15 @@ const BasicExample = (props: any) => {
           <li style={listItemStyle}><Link to='/about'>About</Link></li>
           <li style={listItemStyle}><Link to='/topics'>Topics</Link></li>
         </ul>
-        <hr/>
-        <Route exact path='/'       component={HomeView}/>
-        <Route       path='/about'  component={AboutView}/>
-        <Route       path='/topics' component={TopicsView}/>
+        <Divider />
+        <div style={contentContainerStyle}>
+          <Route exact path='/'       component={HomeView}/>
+          <Route       path='/about'  component={AboutView}/>
+          <Route       path='/topics' component={TopicsView}/>
+        </div>
       </div>
     </Router>
+    </>
   );
 };
 
