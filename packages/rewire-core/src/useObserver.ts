@@ -24,10 +24,6 @@ export interface IUseObserverOptions {
 class Reaction<T> {
   _dispose?: () => void;
   _result: T;
-  _fn: () => T;
-  constructor(fn: () => T) {
-    this._fn = () => this._result = fn();
-  }
 
   dispose() {
     if(!this._dispose) return;
@@ -35,11 +31,11 @@ class Reaction<T> {
     this._dispose = undefined;
   }
 
-  track(action: () => void): T {
+  track(fn: () => T, action: () => void): T {
     this.dispose();
     S.root((dispose) => {
       this._dispose = dispose;
-      S.on(this._fn, action, undefined, true);
+      S.on(() => this._result = fn(), action, undefined, true);
     });
     return this._result;
   }
@@ -47,16 +43,16 @@ class Reaction<T> {
 
 export function useObserver<T>(
   fn: () => T,
-  baseComponentName: string = "observed",
+  baseComponentName: string = 'observed',
   options: IUseObserverOptions = {}
 ): T {
   const wantedForceUpdateHook = options.useForceUpdate || useForceUpdate;
   const forceUpdate           = wantedForceUpdateHook();
   const s                     = useRef<Reaction<T> | null> (null);
   if (!s.current) {
-    s.current = new Reaction<T>(fn);
+    s.current = new Reaction<T>();
   }
 
   useUnmount(() => s.current!.dispose());
-  return s.current!.track(forceUpdate);
+  return s.current!.track(fn, forceUpdate);
 };

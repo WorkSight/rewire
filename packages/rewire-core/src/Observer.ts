@@ -8,9 +8,10 @@ interface IObserverProps {
 
 export function Observer({ children, render }: IObserverProps) {
     const component = children || render;
-    if (typeof component !== "function") {
+    if (typeof component !== 'function') {
         return null;
     }
     return useObserver(component);
 }
+
 Observer.displayName = 'Observer';
