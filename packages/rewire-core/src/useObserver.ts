@@ -15,27 +15,34 @@ export function useForceUpdate() {
   return update;
 }
 
-export function isPlainObject(value: any): boolean {
-  if (!value || typeof value !== "object") {
-      return false;
-  }
-  const proto = Object.getPrototypeOf(value);
-  return !proto || proto === Object.prototype;
-}
-
 export type ForceUpdateHook = () => () => void;
 
 export interface IUseObserverOptions {
   useForceUpdate?: ForceUpdateHook;
 }
 
-interface IRefState {
-  dispose: ((fn?: () => void) => void);
-}
+class Reaction<T> {
+  _dispose?: () => void;
+  _result: T;
+  _fn: () => T;
+  constructor(fn: () => T) {
+    this._fn = () => this._result = fn();
+  }
 
-function disposer(fn?: () => void) {
-  this.__dispose && this.__dispose();
-  this.__dispose = fn;
+  dispose() {
+    if(!this._dispose) return;
+    this._dispose();
+    this._dispose = undefined;
+  }
+
+  track(action: () => void): T {
+    this.dispose();
+    S.root((dispose) => {
+      this._dispose = dispose;
+      S.on(this._fn, action, undefined, true);
+    });
+    return this._result;
+  }
 }
 
 export function useObserver<T>(
@@ -45,35 +52,11 @@ export function useObserver<T>(
 ): T {
   const wantedForceUpdateHook = options.useForceUpdate || useForceUpdate;
   const forceUpdate           = wantedForceUpdateHook();
-  const s                     = useRef<IRefState | null> (null);
+  const s                     = useRef<Reaction<T> | null> (null);
   if (!s.current) {
-    const x: any = {};
-    x.dispose = disposer.bind(x);
-    s.current = x;
+    s.current = new Reaction<T>(fn);
   }
 
-  const ref = s.current!;
-  let rendering = true;
-  let result: any;
-  S.root((dispose) => {
-    ref.dispose(dispose);
-    useUnmount(() => {
-      ref.dispose();
-    });
-
-    S(() => {
-      if (rendering) {
-        try {
-          result = fn();
-        } catch (e) {
-          ref.dispose();
-          throw e;
-        }
-      } else {
-        forceUpdate();
-      }
-    });
-  });
-  rendering = false;
-  return result;
+  useUnmount(() => s.current!.dispose());
+  return s.current!.track(forceUpdate);
 };
