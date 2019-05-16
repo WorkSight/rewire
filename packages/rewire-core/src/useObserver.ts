@@ -43,7 +43,6 @@ class Reaction<T> {
 
 export function useObserver<T>(
   fn: () => T,
-  baseComponentName: string = 'observed',
   options: IUseObserverOptions = {}
 ): T {
   const wantedForceUpdateHook = options.useForceUpdate || useForceUpdate;
