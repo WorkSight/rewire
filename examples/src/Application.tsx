@@ -11,6 +11,7 @@ import {
   Link,
 } from 'react-router-dom';
 import { MuiThemeProvider, createMuiTheme } from '@material-ui/core/styles';
+import { observable, Observer } from 'rewire-core';
 
 const listStyle = ({
   listStyleType: 'none',
@@ -28,9 +29,19 @@ const contentContainerStyle = {
   padding: '0px 20px',
 };
 
+let xxx = observable({name: 'sandy'});
+setTimeout(() => {
+  xxx.name = 'doug'
+}, 5000);
+
+setTimeout(() => {
+  xxx.name = 'ryan'
+}, 10000);
+
 const BasicExample = (props: any) => {
   return (
     < >
+    <Observer>{() => <div><div><div>{xxx.name}</div></div></div>}</Observer>
     <CssBaseline />
     <Router>
       <div>
