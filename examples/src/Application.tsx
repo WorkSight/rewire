@@ -11,8 +11,7 @@ import {
   Link,
 } from 'react-router-dom';
 import { MuiThemeProvider, createMuiTheme } from '@material-ui/core/styles';
-import { observable } from 'rewire-core';
-import { useObserver } from 'rewire-core/src/useObserver';
+import { observable,  useObserver } from 'rewire-core';
 import { memo } from 'react';
 
 const listStyle = ({
@@ -32,8 +31,9 @@ const contentContainerStyle = {
 };
 
 const xxx = observable({name: 'sandy'});
-
+// FUNCTIONAL STYLE!!
 const Test = memo((props) => useObserver(() => <div>{xxx.name}</div>));
+// const Test = memo((props) => <Observe>{() => <div>{xxx.name}</div>}</Observe>);
 setTimeout(() => xxx.name = 'douglas', 5000);
 setTimeout(() => xxx.name = 'ryan', 8000);
 

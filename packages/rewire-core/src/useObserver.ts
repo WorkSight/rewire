@@ -42,7 +42,7 @@ class Reaction<T> {
 }
 
 export function useObserver<T>(
-  fn: () => T,
+  renderFn: () => T,
   options: IUseObserverOptions = {}
 ): T {
   const wantedForceUpdateHook = options.useForceUpdate || useForceUpdate;
@@ -53,5 +53,5 @@ export function useObserver<T>(
   }
 
   useUnmount(() => s.current!.dispose());
-  return s.current!.track(fn, forceUpdate);
+  return s.current!.track(renderFn, forceUpdate);
 };
