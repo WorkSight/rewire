@@ -9,7 +9,7 @@ export function useForceUpdate() {
   const [, setTick] = useState(0);
 
   const update = useCallback(() => {
-      setTick(tick => tick + 1);
+    setTick(tick => tick + 1);
   }, [])
 
   return update;
@@ -26,7 +26,7 @@ class Reaction<T> {
   _result: T;
 
   dispose() {
-    if(!this._dispose) return;
+    if (!this._dispose) return;
     this._dispose();
     this._dispose = undefined;
   }
@@ -47,7 +47,7 @@ export function useObserver<T>(
 ): T {
   const wantedForceUpdateHook = options.useForceUpdate || useForceUpdate;
   const forceUpdate           = wantedForceUpdateHook();
-  const s                     = useRef<Reaction<T> | null> (null);
+  const s                     = useRef<Reaction<T> | null>(null);
   if (!s.current) {
     s.current = new Reaction<T>();
   }
