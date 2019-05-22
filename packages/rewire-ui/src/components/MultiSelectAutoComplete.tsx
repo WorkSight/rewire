@@ -12,6 +12,7 @@ import Popper                           from '@material-ui/core/Popper';
 import MenuItem                         from '@material-ui/core/MenuItem';
 import InputAdornment                   from '@material-ui/core/InputAdornment';
 import Typography                       from '@material-ui/core/Typography';
+import RootRef                          from '@material-ui/core/RootRef';
 import Fade                             from '@material-ui/core/Fade';
 import {Theme}                          from '@material-ui/core/styles';
 import {debounce, match}                from 'rewire-common';
@@ -147,10 +148,12 @@ class MultiSelectAutoComplete<T> extends React.Component<MultiSelectAutoComplete
   search:                   SearchFn<T>;
   map:                      MapFn<T>;
   suggestionsContainerNode: HTMLElement;
+  textFieldRef:             React.RefObject<HTMLElement>;
 
   constructor(props: MultiSelectAutoCompleteProps<T>) {
     super(props);
-    this.search = props.search;
+    this.textFieldRef = React.createRef();
+    this.search       = props.search;
     if (props.debounce) {
       const wait = is.number(props.debounce) ? props.debounce as number : 150;
       this.search = debounce(this.search, wait);
@@ -176,23 +179,25 @@ class MultiSelectAutoComplete<T> extends React.Component<MultiSelectAutoComplete
     const inputFormControlClassName = variant === 'standard' && this.props.label ? classes.inputFormControlWithLabel : undefined;
 
     return (
-      <TextField
-        className={classes.textField}
-        classes={{root: classes.formControlRoot}}
-        value={value}
-        label={label}
-        variant={variant}
-        error={!disableErrors && !disabled && !!error}
-        helperText={!disableErrors && <span>{(!disabled && error) || ''}</span>}
-        inputRef={ref}
-        disabled={disabled}
-        autoFocus={autoFocus}
-        inputProps={{spellCheck: false, className: classes.nativeInput, style: {textAlign: align || 'left'}}}
-        InputProps={{startAdornment: startAdornment, endAdornment: endAdornment, classes: {root: classes.inputRoot, input: inputClassName, formControl: inputFormControlClassName}}}
-        InputLabelProps={{shrink: true, classes: {root: classes.inputLabelRoot, outlined: classes.inputLabelOutlined, shrink: classes.inputLabelShrink}}}
-        FormHelperTextProps={{classes: {root: classes.helperTextRoot, contained: classes.helperTextContained}}}
-        {...other}
-      />
+      <RootRef rootRef={this.textFieldRef}>
+        <TextField
+          className={classes.textField}
+          classes={{root: classes.formControlRoot}}
+          value={value}
+          label={label}
+          variant={variant}
+          error={!disableErrors && !disabled && !!error}
+          helperText={!disableErrors && <span>{(!disabled && error) || ''}</span>}
+          inputRef={ref}
+          disabled={disabled}
+          autoFocus={autoFocus}
+          inputProps={{spellCheck: false, className: classes.nativeInput, style: {textAlign: align || 'left'}}}
+          InputProps={{startAdornment: startAdornment, endAdornment: endAdornment, classes: {root: classes.inputRoot, input: inputClassName, formControl: inputFormControlClassName}}}
+          InputLabelProps={{shrink: true, classes: {root: classes.inputLabelRoot, outlined: classes.inputLabelOutlined, shrink: classes.inputLabelShrink}}}
+          FormHelperTextProps={{classes: {root: classes.helperTextRoot, contained: classes.helperTextContained}}}
+          {...other}
+        />
+      </RootRef>
     );
   }
 
@@ -235,16 +240,15 @@ class MultiSelectAutoComplete<T> extends React.Component<MultiSelectAutoComplete
     const { suggestion, index, itemProps, theme, highlightedIndex, inputValue, classes } = params;
     const isHighlighted = highlightedIndex === index;
     const name          = this.map(suggestion);
+    const parts         = this.parse(inputValue, name);
 
     if (this.props.renderSuggestion) {
       return (
-        <MenuItem selected={isHighlighted} component='div' key={index} className={classes.menuItem} >
-          {this.props.renderSuggestion(suggestion, {theme, isHighlighted, inputValue})}
+        <MenuItem {...itemProps} selected={isHighlighted} component='div' key={index} className={classes.menuItem} >
+          {this.props.renderSuggestion(suggestion, {theme, isHighlighted, inputValue, parts})}
         </MenuItem>
       );
     }
-
-    const parts = this.parse(inputValue, name);
 
     return (
       <MenuItem
@@ -305,7 +309,7 @@ class MultiSelectAutoComplete<T> extends React.Component<MultiSelectAutoComplete
   }
 
   renderSuggestionsContainer = (options: any) => {
-    const { openOnFocus, showEmptySuggestions, suggestionsContainerHeader, suggestionsContainerFooter, hasTransition, transitionTimeout } = this.props;
+    const { openOnFocus, showEmptySuggestions, suggestionsContainerHeader, suggestionsContainerFooter, hasTransition, transitionTimeout, label } = this.props;
     const { isOpen, children, classes } = options;
 
     let transition  = hasTransition !== undefined ? hasTransition : true;
@@ -327,8 +331,10 @@ class MultiSelectAutoComplete<T> extends React.Component<MultiSelectAutoComplete
       },
     };
 
+    const inputComponentNode = this.textFieldRef.current && (label ? this.textFieldRef.current.children[1] : this.textFieldRef.current.children[0]);
+
     return (
-      <Popper open={isOpen} placement='bottom-start' anchorEl={this.suggestionsContainerNode} transition={transition} modifiers={popperModifiers} className={classes.popper} style={{minWidth: this.suggestionsContainerNode ? this.suggestionsContainerNode.clientWidth : 'auto'}}>
+      <Popper open={isOpen} placement='bottom-start' anchorEl={inputComponentNode} transition={transition} modifiers={popperModifiers} className={classes.popper} style={{minWidth: inputComponentNode ? inputComponentNode.clientWidth : 'auto'}}>
         {transition
           ? ({ TransitionProps }) => (
               <Fade {...TransitionProps} timeout={timeout}>

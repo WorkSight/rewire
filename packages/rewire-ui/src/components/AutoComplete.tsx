@@ -12,6 +12,7 @@ import IconButton              from '@material-ui/core/IconButton';
 import MenuItem                from '@material-ui/core/MenuItem';
 import InputAdornment          from '@material-ui/core/InputAdornment';
 import Typography              from '@material-ui/core/Typography';
+import RootRef                 from '@material-ui/core/RootRef';
 import {Theme}                 from '@material-ui/core/styles';
 import CancelIcon              from '@material-ui/icons/Cancel';
 import {debounce, match}       from 'rewire-common';
@@ -118,7 +119,6 @@ const styles = (theme: Theme) => ({
   },
 });
 
-
 export interface ISuggestionsContainerComponentProps {
   downShift: any;
 }
@@ -157,12 +157,14 @@ class AutoComplete<T> extends React.Component<AutoCompleteProps<T>, IAutoComplet
   search: SearchFn<T>;
   map: MapFn<T>;
   inputRef: React.RefObject<HTMLElement>;
+  textFieldRef: React.RefObject<HTMLElement>;
 
   constructor(props: AutoCompleteProps<T>) {
     super(props);
 
-    this.inputRef = React.createRef();
-    this.search    = props.search;
+    this.inputRef     = React.createRef();
+    this.textFieldRef = React.createRef();
+    this.search       = props.search;
     if (props.debounce) {
       const wait = is.number(props.debounce) ? props.debounce as number : 150;
       this.search = debounce(this.search, wait);
@@ -188,23 +190,25 @@ class AutoComplete<T> extends React.Component<AutoCompleteProps<T>, IAutoComplet
     const inputFormControlClassName = variant === 'standard' && this.props.label ? classes.inputFormControlWithLabel : undefined;
 
     return (
-      <TextField
-        className={classes.textField}
-        classes={{root: classes.formControlRoot}}
-        value={value}
-        label={label}
-        variant={variant}
-        error={!disableErrors && !disabled && !!error}
-        helperText={!disableErrors && <span>{(!disabled && error) || ''}</span>}
-        inputRef={this.inputRef}
-        disabled={disabled}
-        autoFocus={autoFocus}
-        inputProps={{spellCheck: false, className: classes.nativeInput, style: {textAlign: align || 'left'}}}
-        InputProps={{onMouseEnter: this.handleMouseEnter, onMouseLeave: this.handleMouseLeave, startAdornment: startAdornment, endAdornment: endAdornment, classes: {root: classes.inputRoot, input: inputClassName, formControl: inputFormControlClassName}}}
-        InputLabelProps={{shrink: true, classes: {root: classes.inputLabelRoot, outlined: classes.inputLabelOutlined, shrink: classes.inputLabelShrink}}}
-        FormHelperTextProps={{classes: {root: classes.helperTextRoot, contained: classes.helperTextContained}}}
-        {...other}
-      />
+      <RootRef rootRef={this.textFieldRef}>
+        <TextField
+          className={classes.textField}
+          classes={{root: classes.formControlRoot}}
+          value={value}
+          label={label}
+          variant={variant}
+          error={!disableErrors && !disabled && !!error}
+          helperText={!disableErrors && <span>{(!disabled && error) || ''}</span>}
+          inputRef={this.inputRef}
+          disabled={disabled}
+          autoFocus={autoFocus}
+          inputProps={{spellCheck: false, className: classes.nativeInput, style: {textAlign: align || 'left'}}}
+          InputProps={{onMouseEnter: this.handleMouseEnter, onMouseLeave: this.handleMouseLeave, startAdornment: startAdornment, endAdornment: endAdornment, classes: {root: classes.inputRoot, input: inputClassName, formControl: inputFormControlClassName}}}
+          InputLabelProps={{shrink: true, classes: {root: classes.inputLabelRoot, outlined: classes.inputLabelOutlined, shrink: classes.inputLabelShrink}}}
+          FormHelperTextProps={{classes: {root: classes.helperTextRoot, contained: classes.helperTextContained}}}
+          {...other}
+        />
+      </RootRef>
     );
   }
 
@@ -247,16 +251,15 @@ class AutoComplete<T> extends React.Component<AutoCompleteProps<T>, IAutoComplet
     const { suggestion, index, itemProps, theme, highlightedIndex, inputValue, classes } = params;
     const isHighlighted = highlightedIndex === index;
     const name          = this.map(suggestion);
+    const parts         = this.parse(inputValue, name);
 
     if (this.props.renderSuggestion) {
       return (
-        <MenuItem selected={isHighlighted} component='div' key={index} className={classes.menuItem}>
-          {this.props.renderSuggestion(suggestion, {theme, isHighlighted, inputValue})}
+        <MenuItem {...itemProps} selected={isHighlighted} component='div' key={index} className={classes.menuItem}>
+          {this.props.renderSuggestion(suggestion, {theme, isHighlighted, inputValue, parts})}
         </MenuItem>
       );
     }
-
-    const parts = this.parse(inputValue, name);
 
     return (
       <MenuItem
@@ -320,7 +323,7 @@ class AutoComplete<T> extends React.Component<AutoCompleteProps<T>, IAutoComplet
   }
 
   renderSuggestionsContainer = (options: any) => {
-    const { openOnFocus, showEmptySuggestions, suggestionsContainerHeader, suggestionsContainerFooter, hasTransition, transitionTimeout } = this.props;
+    const { openOnFocus, showEmptySuggestions, suggestionsContainerHeader, suggestionsContainerFooter, hasTransition, transitionTimeout, label } = this.props;
     const { isOpen, children, classes } = options;
 
     let transition  = hasTransition !== undefined ? hasTransition : true;
@@ -342,8 +345,10 @@ class AutoComplete<T> extends React.Component<AutoCompleteProps<T>, IAutoComplet
       },
     };
 
+    const inputComponentNode = this.textFieldRef.current && (label ? this.textFieldRef.current.children[1] : this.textFieldRef.current.children[0]);
+
     return (
-      <Popper open={isOpen} placement='bottom-start' anchorEl={this.inputRef.current} transition={transition} modifiers={popperModifiers} className={classes.popper} style={{minWidth: this.inputRef.current ? this.inputRef.current.clientWidth : 'auto'}}>
+      <Popper open={isOpen} placement='bottom-start' anchorEl={inputComponentNode} transition={transition} modifiers={popperModifiers} className={classes.popper} style={{minWidth: inputComponentNode ? inputComponentNode.clientWidth : 'auto'}}>
         {transition
           ? ({ TransitionProps }) => (
               <Fade {...TransitionProps} timeout={timeout}>
