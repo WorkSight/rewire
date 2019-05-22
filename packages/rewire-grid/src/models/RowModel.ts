@@ -365,7 +365,7 @@ export default function create(grid: IGrid, rows: IRow[], data?: IRowData, posit
     return newRow;
   }
 
-  let r = new RowModel(grid, data, rowPos);
+  let r = new RowModel(grid, data, rowPos !== undefined ? rowPos : grid.dataRowsByPosition.length);
   rows.splice(r.position, 0, r);
   if (fixed) {
     grid.mergeFixedRows();
