@@ -61,7 +61,7 @@ const styles = (theme: Theme) => ({
     // marginLeft: '-8px',
   },
   tooltip: {
-    fontSize: `calc(${theme.fontSizes.body} * 0.8)`,
+    fontSize: `calc(${theme.fontSizes.body} * 0.95)`,
     padding: `calc(${theme.fontSizes.body} * 0.25) calc(${theme.fontSizes.body} * 0.5)`,
   },
   errorContainer: {
