@@ -247,7 +247,7 @@ function createTestGrid(nRows: number, nColumns: number) {
   // setTimeout(() => {
   //   grid.columnByPos(4).canSort = false;
   //   grid.columnByPos(5).editable = true;
-  //   grid.columnByPos(6).readOnly = true;
+    // grid.columnByPos(6).readOnly = true;
   //   grid.columnByPos(7).enabled = false;
   //   grid.columnByPos(8).enabled = false;
   //   grid.columnByPos(8).renderer = (cell) => <div>{cell.value + ' Col'}</div>;
@@ -261,7 +261,7 @@ function createTestGrid(nRows: number, nColumns: number) {
   // setTimeout(() => {
   //   grid.cellByPos(0, 7).align = '';
   //   grid.cellByPos(0, 7).enabled = false;
-  //   grid.cellByPos(0, 19).setValue(3);
+    // grid.cellByPos(0, 19).setValue(3);
   //   grid.cellByPos(0, 20).setValue(20);
   //   grid.clearSelection();
   // }, 5000);
@@ -280,8 +280,9 @@ newRow.data['column2']    = 'RC 2-3';
 newRow.data['column3']    = 'RC 3-3';
 newRow.data['timeColumn'] = '8:11';
 grid.addRow(newRow);
-
-grid.cell('3', 'column8')!.value = 'ooga booga boa';
+grid.cellByPos(0, 0)!.setValue('ooga booga boa');
+// grid.dataRowsByPosition.forEach(row => row.cellsByColumnPosition.forEach(cell => cell.row = row));
+grid.commit();
 // const r                          = grid.get();
 // console.log(r);
 // setTimeout(() => grid.rows.length = 0, 4000);

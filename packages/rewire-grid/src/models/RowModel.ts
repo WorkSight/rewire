@@ -78,6 +78,8 @@ export class RowModel implements IRow, IDisposable {
     if (!this.grid.loading) {
       this.mergeAllColumns();
     }
+
+    this.commit();
   }
 
   set parentRow(groupRow: IGroupRow | undefined) {
@@ -232,6 +234,14 @@ export class RowModel implements IRow, IDisposable {
     this.setValue(rowData);
   }
 
+  commit() {
+    Object.keys(this.cells).forEach(columnName => {
+      let clonedValue                                     = cloneValue(this.cells[columnName].value);
+      this.originalData[columnName]                       = clonedValue;
+      this.cells[columnName].row.originalData[columnName] = clonedValue; // Shouldn't need to do this, but again, some bug causing an issue.
+    });
+  }
+
   _setValue(data: ICellDataMap, triggerOnValueChangeHandler: boolean = true): boolean {
     if (!data) return false;
     let success = false;
@@ -372,6 +382,7 @@ export default function create(grid: IGrid, rows: IRow[], data?: IRowData, posit
   } else {
     grid.dataRowsByPosition.splice(r.position, 0, r);
   }
+
   return r;
 }
 
