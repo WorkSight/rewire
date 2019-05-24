@@ -154,6 +154,8 @@ export interface IGrid extends IRows, IDisposable {
   get(): ICellDataMap[];
   getChanges(): ICellDataMap[];
   set(data: (IRowData | undefined)[]): void;
+  _commit(): void;
+  commit(): void;
 
   addColumn(column: IColumn): IColumn;
   setColumnPositions(): void;
@@ -258,6 +260,7 @@ export interface IRow extends IDisposable {
   getErrors(): IErrorData[];
   createCell(column: IColumn, value: any, type?: string): ICell;
   clear(columnNames?: string[]): void;
+  commit(): void;
   _setValue(data: ICellDataMap, triggerOnValueChangeHandler?: boolean): boolean;
   setValue(data: ICellDataMap, triggerOnValueChangeHandler?: boolean): boolean;
   mergeAllColumns(): void;

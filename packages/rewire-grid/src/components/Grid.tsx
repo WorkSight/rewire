@@ -384,8 +384,7 @@ const GridInternal = withStyles(styles, class extends React.PureComponent<GridPr
 
   constructor(props: GridProps) {
     super(props);
-    this.grid = props.grid;
-    this.grid.originalDataRowsByPosition = this.grid.dataRowsByPosition.slice();
+    this.grid              = props.grid;
     this._rowElements      = {};
     this._fixedRowElements = {};
 
@@ -405,8 +404,6 @@ const GridInternal = withStyles(styles, class extends React.PureComponent<GridPr
       watch(_currentWindowSize, () => this.updateForScrollbars());
 
       watch(() => this.grid.dataRowsByPosition.length, () => {
-        this.grid.changed = this.grid.hasChanges();
-        this.grid.inError = this.grid.hasErrors();
         setTimeout(() => this.updateForScrollbars(), 0);
       });
     });

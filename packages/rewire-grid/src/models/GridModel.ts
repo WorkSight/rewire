@@ -41,6 +41,7 @@ import {
   freeze,
   root,
   DataSignal,
+  watch,
 }                  from 'rewire-core';
 import { compare } from 'rewire-ui';
 
@@ -144,6 +145,11 @@ class GridModel implements IGrid, IDisposable {
     this._fixedColumns      = computed(columns, () => this.columns.filter((h) => h.fixed), []);
     this._standardColumns   = computed(columns, () => this.columns.filter((h) => !h.fixed), []);
     this._columnsByPosition = computed(columnsPos, () => this.columns.filter((c) => c.visible).sort(ColumnModel.positionCompare), []);
+
+    watch(() => this.dataRowsByPosition.length, () => {
+      this.changed = this.hasChanges();
+      this.inError = this.hasErrors();
+    });
   }
 
   private disposeRows() {
@@ -210,6 +216,7 @@ class GridModel implements IGrid, IDisposable {
 
   set(data: (IRowData | undefined)[]): void {
     this.disposeRows();
+    this.loading = true;
     freeze(() => {
       this.addedRows.length                  = 0;
       this.removedRows.length                = 0;
@@ -220,6 +227,24 @@ class GridModel implements IGrid, IDisposable {
       this.selectedCells.length              = 0;
       this._addRows(data);
     });
+    this.loading = false;
+    this.validate();
+    this.mergeColumns();
+    this._commit();
+  }
+
+  _commit() {
+    this.originalDataRowsByPosition = this.dataRowsByPosition.slice();
+    this.changed                    = false;
+  }
+
+  commit() {
+    for (const row of this.dataRowsByPosition) {
+      if (row) {
+        row.commit();
+      }
+    }
+    this._commit();
   }
 
   getCellsByRange(colStart: number, rowStart: number, colEnd: number, rowEnd: number, allowCollapsed: boolean): ICell[] {
@@ -1048,6 +1073,9 @@ class GridModel implements IGrid, IDisposable {
     // let firstGroupRow = this.rows[0];
     // let cellGroupRow = cells[0].row.parentRow.parentRow;
     // let x = firstGroupRow === cellGroupRow;
+    // let firstRow = this.dataRowsByPosition[0];
+    // let cellRow = this.dataRowsByPosition[0].cellsByColumnPosition[0].row;
+    // let y = firstRow === cellRow;
     this.editCell(undefined);
     let rowsToSelect: IRow[]   = [];
     let cellsToSelect: ICell[] = [];
@@ -1322,6 +1350,7 @@ export default function create(rows: any[], columns: IColumn[], options?: IGridO
     // mergeRows(grid.rows, grid.standardColumns);
     grid.validate();
     grid.mergeColumns();
+    grid._commit();
     return grid;
   });
 }
