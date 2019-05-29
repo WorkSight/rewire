@@ -405,6 +405,7 @@ class Cell extends React.PureComponent<CellProps, {}> {
         selectedRightMost  : this.cell.isRightMostSelection,
         selectedBottomMost : this.cell.isBottomMostSelection,
         selectedLeftMost   : this.cell.isLeftMostSelection,
+        readOnly           : this.cell.readOnly,
         edit               : this.cell.editing,
         disabled           : !this.cell.enabled,
         fixed              : this.column.fixed,
