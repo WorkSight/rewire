@@ -168,7 +168,7 @@ function createTestGrid(nRows: number, nColumns: number) {
   let complexColumnValidator = {
     linkedColumnNames: [],
     fn: (row: IRow, value: any): IError | undefined => {
-      if (value === undefined) {
+      if (value === undefined || value === null) {
         return undefined;
       }
 
@@ -190,7 +190,7 @@ function createTestGrid(nRows: number, nColumns: number) {
   cols[5].validator  = {
     linkedColumnNames: [],
     fn: (row: IRow, value: any): IError | undefined => {
-      if (value === undefined) {
+      if (value === undefined || value === null) {
         return undefined;
       }
 

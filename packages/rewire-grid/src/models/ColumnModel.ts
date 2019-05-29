@@ -117,7 +117,7 @@ export class ColumnModel implements IColumn {
   setEditor(type?: IColumnEditor) {
     let typeOptions: any;
     let t: EditorType;
-    if (type === undefined) {
+    if (!type) {
       t = 'text';
     } else if (typeof (type) === 'string') {
       t = type;
@@ -146,10 +146,10 @@ export class ColumnModel implements IColumn {
       } else if (t === 'checked') {
         this.map = (value: boolean) => value ? 'True' : 'False';
       } else if (t === 'phone') {
-        if (this.typeOptions.format === undefined) {
+        if (!this.typeOptions.format) {
           this.typeOptions.format = defaultPhoneFormat;
         }
-        if (this.typeOptions.mask === undefined) {
+        if (!this.typeOptions.mask) {
           this.typeOptions.mask = defaultPhoneMask;
         }
         this.map = getPhoneString;
@@ -197,7 +197,7 @@ const arrayCompare = (options?: any) => (x: any, y: any): number => {
 };
 
 function getNumberString(value: any): string {
-  if (value === undefined) return value;
+  if (value === undefined || value === null) return value;
 
   let numberStr = this.typeOptions && this.typeOptions.decimals && is.number(value) ? value.toFixed(this.typeOptions.decimals) : value.toString();
   if (this.typeOptions && !this.typeOptions.fixed) {
@@ -236,7 +236,7 @@ function getThousandSeparatedNumberString(numStr: string): string {
 }
 
 function getPhoneString(value: any): string {
-  if (value === undefined) return value;
+  if (value === undefined || value === null) return value;
 
   let phoneStr             = value.toString();
   let phoneFormat          = this.typeOptions.format;
