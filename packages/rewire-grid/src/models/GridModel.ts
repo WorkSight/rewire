@@ -894,7 +894,7 @@ class GridModel implements IGrid, IDisposable {
     let insertPosition     = this.dataRowsByPosition.length;
     if (this.selectedRows.length > 0) {
     this.groupBy.forEach((column: IColumn) => {
-        if (rowToInsertData[column.name] === undefined) {
+        if (rowToInsertData[column.name] === undefined || rowToInsertData[column.name] === null) {
           rowToInsertData[column.name] = this.selectedRows[0].cells[column.name].value;
       }
     });

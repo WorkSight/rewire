@@ -356,7 +356,7 @@ export default function create(grid: IGrid, rows: IRow[], data?: IRowData, posit
       parent = r;
     }
 
-    if (rowPos === undefined) {
+    if (rowPos === undefined || rowPos === null) {
       if (parent.rows.length > 0) {
         rowPos = parent.rows[0].position;
       } else {
