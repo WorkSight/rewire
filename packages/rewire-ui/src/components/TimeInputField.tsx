@@ -1,17 +1,19 @@
-import * as React from 'react';
+import * as React                    from 'react';
 import {Theme}                       from '@material-ui/core/styles';
 import TextField, { TextFieldProps } from '@material-ui/core/TextField';
 import InputAdornment                from '@material-ui/core/InputAdornment';
 import {TextAlignment, TextVariant}  from './editors';
 import {withStyles, WithStyle}       from './styles';
 
+type MapFn<T> = (item?: T) => string;
+
 export class TimeValidator {
   rounding: number;
   constructor(rounding?: number) {
-    this.rounding = rounding !== undefined ? rounding : 0.1;
+    this.rounding = rounding !== undefined ? rounding : 0.25;
   }
 
-  parse(value?: string | number): any {
+  parse(value?: string | number): {value?: number, isValid: boolean} {
     if (typeof value === 'number') {
       const rounded = this.round(value);
       return {
@@ -182,6 +184,7 @@ export interface ITimeFieldProps {
   endAdornment?         : JSX.Element;
 
   onValueChange: (value?: number) => void;
+  map?: MapFn<any>;
 }
 
 export interface ITimeState {
@@ -192,16 +195,22 @@ export interface ITimeState {
 
 type TimeFieldProps = WithStyle<ReturnType<typeof styles>, TextFieldProps & ITimeFieldProps>;
 
+function defaultMap(v: any): any {
+  return v;
+}
+
 class TimeInputField extends React.Component<TimeFieldProps, ITimeState> {
   validator: TimeValidator;
   constructor(props: TimeFieldProps) {
     super(props);
     this.validator = new TimeValidator(props.rounding);
-    this.state     = this._valueToSet(props.value);
+    const map      = props.map || defaultMap;
+    this.state     = this._valueToSet(map(props.value));
   }
 
   componentWillReceiveProps (nextProps: TimeFieldProps) {
-    this.setValue(nextProps.value);
+    const map = nextProps.map || defaultMap;
+    this.setValue(map(nextProps.value));
   }
 
   shouldComponentUpdate(nextProps: TimeFieldProps, nextState: ITimeState) {
