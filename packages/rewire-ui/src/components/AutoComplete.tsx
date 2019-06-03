@@ -15,7 +15,11 @@ import Typography              from '@material-ui/core/Typography';
 import RootRef                 from '@material-ui/core/RootRef';
 import {Theme}                 from '@material-ui/core/styles';
 import CancelIcon              from '@material-ui/icons/Cancel';
-import {debounce, match}       from 'rewire-common';
+import {
+  debounce,
+  match,
+  isNullOrUndefined,
+}                              from 'rewire-common';
 import {withStyles, WithStyle} from './styles';
 import {
   ICustomProps,
@@ -119,6 +123,13 @@ const styles = (theme: Theme) => ({
   },
 });
 
+export interface IAutoCompleteRenderSuggestionFnOptions {
+  theme:         any;
+  isHighlighted: boolean;
+  inputValue?:   any;
+  parts:         {highlight: boolean, text: string}[];
+}
+
 export interface ISuggestionsContainerComponentProps {
   downShift: any;
 }
@@ -171,7 +182,7 @@ class AutoComplete<T> extends React.Component<AutoCompleteProps<T>, IAutoComplet
     }
     this.map = props.map || defaultMap;
 
-    if (props.initialInputValue !== undefined) {
+    if (!isNullOrUndefined(props.initialInputValue)) {
       this.performSearch(props.initialInputValue);
     }
   }
@@ -256,7 +267,7 @@ class AutoComplete<T> extends React.Component<AutoCompleteProps<T>, IAutoComplet
     if (this.props.renderSuggestion) {
       return (
         <MenuItem {...itemProps} selected={isHighlighted} component='div' key={index} className={classes.menuItem}>
-          {this.props.renderSuggestion(suggestion, {theme, isHighlighted, inputValue, parts})}
+          {this.props.renderSuggestion(suggestion, {theme, isHighlighted, inputValue, parts} as IAutoCompleteRenderSuggestionFnOptions)}
         </MenuItem>
       );
     }
@@ -311,9 +322,9 @@ class AutoComplete<T> extends React.Component<AutoCompleteProps<T>, IAutoComplet
 
     return (
       <div {...(isOpen ? getMenuProps({}, {suppressRefError: true}) : {})} {...menuProps}>
-        <Paper elevation={4} className={classNames(...suggestionsPaperClasses)}>
+        <Paper elevation={4} className={classNames(...suggestionsPaperClasses)} style={{fontSize: fontSize}}>
           {suggestionsContainerHeader && suggestionsContainerHeader(suggestionsContainerComponentProps)}
-          <div className={classNames(...suggestionsClasses)} style={{fontSize: fontSize}}>
+          <div className={classNames(...suggestionsClasses)}>
             {suggestions}
           </div>
           {suggestionsContainerFooter && suggestionsContainerFooter(suggestionsContainerComponentProps)}
@@ -326,9 +337,9 @@ class AutoComplete<T> extends React.Component<AutoCompleteProps<T>, IAutoComplet
     const { openOnFocus, showEmptySuggestions, suggestionsContainerHeader, suggestionsContainerFooter, hasTransition, transitionTimeout, label } = this.props;
     const { isOpen, children, classes } = options;
 
-    let transition  = hasTransition !== undefined ? hasTransition : true;
-    let timeout     = transitionTimeout !== undefined && transitionTimeout >= 0 ? transitionTimeout : 350;
-    let showEmpty   = showEmptySuggestions !== undefined ? showEmptySuggestions : openOnFocus ? true : false;
+    let transition  = !isNullOrUndefined(hasTransition) ? hasTransition : true;
+    let timeout     = !isNullOrUndefined(transitionTimeout) && transitionTimeout! >= 0 ? transitionTimeout : 350;
+    let showEmpty   = !isNullOrUndefined(showEmptySuggestions) ? showEmptySuggestions : openOnFocus ? true : false;
     let suggestions = children;
 
     if (!suggestions || suggestions.length <= 0) {
@@ -370,8 +381,8 @@ class AutoComplete<T> extends React.Component<AutoCompleteProps<T>, IAutoComplet
       evt.target.setSelectionRange(0, evt.target.value.length);
     } else if (this.props.endOfTextOnFocus) {
       evt.target.setSelectionRange(evt.target.value.length, evt.target.value.length);
-    } else if (this.props.cursorPositionOnFocus !== undefined) {
-      let cursorPosition = Math.max(0, Math.min(this.props.cursorPositionOnFocus, evt.target.value.length));
+    } else if (!isNullOrUndefined(this.props.cursorPositionOnFocus)) {
+      let cursorPosition = Math.max(0, Math.min(this.props.cursorPositionOnFocus!, evt.target.value.length));
       evt.target.setSelectionRange(cursorPosition, cursorPosition);
     }
 
@@ -482,7 +493,7 @@ class AutoComplete<T> extends React.Component<AutoCompleteProps<T>, IAutoComplet
   }
 
   componentWillReceiveProps (nextProps: ICustomProps<T>) {
-    if (nextProps.selectedItem === undefined && (nextProps.selectedItem !== this.props.selectedItem) && this.downShift) {
+    if (isNullOrUndefined(nextProps.selectedItem) && (nextProps.selectedItem !== this.props.selectedItem) && this.downShift) {
       this.downShift.clearSelection();
     }
 
@@ -545,7 +556,7 @@ class AutoComplete<T> extends React.Component<AutoCompleteProps<T>, IAutoComplet
       <Downshift
         defaultHighlightedIndex={0}
         initialInputValue={initialInputValue}
-        initialIsOpen={initialInputValue !== undefined}
+        initialIsOpen={!isNullOrUndefined(initialInputValue)}
         selectedItem={this.props.selectedItem || null}
         itemToString={this.map}
         onInputValueChange={this.handleInputChanged}

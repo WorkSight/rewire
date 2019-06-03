@@ -5,7 +5,7 @@ import { sampleModel, SampleDialog }             from './SampleDialog';
 import { hotkeysModel, HotKeysDialog }           from './HotKeys';
 import { YesNoModel, YesNoDialog }               from './YesNoDialog';
 import { ConfirmationModel, ConfirmationDialog } from './YesNoDialog';
-import { utc, UTC, TimeSpan }                    from 'rewire-common';
+import { utc, UTC, TimeSpan, isNullOrUndefined } from 'rewire-common';
 import { Observe, observable }                   from 'rewire-core';
 import {
   ActionFn,
@@ -168,7 +168,7 @@ function createTestGrid(nRows: number, nColumns: number) {
   let complexColumnValidator = {
     linkedColumnNames: [],
     fn: (row: IRow, value: any): IError | undefined => {
-      if (value === undefined || value === null) {
+      if (isNullOrUndefined(value)) {
         return undefined;
       }
 
@@ -190,7 +190,7 @@ function createTestGrid(nRows: number, nColumns: number) {
   cols[5].validator  = {
     linkedColumnNames: [],
     fn: (row: IRow, value: any): IError | undefined => {
-      if (value === undefined || value === null) {
+      if (isNullOrUndefined(value)) {
         return undefined;
       }
 
@@ -328,7 +328,7 @@ const clickHandler = (props: ISuggestionsContainerComponentProps) => () => {
 
 const suggestionsContainerHeader = (props: ISuggestionsContainerComponentProps) => (
   <div>
-    <Typography variant='subtitle1'><strong>Items Title</strong></Typography>
+    <Typography variant='subtitle1' style={{fontSize: 'inherit'}}><strong>Items Title</strong></Typography>
   </div>
 );
 

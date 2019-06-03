@@ -1,4 +1,5 @@
 import * as React                    from 'react';
+import {isNullOrUndefined}           from 'rewire-common';
 import {Theme}                       from '@material-ui/core/styles';
 import TextField, { TextFieldProps } from '@material-ui/core/TextField';
 import InputAdornment                from '@material-ui/core/InputAdornment';
@@ -10,7 +11,7 @@ type MapFn<T> = (item?: T) => string;
 export class TimeValidator {
   rounding: number;
   constructor(rounding?: number) {
-    this.rounding = rounding !== undefined ? rounding : 0.25;
+    this.rounding = !isNullOrUndefined(rounding) ? rounding! : 0.25;
   }
 
   parse(value?: string | number): {value?: number, isValid: boolean} {
@@ -23,14 +24,14 @@ export class TimeValidator {
     }
 
     const v = this._parse(value);
-    if ((v === undefined) || (this.rounding === 0)) {
+    if (isNullOrUndefined(v) || this.rounding === 0) {
       return {
         value   : v,
-        isValid : v !== undefined
+        isValid : v !== undefined,
       };
     }
 
-    const rounded = this.round(v);
+    const rounded = this.round(v!);
     return {
       value   : rounded,
       isValid : true
@@ -43,18 +44,18 @@ export class TimeValidator {
     }
 
     let result = this.parseMilitary(value.match(/^([0-9]?[0-9])[:;\/]([0-5][0-9])$/));
-    if (result !==  undefined) {
+    if (!isNullOrUndefined(result)) {
       return result;
     }
 
     result = this.parseAMPM(value.match(/^(0?[1-9]|1[0-2])([:;\/]([0-5][0-9]))? *(am|pm)?$/i));
-    if (result !== undefined) {
+    if (!isNullOrUndefined(result)) {
       return result;
     }
 
     result = this._parseFloat(value.match(/^[0-9]?[0-9]?([\.][0-9]*)?$/));
-    if (result !== undefined) {
-      return parseFloat(result.toFixed(2));
+    if (!isNullOrUndefined(result)) {
+      return parseFloat(result!.toFixed(2));
     }
     return undefined;
   }
@@ -256,8 +257,8 @@ class TimeInputField extends React.Component<TimeFieldProps, ITimeState> {
       evt.target.setSelectionRange(0, evt.target.value.length);
     } else if (this.props.endOfTextOnFocus) {
       evt.target.setSelectionRange(evt.target.value.length, evt.target.value.length);
-    } else if (this.props.cursorPositionOnFocus !== undefined) {
-      let cursorPosition = Math.max(0, Math.min(this.props.cursorPositionOnFocus, evt.target.value.length));
+    } else if (!isNullOrUndefined(this.props.cursorPositionOnFocus)) {
+      let cursorPosition = Math.max(0, Math.min(this.props.cursorPositionOnFocus!, evt.target.value.length));
       evt.target.setSelectionRange(cursorPosition, cursorPosition);
     }
   }

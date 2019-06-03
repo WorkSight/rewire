@@ -8,6 +8,7 @@ import ListItemIcon            from '@material-ui/core/ListItemIcon';
 import {SvgIconProps}          from '@material-ui/core/SvgIcon';
 import {Theme}                 from '@material-ui/core/styles';
 import LabelIcon               from '@material-ui/icons/LabelOutlined';
+import {isNullOrUndefined}     from 'rewire-common';
 import {WithStyle, withStyles} from './styles';
 
 export interface IActionMenuItem {
@@ -122,7 +123,7 @@ class ActionMenu extends React.Component<ActionMenuProps, IActionMenuState> {
           anchorEl={anchorEl}
           open={Boolean(anchorEl)}
           onClose={this.handleMenuClose}
-          marginThreshold={marginThreshold !== undefined ? marginThreshold : 5}
+          marginThreshold={!isNullOrUndefined(marginThreshold) ? marginThreshold : 5}
           disableEnforceFocus={true}
           MenuListProps={{dense: true, disablePadding: true, ...MenuListProps}}
           {...restProps}

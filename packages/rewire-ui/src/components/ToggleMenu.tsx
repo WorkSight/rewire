@@ -1,4 +1,5 @@
 import * as React              from 'react';
+import {isNullOrUndefined}     from 'rewire-common';
 import {Observe}               from 'rewire-core';
 import {Theme}                 from '@material-ui/core/styles';
 import Button, {ButtonProps}   from '@material-ui/core/Button';
@@ -114,7 +115,7 @@ class ToggleMenu extends React.Component<ToggleMenuProps, IToggleMenuState> {
           anchorEl={anchorEl}
           open={Boolean(anchorEl)}
           onClose={this.handleMenuClose}
-          marginThreshold={marginThreshold !== undefined ? marginThreshold : 8}
+          marginThreshold={!isNullOrUndefined(marginThreshold) ? marginThreshold : 8}
           MenuListProps={{dense: true, disablePadding: true, ...MenuListProps}}
           {...restProps}
         >

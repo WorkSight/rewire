@@ -1,4 +1,5 @@
-import S, {DataSignal} from 's-js';
+import S, {DataSignal}     from 's-js';
+import {isNullOrUndefined} from 'rewire-common';
 
 export type EQType = (v1: any, v2: any) => boolean;
 
@@ -14,15 +15,15 @@ export const property   = S.data;
 export const sample     = S.sample;
 
 export function is_proxy(value: ObjectType) {
-  return ((value !== undefined) && (value !== null) && !!value[proxyProperty]);
+  return (!isNullOrUndefined(value) && !!value[proxyProperty]);
 }
 
 function can_observe(value: ObjectType) {
-  return ((value !== undefined) && (value !== null) && !value[proxyProperty] && (Array.isArray(value) || ((typeof value) === 'object')));
+  return (!isNullOrUndefined(value) && !value[proxyProperty] && (Array.isArray(value) || ((typeof value) === 'object')));
 }
 
 export function version(value: ObjectType) {
-  return ((value !== undefined) && (value !== null) && value[versionProperty]);
+  return (!isNullOrUndefined(value) && value[versionProperty]);
 }
 
 function wrap(fn: any) {
@@ -200,8 +201,8 @@ export function defaultEquals(v1: any, v2: any) {
     return true;
   }
 
-  const undefinedOrNullOrEmpty1 = v1 === undefined || v1 === null || v1 === '';
-  const undefinedOrNullOrEmpty2 = v2 === undefined || v2 === null || v2 === '';
+  const undefinedOrNullOrEmpty1 = isNullOrUndefined(v1) || v1 === '';
+  const undefinedOrNullOrEmpty2 = isNullOrUndefined(v2) || v2 === '';
   if (undefinedOrNullOrEmpty1 && undefinedOrNullOrEmpty2) return true;
   if (Array.isArray(v1) && Array.isArray(v2)) {
     if (v1.length !== v2.length) return false;

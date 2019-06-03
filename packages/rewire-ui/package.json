@@ -1,6 +1,6 @@
 {
   "name": "rewire-ui",
-  "version": "1.0.54",
+  "version": "1.0.56",
   "description": "A lightweight set of material-ui-next components built using the reactive library rewire-core.",
   "repository": {
     "type": "git",
@@ -28,7 +28,7 @@
   },
   "homepage": "https://github.com/worksight/rewire",
   "dependencies": {
-    "@material-ui/core": "^3.9.2",
+    "@material-ui/core": "3.9.3",
     "@material-ui/icons": "^3.0.2",
     "@types/classnames": "^2.2.7",
     "@types/color": "^3.0.0",

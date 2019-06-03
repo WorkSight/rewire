@@ -1,5 +1,6 @@
 import * as React              from 'react';
 import classNames              from 'classnames';
+import {isNullOrUndefined}     from 'rewire-common';
 import Switch, {SwitchProps}   from '@material-ui/core/Switch';
 import FormControlLabel        from '@material-ui/core/FormControlLabel';
 import {Theme}                 from '@material-ui/core/styles';
@@ -77,7 +78,7 @@ class SwitchInternal extends React.Component<SwitchPropsStyled> {
 
     const {classes} = this.props;
 
-    if (this.props.label !== undefined) {
+    if (!isNullOrUndefined(this.props.label)) {
       return (
         <FormControlLabel
           className={this.props.className}

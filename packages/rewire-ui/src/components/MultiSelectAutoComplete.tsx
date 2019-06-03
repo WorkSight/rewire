@@ -15,15 +15,24 @@ import Typography                       from '@material-ui/core/Typography';
 import RootRef                          from '@material-ui/core/RootRef';
 import Fade                             from '@material-ui/core/Fade';
 import {Theme}                          from '@material-ui/core/styles';
-import {debounce, match}                from 'rewire-common';
+
+import {
+  debounce,
+  match,
+  isNullOrUndefined,
+}                                       from 'rewire-common';
 import {withStyles, WithStyle}          from './styles';
-import {ISuggestionsContainerComponent} from './AutoComplete';
+import {
+  ISuggestionsContainerComponent,
+  ISuggestionsContainerComponentProps,
+  IAutoCompleteRenderSuggestionFnOptions
+}                                       from './AutoComplete';
 import {
   ICustomProps,
   SearchFn,
   MapFn,
   defaultMap
-} from '../models/search';
+}                                       from '../models/search';
 
 const styles = (theme: Theme) => ({
   container: {
@@ -160,7 +169,7 @@ class MultiSelectAutoComplete<T> extends React.Component<MultiSelectAutoComplete
     }
     this.map = props.map || defaultMap;
 
-    if (props.initialInputValue !== undefined) {
+    if (!isNullOrUndefined(props.initialInputValue)) {
       this.performSearch(props.initialInputValue);
     }
   }
@@ -245,7 +254,7 @@ class MultiSelectAutoComplete<T> extends React.Component<MultiSelectAutoComplete
     if (this.props.renderSuggestion) {
       return (
         <MenuItem {...itemProps} selected={isHighlighted} component='div' key={index} className={classes.menuItem} >
-          {this.props.renderSuggestion(suggestion, {theme, isHighlighted, inputValue, parts})}
+          {this.props.renderSuggestion(suggestion, {theme, isHighlighted, inputValue, parts} as IAutoCompleteRenderSuggestionFnOptions)}
         </MenuItem>
       );
     }
@@ -294,15 +303,18 @@ class MultiSelectAutoComplete<T> extends React.Component<MultiSelectAutoComplete
     }
 
     let fontSize = window.getComputedStyle(this.suggestionsContainerNode).getPropertyValue('font-size'); // needed to keep the suggestions the same font size as the input
+    let suggestionsContainerComponentProps: ISuggestionsContainerComponentProps = {
+      downShift: this.downShift,
+    };
 
     return (
       <div {...(isOpen ? getMenuProps({}, {suppressRefError: true}) : {})} {...menuProps}>
-        <Paper elevation={4} className={classNames(...suggestionsPaperClasses)}>
-          {suggestionsContainerHeader && suggestionsContainerHeader()}
-          <div className={classNames(...suggestionsClasses)} style={{fontSize: fontSize}}>
+        <Paper elevation={4} className={classNames(...suggestionsPaperClasses)} style={{fontSize: fontSize}}>
+          {suggestionsContainerHeader && suggestionsContainerHeader(suggestionsContainerComponentProps)}
+          <div className={classNames(...suggestionsClasses)}>
             {suggestions}
           </div>
-          {suggestionsContainerFooter && suggestionsContainerFooter()}
+          {suggestionsContainerFooter && suggestionsContainerFooter(suggestionsContainerComponentProps)}
         </Paper>
       </div>
     );
@@ -312,9 +324,9 @@ class MultiSelectAutoComplete<T> extends React.Component<MultiSelectAutoComplete
     const { openOnFocus, showEmptySuggestions, suggestionsContainerHeader, suggestionsContainerFooter, hasTransition, transitionTimeout, label } = this.props;
     const { isOpen, children, classes } = options;
 
-    let transition  = hasTransition !== undefined ? hasTransition : true;
-    let timeout     = transitionTimeout !== undefined && transitionTimeout >= 0 ? transitionTimeout : 350;
-    let showEmpty   = showEmptySuggestions !== undefined ? showEmptySuggestions : openOnFocus ? true : false;
+    let transition  = !isNullOrUndefined(hasTransition) ? hasTransition : true;
+    let timeout     = !isNullOrUndefined(transitionTimeout) && transitionTimeout! >= 0 ? transitionTimeout : 350;
+    let showEmpty   = !isNullOrUndefined(showEmptySuggestions) ? showEmptySuggestions : openOnFocus ? true : false;
     let suggestions = children;
 
     if (!suggestions || suggestions.length <= 0) {
@@ -354,8 +366,8 @@ class MultiSelectAutoComplete<T> extends React.Component<MultiSelectAutoComplete
       evt.target.setSelectionRange(0, evt.target.value.length);
     } else if (this.props.endOfTextOnFocus) {
       evt.target.setSelectionRange(evt.target.value.length, evt.target.value.length);
-    } else if (this.props.cursorPositionOnFocus !== undefined) {
-      let cursorPosition = Math.max(0, Math.min(this.props.cursorPositionOnFocus, evt.target.value.length));
+    } else if (!isNullOrUndefined(this.props.cursorPositionOnFocus)) {
+      let cursorPosition = Math.max(0, Math.min(this.props.cursorPositionOnFocus!, evt.target.value.length));
       evt.target.setSelectionRange(cursorPosition, cursorPosition);
     }
 
@@ -488,7 +500,7 @@ class MultiSelectAutoComplete<T> extends React.Component<MultiSelectAutoComplete
   }
 
   componentWillReceiveProps (nextProps: any) {
-    if (nextProps.selectedItems === undefined && (nextProps.selectedItems !== this.props.selectedItems) && this.downShift) {
+    if (isNullOrUndefined(nextProps.selectedItems) && (nextProps.selectedItems !== this.props.selectedItems) && this.downShift) {
       this.downShift.clearSelection();
     }
 
@@ -554,7 +566,7 @@ class MultiSelectAutoComplete<T> extends React.Component<MultiSelectAutoComplete
       <Downshift
         defaultHighlightedIndex={0}
         initialInputValue={initialInputValue}
-        initialIsOpen={initialInputValue !== undefined}
+        initialIsOpen={!isNullOrUndefined(initialInputValue)}
         selectedItem={selectedItems}
         itemToString={this.map}
         onInputValueChange={this.handleInputChanged}

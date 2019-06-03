@@ -1,5 +1,5 @@
-import * as React from 'react';
-import cc         from 'classcat';
+import * as React          from 'react';
+import cc                  from 'classcat';
 import {
   Droppable,
   Draggable,
@@ -10,15 +10,16 @@ import {
   DropResult,
   DraggableProvided,
   DraggableStateSnapshot,
-}                 from 'react-beautiful-dnd';
+}                          from 'react-beautiful-dnd';
 import {
   StyleProps,
   WithStyle,
   withStyles
-}                 from './styles';
-import {Observe}  from 'rewire-core';
-import Icon       from '@material-ui/core/Icon';
-import {omit}     from 'rewire-common';
+}                          from './styles';
+import {isNullOrUndefined} from 'rewire-common';
+import {Observe}           from 'rewire-core';
+import Icon                from '@material-ui/core/Icon';
+import {omit}              from 'rewire-common';
 
 // function shadeColor(color: string, percent: number) {
 //   const f = parseInt(color.slice(1) , 16);
@@ -122,7 +123,7 @@ export class Item extends React.Component<ItemProps> {
   render() {
     const {item, dragProvided, classes, showDragHandle, itemRenderer, disableTabbing} = this.props;
 
-    if (showDragHandle || (showDragHandle === undefined)) {
+    if (showDragHandle || isNullOrUndefined(showDragHandle)) {
       return (
         <Observe render={() => (
           <div ref={(ref) => { dragProvided.innerRef(ref); this.node = ref as HTMLDivElement; }} onClick={this.setFocus} tabIndex={disableTabbing ? '-1' : '0'} className={classes.item} {...dragProvided.draggableProps as any}>
@@ -204,7 +205,7 @@ class SortableListInternal extends React.Component<SortableListProps & SortableS
         {(dropProvided: DroppableProvided, dropSnapshot: DroppableStateSnapshot) => (
           <List {...listProps}>
           <div
-            className={cc({[classes['droppable-container']]: true, [classes['scroll-container']]: (scrollable || (scrollable === undefined)), 'is-dragging-over': dropSnapshot.isDraggingOver, 'is-drop-disabled': isDropDisabled})}
+            className={cc({[classes['droppable-container']]: true, [classes['scroll-container']]: (scrollable || isNullOrUndefined(scrollable)), 'is-dragging-over': dropSnapshot.isDraggingOver, 'is-drop-disabled': isDropDisabled})}
             style={style}
             {...(dropProvided as any).droppableProps}
           >
