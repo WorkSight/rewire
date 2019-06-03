@@ -3,6 +3,7 @@ import classNames                from 'classnames';
 import Checkbox, {CheckboxProps} from '@material-ui/core/Checkbox';
 import FormControlLabel          from '@material-ui/core/FormControlLabel';
 import {Theme}                   from '@material-ui/core/styles';
+import {isNullOrUndefined}       from 'rewire-common';
 import {withStyles, WithStyle}   from './styles';
 
 const styles = (theme: Theme) => ({
@@ -61,7 +62,7 @@ class CheckboxInternal extends React.Component<CheckboxPropsStyled> {
       return null;
     }
 
-    if (this.props.label !== undefined) {
+    if (!isNullOrUndefined(this.props.label)) {
       return (
         <FormControlLabel
           className={this.props.className}

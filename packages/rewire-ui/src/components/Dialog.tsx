@@ -1,7 +1,11 @@
 import * as React                from 'react';
 import Modal, { ActionType }     from '../models/Modal';
 import classNames                from 'classnames';
-import { Observe, disposeOnUnmount, watch }               from 'rewire-core';
+import {isNullOrUndefined}       from 'rewire-common';
+import {
+  Observe,
+  disposeOnUnmount,
+  watch }                        from 'rewire-core';
 import Typography                from '@material-ui/core/Typography';
 import Dialog                    from '@material-ui/core/Dialog';
 import Button, { ButtonProps }   from '@material-ui/core/Button';
@@ -123,7 +127,7 @@ class DialogInternal extends React.Component<DialogProps> {
     const buttonClasses                         = {root: buttonRoot, icon: buttonIcon, label: buttonLabel};
     const hasTitle                              = dialog.title || title;
     const hasActions                            = dialog.actions && Object.keys(dialog.actions).length > 0;
-    const hasDivider                            = hasActions && this.props.hasDivider !== undefined ? this.props.hasDivider : true;
+    const hasDivider                            = hasActions && !isNullOrUndefined(this.props.hasDivider) ? this.props.hasDivider : true;
 
     return (
       <Observe render={() => (
@@ -154,7 +158,7 @@ class DialogInternal extends React.Component<DialogProps> {
     const {classes, dialog, fullWidth, fullScreen, maxWidth, disableEscapeKeyDown, hideBackdrop, transition, transitionDuration, disableTransition, disableEnforceFocus} = this.props;
     const escapeAction            = disableEscapeKeyDown ? undefined : () => dialog.close();
     const transitionToUse         = transition ? transition : Transition;
-    const transitionDurationToUse = transitionDuration !== undefined ? transitionDuration : TRANSITION_TIMEOUT;
+    const transitionDurationToUse = !isNullOrUndefined(transitionDuration) ? transitionDuration : TRANSITION_TIMEOUT;
     const transitionAction        = disableTransition ? undefined : transitionToUse;
     const transitionTime          = disableTransition ? 0 : transitionDurationToUse;
 

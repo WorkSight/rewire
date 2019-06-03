@@ -1,3 +1,4 @@
+import * as React from 'react';
 import {
   IColumn,
   ICell,
@@ -15,6 +16,7 @@ import {
   defaultPhoneFormat,
   defaultPhoneMask
 } from 'rewire-ui';
+import {isNullOrUndefined} from 'rewire-common';
 import {
   freeze,
   DataSignal,
@@ -69,23 +71,23 @@ export class ColumnModel implements IColumn {
     this.position       = 0;
     this.sort           = undefined;
     this.typeOptions    = undefined;
-    this._enabled       = property(options && options.enabled !== undefined ? options.enabled : undefined);
-    this._readOnly      = property(options && options.readOnly !== undefined ? options.readOnly : undefined);
-    this._verticalAlign = property(options && options.verticalAlign !== undefined ? options.verticalAlign : undefined);
-    this.editable       = options && options.editable !== undefined ? options.editable : true;
-    this.fixed          = options && options.fixed !== undefined ? options.fixed : false;
-    this.width          = options && options.width !== undefined ? options.width : undefined;
-    this.visible        = options && options.visible !== undefined ? options.visible : true;
-    this.align          = options && options.align !== undefined ? options.align : undefined;
-    this.colSpan        = options && options.colSpan !== undefined ? options.colSpan : 1;
-    this.rowSpan        = options && options.rowSpan !== undefined ? options.rowSpan : 1;
-    this.canSort        = options && options.canSort !== undefined ? options.canSort : true;
-    this.tooltip        = options && options.tooltip !== undefined ? options.tooltip : undefined;
-    this.cls            = options && options.cls !== undefined ? options.cls : undefined;
-    this.renderer       = options && options.renderer !== undefined ? options.renderer : undefined;
-    this.validator      = options && options.validator !== undefined ? options.validator : undefined;
-    this.onValueChange  = options && options.onValueChange !== undefined ? options.onValueChange : undefined;
-    this.compare        = options && options.compare !== undefined ? options.compare : undefined;
+    this._enabled       = property(options && !isNullOrUndefined(options.enabled) ? options.enabled! : undefined);
+    this._readOnly      = property(options && !isNullOrUndefined(options.readOnly) ? options.readOnly! : undefined);
+    this._verticalAlign = property(options && !isNullOrUndefined(options.verticalAlign) ? options.verticalAlign! : undefined);
+    this.editable       = options && !isNullOrUndefined(options.editable) ? options.editable! : true;
+    this.fixed          = options && !isNullOrUndefined(options.fixed) ? options.fixed! : false;
+    this.width          = options && !isNullOrUndefined(options.width) ? options.width! : undefined;
+    this.visible        = options && !isNullOrUndefined(options.visible) ? options.visible! : true;
+    this.align          = options && !isNullOrUndefined(options.align) ? options.align! : undefined;
+    this.colSpan        = options && !isNullOrUndefined(options.colSpan) ? options.colSpan! : 1;
+    this.rowSpan        = options && !isNullOrUndefined(options.rowSpan) ? options.rowSpan! : 1;
+    this.canSort        = options && !isNullOrUndefined(options.canSort) ? options.canSort! : true;
+    this.tooltip        = options && !isNullOrUndefined(options.tooltip) ? options.tooltip! : undefined;
+    this.cls            = options && !isNullOrUndefined(options.cls) ? options.cls! : undefined;
+    this.renderer       = options && !isNullOrUndefined(options.renderer) ? options.renderer! : undefined;
+    this.validator      = options && !isNullOrUndefined(options.validator) ? options.validator! : undefined;
+    this.onValueChange  = options && !isNullOrUndefined(options.onValueChange) ? options.onValueChange! : undefined;
+    this.compare        = options && !isNullOrUndefined(options.compare) ? options.compare! : undefined;
     this.setEditor(options && options.type);
   }
 
@@ -93,14 +95,14 @@ export class ColumnModel implements IColumn {
     this._readOnly(value);
   }
   get readOnly(): boolean {
-    return (this._readOnly() !== undefined ? this._readOnly() : this.grid.readOnly) as boolean;
+    return (!isNullOrUndefined(this._readOnly()) ? this._readOnly() : this.grid.readOnly) as boolean;
   }
 
   set enabled(value: boolean) {
     this._enabled(value);
   }
   get enabled(): boolean {
-    return (this._enabled() !== undefined ? this._enabled() : this.grid.enabled) as boolean;
+    return (!isNullOrUndefined(this._enabled()) ? this._enabled() : this.grid.enabled) as boolean;
   }
 
   set verticalAlign(value: VerticalAlignment) {
@@ -197,7 +199,7 @@ const arrayCompare = (options?: any) => (x: any, y: any): number => {
 };
 
 function getNumberString(value: any): string {
-  if (value === undefined || value === null) return value;
+  if (isNullOrUndefined(value)) return value;
 
   let numberStr = this.typeOptions && this.typeOptions.decimals && is.number(value) ? value.toFixed(this.typeOptions.decimals) : value.toString();
   if (this.typeOptions && !this.typeOptions.fixed) {
@@ -236,7 +238,7 @@ function getThousandSeparatedNumberString(numStr: string): string {
 }
 
 function getPhoneString(value: any): string {
-  if (value === undefined || value === null) return value;
+  if (isNullOrUndefined(value)) return value;
 
   let phoneStr             = value.toString();
   let phoneFormat          = this.typeOptions.format;

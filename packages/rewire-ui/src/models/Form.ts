@@ -1,4 +1,5 @@
-import * as React from 'react';
+import * as React          from 'react';
+import {isNullOrUndefined} from 'rewire-common';
 import {
   observable,
   replace,
@@ -194,13 +195,13 @@ export default class Form {
   private constructor(fields: IFieldDefns, initial?: ObjectType, options?: IFormOptions) {
     this.field                       = observable({});
     this.validator                   = new Validator();
-    this.defaultAdornmentsEnabled    = options && options.defaultAdornmentsEnabled !== undefined ? options.defaultAdornmentsEnabled : true;
+    this.defaultAdornmentsEnabled    = options && !isNullOrUndefined(options.defaultAdornmentsEnabled) ? options.defaultAdornmentsEnabled! : true;
     this.initialValuesValidationMode = options && options.initialValuesValidationMode ? options.initialValuesValidationMode : 'withValues';
     this.disableErrors               = options && options.disableErrors || false;
     this.variant                     = options && options.variant || 'standard';
-    // this.updateOnChange              = options && options.updateOnChange !== undefined ? options.updateOnChange : true;
+    // this.updateOnChange              = options && !isNullOrUndefined(options.updateOnChange) ? options.updateOnChange! : true;
     this.updateOnChange              = options && options.updateOnChange || false;
-    this.validateOnUpdate            = options && options.validateOnUpdate !== undefined ? options.validateOnUpdate : true;
+    this.validateOnUpdate            = options && !isNullOrUndefined(options.validateOnUpdate) ? options.validateOnUpdate! : true;
     this.initializeFields(fields);
     this.value    = initial || {};
     this._initial = Object.assign({}, this.value);
@@ -219,7 +220,7 @@ export default class Form {
     if (this.initialValuesValidationMode === 'all') {
       validationResult = this.validateForm();
     } else if (this.initialValuesValidationMode === 'withValues') {
-      let fieldsToValidate = this.fields.filter(field => field.value !== undefined);
+      let fieldsToValidate = this.fields.filter(field => !isNullOrUndefined(field.value));
       validationResult = this.validateFields(fieldsToValidate);
     }
 
@@ -297,7 +298,7 @@ export default class Form {
     }
 
     const onValueChange = (v: any) => {
-      let value = v === undefined || v === null || v === '' ? undefined : v;
+      let value = isNullOrUndefined(v) || v === '' ? undefined : v;
       this.setFieldValue(field.name, value);
     };
 
@@ -313,10 +314,10 @@ export default class Form {
       align:            fieldDefn.typeDefn.align,
       label:            fieldDefn.typeDefn.label,
       disabled:         fieldDefn.typeDefn.disabled,
-      disableErrors:    fieldDefn.typeDefn.disableErrors !== undefined ? fieldDefn.typeDefn.disableErrors : this.disableErrors,
+      disableErrors:    !isNullOrUndefined(fieldDefn.typeDefn.disableErrors) ? fieldDefn.typeDefn.disableErrors : this.disableErrors,
       variant:          fieldDefn.typeDefn.variant || this.variant,
-      updateOnChange:   fieldDefn.typeDefn.updateOnChange !== undefined ? fieldDefn.typeDefn.updateOnChange : this.updateOnChange,
-      validateOnUpdate: fieldDefn.typeDefn.validateOnUpdate !== undefined ? fieldDefn.typeDefn.validateOnUpdate : this.validateOnUpdate,
+      updateOnChange:   !isNullOrUndefined(fieldDefn.typeDefn.updateOnChange) ? fieldDefn.typeDefn.updateOnChange : this.updateOnChange,
+      validateOnUpdate: !isNullOrUndefined(fieldDefn.typeDefn.validateOnUpdate) ? fieldDefn.typeDefn.validateOnUpdate : this.validateOnUpdate,
       visible:          true,
       startAdornment:   fieldDefn.typeDefn.startAdornment,
       endAdornment:     fieldDefn.typeDefn.endAdornment,
@@ -386,7 +387,7 @@ export default class Form {
 
   private toObjectValues(): ObjectType {
     return this.fields.reduce((prev: ObjectType, current) => {
-      if (current.value !== undefined) prev[current.name] = current.value;
+      if (!isNullOrUndefined(current.value)) prev[current.name] = current.value;
       return prev;
     }, {});
   }

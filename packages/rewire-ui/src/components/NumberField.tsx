@@ -4,6 +4,7 @@ import * as is                       from 'is';
 import TextField, { TextFieldProps } from '@material-ui/core/TextField';
 import InputAdornment                from '@material-ui/core/InputAdornment';
 import {Theme}                       from '@material-ui/core/styles';
+import {isNullOrUndefined}           from 'rewire-common';
 import BlurInputHOC                  from './BlurInputHOC';
 import {TextAlignment, TextVariant}  from './editors';
 import {withStyles, WithStyle}       from './styles';
@@ -124,8 +125,8 @@ class NumberTextField extends React.Component<NumberFieldProps> {
       evt.target.setSelectionRange(0, evt.target.value.length);
     } else if (this.props.endOfTextOnFocus) {
       evt.target.setSelectionRange(evt.target.value.length, evt.target.value.length);
-    } else if (this.props.cursorPositionOnFocus !== undefined) {
-      let cursorPosition = Math.max(0, Math.min(this.props.cursorPositionOnFocus, evt.target.value.length));
+    } else if (!isNullOrUndefined(this.props.cursorPositionOnFocus)) {
+      let cursorPosition = Math.max(0, Math.min(this.props.cursorPositionOnFocus!, evt.target.value.length));
       evt.target.setSelectionRange(cursorPosition, cursorPosition);
     }
   }
@@ -147,7 +148,7 @@ class NumberTextField extends React.Component<NumberFieldProps> {
     const endAdornment              = this.props.endAdornment ? <InputAdornment position='end' classes={{root: this.props.classes.inputAdornmentRoot}}>{this.props.endAdornment}</InputAdornment> : undefined;
     const inputClassName            = this.props.variant === 'outlined' ? this.props.classes.inputOutlinedInput : this.props.classes.inputInput;
     const inputFormControlClassName = this.props.variant === 'standard' && this.props.label ? this.props.classes.inputFormControlWithLabel : undefined;
-    value                           = value !== undefined ? value : null;
+    value                           = !isNullOrUndefined(value) ? value : null;
 
     if (updateOnChange) {
       return (

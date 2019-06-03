@@ -9,6 +9,7 @@ import * as React              from 'react';
 import * as is                 from 'is';
 import cc                      from 'classcat';
 import classNames              from 'classnames';
+import {isNullOrUndefined}     from 'rewire-common';
 import {Observe}               from 'rewire-core';
 import {withStyles, WithStyle} from 'rewire-ui';
 import {Theme}                 from '@material-ui/core/styles';
@@ -295,7 +296,7 @@ class Cell extends React.PureComponent<CellProps, {}> {
   }
 
   onValueChange = (v: any) => {
-    let value = v === undefined || v === null || v === '' ? undefined : v;
+    let value = isNullOrUndefined(v) || v === '' ? undefined : v;
     this.cell.keyForEdit = undefined;
     this.cell.setValue(value);
     if (this.column.type === 'multiselect' || this.column.type === 'multiselectautocomplete') {
@@ -371,7 +372,7 @@ class Cell extends React.PureComponent<CellProps, {}> {
     return <Observe render={
       () => {
         let hasError = !!cell.error;
-        let value    = this.value !== undefined && this.value !== null ? this.value : <span>&nbsp;</span>;
+        let value    = !isNullOrUndefined(this.value) ? this.value : <span>&nbsp;</span>;
 
         return (
           < >

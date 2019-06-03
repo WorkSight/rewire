@@ -1,8 +1,9 @@
+import {isNullOrUndefined} from 'rewire-common';
 import {defaultEquals} from 'rewire-core';
 import * as is from 'is';
 
 export function defaultGreaterThan(v1: any, v2: any): boolean {
-  if (v1 === undefined || v1 === null || v2 === undefined || v2 === null) {
+  if (isNullOrUndefined(v1) || isNullOrUndefined(v2)) {
     return true;
   }
 
@@ -16,7 +17,7 @@ export function defaultGreaterThan(v1: any, v2: any): boolean {
 }
 
 export function defaultLessThan(v1: any, v2: any): boolean {
-  if (v1 === undefined || v1 === null || v2 === undefined || v2 === null) {
+  if (isNullOrUndefined(v1) || isNullOrUndefined(v2)) {
     return true;
   }
 
@@ -30,7 +31,7 @@ export function defaultLessThan(v1: any, v2: any): boolean {
 }
 
 export function isNull(value?: any): boolean {
-  if ((value === undefined) || (value === null)) return true;
+  if (isNullOrUndefined(value)) return true;
   if (typeof(value) === 'string') return value.length === 0;
   return ((value.id !== undefined) && isNull(value.id));
 }
@@ -49,7 +50,7 @@ export const isRegEx = (re: RegExp, text: string): IValidateFnData => {
   return {
     linkedFieldNames: [],
     fn: (obj: ObjectType, fieldName: string, label: string | undefined, value: any): string | undefined => {
-      if (!re.test(String(value !== undefined ? value : ''))) {
+      if (!re.test(String(!isNullOrUndefined(value) ? value : ''))) {
         return text;
       }
       return undefined;
@@ -61,7 +62,7 @@ export const isEmail: IValidateFnData = {
   linkedFieldNames: [],
   fn: (obj: ObjectType, fieldName: string, label: string | undefined, value: any): string | undefined => {
     const re = /(^$|^(([^<>()\[\]\\.,;:\s@"]+(\.[^<>()\[\]\\.,;:\s@"]+)*)|(".+"))@((\[[0-9]{1,3}\.[0-9]{1,3}\.[0-9]{1,3}\.[0-9]{1,3}\])|(([a-zA-Z\-0-9]+\.)+[a-zA-Z]{2,}))$)/;
-    if (!re.test(String(value !== undefined ? value : ''))) {
+    if (!re.test(String(!isNullOrUndefined(value) ? value : ''))) {
       return 'email is not in a valid format';
     }
     return undefined;
@@ -185,7 +186,7 @@ export const isDifferenceOfOthers = (otherFieldNames: string[], text?: string): 
     linkedFieldNames: otherFieldNames,
     fn: (obj: ObjectType, fieldName: string, label: string | undefined, value: any): string | undefined => {
       let otherValues: any[] = otherFieldNames.map((otherFieldName: string) => obj[otherFieldName] && obj[otherFieldName].value) || [];
-      if (otherValues.findIndex(value => value === undefined || value === null || !is.number(value)) >= 0) {
+      if (otherValues.findIndex(value => isNullOrUndefined(value) || !is.number(value)) >= 0) {
         return undefined;
       }
       let difference = otherValues.reduce((totalValue: number, currValue: number) => totalValue - currValue);
@@ -207,7 +208,7 @@ export const isSumOfOthers = (otherFieldNames: string[], text?: string): IValida
     linkedFieldNames: otherFieldNames,
     fn: (obj: ObjectType, fieldName: string, label: string | undefined, value: any): string | undefined => {
       let otherValues: any[] = otherFieldNames.map((otherFieldName: string) => obj[otherFieldName] && obj[otherFieldName].value) || [];
-      if (otherValues.findIndex(value => value === undefined || value === null || !is.number(value)) >= 0) {
+      if (otherValues.findIndex(value => isNullOrUndefined(value) || !is.number(value)) >= 0) {
         return undefined;
       }
       let sum = otherValues.reduce((totalValue: number, currValue: number) => totalValue + currValue);
