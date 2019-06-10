@@ -1,4 +1,5 @@
 import * as React                    from 'react';
+import {isNullOrUndefined}           from 'rewire-common';
 import BlurInputHOC                  from './BlurInputHOC';
 import TextField, { TextFieldProps } from '@material-ui/core/TextField';
 import InputAdornment                from '@material-ui/core/InputAdornment';
@@ -151,8 +152,8 @@ class TextFieldInternal extends React.Component<TextFieldPropsStyled> {
       evt.target.setSelectionRange(0, evt.target.value.length);
     } else if (this.props.endOfTextOnFocus) {
       evt.target.setSelectionRange(evt.target.value.length, evt.target.value.length);
-    } else if (this.props.cursorPositionOnFocus !== undefined) {
-      let cursorPosition = Math.max(0, Math.min(this.props.cursorPositionOnFocus, evt.target.value.length));
+    } else if (!isNullOrUndefined(this.props.cursorPositionOnFocus)) {
+      let cursorPosition = Math.max(0, Math.min(this.props.cursorPositionOnFocus!, evt.target.value.length));
       evt.target.setSelectionRange(cursorPosition, cursorPosition);
     }
   }
@@ -192,7 +193,7 @@ class TextFieldInternal extends React.Component<TextFieldPropsStyled> {
         inputClassName = classes.inputInput;
       }
     }
-    let value = this.props.value !== undefined && this.props.value !== null ? this.props.value : '';
+    let value = !isNullOrUndefined(this.props.value) ? this.props.value : '';
 
     if (this.props.updateOnChange) {
       return (

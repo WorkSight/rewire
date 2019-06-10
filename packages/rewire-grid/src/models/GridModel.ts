@@ -25,6 +25,7 @@ import {
   IRowData,
   IToggleableColumnsOptions,
 }                              from './GridTypes';
+import {isNullOrUndefined}     from 'rewire-common';
 import createRow, {RowModel}   from './RowModel';
 import {ColumnModel}           from './ColumnModel';
 import {CellModel}             from './CellModel';
@@ -41,6 +42,7 @@ import {
   freeze,
   root,
   DataSignal,
+  watch,
 }                  from 'rewire-core';
 import { compare } from 'rewire-ui';
 
@@ -102,13 +104,13 @@ class GridModel implements IGrid, IDisposable {
     this.focusedCell                = undefined;
     this.fixedWidth                 = '1px';
     this.loading                    = false;
-    this.enabled                    = options && options.enabled !== undefined ? options.enabled : true;
-    this.readOnly                   = options && options.readOnly !== undefined ? options.readOnly : false;
+    this.enabled                    = options && !isNullOrUndefined(options.enabled) ? options.enabled! : true;
+    this.readOnly                   = options && !isNullOrUndefined(options.readOnly) ? options.readOnly! : false;
     this.verticalAlign              = options && options.verticalAlign || 'middle';
-    this.isDraggable                = options && options.isDraggable !== undefined ? options.isDraggable : false;
-    this.multiSelect                = options && options.multiSelect !== undefined ? options.multiSelect : false;
-    this.allowMergeColumns          = options && options.allowMergeColumns !== undefined ? options.allowMergeColumns : false;
-    this.clearSelectionOnBlur       = options && options.clearSelectionOnBlur !== undefined ? options.clearSelectionOnBlur : true;
+    this.isDraggable                = options && !isNullOrUndefined(options.isDraggable) ? options.isDraggable! : false;
+    this.multiSelect                = options && !isNullOrUndefined(options.multiSelect) ? options.multiSelect! : false;
+    this.allowMergeColumns          = options && !isNullOrUndefined(options.allowMergeColumns) ? options.allowMergeColumns! : false;
+    this.clearSelectionOnBlur       = options && !isNullOrUndefined(options.clearSelectionOnBlur) ? options.clearSelectionOnBlur! : true;
     this.toggleableColumnsOptions   = options && options.toggleableColumnsOptions;
     this.clipboard                  = [];
     this.isMouseDown                = false;
@@ -117,9 +119,9 @@ class GridModel implements IGrid, IDisposable {
     this.inError                    = false;
 
     this.rowKeybindPermissions = {
-      insertRow:    options && options.rowKeybindPermissions && options.rowKeybindPermissions.insertRow !== undefined ? options.rowKeybindPermissions.insertRow : true,
-      duplicateRow: options && options.rowKeybindPermissions && options.rowKeybindPermissions.duplicateRow !== undefined ? options.rowKeybindPermissions.duplicateRow : true,
-      deleteRow:    options && options.rowKeybindPermissions && options.rowKeybindPermissions.deleteRow !== undefined ? options.rowKeybindPermissions.deleteRow : true,
+      insertRow:    options && options.rowKeybindPermissions && !isNullOrUndefined(options.rowKeybindPermissions.insertRow) ? options.rowKeybindPermissions.insertRow : true,
+      duplicateRow: options && options.rowKeybindPermissions && !isNullOrUndefined(options.rowKeybindPermissions.duplicateRow) ? options.rowKeybindPermissions.duplicateRow : true,
+      deleteRow:    options && options.rowKeybindPermissions && !isNullOrUndefined(options.rowKeybindPermissions.deleteRow) ? options.rowKeybindPermissions.deleteRow : true,
     };
 
     this.staticKeybinds   = Object.assign({}, gridStaticKeybinds);
@@ -144,6 +146,11 @@ class GridModel implements IGrid, IDisposable {
     this._fixedColumns      = computed(columns, () => this.columns.filter((h) => h.fixed), []);
     this._standardColumns   = computed(columns, () => this.columns.filter((h) => !h.fixed), []);
     this._columnsByPosition = computed(columnsPos, () => this.columns.filter((c) => c.visible).sort(ColumnModel.positionCompare), []);
+
+    watch(() => this.dataRowsByPosition.length, () => {
+      this.changed = this.hasChanges();
+      this.inError = this.hasErrors();
+    });
   }
 
   private disposeRows() {
@@ -210,6 +217,7 @@ class GridModel implements IGrid, IDisposable {
 
   set(data: (IRowData | undefined)[]): void {
     this.disposeRows();
+    this.loading = true;
     freeze(() => {
       this.addedRows.length                  = 0;
       this.removedRows.length                = 0;
@@ -220,6 +228,24 @@ class GridModel implements IGrid, IDisposable {
       this.selectedCells.length              = 0;
       this._addRows(data);
     });
+    this.loading = false;
+    this.validate();
+    this.mergeColumns();
+    this._commit();
+  }
+
+  _commit() {
+    this.originalDataRowsByPosition = this.dataRowsByPosition.slice();
+    this.changed                    = false;
+  }
+
+  commit() {
+    for (const row of this.dataRowsByPosition) {
+      if (row) {
+        row.commit();
+      }
+    }
+    this._commit();
   }
 
   getCellsByRange(colStart: number, rowStart: number, colEnd: number, rowEnd: number, allowCollapsed: boolean): ICell[] {
@@ -807,8 +833,8 @@ class GridModel implements IGrid, IDisposable {
     let pos               = position;
     for (const rowData of data) {
       addedRows.push(this._addRow(rowData, pos));
-      if (pos !== undefined) {
-        pos++;
+      if (!isNullOrUndefined(pos)) {
+        pos!++;
       }
     }
 
@@ -848,8 +874,8 @@ class GridModel implements IGrid, IDisposable {
       if (duplicatedRow) {
         duplicatedRows.push(duplicatedRow);
       }
-      if (pos !== undefined) {
-        pos++;
+      if (!isNullOrUndefined(pos)) {
+        pos!++;
       }
     });
 
@@ -869,7 +895,7 @@ class GridModel implements IGrid, IDisposable {
     let insertPosition     = this.dataRowsByPosition.length;
     if (this.selectedRows.length > 0) {
     this.groupBy.forEach((column: IColumn) => {
-        if (rowToInsertData[column.name] === undefined) {
+        if (isNullOrUndefined(rowToInsertData[column.name])) {
           rowToInsertData[column.name] = this.selectedRows[0].cells[column.name].value;
       }
     });
@@ -1048,6 +1074,9 @@ class GridModel implements IGrid, IDisposable {
     // let firstGroupRow = this.rows[0];
     // let cellGroupRow = cells[0].row.parentRow.parentRow;
     // let x = firstGroupRow === cellGroupRow;
+    // let firstRow = this.dataRowsByPosition[0];
+    // let cellRow = this.dataRowsByPosition[0].cellsByColumnPosition[0].row;
+    // let y = firstRow === cellRow;
     this.editCell(undefined);
     let rowsToSelect: IRow[]   = [];
     let cellsToSelect: ICell[] = [];
@@ -1305,11 +1334,11 @@ export default function create(rows: any[], columns: IColumn[], options?: IGridO
       grid.addFixedRow({data: headerRow});
       let groupBy = options && options.groupBy;
       if (groupBy) {
-        grid.groupBy = groupBy.map((name: string) => grid.column(name)).filter((column: IColumn | undefined) => column !== undefined) as IColumn[];
+        grid.groupBy = groupBy.map((name: string) => grid.column(name)).filter((column: IColumn | undefined) => !isNullOrUndefined(column)) as IColumn[];
       }
       let toggleableColumns  = options && options.toggleableColumns;
       grid.toggleableColumns = toggleableColumns
-                                 ? toggleableColumns.map((name: string) => grid.column(name)).filter((column: IColumn | undefined) => column !== undefined && !column.isGroupByColumn) as IColumn[]
+                                 ? toggleableColumns.map((name: string) => grid.column(name)).filter((column: IColumn | undefined) => !isNullOrUndefined(column) && !column!.isGroupByColumn) as IColumn[]
                                  : [];
     });
     freeze(() => {
@@ -1322,6 +1351,7 @@ export default function create(rows: any[], columns: IColumn[], options?: IGridO
     // mergeRows(grid.rows, grid.standardColumns);
     grid.validate();
     grid.mergeColumns();
+    grid._commit();
     return grid;
   });
 }

@@ -154,6 +154,8 @@ export interface IGrid extends IRows, IDisposable {
   get(): ICellDataMap[];
   getChanges(): ICellDataMap[];
   set(data: (IRowData | undefined)[]): void;
+  _commit(): void;
+  commit(): void;
 
   addColumn(column: IColumn): IColumn;
   setColumnPositions(): void;
@@ -259,6 +261,7 @@ export interface IRow extends IDisposable {
   getErrors(): IErrorData[];
   createCell(column: IColumn, value: any, type?: string): ICell;
   clear(columnNames?: string[]): void;
+  commit(): void;
   _setValue(data: ICellDataMap, triggerOnValueChangeHandler?: boolean): boolean;
   setValue(data: ICellDataMap, triggerOnValueChangeHandler?: boolean): boolean;
   mergeAllColumns(): void;
@@ -281,7 +284,7 @@ export type MaskType = (string | RegExp)[];
 
 export type IColumnEditor =
   'text' | 'date' | 'checked' | 'none' |
-  {type: 'time', options?: {rounding?: number}} |
+  {type: 'time', options?: {disableErrors?: boolean, rounding?: number, map?: MapFn<any>}} |
   {type: 'select', options: {search: SearchFn<any>, map: MapFn<any>}} |
   {type: 'multiselect', options: {search: SearchFn<any>, map: MapFn<any>}} |
   {type: 'number', options?: {decimals?: number, thousandSeparator?: boolean, fixed?: boolean, allowNegative?: boolean}} |

@@ -1,7 +1,8 @@
 import * as React from 'react';
 import * as is from 'is';
-import {IGrid, IColumn, ICell, IRow, IError, IErrorData, TextAlignment, VerticalAlignment, cloneValue} from './GridTypes';
+import {isNullOrUndefined} from 'rewire-common';
 import {observable, defaultEquals, property, DataSignal, freeze} from 'rewire-core';
+import {IGrid, IColumn, ICell, IRow, IError, IErrorData, TextAlignment, VerticalAlignment, cloneValue} from './GridTypes';
 import * as deepEqual                                            from 'fast-deep-equal';
 
 let id = 0;
@@ -70,21 +71,21 @@ export class CellModel implements ICell {
     this._enabled(value);
   }
   get enabled(): boolean {
-    return (this._enabled() !== undefined ? this._enabled() : this.column.enabled) as boolean;
+    return (!isNullOrUndefined(this._enabled()) ? this._enabled() : this.column.enabled) as boolean;
   }
 
   set readOnly(value: boolean) {
     this._readOnly(value);
   }
   get readOnly(): boolean {
-    return (this._readOnly() !== undefined ? this._readOnly() : this.column.readOnly) as boolean;
+    return (!isNullOrUndefined(this._readOnly()) ? this._readOnly() : this.column.readOnly) as boolean;
   }
 
   set editable(value: boolean) {
     this._editable(value);
   }
   get editable(): boolean {
-    return (this._editable() !== undefined ? this._editable() : this.column.editable) as boolean;
+    return (!isNullOrUndefined(this._editable()) ? this._editable() : this.column.editable) as boolean;
   }
 
   set cls(value: string | undefined) {

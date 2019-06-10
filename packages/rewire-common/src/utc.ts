@@ -1,35 +1,54 @@
-Date.prototype.getTimezoneOffset = function() {
-  return 0;
-};
+export type DateType = UTC | Date | string | number;
+export enum TimeSpan { years, months, days, weeks, hours, minutes, seconds, milliseconds }
 
-export type DateType = Date | string | number;
-export enum TimeSpan { Years, Months, Days, Weeks, Hours, Minutes, Seconds, Milliseconds }
+const _zoneOffset = (new Date()).getTimezoneOffset() * 60000;
 
 export class UTC {
-  private _dt: number;
-  constructor(dt: DateType) {
-    this._dt = UTC.toNumber(dt);
+  public static readonly MaxValue: UTC = utc(Date.UTC(4999, 12, 39)).startOfDay();
+  public static readonly MinValue: UTC = utc(Date.UTC(1, 1, 1)).startOfDay();
+
+  public utc: number;
+  public zoneOffset: number;
+  constructor(dt: DateType, isUTC: boolean = false) {
+    this.zoneOffset = isUTC ? 0 : _zoneOffset;
+    this.utc        = UTC.toNumber(dt, this.zoneOffset);
   }
 
-  static toNumber(dt: DateType) {
+  static ymd(year: number, month: number = 1, day: number = 1, hours: number = 0, minutes: number = 0, seconds: number = 0, ms: number = 0) {
+    return new UTC(Date.UTC(year, month - 1, day, hours, minutes, seconds,  ms));
+  }
+
+  valueOf() {
+    return this.utc;
+  }
+
+  equals(utc: UTC) {
+    return this.utc === utc.utc;
+  }
+
+  static toNumber(dt: DateType, zoneOffset: number = _zoneOffset) {
+    if (dt instanceof UTC) {
+      return dt.utc;
+    }
+
     if (dt instanceof Date) {
-      return dt.getTime();
+      return dt.getTime() - zoneOffset;
     }
 
     if (typeof(dt) === 'number') {
-      return dt;
+      return dt - zoneOffset;
     }
 
     return Date.parse(dt as string);
   }
 
   get date(): number {
-    return this._dt;
+    return this.utc + this.zoneOffset;
   }
 
   startOfDay() {
-    this._dt = new Date(this._dt).setUTCHours(0, 0, 0, 0);
-    return this._dt;
+    this.utc = new Date(this.utc).setUTCHours(0, 0, 0, 0);
+    return this;
   }
 
   pad(num: number, size: number = 2) {
@@ -37,7 +56,8 @@ export class UTC {
   }
 
   toDateString() {
-    let d     = new Date(this._dt);
+    if ((this.utc === UTC.MaxValue.utc) || (this.utc === UTC.MinValue.utc)) return '';
+    let d     = new Date(this.utc);
     let year  = d.getUTCFullYear();
     let month = d.getUTCMonth() + 1;
     let day   = d.getUTCDate();
@@ -49,7 +69,7 @@ export class UTC {
   }
 
   toTimeString() {
-    let d       = new Date(this._dt);
+    let d       = new Date(this.utc);
     let hours   = d.getUTCHours();
     let minutes = d.getUTCMinutes();
     return `${this.pad(hours)}:${this.pad(minutes)}`;
@@ -59,24 +79,32 @@ export class UTC {
     return +amount.toFixed(decimals);
   }
 
-  add(amount: number, ts: TimeSpan = TimeSpan.Days) {
+  add(amount: number, ts: TimeSpan = TimeSpan.days) {
     switch (ts) {
-      case TimeSpan.Years:
-        const d = new Date(this._dt);
-        return d.setUTCFullYear(d.getUTCFullYear() + amount);
+      case TimeSpan.years:
+        const d = new Date(this.utc);
+        return new UTC(d.setUTCFullYear(d.getUTCFullYear() + amount) + this.zoneOffset, !!this.zoneOffset);
 
-      case TimeSpan.Months:
-        const d2 = new Date(this._dt);
-        return d2.setUTCFullYear(d2.getUTCFullYear(), (d2.getUTCMonth() + amount));
+      case TimeSpan.months:
+        const d2 = new Date(this.utc);
+        return new UTC(d2.setUTCFullYear(d2.getUTCFullYear(), (d2.getUTCMonth() + amount)) + this.zoneOffset, !!this.zoneOffset);
 
       default:
-        return this._dt + (amount * UTC.TimeSpanToMillis[ts]);
+        return new UTC(this.utc + (amount * UTC.TimeSpanToMillis[ts]) + this.zoneOffset, !!this.zoneOffset);
     }
   }
 
-  subtract(dt: DateType, ts: TimeSpan = TimeSpan.Days, roundTo: number = 0) {
+  toString(): string {
+    return new Date(this.utc).toISOString();
+  }
+
+  toJSON(): any {
+    return this.toString();
+  }
+
+  subtract(dt: DateType, ts: TimeSpan = TimeSpan.days, roundTo: number = 0) {
     let right  = UTC.toNumber(dt);
-    let left   = this._dt;
+    let left   = this.utc;
     let result = (left - right) / UTC.TimeSpanToMillis[ts];
     if (roundTo > 0) {
       return this.round(result, roundTo);
@@ -93,17 +121,19 @@ export class UTC {
   private static MillisecondsPerSecond = 1000;
 
   public static TimeSpanToMillis = {
-    [TimeSpan.Years]       : UTC.MillisecondsPerYear,
-    [TimeSpan.Months]      : UTC.MillisecondsPerMonth,
-    [TimeSpan.Weeks]       : UTC.MillisecondsPerWeek,
-    [TimeSpan.Days]        : UTC.MillisecondsPerDay,
-    [TimeSpan.Hours]       : UTC.MillisecondsPerHour,
-    [TimeSpan.Minutes]     : UTC.MillisecondsPerMinute,
-    [TimeSpan.Seconds]     : UTC.MillisecondsPerSecond,
-    [TimeSpan.Milliseconds]: 1
+    [TimeSpan.years]:        UTC.MillisecondsPerYear,
+    [TimeSpan.months]:       UTC.MillisecondsPerMonth,
+    [TimeSpan.weeks]:        UTC.MillisecondsPerWeek,
+    [TimeSpan.days]:         UTC.MillisecondsPerDay,
+    [TimeSpan.hours]:        UTC.MillisecondsPerHour,
+    [TimeSpan.minutes]:      UTC.MillisecondsPerMinute,
+    [TimeSpan.seconds]:      UTC.MillisecondsPerSecond,
+    [TimeSpan.milliseconds]: 1
   };
+
+  static get ZoneOffset() { return _zoneOffset; }
 }
 
-export default function utc(dt?: DateType) {
-  return new UTC(dt || Date.now());
+export default function utc(dt?: DateType, isUTC: boolean = false) {
+  return new UTC(dt || Date.now(), isUTC);
 }

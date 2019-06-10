@@ -5,6 +5,7 @@ import IconButton                    from '@material-ui/core/IconButton';
 import {Theme}                       from '@material-ui/core/styles';
 import VisibilityIcon                from '@material-ui/icons/Visibility';
 import VisibilityOffIcon             from '@material-ui/icons/VisibilityOff';
+import {isNullOrUndefined}           from 'rewire-common';
 import BlurInputHOC                  from './BlurInputHOC';
 import {TextAlignment, TextVariant}  from './editors';
 import {withStyles, WithStyle}       from './styles';
@@ -130,8 +131,8 @@ class PasswordFieldInternal extends React.Component<PasswordFieldPropsStyled, IP
       evt.target.setSelectionRange(0, evt.target.value.length);
     } else if (this.props.endOfTextOnFocus) {
       evt.target.setSelectionRange(evt.target.value.length, evt.target.value.length);
-    } else if (this.props.cursorPositionOnFocus !== undefined) {
-      let cursorPosition = Math.max(0, Math.min(this.props.cursorPositionOnFocus, evt.target.value.length));
+    } else if (!isNullOrUndefined(this.props.cursorPositionOnFocus)) {
+      let cursorPosition = Math.max(0, Math.min(this.props.cursorPositionOnFocus!, evt.target.value.length));
       evt.target.setSelectionRange(cursorPosition, cursorPosition);
     }
   }
@@ -162,7 +163,7 @@ class PasswordFieldInternal extends React.Component<PasswordFieldPropsStyled, IP
     const type                      = this.state.showPassword ? 'text' : 'password';
     const inputClassName            = this.props.variant === 'outlined' ? this.props.classes.inputOutlinedInput : this.props.classes.inputInput;
     const inputFormControlClassName = this.props.variant === 'standard' && this.props.label ? this.props.classes.inputFormControlWithLabel : undefined;
-    let value                       = this.props.value !== undefined && this.props.value !== null ? this.props.value : '';
+    let value                       = !isNullOrUndefined(this.props.value) ? this.props.value : '';
 
     if (this.props.updateOnChange) {
       return (

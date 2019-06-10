@@ -12,9 +12,14 @@ import IconButton              from '@material-ui/core/IconButton';
 import MenuItem                from '@material-ui/core/MenuItem';
 import InputAdornment          from '@material-ui/core/InputAdornment';
 import Typography              from '@material-ui/core/Typography';
+import RootRef                 from '@material-ui/core/RootRef';
 import {Theme}                 from '@material-ui/core/styles';
 import CancelIcon              from '@material-ui/icons/Cancel';
-import {debounce, match}       from 'rewire-common';
+import {
+  debounce,
+  match,
+  isNullOrUndefined,
+}                              from 'rewire-common';
 import {withStyles, WithStyle} from './styles';
 import {
   ICustomProps,
@@ -118,6 +123,12 @@ const styles = (theme: Theme) => ({
   },
 });
 
+export interface IAutoCompleteRenderSuggestionFnOptions {
+  theme:         any;
+  isHighlighted: boolean;
+  inputValue?:   any;
+  parts:         {highlight: boolean, text: string}[];
+}
 
 export interface ISuggestionsContainerComponentProps {
   downShift: any;
@@ -157,19 +168,21 @@ class AutoComplete<T> extends React.Component<AutoCompleteProps<T>, IAutoComplet
   search: SearchFn<T>;
   map: MapFn<T>;
   inputRef: React.RefObject<HTMLElement>;
+  textFieldRef: React.RefObject<HTMLElement>;
 
   constructor(props: AutoCompleteProps<T>) {
     super(props);
 
-    this.inputRef = React.createRef();
-    this.search    = props.search;
+    this.inputRef     = React.createRef();
+    this.textFieldRef = React.createRef();
+    this.search       = props.search;
     if (props.debounce) {
       const wait = is.number(props.debounce) ? props.debounce as number : 150;
       this.search = debounce(this.search, wait);
     }
     this.map = props.map || defaultMap;
 
-    if (props.initialInputValue !== undefined) {
+    if (!isNullOrUndefined(props.initialInputValue)) {
       this.performSearch(props.initialInputValue);
     }
   }
@@ -188,23 +201,25 @@ class AutoComplete<T> extends React.Component<AutoCompleteProps<T>, IAutoComplet
     const inputFormControlClassName = variant === 'standard' && this.props.label ? classes.inputFormControlWithLabel : undefined;
 
     return (
-      <TextField
-        className={classes.textField}
-        classes={{root: classes.formControlRoot}}
-        value={value}
-        label={label}
-        variant={variant}
-        error={!disableErrors && !disabled && !!error}
-        helperText={!disableErrors && <span>{(!disabled && error) || ''}</span>}
-        inputRef={this.inputRef}
-        disabled={disabled}
-        autoFocus={autoFocus}
-        inputProps={{spellCheck: false, className: classes.nativeInput, style: {textAlign: align || 'left'}}}
-        InputProps={{onMouseEnter: this.handleMouseEnter, onMouseLeave: this.handleMouseLeave, startAdornment: startAdornment, endAdornment: endAdornment, classes: {root: classes.inputRoot, input: inputClassName, formControl: inputFormControlClassName}}}
-        InputLabelProps={{shrink: true, classes: {root: classes.inputLabelRoot, outlined: classes.inputLabelOutlined, shrink: classes.inputLabelShrink}}}
-        FormHelperTextProps={{classes: {root: classes.helperTextRoot, contained: classes.helperTextContained}}}
-        {...other}
-      />
+      <RootRef rootRef={this.textFieldRef}>
+        <TextField
+          className={classes.textField}
+          classes={{root: classes.formControlRoot}}
+          value={value}
+          label={label}
+          variant={variant}
+          error={!disableErrors && !disabled && !!error}
+          helperText={!disableErrors && <span>{(!disabled && error) || ''}</span>}
+          inputRef={this.inputRef}
+          disabled={disabled}
+          autoFocus={autoFocus}
+          inputProps={{spellCheck: false, className: classes.nativeInput, style: {textAlign: align || 'left'}}}
+          InputProps={{onMouseEnter: this.handleMouseEnter, onMouseLeave: this.handleMouseLeave, startAdornment: startAdornment, endAdornment: endAdornment, classes: {root: classes.inputRoot, input: inputClassName, formControl: inputFormControlClassName}}}
+          InputLabelProps={{shrink: true, classes: {root: classes.inputLabelRoot, outlined: classes.inputLabelOutlined, shrink: classes.inputLabelShrink}}}
+          FormHelperTextProps={{classes: {root: classes.helperTextRoot, contained: classes.helperTextContained}}}
+          {...other}
+        />
+      </RootRef>
     );
   }
 
@@ -247,16 +262,15 @@ class AutoComplete<T> extends React.Component<AutoCompleteProps<T>, IAutoComplet
     const { suggestion, index, itemProps, theme, highlightedIndex, inputValue, classes } = params;
     const isHighlighted = highlightedIndex === index;
     const name          = this.map(suggestion);
+    const parts         = this.parse(inputValue, name);
 
     if (this.props.renderSuggestion) {
       return (
-        <MenuItem selected={isHighlighted} component='div' key={index} className={classes.menuItem}>
-          {this.props.renderSuggestion(suggestion, {theme, isHighlighted, inputValue})}
+        <MenuItem {...itemProps} selected={isHighlighted} component='div' key={index} className={classes.menuItem}>
+          {this.props.renderSuggestion(suggestion, {theme, isHighlighted, inputValue, parts} as IAutoCompleteRenderSuggestionFnOptions)}
         </MenuItem>
       );
     }
-
-    const parts = this.parse(inputValue, name);
 
     return (
       <MenuItem
@@ -308,9 +322,9 @@ class AutoComplete<T> extends React.Component<AutoCompleteProps<T>, IAutoComplet
 
     return (
       <div {...(isOpen ? getMenuProps({}, {suppressRefError: true}) : {})} {...menuProps}>
-        <Paper elevation={4} className={classNames(...suggestionsPaperClasses)}>
+        <Paper elevation={4} className={classNames(...suggestionsPaperClasses)} style={{fontSize: fontSize}}>
           {suggestionsContainerHeader && suggestionsContainerHeader(suggestionsContainerComponentProps)}
-          <div className={classNames(...suggestionsClasses)} style={{fontSize: fontSize}}>
+          <div className={classNames(...suggestionsClasses)}>
             {suggestions}
           </div>
           {suggestionsContainerFooter && suggestionsContainerFooter(suggestionsContainerComponentProps)}
@@ -320,12 +334,12 @@ class AutoComplete<T> extends React.Component<AutoCompleteProps<T>, IAutoComplet
   }
 
   renderSuggestionsContainer = (options: any) => {
-    const { openOnFocus, showEmptySuggestions, suggestionsContainerHeader, suggestionsContainerFooter, hasTransition, transitionTimeout } = this.props;
+    const { openOnFocus, showEmptySuggestions, suggestionsContainerHeader, suggestionsContainerFooter, hasTransition, transitionTimeout, label } = this.props;
     const { isOpen, children, classes } = options;
 
-    let transition  = hasTransition !== undefined ? hasTransition : true;
-    let timeout     = transitionTimeout !== undefined && transitionTimeout >= 0 ? transitionTimeout : 350;
-    let showEmpty   = showEmptySuggestions !== undefined ? showEmptySuggestions : openOnFocus ? true : false;
+    let transition  = !isNullOrUndefined(hasTransition) ? hasTransition : true;
+    let timeout     = !isNullOrUndefined(transitionTimeout) && transitionTimeout! >= 0 ? transitionTimeout : 350;
+    let showEmpty   = !isNullOrUndefined(showEmptySuggestions) ? showEmptySuggestions : openOnFocus ? true : false;
     let suggestions = children;
 
     if (!suggestions || suggestions.length <= 0) {
@@ -342,8 +356,10 @@ class AutoComplete<T> extends React.Component<AutoCompleteProps<T>, IAutoComplet
       },
     };
 
+    const inputComponentNode = this.textFieldRef.current && (label ? this.textFieldRef.current.children[1] : this.textFieldRef.current.children[0]);
+
     return (
-      <Popper open={isOpen} placement='bottom-start' anchorEl={this.inputRef.current} transition={transition} modifiers={popperModifiers} className={classes.popper} style={{minWidth: this.inputRef.current ? this.inputRef.current.clientWidth : 'auto'}}>
+      <Popper open={isOpen} placement='bottom-start' anchorEl={inputComponentNode} transition={transition} modifiers={popperModifiers} className={classes.popper} style={{minWidth: inputComponentNode ? inputComponentNode.clientWidth : 'auto'}}>
         {transition
           ? ({ TransitionProps }) => (
               <Fade {...TransitionProps} timeout={timeout}>
@@ -365,8 +381,8 @@ class AutoComplete<T> extends React.Component<AutoCompleteProps<T>, IAutoComplet
       evt.target.setSelectionRange(0, evt.target.value.length);
     } else if (this.props.endOfTextOnFocus) {
       evt.target.setSelectionRange(evt.target.value.length, evt.target.value.length);
-    } else if (this.props.cursorPositionOnFocus !== undefined) {
-      let cursorPosition = Math.max(0, Math.min(this.props.cursorPositionOnFocus, evt.target.value.length));
+    } else if (!isNullOrUndefined(this.props.cursorPositionOnFocus)) {
+      let cursorPosition = Math.max(0, Math.min(this.props.cursorPositionOnFocus!, evt.target.value.length));
       evt.target.setSelectionRange(cursorPosition, cursorPosition);
     }
 
@@ -477,7 +493,7 @@ class AutoComplete<T> extends React.Component<AutoCompleteProps<T>, IAutoComplet
   }
 
   componentWillReceiveProps (nextProps: ICustomProps<T>) {
-    if (nextProps.selectedItem === undefined && (nextProps.selectedItem !== this.props.selectedItem) && this.downShift) {
+    if (isNullOrUndefined(nextProps.selectedItem) && (nextProps.selectedItem !== this.props.selectedItem) && this.downShift) {
       this.downShift.clearSelection();
     }
 
@@ -540,7 +556,7 @@ class AutoComplete<T> extends React.Component<AutoCompleteProps<T>, IAutoComplet
       <Downshift
         defaultHighlightedIndex={0}
         initialInputValue={initialInputValue}
-        initialIsOpen={initialInputValue !== undefined}
+        initialIsOpen={!isNullOrUndefined(initialInputValue)}
         selectedItem={this.props.selectedItem || null}
         itemToString={this.map}
         onInputValueChange={this.handleInputChanged}

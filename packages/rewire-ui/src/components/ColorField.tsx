@@ -7,6 +7,7 @@ import InputLabel                      from '@material-ui/core/InputLabel';
 import IconButton                      from '@material-ui/core/IconButton';
 import FormControl                     from '@material-ui/core/FormControl';
 import {Theme}                         from '@material-ui/core/styles';
+import {isNullOrUndefined}             from 'rewire-common';
 import {withStyles, WithStyle}         from './styles';
 
 const styles = (theme: Theme) => ({
@@ -227,7 +228,7 @@ class ColorField extends React.Component<ColorFieldPropsStyled, IColorFieldState
     }
 
     const {classes, label, variant} = this.props;
-    let value = this.props.value !== undefined && this.props.value !== null ? this.props.value : '#fff';
+    let value = !isNullOrUndefined(this.props.value) ? this.props.value : '#fff';
 
     return (
       <FormControl

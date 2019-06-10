@@ -1,4 +1,4 @@
-import { useCallback, useEffect, useState, useRef } from 'react'
+import { useCallback, useEffect, useState, useRef } from 'react';
 import S from 's-js';
 
 export function useUnmount(fn: () => void) {
@@ -10,7 +10,7 @@ export function useForceUpdate() {
 
   const update = useCallback(() => {
     setTick(tick => tick + 1);
-  }, [])
+  }, []);
 
   return update;
 }

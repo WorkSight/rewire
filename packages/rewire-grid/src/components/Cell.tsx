@@ -9,6 +9,7 @@ import * as React              from 'react';
 import * as is                 from 'is';
 import cc                      from 'classcat';
 import classNames              from 'classnames';
+import {isNullOrUndefined}     from 'rewire-common';
 import {Observe}               from 'rewire-core';
 import {withStyles, WithStyle} from 'rewire-ui';
 import {Theme}                 from '@material-ui/core/styles';
@@ -61,7 +62,7 @@ const styles = (theme: Theme) => ({
     // marginLeft: '-8px',
   },
   tooltip: {
-    fontSize: `calc(${theme.fontSizes.body} * 0.8)`,
+    fontSize: `calc(${theme.fontSizes.body} * 0.95)`,
     padding: `calc(${theme.fontSizes.body} * 0.25) calc(${theme.fontSizes.body} * 0.5)`,
   },
   errorContainer: {
@@ -295,7 +296,7 @@ class Cell extends React.PureComponent<CellProps, {}> {
   }
 
   onValueChange = (v: any) => {
-    let value = v === undefined || v === null || v === '' ? undefined : v;
+    let value = isNullOrUndefined(v) || v === '' ? undefined : v;
     this.cell.keyForEdit = undefined;
     this.cell.setValue(value);
     if (this.column.type === 'multiselect' || this.column.type === 'multiselectautocomplete') {
@@ -371,7 +372,7 @@ class Cell extends React.PureComponent<CellProps, {}> {
     return <Observe render={
       () => {
         let hasError = !!cell.error;
-        let value    = this.value !== undefined && this.value !== null ? this.value : <span>&nbsp;</span>;
+        let value    = !isNullOrUndefined(this.value) ? this.value : <span>&nbsp;</span>;
 
         return (
           < >
@@ -405,6 +406,7 @@ class Cell extends React.PureComponent<CellProps, {}> {
         selectedRightMost  : this.cell.isRightMostSelection,
         selectedBottomMost : this.cell.isBottomMostSelection,
         selectedLeftMost   : this.cell.isLeftMostSelection,
+        readOnly           : this.cell.readOnly,
         edit               : this.cell.editing,
         disabled           : !this.cell.enabled,
         fixed              : this.column.fixed,

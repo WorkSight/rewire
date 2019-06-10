@@ -1,4 +1,5 @@
 import * as is from 'is';
+import {isNullOrUndefined}                           from 'rewire-common';
 import {defaultEquals}                               from 'rewire-core';
 import {isNull, defaultGreaterThan, defaultLessThan} from 'rewire-ui';
 import {IRow, IError, ErrorSeverity}                 from './GridTypes';
@@ -27,7 +28,7 @@ export const isRegEx = (re: RegExp, text: string): IValidateFnData => {
       let error: IError | undefined;
       let errorMsg: string             = '';
       let errorSeverity: ErrorSeverity = ErrorSeverity.Error;
-      if (!re.test(String(value !== undefined ? value : ''))) {
+      if (!re.test(String(!isNullOrUndefined(value) ? value : ''))) {
         errorMsg = text;
       }
       error = errorMsg ? {messageText: errorMsg, severity: errorSeverity} : undefined;
@@ -43,7 +44,7 @@ export const isEmail: IValidateFnData = {
     let errorMsg: string             = '';
     let errorSeverity: ErrorSeverity = ErrorSeverity.Error;
     const re = /(^$|^(([^<>()\[\]\\.,;:\s@"]+(\.[^<>()\[\]\\.,;:\s@"]+)*)|(".+"))@((\[[0-9]{1,3}\.[0-9]{1,3}\.[0-9]{1,3}\.[0-9]{1,3}\])|(([a-zA-Z\-0-9]+\.)+[a-zA-Z]{2,}))$)/;
-    if (!re.test(String(value !== undefined ? value : ''))) {
+    if (!re.test(String(!isNullOrUndefined(value) ? value : ''))) {
       errorMsg = 'email is not in a valid format';
     }
     error = errorMsg ? {messageText: errorMsg, severity: errorSeverity} : undefined;
@@ -213,7 +214,7 @@ export const isDifferenceOfOthers = (otherColumnNames: string[], text?: string):
       let errorMsg: string             = '';
       let errorSeverity: ErrorSeverity = ErrorSeverity.Error;
       let otherValues: any[]           = otherColumnNames.map((otherColumnName: string) => row.cells[otherColumnName] && row.cells[otherColumnName].value) || [];
-      if (otherValues.findIndex(value => value === undefined || value === null || !is.number(value)) >= 0) {
+      if (otherValues.findIndex(value => isNullOrUndefined(value) || !is.number(value)) >= 0) {
         return undefined;
       }
       let difference = otherValues.reduce((totalValue: number, currValue: number) => {
@@ -245,7 +246,7 @@ export const isSumOfOthers = (otherColumnNames: string[], text?: string): IValid
       let errorMsg: string             = '';
       let errorSeverity: ErrorSeverity = ErrorSeverity.Error;
       let otherValues: any[]           = otherColumnNames.map((otherColumnName: string) => row.cells[otherColumnName] && row.cells[otherColumnName].value) || [];
-      if (otherValues.findIndex(value => value === undefined || value === null || !is.number(value)) >= 0) {
+      if (otherValues.findIndex(value => isNullOrUndefined(value) || !is.number(value)) >= 0) {
         return undefined;
       }
       let sum = otherValues.reduce((totalValue: number, currValue: number) => {

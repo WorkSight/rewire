@@ -1,4 +1,5 @@
 import * as React                    from 'react';
+import {isNullOrUndefined}           from 'rewire-common';
 import {Theme}                       from '@material-ui/core/styles';
 import TextField, { TextFieldProps } from '@material-ui/core/TextField';
 import {withStyles, WithStyle}       from './styles';
@@ -54,7 +55,7 @@ class StaticFieldInternal extends React.Component<StaticFieldProps> {
     }
 
     const {classes} = this.props;
-    let value       = this.props.value !== undefined && this.props.value !== null ? this.props.value : '';
+    let value       = !isNullOrUndefined(this.props.value) ? this.props.value : '';
 
     return (
       <TextField

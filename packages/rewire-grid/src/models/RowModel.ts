@@ -16,6 +16,7 @@ import {
   allRows,
   IRowData,
 }                              from './GridTypes';
+import {isNullOrUndefined}     from 'rewire-common';
 import createCell, {CellModel} from './CellModel';
 import * as nanoid             from 'nanoid';
 import * as deepEqual          from 'fast-deep-equal';
@@ -57,8 +58,8 @@ export class RowModel implements IRow, IDisposable {
     let options             = data && data.options;
     this._allowMergeColumns = options && options.allowMergeColumns;
     this.cls                = options && options.cls;
-    this.visible            = options && options.visible !== undefined ? options.visible : true;
-    this.fixed              = options && options.fixed !== undefined ? options.fixed : false;
+    this.visible            = options && !isNullOrUndefined(options.visible) ? options.visible! : true;
+    this.fixed              = options && !isNullOrUndefined(options.fixed) ? options.fixed! : false;
     this.onClick            = options && options.onClick;
 
     if (data && data.id) {
@@ -81,18 +82,20 @@ export class RowModel implements IRow, IDisposable {
     if (!this.grid.loading) {
       this.mergeAllColumns();
     }
+
+    this.commit();
   }
 
   set parentRow(groupRow: IGroupRow | undefined) {
     this._parentRow = groupRow;
     let visible     = true;
     let pRow        = groupRow;
-    while (pRow !== undefined) {
-      if (!pRow.expanded) {
+    while (!isNullOrUndefined(pRow)) {
+      if (!pRow!.expanded) {
         visible = false;
         break;
       }
-      pRow = pRow.parentRow;
+      pRow = pRow!.parentRow;
     }
     this.visible = visible;
   }
@@ -104,7 +107,7 @@ export class RowModel implements IRow, IDisposable {
     this._allowMergeColumns = value;
   }
   get allowMergeColumns(): boolean {
-    return this._allowMergeColumns !== undefined ? this._allowMergeColumns : this.grid.allowMergeColumns;
+    return !isNullOrUndefined(this._allowMergeColumns) ? this._allowMergeColumns! : this.grid.allowMergeColumns;
   }
 
   createCell(column: IColumn, value: any): ICell {
@@ -235,6 +238,14 @@ export class RowModel implements IRow, IDisposable {
     this.setValue(rowData);
   }
 
+  commit() {
+    Object.keys(this.cells).forEach(columnName => {
+      let clonedValue                                     = cloneValue(this.cells[columnName].value);
+      this.originalData[columnName]                       = clonedValue;
+      this.cells[columnName].row.originalData[columnName] = clonedValue; // Shouldn't need to do this, but again, some bug causing an issue.
+    });
+  }
+
   _setValue(data: ICellDataMap, triggerOnValueChangeHandler: boolean = true): boolean {
     if (!data) return false;
     let success = false;
@@ -327,8 +338,8 @@ function find(rows: IRows, column: IColumn, data?: ICellDataMap): IGroupRow | un
 
 export default function create(grid: IGrid, rows: IRow[], data?: IRowData, position?: number): IRow {
   let options = data && data.options;
-  let fixed   = options && options.fixed !== undefined ? options.fixed : false;
-  let rowPos  = (position !== undefined) ? Math.max(Math.min(position, grid.dataRowsByPosition.length), 0) : (fixed ? rows.length : undefined);
+  let fixed   = options && !isNullOrUndefined(options.fixed) ? options.fixed! : false;
+  let rowPos  = !isNullOrUndefined(position) ? Math.max(Math.min(position!, grid.dataRowsByPosition.length), 0) : (fixed ? rows.length : undefined);
 
   if (grid.groupBy.length > 0 && !fixed) {
     let root:   IGroupRow;
@@ -349,7 +360,7 @@ export default function create(grid: IGrid, rows: IRow[], data?: IRowData, posit
       parent = r;
     }
 
-    if (rowPos === undefined) {
+    if (isNullOrUndefined(rowPos)) {
       if (parent.rows.length > 0) {
         rowPos = parent.rows[0].position;
       } else {
@@ -368,13 +379,14 @@ export default function create(grid: IGrid, rows: IRow[], data?: IRowData, posit
     return newRow;
   }
 
-  let r = new RowModel(grid, data, rowPos);
+  let r = new RowModel(grid, data, !isNullOrUndefined(rowPos) ? rowPos : grid.dataRowsByPosition.length);
   rows.splice(r.position, 0, r);
   if (fixed) {
     grid.mergeFixedRows();
   } else {
     grid.dataRowsByPosition.splice(r.position, 0, r);
   }
+
   return r;
 }
 
