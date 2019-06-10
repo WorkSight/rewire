@@ -336,7 +336,7 @@ function find(rows: IRows, column: IColumn, data?: ICellDataMap): IGroupRow | un
 export default function create(grid: IGrid, rows: IRow[], data?: IRowData, position?: number): IRow {
   let options = data && data.options;
   let fixed   = options && !isNullOrUndefined(options.fixed) ? options.fixed! : false;
-  let rowPos  = (!isNullOrUndefined(position) ? Math.max(Math.min(position!, grid.dataRowsByPosition.length), 0) : (fixed ? rows.length : undefined);
+  let rowPos  = !isNullOrUndefined(position) ? Math.max(Math.min(position!, grid.dataRowsByPosition.length), 0) : (fixed ? rows.length : undefined);
 
   if (grid.groupBy.length > 0 && !fixed) {
     let root:   IGroupRow;

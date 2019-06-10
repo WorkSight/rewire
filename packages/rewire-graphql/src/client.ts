@@ -8,6 +8,8 @@ import {
   GraphQLMiddleware,
   GQL
 }                             from './types';
+import { BSON }               from './bson';
+import { nullToUndefined }    from 'rewire-common';
 import { hashString }         from './hash';
 import { SubscriptionClient } from 'subscriptions-transport-ws';
 import { from, Stream }       from 'most';
@@ -42,7 +44,7 @@ class Client implements IClient {
   }
 
   executeQuery(queryObject: IQuery, headers?: object, mutate: boolean = false): Promise<IQueryResponse> {
-    const body    = JSON.stringify({query: (isGQL(queryObject.query)) ? queryObject.query.loc.source.body : queryObject.query, variables: queryObject.variables});
+    const body    = BSON.stringify({query: (isGQL(queryObject.query)) ? queryObject.query.loc.source.body : queryObject.query, variables: queryObject.variables});
     const queryId = hashString(body);
 
     if (!mutate) {
@@ -80,8 +82,8 @@ class Client implements IClient {
         }
 
         if (this.bearer) reqInit.headers.Authorization = 'Bearer ' + this.bearer;
-        let res = await fetch(this.url, reqInit);
-        let response = await res.json();
+        let res      = await fetch(this.url, reqInit);
+        let response = nullToUndefined(await res.json());
         if (res.ok && !response.errors) {
           resolve({data: response.data});
         } else {
@@ -137,7 +139,7 @@ export function uploadMiddleware(query: IQuery, request: RequestInit, next: () =
   // GraphQL multipart request spec:
   // https://github.com/jaydenseric/graphql-multipart-request-spec
   const form = new FormData();
-  form.append('operations', JSON.stringify({query: (isGQL(query.query)) ? query.query.loc.source.body : query.query, variables: clone.variables}));
+  form.append('operations', BSON.stringify({query: (isGQL(query.query)) ? query.query.loc.source.body : query.query, variables: clone.variables}));
 
   const map = {};
   let i     = 0;

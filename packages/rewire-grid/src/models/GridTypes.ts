@@ -249,7 +249,7 @@ export interface IRow extends IDisposable {
   allowMergeColumns?            : boolean;
   position                      : number;
   readonly originalData         : ICellDataMap;
-  cellsByColumnPosition: ICell[];
+  cellsByColumnPosition         : ICell[];
   parentRow?                    : IGroupRow;
   visible                       : boolean;
   fixed                         : boolean;
