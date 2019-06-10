@@ -55,3 +55,14 @@ export function useObserver<T>(
   useUnmount(() => s.current!.dispose());
   return s.current!.track(renderFn, forceUpdate);
 };
+
+export function disposeOnUnmount(context: any, fn: Function) {
+  S.root((dispose) => {
+    const oldCWM = context.componentWillUnmount;
+    context.componentWillUnmount = () => {
+      if (oldCWM) oldCWM.call(context);
+      dispose();
+    };
+    fn();
+  });
+}
