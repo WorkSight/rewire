@@ -5,21 +5,70 @@ import {client as create, uploadMiddleware} from 'rewire-graphql';
 const client = create('http://api.worksight.services:3010/graphql');
 
 const query = gql`
-  query($size: Int!) {
-    search(options: {filter: {eq: {name: "sandy"}}}, size: $size) {
+  query($type: EntityType!, $search: String, $filter: FieldFilter, $count: Int) {
+    search(type: $type, search: $search, filter: $filter, count: $count) {
+      id
+      name
+      code
+      display
+    }
+  }
+`;
+
+const query2 = gql`
+  query($ids: [ID!]!) {
+    employeesByIds(ids: $ids) {
+      id
+      name
+      code
+      phone {
+        home
+        mobile
+        work
+        fax
+        workFax
+      }
+      email
+    }
+  }
+`;
+
+const query3 = gql`
+  query($filter: EntityFilter, $sort: EntitySort, $first: Int, $after: Cursor) {
+    generators(filter: $filter, sort: $sort, first: $first, after: $after) {
       took
-      count
-      results {
-        ... on OccupationCode {
-          _type
+      totalCount
+      cursor
+      data {
+        id
+        name
+        cycle {
           id
-          employee {
-            id
-            name
-          }
           name
-          code
         }
+      }
+    }
+  }
+`;
+
+const query4 = gql`
+  query($filter: EmployeeFilter, $sort: EmployeeSort, $first: Int, $after: Cursor) {
+    employees(filter: $filter, sort: $sort, first: $first, after: $after) {
+      took
+      totalCount
+      cursor
+      data {
+        id
+        name
+        code
+        phone {
+          home
+          mobile
+          work
+          fax
+          workFax
+        }
+        email
       }
     }
   }
@@ -72,8 +121,7 @@ export async function uploadFile(file: File) {
 }
 
 async function run() {
-  // client.bearer = '3a38887fece4e7d1e4b7c2b44fd5f9e8518cf9cde8c83a02';
-  client.bearer = '49c28e3d3c4ea320ac409900303fc1458fc2031d40fd720c';
+  client.bearer = '0ab38f1096494eb96aa206a7053370b9e171743058f8ce70';
   client.use(uploadMiddleware);
   client.use((q, req, next) => {
     next();
@@ -85,7 +133,16 @@ async function run() {
   // });
   // let r2: any = await client.query(employees);
   // console.log(r2);
-  // r2 = await client.query(query, {size: 2});
+  // let r1 = await client.query(query, {type: 'employees', filter: {field: 'name', eq: 'dsafsfsffs'}});
+  // let r2 = await client.query(query2, {ids: ['a42afb4a-a253-48c5-a980-d65d85d4e223']});
+  // let r3 = await client.query(query3, {filter: {id: ['476e3575-cee5-4126-a484-012b7ef5796b']}});
+  // let r4 = await client.query(query3);
+  let r5 = await client.query(query4);
+  // console.log(r1);
+  // console.log(r2);
+  // console.log(r3);
+  // console.log(r4);
+  console.log(r5);
   // let r3: any = await client.query(query2, {size: 2});
   // console.log(await r2);
   // console.log();

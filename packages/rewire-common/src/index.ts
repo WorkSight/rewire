@@ -5,6 +5,7 @@ export * from './omit';
 export * from './regExMatch';
 export * from './utc';
 export * from './isNullOrUndefined';
+export * from './nullToUndefined';
 
 export {default as debounce}          from './debounce';
 export {default as delay}             from './delay';
@@ -13,3 +14,4 @@ export {default as omit}              from './omit';
 export {default as match}             from './regExMatch';
 export {default as utc}               from './utc';
 export {default as isNullOrUndefined} from './isNullOrUndefined';
+export {default as nullToUndefined}   from './nullToUndefined';

@@ -7,9 +7,11 @@ export class UTC {
   public static readonly MaxValue: UTC = utc(Date.UTC(4999, 12, 39)).startOfDay();
   public static readonly MinValue: UTC = utc(Date.UTC(1, 1, 1)).startOfDay();
 
-  public  utc: number;
+  public utc: number;
+  public zoneOffset: number;
   constructor(dt: DateType, isUTC: boolean = false) {
-    this.utc = UTC.toNumber(dt, (isUTC) ? 0 : _zoneOffset);
+    this.zoneOffset = isUTC ? 0 : _zoneOffset;
+    this.utc        = UTC.toNumber(dt, this.zoneOffset);
   }
 
   static ymd(year: number, month: number = 1, day: number = 1, hours: number = 0, minutes: number = 0, seconds: number = 0, ms: number = 0) {
@@ -41,7 +43,7 @@ export class UTC {
   }
 
   get date(): number {
-    return this.utc + _zoneOffset;
+    return this.utc + this.zoneOffset;
   }
 
   startOfDay() {
@@ -81,14 +83,14 @@ export class UTC {
     switch (ts) {
       case TimeSpan.years:
         const d = new Date(this.utc);
-        return new UTC(d.setUTCFullYear(d.getUTCFullYear() + amount) + _zoneOffset);
+        return new UTC(d.setUTCFullYear(d.getUTCFullYear() + amount) + this.zoneOffset, !!this.zoneOffset);
 
       case TimeSpan.months:
         const d2 = new Date(this.utc);
-        return new UTC(d2.setUTCFullYear(d2.getUTCFullYear(), (d2.getUTCMonth() + amount)) + _zoneOffset);
+        return new UTC(d2.setUTCFullYear(d2.getUTCFullYear(), (d2.getUTCMonth() + amount)) + this.zoneOffset, !!this.zoneOffset);
 
       default:
-        return new UTC(this.utc + (amount * UTC.TimeSpanToMillis[ts]) + _zoneOffset);
+        return new UTC(this.utc + (amount * UTC.TimeSpanToMillis[ts]) + this.zoneOffset, !!this.zoneOffset);
     }
   }
 
