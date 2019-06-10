@@ -23,7 +23,7 @@ export class CellModel implements ICell {
   rowSpan              : number;
   colSpan              : number;
   selected             : boolean;
-  value                : any;
+  // _value               : any;
   error?               : IError;
   editing              : boolean;
   options              : any;
@@ -181,6 +181,19 @@ export class CellModel implements ICell {
     }
 
     this.setValue(undefined);
+  }
+
+  get value() {
+    return (this.row.data) ? this.row.data && this.row.data[this.column.name] : undefined;
+  }
+
+  set value(value: any) {
+    if (this.row.data) {
+      this.row.data[this.column.name] = value;
+      return;
+    }
+    return;
+    // this._value = value;
   }
 
   hasChanges(): boolean {

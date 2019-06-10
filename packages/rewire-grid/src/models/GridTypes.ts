@@ -242,12 +242,13 @@ export interface IRow extends IDisposable {
   id                            : string;
   grid                          : IGrid;
   cells                         : ICellMap;
+  data?                         : any;
   selected                      : boolean;
   cls?                          : string;
   allowMergeColumns?            : boolean;
   position                      : number;
   readonly originalData         : ICellDataMap;
-  cellsByColumnPosition: ICell[];
+  cellsByColumnPosition         : ICell[];
   parentRow?                    : IGroupRow;
   visible                       : boolean;
   fixed                         : boolean;

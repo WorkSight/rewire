@@ -19,6 +19,7 @@ import {
 import createCell, {CellModel} from './CellModel';
 import * as nanoid             from 'nanoid';
 import * as deepEqual          from 'fast-deep-equal';
+import { observable }          from 'rewire-core';
 
 const EmptyFn = () => {};
 
@@ -33,6 +34,7 @@ export class RowModel implements IRow, IDisposable {
   cellsByColumnPosition : ICell[];
   selected              : boolean;
   cls?                  : string;
+  data?                 : any;
   visible               : boolean;
   fixed                 : boolean;
   position              : number;
@@ -50,6 +52,7 @@ export class RowModel implements IRow, IDisposable {
     this.originalData       = {};
     this.selected           = false;
     this.position           = position;
+    this.data               = observable((data && data.data) || {});
 
     let options             = data && data.options;
     this._allowMergeColumns = options && options.allowMergeColumns;
