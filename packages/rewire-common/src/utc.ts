@@ -2,8 +2,9 @@ export type DateType = UTC | Date | string | number;
 export enum TimeSpan { years, months, days, weeks, hours, minutes, seconds, milliseconds }
 
 const _zoneOffset = (new Date()).getTimezoneOffset() * 60000;
-const _maxValue   = Date.UTC(9999, 12, 31, 0, 0, 0, 0);
-const _minValue   = Date.UTC(1, 1, 1, 0, 0, 0, 0);
+
+const _maxValue = Date.UTC(9999, 12 - 1, 31, 0, 0, 0, 0);
+const _minValue = Date.UTC(1, 1 - 1, 1, 0, 0, 0, 0);
 
 export class UTC {
   public static readonly MaxValue: UTC = utc(_maxValue);
