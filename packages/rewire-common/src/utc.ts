@@ -4,14 +4,21 @@ export enum TimeSpan { years, months, days, weeks, hours, minutes, seconds, mill
 const _zoneOffset = (new Date()).getTimezoneOffset() * 60000;
 
 export class UTC {
-  public static readonly MaxValue: UTC = utc(Date.UTC(9999, 12, 31)).startOfDay();
-  public static readonly MinValue: UTC = utc(Date.UTC(1, 1, 1)).startOfDay();
+  public static readonly MaxValue: UTC = utc(Date.UTC(9999, 12, 31), false).startOfDay();
+  public static readonly MinValue: UTC = utc(Date.UTC(1, 1, 1), false).startOfDay();
 
-  public  utc: number;
-  constructor(dt: DateType) {
-    let value =  UTC.toNumber(dt);
-    if (value < UTC.MinValue.utc) value = UTC.MinValue.utc;
-    else if (value > UTC.MaxValue.utc) value = UTC.MaxValue.utc;
+  public utc: number;
+
+  constructor(dt: DateType, bounded: boolean = true) {
+    let value = UTC.toNumber(dt);
+
+    if (bounded) {
+      if (value < UTC.MinValue.utc) {
+        value = UTC.MinValue.utc;
+      } else if (value > UTC.MaxValue.utc) {
+        value = UTC.MaxValue.utc;
+      }
+    }
     this.utc = value;
   }
 
@@ -146,6 +153,6 @@ export class UTC {
   static get ZoneOffset() { return _zoneOffset; }
 }
 
-export default function utc(dt?: DateType) {
-  return (dt && new UTC(dt)) || UTC.now();
+export default function utc(dt?: DateType, bounded?: boolean) {
+  return (dt && new UTC(dt, bounded)) || UTC.now();
 }
