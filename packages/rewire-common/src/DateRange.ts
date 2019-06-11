@@ -12,7 +12,7 @@ export function isDateRange(obj: any): obj is DateRange {
   return obj instanceof DateRange;
 }
 
-export class DateRange implements Iterable<UTC> {
+export default class DateRange implements Iterable<UTC> {
   public static readonly Empty = new DateRange(UTC.MaxValue, UTC.MinValue);
   private _start: UTC;
   private _end:   UTC;
