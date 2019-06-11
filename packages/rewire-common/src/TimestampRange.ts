@@ -4,7 +4,7 @@ import { isJSONRange, IJSONRange }       from './DateRange';
 
 export type ITimestampRangeCreator = (new <T extends TimestampRange>(start: DateType | TimestampRange, end?: DateType, creator?: ITimestampRangeCreator) => T) | undefined;
 
-export class TimestampRange {
+export default class TimestampRange {
   public static readonly Empty         = new TimestampRange(UTC.MaxValue, UTC.MinValue);
   // private static millisecondsInOneDay = 24 * 60 * 60 * 1000;
   private _start: UTC;
