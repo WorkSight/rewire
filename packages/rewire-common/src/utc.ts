@@ -2,16 +2,18 @@ export type DateType = UTC | Date | string | number;
 export enum TimeSpan { years, months, days, weeks, hours, minutes, seconds, milliseconds }
 
 const _zoneOffset = (new Date()).getTimezoneOffset() * 60000;
+const _maxValue   = Date.UTC(9999, 12, 31, 0, 0, 0, 0);
+const _minValue   = Date.UTC(1, 1, 1, 0, 0, 0, 0);
 
 export class UTC {
-  public static readonly MaxValue: UTC = utc(Date.UTC(9999, 12, 31)).startOfDay();
-  public static readonly MinValue: UTC = utc(Date.UTC(1, 1, 1)).startOfDay();
+  public static readonly MaxValue: UTC = utc(_maxValue);
+  public static readonly MinValue: UTC = utc(_minValue);
 
   public  utc: number;
   constructor(dt: DateType) {
-    let value =  UTC.toNumber(dt);
-    if (value < UTC.MinValue.utc) value = UTC.MinValue.utc;
-    else if (value > UTC.MaxValue.utc) value = UTC.MaxValue.utc;
+    let value = UTC.toNumber(dt);
+    if (value < _minValue)      value = _minValue;
+    else if (value > _maxValue) value = _maxValue;
     this.utc = value;
   }
 
