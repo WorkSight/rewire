@@ -19,39 +19,39 @@ export default class DateRange implements Iterable<UTC> {
 
   constructor(start?: DateType | DateRange | IJSONRange | string, end?: DateType | IDateRangeCreator, private creator?: IDateRangeCreator) {
     if (!start) {
-      this._start = new UTC(UTC.MinValue);
-      this._end   = new UTC(UTC.MaxValue);
+      this._start = new UTC(UTC.MinValue.utc);
+      this._end   = new UTC(UTC.MaxValue.utc);
       return;
     }
 
     if (start instanceof DateRange) {
       this._start = start._start;
-      this._end = start._end;
+      this._end   = start._end;
       if (end instanceof DateRange) {
         this.creator = end as IDateRangeCreator;
       }
       return;
     }
 
-    if (isJSONRange(start)) {
-      return new DateRange(start.start, start.end);
-    }
-
     if (typeof start === 'string') {
-      const parts = start.split(',');
+      const parts = start.replace(/"/g, '').split(',');
       if (parts.length === 2) {
-        this._start = (new UTC((parts[0].substr(1) + 'T00:00:00.000Z').trim())).startOfDay();
-        this._end   = (new UTC((parts[1].substr(0, parts[1].length - 1) + 'T00:00:00.000Z').trim())).startOfDay();
+        this._start = (new UTC((parts[0].substr(1).trim() + 'T00:00:00.000Z'))).startOfDay();
+        this._end   = (new UTC((parts[1].substr(0, parts[1].length - 1).trim() + 'T00:00:00.000Z'))).startOfDay();
         return;
       }
+    }
+
+    if (isJSONRange(start)) {
+      return new DateRange(start.start, start.end);
     }
 
     if (!end) {
       end = UTC.MaxValue;
     }
 
-    this._start = utc(start as DateType).startOfDay();
-    this._end   = utc(end as DateType).startOfDay();
+    this._start = new UTC(start as DateType).startOfDay();
+    this._end   = new UTC(end as DateType).startOfDay();
   }
 
   create(start: DateType | DateRange, end?: DateType): DateRange {

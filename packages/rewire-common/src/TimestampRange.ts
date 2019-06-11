@@ -31,10 +31,10 @@ export default class TimestampRange {
     }
 
     if (typeof start === 'string') {
-      const parts = start.split('"');
-      if (parts.length === 5) {
-        this._start = new UTC(parts[1] + 'Z');
-        this._end   = new UTC(parts[3] + 'Z');
+      const partsInput = start.replace(/"/g, '').split(',');
+      if (partsInput.length === 2) {
+        this._start = (new UTC(partsInput[0].substr(1).trim() + 'Z'));
+        this._end   = (new UTC(partsInput[1].substr(0, partsInput[1].length - 1).trim() + 'Z'));
         return;
       }
     }
