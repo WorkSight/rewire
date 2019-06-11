@@ -4,12 +4,15 @@ export enum TimeSpan { years, months, days, weeks, hours, minutes, seconds, mill
 const _zoneOffset = (new Date()).getTimezoneOffset() * 60000;
 
 export class UTC {
-  public static readonly MaxValue: UTC = utc(Date.UTC(4999, 12, 39)).startOfDay();
+  public static readonly MaxValue: UTC = utc(Date.UTC(9999, 12, 31)).startOfDay();
   public static readonly MinValue: UTC = utc(Date.UTC(1, 1, 1)).startOfDay();
 
   public  utc: number;
   constructor(dt: DateType) {
-    this.utc = UTC.toNumber(dt);
+    let value =  UTC.toNumber(dt);
+    if (value < UTC.MinValue.utc) value = UTC.MinValue.utc;
+    else if (value > UTC.MaxValue.utc) value = UTC.MaxValue.utc;
+    this.utc = value;
   }
 
   static ymd(year: number, month: number = 1, day: number = 1, hours: number = 0, minutes: number = 0, seconds: number = 0, ms: number = 0) {
