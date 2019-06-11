@@ -26,6 +26,10 @@ export class UTC {
     return this.utc;
   }
 
+  clone() {
+    return new UTC(this.utc);
+  }
+
   equals(utc: UTC) {
     return this.utc === utc.utc;
   }
@@ -47,6 +51,10 @@ export class UTC {
     if (!s || (s.length === 0)) return UTC.now().utc;
     if (s[s.length - 1].toLowerCase() !== 'z') s += 'Z';
     return Date.parse(s);
+  }
+
+  get isValid(): boolean {
+    return !Number.isNaN(this.utc);
   }
 
   get date(): number {

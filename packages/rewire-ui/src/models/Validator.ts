@@ -9,11 +9,9 @@ export function defaultGreaterThan(v1: any, v2: any): boolean {
 
   if (is.string(v1) && is.string(v2)) {
     return v1.localeCompare(v2) > 0 ;
-  } else if ((is.number(v1) && is.number(v2)) || (is.date(v1) && is.date(v2))) {
+  } else {
     return v1 > v2;
   }
-
-  return true;
 }
 
 export function defaultLessThan(v1: any, v2: any): boolean {
@@ -23,11 +21,9 @@ export function defaultLessThan(v1: any, v2: any): boolean {
 
   if (is.string(v1) && is.string(v2)) {
     return v1.localeCompare(v2) < 0;
-  } else if ((is.number(v1) && is.number(v2)) || (is.date(v1) && is.date(v2))) {
+  } else {
     return v1 < v2;
   }
-
-  return true;
 }
 
 export function isNull(value?: any): boolean {

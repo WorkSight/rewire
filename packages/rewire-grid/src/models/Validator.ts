@@ -21,6 +21,25 @@ export const isRequired: IValidateFnData = {
   }
 };
 
+export function compositeValidator(dependencies: string[], validator: IValidateFnData) {
+  return (function () {
+    let isInside = false;
+    return {
+      linkedColumnNames: [],
+      fn: (row: IRow, value: any): IError | undefined => {
+        if (isInside) return undefined;
+        isInside = true;
+        const result = validator.fn(row, value);
+        for (const dependency of dependencies) {
+          row.cells[dependency].validate();
+        }
+        isInside = false;
+        return result;
+      }
+    };
+  })();
+}
+
 export const isRegEx = (re: RegExp, text: string): IValidateFnData => {
   return {
     linkedColumnNames: [],

@@ -59,6 +59,10 @@ export default class TimestampRange {
     return this._start.valueOf();
   }
 
+  clone() {
+    return new TimestampRange(this);
+  }
+
   get start() { return this._start; }
   get end() { return this._end; }
 

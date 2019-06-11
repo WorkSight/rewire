@@ -83,7 +83,7 @@ class Client implements IClient {
 
         if (this.bearer) reqInit.headers.Authorization = 'Bearer ' + this.bearer;
         let res      = await fetch(this.url, reqInit);
-        let response = nullToUndefined(await res.json());
+        let response = BSON.parse(await res.text());
         if (res.ok && !response.errors) {
           resolve({data: response.data});
         } else {

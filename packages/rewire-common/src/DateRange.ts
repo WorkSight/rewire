@@ -66,6 +66,10 @@ export default class DateRange implements Iterable<UTC> {
     return this._start.valueOf();
   }
 
+  clone() {
+    return new DateRange(this);
+  }
+
   *[Symbol.iterator](): IterableIterator<UTC> {
     let current = this._start;
     while (current <= this._end) {
