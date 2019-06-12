@@ -35,6 +35,8 @@ export default class TimestampRange {
       if (partsInput.length === 2) {
         this._start = (new UTC(partsInput[0].substr(1).trim() + 'Z'));
         this._end   = (new UTC(partsInput[1].substr(0, partsInput[1].length - 1).trim() + 'Z'));
+        if (!this._start.isValid) this._start = UTC.MinValue;
+        if (!this._end.isValid)   this._end   = UTC.MaxValue;
         return;
       }
     }

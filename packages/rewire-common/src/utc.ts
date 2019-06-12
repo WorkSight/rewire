@@ -13,6 +13,8 @@ export class UTC {
   public  utc: number;
   constructor(dt: DateType) {
     let value = UTC.toNumber(dt);
+    if (Math.floor(Math.abs(value) / 1_000_000_000) === 1) value *= 1000;
+    else if (Math.floor(Math.abs(value) / 1_000_000_000_000_000) === 1) value /= 1000;
     if (value < _minValue)      value = _minValue;
     else if (value > _maxValue) value = _maxValue;
     this.utc = value;
@@ -20,6 +22,10 @@ export class UTC {
 
   static ymd(year: number, month: number = 1, day: number = 1, hours: number = 0, minutes: number = 0, seconds: number = 0, ms: number = 0) {
     return new UTC(Date.UTC(year, month - 1, day, hours, minutes, seconds,  ms));
+  }
+
+  get isValid() {
+    return !Number.isNaN(this.utc);
   }
 
   valueOf() {
@@ -51,10 +57,6 @@ export class UTC {
     if (!s || (s.length === 0)) return UTC.now().utc;
     if (s[s.length - 1].toLowerCase() !== 'z') s += 'Z';
     return Date.parse(s);
-  }
-
-  get isValid(): boolean {
-    return !Number.isNaN(this.utc);
   }
 
   get date(): number {
