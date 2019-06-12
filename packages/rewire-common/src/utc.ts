@@ -77,7 +77,7 @@ export class UTC {
 
   get daysInMonth(): number {
     let date = new Date(this.utc);
-    return new Date(Date.UTC(date.getUTCFullYear(), date.getUTCMonth(), 0)).getUTCDate();
+    return new Date(Date.UTC(date.getUTCFullYear(), date.getUTCMonth() + 1, 0)).getUTCDate();
   }
 
   startOfDay() {
