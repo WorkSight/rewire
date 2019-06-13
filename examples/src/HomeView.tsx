@@ -235,7 +235,7 @@ function createTestGrid(nRows: number, nColumns: number) {
       else if (colName === 'differenceColumn') v = 4;
       else if (colName === 'sumColumn') v = 19;
       else if (colName === 'maskColumn') v = undefined;
-      else if (colName === 'dateColumn') v = '2018-11-11';
+      else if (colName === 'dateColumn') v = utc();
       else if (colName === 'complexColumn') v = row > 3 ? new ComplexCellData(nanoid(10), 'Homer', 45) : undefined;
       else if (colName === 'phoneColumn') v = Number.parseInt('1250' + Math.round(Math.random() * 100000000).toString());
       else if (((column >= 5) && (column <= 6)) || colName === 'numberColumn') v = Math.random() * 10000;

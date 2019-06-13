@@ -16,7 +16,7 @@ import {
   defaultPhoneFormat,
   defaultPhoneMask
 } from 'rewire-ui';
-import {isNullOrUndefined} from 'rewire-common';
+import {isNullOrUndefined, UTC} from 'rewire-common';
 import {
   freeze,
   DataSignal,
@@ -147,6 +147,8 @@ export class ColumnModel implements IColumn {
         this.align = this.align || 'right';
       } else if (t === 'checked') {
         this.map = (value: boolean) => value ? 'True' : 'False';
+      } else if (t === 'date') {
+         this.map = (value: UTC) => value ? value.toDateString() : '';
       } else if (t === 'phone') {
         if (!this.typeOptions.format) {
           this.typeOptions.format = defaultPhoneFormat;

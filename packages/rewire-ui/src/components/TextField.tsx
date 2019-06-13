@@ -1,5 +1,5 @@
 import * as React                    from 'react';
-import {isNullOrUndefined}           from 'rewire-common';
+import {isNullOrUndefined, utc}      from 'rewire-common';
 import BlurInputHOC                  from './BlurInputHOC';
 import TextField, { TextFieldProps } from '@material-ui/core/TextField';
 import InputAdornment                from '@material-ui/core/InputAdornment';
@@ -145,6 +145,14 @@ class TextFieldInternal extends React.Component<TextFieldPropsStyled> {
     );
   }
 
+  onValueChange = (value?: string) => {
+    let v = value;
+    if (this.props.type === 'date') {
+      v = v ? utc(v) : undefined;
+    }
+    this.props.onValueChange(v);
+  }
+
   handleFocus = (evt: React.FocusEvent<HTMLInputElement>) => {
     if (this.props.type === 'date' && (this.props.selectOnFocus || this.props.endOfTextOnFocus)) {
       evt.target.select();
@@ -215,7 +223,7 @@ class TextFieldInternal extends React.Component<TextFieldPropsStyled> {
         onFocus={this.handleFocus}
         onBlur={this.props.onBlur}
         onKeyDown={this.handleKeyDown}
-        onChange={(evt: React.ChangeEvent<HTMLInputElement>) => this.props.onValueChange(evt.target.value)}
+        onChange={(evt: React.ChangeEvent<HTMLInputElement>) => this.onValueChange(evt.target.value)}
         inputProps={{spellCheck: !!multiline, className: classes.nativeInput, style: {textAlign: this.props.align || 'left'}}}
         InputProps={{startAdornment: startAdornment, endAdornment: endAdornment, classes: {root: classes.inputRoot, multiline: multilineClassName, input: inputClassName, inputType: inputTypeClassName, formControl: inputFormControlClassName}}}
         InputLabelProps={{shrink: true, classes: {root: classes.inputLabelRoot, outlined: classes.inputLabelOutlined, shrink: classes.inputLabelShrink}}}
@@ -224,7 +232,7 @@ class TextFieldInternal extends React.Component<TextFieldPropsStyled> {
     }
 
     return (
-    <BlurInputHOC {...this.props} value={value} onValueChange={this.props.onValueChange}
+    <BlurInputHOC {...this.props} value={value} onValueChange={this.onValueChange}
       render={(props: TextFieldPropsStyled) =>
         <TextField
           className={props.className}
