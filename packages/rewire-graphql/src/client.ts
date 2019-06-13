@@ -9,7 +9,6 @@ import {
   GQL
 }                             from './types';
 import { BSON }               from './bson';
-import { nullToUndefined }    from 'rewire-common';
 import { hashString }         from './hash';
 import { SubscriptionClient } from 'subscriptions-transport-ws';
 import { from, Stream }       from 'most';

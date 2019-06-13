@@ -10,7 +10,7 @@ export class UTC {
   public static readonly MaxValue: UTC = utc(_maxValue);
   public static readonly MinValue: UTC = utc(_minValue);
 
-  public  utc: number;
+  public utc: number;
   constructor(dt: DateType) {
     let value = UTC.toNumber(dt);
     if (Math.floor(Math.abs(value) / 1_000_000_000) === 1) value *= 1000;
@@ -21,7 +21,7 @@ export class UTC {
   }
 
   static ymd(year: number, month: number = 1, day: number = 1, hours: number = 0, minutes: number = 0, seconds: number = 0, ms: number = 0) {
-    return new UTC(Date.UTC(year, month - 1, day, hours, minutes, seconds,  ms));
+    return new UTC(Date.UTC(year, month - 1, day, hours, minutes, seconds, ms));
   }
 
   get isValid() {
@@ -63,8 +63,43 @@ export class UTC {
     return this.utc;
   }
 
+  get day(): number {
+    return new Date(this.utc).getUTCDate();
+  }
+
+  get month(): number {
+    return new Date(this.utc).getUTCMonth() + 1;
+  }
+
+  get year(): number {
+    return new Date(this.utc).getUTCFullYear();
+  }
+
+  get daysInMonth(): number {
+    let date = new Date(this.utc);
+    return new Date(Date.UTC(date.getUTCFullYear(), date.getUTCMonth() + 1, 0)).getUTCDate();
+  }
+
   startOfDay() {
     this.utc = new Date(this.utc).setUTCHours(0, 0, 0, 0);
+    return this;
+  }
+
+  startOfMonth() {
+    let date = new Date(this.utc);
+    date.setUTCDate(1);
+    this.utc = date.setUTCHours(0, 0, 0, 0);
+    return this;
+  }
+
+  endOfDay() {
+    this.utc = new Date(this.utc).setUTCHours(23, 59, 59, 999);
+    return this;
+  }
+
+  endOfMonth() {
+    let date = new Date(this.utc);
+    this.utc = new Date(Date.UTC(date.getUTCFullYear(), date.getUTCMonth() + 1, 0)).setUTCHours(23, 59, 59, 999);
     return this;
   }
 
@@ -113,6 +148,10 @@ export class UTC {
 
   static now() {
     return new UTC(new Date().getTime() - _zoneOffset);
+  }
+
+  toDate() {
+    return new Date(this.utc);
   }
 
   toLocalDate() {
