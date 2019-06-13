@@ -1,5 +1,5 @@
 import * as React                    from 'react';
-import {isNullOrUndefined, utc}      from 'rewire-common';
+import {isNullOrUndefined, utc, UTC} from 'rewire-common';
 import BlurInputHOC                  from './BlurInputHOC';
 import TextField, { TextFieldProps } from '@material-ui/core/TextField';
 import InputAdornment                from '@material-ui/core/InputAdornment';
@@ -89,26 +89,26 @@ const styles = (theme: Theme) => ({
 });
 
 export interface ITextFieldProps {
-  visible?         : boolean;
-  disabled?        : boolean;
-  disableErrors?   : boolean;
-  error?           : string;
-  value?           : string;
-  label?           : string;
-  placeholder?     : string;
-  align?           : TextAlignment;
-  variant?         : TextVariant;
-  multiline?       : boolean;
-  rows?            : string | number; // only used if multiline is true
-  rowsMax?         : string | number; // only used if multiline is true
-  selectOnFocus?   : boolean;
-  endOfTextOnFocus?: boolean;
+  visible?              : boolean;
+  disabled?             : boolean;
+  disableErrors?        : boolean;
+  error?                : string;
+  value?                : string;
+  label?                : string;
+  placeholder?          : string;
+  align?                : TextAlignment;
+  variant?              : TextVariant;
+  multiline?            : boolean;
+  rows?                 : string | number; // only used if multiline is true
+  rowsMax?              : string | number; // only used if multiline is true
+  selectOnFocus?        : boolean;
+  endOfTextOnFocus?     : boolean;
   cursorPositionOnFocus?: number;
-  updateOnChange?  : boolean;
-  startAdornment?  : JSX.Element;
-  endAdornment?    : JSX.Element;
+  updateOnChange?       : boolean;
+  startAdornment?       : JSX.Element;
+  endAdornment?         : JSX.Element;
 
-  onValueChange: (value?: string) => void;
+  onValueChange: (value?: string | UTC) => void;
 }
 
 type TextFieldPropsStyled = WithStyle<ReturnType<typeof styles>, TextFieldProps & ITextFieldProps>;
@@ -145,10 +145,10 @@ class TextFieldInternal extends React.Component<TextFieldPropsStyled> {
     );
   }
 
-  onValueChange = (value?: string) => {
+  onValueChange = (value?: string | UTC) => {
     let v = value;
     if (this.props.type === 'date') {
-      v = v ? utc(v) : undefined;
+      v = v ? utc(v).startOfDay() : undefined;
     }
     this.props.onValueChange(v);
   }
