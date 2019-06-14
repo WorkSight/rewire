@@ -87,7 +87,9 @@ class GridModel implements IGrid, IDisposable {
 
   private _dispose: () => void;
 
-  constructor(options?: IGridOptions) {
+  private constructor() { }
+
+  private initialize(dispose: () => void, options?: IGridOptions) {
     this._contentElement            = property(undefined);
     this._sort                      = [];
     this.id                         = id++;
@@ -126,16 +128,7 @@ class GridModel implements IGrid, IDisposable {
 
     this.staticKeybinds   = Object.assign({}, gridStaticKeybinds);
     this.variableKeybinds = merge(gridDefaultVariableKeybinds, options && options.variableKeybinds || {}) as IGridVariableKeybinds;
-  }
 
-  setContentElement(element: HTMLDivElement | undefined) {
-    this._contentElement(element);
-  }
-  get contentElement(): HTMLDivElement | undefined {
-    return this._contentElement();
-  }
-
-  initialize(dispose: () => void) {
     if (this.rows && (this.rows.length > 0)) {
       this.selectedRows = [this.rows[0]];
     }
@@ -151,6 +144,14 @@ class GridModel implements IGrid, IDisposable {
       this.changed = this.hasChanges();
       this.inError = this.hasErrors();
     });
+    return this;
+  }
+
+  setContentElement(element: HTMLDivElement | undefined) {
+    this._contentElement(element);
+  }
+  get contentElement(): HTMLDivElement | undefined {
+    return this._contentElement();
   }
 
   private disposeRows() {
@@ -1291,6 +1292,51 @@ class GridModel implements IGrid, IDisposable {
     this.editCell(undefined);
     this.selectCells([]);
   }
+
+  static create(rows: any[], columns: IColumn[], options?: IGridOptions): IGrid {
+    return root((dispose) => {
+      let grid     = observable(new GridModel());
+      grid.loading = true;
+      grid.initialize(dispose, options);
+      freeze(() => {
+        let fixedColumns: IColumn[]    = [];
+        let standardColumns: IColumn[] = [];
+        for (const column of columns) {
+          if (column.fixed) {
+            fixedColumns.push(column);
+          } else {
+            standardColumns.push(column);
+          }
+        }
+        fixedColumns.forEach((column: IColumn) => grid.addColumn(column));
+        standardColumns.forEach((column: IColumn) => grid.addColumn(column));
+      });
+      freeze(() => {
+        let headerRow = columns.reduce((previous: any, current: any) => (previous[current.name] = current.title, previous), {});
+        grid.addFixedRow({data: headerRow});
+        let groupBy = options && options.groupBy;
+        if (groupBy) {
+          grid.groupBy = groupBy.map((name: string) => grid.column(name)).filter((column: IColumn | undefined) => !isNullOrUndefined(column)) as IColumn[];
+        }
+        let toggleableColumns  = options && options.toggleableColumns;
+        grid.toggleableColumns = toggleableColumns
+                                   ? toggleableColumns.map((name: string) => grid.column(name)).filter((column: IColumn | undefined) => !isNullOrUndefined(column) && !column!.isGroupByColumn) as IColumn[]
+                                   : [];
+      });
+      freeze(() => {
+        grid.setColumnPositions();
+        grid._addRows(rows);
+      });
+      grid.loading = false;
+      // mergeRows(grid.fixedRows, grid.fixedColumns);
+      // mergeRows(grid.fixedRows, grid.standardColumns);
+      // mergeRows(grid.rows, grid.standardColumns);
+      grid.validate();
+      grid.mergeColumns();
+      grid._commit();
+      return grid;
+    });
+  }
 }
 
 export function mergeRows(rows: IRow[], columns: IColumn[], mergeEmpty: boolean = false): void {
@@ -1311,47 +1357,4 @@ export function mergeRows(rows: IRow[], columns: IColumn[], mergeEmpty: boolean 
   }
 }
 
-export default function create(rows: any[], columns: IColumn[], options?: IGridOptions): IGrid {
-  return root((dispose) => {
-    let grid     = observable(new GridModel(options));
-    grid.loading = true;
-    grid.initialize(dispose);
-    freeze(() => {
-      let fixedColumns: IColumn[]    = [];
-      let standardColumns: IColumn[] = [];
-      for (const column of columns) {
-        if (column.fixed) {
-          fixedColumns.push(column);
-        } else {
-          standardColumns.push(column);
-        }
-      }
-      fixedColumns.forEach((column: IColumn) => grid.addColumn(column));
-      standardColumns.forEach((column: IColumn) => grid.addColumn(column));
-    });
-    freeze(() => {
-      let headerRow = columns.reduce((previous: any, current: any) => (previous[current.name] = current.title, previous), {});
-      grid.addFixedRow({data: headerRow});
-      let groupBy = options && options.groupBy;
-      if (groupBy) {
-        grid.groupBy = groupBy.map((name: string) => grid.column(name)).filter((column: IColumn | undefined) => !isNullOrUndefined(column)) as IColumn[];
-      }
-      let toggleableColumns  = options && options.toggleableColumns;
-      grid.toggleableColumns = toggleableColumns
-                                 ? toggleableColumns.map((name: string) => grid.column(name)).filter((column: IColumn | undefined) => !isNullOrUndefined(column) && !column!.isGroupByColumn) as IColumn[]
-                                 : [];
-    });
-    freeze(() => {
-      grid.setColumnPositions();
-      grid._addRows(rows);
-    });
-    grid.loading = false;
-    // mergeRows(grid.fixedRows, grid.fixedColumns);
-    // mergeRows(grid.fixedRows, grid.standardColumns);
-    // mergeRows(grid.rows, grid.standardColumns);
-    grid.validate();
-    grid.mergeColumns();
-    grid._commit();
-    return grid;
-  });
-}
+export default GridModel.create;

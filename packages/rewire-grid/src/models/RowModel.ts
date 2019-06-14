@@ -47,13 +47,14 @@ export class RowModel implements IRow, IDisposable {
     return a.position < b.position ? -1 : a.position > b.position ? 1 : 0;
   }
 
-  constructor(grid: IGrid, data?: IRowData, position: number = 0) {
+  protected constructor() { }
+  protected initialize(grid: IGrid, data?: IRowData, position: number = 0) {
     this.grid               = grid;
     this.cells              = {};
     this.originalData       = {};
     this.selected           = false;
     this.position           = position;
-    this.data               = observable((data && data.data) || {});
+    this.data               = data && data.data;
 
     let options             = data && data.options;
     this._allowMergeColumns = options && options.allowMergeColumns;
@@ -84,6 +85,7 @@ export class RowModel implements IRow, IDisposable {
     }
 
     this.commit();
+    return this;
   }
 
   set parentRow(groupRow: IGroupRow | undefined) {
@@ -282,7 +284,7 @@ export class RowModel implements IRow, IDisposable {
       fixed: this.fixed,
       allowMergeColumns: this._allowMergeColumns,
     };
-    let newRow = new RowModel(this.grid, {data: newCellValues, options: options}, this.position);
+    let newRow = RowModel.create(this.grid, {data: newCellValues, options: options}, this.position);
     return newRow;
   }
 
@@ -324,6 +326,10 @@ export class RowModel implements IRow, IDisposable {
   revert() {
     this.setValue(this._revertHelper(), false);
   }
+
+  static create(grid: IGrid, data?: IRowData, position: number = 0) {
+    return observable(new RowModel()).initialize(grid, data, position);
+  }
 }
 
 function find(rows: IRows, column: IColumn, data?: ICellDataMap): IGroupRow | undefined {
@@ -348,7 +354,7 @@ export default function create(grid: IGrid, rows: IRow[], data?: IRowData, posit
     for (const column of grid.groupBy) {
       let r = find(parent, column, data && data.data);
       if (!r) {
-        r = new GroupModel(grid, column, level, data);
+        r = GroupModel.createGroup(grid, column, level, data);
         if (isGroupRow(parent)) {
           r.parentRow = parent;
         }
@@ -371,7 +377,7 @@ export default function create(grid: IGrid, rows: IRow[], data?: IRowData, posit
         }
       }
     }
-    let newRow       = new RowModel(grid, data, rowPos);
+    let newRow       = RowModel.create(grid, data, rowPos);
     newRow.parentRow = parent as IGroupRow;
     let insertIdx    = parent.rows.findIndex((row: IRow) => row.position === newRow.position - 1) + 1;
     parent.rows.splice(insertIdx, 0, newRow);
@@ -379,7 +385,7 @@ export default function create(grid: IGrid, rows: IRow[], data?: IRowData, posit
     return newRow;
   }
 
-  let r = new RowModel(grid, data, !isNullOrUndefined(rowPos) ? rowPos : grid.dataRowsByPosition.length);
+  let r = RowModel.create(grid, data, !isNullOrUndefined(rowPos) ? rowPos : grid.dataRowsByPosition.length);
   rows.splice(r.position, 0, r);
   if (fixed) {
     grid.mergeFixedRows();
@@ -393,9 +399,19 @@ export default function create(grid: IGrid, rows: IRow[], data?: IRowData, posit
 export class GroupModel extends RowModel implements IGroupRow {
   rows    : IRow[]  = [];
   expanded: boolean = true;
+  column  : IColumn;
+  level   : number;
 
-  constructor(grid: IGrid, public column: IColumn, public level: number, data?: IRowData) {
-    super(grid, data);
-    this.id = nanoid(10);
+  protected constructor() {
+    super();
+  }
+
+  static createGroup(grid: IGrid,  column: IColumn, level: number, data?: IRowData) {
+    const group    = observable(new GroupModel());
+    group.id       = nanoid(10);
+    group.column   = column;
+    group.level    = level;
+    group.initialize(grid, data);
+    return group;
   }
 }

@@ -166,6 +166,18 @@ function createHandler(eq: EQType, parent?: () => void) {
       //     return true;
       //   }
       // }
+      if (!target.hasOwnProperty(property)) {
+        // for getters
+        let proto = Object.getPrototypeOf(target);
+        while (proto !== _objectProto) {
+          let propDesc = Object.getOwnPropertyDescriptor(proto, property);
+          if (propDesc && propDesc.set && typeof propDesc.set === 'function') {
+            target[property] = value;
+            return true;
+          }
+          proto = Object.getPrototypeOf(proto);
+        }
+      }
 
       let v = dependencyCache[property];
       if (!v) {

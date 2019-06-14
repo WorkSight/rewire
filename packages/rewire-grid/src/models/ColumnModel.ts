@@ -20,7 +20,8 @@ import {isNullOrUndefined} from 'rewire-common';
 import {
   freeze,
   DataSignal,
-  property
+  property,
+  observable,
 } from 'rewire-core';
 import { IValidateFnData } from './Validator';
 import * as is             from 'is';
@@ -29,9 +30,9 @@ let id            = 0;
 const toLowerCase = (value: string) => String(value).toLowerCase();
 
 export class ColumnModel implements IColumn {
-  private _enabled      : DataSignal<boolean | undefined>;
-  private _readOnly     : DataSignal<boolean | undefined>;
-  private _verticalAlign: DataSignal<VerticalAlignment | undefined>;
+  _enabled?      : boolean;
+  _readOnly?     : boolean;
+  _verticalAlign?: VerticalAlignment;
 
   id           : number;
   grid         : IGrid;
@@ -64,16 +65,18 @@ export class ColumnModel implements IColumn {
     return a.position < b.position ? -1 : a.position > b.position ? 1 : 0;
   }
 
-  constructor(name: string, title: string, options?: IColumnOptions) {
+  private constructor() { }
+
+  private initialize(name: string, title: string, options?: IColumnOptions) {
     this.id             = id++;
     this.name           = name;
     this.title          = title;
     this.position       = 0;
     this.sort           = undefined;
     this.typeOptions    = undefined;
-    this._enabled       = property(options && !isNullOrUndefined(options.enabled) ? options.enabled! : undefined);
-    this._readOnly      = property(options && !isNullOrUndefined(options.readOnly) ? options.readOnly! : undefined);
-    this._verticalAlign = property(options && !isNullOrUndefined(options.verticalAlign) ? options.verticalAlign! : undefined);
+    this._enabled       = options && !isNullOrUndefined(options.enabled) ? options.enabled! : undefined;
+    this._readOnly      = options && !isNullOrUndefined(options.readOnly) ? options.readOnly! : undefined;
+    this._verticalAlign = options && !isNullOrUndefined(options.verticalAlign) ? options.verticalAlign! : undefined;
     this.editable       = options && !isNullOrUndefined(options.editable) ? options.editable! : true;
     this.fixed          = options && !isNullOrUndefined(options.fixed) ? options.fixed! : false;
     this.width          = options && !isNullOrUndefined(options.width) ? options.width! : undefined;
@@ -89,27 +92,28 @@ export class ColumnModel implements IColumn {
     this.onValueChange  = options && !isNullOrUndefined(options.onValueChange) ? options.onValueChange! : undefined;
     this.compare        = options && !isNullOrUndefined(options.compare) ? options.compare! : undefined;
     this.setEditor(options && options.type);
+    return this;
   }
 
   set readOnly(value: boolean) {
-    this._readOnly(value);
+    this._readOnly = value;
   }
   get readOnly(): boolean {
-    return (!isNullOrUndefined(this._readOnly()) ? this._readOnly() : this.grid.readOnly) as boolean;
+    return (!isNullOrUndefined(this._readOnly) ? this._readOnly : this.grid.readOnly) as boolean;
   }
 
   set enabled(value: boolean) {
-    this._enabled(value);
+    this._enabled = value;
   }
   get enabled(): boolean {
-    return (!isNullOrUndefined(this._enabled()) ? this._enabled() : this.grid.enabled) as boolean;
+    return (!isNullOrUndefined(this._enabled) ? this._enabled : this.grid.enabled) as boolean;
   }
 
   set verticalAlign(value: VerticalAlignment) {
-    this._verticalAlign(value);
+    this._verticalAlign = value;
   }
   get verticalAlign(): VerticalAlignment {
-    return this._verticalAlign() || this.grid.verticalAlign;
+    return this._verticalAlign || this.grid.verticalAlign;
   }
 
   get isGroupByColumn(): boolean {
@@ -128,9 +132,9 @@ export class ColumnModel implements IColumn {
       typeOptions = type.options;
     }
 
+    this.type        = t;
+    this.typeOptions = typeOptions || {};
     freeze(() => {
-      this.type    = t;
-      this.typeOptions = typeOptions || {};
       if (this.type === 'none') {
         this.editor = undefined;
       } else {
@@ -171,6 +175,10 @@ export class ColumnModel implements IColumn {
         }
       }
     });
+  }
+
+  static create(name: string, title: string, options?: IColumnOptions): IColumn {
+    return observable(new ColumnModel()).initialize(name, title, options);
   }
 }
 
@@ -254,6 +262,4 @@ function getPhoneString(value: any): string {
   return formattedNumberArr.join('');
 }
 
-export default function create(name: string, title: string, options?: IColumnOptions): IColumn {
-  return new ColumnModel(name, title, options);
-}
+export default ColumnModel.create;
