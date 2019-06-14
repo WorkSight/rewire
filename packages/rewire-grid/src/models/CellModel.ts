@@ -1,7 +1,7 @@
-import * as React              from 'react';
-import * as is                 from 'is';
-import {isNullOrUndefined}     from 'rewire-common';
-import {defaultEquals, freeze} from 'rewire-core';
+import * as React                          from 'react';
+import * as is                             from 'is';
+import {isNullOrUndefined}                 from 'rewire-common';
+import {defaultEquals, freeze, observable} from 'rewire-core';
 import {IGrid,
   IColumn,
   ICell,
@@ -11,9 +11,8 @@ import {IGrid,
   TextAlignment,
   VerticalAlignment,
   cloneValue
-}                              from './GridTypes';
-import * as deepEqual          from 'fast-deep-equal';
-import { observable }          from 'rewire-core/dist/src';
+}                                          from './GridTypes';
+import * as deepEqual                      from 'fast-deep-equal';
 
 let id = 0;
 export class CellModel implements ICell {
