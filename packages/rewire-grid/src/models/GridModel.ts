@@ -38,17 +38,15 @@ import {
   observable,
   computed,
   observe,
-  property,
   freeze,
   root,
-  DataSignal,
   watch,
 }                  from 'rewire-core';
 import { compare } from 'rewire-ui';
 
 let id = 0;
 class GridModel implements IGrid, IDisposable {
-  _contentElement           : DataSignal<HTMLDivElement | undefined>;
+  __contentElement?         : HTMLDivElement; // __ means non-obserbable property
   _standardColumns          : () => IColumn[];
   _fixedColumns             : () => IColumn[];
   _columnsByPosition        : () => IColumn[];
@@ -90,7 +88,6 @@ class GridModel implements IGrid, IDisposable {
   private constructor() { }
 
   private initialize(dispose: () => void, options?: IGridOptions) {
-    this._contentElement            = property(undefined);
     this._sort                      = [];
     this.id                         = id++;
     this.addedRows                  = [];
@@ -148,10 +145,10 @@ class GridModel implements IGrid, IDisposable {
   }
 
   setContentElement(element: HTMLDivElement | undefined) {
-    this._contentElement(element);
+    this.__contentElement = element;
   }
   get contentElement(): HTMLDivElement | undefined {
-    return this._contentElement();
+    return this.__contentElement;
   }
 
   private disposeRows() {
@@ -1274,7 +1271,7 @@ class GridModel implements IGrid, IDisposable {
   }
 
   static create(rows: any[], columns: IColumn[], options?: IGridOptions): IGrid {
-    return root((dispose) => {
+    return root((dispose: any) => {
       let grid     = observable(new GridModel());
       grid.loading = true;
       grid.initialize(dispose, options);
