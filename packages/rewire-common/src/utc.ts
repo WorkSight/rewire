@@ -150,7 +150,7 @@ export class UTC {
 
   static now() {
     let date = new Date();
-    return new UTC(date.getTime() + getTimezoneOffset(date));
+    return new UTC(date.getTime());
   }
 
   toDate() {
