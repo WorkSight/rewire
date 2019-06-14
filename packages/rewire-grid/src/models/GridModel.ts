@@ -677,13 +677,6 @@ class GridModel implements IGrid, IDisposable {
     for (const rows of allDataRows(this.rows)) {
       rows.row.position = totalRowCount;
       newDataRowsByPosition.push(rows.row);
-      Object.values(rows.row.cells).forEach(cell => {
-        cell.row.position = totalRowCount; // cell row and grid row different objects for some reason
-        // console.log(rows.row.position);
-        // console.log(cell.row.position);
-        // console.log(cell.rowPosition);
-        // console.log('***********************');
-      });
       totalRowCount++;
     }
 
@@ -910,9 +903,6 @@ class GridModel implements IGrid, IDisposable {
     let totalRowCount = 0;
     for (const rows of allDataRows(this.rows)) {
       rows.row.position = totalRowCount;
-      Object.values(rows.row.cells).forEach(cell => { // won't need to do this once the row references bug is fixed.
-        cell.row.position = totalRowCount; // cell row and grid row different objects for some reason
-      });
       totalRowCount++;
     }
   }
@@ -1072,12 +1062,7 @@ class GridModel implements IGrid, IDisposable {
       this.focusedCell && this.focusedCell.setFocus(false);
       return;
     }
-    // let firstGroupRow = this.rows[0];
-    // let cellGroupRow = cells[0].row.parentRow.parentRow;
-    // let x = firstGroupRow === cellGroupRow;
-    // let firstRow = this.dataRowsByPosition[0];
-    // let cellRow = this.dataRowsByPosition[0].cellsByColumnPosition[0].row;
-    // let y = firstRow === cellRow;
+
     this.editCell(undefined);
     let rowsToSelect: IRow[]   = [];
     let cellsToSelect: ICell[] = [];
@@ -1087,12 +1072,7 @@ class GridModel implements IGrid, IDisposable {
         return;
       }
       cell.selected = true;
-      // rowsToSelect.push(cell.row);
-      let row = this.row(cell.row.id);
-      // let test = cell.row === row; // testing to see that the two rows are the same object. Currently not, which is a bug
-      if (row) {
-        rowsToSelect.push(row);
-      }
+      rowsToSelect.push(cell.row);
       cellsToSelect.push(cell);
 
       if (handleMergedCells) {
