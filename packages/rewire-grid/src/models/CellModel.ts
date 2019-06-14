@@ -1,7 +1,7 @@
 import * as React              from 'react';
 import * as is                 from 'is';
 import {isNullOrUndefined}     from 'rewire-common';
-import {defaultEquals, freeze, DataSignal, property} from 'rewire-core';
+import {defaultEquals, freeze} from 'rewire-core';
 import {IGrid,
   IColumn,
   ICell,
@@ -25,7 +25,7 @@ export class CellModel implements ICell {
   _verticalAlign?      : VerticalAlignment;
   _renderer?           : React.SFC<any>;
   _onValueChange?      : ((cell: ICell, v: any) => void);
-  private _element     : DataSignal<HTMLTableDataCellElement | undefined>;
+  private __element?   : HTMLTableDataCellElement; // non-observable
 
   id                   : number;
   row                  : IRow;
@@ -67,7 +67,7 @@ export class CellModel implements ICell {
     this.isBottomMostSelection = false;
     this.isLeftMostSelection   = false;
     this.keyForEdit            = undefined;
-    this._element              = property(undefined);
+    this.__element             = undefined;
     return this;
   }
 
@@ -128,10 +128,10 @@ export class CellModel implements ICell {
   }
 
   setElement(element: HTMLTableDataCellElement | undefined) {
-    this._element(element);
+    this.__element = element;
   }
   get element(): HTMLTableDataCellElement | undefined {
-    return this._element();
+    return this.__element;
   }
 
   get rowPosition(): number {

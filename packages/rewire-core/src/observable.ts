@@ -129,8 +129,8 @@ function createHandler(eq: EQType, parent?: () => void) {
         return value;
       }
 
-      if (typeof(value) === 'function') {
-        return value; // ? property
+      if ((typeof(value) === 'function') || property.startsWith('__')) { // a function or a non-observable property
+        return value;
       }
 
       if (!target.hasOwnProperty(property)) {
@@ -166,6 +166,11 @@ function createHandler(eq: EQType, parent?: () => void) {
       //     return true;
       //   }
       // }
+      if (property.startsWith('__')) { // non-observable property
+        target[property] = value;
+        return true;
+      }
+
       if (!target.hasOwnProperty(property)) {
         // for getters
         let proto = Object.getPrototypeOf(target);
