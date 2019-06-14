@@ -1,7 +1,9 @@
 export type DateType = UTC | Date | string | number;
 export enum TimeSpan { years, months, days, weeks, hours, minutes, seconds, milliseconds }
 
-const _zoneOffset = (new Date()).getTimezoneOffset() * 60000;
+export function getTimezoneOffset(date: Date) {
+  return (date.getTimezoneOffset() * 60000);
+}
 
 const _maxValue = Date.UTC(9999, 12 - 1, 31, 0, 0, 0, 0);
 const _minValue = Date.UTC(1, 1 - 1, 1, 0, 0, 0, 0);
@@ -147,7 +149,8 @@ export class UTC {
   }
 
   static now() {
-    return new UTC(new Date().getTime() - _zoneOffset);
+    let date = new Date();
+    return new UTC(date.getTime() + getTimezoneOffset(date));
   }
 
   toDate() {
@@ -155,7 +158,8 @@ export class UTC {
   }
 
   toLocalDate() {
-    return new Date(this.utc + _zoneOffset);
+    let date = new Date(this.utc);
+    return new Date(this.utc - getTimezoneOffset(date));
   }
 
   toString(): string {
@@ -194,8 +198,6 @@ export class UTC {
     [TimeSpan.seconds]:      UTC.MillisecondsPerSecond,
     [TimeSpan.milliseconds]: 1
   };
-
-  static get ZoneOffset() { return _zoneOffset; }
 }
 
 export default function utc(dt?: DateType) {

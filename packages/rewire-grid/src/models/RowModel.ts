@@ -242,9 +242,8 @@ export class RowModel implements IRow, IDisposable {
 
   commit() {
     Object.keys(this.cells).forEach(columnName => {
-      let clonedValue                                     = cloneValue(this.cells[columnName].value);
-      this.originalData[columnName]                       = clonedValue;
-      this.cells[columnName].row.originalData[columnName] = clonedValue; // Shouldn't need to do this, but again, some bug causing an issue.
+      let clonedValue               = cloneValue(this.cells[columnName].value);
+      this.originalData[columnName] = clonedValue;
     });
   }
 
