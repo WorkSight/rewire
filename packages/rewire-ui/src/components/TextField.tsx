@@ -1,5 +1,5 @@
 import * as React                    from 'react';
-import {isNullOrUndefined}           from 'rewire-common';
+import {isNullOrUndefined, utc, UTC} from 'rewire-common';
 import BlurInputHOC                  from './BlurInputHOC';
 import TextField, { TextFieldProps } from '@material-ui/core/TextField';
 import InputAdornment                from '@material-ui/core/InputAdornment';
@@ -89,26 +89,26 @@ const styles = (theme: Theme) => ({
 });
 
 export interface ITextFieldProps {
-  visible?         : boolean;
-  disabled?        : boolean;
-  disableErrors?   : boolean;
-  error?           : string;
-  value?           : string;
-  label?           : string;
-  placeholder?     : string;
-  align?           : TextAlignment;
-  variant?         : TextVariant;
-  multiline?       : boolean;
-  rows?            : string | number; // only used if multiline is true
-  rowsMax?         : string | number; // only used if multiline is true
-  selectOnFocus?   : boolean;
-  endOfTextOnFocus?: boolean;
+  visible?              : boolean;
+  disabled?             : boolean;
+  disableErrors?        : boolean;
+  error?                : string;
+  value?                : string;
+  label?                : string;
+  placeholder?          : string;
+  align?                : TextAlignment;
+  variant?              : TextVariant;
+  multiline?            : boolean;
+  rows?                 : string | number; // only used if multiline is true
+  rowsMax?              : string | number; // only used if multiline is true
+  selectOnFocus?        : boolean;
+  endOfTextOnFocus?     : boolean;
   cursorPositionOnFocus?: number;
-  updateOnChange?  : boolean;
-  startAdornment?  : JSX.Element;
-  endAdornment?    : JSX.Element;
+  updateOnChange?       : boolean;
+  startAdornment?       : JSX.Element;
+  endAdornment?         : JSX.Element;
 
-  onValueChange: (value?: string) => void;
+  onValueChange: (value?: string | UTC) => void;
 }
 
 type TextFieldPropsStyled = WithStyle<ReturnType<typeof styles>, TextFieldProps & ITextFieldProps>;
@@ -143,6 +143,14 @@ class TextFieldInternal extends React.Component<TextFieldPropsStyled> {
       (nextProps.startAdornment !== this.props.startAdornment) ||
       (nextProps.endAdornment !== this.props.endAdornment)
     );
+  }
+
+  onValueChange = (value?: string | UTC) => {
+    let v = value;
+    if (this.props.type === 'date') {
+      v = v ? utc(v).startOfDay() : undefined;
+    }
+    this.props.onValueChange(v);
   }
 
   handleFocus = (evt: React.FocusEvent<HTMLInputElement>) => {
@@ -215,7 +223,7 @@ class TextFieldInternal extends React.Component<TextFieldPropsStyled> {
         onFocus={this.handleFocus}
         onBlur={this.props.onBlur}
         onKeyDown={this.handleKeyDown}
-        onChange={(evt: React.ChangeEvent<HTMLInputElement>) => this.props.onValueChange(evt.target.value)}
+        onChange={(evt: React.ChangeEvent<HTMLInputElement>) => this.onValueChange(evt.target.value)}
         inputProps={{spellCheck: !!multiline, className: classes.nativeInput, style: {textAlign: this.props.align || 'left'}}}
         InputProps={{startAdornment: startAdornment, endAdornment: endAdornment, classes: {root: classes.inputRoot, multiline: multilineClassName, input: inputClassName, inputType: inputTypeClassName, formControl: inputFormControlClassName}}}
         InputLabelProps={{shrink: true, classes: {root: classes.inputLabelRoot, outlined: classes.inputLabelOutlined, shrink: classes.inputLabelShrink}}}
@@ -224,7 +232,7 @@ class TextFieldInternal extends React.Component<TextFieldPropsStyled> {
     }
 
     return (
-    <BlurInputHOC {...this.props} value={value} onValueChange={this.props.onValueChange}
+    <BlurInputHOC {...this.props} value={value} onValueChange={this.onValueChange}
       render={(props: TextFieldPropsStyled) =>
         <TextField
           className={props.className}
