@@ -129,7 +129,7 @@ function createHandler(eq: EQType, parent?: () => void) {
         return value;
       }
 
-      if ((typeof(value) === 'function') || property.startsWith('__')) { // a function or a non-observable property
+      if (typeof(value) === 'function') { // a function or a non-observable property
         return value;
       }
 
@@ -148,7 +148,7 @@ function createHandler(eq: EQType, parent?: () => void) {
       let v = dependencyCache[property];
       if (v) return v();
 
-      v = S.data(observable(value, incrementVersion));
+      v = S.data(property.startsWith('__') ? value: observable(value, incrementVersion));
       dependencyCache[property] = v;
       return v();
     },
