@@ -417,7 +417,7 @@ const GridInternal = withStyles(styles, class extends React.PureComponent<GridPr
     return this.props.grid.standardColumns.reduce((prev, current) => prev = prev + (current.visible ? 1 : 0), 0);
   }
 
-  handleExternalMouseUp = (evt: React.MouseEvent) => {
+  handleExternalMouseUp = (evt: MouseEvent) => {
     if (this.grid.clearSelectionOnBlur && !this.grid.isMouseDown) {
       this.grid.clearSelection();
     }
