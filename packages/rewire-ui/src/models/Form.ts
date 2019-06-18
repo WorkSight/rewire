@@ -1,5 +1,8 @@
-import * as React          from 'react';
-import {isNullOrUndefined} from 'rewire-common';
+import * as React      from 'react';
+import {
+  isNullOrUndefined,
+  isNullOrUndefinedOrEmpty,
+}                      from 'rewire-common';
 import {
   observable,
   replace,
@@ -259,6 +262,15 @@ export default class Form {
     return this._value;
   }
 
+  getChanges(): {[s: string]: any} {
+    let changesObj = {};
+    for (const field of this.fields) {
+      if (!defaultEquals(field.value, this._value[field.name]))
+        changesObj[field.name] = field.value;
+    }
+    return changesObj;
+  }
+
   private initializeFields(fields: IFieldDefns) {
     this.fields = [];
     for (let fieldName in fields) {
@@ -298,7 +310,7 @@ export default class Form {
     }
 
     const onValueChange = (v: any) => {
-      let value = isNullOrUndefined(v) || v === '' ? undefined : v;
+      let value = isNullOrUndefinedOrEmpty(v) ? undefined : v;
       this.setFieldValue(field.name, value);
     };
 
