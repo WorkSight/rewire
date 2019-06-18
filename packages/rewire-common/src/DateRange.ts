@@ -37,9 +37,9 @@ export default class DateRange implements Iterable<UTC> {
       const parts = start.replace(/"/g, '').split(',');
       if (parts.length === 2) {
         const s     = parts[0].substr(1).trim();
-        this._start = s ? new UTC(s + 'T00:00:00.000Z') : UTC.MinValue;
+        this._start = s ? new UTC(s + 'T00:00Z') : UTC.MinValue;
         const e     = parts[1].substr(0, parts[1].length - 1).trim();
-        this._end   = e ? new UTC(e + 'T00:00:00.000Z') : UTC.MaxValue;
+        this._end   = e ? new UTC(e + 'T00:00Z') : UTC.MaxValue;
         if (!this._start.isValid) this._start = UTC.MinValue;
         if (!this._end.isValid)   this._end   = UTC.MaxValue;
         return;
