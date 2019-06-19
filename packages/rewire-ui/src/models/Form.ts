@@ -196,6 +196,7 @@ export default class Form {
   field:                       { [index: string]: IEditorField };
 
   private constructor(fields: IFieldDefns, initial?: ObjectType, options?: IFormOptions) {
+    this._value                      = observable({});
     this.field                       = observable({});
     this.validator                   = new Validator();
     this.defaultAdornmentsEnabled    = options && !isNullOrUndefined(options.defaultAdornmentsEnabled) ? options.defaultAdornmentsEnabled! : true;
@@ -213,7 +214,7 @@ export default class Form {
   set value(value: ObjectType)  {
     if (this.dispose) this.dispose();
 
-    this._value = value;
+    replace(this._value, value);
     this.fields.forEach(field => {
       field.value = field.type === 'boolean' || field.type === 'switch' ? value[field.name] || false : value[field.name];
       field.error = undefined;
@@ -224,12 +225,12 @@ export default class Form {
       validationResult = this.validateForm();
     } else if (this.initialValuesValidationMode === 'withValues') {
       let fieldsToValidate = this.fields.filter(field => !isNullOrUndefined(field.value));
-      validationResult = this.validateFields(fieldsToValidate);
+      validationResult     = this.validateFields(fieldsToValidate);
     }
 
     root((dispose) => {
       this.dispose        = dispose;
-      const fieldsChanged = observe(() => this.fields.map(f => f.value));
+      const fieldsChanged = observe(() => { Object.keys(this._value).map(k => this._value[k]); this.fields.map(f => f.value); });
       this._hasChanges    = computed(fieldsChanged, () => {
         if (!this._value) return false;
         for (const field of this.fields) {
