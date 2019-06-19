@@ -184,13 +184,14 @@ class GridModel implements IGrid, IDisposable {
     this.selectedCells.forEach(cell => cell.clear());
   }
 
-  get(): ICellDataMap[] {
-    const data: ICellDataMap[] = [];
+  get(): IRowData[] {
+    const data: IRowData[] = [];
     for (const row of allDataRows(this.rows)) {
-      let rowData: ICellDataMap = {};
-      for (const column of this.columns) {
-        rowData[column.name] = row.row.cells[column.name].value;
-      }
+      let rowData: IRowData = {
+        id: row.row.id,
+        data: row.row.data,
+        options: row.row.options,
+      };
       data.push(rowData);
     }
     return data;
