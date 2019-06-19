@@ -33,9 +33,14 @@ class Reaction<T> {
 
   track(fn: () => T, action: () => void): T {
     this.dispose();
+    let alreadyRendered = false;
     S.root((dispose) => {
       this._dispose = dispose;
-      S.on(() => this._result = fn(), action, undefined, true);
+      S.on(() => {
+        if (alreadyRendered) return this._result;
+        this._result = fn();
+        alreadyRendered = true;
+      }, () => (this.dispose(), action()), undefined, true);
     });
     return this._result;
   }
