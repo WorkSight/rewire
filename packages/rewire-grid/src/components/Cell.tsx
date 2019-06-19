@@ -4,20 +4,20 @@ import {
   IColumn,
   ICell,
   ErrorSeverity,
-}                              from '../models/GridTypes';
-import * as React              from 'react';
-import * as is                 from 'is';
-import cc                      from 'classcat';
-import classNames              from 'classnames';
-import {isNullOrUndefined}     from 'rewire-common';
-import {Observe}               from 'rewire-core';
-import {withStyles, WithStyle} from 'rewire-ui';
-import {Theme}                 from '@material-ui/core/styles';
-import ErrorIcon               from '@material-ui/icons/Error';
-import WarningIcon             from '@material-ui/icons/Warning';
-import InfoIcon                from '@material-ui/icons/Info';
-import Tooltip                 from '@material-ui/core/Tooltip';
-import Fade                    from '@material-ui/core/Fade';
+}                                 from '../models/GridTypes';
+import * as React                 from 'react';
+import * as is                    from 'is';
+import cc                         from 'classcat';
+import classNames                 from 'classnames';
+import {isNullOrUndefinedOrEmpty} from 'rewire-common';
+import {Observe}                  from 'rewire-core';
+import {withStyles, WithStyle}    from 'rewire-ui';
+import {Theme}                    from '@material-ui/core/styles';
+import ErrorIcon                  from '@material-ui/icons/Error';
+import WarningIcon                from '@material-ui/icons/Warning';
+import InfoIcon                   from '@material-ui/icons/Info';
+import Tooltip                    from '@material-ui/core/Tooltip';
+import Fade                       from '@material-ui/core/Fade';
 
 const styles = (theme: Theme) => ({
   tableCell: {
@@ -296,7 +296,7 @@ class Cell extends React.PureComponent<CellProps, {}> {
   }
 
   onValueChange = (v: any) => {
-    let value = isNullOrUndefined(v) || v === '' ? undefined : v;
+    let value = isNullOrUndefinedOrEmpty(v) ? undefined : v;
     this.cell.keyForEdit = undefined;
     this.cell.setValue(value);
     if (this.column.type === 'multiselect' || this.column.type === 'multiselectautocomplete') {
@@ -372,7 +372,7 @@ class Cell extends React.PureComponent<CellProps, {}> {
     return <Observe render={
       () => {
         let hasError = !!cell.error;
-        let value    = !isNullOrUndefined(this.value) ? this.value : <span>&nbsp;</span>;
+        let value    = !isNullOrUndefinedOrEmpty(this.value) ? this.value : <span>&nbsp;</span>;
 
         return (
           < >

@@ -1,5 +1,5 @@
-import S, {DataSignal}     from 's-js';
-import {isNullOrUndefined} from 'rewire-common';
+import S, {DataSignal}                               from 's-js';
+import {isNullOrUndefined, isNullOrUndefinedOrEmpty} from 'rewire-common';
 
 export type EQType = (v1: any, v2: any) => boolean;
 
@@ -197,12 +197,12 @@ function createHandler(eq: EQType, parent?: () => void) {
 
 export function defaultEquals(v1: any, v2: any) {
   if (v1 === v2) return true;
-  if (v1 && v1.id && v2 && v2.id && v1.id === v2.id) {
+  if (v1 && !isNullOrUndefinedOrEmpty(v1.id) && v2 && !isNullOrUndefinedOrEmpty(v2.id) && v1.id === v2.id) {
     return true;
   }
 
-  const undefinedOrNullOrEmpty1 = isNullOrUndefined(v1) || v1 === '';
-  const undefinedOrNullOrEmpty2 = isNullOrUndefined(v2) || v2 === '';
+  const undefinedOrNullOrEmpty1 = isNullOrUndefinedOrEmpty(v1);
+  const undefinedOrNullOrEmpty2 = isNullOrUndefinedOrEmpty(v2);
   if (undefinedOrNullOrEmpty1 && undefinedOrNullOrEmpty2) return true;
   if (Array.isArray(v1) && Array.isArray(v2)) {
     if (v1.length !== v2.length) return false;
