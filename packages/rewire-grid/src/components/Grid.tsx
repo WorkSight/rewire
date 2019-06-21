@@ -242,6 +242,7 @@ const styles = (theme: Theme) => {
       display: 'flex',
       flexDirection: 'column',
       width: '100%',
+      overflow: 'auto',
     },
     leftLabels: {
       backgroundColor: theme.palette.leftLabelBackground.main,
@@ -539,12 +540,15 @@ const GridInternal = withStyles(styles, class extends React.PureComponent<GridPr
     Object.keys(this._fixedRowElements).forEach(rowId => {
       let rowElement = this._rowElements[rowId];
       if (rowElement) {
-        let fixedRowElement = this._fixedRowElements[rowId];
-        if (rowElement.clientHeight === fixedRowElement.clientHeight) return;
-        if (rowElement.clientHeight > fixedRowElement.clientHeight) {
-          fixedRowElement.style.height = rowElement.clientHeight + 'px';
+        let fixedRowElement             = this._fixedRowElements[rowId];
+        let rowElementClientHeight      = rowElement.clientHeight;
+        let fixedRowElementClientHeight = fixedRowElement.clientHeight;
+
+        if (rowElementClientHeight === fixedRowElementClientHeight) return;
+        if (rowElementClientHeight > fixedRowElementClientHeight) {
+          fixedRowElement.style.height = rowElementClientHeight + 'px';
         } else {
-          rowElement.style.height = fixedRowElement.clientHeight + 'px';
+          rowElement.style.height = fixedRowElementClientHeight + 'px';
         }
       }
     });

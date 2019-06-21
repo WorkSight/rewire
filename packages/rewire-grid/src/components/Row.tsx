@@ -92,27 +92,31 @@ const Row = withStyles(styles, class extends PureComponent<RowProps, {}> {
   }
 
   private fixedRowResizeHandler = () => {
-    let fixedRowElement = this.element;
-    let rowElement      = this.props.rowElements && this.props.rowElements[this.props.row.id];
+    let fixedRowElement             = this.element;
+    let rowElement                  = this.props.rowElements && this.props.rowElements[this.props.row.id];
+    let rowElementClientHeight      = rowElement.clientHeight;
+    let fixedRowElementClientHeight = fixedRowElement.clientHeight;
     if (rowElement) {
-      if (rowElement.clientHeight === fixedRowElement.clientHeight) return;
-      if (rowElement.clientHeight < fixedRowElement.clientHeight) {
-        rowElement.style.height = fixedRowElement.clientHeight + 'px';
+      if (rowElementClientHeight === fixedRowElementClientHeight) return;
+      if (rowElementClientHeight < fixedRowElementClientHeight) {
+        rowElement.style.height = fixedRowElementClientHeight + 'px';
       } else {
-        fixedRowElement.style.height = rowElement.clientHeight + 'px';
+        fixedRowElement.style.height = rowElementClientHeight + 'px';
       }
     }
   }
 
   private standardRowResizeHandler = (elements: ResizeObserverEntry[]) => {
-    let rowElement      = this.element;
-    let fixedRowElement = this.props.fixedRowElements && this.props.fixedRowElements[this.props.row.id];
+    let rowElement                  = this.element;
+    let fixedRowElement             = this.props.fixedRowElements && this.props.fixedRowElements[this.props.row.id];
+    let rowElementClientHeight      = rowElement.clientHeight;
+    let fixedRowElementClientHeight = fixedRowElement.clientHeight;
     if (fixedRowElement) {
-      if (fixedRowElement.clientHeight === rowElement.clientHeight) return;
-      if (fixedRowElement.clientHeight < rowElement.clientHeight) {
-        fixedRowElement.style.height = rowElement.clientHeight + 'px';
+      if (fixedRowElementClientHeight === rowElementClientHeight) return;
+      if (fixedRowElementClientHeight < rowElementClientHeight) {
+        fixedRowElement.style.height = rowElementClientHeight + 'px';
       } else {
-        rowElement.style.height = fixedRowElement.clientHeight + 'px';
+        rowElement.style.height = fixedRowElementClientHeight + 'px';
       }
     }
   }
