@@ -253,6 +253,7 @@ const styles = (theme: Theme) => {
       display: 'flex',
       flexDirection: 'column',
       width: '100%',
+      overflow: 'auto'
     },
     leftLabels: {
       backgroundColor: theme.palette.leftLabelBackground.main,

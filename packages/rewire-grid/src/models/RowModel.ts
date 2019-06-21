@@ -114,6 +114,16 @@ export class RowModel implements IRow, IDisposable {
     return !isNullOrUndefined(this._allowMergeColumns) ? this._allowMergeColumns! : this.grid.allowMergeColumns;
   }
 
+  get options(): IRowOptions {
+    return {
+      allowMergeColumns: this.allowMergeColumns,
+      cls: this.cls,
+      visible: this.visible,
+      fixed: this.fixed,
+      onClick: this.onClick,
+    };
+  }
+
   createCell(column: IColumn, value: any): ICell {
     return this.cells[column.name] = createCell(this, column, value);
   }

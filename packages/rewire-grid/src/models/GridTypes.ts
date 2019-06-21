@@ -255,6 +255,7 @@ export interface IRow extends IDisposable {
   parentRow?                    : IGroupRow;
   visible                       : boolean;
   fixed                         : boolean;
+  options                       : IRowOptions;
 
   onClick?(row: IRow): void;
   hasChanges(): boolean;

@@ -1,6 +1,6 @@
 {
   "name": "rewire-core",
-  "version": "1.0.82",
+  "version": "1.0.85",
   "description": "A simple library for developing react applications using reactive state and proxies",
   "main": "./src/index.ts",
   "typings": "./src/index.ts",
