@@ -1,24 +1,8 @@
-import { useCallback, useEffect, useState, useRef } from 'react';
+import { useEffect, useState, useRef } from 'react';
 import S from 's-js';
 
 export function useUnmount(fn: () => void) {
   useEffect(() => fn, []);
-}
-
-export function useForceUpdate() {
-  const [, setTick] = useState(0);
-
-  const update = useCallback(() => {
-    setTick(tick => tick + 1);
-  }, []);
-
-  return update;
-}
-
-export type ForceUpdateHook = () => () => void;
-
-export interface IUseObserverOptions {
-  useForceUpdate?: ForceUpdateHook;
 }
 
 class Reaction<T> {
@@ -40,25 +24,24 @@ class Reaction<T> {
         if (alreadyRendered) return this._result;
         this._result = fn();
         alreadyRendered = true;
-      }, () => (this.dispose(), action()), undefined, true);
+      }, action, undefined, true);
     });
     return this._result;
   }
 }
 
 export function useObserver<T>(
-  renderFn: () => T,
-  options: IUseObserverOptions = {}
+  renderFn: () => T
 ): T {
-  const wantedForceUpdateHook = options.useForceUpdate || useForceUpdate;
-  const forceUpdate           = wantedForceUpdateHook();
-  const s                     = useRef<Reaction<T> | null>(null);
+  const [, setTick] = useState(0);
+  const update      = () => setTick(tick => tick + 1);
+  const s           = useRef<Reaction<T> | null>(null);
   if (!s.current) {
     s.current = new Reaction<T>();
   }
 
   useUnmount(() => s.current!.dispose());
-  return s.current!.track(renderFn, forceUpdate);
+  return s.current!.track(renderFn, update);
 };
 
 export function disposeOnUnmount(context: any, fn: Function) {

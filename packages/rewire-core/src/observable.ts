@@ -13,6 +13,7 @@ export const root       = S.root;
 export const freeze     = S.freeze;
 export const property   = S.data;
 export const sample     = S.sample;
+export const value      = S.value;
 
 export function is_proxy(value: ObjectType) {
   return (!isNullOrUndefined(value) && !!value[proxyProperty]);

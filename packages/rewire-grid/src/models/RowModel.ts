@@ -34,6 +34,7 @@ export class RowModel implements IRow, IDisposable {
   originalData          : ICellDataMap;
   cellsByColumnPosition : ICell[];
   selected              : boolean;
+  height                : number;
   cls?                  : string;
   data?                 : any;
   visible               : boolean;
@@ -50,6 +51,7 @@ export class RowModel implements IRow, IDisposable {
   protected constructor() { }
   protected initialize(grid: IGrid, data?: IRowData, position: number = 0) {
     this.grid               = grid;
+    this.height             = 28; // default height!
     this.cells              = {};
     this.originalData       = {};
     this.selected           = false;

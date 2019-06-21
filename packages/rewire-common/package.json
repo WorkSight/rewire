@@ -20,7 +20,7 @@
   },
   "homepage": "https://github.com/worksight/rewire",
   "dependencies": {
-    "query-string": "^6.3.0"
+    "query-string": "^6.8.0"
   },
   "devDependencies": {
     "@babel/core": "^7.0.0-0",
