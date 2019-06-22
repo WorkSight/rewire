@@ -51,7 +51,7 @@ export class RowModel implements IRow, IDisposable {
   protected constructor() { }
   protected initialize(grid: IGrid, data?: IRowData, position: number = 0) {
     this.grid               = grid;
-    this.height             = 28; // default height!
+    this.height             = 28; // default value
     this.cells              = {};
     this.originalData       = {};
     this.selected           = false;
@@ -122,6 +122,11 @@ export class RowModel implements IRow, IDisposable {
       fixed: this.fixed,
       onClick: this.onClick,
     };
+  }
+
+  recomputeHeight() {
+    this.height = 0;
+    (this as any).__computed = undefined;
   }
 
   createCell(column: IColumn, value: any): ICell {

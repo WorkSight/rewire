@@ -74,6 +74,8 @@ export interface IGrid extends IRows, IDisposable {
   selectedCells             : ICell[];
   focusedCell?              : ICell;
   fixedWidth                : string;
+  headerRowHeight?          : number;
+  rowHeight?                : number;
   loading                   : boolean;
   readonly fixedColumns     : IColumn[];
   readonly standardColumns  : IColumn[];

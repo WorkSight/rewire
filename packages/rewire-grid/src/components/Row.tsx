@@ -16,6 +16,7 @@ import {WithStyle, withStyles} from 'rewire-ui';
 
 export interface IRowProps {
   row               : IRow;
+  height?           : number;
   columns           : IColumn[];
   Cell              : React.ComponentType<any>;
   isFixedColumnsRow?: boolean;
@@ -113,13 +114,35 @@ const Row = withStyles(styles, class extends PureComponent<RowProps, {}> {
     return cells;
   }
 
+  recomputeHeight() {
+    const r: any = this.props.row;
+    if (this.props.height !== undefined) {
+      return this.props.height;
+    }
+
+    if (r.__computed) return r.__computed;
+
+    const el: any = this.element.current;
+    if (!r.__computed && el && !el.__pendingClientRect) {
+      el.__pendingClientRect = true;
+      requestAnimationFrame(() => {
+        const height = (r.__computed = Math.ceil(el!.getBoundingClientRect().height));
+        el!.__pendingClientRect = false;
+        if (height > this.props.row.height) {
+          this.props.row.height = height;
+        }
+      });
+    }
+
+    return r.height;
+  }
+
   renderRow() {
     const className = cc([this.props.className, {selected: this.props.row.selected, [this.props.classes.notVisible + ' notVisible']: !this.props.row.visible, visible: this.props.row.visible}, this.props.row.cls, 'tabrow']);
-    if (this.element.current) {
-      const height = Math.ceil(this.element.current.getBoundingClientRect().height);
-      if (height > this.props.row.height) {
-        this.props.row.height = height;
-      }
+    const height    = this.recomputeHeight();
+
+    if (height > this.props.row.height) {
+      this.props.row.height = height;
     }
 
     return (
@@ -148,7 +171,7 @@ const Row = withStyles(styles, class extends PureComponent<RowProps, {}> {
     return (
       < >
         <Observe render={() => (
-          <tr style={{visibility: groupRow.visible ? 'visible' : 'collapse', height: this.props.row.height}}>
+          <tr style={{visibility: groupRow.visible ? 'visible' : 'collapse', height: 28}}>
             <td colSpan={this.props.visibleColumns} className={classNames(cc(className), this.props.classes.group, this.props.classes[`groupLevel${groupRow.level}`])} onClick={this.handleGroupRowClick(groupRow)}>
               <div><span>{value}</span></div>
             </td>

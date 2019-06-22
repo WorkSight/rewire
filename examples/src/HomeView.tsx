@@ -379,6 +379,8 @@ function createEmployeesGrid1() {
   let grid = createGrid(rows, cols, {multiSelect: true, allowMergeColumns: true, toggleableColumns: ['timeColumn', 'email', 'isActive', 'autoCompleteColumn'], toggleableColumnsOptions: {onItemClick: toggleMenuHandleItemClick} as IToggleableColumnsOptions });
   // sort by employee names
   grid.addSort(cols[0], 'ascending');
+  grid.headerRowHeight = 32;
+  grid.rowHeight = 56;
 
   return grid;
 }
@@ -424,6 +426,8 @@ function createEmployeesGrid2() {
   let grid = createGrid(rows, cols, {multiSelect: true, allowMergeColumns: true});
   // sort by employee names
   grid.addSort(cols[0], 'ascending');
+  grid.headerRowHeight = 56;
+  grid.rowHeight = 38;
 
   return grid;
 }
