@@ -92,11 +92,6 @@ const Row = withStyles(styles, class extends PureComponent<RowProps, {}> {
       row.visible = expanded;
       if (isGroupRow(row)) {
         this.groupRowExpansion(row, row.expanded && row.visible);
-      } else {
-        // while cell row bug exists, need to do this.
-        row.cellsByColumnPosition.forEach(cell => {
-          cell.row.visible = expanded;
-        });
       }
     });
   }

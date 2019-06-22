@@ -79,9 +79,6 @@ export interface IGrid extends IRows, IDisposable {
   loading                   : boolean;
   readonly fixedColumns     : IColumn[];
   readonly standardColumns  : IColumn[];
-  readonly columnsByPosition: IColumn[];
-  dataRowsByPosition        : IRow[];
-  originalDataRowsByPosition: IRow[];
   addedRows                 : IRowIteratorResult[];
   removedRows               : IRowIteratorResult[];
   groupBy                   : IColumn[];
@@ -156,7 +153,6 @@ export interface IGrid extends IRows, IDisposable {
   get(): ICellDataMap[];
   getChanges(): ICellDataMap[];
   set(data: (IRowData | undefined)[]): void;
-  _commit(): void;
   commit(): void;
 
   addColumn(column: IColumn): IColumn;
@@ -166,16 +162,11 @@ export interface IGrid extends IRows, IDisposable {
   removeFixedRow(id: string): void;
 
   setRowPositions(): void;
-  _removeRow(rows: IterableIterator<IRowIteratorResult>, id: string): void;
-  _removeGroupRow(rows: IterableIterator<IRowIteratorResult>, id: string): void;
   removeRow(id: string): void;
   removeRows(ids: string[]): void;
   removeSelectedRows(reselect?: boolean): void;
   addRow(data?: IRowData, position?: number): IRow;
-  _addRow(data?: IRowData, position?: number): IRow;
   addRows(data: (IRowData | undefined)[], position?: number): IRow[];
-  _addRows(data: (IRowData | undefined)[], position?: number): IRow[];
-  _duplicateRow(rows: IterableIterator<IRowIteratorResult>, id: string, position?: number): IRow | undefined;
   duplicateRow(id: string, position?: number): IRow | undefined;
   duplicateRows(ids: string[], position?: number): IRow[];
   duplicateSelectedRows(): IRow[];
@@ -253,7 +244,6 @@ export interface IRow extends IDisposable {
   allowMergeColumns?            : boolean;
   position                      : number;
   readonly originalData         : ICellDataMap;
-  cellsByColumnPosition         : ICell[];
   parentRow?                    : IGroupRow;
   visible                       : boolean;
   fixed                         : boolean;
@@ -266,14 +256,12 @@ export interface IRow extends IDisposable {
   createCell(column: IColumn, value: any, type?: string): ICell;
   clear(columnNames?: string[]): void;
   commit(): void;
-  _setValue(data: ICellDataMap, triggerOnValueChangeHandler?: boolean): boolean;
   setValue(data: ICellDataMap, triggerOnValueChangeHandler?: boolean): boolean;
   mergeAllColumns(): void;
   mergeFixedColumns(): void;
   mergeStandardColumns(): void;
   clone(): IRow;
   validate(columnNames?: string[]): void;
-  _revert(): void;
   revert(): void;
 }
 
