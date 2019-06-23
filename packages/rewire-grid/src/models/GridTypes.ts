@@ -79,8 +79,8 @@ export interface IGrid extends IRows, IDisposable {
   loading                   : boolean;
   readonly fixedColumns     : IColumn[];
   readonly standardColumns  : IColumn[];
-  addedRows                 : IRowIteratorResult[];
-  removedRows               : IRowIteratorResult[];
+  addedRows                 : IRow[];
+  removedRows               : IRow[];
   groupBy                   : IColumn[];
   toggleableColumns         : IColumn[];
   toggleableColumnsOptions? : IToggleableColumnsOptions;
@@ -244,7 +244,6 @@ export interface IRow extends IDisposable {
   allowMergeColumns?            : boolean;
   position                      : number;
   readonly originalData         : ICellDataMap;
-  parentRow?                    : IGroupRow;
   visible                       : boolean;
   fixed                         : boolean;
   options                       : IRowOptions;
@@ -263,13 +262,6 @@ export interface IRow extends IDisposable {
   clone(): IRow;
   validate(columnNames?: string[]): void;
   revert(): void;
-}
-
-export interface IGroupRow extends IRow, IRows {
-  rows          : IRow[];
-  column        : IColumn;
-  readonly level: number;
-  expanded      : boolean;
 }
 
 export type MaskType = (string | RegExp)[];
@@ -410,23 +402,13 @@ export function isRow(row: any): row is IRow {
   return !!(row && (row as IRow).createCell);
 }
 
-export function isGroupRow(row: any): row is IGroupRow {
-  return (row && 'expanded' in row);
-}
-
 export function isColumn(column: any): column is IColumn {
   return !!(column && (column as IColumn).name);
 }
 
 export function getValue(row?: IRow | ObjectType, column?: IColumn): string | undefined {
   if (!row || !column) return undefined;
-  let value: any;
-  if (isGroupRow(row)) {
-    value = row.cells[column.name].value;
-  } else {
-    value = row[column.name];
-  }
-
+  let value: any = row[column.name];
   if (column.map) value = column.map(value);
   return value;
 }
@@ -441,65 +423,7 @@ export function cloneValue(value: any): any {
   }
 }
 
-export interface IRowIteratorResult {
-  rows: IRow[];
-  row: IRow;
-  idx: number;
-}
-
-export interface IGroupRowIteratorResult {
-  rows: IRow[];
-  row: IGroupRow;
-  idx: number;
-}
-
-export function *groupRows(rows: IRow[]): IterableIterator<IGroupRowIteratorResult> {
-  let result: any = {rows: rows, row: undefined, idx: 0};
-  for (const row of rows) {
-    if (isGroupRow(row)) {
-      result.row = row;
-      yield result;
-      result.idx++;
-      yield *groupRows(row.rows);
-    }
-  }
-}
-
-export function *allRows(rows: IRow[]): IterableIterator<IRowIteratorResult> {
-  let result: any = {rows: rows, row: undefined, idx: 0};
-  for (const row of rows) {
-    result.row = row;
-    yield result;
-    result.idx++;
-    if (isGroupRow(row)) {
-      yield *allRows(row.rows);
-    }
-  }
-}
-
-export function *fixedRows(grid: IGrid): IterableIterator<IRowIteratorResult> {
-  let result: any = {rows: grid.fixedRows, row: undefined, idx: 0};
-  for (const row of grid.fixedRows) {
-    result.row = row;
-    yield result;
-    result.idx++;
-  }
-}
-
-export function *allDataRows(rows: IRow[], allowCollapsed: boolean = true): IterableIterator<IRowIteratorResult> {
-  let result: any = {rows: rows, row: undefined, idx: 0};
-  for (const row of rows) {
-    if (isGroupRow(row) && (allowCollapsed || row.expanded)) {
-      yield *allDataRows(row.rows, allowCollapsed);
-    } else {
-      result.row = row;
-      yield result;
-      result.idx++;
-    }
-  }
-}
-
-export function find<T>(rows: IterableIterator<T>, predicate: (row: T) => boolean): T | undefined {
+export function find(rows: Iterable<IRow>, predicate: (row: IRow) => boolean): IRow | undefined {
   if (!predicate) return undefined;
 
   for (const row of rows) {
@@ -508,87 +432,26 @@ export function find<T>(rows: IterableIterator<T>, predicate: (row: T) => boolea
   return undefined;
 }
 
-export function findRowByCellData(rows: IRow[], cell: ICell): IRowIteratorResult | undefined {
-  return find(allDataRows(rows), (r) => {
-    let rCell = r.row.cells[cell.column.name];
-    return !!rCell && (rCell.value === cell.value || (!!rCell.column.compare && rCell.column.compare(rCell.value, cell.value) === 0));
-  });
+export function findRowById(iterator: Iterable<IRow>, id: string): IRow | undefined {
+  return find(iterator, (r) => r.id === id);
 }
 
-export function findRowByRowData(rows: IRow[], row: any): IRowIteratorResult | undefined {
-  return find(allDataRows(rows), (r) => {
-    let match            = false;
-    let rCellDataByName  = r.row.cells;
-    let rowCellDataByPos = row.cellsByColumnPosition;
-
-    for (let i = 0; i < rowCellDataByPos.length; i++) {
-      let rowCell = rowCellDataByPos[i];
-      let rCell   = rCellDataByName[rowCell.column.name];
-      if (!rCell) {
-        continue;
-      }
-
-      if (rCell === rowCell || rCell.value === rowCell.value || (rCell.column.compare && rCell.column.compare(rCell.value, rowCell.value) === 0)) {
-        match = true;
-        break;
-      }
-    }
-    return match;
-  });
-}
-
-export function findRowByRowDataExact(rows: IRow[], row: any): IRowIteratorResult | undefined {
-  return find(allDataRows(rows), (r) => {
-    let rCellData   = r.row.cellsByColumnPosition;
-    let rowCellData = row.cellsByColumnPosition;
-    if (rCellData.length !== rowCellData.length) {
-      return false;
-    }
-
-    let same = true;
-    for (let i = 0; i < rCellData.length; i++) {
-      let rCell   = rCellData[i];
-      let rowCell = rowCellData[i];
-      if (rCell.column.compare) {
-        if (rCell.column.compare(rCell.value, rowCell.value) !== 0) {
-          same = false;
-          break;
-        }
-      } else {
-        if (rCell.value !== rowCell.value) {
-          same = false;
-          break;
-        }
-      }
-    }
-    return same;
-  });
-}
-
-export function findRowById(iterator: IterableIterator<IRowIteratorResult>, id: string): IRowIteratorResult | undefined {
-  return find(iterator, (r) => r.row.id === id);
-}
-
-export function findRowByPosition(iterator: IterableIterator<IRowIteratorResult>, position: number): IRowIteratorResult | undefined {
-  return find(iterator, (r) => r.row.position === position);
+export function findRowByPosition(iterator: Iterable<IRow>, position: number): IRow | undefined {
+  return this.rows[position];
 }
 
 export function findColumnByName(columns: IColumn[], name: string): IColumn | undefined {
   return columns.find((column) => column.name === name);
 }
 
-export function findColumnByPosition(columns: IColumn[], position: number): IColumn | undefined {
-  return columns.find((column) => column.position === position);
-}
+// export function collapseAll(rows: IRow[]) {
+//   for (const groupRow of groupRows(rows)) {
+//     groupRow.row.expanded = false;
+//   }
+// }
 
-export function collapseAll(rows: IRow[]) {
-  for (const groupRow of groupRows(rows)) {
-    groupRow.row.expanded = false;
-  }
-}
-
-export function expandAll(rows: IRow[]) {
-  for (const groupRow of groupRows(rows)) {
-    groupRow.row.expanded = true;
-  }
-}
+// export function expandAll(rows: IRow[]) {
+//   for (const groupRow of groupRows(rows)) {
+//     groupRow.row.expanded = true;
+//   }
+// }

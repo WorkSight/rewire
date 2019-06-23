@@ -33,7 +33,6 @@ export class CellModel implements ICell {
   rowSpan              : number;
   colSpan              : number;
   selected             : boolean;
-  // _value               : any;
   error?               : IError;
   editing              : boolean;
   options              : any;

@@ -2,13 +2,9 @@ import {PureComponent} from 'react';
 import {
   IRow,
   IColumn,
-  IGroupRow,
-  getValue,
-  isGroupRow,
 }                              from '../models/GridTypes';
 import * as React              from 'react';
 import cc                      from 'classcat';
-import classNames              from 'classnames';
 import * as Color              from 'color';
 import {Observe}               from 'rewire-core';
 import {Theme}                 from '@material-ui/core/styles';
@@ -21,7 +17,6 @@ export interface IRowProps {
   Cell              : React.ComponentType<any>;
   isFixedColumnsRow?: boolean;
   index             : number;
-  visibleColumns    : number;
   className?        : string;
 }
 
@@ -54,6 +49,22 @@ const styles = (theme: Theme) => {
   return styleObj;
 };
 
+type IGroupProps = {title: string, rows: JSX.Element[], visibleColumns: number, level: number} & React.Props<any>;
+export const GroupRow = React.memo(withStyles(styles, (props: IGroupProps & {classes: any}) => {
+  return (
+    < >
+      <Observe render={() => (
+        <tr style={{visibility: true ? 'visible' : 'collapse', height: 28}}>
+          <td colSpan={props.visibleColumns} className={cc([props.classes.group, props.classes[`groupLevel${props.level}`], 'group', 'level-' + props.level])}>
+            <div><span>{props.title}</span></div>
+          </td>
+        </tr>
+      )} />
+      {props.rows}
+    </>
+  );
+}));
+
 type RowProps = WithStyle<ReturnType<typeof styles>, IRowProps>;
 
 const Row = withStyles(styles, class extends PureComponent<RowProps, {}> {
@@ -64,37 +75,25 @@ const Row = withStyles(styles, class extends PureComponent<RowProps, {}> {
     this.element = React.createRef();
   }
 
-  componentWillUnmount() {
-    if (isGroupRow(this.props.row)) {
-      return;
-    }
-  }
-
-  componentDidMount() {
-    if (isGroupRow(this.props.row)) {
-      return;
-    }
-  }
-
   handleRowClick = () => {
     if (this.props.row.onClick) {
       this.props.row.onClick(this.props.row);
     }
   }
 
-  handleGroupRowClick = (groupRow: IGroupRow) => () => {
-    groupRow.expanded = !groupRow.expanded;
-    this.groupRowExpansion(groupRow, groupRow.expanded);
-  }
+  // handleGroupRowClick = (groupRow: IGroupRow) => () => {
+  //   groupRow.expanded = !groupRow.expanded;
+  //   this.groupRowExpansion(groupRow, groupRow.expanded);
+  // }
 
-  groupRowExpansion(groupRow: IGroupRow, expanded: boolean) {
-    groupRow.rows.forEach(row => {
-      row.visible = expanded;
-      if (isGroupRow(row)) {
-        this.groupRowExpansion(row, row.expanded && row.visible);
-      }
-    });
-  }
+  // groupRowExpansion(groupRow: IGroupRow, expanded: boolean) {
+  //   groupRow.rows.forEach(row => {
+  //     row.visible = expanded;
+  //     if (isGroupRow(row)) {
+  //       this.groupRowExpansion(row, row.expanded && row.visible);
+  //     }
+  //   });
+  // }
 
   renderCells = () => {
     if (!this.props.row.cells) return [];
@@ -121,7 +120,7 @@ const Row = withStyles(styles, class extends PureComponent<RowProps, {}> {
     if (!r.__computed && el && !el.__pendingClientRect) {
       el.__pendingClientRect = true;
       requestAnimationFrame(() => {
-        const height = (r.__computed = Math.ceil(el!.getBoundingClientRect().height));
+        const height = (r.__computed = el!.getBoundingClientRect().height);
         el!.__pendingClientRect = false;
         if (height > this.props.row.height) {
           this.props.row.height = height;
@@ -132,53 +131,25 @@ const Row = withStyles(styles, class extends PureComponent<RowProps, {}> {
     return r.height;
   }
 
-  renderRow() {
-    const className = cc([this.props.className, {selected: this.props.row.selected, [this.props.classes.notVisible + ' notVisible']: !this.props.row.visible, visible: this.props.row.visible}, this.props.row.cls, 'tabrow']);
-    const height    = this.recomputeHeight();
-
-    if (height > this.props.row.height) {
-      this.props.row.height = height;
-    }
-
-    return (
-      <Observe render={() => (
-        <tr className={className} ref={this.element} onClick={this.handleRowClick} style={{height: this.props.row.height}}>
-          {this.renderCells()}
-        </tr>
-      )}/>
-    );
-  }
-
-  renderChildRows(groupRow: IGroupRow): React.ReactNode[] | null {
-    return groupRow.rows.map((r, idx) => <Row key={r.id} row={r} columns={this.props.columns} index={idx} Cell={this.props.Cell} isFixedColumnsRow={this.props.isFixedColumnsRow} className={((idx % 2) === 1) ? 'alt' : ''} visibleColumns={this.props.visibleColumns} />);
-  }
-
-  renderGroupRow(groupRow: IGroupRow) {
-    let value: JSX.Element | string | undefined;
-    let className: any[] = ['group', 'level-' + groupRow.level];
-    if (groupRow.grid.standardColumns === this.props.columns && (groupRow.grid.fixedColumns.length > 0)) {
-      value = <span>&nbsp;</span>;
-    } else {
-      className.push({expanded: groupRow.expanded, collapsed: !groupRow.expanded});
-      value = getValue(groupRow, groupRow.column);
-    }
-
-    return (
-      < >
-        <Observe render={() => (
-          <tr style={{visibility: groupRow.visible ? 'visible' : 'collapse', height: 28}}>
-            <td colSpan={this.props.visibleColumns} className={classNames(cc(className), this.props.classes.group, this.props.classes[`groupLevel${groupRow.level}`])} onClick={this.handleGroupRowClick(groupRow)}>
-              <div><span>{value}</span></div>
-            </td>
-          </tr>
-        )} />
-        {this.renderChildRows(groupRow)}
-      </>
-    );
-  }
-
   render() {
-    return <Observe render={() => isGroupRow(this.props.row) ? this.renderGroupRow(this.props.row) : this.renderRow()} />;
+    return <Observe render={
+      () => {
+        const className = cc([this.props.className, {selected: this.props.row.selected, [this.props.classes.notVisible + ' notVisible']: !this.props.row.visible, visible: this.props.row.visible}, this.props.row.cls, 'tabrow']);
+        const height    = this.recomputeHeight();
+
+        if (height > this.props.row.height) {
+          this.props.row.height = height;
+        }
+
+        return (
+          <Observe render={() => (
+            <tr className={className} ref={this.element} onClick={this.handleRowClick} style={{height: this.props.row.height}}>
+              {this.renderCells()}
+            </tr>
+          )}/>
+        );
+      }
+    } />;
   }
 });
 

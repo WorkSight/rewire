@@ -6,14 +6,11 @@ import {
   IRowOptions,
   ICellMap,
   ICellDataMap,
-  IGroupRow,
   IRows,
   IErrorData,
   getValue,
   IDisposable,
-  isGroupRow,
   cloneValue,
-  allRows,
   IRowData,
 }                          from './GridTypes';
 import {isNullOrUndefined} from 'rewire-common';
@@ -25,7 +22,6 @@ import { observable }      from 'rewire-core';
 const EmptyFn = () => {};
 
 export class RowModel implements IRow, IDisposable {
-  private _parentRow?        : IGroupRow;
   private _allowMergeColumns?: boolean;
 
   id                    : string;
@@ -74,7 +70,7 @@ export class RowModel implements IRow, IDisposable {
       this.createCell(column, data && data.data && data.data[column.name]);
     }
 
-    if (!this.grid.loading && !this.fixed && !isGroupRow(this)) {
+    if (!this.grid.loading && !this.fixed) {
       this.validate();
     }
 
@@ -84,23 +80,6 @@ export class RowModel implements IRow, IDisposable {
 
     this.commit();
     return this;
-  }
-
-  set parentRow(groupRow: IGroupRow | undefined) {
-    this._parentRow = groupRow;
-    let visible     = true;
-    let pRow        = groupRow;
-    while (!isNullOrUndefined(pRow)) {
-      if (!pRow!.expanded) {
-        visible = false;
-        break;
-      }
-      pRow = pRow!.parentRow;
-    }
-    this.visible = visible;
-  }
-  get parentRow(): IGroupRow | undefined {
-    return this._parentRow;
   }
 
   set allowMergeColumns(value: boolean) {
@@ -143,7 +122,7 @@ export class RowModel implements IRow, IDisposable {
   }
 
   private mergeColumns(columns: IColumn[]) {
-    if ((!this.fixed && !this.allowMergeColumns) || isGroupRow(this)) {
+    if (!this.fixed && !this.allowMergeColumns) {
       return;
     }
 
@@ -344,57 +323,47 @@ export class RowModel implements IRow, IDisposable {
   }
 }
 
-function find(rows: IRows, column: IColumn, data?: ICellDataMap): IGroupRow | undefined {
-  let value = getValue(data, column);
-  for (const r of rows.rows) {
-    if (value === getValue(r, column)) {
-      return r as IGroupRow;
-    }
-  }
-  return undefined;
-}
-
 export default function create(grid: IGrid, rows: IRow[], data?: IRowData, position?: number): IRow {
   let options = data && data.options;
   let fixed   = options && !isNullOrUndefined(options.fixed) ? options.fixed! : false;
   let rowPos  = !isNullOrUndefined(position) ? Math.max(Math.min(position!, grid.rows.length), 0) : (fixed ? rows.length : undefined);
 
-  if (grid.groupBy.length > 0 && !fixed) {
-    let root:   IGroupRow;
-    let parent: any = grid;
-    let level = 0;
-    for (const column of grid.groupBy) {
-      let r = find(parent, column, data && data.data);
-      if (!r) {
-        r = GroupModel.createGroup(grid, column, level, data);
-        if (isGroupRow(parent)) {
-          r.parentRow = parent;
-        }
-        parent.rows.push(r);
-      }
+  // if (grid.groupBy.length > 0 && !fixed) {
+  //   let parent: any = grid;
+  //   let level = 0;
+  //   for (const column of grid.groupBy) {
+  //     let r = find(parent, column, data && data.data);
+  //     if (!r) {
+  //       r = GroupModel.createGroup(grid, column, level, data);
+  //       if (isGroupRow(parent)) {
+  //         r.parentRow = parent;
+  //       }
+  //       parent.rows.push(r);
+  //     }
 
-      if (level === 0) root = r;
-      level++;
-      parent = r;
-    }
+  //     level++;
+  //     parent = r;
+  //   }
 
-    if (isNullOrUndefined(rowPos)) {
-      if (parent.rows.length > 0) {
-        rowPos = parent.rows[0].position;
-      } else {
-        rowPos = 0;
-        for (const row of allRows(rows)) {
-          if (row.row.id === parent.id) break;
-          if (!isGroupRow(row.row)) rowPos++;
-        }
-      }
-    }
-    let newRow       = RowModel.create(grid, data, rowPos);
-    newRow.parentRow = parent as IGroupRow;
-    let insertIdx    = parent.rows.findIndex((row: IRow) => row.position === newRow.position - 1) + 1;
-    parent.rows.splice(insertIdx, 0, newRow);
-    return newRow;
-  }
+  //   if (isNullOrUndefined(rowPos)) {
+  //     rowPos = 0;
+  //     // if (parent.rows.length > 0) {
+  //     //   rowPos = parent.rows[0].position;
+  //     // } else {
+  //     //   rowPos = 0;
+  //     //   for (const row of allRows(rows)) {
+  //     //     if (row.row.id === parent.id) break;
+  //     //     if (!isGroupRow(row.row)) rowPos++;
+  //     //   }
+  //     // }
+  //   }
+  //   let newRow       = RowModel.create(grid, data, rowPos);
+  //   newRow.parentRow = parent as IGroupRow;
+  //   // let insertIdx    = parent.rows.findIndex((row: IRow) => row.position === newRow.position - 1) + 1;
+  //   parent.rows.splice(rowPos, 0, newRow);
+  //   rows.splice(newRow.position, 0, newRow);
+  //   return newRow;
+  // }
 
   let r = RowModel.create(grid, data, !isNullOrUndefined(rowPos) ? rowPos : grid.rows.length);
   rows.splice(r.position, 0, r);
@@ -404,22 +373,22 @@ export default function create(grid: IGrid, rows: IRow[], data?: IRowData, posit
   return r;
 }
 
-export class GroupModel extends RowModel implements IGroupRow {
-  rows    : IRow[]  = [];
-  expanded: boolean = true;
-  column  : IColumn;
-  level   : number;
+// export class GroupModel extends RowModel implements IGroupRow {
+//   rows    : IRow[]  = [];
+//   expanded: boolean = true;
+//   column  : IColumn;
+//   level   : number;
 
-  protected constructor() {
-    super();
-  }
+//   protected constructor() {
+//     super();
+//   }
 
-  static createGroup(grid: IGrid,  column: IColumn, level: number, data?: IRowData) {
-    const group    = observable(new GroupModel());
-    group.id       = nanoid(10);
-    group.column   = column;
-    group.level    = level;
-    group.initialize(grid, data);
-    return group;
-  }
-}
+//   static createGroup(grid: IGrid,  column: IColumn, level: number, data?: IRowData) {
+//     const group    = observable(new GroupModel());
+//     group.id       = nanoid(10);
+//     group.column   = column;
+//     group.level    = level;
+//     group.initialize(grid, data);
+//     return group;
+//   }
+// }

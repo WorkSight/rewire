@@ -430,9 +430,8 @@ class Cell extends React.PureComponent<CellProps, {}> {
         tdClasses                 = classNames(tdClasses, classes.tableCellEditing);
       }
 
-      let colSpan = cell.colSpan;
-      let rowSpan = cell.rowSpan;
-
+      let colSpan   = cell.colSpan;
+      let rowSpan   = cell.rowSpan;
       let innerCell =
         <div className={classNames(classes.cellContainer, 'cellContainer')}>
           <div className={cellInnerContainerClasses}>

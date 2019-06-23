@@ -164,6 +164,8 @@ class AutoComplete<T> extends React.Component<AutoCompleteProps<T>, IAutoComplet
     isHovered: false,
     suggestions: [],
   };
+
+  _fontSize?: string;
   downShift: any;
   search: SearchFn<T>;
   map: MapFn<T>;
@@ -315,14 +317,16 @@ class AutoComplete<T> extends React.Component<AutoCompleteProps<T>, IAutoComplet
       }
     }
 
-    let fontSize = window.getComputedStyle(this.inputRef.current!).getPropertyValue('font-size'); // needed to keep the suggestions the same font size as the input
+    if (!this._fontSize) {
+      this._fontSize = window.getComputedStyle(this.inputRef.current!).getPropertyValue('font-size'); // needed to keep the suggestions the same font size as the input
+    }
     let suggestionsContainerComponentProps: ISuggestionsContainerComponentProps = {
       downShift: this.downShift,
     };
 
     return (
       <div {...(isOpen ? getMenuProps({}, {suppressRefError: true}) : {})} {...menuProps}>
-        <Paper elevation={4} className={classNames(...suggestionsPaperClasses)} style={{fontSize: fontSize}}>
+        <Paper elevation={4} className={classNames(...suggestionsPaperClasses)} style={{fontSize: this._fontSize}}>
           {suggestionsContainerHeader && suggestionsContainerHeader(suggestionsContainerComponentProps)}
           <div className={classNames(...suggestionsClasses)}>
             {suggestions}
