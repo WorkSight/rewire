@@ -61,6 +61,7 @@ function collapse(rows: JSX.Element[]) {
 }
 
 function expand(rows: JSX.Element[]) {
+  return rows;
   return rows.map((r: JSX.Element) => {
     const style = (r.props.style || {}).visibility = 'visible';
     React.cloneElement(r, {style});
@@ -69,9 +70,9 @@ function expand(rows: JSX.Element[]) {
 
 export const GroupRow = React.memo(withStyles(styles, (props: IGroupProps & {classes?: any}) => {
   const [collapsed, setCollapsed] = React.useState(false);
-  const rows = props.rows;
+  // const rows = props.rows;
   console.log('collapsed ', collapsed);
-  // const rows = collapsed ? collapse(props.rows) : expand(props.rows);
+  const rows = collapsed ? collapse(props.rows) : expand(props.rows);
   return (
     < >
       <Observe render={() => (
