@@ -42,7 +42,7 @@ export function useObserver<T>(
 
   useUnmount(() => s.current!.dispose());
   return s.current!.track(renderFn, update);
-};
+}
 
 export function disposeOnUnmount(context: any, fn: Function) {
   S.root((dispose) => {

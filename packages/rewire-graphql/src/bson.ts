@@ -1,4 +1,4 @@
-import { utc, DateRange, TimestampRange } from "rewire-common";
+import { utc, DateRange, TimestampRange } from 'rewire-common';
 
 export class BSON {
   private static _types: {[converter: string]: (value: any) => any} = {};
