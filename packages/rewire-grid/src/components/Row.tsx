@@ -37,6 +37,9 @@ const styles = (theme: Theme) => {
     visible: {
       visibility: 'visible',
     },
+    collapsed: {
+      '& tr': {display: 'none !important'}
+    }
   };
 
   for (let i = 0; i < 7; i++) {
@@ -50,17 +53,35 @@ const styles = (theme: Theme) => {
 };
 
 type IGroupProps = {title: string, rows: JSX.Element[], visibleColumns: number, level: number} & React.Props<any>;
-export const GroupRow = React.memo(withStyles(styles, (props: IGroupProps & {classes: any}) => {
+function collapse(rows: JSX.Element[]) {
+  return rows.map((r: JSX.Element) => {
+    const style = (r.props.style || {}).visibility = 'collapsed';
+    React.cloneElement(r, {style});
+  });
+}
+
+function expand(rows: JSX.Element[]) {
+  return rows.map((r: JSX.Element) => {
+    const style = (r.props.style || {}).visibility = 'visible';
+    React.cloneElement(r, {style});
+  });
+}
+
+export const GroupRow = React.memo(withStyles(styles, (props: IGroupProps & {classes?: any}) => {
+  const [collapsed, setCollapsed] = React.useState(false);
+  const rows = props.rows;
+  console.log('collapsed ', collapsed);
+  // const rows = collapsed ? collapse(props.rows) : expand(props.rows);
   return (
     < >
       <Observe render={() => (
-        <tr style={{visibility: true ? 'visible' : 'collapse', height: 28}}>
-          <td colSpan={props.visibleColumns} className={cc([props.classes.group, props.classes[`groupLevel${props.level}`], 'group', 'level-' + props.level])}>
+        <tr onClick={() => setCollapsed(!collapsed)} style={{height: 28}}>
+          <td colSpan={props.visibleColumns} className={cc([props.classes.group, props.classes[`groupLevel${props.level}`], 'group', 'level-' + props.level, props.classes.collapsed])}>
             <div><span>{props.title}</span></div>
           </td>
         </tr>
       )} />
-      {props.rows}
+      {rows}
     </>
   );
 }));

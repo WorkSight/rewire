@@ -596,7 +596,7 @@ const GridInternal = withStyles(styles, class extends React.PureComponent<GridPr
         const key   = this.getGroupKey(row, groupBy, level);
         let   group = _groups[key];
         if (!group) {
-          group = _groups[key] = <GroupRow key={key} level={level-1} classes='' title={fixed ? key : ' '} visibleColumns={visibleColumns} rows={[]}></GroupRow>;
+          group = _groups[key] = <GroupRow key={key} level={level-1} title={fixed ? key : ' '} visibleColumns={visibleColumns} rows={[]}></GroupRow>;
           if (level === 1) result.push(group);
           else parentGroup && parentGroup.props.rows.push(group);
         }
