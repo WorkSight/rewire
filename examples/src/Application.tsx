@@ -1,10 +1,11 @@
-import * as React     from 'react';
-import * as ReactDOM  from 'react-dom';
-import CssBaseline    from '@material-ui/core/CssBaseline';
-import Divider        from '@material-ui/core/Divider';
-import { HomeView }   from './HomeView';
-import { AboutView }  from './AboutView';
-import { TopicsView } from './TopicsView';
+import * as React         from 'react';
+import * as ReactDOM      from 'react-dom';
+import CssBaseline        from '@material-ui/core/CssBaseline';
+import Divider            from '@material-ui/core/Divider';
+import { HomeView }       from './HomeView';
+import { AboutView }      from './AboutView';
+import { TopicsView }     from './TopicsView';
+import { TypographyView } from './TypographyView';
 import {
   BrowserRouter as Router,
   Route,
@@ -48,12 +49,14 @@ const BasicExample = (props: any) => {
           <li style={listItemStyle}><Link to='/'>Home</Link></li>
           <li style={listItemStyle}><Link to='/about'>About</Link></li>
           <li style={listItemStyle}><Link to='/topics'>Topics</Link></li>
+          <li style={listItemStyle}><Link to='/typography'>Typography</Link></li>
         </ul>
         <Divider />
         <div style={contentContainerStyle}>
-          <Route exact path='/'       component={HomeView}/>
-          <Route       path='/about'  component={AboutView}/>
-          <Route       path='/topics' component={TopicsView}/>
+          <Route exact path='/'           component={HomeView}/>
+          <Route       path='/about'      component={AboutView}/>
+          <Route       path='/topics'     component={TopicsView}/>
+          <Route       path='/typography' component={TypographyView}/>
         </div>
       </div>
     </Router>
