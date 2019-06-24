@@ -20,6 +20,7 @@ import {MuiThemeProvider, Theme}           from '@material-ui/core/styles';
 import SettingsIcon                        from '@material-ui/icons/Settings';
 import createGridTheme                     from './GridTheme';
 import {scrollBySmooth}                    from '../models/SmoothScroll';
+import ResizeObserver                      from 'resize-observer-polyfill';
 import './data-grid.scss';
 
 interface IColumnProps {
@@ -44,16 +45,30 @@ class ColumnWidth extends React.PureComponent<IColumnProps> {
   }
 }
 
-let _currentWindowSize = property({width: -1, height: -1});
-let previous           = {width: 0, height: 0};
-window.onresize = (evt) => {
-  let current = {width: window.innerWidth, height: window.innerHeight};
-  if ((current === previous) || (current && previous && (current.width === previous.width) && (current.height === previous.height)))
-    return;
-
-  _currentWindowSize({width: current.width, height: current.height});
-  previous = current;
+type ResizeCallback = (height: {clientHeight: number, scrollHeight: number}) => void;
+interface IResizeWatcherResult {
+  watch(callback: ResizeCallback): void;
 };
+
+function verticalResizeWatcher(lifetime: React.Component<any>, element: HTMLElement): IResizeWatcherResult {
+  const _previous                    = {scrollHeight: element.scrollHeight, clientHeight: element.clientHeight};
+  const _callbacks: ResizeCallback[] = [];
+
+  const observer = new ResizeObserver(function() {
+    const current = {scrollHeight: element.scrollHeight, clientHeight: element.clientHeight};
+    if (current && _previous && (current.scrollHeight === _previous.scrollHeight) === (current.clientHeight === _previous.clientHeight)) return;
+    for (const callback of _callbacks) {
+      callback(current);
+    }
+    _previous.clientHeight = current.clientHeight;
+    _previous.scrollHeight = current.scrollHeight;
+  });
+
+  observer.observe(element);
+  const oldCWUM = lifetime.componentWillUnmount;
+  lifetime.componentWillUnmount = () => { observer.disconnect(); oldCWUM && oldCWUM(); }
+  return { watch(callback: ResizeCallback) { _callbacks.push(callback); callback(_previous) } };
+}
 
 export interface IGridProps {
   grid: IGrid;
@@ -64,7 +79,7 @@ export interface IGridProps {
   gridFontSizes?: IGridFontSizes;
 }
 
-type BodyType = {grid: IGrid, columns: IColumn[], scrollY: DataSignal<number>, rowElements?: {[s: string]: HTMLTableRowElement}, fixedRowElements?: {[s: string]: HTMLTableRowElement}, loadMoreRows?: (args: {start: number, end: number}) => Promise<any[]> };
+type BodyType = {grid: IGrid, columns: IColumn[], scrollY: DataSignal<number>, loadMoreRows?: (args: {start: number, end: number}) => Promise<any[]> };
 class Body extends React.PureComponent<BodyType, {offset: number}> {
   constructor(props: BodyType) {
     super(props);
@@ -77,7 +92,7 @@ class Body extends React.PureComponent<BodyType, {offset: number}> {
   render() {
     return (
       <tbody role='rowgroup'>
-        <Observe render={() => this.props.grid.rows.map((row, index) => <Row key={row.id} rowElements={this.props.rowElements} fixedRowElements={this.props.fixedRowElements} columns={this.props.columns} Cell={Cell} index={index} visibleColumns={this.visibleColumns} className={((index % 2) === 1) ? 'alt' : ''} row={row} />)} />
+        <Observe render={() => this.props.grid.rows.map((row, index) => <Row key={row.id} height={this.props.grid.rowHeight} columns={this.props.columns} Cell={Cell} index={index} visibleColumns={this.visibleColumns} className={((index % 2) === 1) ? 'alt' : ''} row={row} />)} />
       </tbody>
     );
   }
@@ -104,7 +119,7 @@ class VirtualBody extends React.PureComponent<BodyType, {offset: number, loading
     for (let r of rows) {
       let rowIdx = i + offset;
       let rr     = this.props.grid.addRow(r);
-      this.rowCache[offset + i] = <Row key={rowIdx} rowElements={this.props.rowElements} fixedRowElements={this.props.fixedRowElements} columns={this.props.columns} Cell={Cell} index={rowIdx} className={((rowIdx % 2) === 1) ? 'alt' : ''} row={rr} visibleColumns={this.visibleColumns} />;
+      this.rowCache[offset + i] = <Row key={rowIdx} columns={this.props.columns} height={this.props.grid.rowHeight} Cell={Cell} index={rowIdx} className={((rowIdx % 2) === 1) ? 'alt' : ''} row={rr} visibleColumns={this.visibleColumns} />;
     }
   }
 
@@ -138,10 +153,6 @@ class VirtualBody extends React.PureComponent<BodyType, {offset: number, loading
     this._body = element as HTMLTableSectionElement;
   }
 
-  // needsUpdate = false;
-  // shouldComponentUpdate() {
-  //   return this.needsUpdate;
-  // }
   rowCache: JSX.Element[] = [];
 
   _body: HTMLTableSectionElement | null;
@@ -162,7 +173,7 @@ class VirtualBody extends React.PureComponent<BodyType, {offset: number, loading
       }
 
       let row   = rows[rowIdx];
-      cachedRow = <Row key={rowIdx} rowElements={this.props.rowElements} fixedRowElements={this.props.fixedRowElements} className={((rowIdx % 2) === 1) ? 'alt' : ''} Cell={Cell} row={row} index={rowIdx} columns={this.props.columns} visibleColumns={this.visibleColumns} />;
+      cachedRow = <Row key={rowIdx} className={((rowIdx % 2) === 1) ? 'alt' : ''} height={this.props.grid.rowHeight} Cell={Cell} row={row} index={rowIdx} columns={this.props.columns} visibleColumns={this.visibleColumns} />;
       this.rowCache[rowIdx] = cachedRow;
       result.push(cachedRow);
     }
@@ -242,6 +253,7 @@ const styles = (theme: Theme) => {
       display: 'flex',
       flexDirection: 'column',
       width: '100%',
+      overflow: 'auto'
     },
     leftLabels: {
       backgroundColor: theme.palette.leftLabelBackground.main,
@@ -372,21 +384,39 @@ const styles = (theme: Theme) => {
 
 type GridProps = WithStyle<ReturnType<typeof styles>, IGridProps>;
 
+function getScrollbarWidth() {
+  // Creating invisible container
+  const outer = document.createElement('div');
+  outer.style.visibility = 'hidden';
+  outer.style.overflow = 'scroll'; // forcing scrollbar to appear
+  outer.style.msOverflowStyle = 'scrollbar'; // needed for WinJS apps
+  document.body.appendChild(outer);
+
+  // Creating inner element and placing it in the container
+  const inner = document.createElement('div');
+  outer.appendChild(inner);
+
+  // Calculating difference between container's full width and the child width
+  const scrollbarWidth = (outer.offsetWidth - inner.offsetWidth);
+
+  // Removing temporary elements from the DOM
+  outer.parentNode!.removeChild(outer);
+  return scrollbarWidth;
+}
+
+let _scrollbarWidth: number = getScrollbarWidth();
+
 const GridInternal = withStyles(styles, class extends React.PureComponent<GridProps> {
   private scrollX            : DataSignal<number>;
   private scrollY            : DataSignal<number>;
   private _columnTableWrapper: HTMLDivElement;
   private _columnTable       : HTMLTableElement;
   private _leftLabels        : HTMLDivElement;
-  private _rowElements       : {[s: string]: HTMLTableRowElement};
-  private _fixedRowElements  : {[s: string]: HTMLTableRowElement};
   grid                       : IGrid;
 
   constructor(props: GridProps) {
     super(props);
     this.grid              = props.grid;
-    this._rowElements      = {};
-    this._fixedRowElements = {};
 
     disposeOnUnmount(this, () => {
       this.scrollX = property(0);
@@ -399,12 +429,6 @@ const GridInternal = withStyles(styles, class extends React.PureComponent<GridPr
 
       watch(() => this.scrollY(), () => {
         if (this._leftLabels && this._leftLabels.scrollTop !== this.scrollY()) this._leftLabels.scrollTo(this._leftLabels.scrollLeft, this.scrollY());
-      });
-
-      watch(_currentWindowSize, () => this.updateForScrollbars());
-
-      watch(() => this.grid.dataRowsByPosition.length, () => {
-        setTimeout(() => this.updateForScrollbars(), 0);
       });
     });
   }
@@ -499,15 +523,18 @@ const GridInternal = withStyles(styles, class extends React.PureComponent<GridPr
   }
 
   componentDidMount() {
-    this.updateForScrollbars();
+    verticalResizeWatcher(this, this.grid.contentElement!).watch((value) => {
+      if (this._columnTableWrapper && this._columnTableWrapper.style) {
+        let node = this.grid.contentElement as HTMLElement;
+        if (node) {
+          this._columnTableWrapper.style.paddingRight = value.clientHeight < value.scrollHeight ? _scrollbarWidth + 'px' : '0';
+        }
+      }
+    });
+
     if (this.grid.multiSelect || this.grid.clearSelectionOnBlur) {
       document.addEventListener('mouseup', this.handleExternalMouseUp);
     }
-    if (Object.keys(this._rowElements).length <= 0) {
-      return;
-    }
-
-    this.updateForRowHeights();
   }
 
   componentWillUnmount() {
@@ -523,31 +550,6 @@ const GridInternal = withStyles(styles, class extends React.PureComponent<GridPr
       this._fixedColGroups = undefined;
       this._colGroups      = undefined;
     }
-  }
-
-  updateForScrollbars() {
-    let columnWrap = this._columnTableWrapper;
-    if (columnWrap && columnWrap.style) {
-      let node = this.grid.contentElement as HTMLElement;
-      if (node) {
-        columnWrap.style.paddingRight = (node.clientHeight < node.scrollHeight) ? '17px' : '0';
-      }
-    }
-  }
-
-  updateForRowHeights() {
-    Object.keys(this._fixedRowElements).forEach(rowId => {
-      let rowElement = this._rowElements[rowId];
-      if (rowElement) {
-        let fixedRowElement = this._fixedRowElements[rowId];
-        if (rowElement.clientHeight === fixedRowElement.clientHeight) return;
-        if (rowElement.clientHeight > fixedRowElement.clientHeight) {
-          fixedRowElement.style.height = rowElement.clientHeight + 'px';
-        } else {
-          rowElement.style.height = fixedRowElement.clientHeight + 'px';
-        }
-      }
-    });
   }
 
   setLeftLabelsRef = (element: HTMLDivElement) => {
@@ -566,7 +568,6 @@ const GridInternal = withStyles(styles, class extends React.PureComponent<GridPr
     if (element && element !== this.grid.contentElement) {
       this.grid.setContentElement(element);
     }
-    // this._gridContent(element as HTMLDivElement);
   }
 
   renderFixedColumnHeaders(): JSX.Element | null {
@@ -580,7 +581,7 @@ const GridInternal = withStyles(styles, class extends React.PureComponent<GridPr
           {this.renderColumnGroups(true)}
           <thead role='rowgroup'>
             <Observe render={() => (
-              this.props.grid.fixedRows.map((row, index) => <Row key={row.id} Cell={Column} columns={this.props.grid.fixedColumns} index={index} visibleColumns={this.visibleFixedColumnCount} row={row} />)
+              this.props.grid.fixedRows.map((row, index) => <Row key={row.id} height={this.props.grid.headerRowHeight} Cell={Column} columns={this.props.grid.fixedColumns} index={index} visibleColumns={this.visibleFixedColumnCount} row={row} />)
             )} />
           </thead>
         </table>
@@ -607,7 +608,7 @@ const GridInternal = withStyles(styles, class extends React.PureComponent<GridPr
 
     let result = <colgroup>{groups}</colgroup>;
     if (fixed) this._fixedColGroups = result;
-    else       this._colGroups = result;
+    else       this._colGroups      = result;
     return result;
   }
 
@@ -621,7 +622,7 @@ const GridInternal = withStyles(styles, class extends React.PureComponent<GridPr
         <table role='grid' style={{width: this.props.grid.fixedWidth, marginBottom: '17px'}}>
           {this.renderColumnGroups(true)}
           <tbody role='rowgroup'>
-            {this.props.grid.rows.map((row, index) => <Row key={row.id} row={row} rowElements={this._rowElements} fixedRowElements={this._fixedRowElements} Cell={Cell} columns={this.props.grid.fixedColumns} isFixedColumnsRow={true} index={index} visibleColumns={this.visibleFixedColumnCount} className={((index % 2) === 1) ? 'alt' : ''} />)}
+            {this.props.grid.rows.map((row, index) => <Row key={row.id} row={row} Cell={Cell} height={this.props.grid.rowHeight} columns={this.props.grid.fixedColumns} isFixedColumnsRow={true} index={index} visibleColumns={this.visibleFixedColumnCount} className={((index % 2) === 1) ? 'alt' : ''} />)}
           </tbody>
         </table>
       </div>
@@ -669,7 +670,7 @@ const GridInternal = withStyles(styles, class extends React.PureComponent<GridPr
               {this.renderColumnGroups(false)}
               <thead role='rowgroup'>
                 <Observe render={() => (
-                  this.props.grid.fixedRows.map((row, index) => <Row key={row.id} Cell={Column} columns={this.props.grid.standardColumns} index={index} visibleColumns={this.visibleStandardColumnCount} row={row} />)
+                  this.props.grid.fixedRows.map((row, index) => <Row key={row.id} height={this.props.grid.headerRowHeight} Cell={Column} columns={this.props.grid.standardColumns} index={index} visibleColumns={this.visibleStandardColumnCount} row={row} />)
                 )} />
               </thead>
             </table>
@@ -680,7 +681,6 @@ const GridInternal = withStyles(styles, class extends React.PureComponent<GridPr
   }
 
   componentDidUpdate(prevProps: GridProps) {
-    this.updateForScrollbars();
     if (prevProps.grid !== this.props.grid) {
       this.grid = this.props.grid;
     }
@@ -690,9 +690,6 @@ const GridInternal = withStyles(styles, class extends React.PureComponent<GridPr
 
   renderData(): JSX.Element {
     let BodyRenderer     = (this.props.virtual) ? VirtualBody : Body;
-    let rowElements      = this.props.grid.fixedColumns.length > 0 ? this._rowElements : undefined;
-    let fixedRowElements = this.props.grid.fixedColumns.length > 0 ? this._fixedRowElements : undefined;
-
     return (
       <Observe render={() => (
         <div className={classNames('grid-scroll', this.props.classes.gridScroll)} onScroll={this.handleScroll}>
@@ -700,7 +697,7 @@ const GridInternal = withStyles(styles, class extends React.PureComponent<GridPr
             <div className={classNames('grid-content', this.props.classes.gridContent)}  ref={this.setGridContentRef}>
               <table role='grid'>
                 {this.renderColumnGroups(false)}
-                <BodyRenderer grid={this.props.grid} scrollY={this.scrollY} rowElements={rowElements} fixedRowElements={fixedRowElements} columns={this.props.grid.standardColumns} />
+                <BodyRenderer grid={this.props.grid} scrollY={this.scrollY} columns={this.props.grid.standardColumns} />
               </table>
             </div>
         </div>

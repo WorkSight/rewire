@@ -74,6 +74,8 @@ export interface IGrid extends IRows, IDisposable {
   selectedCells             : ICell[];
   focusedCell?              : ICell;
   fixedWidth                : string;
+  headerRowHeight?          : number;
+  rowHeight?                : number;
   loading                   : boolean;
   readonly fixedColumns     : IColumn[];
   readonly standardColumns  : IColumn[];
@@ -245,6 +247,7 @@ export interface IRow extends IDisposable {
   grid                          : IGrid;
   cells                         : ICellMap;
   data?                         : any;
+  height                        : number;
   selected                      : boolean;
   cls?                          : string;
   allowMergeColumns?            : boolean;
@@ -254,6 +257,7 @@ export interface IRow extends IDisposable {
   parentRow?                    : IGroupRow;
   visible                       : boolean;
   fixed                         : boolean;
+  options                       : IRowOptions;
 
   onClick?(row: IRow): void;
   hasChanges(): boolean;

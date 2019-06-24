@@ -59,6 +59,7 @@ class GridModel implements IGrid, IDisposable {
   removedRows               : IRowIteratorResult[];
   rows                      : IRow[];
   fixedRows                 : IRow[];
+  headerRowHeight?          : number;
   columns                   : IColumn[];
   toggleableColumns         : IColumn[];
   toggleableColumnsOptions? : IToggleableColumnsOptions;
@@ -69,6 +70,7 @@ class GridModel implements IGrid, IDisposable {
   selectedCells             : ICell[];
   focusedCell?              : ICell;
   fixedWidth                : string;
+  rowHeight?                : number;
   loading                   : boolean;
   isDraggable               : boolean;
   clipboard                 : ICell[];
@@ -184,13 +186,14 @@ class GridModel implements IGrid, IDisposable {
     this.selectedCells.forEach(cell => cell.clear());
   }
 
-  get(): ICellDataMap[] {
-    const data: ICellDataMap[] = [];
+  get(): IRowData[] {
+    const data: IRowData[] = [];
     for (const row of allDataRows(this.rows)) {
-      let rowData: ICellDataMap = {};
-      for (const column of this.columns) {
-        rowData[column.name] = row.row.cells[column.name].value;
-      }
+      let rowData: IRowData = {
+        id: row.row.id,
+        data: row.row.data,
+        options: row.row.options,
+      };
       data.push(rowData);
     }
     return data;
@@ -721,6 +724,8 @@ class GridModel implements IGrid, IDisposable {
       }
     });
 
+    const rows = new Set<IRow>();
+
     selectedCells.forEach((selectedCell) => {
       let clipboardCellsForColumn = clipboardCellsByColumnPosition[selectedCell.columnPosition];
       if (!clipboardCellsForColumn || clipboardCellsForColumn.length <= 0) {
@@ -729,9 +734,17 @@ class GridModel implements IGrid, IDisposable {
 
       let clipboardCell = clipboardCellsForColumn.shift();
       selectedCell.setValue(cloneValue(clipboardCell.value));
+      rows.add(selectedCell.row);
+
 
       if (clipboardCellsForColumn.length <= 0) {
         clipboardCellsByColumnPosition[selectedCell.columnPosition] = clipboardCellsByColumnPositionOriginal[selectedCell.columnPosition].slice();
+      }
+    });
+
+    freeze(() => {
+      for (const r of rows) {
+        (r as RowModel).recomputeHeight();
       }
     });
   }

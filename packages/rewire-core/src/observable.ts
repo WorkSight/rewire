@@ -13,6 +13,7 @@ export const root       = S.root;
 export const freeze     = S.freeze;
 export const property   = S.data;
 export const sample     = S.sample;
+export const value      = S.value;
 
 export function is_proxy(value: ObjectType) {
   return (!isNullOrUndefined(value) && !!value[proxyProperty]);
@@ -148,7 +149,7 @@ function createHandler(eq: EQType, parent?: () => void) {
       let v = dependencyCache[property];
       if (v) return v();
 
-      v = S.data(property.startsWith('__') ? value: observable(value, incrementVersion));
+      v = S.data(property.startsWith('__') ? value : observable(value, incrementVersion));
       dependencyCache[property] = v;
       return v();
     },

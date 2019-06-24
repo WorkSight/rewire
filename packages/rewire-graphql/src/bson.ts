@@ -6,8 +6,10 @@ export class BSON {
     if (value === null) {
       return undefined;
     }
-    if (!value || !value.__type) return value;
-    return BSON._types[value.__type](value.value);
+
+    let fn;
+    if (!value || !value.__type || !(fn = BSON._types[value.__type])) return value;
+    return fn(value.value);
   }
 
   static replacer(key: string, v?: any) {

@@ -69,7 +69,7 @@ export class SampleModel extends Modal {
 
   constructor() {
     super('Sample Dialog');
-    this.action('login', this.submit, { type: 'submit', disabled: () => this.form.hasErrors })
+    this.action('login', this.submit, { type: 'submit', disabled: () => this.form.hasErrors || !this.form.hasChanges })
         .action('cancel', { color: 'secondary', icon: 'cancel' });
   }
 

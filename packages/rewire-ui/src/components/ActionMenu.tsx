@@ -1,5 +1,6 @@
 import * as React              from 'react';
 import {Observe}               from 'rewire-core';
+import classNames              from 'classnames';
 import Button, {ButtonProps}   from '@material-ui/core/Button';
 import Menu, {MenuProps}       from '@material-ui/core/Menu';
 import MenuItem                from '@material-ui/core/MenuItem';
@@ -20,6 +21,7 @@ export interface IActionMenuItem {
   isExternalLink?: boolean;
   href?: string;
 
+  disabled?(): boolean;
   onClick?(): void;
 }
 
@@ -36,6 +38,10 @@ const styles = (theme: Theme) => ({
   menuItem: {
   },
   menuItemSelected: {
+  },
+  menuItemDisabled: {
+    opacity: '0.5',
+    cursor: 'default',
   },
 });
 
@@ -77,29 +83,33 @@ class ActionMenu extends React.Component<ActionMenuProps, IActionMenuState> {
   }
 
   renderMenuContent = React.memo((): JSX.Element => {
-    const {classes, items} = this.props;
+    return <Observe render={() => {
+      const {classes, items} = this.props;
+      return (
+        < >
+        {items.map((item: IActionMenuItem) => {
+          let externalLinkProps: any = {};
+          if (item.isExternalLink) {
+              externalLinkProps.component = 'a';
+              externalLinkProps.target    = '_blank';
+              externalLinkProps.href      = item.href || '';
+          }
+          let disabled     = !!(item.disabled && item.disabled());
+          let rootClasses  = classNames(classes.menuItem, disabled ? classes.menuItemDisabled : undefined);
+          let clickHandler = !disabled ? this.handleItemClick(item) : undefined;
 
-    return <Observe render={() => (
-      < >
-      {items.map((item: IActionMenuItem) => {
-        let externalLinkProps: any = {};
-        if (item.isExternalLink) {
-            externalLinkProps.component = 'a';
-            externalLinkProps.target    = '_blank';
-            externalLinkProps.href      = item.href || '';
-        }
-
-        return (
-          <MenuItem key={item.name} {...externalLinkProps} divider={item.divider} classes={{root: classes.menuItem, selected: classes.menuItemSelected}} onClick={this.handleItemClick(item)}>
-            <ListItemIcon className={classes.listItemIcon}>
-              {item.icon ? <item.icon /> : <LabelIcon />}
-            </ListItemIcon>
-            <ListItemText className={classes.listItemText} primary={item.title} />
-          </MenuItem>
-        );
-      })}
-      </>
-    )} />;
+          return (
+            <MenuItem key={item.name} {...externalLinkProps} divider={item.divider} disableRipple={disabled} classes={{root: rootClasses, selected: classes.menuItemSelected}} onClick={clickHandler}>
+              <ListItemIcon className={classes.listItemIcon}>
+                {item.icon ? <item.icon /> : <LabelIcon />}
+              </ListItemIcon>
+              <ListItemText className={classes.listItemText} primary={item.title} />
+            </MenuItem>
+          );
+        })}
+        </>
+      );
+    }} />;
   });
 
   render() {

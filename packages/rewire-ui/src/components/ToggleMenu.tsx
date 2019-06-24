@@ -1,6 +1,7 @@
 import * as React              from 'react';
 import {isNullOrUndefined}     from 'rewire-common';
 import {Observe}               from 'rewire-core';
+import classNames              from 'classnames';
 import {Theme}                 from '@material-ui/core/styles';
 import Button, {ButtonProps}   from '@material-ui/core/Button';
 import Menu, {MenuProps}       from '@material-ui/core/Menu';
@@ -16,6 +17,8 @@ export interface IToggleMenuItem {
   title:   string;
   visible: boolean;
   icon?:   React.ComponentType<SvgIconProps>;
+
+  disabled?(): boolean;
 }
 
 const styles = (theme: Theme) => ({
@@ -34,6 +37,10 @@ const styles = (theme: Theme) => ({
     minWidth: '150px',
   },
   menuItemSelected: {
+  },
+  menuItemDisabled: {
+    opacity: '0.5',
+    cursor: 'default',
   },
 });
 
@@ -74,24 +81,30 @@ class ToggleMenu extends React.Component<ToggleMenuProps, IToggleMenuState> {
   }
 
   renderMenuContent = React.memo((): JSX.Element => {
-    const {classes, items, onItemClick} = this.props;
-
-    return <Observe render={() => (
-      < >
-      {items.map((item: IToggleMenuItem) =>
-        <MenuItem key={item.name} classes={{root: classes.menuItem, selected: classes.menuItemSelected}} onClick={onItemClick ? () => onItemClick(item) : () => this.handleItemClick(item)}>
-          <ListItemText className={classes.listItemText} primary={item.title} />
-          <Observe render={() => (
-            item.visible
-              ? <ListItemIcon className={classes.listItemIcon}>
-                  {item.icon ? <item.icon /> : <CheckIcon />}
-                </ListItemIcon>
-              : null
-          )} />
-        </MenuItem>
-      )}
-      </>
-    )} />;
+    return <Observe render={() => {
+      const {classes, items, onItemClick} = this.props;
+      return (
+        < >
+        {items.map((item: IToggleMenuItem) => {
+          let disabled     = !!(item.disabled && item.disabled());
+          let rootClasses  = classNames(classes.menuItem, disabled ? classes.menuItemDisabled : undefined);
+          let clickHandler = !disabled ? ( onItemClick ? () => onItemClick(item) : () => this.handleItemClick(item) ) : undefined;
+          return (
+            <MenuItem key={item.name} classes={{root: rootClasses, selected: classes.menuItemSelected}} disableRipple={disabled} onClick={clickHandler}>
+              <ListItemText className={classes.listItemText} primary={item.title} />
+              <Observe render={() => (
+                item.visible
+                  ? <ListItemIcon className={classes.listItemIcon}>
+                      {item.icon ? <item.icon /> : <CheckIcon />}
+                    </ListItemIcon>
+                  : null
+              )} />
+            </MenuItem>
+          );
+        })}
+        </>
+      );
+    }} />;
   });
 
   render() {
