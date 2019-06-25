@@ -11,7 +11,9 @@ import {
   disposeOnUnmount,
   watch,
   property,
-  DataSignal
+  DataSignal,
+  computed,
+  version
 }                                          from 'rewire-core';
 import Column                              from './Column';
 import classNames                          from 'classnames';
@@ -529,6 +531,10 @@ const GridInternal = withStyles(styles, class extends React.PureComponent<GridPr
     }
   }
 
+  componentWillMount() {
+    disposeOnUnmount(this, () => this.buildGroups());
+  }
+
   componentWillUnmount() {
     if (this.grid.multiSelect || this.grid.clearSelectionOnBlur) {
       document.removeEventListener('mouseup', this.handleExternalMouseUp);
@@ -599,34 +605,39 @@ const GridInternal = withStyles(styles, class extends React.PureComponent<GridPr
     return key.join('->');
   }
 
-  _groups: IGroupRow[];
-  buildGroups(rows: IRow[], groupBy: IColumn[]) {
-    if (this._groups) return;
-    const _groupMap = {};
-    this._groups = [];
-    for (const row of rows) {
-      let parentGroup : IGroupRow | undefined;
-      for (let level = 1; level <= groupBy.length; level++) {
-        const key   = this.getGroupKey(row, groupBy, level);
-        let   group = _groupMap[key];
-        if (!group) {
-          const value = this.getGroupValue(row, groupBy[level-1]);
-          group = _groupMap[key] = new GroupRowModel(value, level);
-          if (!parentGroup) this._groups.push(group);
-          else parentGroup.rows.push(group);
-        }
+  _groups: () => IGroupRow[] | undefined;
+  buildGroups() {
+    const computation = () => {
+      if (!this.grid.groupBy || (this.grid.groupBy.length === 0)) return undefined;
+      const groupMap = {};
+      const groups: IGroupRow[] = [];
+      for (const row of this.grid.rows) {
+        let parentGroup : IGroupRow | undefined;
+        for (let level = 0; level < this.grid.groupBy.length; level++) {
+          const key   = this.getGroupKey(row, this.grid.groupBy, level + 1);
+          let   group = groupMap[key];
+          if (!group) {
+            const value = this.getGroupValue(row, this.grid.groupBy[level]);
+            group = groupMap[key] = new GroupRowModel(value, level);
+            if (!parentGroup) groups.push(group);
+            else parentGroup.rows.push(group);
+          }
 
-        parentGroup = group;
-        if (level === groupBy.length) {
-          parentGroup!.rows.push(row);
+          parentGroup = group;
+          if (level === this.grid.groupBy.length - 1) {
+            parentGroup!.rows.push(row);
+          }
         }
       }
-    }
+      return groups;
+    };
+
+    this._groups = computed<IGroupRow[] | undefined>(() => this.grid.rows.length, computation, undefined, true);
   }
 
-  renderGroups(rows: IRow[], columns: IColumn[], visibleColumns: number, groupBy: IColumn[], fixed: boolean) {
-    this.buildGroups(rows, groupBy);
-    return this._groups.map((group) => <GroupRow fixed={fixed} key={group.title} group={group} columns={columns} visibleColumns={visibleColumns} />);
+  renderGroups(columns: IColumn[], visibleColumns: number,fixed: boolean) {
+    const groups = this._groups();
+    return groups && groups.map((group) => <GroupRow fixed={fixed} key={group.title} group={group} columns={columns} visibleColumns={visibleColumns} />);
   }
 
   renderRows = (rows: IRow[], columns: IColumn[], fixed: boolean) => {
@@ -637,8 +648,7 @@ const GridInternal = withStyles(styles, class extends React.PureComponent<GridPr
 
     // group rows yeah!!
     const visibleColumns: number = columns.reduce((previous, current) => previous + ((current.visible) ? 1 : 0), 0);
-    // return <Observe render={() => this.renderGroups(rows, columns, visibleColumns, this.props.grid.groupBy, fixed)} />;
-    return this.renderGroups(rows, columns, visibleColumns, this.props.grid.groupBy, fixed);
+    return <Observe render={() => this.renderGroups(columns, visibleColumns, fixed)} />;
   }
 
   renderColumnGroups(fixed: boolean): JSX.Element {
@@ -728,6 +738,10 @@ const GridInternal = withStyles(styles, class extends React.PureComponent<GridPr
       )} />
     );
   }
+
+  // shouldComponentUpdate(nextProps, nextState, nextContext) {
+  //   return nextProps.grid !== this.props.grid;
+  // }
 
   componentDidUpdate(prevProps: GridProps) {
     if (prevProps.grid !== this.props.grid) {

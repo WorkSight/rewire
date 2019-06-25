@@ -59,7 +59,7 @@ export const GroupRow = React.memo(withStyles(styles, (props: IGroupProps & {cla
     < >
       <Observe render={() => (
         <tr onClick={() => props.group.expanded ? props.group.collapse() : props.group.expand()} className={(props.group.visible === false) ? props.classes.hidden : props.classes.visible} style={{height: 28}}>
-          <td colSpan={props.visibleColumns} className={cc([props.classes.group, props.classes[`groupLevel${props.group.level}`], 'group', 'level-' + props.group.level, props.classes.collapsed])}>
+          <td colSpan={props.visibleColumns} className={cc([props.classes.group, props.classes[`groupLevel${props.group.level}`], 'group', {expanded: (props.group.expanded && props.fixed), collapsed: !props.group.expanded && props.fixed}, 'level-' + props.group.level, props.classes.collapsed])}>
             <div><span>{props.fixed ? props.group.title : ''}</span></div>
           </td>
         </tr>
@@ -113,16 +113,17 @@ const Row = withStyles(styles, class extends PureComponent<RowProps, {}> {
     if (r.__computed) return r.__computed;
 
     const el: any = this.element.current;
-    if (!r.__computed && el && !el.__pendingClientRect) {
-      el.__pendingClientRect = true;
-      requestAnimationFrame(() => {
-        const height = (r.__computed = el!.getBoundingClientRect().height);
-        el!.__pendingClientRect = false;
-        if (height > this.props.row.height) {
-          this.props.row.height  = height;
-        }
-      });
-    }
+    if (el && (el.__pendingClientRect === true)) return r.height; // in the middle of a recalculation so early exit
+    el && (el.__pendingClientRect = true);
+    requestAnimationFrame(() => {
+      const el: any = this.element.current;
+      if (!el) return; // this return should never get hit!
+      const height = (r.__computed = el!.getBoundingClientRect().height);
+      if (height > this.props.row.height) {
+        this.props.row.height  = height;
+      }
+      el.__pendingClientRect = false;
+    });
 
     return r.height;
   }

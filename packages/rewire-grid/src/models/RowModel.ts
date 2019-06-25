@@ -100,6 +100,7 @@ export class RowModel implements IRow, IDisposable {
   }
 
   recomputeHeight() {
+    if (this.grid.rowHeight || this.fixed) return;
     this.height = 0;
     (this as any).__computed = undefined;
   }

@@ -13,6 +13,7 @@ import {IGrid,
   cloneValue
 }                                          from './GridTypes';
 import * as deepEqual                      from 'fast-deep-equal';
+import { RowModel } from './RowModel';
 
 let id = 0;
 export class CellModel implements ICell {
@@ -190,10 +191,10 @@ export class CellModel implements ICell {
   set value(value: any) {
     if (this.row.data) {
       this.row.data[this.column.name] = value;
+      (this.row as RowModel).recomputeHeight();
       return;
     }
     return;
-    // this._value = value;
   }
 
   hasChanges(): boolean {

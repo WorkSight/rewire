@@ -298,6 +298,7 @@ newRow.data['timeColumn'] = '8:11';
 grid.addRow(newRow);
 grid.cellByPos(0, 0)!.setValue('ooga booga boa');
 // grid.dataRowsByPosition.forEach(row => row.cellsByColumnPosition.forEach(cell => cell.row = row));
+// grid.headerRowHeight      = 28;
 grid.commit();
 // const r                          = grid.get();
 // console.log(r);
@@ -569,7 +570,7 @@ export const HomeView = withStyles(styles, (props: HomeViewProps) => {
 
   return (
     <Observe render={() => (
-      <TransitionWrapper>
+      // <TransitionWrapper>
       <div>
         <div className={classes.dialogButtonsContainer}>
         <Button className={classes.openDialogButton} color='primary' variant='contained' onClick={() => sampleModel.open()}>Load Dialog Test</Button>
@@ -643,7 +644,7 @@ export const HomeView = withStyles(styles, (props: HomeViewProps) => {
           </Paper>
         </div>
       </div>
-      </TransitionWrapper>
+      // </TransitionWrapper>
     )} />
   );
 });
