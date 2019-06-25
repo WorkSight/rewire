@@ -37,7 +37,6 @@ import {
   watch,
 }                  from 'rewire-core';
 import { compare } from 'rewire-ui';
-import { findRowByPosition } from '../../dist/src';
 
 let id = 0;
 class GridModel implements IGrid, IDisposable {
