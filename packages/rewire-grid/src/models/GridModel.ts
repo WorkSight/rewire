@@ -746,7 +746,7 @@ class GridModel implements IGrid, IDisposable {
       for (const r of rows) {
         (r as RowModel).recomputeHeight();
       }
-    })
+    });
   }
 
   get fixedColumns() {

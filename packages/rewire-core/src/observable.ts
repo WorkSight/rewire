@@ -149,7 +149,7 @@ function createHandler(eq: EQType, parent?: () => void) {
       let v = dependencyCache[property];
       if (v) return v();
 
-      v = S.data(property.startsWith('__') ? value: observable(value, incrementVersion));
+      v = S.data(property.startsWith('__') ? value : observable(value, incrementVersion));
       dependencyCache[property] = v;
       return v();
     },

@@ -48,13 +48,13 @@ class ColumnWidth extends React.PureComponent<IColumnProps> {
 type ResizeCallback = (height: {clientHeight: number, scrollHeight: number}) => void;
 interface IResizeWatcherResult {
   watch(callback: ResizeCallback): void;
-};
+}
 
 function verticalResizeWatcher(lifetime: React.Component<any>, element: HTMLElement): IResizeWatcherResult {
   const _previous                    = {scrollHeight: element.scrollHeight, clientHeight: element.clientHeight};
   const _callbacks: ResizeCallback[] = [];
 
-  var observer = new ResizeObserver(function() {
+  const observer = new ResizeObserver(function() {
     const current = {scrollHeight: element.scrollHeight, clientHeight: element.clientHeight};
     if (current && _previous && (current.scrollHeight === _previous.scrollHeight) === (current.clientHeight === _previous.clientHeight)) return;
     for (const callback of _callbacks) {
@@ -66,8 +66,8 @@ function verticalResizeWatcher(lifetime: React.Component<any>, element: HTMLElem
 
   observer.observe(element);
   const oldCWUM = lifetime.componentWillUnmount;
-  lifetime.componentWillUnmount = () => { observer.disconnect(); oldCWUM && oldCWUM(); }
-  return { watch(callback: ResizeCallback) { _callbacks.push(callback); callback(_previous) } };
+  lifetime.componentWillUnmount = () => { observer.disconnect(); oldCWUM && oldCWUM(); };
+  return { watch(callback: ResizeCallback) { _callbacks.push(callback); callback(_previous); } };
 }
 
 export interface IGridProps {

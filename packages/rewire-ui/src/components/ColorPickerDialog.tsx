@@ -46,7 +46,7 @@ class ColorPickerDialog extends React.Component<ColorPickerDialogProps> {
   }
 
   render() {
-    const {classes, className, disableAlpha, width, color, isOpen, anchorEl, onOpen, onClose, onChange, onChangeComplete} = this.props;
+    const {className, disableAlpha, width, color, isOpen, anchorEl, onOpen, onClose, onChange, onChangeComplete} = this.props;
     const defaultStyles = {
       color: {
         width: '42px',
