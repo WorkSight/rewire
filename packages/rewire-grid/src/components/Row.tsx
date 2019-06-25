@@ -2,6 +2,8 @@ import {PureComponent} from 'react';
 import {
   IRow,
   IColumn,
+  IGroupRow,
+  isGroupRow
 }                              from '../models/GridTypes';
 import * as React              from 'react';
 import cc                      from 'classcat';
@@ -9,6 +11,7 @@ import * as Color              from 'color';
 import {Observe}               from 'rewire-core';
 import {Theme}                 from '@material-ui/core/styles';
 import {WithStyle, withStyles} from 'rewire-ui';
+import Cell                    from './Cell';
 
 export interface IRowProps {
   row               : IRow;
@@ -31,15 +34,12 @@ const styles = (theme: Theme) => {
         color: Color(color).darken(.45).string(),
       },
     },
-    notVisible: {
-      visibility: 'collapse',
-    },
     visible: {
       visibility: 'visible',
     },
-    collapsed: {
-      '& tr': {display: 'none !important'}
-    }
+    hidden: {
+      visibility: 'collapse',
+    },
   };
 
   for (let i = 0; i < 7; i++) {
@@ -52,37 +52,25 @@ const styles = (theme: Theme) => {
   return styleObj;
 };
 
-type IGroupProps = {title: string, rows: JSX.Element[], visibleColumns: number, level: number} & React.Props<any>;
-function collapse(rows: JSX.Element[]) {
-  return rows.map((r: JSX.Element) => {
-    const style = (r.props.style || {}).visibility = 'collapsed';
-    React.cloneElement(r, {style});
-  });
-}
-
-function expand(rows: JSX.Element[]) {
-  return rows;
-  return rows.map((r: JSX.Element) => {
-    const style = (r.props.style || {}).visibility = 'visible';
-    React.cloneElement(r, {style});
-  });
-}
+type IGroupProps = {group: IGroupRow, columns: IColumn[], visibleColumns: number, fixed: boolean} & React.Props<any>;
 
 export const GroupRow = React.memo(withStyles(styles, (props: IGroupProps & {classes?: any}) => {
-  const [collapsed, setCollapsed] = React.useState(false);
-  // const rows = props.rows;
-  console.log('collapsed ', collapsed);
-  const rows = collapsed ? collapse(props.rows) : expand(props.rows);
   return (
     < >
       <Observe render={() => (
-        <tr onClick={() => setCollapsed(!collapsed)} style={{height: 28}}>
-          <td colSpan={props.visibleColumns} className={cc([props.classes.group, props.classes[`groupLevel${props.level}`], 'group', 'level-' + props.level, props.classes.collapsed])}>
-            <div><span>{props.title}</span></div>
+        <tr onClick={() => props.group.expanded ? props.group.collapse() : props.group.expand()} className={(props.group.visible === false) ? props.classes.hidden : props.classes.visible} style={{height: 28}}>
+          <td colSpan={props.visibleColumns} className={cc([props.classes.group, props.classes[`groupLevel${props.group.level}`], 'group', 'level-' + props.group.level, props.classes.collapsed])}>
+            <div><span>{props.fixed ? props.group.title : ''}</span></div>
           </td>
         </tr>
       )} />
-      {rows}
+      {props.group.rows.map((r, idx) => {
+        if (isGroupRow(r)) {
+          return <GroupRow key={r.title} fixed={props.fixed} group={r} columns={props.columns} visibleColumns={props.visibleColumns} />
+        } else {
+          return <Row key={r.id} height={r.grid.rowHeight} columns={props.columns} Cell={Cell} index={idx} className={((idx % 2) === 1) ? 'alt' : ''} row={r} />;
+        }
+      })}
     </>
   );
 }));
@@ -102,20 +90,6 @@ const Row = withStyles(styles, class extends PureComponent<RowProps, {}> {
       this.props.row.onClick(this.props.row);
     }
   }
-
-  // handleGroupRowClick = (groupRow: IGroupRow) => () => {
-  //   groupRow.expanded = !groupRow.expanded;
-  //   this.groupRowExpansion(groupRow, groupRow.expanded);
-  // }
-
-  // groupRowExpansion(groupRow: IGroupRow, expanded: boolean) {
-  //   groupRow.rows.forEach(row => {
-  //     row.visible = expanded;
-  //     if (isGroupRow(row)) {
-  //       this.groupRowExpansion(row, row.expanded && row.visible);
-  //     }
-  //   });
-  // }
 
   renderCells = () => {
     if (!this.props.row.cells) return [];
@@ -145,7 +119,7 @@ const Row = withStyles(styles, class extends PureComponent<RowProps, {}> {
         const height = (r.__computed = el!.getBoundingClientRect().height);
         el!.__pendingClientRect = false;
         if (height > this.props.row.height) {
-          this.props.row.height = height;
+          this.props.row.height  = height;
         }
       });
     }
@@ -156,7 +130,7 @@ const Row = withStyles(styles, class extends PureComponent<RowProps, {}> {
   render() {
     return <Observe render={
       () => {
-        const className = cc([this.props.className, {selected: this.props.row.selected, [this.props.classes.notVisible + ' notVisible']: !this.props.row.visible, visible: this.props.row.visible}, this.props.row.cls, 'tabrow']);
+        const className = cc([this.props.className, {selected: this.props.row.selected}, (this.props.row.visible === false) ?  this.props.classes.hidden : this.props.classes.visible, this.props.row.cls, 'tabrow']);
         const height    = this.recomputeHeight();
 
         if (height > this.props.row.height) {

@@ -188,6 +188,16 @@ export interface IGridOptions {
   variableKeybinds?        : {[keybind: string]: GridKeybindAction};
 }
 
+export interface IGroupRow {
+  expanded       : boolean;
+  visible        : boolean;
+  rows           : (IRow | IGroupRow)[];
+  readonly title : string;
+  readonly level : number;
+  expand()       : void;
+  collapse()     : void;
+}
+
 export interface IGridColors {
   headerBackground?: string;
   headerText?: string;
@@ -400,6 +410,10 @@ export interface ICellCustomValue {
 
 export function isRow(row: any): row is IRow {
   return !!(row && (row as IRow).createCell);
+}
+
+export function isGroupRow(row: any): row is IGroupRow {
+  return !!row._expanded;
 }
 
 export function isColumn(column: any): column is IColumn {

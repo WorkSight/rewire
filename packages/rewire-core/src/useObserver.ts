@@ -1,4 +1,4 @@
-import { useEffect, useState, useRef } from 'react';
+import { useEffect, useState, useRef, useCallback } from 'react';
 import S from 's-js';
 
 export function useUnmount(fn: () => void) {
@@ -31,10 +31,15 @@ class Reaction<T> {
 }
 
 export function useObserver<T>(
-  renderFn: () => T
+  renderFn: () => T, debug?: boolean
 ): T {
   const [, setTick] = useState(0);
-  const update      = () => setTick(tick => tick + 1);
+  const update      = useCallback(() => {
+    if (debug) {
+      console.trace();
+    }
+    setTick(tick => tick + 1);
+  }, []);
   const s           = useRef<Reaction<T> | null>(null);
   if (!s.current) {
     s.current = new Reaction<T>();

@@ -1,17 +1,25 @@
-import {IGrid, IColumn, IGridColors, IGridFontSizes, IRow} from '../models/GridTypes';
-import Column                                        from './Column';
-import classNames                                    from 'classnames';
-import Cell                                          from './Cell';
-import Row, {GroupRow}                               from './Row';
-import * as React                                    from 'react';
-import * as Color                                    from 'color';
+import {
+  IGrid,
+  IColumn,
+  IGridColors,
+  IGridFontSizes,
+  IRow,
+  IGroupRow
+}                                          from '../models/GridTypes';
 import {
   Observe,
   disposeOnUnmount,
   watch,
   property,
   DataSignal
-} from 'rewire-core';
+}                                          from 'rewire-core';
+import Column                              from './Column';
+import classNames                          from 'classnames';
+import Cell                                from './Cell';
+import Row, {GroupRow}                     from './Row';
+import GroupRowModel                       from '../models/GroupRowModel';
+import * as React                          from 'react';
+import * as Color                          from 'color';
 import {debounce}                          from 'rewire-common';
 import {WithStyle, withStyles, ToggleMenu} from 'rewire-ui';
 import {PopoverOrigin}                     from '@material-ui/core/Popover';
@@ -576,38 +584,49 @@ const GridInternal = withStyles(styles, class extends React.PureComponent<GridPr
   _fixedColGroups: JSX.Element | undefined;
   _colGroups: JSX.Element | undefined;
 
+  getGroupValue(row: IRow, column: IColumn) {
+    const v = row && row.data && column && row.data[column.name];
+    return (v === null || v === undefined || Number.isNaN(v)) ? '(none)' : (column.map && column.map(v)) || String(v);
+  }
+
   getGroupKey(row: IRow, groupBy: IColumn[], level: number): string {
     const key: string[] = [];
     for (let index = 0; index < level; index++) {
       const column        = groupBy[index];
-      const v             = row.data[column.name];
-      const valueAsString = (v === null || v === undefined || Number.isNaN(v)) ? '(none)' : (column.map && column.map(v)) || String(v);
+      const valueAsString = this.getGroupValue(row, column);
       key.push(valueAsString);
     }
     return key.join('->');
   }
 
-  renderGroups(rows: IRow[], columns: IColumn[], visibleColumns: number, groupBy: IColumn[], fixed: boolean) {
-    const _groups: {[key: string]: JSX.Element} = {};
-    const result: JSX.Element[] = [];
-    let parentGroup: JSX.Element | undefined;
+  _groups: IGroupRow[];
+  buildGroups(rows: IRow[], groupBy: IColumn[]) {
+    if (this._groups) return;
+    const _groupMap = {};
+    this._groups = [];
     for (const row of rows) {
+      let parentGroup : IGroupRow | undefined;
       for (let level = 1; level <= groupBy.length; level++) {
         const key   = this.getGroupKey(row, groupBy, level);
-        let   group = _groups[key];
+        let   group = _groupMap[key];
         if (!group) {
-          group = _groups[key] = <GroupRow key={key} level={level-1} title={fixed ? key : ' '} visibleColumns={visibleColumns} rows={[]}></GroupRow>;
-          if (level === 1) result.push(group);
-          else parentGroup && parentGroup.props.rows.push(group);
+          const value = this.getGroupValue(row, groupBy[level-1]);
+          group = _groupMap[key] = new GroupRowModel(value, level);
+          if (!parentGroup) this._groups.push(group);
+          else parentGroup.rows.push(group);
         }
+
         parentGroup = group;
         if (level === groupBy.length) {
-          const index = parentGroup.props.rows.length;
-          parentGroup.props.rows.push(<Row key={key + row.id} height={this.props.grid.rowHeight} columns={columns} Cell={Cell} index={index} className={((index % 2) === 1) ? 'alt' : ''} row={row} />);
+          parentGroup!.rows.push(row);
         }
       }
     }
-    return result;
+  }
+
+  renderGroups(rows: IRow[], columns: IColumn[], visibleColumns: number, groupBy: IColumn[], fixed: boolean) {
+    this.buildGroups(rows, groupBy);
+    return this._groups.map((group) => <GroupRow fixed={fixed} key={group.title} group={group} columns={columns} visibleColumns={visibleColumns} />);
   }
 
   renderRows = (rows: IRow[], columns: IColumn[], fixed: boolean) => {
@@ -618,7 +637,8 @@ const GridInternal = withStyles(styles, class extends React.PureComponent<GridPr
 
     // group rows yeah!!
     const visibleColumns: number = columns.reduce((previous, current) => previous + ((current.visible) ? 1 : 0), 0);
-    return <Observe render={() => this.renderGroups(rows, columns, visibleColumns, this.props.grid.groupBy, fixed)} />;
+    // return <Observe render={() => this.renderGroups(rows, columns, visibleColumns, this.props.grid.groupBy, fixed)} />;
+    return this.renderGroups(rows, columns, visibleColumns, this.props.grid.groupBy, fixed);
   }
 
   renderColumnGroups(fixed: boolean): JSX.Element {
@@ -723,12 +743,12 @@ const GridInternal = withStyles(styles, class extends React.PureComponent<GridPr
       <Observe render={() => (
         <div className={classNames('grid-scroll', this.props.classes.gridScroll)} onScroll={this.handleScroll}>
           {this.renderFixedColumnData()}
-            <div className={classNames('grid-content', this.props.classes.gridContent)}  ref={this.setGridContentRef}>
-              <table role='grid'>
-                {this.renderColumnGroups(false)}
-                <BodyRenderer grid={this.props.grid} renderRows={this.renderRows} scrollY={this.scrollY} columns={this.props.grid.standardColumns} />
-              </table>
-            </div>
+          <div className={classNames('grid-content', this.props.classes.gridContent)}  ref={this.setGridContentRef}>
+            <table role='grid'>
+              {this.renderColumnGroups(false)}
+              <BodyRenderer grid={this.props.grid} renderRows={this.renderRows} scrollY={this.scrollY} columns={this.props.grid.standardColumns} />
+            </table>
+          </div>
         </div>
       )} />
     );
