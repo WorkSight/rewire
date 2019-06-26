@@ -6,8 +6,8 @@ import {
   IToggleMenuItem,
   ISuggestionsContainerComponent,
 } from 'rewire-ui';
-import { IValidateFnData } from './Validator';
-import * as merge          from 'deepmerge';
+import { IValidateFn } from './Validator';
+import * as merge      from 'deepmerge';
 export { EditorType };
 
 export interface IRows {
@@ -49,9 +49,9 @@ export interface IGridStaticKeybinds {
   'Ctrl+C': GridKeybindAction;
 }
 export interface IGridVariableKeybinds {
-  'Ctrl+R': GridKeybindAction;
-  'Ctrl+U': GridKeybindAction;
-  'Ctrl+Shift+U': GridKeybindAction;
+  // 'Ctrl+R': GridKeybindAction;
+  // 'Ctrl+U': GridKeybindAction;
+  // 'Ctrl+Shift+U': GridKeybindAction;
   'Ctrl+X': GridKeybindAction;
   'Ctrl+V': GridKeybindAction;
   'Delete': GridKeybindAction;
@@ -83,7 +83,6 @@ export interface IGrid extends IRows, IDisposable {
   toggleableColumns         : IColumn[];
   toggleableColumnsOptions? : IToggleableColumnsOptions;
   hasToggleableColumns      : boolean;
-  clipboard                 : ICell[];
   isMouseDown               : boolean;
   multiSelect               : boolean;
   allowMergeColumns         : boolean;
@@ -95,7 +94,6 @@ export interface IGrid extends IRows, IDisposable {
   staticKeybinds            : IGridStaticKeybinds;
   variableKeybinds          : IGridVariableKeybinds;
 
-  hasChanges(): boolean;
   hasErrors(): boolean;
   getErrors(): IErrorData[];
   validate(): void;
@@ -138,15 +136,10 @@ export interface IGrid extends IRows, IDisposable {
   column(columnName: string): IColumn | undefined;
   columnByPos(columnPosition: number): IColumn | undefined;
 
-  revert(): void;
-  revertSelectedCells(): void;
-  revertSelectedRows(): void;
   clear(): void;
   clearSelectedCells(): void;
   get(): ICellDataMap[];
-  getChanges(): ICellDataMap[];
   set(data: (IRowData | undefined)[]): void;
-  commit(): void;
 
   addColumn(column: IColumn): IColumn;
   setColumnPositions(): void;
@@ -240,31 +233,26 @@ export interface IRow extends IDisposable {
   id                            : string;
   grid                          : IGrid;
   cells                         : ICellMap;
-  data?                         : any;
+  data                          : any;
   height                        : number;
   selected                      : boolean;
   cls?                          : string;
   allowMergeColumns?            : boolean;
   position                      : number;
-  readonly originalData         : ICellDataMap;
   visible                       : boolean;
   fixed                         : boolean;
   options                       : IRowOptions;
 
   onClick?(row: IRow): void;
-  hasChanges(): boolean;
   hasErrors(): boolean;
   getErrors(): IErrorData[];
   createCell(column: IColumn, value: any, type?: string): ICell;
   clear(columnNames?: string[]): void;
-  commit(): void;
-  setValue(data: ICellDataMap, triggerOnValueChangeHandler?: boolean): boolean;
   mergeAllColumns(): void;
   mergeFixedColumns(): void;
   mergeStandardColumns(): void;
   clone(): IRow;
-  validate(columnNames?: string[]): void;
-  revert(): void;
+  validate(): void;
 }
 
 export type MaskType = (string | RegExp)[];
@@ -309,7 +297,7 @@ export interface IColumnOptions {
   width?        : string;
   canSort?      : boolean;
   renderer?     : React.SFC<any>;
-  validator?    : IValidateFnData;
+  validator?    : IValidateFn;
 
   onValueChange?(cell: ICell, v: any): void;
   compare?(x: any, y: any): number;
@@ -338,7 +326,7 @@ export interface IColumn extends ICellProperties {
   isGroupByColumn: boolean;
   typeOptions?   : any;
   editor?        : React.SFC<any>;
-  validator?     : IValidateFnData;
+  validator?     : IValidateFn;
 
   map?(value: any): string;
   predicate?(value: any, filter: {value: any}): boolean;
@@ -365,7 +353,6 @@ export interface ICell extends ICellProperties {
   enabled              : boolean;
   readOnly             : boolean;
   readonly editing     : boolean;
-  element?             : HTMLTableDataCellElement;
   rowPosition          : number;
   columnPosition       : number;
   isTopMostSelection   : boolean;
@@ -374,7 +361,6 @@ export interface ICell extends ICellProperties {
   isLeftMostSelection  : boolean;
   keyForEdit?          : string;
 
-  hasChanges(): boolean;
   hasErrors(): boolean;
   getErrors(): IErrorData[];
   clone(row: IRow): ICell;
@@ -382,14 +368,8 @@ export interface ICell extends ICellProperties {
   setEditing(editing: boolean): void;
   canFocus(): boolean;
   setFocus(focus?: boolean): void;
-  setElement(element: HTMLTableDataCellElement | undefined): void;
-  _setValue(v?: any, triggerOnValueChangeHandler?: boolean): boolean;
-  setValue(v?: any, triggerOnValueChangeHandler?: boolean): boolean;
   validate(): void;
-  _revert(): void;
-  revert(): void;
   unselect(): void;
-  findVerticallyNearestCellWithUnselectedRow(): ICell | undefined;
   performKeybindAction(evt: React.KeyboardEvent<any>): void;
 }
 

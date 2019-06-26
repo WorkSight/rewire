@@ -38,6 +38,7 @@ export function useObserver<T>(
     if (debug) {
       console.trace();
     }
+    // requestAnimationFrame(() => setTick(tick => tick + 1));
     setTick(tick => tick + 1);
   }, []);
   const s           = useRef<Reaction<T> | null>(null);

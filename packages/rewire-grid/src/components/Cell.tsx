@@ -18,6 +18,7 @@ import WarningIcon                from '@material-ui/icons/Warning';
 import InfoIcon                   from '@material-ui/icons/Info';
 import Tooltip                    from '@material-ui/core/Tooltip';
 import Fade                       from '@material-ui/core/Fade';
+import { CellModel } from '../models/CellModel';
 
 const styles = (theme: Theme) => ({
   tableCell: {
@@ -298,7 +299,7 @@ class Cell extends React.PureComponent<CellProps, {}> {
   onValueChange = (v: any) => {
     let value = isNullOrUndefinedOrEmpty(v) ? undefined : v;
     this.cell.keyForEdit = undefined;
-    this.cell.setValue(value);
+    this.cell.value      = value;
     if (this.column.type === 'multiselect' || this.column.type === 'multiselectautocomplete') {
       return;
     }
@@ -319,9 +320,9 @@ class Cell extends React.PureComponent<CellProps, {}> {
   }
 
   setCellRef = (element: HTMLTableDataCellElement) => {
-    if (element && element !== this.cell.element) {
+    if (element && element !== (this.cell as CellModel).element) {
       // this.cell.element = (element as HTMLTableDataCellElement);
-      this.cell.setElement(element as HTMLTableDataCellElement);
+      (this.cell as CellModel).setElement(element as HTMLTableDataCellElement);
     }
   }
 

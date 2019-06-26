@@ -55,7 +55,7 @@ export default class Column extends React.PureComponent<IColumnCellProps> {
           // widthToSet       = currColumn.width ? widthToSet - (cellWidth - currColumn.width.slice().replace(new RegExp(/px/, 'g'), '')) : widthToSet;
           // widthToSet       = currColumn.width ? cellWidth + (widthToSet - currColumn.width.slice().replace(new RegExp(/px/, 'g'), '')) : widthToSet;
           currColumn.width = `${widthToSet}px`;
-          currColumn       = currColumn.grid.adjacentRightColumn(currColumn)!;
+          currColumn       = (currColumn.grid as any).adjacentRightColumn(currColumn)!;
         }
       } else {
         this.column.width = `${Math.max(this.startOffset + evt.pageX, 5)}px`;

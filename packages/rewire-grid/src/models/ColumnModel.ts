@@ -21,7 +21,7 @@ import {
   freeze,
   observable,
 } from 'rewire-core';
-import { IValidateFnData } from './Validator';
+import { IValidateFn }     from './Validator';
 import * as is             from 'is';
 
 let id            = 0;
@@ -52,7 +52,7 @@ export class ColumnModel implements IColumn {
   type         : EditorType;
   renderer?    : React.SFC<any>;
   editor?      : React.SFC<any>;
-  validator?   : IValidateFnData;
+  validator?   : IValidateFn;
 
   onValueChange?(cell: ICell, v: any): void;
   map?(value: any): string;

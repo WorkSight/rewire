@@ -546,6 +546,7 @@ const GridInternal = withStyles(styles, class extends React.PureComponent<GridPr
       // reset column groups
       this._fixedColGroups = undefined;
       this._colGroups      = undefined;
+      this.grid            = nextProps.grid;
     }
   }
 
@@ -743,11 +744,11 @@ const GridInternal = withStyles(styles, class extends React.PureComponent<GridPr
   //   return nextProps.grid !== this.props.grid;
   // }
 
-  componentDidUpdate(prevProps: GridProps) {
-    if (prevProps.grid !== this.props.grid) {
-      this.grid = this.props.grid;
-    }
-  }
+  // componentDidUpdate(prevProps: GridProps) {
+  //   if (prevProps.grid !== this.props.grid) {
+  //     this.grid = this.props.grid;
+  //   }
+  // }
 
   _body: HTMLTableSectionElement | null;
 
@@ -770,7 +771,6 @@ const GridInternal = withStyles(styles, class extends React.PureComponent<GridPr
 
   render() {
     const {style, className, classes} = this.props;
-
     return <Observe render={() => (
       <div className={classNames(classes.root, className)} style={{...style}}>
         <div className={classNames('ws-grid', classes.wsGrid)} onMouseDown={(this.grid.multiSelect || this.grid.clearSelectionOnBlur) ? this.handleMouseDown : undefined}>

@@ -17,7 +17,7 @@ import AccessTimeIcon  from '@material-ui/icons/AccessTime';
 import DateRangeIcon   from '@material-ui/icons/DateRange';
 import Validator, {
   ValidationResult,
-  IValidateFnData}     from './Validator';
+  IValidateFn}         from './Validator';
 import editor, {
   EditorType,
   TextAlignment,
@@ -42,7 +42,7 @@ export interface IFieldDefn {
   editor(editorType: EditorType, editProps?: any):                IFieldDefn;
   updateOnChange(updateOnChange?: boolean):                       IFieldDefn;
   validateOnUpdate(validateOnUpdate?: boolean):                   IFieldDefn;
-  validators(fnData: IValidateFnData):                            IFieldDefn;
+  validators(fnData: IValidateFn):                                IFieldDefn;
   onValueChange(handleValueChange: (form: Form, v: any) => void): IFieldDefn;
 }
 
@@ -51,7 +51,6 @@ export interface IEditorField extends IField {
   type:             IFieldTypes;
   updateOnChange:   boolean;
   validateOnUpdate: boolean;
-  linkedFieldNames: string[];
 
   onValueChange?(form: Form, v: any): void;
 }
@@ -76,7 +75,7 @@ interface IBaseFieldDefn {
   visible?         : boolean;
   updateOnChange?  : boolean;
   validateOnUpdate?: boolean;
-  validators?      : IValidateFnData;
+  validators?      : IValidateFn;
 
   onValueChange?(form: Form, v: any): void;
   startAdornment?(): JSX.Element;
@@ -152,11 +151,11 @@ class BaseField implements IFieldDefn {
     return this;
   }
 
-  validators(validateFnData: IValidateFnData): IFieldDefn {
+  validators(validateFn: IValidateFn): IFieldDefn {
     if (this.typeDefn.validators) {
-      this.typeDefn.validators = and(validateFnData, this.typeDefn.validators);
+      this.typeDefn.validators = and(validateFn, this.typeDefn.validators);
     } else {
-      this.typeDefn.validators = validateFnData;
+      this.typeDefn.validators = validateFn;
     }
 
     return this;
@@ -334,7 +333,6 @@ export default class Form {
       visible:          true,
       startAdornment:   fieldDefn.typeDefn.startAdornment,
       endAdornment:     fieldDefn.typeDefn.endAdornment,
-      linkedFieldNames: fieldDefn.typeDefn.validators && fieldDefn.typeDefn.validators.linkedFieldNames || [],
       onValueChange:    fieldDefn.typeDefn.onValueChange,
     } as IEditorField;
 
@@ -446,7 +444,7 @@ export default class Form {
   }
 
   public validateField(field: IEditorField): ValidationResult {
-    let fieldNamesToValidate = this.fields.filter(f => !f.disableErrors && f.linkedFieldNames.includes(field.name)).map(f => f.name);
+    let fieldNamesToValidate = this.fields.filter(f => !f.disableErrors).map(f => f.name);
     if (!field.disableErrors) {
       fieldNamesToValidate.push(field.name);
     }
@@ -462,7 +460,7 @@ export default class Form {
   }
 
   public validateFields(fields: IEditorField[]): ValidationResult {
-    let fieldNamesToValidate = this.fields.filter(f => !f.disableErrors && fields.findIndex(field => f.linkedFieldNames.includes(field.name)) >= 0).map(f => f.name);
+    let fieldNamesToValidate = this.fields.filter(f => !f.disableErrors).map(f => f.name);
     fields.forEach((field: IEditorField) => {
       if (!field.disableErrors) {
         fieldNamesToValidate.push(field.name);

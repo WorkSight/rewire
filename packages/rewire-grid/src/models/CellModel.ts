@@ -1,7 +1,6 @@
-import * as React                          from 'react';
-import * as is                             from 'is';
-import {isNullOrUndefined}                 from 'rewire-common';
-import {defaultEquals, freeze, observable} from 'rewire-core';
+import * as React           from 'react';
+import {isNullOrUndefined}  from 'rewire-common';
+import {observable, defaultEquals}         from 'rewire-core';
 import {IGrid,
   IColumn,
   ICell,
@@ -11,9 +10,17 @@ import {IGrid,
   TextAlignment,
   VerticalAlignment,
   cloneValue
-}                                          from './GridTypes';
-import * as deepEqual                      from 'fast-deep-equal';
-import { RowModel } from './RowModel';
+}                           from './GridTypes';
+import { RowModel }         from './RowModel';
+
+const _guards = new Map();
+function guard<T>(context: any, fn: () => T) {
+  if (_guards.has(context)) return;
+  _guards.set(context, true);
+  const result = fn.call(context);
+  _guards.delete(context);
+  return result;
+}
 
 let id = 0;
 export class CellModel implements ICell {
@@ -141,28 +148,29 @@ export class CellModel implements ICell {
     return this.column.position;
   }
 
-  _setValue(value?: any, triggerOnValueChangeHandler: boolean = true): boolean {
-    if (is.object(this.value) && is.object(value)) {
-      if (deepEqual(this.value, value)) return false;
-      freeze(() => {
-        Object.keys(this.value).forEach((key: string) => delete this.value[key]);
-        Object.keys(value).forEach((key: string) => this.value[key] = undefined);
-      });
-      Object.assign(this.value, value);
-    } else if (is.object(value)) {
-      this.value = cloneValue(value);
-    } else {
-      if (defaultEquals(this.value, value)) return false;
-      this.value = value;
+  clear() {
+    if (this.readOnly || !this.enabled) {
+      return;
     }
 
-    triggerOnValueChangeHandler && this.onValueChange && this.onValueChange(this, value);
-    return true;
+    this.value = undefined;
   }
 
-  setValue(value?: any, triggerOnValueChangeHandler: boolean = true): boolean {
-    if (this._setValue(value, triggerOnValueChangeHandler)) {
-      this.validate();
+  private runOnValueChange() {
+    this.onValueChange && this.onValueChange(this, this.value)
+  }
+
+  get value() {
+    return this.row.data[this.column.name];
+  }
+  set value(value: any) {
+    const oldValue = this.row.data[this.column.name];
+    if (defaultEquals(value, oldValue)) return;
+    this.row.data[this.column.name] = value;
+    if (this.row.fixed) return;
+    if (!this.grid.loading) {
+      const cell = this.row.cells[this.column.name];
+      cell.validate();
 
       if (this.column.fixed) {
         this.row.mergeFixedColumns();
@@ -170,42 +178,9 @@ export class CellModel implements ICell {
         this.row.mergeStandardColumns();
       }
 
-      this.grid.changed = this.grid.hasChanges();
-      return true;
-    }
-    return false;
-  }
-
-  clear() {
-    if (this.readOnly || !this.enabled) {
-      return;
-    }
-
-    this.setValue(undefined);
-  }
-
-  get value() {
-    return (this.row.data) ? this.row.data && this.row.data[this.column.name] : undefined;
-  }
-
-  set value(value: any) {
-    if (this.row.data) {
-      this.row.data[this.column.name] = value;
       (this.row as RowModel).recomputeHeight();
-      return;
+      guard(cell, this.runOnValueChange);
     }
-    return;
-  }
-
-  hasChanges(): boolean {
-    let prevVal = this.row.originalData[this.column.name];
-    let currVal = this.value;
-    if (prevVal === currVal || (!prevVal && !currVal)) {
-      return false;
-    } else if (!prevVal || !currVal) {
-      return true;
-    }
-    return !deepEqual(prevVal, currVal);
   }
 
   hasErrors(): boolean {
@@ -271,29 +246,9 @@ export class CellModel implements ICell {
     if (this.row.fixed) return;
 
     if (this.column.validator) {
-      this.error = this.column.validator.fn(this.row, this.value);
+      this.error = this.column.validator(this.row, this.value);
     }
-    // validate other cells in the same row if they have a column validator whose linkedColumnNames contains this cells column name
-    // let cellsToValidate = this.row.cellsByColumnPosition.filter((cell: ICell) => cell.column.validator && cell.column.validator.linkedColumnNames.includes(this.column.name));
-    // cellsToValidate.forEach((cell: ICell) => {
-    //   let column = cell.column;
-    //   cell.error = column.validator!.fn(cell.row, cell.value);
-    // });
-
     this.grid.inError = this.grid.hasErrors();
-  }
-
-  // reverts value without validation, onValueChange handler, or grid changed update
-  _revert() {
-    if (this.hasChanges()) {
-      this._setValue(cloneValue(this.row.originalData[this.column.name]), false);
-    }
-  }
-
-  revert() {
-    if (this.hasChanges()) {
-      this.setValue(cloneValue(this.row.originalData[this.column.name]), false);
-    }
   }
 
   unselect() {
@@ -302,25 +257,6 @@ export class CellModel implements ICell {
     this.isRightMostSelection  = false;
     this.isBottomMostSelection = false;
     this.isLeftMostSelection   = false;
-  }
-
-  findVerticallyNearestCellWithUnselectedRow(): ICell | undefined {
-    let currCell: ICell                    = this;
-    let newCellToSelect: ICell | undefined = this;
-    do {
-      currCell        = newCellToSelect;
-      newCellToSelect = this.grid.adjacentBottomCell(currCell, true);
-    } while (newCellToSelect && newCellToSelect.row.selected);
-    if (!newCellToSelect) {
-      currCell        = this;
-      newCellToSelect = this;
-      do {
-        currCell        = newCellToSelect;
-        newCellToSelect = this.grid.adjacentTopCell(currCell, true);
-      } while (newCellToSelect && newCellToSelect.row.selected);
-    }
-
-    return newCellToSelect;
   }
 
   performKeybindAction(evt: React.KeyboardEvent<any>): void {
