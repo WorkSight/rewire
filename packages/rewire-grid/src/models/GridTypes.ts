@@ -79,8 +79,6 @@ export interface IGrid extends IRows, IDisposable {
   loading                   : boolean;
   readonly fixedColumns     : IColumn[];
   readonly standardColumns  : IColumn[];
-  addedRows                 : IRow[];
-  removedRows               : IRow[];
   groupBy                   : IColumn[];
   toggleableColumns         : IColumn[];
   toggleableColumnsOptions? : IToggleableColumnsOptions;
@@ -93,12 +91,9 @@ export interface IGrid extends IRows, IDisposable {
   changed                   : boolean;
   inError                   : boolean;
   clearSelectionOnBlur?     : boolean;
-  contentElement?           : HTMLDivElement;
   rowKeybindPermissions     : IGridRowKeybindPermissions;
   staticKeybinds            : IGridStaticKeybinds;
   variableKeybinds          : IGridVariableKeybinds;
-
-  setContentElement(element: HTMLDivElement | undefined): void;
 
   hasChanges(): boolean;
   hasErrors(): boolean;
@@ -142,8 +137,6 @@ export interface IGrid extends IRows, IDisposable {
   getRowsByRange(rowStart: number, rowEnd: number, allowCollapsed?: boolean): IRow[];
   column(columnName: string): IColumn | undefined;
   columnByPos(columnPosition: number): IColumn | undefined;
-  adjacentRightColumn(column: IColumn): IColumn | undefined;
-  adjacentLeftColumn(column: IColumn): IColumn | undefined;
 
   revert(): void;
   revertSelectedCells(): void;

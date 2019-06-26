@@ -12,8 +12,7 @@ import {
   watch,
   property,
   DataSignal,
-  computed,
-  version
+  computed
 }                                          from 'rewire-core';
 import Column                              from './Column';
 import classNames                          from 'classnames';
@@ -136,19 +135,19 @@ class VirtualBody extends React.PureComponent<BodyType, {offset: number, loading
   }
 
   componentDidMount() {
-    disposeOnUnmount(this, () => {
-      watch(() => this.props.grid.contentElement, () => {
-        let gridContent = this.props.grid.contentElement;
-        if (!gridContent) return;
-        let rows                 = this.props.grid.rows;
-        let totalSize            = Math.trunc(rows.length * 30);
-        gridContent.style.height = totalSize + 'px';
-        this.viewportCount       = Math.trunc(gridContent.parentElement!.clientHeight / 30) + 2;
-        this.forceUpdate();
-      });
+    // disposeOnUnmount(this, () => {
+    //   watch(() => this.contentElement, () => {
+    //     let gridContent = this.contentElement;
+    //     if (!gridContent) return;
+    //     let rows                 = this.props.grid.rows;
+    //     let totalSize            = Math.trunc(rows.length * 30);
+    //     gridContent.style.height = totalSize + 'px';
+    //     this.viewportCount       = Math.trunc(gridContent.parentElement!.clientHeight / 30) + 2;
+    //     this.forceUpdate();
+    //   });
 
-      watch(this.props.scrollY, this.onScroll);
-    });
+    //   watch(this.props.scrollY, this.onScroll);
+    // });
   }
 
   setBodyRef = (element: HTMLTableSectionElement) => {
@@ -445,11 +444,11 @@ const GridInternal = withStyles(styles, class extends React.PureComponent<GridPr
 
   handleScroll = (evt: React.UIEvent<any>) => {
     let target: Element = evt.target as Element;
-    if (target === this.grid.contentElement) {
+    if (target === this.contentElement) {
       this.scrollX(target.scrollLeft);
       this.scrollY(target.scrollTop);
     } else if (target === this._leftLabels && target.scrollTop !== this.scrollY()) {
-      this.grid.contentElement!.scrollTo(this.scrollX(), target.scrollTop);
+      this.contentElement!.scrollTo(this.scrollX(), target.scrollTop);
     }
   }
 
@@ -472,7 +471,7 @@ const GridInternal = withStyles(styles, class extends React.PureComponent<GridPr
 
     if (evt.shiftKey) {
       // simulate a horizontal scroll on the grid content;
-      this.grid.contentElement!.scrollBy(scrollAmount, 0);
+      this.contentElement!.scrollBy(scrollAmount, 0);
       // scrollBySmooth(this.grid.contentElement!, scrollAmount, 0, 150);
       // let variation = this.grid.contentElement!.scrollLeft + scrollAmount;
       // this.grid.contentElement!.scrollTo({left: variation, top: this.grid.contentElement!.scrollTop, behavior: 'auto'});
@@ -480,7 +479,7 @@ const GridInternal = withStyles(styles, class extends React.PureComponent<GridPr
     } else {
       // simulate a vertical scroll on the grid content;
       // scrollBySmooth(this.grid.contentElement!, 0, scrollAmount, 150);
-      this.grid.contentElement!.scrollBy(0, scrollAmount);
+      this.contentElement!.scrollBy(0, scrollAmount);
       // let variation = this.grid.contentElement!.scrollTop + scrollAmount;
       // this.grid.contentElement!.scrollTo({left: this.grid.contentElement!.scrollLeft, top: variation, behavior: 'auto'});
       // this.grid.contentElement!.scroll(this.grid.contentElement!.scrollLeft, variation);
@@ -491,11 +490,11 @@ const GridInternal = withStyles(styles, class extends React.PureComponent<GridPr
     switch (evt.key) {
       case 'PageUp':
         // this.grid.contentElement!.scrollBy(0, -500);
-        scrollBySmooth(this.grid.contentElement!, 0, -500, 100);
+        scrollBySmooth(this.contentElement!, 0, -500, 100);
         break;
       case 'PageDown':
         // this.grid.contentElement!.scrollBy(0, 500);
-        scrollBySmooth(this.grid.contentElement!, 0, 500, 100);
+        scrollBySmooth(this.contentElement!, 0, 500, 100);
         break;
       default:
         return;
@@ -517,9 +516,9 @@ const GridInternal = withStyles(styles, class extends React.PureComponent<GridPr
   }
 
   componentDidMount() {
-    verticalResizeWatcher(this, this.grid.contentElement!).watch((value) => {
+    verticalResizeWatcher(this, this.contentElement!).watch((value) => {
       if (this._columnTableWrapper && this._columnTableWrapper.style) {
-        let node = this.grid.contentElement as HTMLElement;
+        let node = this.contentElement as HTMLElement;
         if (node) {
           this._columnTableWrapper.style.paddingRight = value.clientHeight < value.scrollHeight ? _scrollbarWidth + 'px' : '0';
         }
@@ -562,9 +561,10 @@ const GridInternal = withStyles(styles, class extends React.PureComponent<GridPr
     this._columnTable = element as HTMLTableElement;
   }
 
+  contentElement: HTMLDivElement;
   setGridContentRef = (element: HTMLDivElement) => {
-    if (element && element !== this.grid.contentElement) {
-      this.grid.setContentElement(element);
+    if (element && element !== this.contentElement) {
+      this.contentElement = element;
     }
   }
 
@@ -757,7 +757,7 @@ const GridInternal = withStyles(styles, class extends React.PureComponent<GridPr
       <Observe render={() => (
         <div className={classNames('grid-scroll', this.props.classes.gridScroll)} onScroll={this.handleScroll}>
           {this.renderFixedColumnData()}
-          <div className={classNames('grid-content', this.props.classes.gridContent)}  ref={this.setGridContentRef}>
+          <div className={classNames('grid-content', this.props.classes.gridContent)} ref={this.setGridContentRef}>
             <table role='grid'>
               {this.renderColumnGroups(false)}
               <BodyRenderer grid={this.props.grid} renderRows={this.renderRows} scrollY={this.scrollY} columns={this.props.grid.standardColumns} />
