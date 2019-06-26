@@ -28,6 +28,12 @@ import { and, isEmail, isRegEx } from './Validator';
 import { defaultPhoneFormat }    from '../components/PhoneField';
 
 export type IFieldTypes = 'string' | 'multistring' | 'static' | 'reference' | 'select' | 'multiselect' | 'number' | 'boolean' | 'switch' | 'date' | 'time' | 'avatar' | 'password' | 'email' | 'phone' | 'color' | 'mask' | 'multiselectautocomplete';
+export type FormType<T> = { field : Record<keyof T, IEditorField> } & Form;
+export interface IFormContext {
+  field(name: string): () => any;
+  value<T>(v: T): () => T;
+  email(editProps?: any): IFieldDefn;
+}
 
 export interface IFieldDefn {
   label(text: string):                                            IFieldDefn;
@@ -488,22 +494,27 @@ export default class Form {
     return result;
   }
 
-  static create<T>(fields: T, initial?: ObjectType, options?: IFormOptions) {
-    type FormType = {
-      field                   : Record<keyof typeof fields, IEditorField>,
-      fields                  : IEditorField[],
-      value                   : ObjectType,
-      validation              : Validator,
-      isOpen                  : boolean,
-      hasChanges              : boolean,
-      defaultAdornmentsEnabled: boolean,
-      disableErrors           : boolean,
-      updateOnChange          : boolean,
-      validateOnUpdate        : boolean,
+  static create<T>(fields: (context: IFormContext) => T, initial?: ObjectType, options?: IFormOptions) {
+    const context = {
+      field(field: string) {
+        return () => 45;
+      },
 
-      submit(): void;
-    };
-    return new Form(fields as any, initial, options) as any as FormType & Form;
+      value<T>(v: T) {
+        return () => v;
+      },
+
+      email(editProps: any): IFieldDefn {
+        let field                 = new BaseField('email', editProps);
+        field.typeDefn.validators = isEmail;
+        return field;
+      }
+    }
+    return (new Form(fields(context) as any, initial, options) as unknown) as FormType<ReturnType<typeof fields>>;
+  }
+
+  static field(fieldName: string) {
+    return () => 45;
   }
 
   static string(editProps?: any): IFieldDefn {

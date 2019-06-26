@@ -86,15 +86,24 @@ export const isGreaterThanOrEquals = (otherFieldName: string, text?: string): IV
   return undefined;
 };
 
-export const isLessThan = (otherFieldName: string, text?: string): IValidateFn => (obj: ObjectType, fieldName: string, label: string | undefined, value: any): string | undefined => {
-  let otherValue = obj[otherFieldName] && obj[otherFieldName].value;
+export const isLessThan = (other: () => number, text?: string): IValidateFn => (obj: ObjectType, fieldName: string, label: string | undefined, value: any): string | undefined => {
+  let otherValue = other();
   if (!defaultLessThan(value, otherValue)) {
     if (text) return text;
-    let otherLabel = obj[otherFieldName] && obj[otherFieldName].label || otherFieldName;
-    return `${label || fieldName} must be less than ${otherLabel}`;
+    return `${label || fieldName} must be less than ${otherValue}`;
   }
   return undefined;
 };
+
+// export const isLessThan = (otherFieldName: string, text?: string): IValidateFn => (obj: ObjectType, fieldName: string, label: string | undefined, value: any): string | undefined => {
+//   let otherValue = obj[otherFieldName] && obj[otherFieldName].value;
+//   if (!defaultLessThan(value, otherValue)) {
+//     if (text) return text;
+//     let otherLabel = obj[otherFieldName] && obj[otherFieldName].label || otherFieldName;
+//     return `${label || fieldName} must be less than ${otherLabel}`;
+//   }
+//   return undefined;
+// };
 
 export const isLessThanOrEquals = (otherFieldName: string, text?: string): IValidateFn => (obj: ObjectType, fieldName: string, label: string | undefined, value: any): string | undefined => {
   let otherValue = obj[otherFieldName] && obj[otherFieldName].value;

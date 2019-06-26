@@ -7,6 +7,7 @@ import {
   isRequired,
   and,
   isSameAsOther,
+  isLessThan,
   ISuggestionsContainerComponentProps
 }                    from 'rewire-ui';
 import { Observe }   from 'rewire-core';
@@ -32,40 +33,45 @@ const suggestionsContainerFooter = (props: ISuggestionsContainerComponentProps) 
   </div>
 );
 
+function createForm() {
+  return Form.create((form) => ({
+    email:                   form.email().label('Email').validators(isRequired).placeholder('enter a valid email').autoFocus(),
+    password:                Form.password().label('Password').validators(and(isRequired, isSameAsOther('password_confirmation', 'passwords are not the same'))).placeholder('enter a password'),
+    password_confirmation:   Form.password().label('Confirm Password').placeholder('confirm your password'),
+    country:                 Form.reference(countries).label('Country').validators(isRequired).placeholder('type to lookup'),
+    time:                    Form.time().label('Time').validators(isRequired).onValueChange((form: Form, v: any) => form.setFieldValue('email', 'hi@hi.com')),
+    multiselectAutoComplete: Form.multiselectautocomplete(countries, { chipLimit: 2 }).label('Multiselect AutoComplete Country').validators(isRequired).placeholder('select all that apply'),
+    multiselectCountry:      Form.multiselect(countries).label('Multiselect Country').validators(isRequired).placeholder('select countries'),
+    selectCountry:           Form.select(countries).label('Select Country').validators(isRequired).placeholder('click to select'),
+    money:                   Form.number().label('Show Me').validators(isRequired).placeholder('The Money'),
+    date:                    Form.date().label('Date').validators(isRequired),
+    startDate:               Form.date().label('Date').validators(isLessThan(form.field('endDate'), 'start date must be less than end date')),
+    endDate:                 Form.date().label('Date'),
+    multi:                   Form.multistring({ rows: 1 }).label('Multiline').placeholder('enter multistring').validators(isRequired),
+    color:                   Form.color().label('Color'),
+    phone:                   Form.phone().label('Phone'),
+    mask:                    Form.mask({mask: ['(', /[1-9]/, /\d/, /\d/, ')', ' ', /\d/, /\d/, /\d/, '-', /\d/, /\d/, /\d/, /\d/]}).label('MyMask').validators(isRequired),
+    trigger:                 Form.string().label('Trigger').placeholder('Change me to trigger handler').onValueChange((form: Form, v: any) => {form.setFieldValue('email', 'Triggered!@hotmail.com'); form.setFieldValue('money', 1337); }),
+    advancedAutoComplete:    Form.reference(countries, { suggestionsContainerHeader: suggestionsContainerHeader, suggestionsContainerFooter: suggestionsContainerFooter, openOnFocus: true }).label('Advanced AutoComplete').validators(isRequired).placeholder('select a country'),
+  }), {
+    email:                 'my_email@gmail.com',
+    country:               {id: 2, name: 'Albania'},
+    selectCountry:         {id: 0, name: 'Afghanistan'},
+    time:                  '10:30',
+    password:              '384lalxk#44',
+    // password_confirmation: '384lalxk#44', // not providing a matching value causes form validation to fail and Submit button to become disabled
+    money:                 '100.50',
+    date:                  '2018-03-05',
+    multi:                 `this is line 1\r\nthis is line 2\r\nand this is line 3`,
+    color:                 '#ffeedd',
+    multiselectAutoComplete: [{ id: '0', name: 'Afghanistan' }, { id: '23', name: 'Benin' }, { id: '24', name: 'Bermuda' }],
+    advancedAutoComplete: {id: 0, name: 'Afghanistan'},
+  }
+)
+}
+
 export class SampleModel extends Modal {
-  form: Form = Form.create(
-    {
-      email:                   Form.email().label('Email').validators(isRequired).placeholder('enter a valid email').autoFocus(),
-      password:                Form.password().label('Password').validators(and(isRequired, isSameAsOther('password_confirmation', 'passwords are not the same'))).placeholder('enter a password'),
-      password_confirmation:   Form.password().label('Confirm Password').placeholder('confirm your password'),
-      country:                 Form.reference(countries).label('Country').validators(isRequired).placeholder('type to lookup'),
-      time:                    Form.time().label('Time').validators(isRequired).onValueChange((form: Form, v: any) => form.setFieldValue('email', 'hi@hi.com')),
-      multiselectAutoComplete: Form.multiselectautocomplete(countries, { chipLimit: 2 }).label('Multiselect AutoComplete Country').validators(isRequired).placeholder('select all that apply'),
-      multiselectCountry:      Form.multiselect(countries).label('Multiselect Country').validators(isRequired).placeholder('select countries'),
-      selectCountry:           Form.select(countries).label('Select Country').validators(isRequired).placeholder('click to select'),
-      money:                   Form.number().label('Show Me').validators(isRequired).placeholder('The Money'),
-      date:                    Form.date().label('Date').validators(isRequired),
-      multi:                   Form.multistring({ rows: 1 }).label('Multiline').placeholder('enter multistring').validators(isRequired),
-      color:                   Form.color().label('Color'),
-      phone:                   Form.phone().label('Phone'),
-      mask:                    Form.mask({mask: ['(', /[1-9]/, /\d/, /\d/, ')', ' ', /\d/, /\d/, /\d/, '-', /\d/, /\d/, /\d/, /\d/]}).label('MyMask').validators(isRequired),
-      trigger:                 Form.string().label('Trigger').placeholder('Change me to trigger handler').onValueChange((form: Form, v: any) => {form.setFieldValue('email', 'Triggered!@hotmail.com'); form.setFieldValue('money', 1337); }),
-      advancedAutoComplete:    Form.reference(countries, { suggestionsContainerHeader: suggestionsContainerHeader, suggestionsContainerFooter: suggestionsContainerFooter, openOnFocus: true }).label('Advanced AutoComplete').validators(isRequired).placeholder('select a country'),
-    }, {
-      email:                 'my_email@gmail.com',
-      country:               {id: 2, name: 'Albania'},
-      selectCountry:         {id: 0, name: 'Afghanistan'},
-      time:                  '10:30',
-      password:              '384lalxk#44',
-      // password_confirmation: '384lalxk#44', // not providing a matching value causes form validation to fail and Submit button to become disabled
-      money:                 '100.50',
-      date:                  '2018-03-05',
-      multi:                 `this is line 1\r\nthis is line 2\r\nand this is line 3`,
-      color:                 '#ffeedd',
-      multiselectAutoComplete: [{ id: '0', name: 'Afghanistan' }, { id: '23', name: 'Benin' }, { id: '24', name: 'Bermuda' }],
-      advancedAutoComplete: {id: 0, name: 'Afghanistan'},
-    }
-  );
+  form = createForm();
 
   constructor() {
     super('Sample Dialog');
