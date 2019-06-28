@@ -2,19 +2,27 @@ import {isNullOrUndefined} from 'rewire-common';
 import {defaultEquals} from 'rewire-core';
 import * as is from 'is';
 
-export function defaultGreaterThan(v1: any, v2: any): boolean {
+export function isGreaterThan(v1: any, v2: any): boolean {
   if (isNullOrUndefined(v1) || isNullOrUndefined(v2)) {
     return true;
   }
 
   if (is.string(v1) && is.string(v2)) {
-    return v1.localeCompare(v2) > 0 ;
+    return v1.localeCompare(v2) > 0;
   } else {
     return v1 > v2;
   }
 }
 
-export function defaultLessThan(v1: any, v2: any): boolean {
+export function isGreaterThanOrEquals(v1: any, v2: any): boolean {
+  return defaultEquals(v1, v2) || isGreaterThan(v1, v2);
+}
+
+export function isLessThanOrEquals(v1: any, v2: any): boolean {
+  return defaultEquals(v1, v2) || isLessThan(v1, v2);
+}
+
+export function isLessThan(v1: any, v2: any): boolean {
   if (isNullOrUndefined(v1) || isNullOrUndefined(v2)) {
     return true;
   }
@@ -26,202 +34,187 @@ export function defaultLessThan(v1: any, v2: any): boolean {
   }
 }
 
+export function isEqual(v1: any, v2: any): boolean {
+  if (isNullOrUndefined(v1) || isNullOrUndefined(v2)) {
+    return true;
+  }
+
+  return defaultEquals(v1, v2);
+}
+
+export function isNotEqual(v1: any, v2: any): boolean {
+  if (isNullOrUndefined(v1) || isNullOrUndefined(v2)) {
+    return true;
+  }
+
+  return !defaultEquals(v1, v2);
+}
+
 export function isNull(value?: any): boolean {
   if (isNullOrUndefined(value)) return true;
   if (typeof(value) === 'string') return value.length === 0;
   return ((value.id !== undefined) && isNull(value.id));
 }
 
-export type IValidateFn     = (obj: ObjectType, fieldName: string, label: string | undefined, value: any) => string | undefined;
-
-export const isRequired: IValidateFn = (obj: ObjectType, fieldName: string, label: string | undefined, value: any): string | undefined => {
-  return (isNull(value) || (is.array(value) && value.length <= 0)) ? `${label || 'field'} is required` : undefined;
-};
-
-export const isRegEx = (re: RegExp, text: string): IValidateFn => (obj: ObjectType, fieldName: string, label: string | undefined, value: any): string | undefined => {
-  if (!re.test(String(!isNullOrUndefined(value) ? value : ''))) {
-    return text;
-  }
-  return undefined;
-};
-
-
-export const isEmail: IValidateFn = (obj: ObjectType, fieldName: string, label: string | undefined, value: any): string | undefined => {
+export const isRequired = (value: any): boolean => !(isNull(value) || (is.array(value) && value.length <= 0));
+export const isRegEx    = (value: string, re: RegExp): boolean => re.test(String(!isNullOrUndefined(value) ? value : ''));
+export const isEmail    = (value: any): boolean  => {
   const re = /(^$|^(([^<>()\[\]\\.,;:\s@"]+(\.[^<>()\[\]\\.,;:\s@"]+)*)|(".+"))@((\[[0-9]{1,3}\.[0-9]{1,3}\.[0-9]{1,3}\.[0-9]{1,3}\])|(([a-zA-Z\-0-9]+\.)+[a-zA-Z]{2,}))$)/;
-  if (!re.test(String(!isNullOrUndefined(value) ? value : ''))) {
-    return 'email is not in a valid format';
-  }
-  return undefined;
+  return re.test(String(!isNullOrUndefined(value) ? value : ''));
+};
+export const requiredWhenOtherIsNotNull = (value: any, otherValue: any): boolean => {
+  if (isNull(otherValue)) return false;
+  return isRequired(value);
 };
 
-export const requiredWhenOtherIsNotNull = (otherFieldName: string): IValidateFn => (obj: ObjectType, fieldName: string, label: string | undefined, value: any): string | undefined => {
-  let otherValue = obj[otherFieldName] && obj[otherFieldName].value;
-  if (isNull(otherValue)) return undefined;
-  return isRequired(obj, fieldName, label, value);
+export const requiredWhenOtherIsValue = (value: any, otherValue: any, requiredValue: any): boolean => {
+  if (otherValue !== requiredValue) return true;
+  return isRequired(value);
 };
 
-export const requiredWhenOtherIsValue = (otherFieldName: string, requiredValue: any): IValidateFn => (obj: ObjectType, fieldName: string, label: string | undefined, value: any): string | undefined => {
-  let otherValue = obj[otherFieldName] && obj[otherFieldName].value;
-  if (otherValue !== requiredValue) return undefined;
-  return isRequired(obj, fieldName, label, value);
-};
-
-export const isGreaterThan = (otherFieldName: string, text?: string): IValidateFn => (obj: ObjectType, fieldName: string, label: string | undefined, value: any): string | undefined => {
-  let otherValue = obj[otherFieldName] && obj[otherFieldName].value;
-  if (!defaultGreaterThan(value, otherValue)) {
-    if (text) return text;
-    let otherLabel = obj[otherFieldName] && obj[otherFieldName].label || otherFieldName;
-    return `${label || fieldName} must be greather than ${otherLabel}`;
-  }
-  return undefined;
-};
-
-export const isGreaterThanOrEquals = (otherFieldName: string, text?: string): IValidateFn => (obj: ObjectType, fieldName: string, label: string | undefined, value: any): string | undefined => {
-  let otherValue = obj[otherFieldName] && obj[otherFieldName].value;
-  if (!defaultGreaterThan(value, otherValue) && !defaultEquals(value, otherValue)) {
-    if (text) return text;
-    let otherLabel = obj[otherFieldName] && obj[otherFieldName].label || otherFieldName;
-    return `${label || fieldName} must be greather than or equals to ${otherLabel}`;
-  }
-  return undefined;
-};
-
-export const isLessThan = (other: () => number, text?: string): IValidateFn => (obj: ObjectType, fieldName: string, label: string | undefined, value: any): string | undefined => {
-  let otherValue = other();
-  if (!defaultLessThan(value, otherValue)) {
-    if (text) return text;
-    return `${label || fieldName} must be less than ${otherValue}`;
-  }
-  return undefined;
-};
-
-// export const isLessThan = (otherFieldName: string, text?: string): IValidateFn => (obj: ObjectType, fieldName: string, label: string | undefined, value: any): string | undefined => {
-//   let otherValue = obj[otherFieldName] && obj[otherFieldName].value;
-//   if (!defaultLessThan(value, otherValue)) {
-//     if (text) return text;
-//     let otherLabel = obj[otherFieldName] && obj[otherFieldName].label || otherFieldName;
-//     return `${label || fieldName} must be less than ${otherLabel}`;
-//   }
-//   return undefined;
-// };
-
-export const isLessThanOrEquals = (otherFieldName: string, text?: string): IValidateFn => (obj: ObjectType, fieldName: string, label: string | undefined, value: any): string | undefined => {
-  let otherValue = obj[otherFieldName] && obj[otherFieldName].value;
-  if (!defaultLessThan(value, otherValue) && !defaultEquals(value, otherValue)) {
-    if (text) return text;
-    let otherLabel = obj[otherFieldName] && obj[otherFieldName].label || otherFieldName;
-    return `${label || fieldName} must be less than or equals to ${otherLabel}`;
-  }
-  return undefined;
-};
-
-export const isSameAsOther = (otherFieldName: string, text?: string): IValidateFn => (obj: ObjectType, fieldName: string, label: string | undefined, value: any): string | undefined => {
-  let otherValue = obj[otherFieldName] && obj[otherFieldName].value;
-  if (!defaultEquals(value, otherValue)) {
-    if (text) return text;
-    let otherLabel = obj[otherFieldName] && obj[otherFieldName].label || otherFieldName;
-    return `${label || fieldName} must be same as ${otherLabel}`;
-  }
-  return undefined;
-};
-
-export const isDifferentFromOther = (otherFieldName: string, text?: string): IValidateFn => (obj: ObjectType, fieldName: string, label: string | undefined, value: any): string | undefined => {
-  let otherValue = obj[otherFieldName] && obj[otherFieldName].value;
-  if (defaultEquals(value, otherValue)) {
-    if (text) return text;
-    let otherLabel = obj[otherFieldName] && obj[otherFieldName].label || otherFieldName;
-    return `${label || fieldName} must be different from ${otherLabel}`;
-  }
-  return undefined;
-};
-
-export const isDifferenceOfOthers = (otherFieldNames: string[], text?: string): IValidateFn => (obj: ObjectType, fieldName: string, label: string | undefined, value: any): string | undefined => {
-  let otherValues: any[] = otherFieldNames.map((otherFieldName: string) => obj[otherFieldName] && obj[otherFieldName].value) || [];
-  if (otherValues.findIndex(value => isNullOrUndefined(value) || !is.number(value)) >= 0) {
-    return undefined;
-  }
+export const isDifferenceOfOthers = (value: number, ...otherValues: number[]): boolean => {
+  if (otherValues.some((v: number | undefined) => isNullOrUndefined(v))) return true;
   let difference = otherValues.reduce((totalValue: number, currValue: number) => totalValue - currValue);
-  if (value !== difference) {
-    if (text) return text;
-    let otherLabels: string[]   = otherFieldNames.map((otherFieldName: string) => obj[otherFieldName] && obj[otherFieldName].label || otherFieldName) || [];
-    let otherLabelsErrorMessage = otherLabels.reduce((message: string, otherLabel: string, idx: number) => {
-      return message.concat(` and ${otherLabel}`);
-    });
-    return `${label || fieldName} must equal difference of ${otherLabelsErrorMessage}`;
-  }
-  return undefined;
+  return value !== difference;
 };
 
-export const isSumOfOthers = (otherFieldNames: string[], text?: string): IValidateFn => (obj: ObjectType, fieldName: string, label: string | undefined, value: any): string | undefined => {
-  let otherValues: any[] = otherFieldNames.map((otherFieldName: string) => obj[otherFieldName] && obj[otherFieldName].value) || [];
-  if (otherValues.findIndex(value => isNullOrUndefined(value) || !is.number(value)) >= 0) {
-    return undefined;
-  }
-  let sum = otherValues.reduce((totalValue: number, currValue: number) => totalValue + currValue);
-  if (value !== sum) {
-    if (text) return text;
-    let otherLabels: string[]   = otherFieldNames.map((otherFieldName: string) => obj[otherFieldName] && obj[otherFieldName].label || otherFieldName) || [];
-    let otherLabelsErrorMessage = otherLabels.reduce((message: string, otherLabel: string, idx: number) => {
-      return message.concat(` and ${otherLabel}`);
-    });
-    return `${label || fieldName} must equal sum of ${otherLabelsErrorMessage}`;
-  }
-  return undefined;
+export const isSumOfOthers = (totalValue: number, ...otherValues: number[]): boolean => {
+  if (otherValues.some((v: number | undefined) => isNullOrUndefined(v))) return true;
+  let difference = otherValues.reduce((totalValue: number, currValue: number) => totalValue - currValue);
+  return value === difference;
 };
 
-export const and = (...args: IValidateFn[]) => (obj: Object, fieldName: string, label: string | undefined, value: any): string | undefined => {
-  for (const func of args) {
-    const fn = func;
-    const result = fn(obj, fieldName, label, value);
-    if (result) return result;
-  }
-};
-
-export interface ValidationResult {
-  success: boolean;
-  errors: {[index: string]: string | undefined};
+export type IValidationFn = (...args: any[]) => boolean | (IError | undefined);
+export enum ErrorSeverity {
+  Info,
+  Warning,
+  Error,
+  Critical
+}
+export interface IError {text: string, severity: ErrorSeverity};
+export interface IValidator {
+  fn     : IValidationFn;
+  error? : IError;
+  args?  : any[];
 }
 
+export type SingleParameterBuiltInValidator = 'required' | 'email' | 'empty'
+export type BuiltInValidators = SingleParameterBuiltInValidator |  '<' | '>' | '<=' | '>=' | '==' | '!=' | 'regex' | 'sumOf';
+export type IFormValidator = (IValidator | SingleParameterBuiltInValidator | IValidationFn) | (IValidator | SingleParameterBuiltInValidator | IValidationFn)[];
+
+export function validators(v: IFormValidator) {
+  if (!Array.isArray(v)) v = [v]
+  return v.map((v: any) => {
+    if (v.fn) return v as IValidator;
+    return validator(v);
+  });
+}
+
+const createBuiltIn = (builtIn: BuiltInValidators, fn: IValidationFn, error: string): {[builtIn: string]: IValidator} => ({ [builtIn]: {fn, error: {text: error, severity: ErrorSeverity.Error}}});
+
+const __builtInValidators: {[type: string]: IValidator} = {
+  ...createBuiltIn('regex', isRequired, 'is required'),
+  ...createBuiltIn('email', isEmail, 'is email'),
+  ...createBuiltIn('>', isGreaterThan, ''),
+  ...createBuiltIn('>=', isGreaterThanOrEquals, ''),
+  ...createBuiltIn('<=', isLessThanOrEquals, ''),
+  ...createBuiltIn('<', isLessThan, ''),
+  ...createBuiltIn('==', isEqual, ''),
+  ...createBuiltIn('!=', isNotEqual, ''),
+  ...createBuiltIn('empty', isNull, ''),
+  ...createBuiltIn('required', isRequired, ''),
+  ...createBuiltIn('regex', isRegEx, ''),
+  ...createBuiltIn('sumOf', isSumOfOthers, ''),
+};
+
+export const field = (field: string) => ({field});
+export const error = (text: string, severity?: ErrorSeverity) => ({text, severity: severity || ErrorSeverity.Error});
+
+export function validator(fn: IValidationFn | BuiltInValidators, ...args: any[]): IValidator {
+  const validation: IValidator = (typeof fn == 'string') ? __builtInValidators[fn] : {fn};
+  if (!validation) throw new Error('invalid validation function or fn is not a built in validator');
+  validation.args = [];
+  for (const paramOrError of args) {
+    if (paramOrError.hasOwnProperty('severity')) {
+      validation.error = paramOrError;
+      continue;
+    }
+    validation.args.push(paramOrError);
+  }
+  return validation;
+}
+
+export interface IValidationContext {
+  getFieldValue(field: string): any;
+  setError(field: string, error?: IError): void;
+}
+
+export enum eValidationResult {Success = 0, Error = 1};
+
 export default class Validator {
-  private rules: {[index: string]: IValidateFn} = {};
-  constructor() { }
+  private rules: {[index: string]: IValidator[]} = {};
+  constructor()  {}
 
-  addRule(fieldName: string, fnData: IValidateFn) {
-    if (this.rules[fieldName]) {
-      this.rules[fieldName] = and(this.rules[fieldName], fnData);
-      return;
-    }
-
-    this.rules[fieldName] = fnData;
+  addRule(field: string, validator: IValidator | IValidator[]) {
+    if (!Array.isArray(validator)) validator = [validator];
+    const existingValidators = this.rules[field] || (this.rules[field] = []);
+    existingValidators.push(...validator);
   }
 
-  setRule(fieldName: string, fnData: IValidateFn) {
-    this.rules[fieldName] = fnData;
+  setRule(field: string, validator: IValidator | IValidator[]) {
+    if (!Array.isArray(validator)) validator = [validator];
+    const validators = this.rules[field] = [] as IValidator[];
+    validators.push(...validator);
   }
 
-  validateFields(fieldNames: string[], obj: ObjectType): ValidationResult {
-    let result: ValidationResult = {
-      success: true,
-      errors: {}
-    };
-    if (!fieldNames || !obj) {
-      return result;
+  private isValid(context: IValidationContext, field: string, validator: IValidator, setErrors: boolean): eValidationResult {
+    const args        = validator.args!.map(f => (f.hasOwnProperty('field') ? context.getFieldValue(f): f));
+    let   errorResult = validator.fn.apply(undefined, [context.getFieldValue(field), ...args]);
+    if (typeof errorResult === 'boolean') {
+      // if error result is a simple boolean then true means no error otherwise pull the error from the validator!
+      errorResult = (errorResult) ? undefined : validator.error;
     }
+    if (errorResult !== undefined) {
+      if (setErrors) context.setError(field, errorResult)
+      return eValidationResult.Error;
+    }
+    if (setErrors) context.setError(field);
+    return eValidationResult.Success;
+  }
 
-    fieldNames.forEach(fieldName => {
-      const value = obj[fieldName] && obj[fieldName].value;
-      const label = obj[fieldName] && obj[fieldName].label;
-      const fn    = this.rules[fieldName] && this.rules[fieldName];
-
-      if (fn) {
-        const v = fn(obj, fieldName, label, value);
-        if (v) {
-          result.success           = false;
-          result.errors[fieldName] = v;
+  private _validateField(context: IValidationContext, field: string, setErrors: boolean): eValidationResult {
+    const validators = this.rules[field];
+    if (validators) {
+      for(const validator of validators) {
+        if (this.isValid(context, field, validator, setErrors) === eValidationResult.Error) {
+          return eValidationResult.Error;
         }
       }
-    });
+    }
+    return eValidationResult.Success;
+  }
 
+  private shouldValidateField(currentField: string, fieldToValidate: string) {
+    if (currentField === fieldToValidate) return true;
+    const validators = this.rules[fieldToValidate];
+    if (!validators) return false;
+    return validators.some((v) => v.args && v.args.some(f => f && f.field === currentField));
+  }
+
+  validateField(context: IValidationContext, field: string, setErrors: boolean = true): eValidationResult {
+    let result = eValidationResult.Success;
+    for (const fieldToValidate of Object.keys(this.rules)) {
+      if (!this.shouldValidateField(field, fieldToValidate)) continue;
+      result |= this._validateField(context, fieldToValidate, setErrors);
+    }
+    return result;
+  }
+
+  validate(context: IValidationContext, setErrors: boolean = true): eValidationResult {
+    let result = eValidationResult.Success;
+    for (const fieldToValidate of Object.keys(this.rules)) {
+      result |= this._validateField(context, fieldToValidate, setErrors);
+    }
     return result;
   }
 }

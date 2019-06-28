@@ -4,9 +4,9 @@ import {
   Form,
   FormView,
   Modal,
-  isRequired,
-  and,
-  isSameAsOther
+  validator,
+  field,
+  error,
 }                    from 'rewire-ui';
 import { delay }     from 'rewire-common';
 import { Observe }   from 'rewire-core';
@@ -17,22 +17,22 @@ const confirmation = new Modal('Delete entire hard drive?')
   .action('no');
 
 class LoginDialog extends Modal {
-  form: Form = Form.create({
-    email                : Form.email().label('Email').validators(isRequired).placeholder('enter a valid email'),
-    password             : Form.password().label('Password').validators(and(isRequired, isSameAsOther('password_confirmation', 'passwords are not the same'))).placeholder('enter a password'),
-    password_confirmation: Form.password().label('Confirm Password').placeholder('confirm your password'),
-    country              : Form.reference(countries).label('AutoComplete Country').validators(isRequired).placeholder('enter a country'),
-    time                 : Form.time().label('Time').validators(isRequired),
-    selectCountry        : Form.select(countries).label('Select Country').validators(isRequired).placeholder('select a country'),
-    multiselectCountry   : Form.multiselect(countries).label('Multiselect Country').validators(isRequired).placeholder('select countries'),
-    money                : Form.number().label('Show Me').validators(isRequired).placeholder('The Money'),
-    date                 : Form.date().label('Date').validators(isRequired),
-    multi                : Form.multistring({rows: 1}).label('Multiline').placeholder('enter multiline string').validators(isRequired),
-    color                : Form.color().label('Color'),
-    phone                : Form.phone().label('Phone'),
-    mask                 : Form.mask({mask: ['(', /[1-9]/, /\d/, /\d/, ')', ' ', /\d/, /\d/, /\d/, '-', /\d/, /\d/, /\d/, /\d/]}).label('MyMask').validators(isRequired).autoFocus(),
-    trigger              : Form.string().label('Trigger').placeholder('Change me to trigger handler').onValueChange((form: Form, v: any) => {form.setFieldValue('email', 'Triggered!@hotmail.com'); form.setFieldValue('money', 1337); }),
-  }, {}, {initialValuesValidationMode: 'all'});
+  form: Form = Form.create((_) => ({
+    email                : _.email().label('Email').validators('required').placeholder('enter a valid email'),
+    password             : _.password().label('Password').validators('required', validator('==', field('password_confirmation'), error('passwords are not the same'))).placeholder('enter a password'),
+    password_confirmation: _.password().label('Confirm Password').placeholder('confirm your password'),
+    country              : _.reference(countries).label('AutoComplete Country').validators('required').placeholder('enter a country'),
+    time                 : _.time().label('Time').validators('required'),
+    selectCountry        : _.select(countries).label('Select Country').validators('required').placeholder('select a country'),
+    multiselectCountry   : _.multiselect(countries).label('Multiselect Country').validators('required').placeholder('select countries'),
+    money                : _.number().label('Show Me').validators('required').placeholder('The Money'),
+    date                 : _.date().label('Date').validators('required'),
+    multi                : _.multistring({rows: 1}).label('Multiline').placeholder('enter multiline string').validators('required'),
+    color                : _.color().label('Color'),
+    phone                : _.phone().label('Phone'),
+    mask                 : _.mask({mask: ['(', /[1-9]/, /\d/, /\d/, ')', ' ', /\d/, /\d/, /\d/, '-', /\d/, /\d/, /\d/, /\d/]}).label('MyMask').validators('required').autoFocus(),
+    trigger              : _.string().label('Trigger').placeholder('Change me to trigger handler').onValueChange((form: Form, v: any) => {form.setFieldValue('email', 'Triggered!@hotmail.com'); form.setFieldValue('money', 1337); }),
+  }), {}, {initialValuesValidationMode: 'all'});
 
   constructor() {
     super('');

@@ -23,8 +23,8 @@ import {CellModel}             from './CellModel';
 import {
   gridStaticKeybinds,
   gridDefaultVariableKeybinds
-}                              from './GridKeybinds';
-import * as merge              from 'deepmerge';
+}                  from './GridKeybinds';
+import * as merge  from 'deepmerge';
 import {
   observable,
   computed,
@@ -34,7 +34,10 @@ import {
   watch,
   sample
 }                  from 'rewire-core';
-import { compare } from 'rewire-ui';
+import {
+  compare,
+  Validator
+}                  from 'rewire-ui';
 
 let id = 0;
 class GridModel implements IGrid, IDisposable {
@@ -68,6 +71,7 @@ class GridModel implements IGrid, IDisposable {
   staticKeybinds            : IGridStaticKeybinds;
   variableKeybinds          : IGridVariableKeybinds;
   startCell?                : ICell;
+  __validator               : Validator;
   changed                   : boolean;
   inError                   : boolean;
 
@@ -76,6 +80,7 @@ class GridModel implements IGrid, IDisposable {
   private constructor() { }
 
   private initialize(dispose: () => void, options?: IGridOptions) {
+    this.__validator                = new Validator();
     this._dispose                   = dispose;
     this._sort                      = [];
     this.id                         = id++;
@@ -134,6 +139,10 @@ class GridModel implements IGrid, IDisposable {
   dispose() {
     this.disposeRows();
     if (this._dispose) this._dispose();
+  }
+
+  get validator() {
+    return this.__validator;
   }
 
   copy() {
@@ -1031,17 +1040,11 @@ class GridModel implements IGrid, IDisposable {
       grid.initialize(dispose, options);
       grid.loading = true;
       freeze(() => {
-        let fixedColumns: IColumn[]    = [];
-        let standardColumns: IColumn[] = [];
         for (const column of columns) {
-          if (column.fixed) {
-            fixedColumns.push(column);
-          } else {
-            standardColumns.push(column);
-          }
+          const c: ColumnModel = (column as ColumnModel);
+          if (c.__validators) grid.__validator.addRule(column.name, c.__validators);
+          grid.addColumn(column);
         }
-        fixedColumns.forEach((column: IColumn) => grid.addColumn(column));
-        standardColumns.forEach((column: IColumn) => grid.addColumn(column));
       });
       freeze(() => {
         let headerRow = columns.reduce((previous: any, current: any) => (previous[current.name] = current.title, previous), {});

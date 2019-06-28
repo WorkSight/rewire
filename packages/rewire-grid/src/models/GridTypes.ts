@@ -5,8 +5,10 @@ import {
   MapFn,
   IToggleMenuItem,
   ISuggestionsContainerComponent,
+  Validator,
+  IFormValidator,
+  IError,
 } from 'rewire-ui';
-import { IValidateFn } from './Validator';
 import * as merge      from 'deepmerge';
 export { EditorType };
 
@@ -29,36 +31,36 @@ export interface IGridRowKeybindPermissions {
 
 export type GridKeybindAction = (evt: React.KeyboardEvent<any>, cell: ICell) => void;
 export interface IGridStaticKeybinds {
-  'ArrowUp': GridKeybindAction;
-  'ArrowDown': GridKeybindAction;
-  'ArrowLeft': GridKeybindAction;
-  'ArrowRight': GridKeybindAction;
-  'Shift+ArrowUp': GridKeybindAction;
-  'Shift+ArrowDown': GridKeybindAction;
-  'Shift+ArrowLeft': GridKeybindAction;
-  'Shift+ArrowRight': GridKeybindAction;
-  'Tab': GridKeybindAction;
-  'Shift+Tab': GridKeybindAction;
-  'Home': GridKeybindAction;
-  'End': GridKeybindAction;
-  'Ctrl+Home': GridKeybindAction;
-  'Ctrl+End': GridKeybindAction;
-  'Escape': GridKeybindAction;
-  'Enter': GridKeybindAction;
-  'F2': GridKeybindAction;
-  'Ctrl+C': GridKeybindAction;
+  'ArrowUp'          : GridKeybindAction;
+  'ArrowDown'        : GridKeybindAction;
+  'ArrowLeft'        : GridKeybindAction;
+  'ArrowRight'       : GridKeybindAction;
+  'Shift+ArrowUp'    : GridKeybindAction;
+  'Shift+ArrowDown'  : GridKeybindAction;
+  'Shift+ArrowLeft'  : GridKeybindAction;
+  'Shift+ArrowRight' : GridKeybindAction;
+  'Tab'              : GridKeybindAction;
+  'Shift+Tab'        : GridKeybindAction;
+  'Home'             : GridKeybindAction;
+  'End'              : GridKeybindAction;
+  'Ctrl+Home'        : GridKeybindAction;
+  'Ctrl+End'         : GridKeybindAction;
+  'Escape'           : GridKeybindAction;
+  'Enter'            : GridKeybindAction;
+  'F2'               : GridKeybindAction;
+  'Ctrl+C'           : GridKeybindAction;
 }
 export interface IGridVariableKeybinds {
   // 'Ctrl+R': GridKeybindAction;
   // 'Ctrl+U': GridKeybindAction;
   // 'Ctrl+Shift+U': GridKeybindAction;
-  'Ctrl+X': GridKeybindAction;
-  'Ctrl+V': GridKeybindAction;
-  'Delete': GridKeybindAction;
-  'Ctrl+Insert': GridKeybindAction;
-  'Ctrl+D': GridKeybindAction;
-  'Ctrl+Delete': GridKeybindAction;
-  [keybind: string]: GridKeybindAction;
+  'Ctrl+X'          : GridKeybindAction;
+  'Ctrl+V'          : GridKeybindAction;
+  'Delete'          : GridKeybindAction;
+  'Ctrl+Insert'     : GridKeybindAction;
+  'Ctrl+D'          : GridKeybindAction;
+  'Ctrl+Delete'     : GridKeybindAction;
+  [keybind : string]: GridKeybindAction;
 }
 
 export interface IGrid extends IRows, IDisposable {
@@ -93,6 +95,7 @@ export interface IGrid extends IRows, IDisposable {
   rowKeybindPermissions     : IGridRowKeybindPermissions;
   staticKeybinds            : IGridStaticKeybinds;
   variableKeybinds          : IGridVariableKeybinds;
+  readonly validator        : Validator
 
   hasErrors(): boolean;
   getErrors(): IErrorData[];
@@ -297,7 +300,7 @@ export interface IColumnOptions {
   width?        : string;
   canSort?      : boolean;
   renderer?     : React.SFC<any>;
-  validator?    : IValidateFn;
+  validators?   : IFormValidator;
 
   onValueChange?(cell: ICell, v: any): void;
   compare?(x: any, y: any): number;
@@ -326,7 +329,6 @@ export interface IColumn extends ICellProperties {
   isGroupByColumn: boolean;
   typeOptions?   : any;
   editor?        : React.SFC<any>;
-  validator?     : IValidateFn;
 
   map?(value: any): string;
   predicate?(value: any, filter: {value: any}): boolean;
@@ -334,13 +336,6 @@ export interface IColumn extends ICellProperties {
   setEditor(type?: IColumnEditor): void;
 }
 
-export enum ErrorSeverity {
-  Info,
-  Warning,
-  Error,
-  Critical
-}
-export interface IError { messageText: string; severity: ErrorSeverity; }
 export interface IErrorData { name: string; error: IError; }
 
 export interface ICell extends ICellProperties {

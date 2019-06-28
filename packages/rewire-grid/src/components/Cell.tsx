@@ -2,8 +2,7 @@ import {
   IGrid,
   IRow,
   IColumn,
-  ICell,
-  ErrorSeverity,
+  ICell
 }                                 from '../models/GridTypes';
 import * as React                 from 'react';
 import * as is                    from 'is';
@@ -11,14 +10,18 @@ import cc                         from 'classcat';
 import classNames                 from 'classnames';
 import {isNullOrUndefinedOrEmpty} from 'rewire-common';
 import {Observe}                  from 'rewire-core';
-import {withStyles, WithStyle}    from 'rewire-ui';
+import {
+  withStyles,
+  WithStyle,
+  ErrorSeverity
+}                                 from 'rewire-ui';
 import {Theme}                    from '@material-ui/core/styles';
 import ErrorIcon                  from '@material-ui/icons/Error';
 import WarningIcon                from '@material-ui/icons/Warning';
 import InfoIcon                   from '@material-ui/icons/Info';
 import Tooltip                    from '@material-ui/core/Tooltip';
 import Fade                       from '@material-ui/core/Fade';
-import { CellModel } from '../models/CellModel';
+import { CellModel }              from '../models/CellModel';
 
 const styles = (theme: Theme) => ({
   tableCell: {
@@ -271,7 +274,7 @@ class Cell extends React.PureComponent<CellProps, {}> {
     if (this.cell.error && !this.cell.editing) {
       return (
         <Tooltip
-          title={this.cell.error.messageText}
+          title={this.cell.error.text}
           placement='right-start'
           TransitionComponent={Fade}
           PopperProps={{ style: {pointerEvents: 'none'} }}

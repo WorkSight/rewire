@@ -9,7 +9,6 @@ import { utc, UTC, TimeSpan, isNullOrUndefined } from 'rewire-common';
 import { Observe, observable }                   from 'rewire-core';
 import {
   ActionFn,
-  TransitionWrapper,
   WithStyle,
   withStyles,
   ActionMenu,
@@ -17,23 +16,21 @@ import {
   ToggleMenu,
   IToggleMenuItem,
   ISuggestionsContainerComponentProps,
+  validator,
+  field,
+  ErrorSeverity,
+  IError,
+  error,
 } from 'rewire-ui';
 import {
   createGrid,
   createColumn,
-  IError,
-  ErrorSeverity,
   Grid,
   IRowData,
   ICell,
   IRow,
-  isGreaterThan        as gridIsGreaterThan,
-  isRequired           as gridIsRequired,
-  isSumOfOthers        as gridIsSumOfOthers,
-  isDifferenceOfOthers as gridIsDifferenceOfOthers,
   IToggleableColumnsOptions,
-  IColumn,
-  isGreaterThanValue,
+  IColumn
 }                            from 'rewire-grid';
 import {PopoverOrigin}       from '@material-ui/core/Popover';
 import Paper                 from '@material-ui/core/Paper';
@@ -155,40 +152,7 @@ function createTestGrid(nRows: number, nColumns: number) {
     cell.row.cells.differenceColumn.value = diff;
   };
 
-  cols.push(createColumn('maskColumn',              'Mask',                { type: { type: 'mask', options: { mask: ['(', /[1-9]/, /\d/, /\d/, ')', ' ', /\d/, /\d/, /\d/, '-', /\d/, /\d/, /\d/, /\d/] } }, width: Math.trunc(Math.random() * 250 + 50) + 'px' }));
-  cols.push(createColumn('phoneColumn',             'Phone',               { type: { type: 'phone' }, width: Math.trunc(Math.random() * 250 + 50) + 'px' }));
-  cols.push(createColumn('numberColumn',            'Number',              { type: { type: 'number', options: { decimals: 2, fixed: true, thousandSeparator: false } }, validator: gridIsRequired, width: Math.trunc(Math.random() * 250 + 50) + 'px' }));
-  cols.push(createColumn('dateColumn',              'Date',                { type: 'date', width: Math.trunc(Math.random() * 250 + 50) + 'px' }));
-  cols.push(createColumn('timeOutColumn',           'Time Out',            { type: { type: 'time', options: { disableErrors: false, map: formatTime } }, readOnly: true, onValueChange: timeOnValueChange, width: Math.trunc(Math.random() * 250 + 50) + 'px' }));
-  cols.push(createColumn('timeInColumn',            'Time In',             { type: { type: 'time', options: { disableErrors: false, map: formatTime } }, validator: gridIsGreaterThan('timeOutColumn'), onValueChange: timeOnValueChange, width: Math.trunc(Math.random() * 250 + 50) + 'px' }));
-  cols.push(createColumn('differenceColumn',        'Time Difference',     { type: { type: 'number', options: { decimals: 2 } }, validator: isGreaterThanValue(0), width: Math.trunc(Math.random() * 250 + 50) + 'px' }));
-  cols.push(createColumn('sumColumn',               'Time Sum',            { type: { type: 'number', options: { decimals: 2 } }, validator: gridIsSumOfOthers(['timeInColumn', 'timeOutColumn']), width: Math.trunc(Math.random() * 250 + 50) + 'px' }));
-  cols.push(createColumn('autoCompleteColumn',      'Auto Complete',       { type: { type: 'auto-complete', options: countries }, width: Math.trunc(Math.random() * 250 + 50) + 'px' }));
-  cols.push(createColumn('multiAutoCompleteColumn', 'Multi Auto Complete', { type: { type: 'multiselectautocomplete', options: countries}, width: '250px'}));
-  cols.push(createColumn('selectColumn',            'Select',              { type: { type: 'select', options: countries }, width: Math.trunc(Math.random() * 250 + 50) + 'px' }));
-  cols.push(createColumn('multiselectColumn',       'MultiSelect',         { type: { type: 'multiselect', options: countries }, width: Math.trunc(Math.random() * 250 + 50) + 'px' }));
-  cols.push(createColumn('checkedColumn',           'Checked',             { type: 'checked', width: Math.trunc(Math.random() * 250 + 50) + 'px' }));
-
-  let complexColumnValidator = (row: IRow, value: any): IError | undefined => {
-    if (isNullOrUndefined(value)) {
-      return undefined;
-    }
-
-    let error: IError | undefined;
-    let errorMsg: string = '';
-    let errorSeverity: ErrorSeverity = ErrorSeverity.Error;
-    if (value.name === 'Homer') {
-      errorMsg = 'No Homers allowed!';
-      errorSeverity = ErrorSeverity.Critical;
-    }
-    error = errorMsg ? { messageText: errorMsg, severity: errorSeverity } : undefined;
-    return error;
-  };
-
-  cols.push(createColumn('complexColumn', 'Complex', { type: 'none', renderer: ComplexCell, compare: ComplexCellData.compare, validator: complexColumnValidator, width: Math.trunc(Math.random() * 250 + 50) + 'px' }));
-  // Override and set some columns to be number!
-  cols[5].setEditor({ type: 'number', options: { decimals: 2, thousandSeparator: true } });
-  cols[5].validator  = (row: IRow, value: any): IError | undefined => {
+  const customNumberValidator = (value: any): IError | undefined => {
     if (isNullOrUndefined(value)) {
       return undefined;
     }
@@ -209,9 +173,34 @@ function createTestGrid(nRows: number, nColumns: number) {
       errorMsg = 'Between 2000 and 4000';
       errorSeverity = ErrorSeverity.Info;
     }
-    error = errorMsg ? { messageText: errorMsg, severity: errorSeverity } : undefined;
+    error = errorMsg ? { text: errorMsg, severity: errorSeverity } : undefined;
     return error;
   };
+
+  cols.push(createColumn('maskColumn',              'Mask',                { type: { type: 'mask', options: { mask: ['(', /[1-9]/, /\d/, /\d/, ')', ' ', /\d/, /\d/, /\d/, '-', /\d/, /\d/, /\d/, /\d/] } }, width: Math.trunc(Math.random() * 250 + 50) + 'px' }));
+  cols.push(createColumn('phoneColumn',             'Phone',               { type: { type: 'phone' }, width: Math.trunc(Math.random() * 250 + 50) + 'px' }));
+  cols.push(createColumn('numberColumn',            'Number',              { type: { type: 'number', options: { decimals: 2, fixed: true, thousandSeparator: false } }, validators: ['required', customNumberValidator], width: Math.trunc(Math.random() * 250 + 50) + 'px' }));
+  cols.push(createColumn('dateColumn',              'Date',                { type: 'date', width: Math.trunc(Math.random() * 250 + 50) + 'px' }));
+  cols.push(createColumn('timeOutColumn',           'Time Out',            { type: { type: 'time', options: { disableErrors: false, map: formatTime } }, readOnly: true, onValueChange: timeOnValueChange, width: Math.trunc(Math.random() * 250 + 50) + 'px' }));
+  cols.push(createColumn('timeInColumn',            'Time In',             { type: { type: 'time', options: { disableErrors: false, map: formatTime } }, validators: validator('>', field('timeOutColumn')), onValueChange: timeOnValueChange, width: Math.trunc(Math.random() * 250 + 50) + 'px' }));
+  cols.push(createColumn('differenceColumn',        'Time Difference',     { type: { type: 'number', options: { decimals: 2 } }, validators: validator('>', 0), width: Math.trunc(Math.random() * 250 + 50) + 'px' }));
+  cols.push(createColumn('sumColumn',               'Time Sum',            { type: { type: 'number', options: { decimals: 2 } }, validators: validator('sumOf', field('timeInColumn'), field('timeOutColumn')), width: Math.trunc(Math.random() * 250 + 50) + 'px' }));
+  cols.push(createColumn('autoCompleteColumn',      'Auto Complete',       { type: { type: 'auto-complete', options: countries }, width: Math.trunc(Math.random() * 250 + 50) + 'px' }));
+  cols.push(createColumn('multiAutoCompleteColumn', 'Multi Auto Complete', { type: { type: 'multiselectautocomplete', options: countries}, width: '250px'}));
+  cols.push(createColumn('selectColumn',            'Select',              { type: { type: 'select', options: countries }, width: Math.trunc(Math.random() * 250 + 50) + 'px' }));
+  cols.push(createColumn('multiselectColumn',       'MultiSelect',         { type: { type: 'multiselect', options: countries }, width: Math.trunc(Math.random() * 250 + 50) + 'px' }));
+  cols.push(createColumn('checkedColumn',           'Checked',             { type: 'checked', width: Math.trunc(Math.random() * 250 + 50) + 'px' }));
+
+  let complexColumnValidator = (value: any): IError | undefined => {
+    if (isNullOrUndefined(value)) {
+      return undefined;
+    }
+    return (value.name === 'Homer') ? error('no homers allowed', ErrorSeverity.Critical) : undefined;
+  };
+
+  cols.push(createColumn('complexColumn', 'Complex', { type: 'none', renderer: ComplexCell, compare: ComplexCellData.compare, validators: complexColumnValidator, width: Math.trunc(Math.random() * 250 + 50) + 'px' }));
+  // Override and set some columns to be number!
+  cols[5].setEditor({ type: 'number', options: { decimals: 2, thousandSeparator: true } });
   cols[6].setEditor({ type: 'number', options: { decimals: 3, thousandSeparator: true } });
 
   const timeIn:  UTC = utc().startOfDay().add(7.5, TimeSpan.hours);

@@ -8,17 +8,18 @@ import {
   IErrorData,
   IDisposable,
   cloneValue,
-  IRowData,
+  IRowData
 }                          from './GridTypes';
 import {isNullOrUndefined} from 'rewire-common';
 import createCell          from './CellModel';
 import * as nanoid         from 'nanoid';
 import * as deepEqual      from 'fast-deep-equal';
 import { observable }      from 'rewire-core';
+import { IValidationContext, IError } from 'rewire-ui';
 
 const EmptyFn = () => {};
 
-export class RowModel implements IRow, IDisposable {
+export class RowModel implements IRow, IDisposable, IValidationContext {
   private _allowMergeColumns?: boolean;
   id                    : string;
   grid                  : IGrid;
@@ -75,7 +76,7 @@ export class RowModel implements IRow, IDisposable {
   }
 
   validate() {
-    this.grid.columns.forEach(c => this.cells[c.name].validate());
+    this.grid.validator.validate(this);
   }
 
   set allowMergeColumns(value: boolean) {
@@ -93,6 +94,16 @@ export class RowModel implements IRow, IDisposable {
       fixed: this.fixed,
       onClick: this.onClick,
     };
+  }
+
+  // IValidationContext
+  getFieldValue(field: string) {
+    return this.data[field];
+  }
+
+  // IValidationContext
+  setError(field: string, error?: IError): void {
+    this.cells[field].error = error;
   }
 
   recomputeHeight() {

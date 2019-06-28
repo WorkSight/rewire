@@ -1,17 +1,18 @@
-import * as React           from 'react';
-import {isNullOrUndefined}  from 'rewire-common';
-import {observable, defaultEquals}         from 'rewire-core';
-import {IGrid,
+import * as React                    from 'react';
+import { isNullOrUndefined }         from 'rewire-common';
+import { observable, defaultEquals } from 'rewire-core';
+import { IError }                    from 'rewire-ui';
+import {
+  IGrid,
   IColumn,
   ICell,
   IRow,
-  IError,
   IErrorData,
   TextAlignment,
   VerticalAlignment,
   cloneValue
-}                           from './GridTypes';
-import { RowModel }         from './RowModel';
+}                   from './GridTypes';
+import { RowModel } from './RowModel';
 
 const _guards = new Map();
 function guard<T>(context: any, fn: () => T) {
@@ -244,10 +245,7 @@ export class CellModel implements ICell {
 
   validate() {
     if (this.row.fixed) return;
-
-    if (this.column.validator) {
-      this.error = this.column.validator(this.row, this.value);
-    }
+    this.grid.validator.validateField((this.row as RowModel), this.column.name);
     this.grid.inError = this.grid.hasErrors();
   }
 

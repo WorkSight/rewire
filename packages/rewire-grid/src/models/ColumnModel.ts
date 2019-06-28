@@ -14,14 +14,15 @@ import {
   editor,
   compare,
   defaultPhoneFormat,
-  defaultPhoneMask
+  defaultPhoneMask,
+  IValidator,
+  validators
 } from 'rewire-ui';
 import {isNullOrUndefined, UTC} from 'rewire-common';
 import {
   freeze,
   observable,
 } from 'rewire-core';
-import { IValidateFn }     from './Validator';
 import * as is             from 'is';
 
 let id            = 0;
@@ -31,6 +32,7 @@ export class ColumnModel implements IColumn {
   _enabled?      : boolean;
   _readOnly?     : boolean;
   _verticalAlign?: VerticalAlignment;
+  __validators   : IValidator[]
 
   id           : number;
   grid         : IGrid;
@@ -52,7 +54,6 @@ export class ColumnModel implements IColumn {
   type         : EditorType;
   renderer?    : React.SFC<any>;
   editor?      : React.SFC<any>;
-  validator?   : IValidateFn;
 
   onValueChange?(cell: ICell, v: any): void;
   map?(value: any): string;
@@ -86,9 +87,11 @@ export class ColumnModel implements IColumn {
     this.tooltip        = options && !isNullOrUndefined(options.tooltip) ? options.tooltip! : undefined;
     this.cls            = options && !isNullOrUndefined(options.cls) ? options.cls! : undefined;
     this.renderer       = options && !isNullOrUndefined(options.renderer) ? options.renderer! : undefined;
-    this.validator      = options && !isNullOrUndefined(options.validator) ? options.validator! : undefined;
     this.onValueChange  = options && !isNullOrUndefined(options.onValueChange) ? options.onValueChange! : undefined;
     this.compare        = options && !isNullOrUndefined(options.compare) ? options.compare! : undefined;
+    if (options && options.validators) {
+      this.__validators = validators(options.validators);
+    }
     this.setEditor(options && options.type);
     return this;
   }

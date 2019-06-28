@@ -7,14 +7,12 @@ import {
   FormView,
   Modal,
   TransitionWrapper,
-  isRequired,
-  and,
-  isSameAsOther,
-  isDifferenceOfOthers,
-  isSumOfOthers,
-  isLessThan,
+  validator,
+  field,
+  error,
+  requiredWhenOtherIsValue,
   requiredWhenOtherIsNotNull,
-  requiredWhenOtherIsValue
+  isDifferenceOfOthers
 }                        from 'rewire-ui';
 import AccessibilityIcon from '@material-ui/icons/Accessibility';
 import AddIcon           from '@material-ui/icons/Add';
@@ -43,31 +41,31 @@ class TestDialog extends Modal {
     return true;
   }
 
-  form = Form.create({
-    date                 : Form.date().label('Date').validators(isRequired).autoFocus(),
-    dollars              : Form.number().label('Dollars').validators(isRequired).placeholder('Show me the money').startAdornment(() => <div style={{display: 'flex', alignItems: 'center'}}><AddIcon /><span>$</span></div>),
-    shouldI              : Form.multiselect(searcher).label('Should I?').placeholder('choose!').startAdornment(() => <AccessibilityIcon />).validators(isRequired),
-    static               : Form.static().label('Static'),
-    isGreat              : Form.boolean().label('Is Great'),
-    noLabel              : Form.boolean(),
-    disabled             : Form.boolean().label('Disabled').disabled(() => true),
-    email                : Form.email().label('Email').validators(requiredWhenOtherIsValue('name', 'Ryan')).placeholder('enter a valid email'),
-    name                 : Form.string().label('Name').validators(isRequired).placeholder('enter your name').startAdornment(() => <AccessibilityIcon />),
-    password             : Form.password().label('Password').validators(and(isRequired, isSameAsOther('password_confirmation', 'passwords are not the same'))).placeholder('enter a password').updateOnChange(),
-    password_confirmation: Form.password().label('Confirm Password').placeholder('confirm your password').updateOnChange(),
-    phone                : Form.phone().label('Phone Number (optional)').placeholder('your phone number'),
-    phoneCustom          : Form.phone({format: '#-##-###-####-#####'}).label('Phone Number Custom (optional)').placeholder('your phone number'),
-    country              : Form.reference(countries).label('Country').placeholder('pick a country').startAdornment(() => <AccessibilityIcon />).validators(isRequired),
-    timeOut              : Form.time().label('Time Out').placeholder('enter a time').validators(and(isRequired, isLessThan('timeIn'))),
-    timeIn               : Form.time().label('Time In').placeholder('enter a time').validators(requiredWhenOtherIsNotNull('timeOut')),
-    difference           : Form.number().label('Time Difference').placeholder('enter difference').validators(isDifferenceOfOthers(['timeIn', 'timeOut'])),
-    sum                  : Form.number().label('Time Sum').placeholder('enter sum').validators(isSumOfOthers(['timeIn', 'timeOut'])),
-    avatar               : Form.avatar({width: 1000, height: 1000, avatarDiameter: 150, cropRadius: 75}).label('Add Photo (Optional)'),
-    multi                : Form.multistring().validators(isRequired).placeholder('enter some multiline text').startAdornment(() => <AccessibilityIcon />).endAdornment(() => <AddIcon />),
-    switch1              : Form.switch().label('Switch 1'),
-    switch2              : Form.switch().label('Switch 2'),
-    color                : Form.color().disabled(() => false).label('Colour picker'),
-  }, {email: 'splace@worksight.net', static: `Can't Change Me`, isGreat: true, switch2: true, phone: '34232221535'}, {variant: 'outlined', initialValuesValidationMode: 'withValues'});
+  form = Form.create((_) => ({
+    date                 : _.date().label('Date').validators('required').autoFocus(),
+    dollars              : _.number().label('Dollars').validators('required').placeholder('Show me the money').startAdornment(() => <div style={{display: 'flex', alignItems: 'center'}}><AddIcon /><span>$</span></div>),
+    shouldI              : _.multiselect(searcher).label('Should I?').placeholder('choose!').startAdornment(() => <AccessibilityIcon />).validators('required'),
+    static               : _.static().label('Static'),
+    isGreat              : _.boolean().label('Is Great'),
+    noLabel              : _.boolean(),
+    disabled             : _.boolean().label('Disabled').disabled(() => true),
+    email                : _.email().label('Email').validators(validator(requiredWhenOtherIsValue, field('name'), 'Ryan')).placeholder('enter a valid email'),
+    name                 : _.string().label('Name').validators('required').placeholder('enter your name').startAdornment(() => <AccessibilityIcon />),
+    password             : _.password().label('Password').validators('required', validator('==', field('password_confirmation'), error('passwords are not the same'))).placeholder('enter a password').updateOnChange(),
+    password_confirmation: _.password().label('Confirm Password').placeholder('confirm your password').updateOnChange(),
+    phone                : _.phone().label('Phone Number (optional)').placeholder('your phone number'),
+    phoneCustom          : _.phone({format: '#-##-###-####-#####'}).label('Phone Number Custom (optional)').placeholder('your phone number'),
+    country              : _.reference(countries).label('Country').placeholder('pick a country').startAdornment(() => <AccessibilityIcon />).validators('required'),
+    timeOut              : _.time().label('Time Out').placeholder('enter a time').validators('required', validator('<', field('timeIn'))),
+    timeIn               : _.time().label('Time In').placeholder('enter a time').validators(validator(requiredWhenOtherIsNotNull, field('timeOut'))),
+    difference           : _.number().label('Time Difference').placeholder('enter difference').validators(validator(isDifferenceOfOthers, field('timeIn'), field('timeOut'))),
+    sum                  : _.number().label('Time Sum').placeholder('enter sum').validators(validator('sumOf', field('timeIn'), field('timeOut'))),
+    avatar               : _.avatar({width: 1000, height: 1000, avatarDiameter: 150, cropRadius: 75}).label('Add Photo (Optional)'),
+    multi                : _.multistring().validators('required').placeholder('enter some multiline text').startAdornment(() => <AccessibilityIcon />).endAdornment(() => <AddIcon />),
+    switch1              : _.switch().label('Switch 1'),
+    switch2              : _.switch().label('Switch 2'),
+    color                : _.color().disabled(() => false).label('Colour picker'),
+  }), {email: 'splace@worksight.net', static: `Can't Change Me`, isGreat: true, switch2: true, phone: '34232221535'}, {variant: 'outlined', initialValuesValidationMode: 'withValues'});
 }
 
 const testDialog   = new TestDialog();
@@ -131,4 +129,3 @@ export const AboutView = (props: any) => (
     </div>
   </TransitionWrapper>
 );
-
