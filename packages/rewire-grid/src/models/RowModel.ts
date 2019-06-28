@@ -97,8 +97,9 @@ export class RowModel implements IRow, IDisposable, IValidationContext {
   }
 
   // IValidationContext
-  getFieldValue(field: string) {
-    return this.data[field];
+  getField(field: string) {
+    const cell = this.cells[field];
+    return {label: cell.column.title, value: this.data[field]};
   }
 
   // IValidationContext

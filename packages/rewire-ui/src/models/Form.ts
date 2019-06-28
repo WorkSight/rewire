@@ -48,7 +48,7 @@ export interface IFieldDefn {
   editor           (editorType: EditorType, editProps?: any):         IFieldDefn;
   updateOnChange   (updateOnChange?: boolean):                        IFieldDefn;
   validateOnUpdate (validateOnUpdate?: boolean):                      IFieldDefn;
-  validators       (...validators: IFormValidator[]):                 IFieldDefn;
+  validators       (...v: IFormValidator[]):                          IFieldDefn;
   onValueChange    (handleValueChange: (form: Form, v: any) => void): IFieldDefn;
 }
 
@@ -270,9 +270,9 @@ class BaseField implements IFieldDefn {
     return this;
   }
 
-  validators(v: IFormValidator): IFieldDefn {
+  validators(...v: IFormValidator[]): IFieldDefn {
     if (!this.typeDefn.validators) this.typeDefn.validators = [];
-    this.typeDefn.validators.push(...validators(v));
+    this.typeDefn.validators.push(...v.flatMap(vs => validators(vs)));
     return this;
   }
 
@@ -509,10 +509,10 @@ export default class Form implements IValidationContext {
     this.field[field].error = (error) ? error.text : undefined;
   }
 
-  public getFieldValue(fieldName: string): any {
+  public getField(fieldName: string): any {
     let field = this.field[fieldName];
     if (!field) return;
-    return field.value;
+    return {label: field.label, value: field.value};
   }
 
   private toObjectValues(): ObjectType {

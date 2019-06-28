@@ -36,7 +36,7 @@ function createForm() {
   return Form.create((_) => ({
     email:                   _.email().label('Email').validators('email').placeholder('enter a valid email').autoFocus(),
     password:                _.password().label('Password').validators('required', validator('==', field('password_confirmation'), error('passwords must be the same'))).placeholder('enter a password'),
-    password_confirmation:   _.password().label('Confirm Password').placeholder('confirm your password'),
+    password_confirmation:   _.password().label('Confirm Password').validators('required').placeholder('confirm your password'),
     country:                 _.reference(countries).label('Country').validators('required').placeholder('type to lookup'),
     time:                    _.time().label('Time').validators('required').onValueChange((form: Form, v: any) => form.setFieldValue('email', 'hi@hi.com')),
     multiselectAutoComplete: _.multiselectautocomplete(countries, { chipLimit: 2 }).label('Multiselect AutoComplete Country').validators('required').placeholder('select all that apply'),

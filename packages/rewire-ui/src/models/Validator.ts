@@ -35,7 +35,7 @@ export function isLessThan(v1: any, v2: any): boolean {
 }
 
 export function isEqual(v1: any, v2: any): boolean {
-  if (isNullOrUndefined(v1) || isNullOrUndefined(v2)) {
+  if (isNullOrUndefined(v1) && isNullOrUndefined(v2)) {
     return true;
   }
 
@@ -43,7 +43,7 @@ export function isEqual(v1: any, v2: any): boolean {
 }
 
 export function isNotEqual(v1: any, v2: any): boolean {
-  if (isNullOrUndefined(v1) || isNullOrUndefined(v2)) {
+  if (isNullOrUndefined(v1) && isNullOrUndefined(v2)) {
     return true;
   }
 
@@ -78,7 +78,7 @@ export const isDifferenceOfOthers = (value: number, ...otherValues: number[]): b
   return value !== difference;
 };
 
-export const isSumOfOthers = (totalValue: number, ...otherValues: number[]): boolean => {
+export const isSumOfOthers = (value: number, ...otherValues: number[]): boolean => {
   if (otherValues.some((v: number | undefined) => isNullOrUndefined(v))) return true;
   let difference = otherValues.reduce((totalValue: number, currValue: number) => totalValue - currValue);
   return value === difference;
@@ -91,10 +91,12 @@ export enum ErrorSeverity {
   Error,
   Critical
 }
-export interface IError {text: string, severity: ErrorSeverity};
+type IErrorText = string | ((...values: any[]) => string);
+export interface IError     {text: string, severity: ErrorSeverity};
+export interface IErrorDefn {text: string | IErrorText, severity: ErrorSeverity};
 export interface IValidator {
   fn     : IValidationFn;
-  error? : IError;
+  error? : IErrorDefn;
   args?  : any[];
 }
 
@@ -110,28 +112,39 @@ export function validators(v: IFormValidator) {
   });
 }
 
-const createBuiltIn = (builtIn: BuiltInValidators, fn: IValidationFn, error: string): {[builtIn: string]: IValidator} => ({ [builtIn]: {fn, error: {text: error, severity: ErrorSeverity.Error}}});
+const createBuiltIn = (builtIn: BuiltInValidators, fn: IValidationFn, error: IErrorText): {[builtIn: string]: IValidator} => ({ [builtIn]: {fn, error: {text: error, severity: ErrorSeverity.Error}}});
+
+export function template(strings: any, ...keys: any[]) {
+  return (function(...values: any[]) {
+    var dict = values[values.length - 1] || {};
+    var result = [strings[0]];
+    keys.forEach(function(key, i) {
+      var value = Number.isInteger(key) ? values[key] : dict[key];
+      result.push(value, strings[i + 1]);
+    });
+    return result.join('');
+  });
+}
 
 const __builtInValidators: {[type: string]: IValidator} = {
-  ...createBuiltIn('regex', isRequired, 'is required'),
-  ...createBuiltIn('email', isEmail, 'is email'),
-  ...createBuiltIn('>', isGreaterThan, ''),
-  ...createBuiltIn('>=', isGreaterThanOrEquals, ''),
-  ...createBuiltIn('<=', isLessThanOrEquals, ''),
-  ...createBuiltIn('<', isLessThan, ''),
-  ...createBuiltIn('==', isEqual, ''),
-  ...createBuiltIn('!=', isNotEqual, ''),
-  ...createBuiltIn('empty', isNull, ''),
-  ...createBuiltIn('required', isRequired, ''),
-  ...createBuiltIn('regex', isRegEx, ''),
-  ...createBuiltIn('sumOf', isSumOfOthers, ''),
+  ...createBuiltIn('regex', isRegEx, 'this field has an invalid value'),
+  ...createBuiltIn('email', isEmail, 'must be a valid email address'),
+  ...createBuiltIn('>', isGreaterThan, template`must be greater than ${1}`),
+  ...createBuiltIn('>=', isGreaterThanOrEquals, template`must be greater than or equal to ${1}`),
+  ...createBuiltIn('<=', isLessThanOrEquals, template`must be greater less than or equal to ${1}`),
+  ...createBuiltIn('<', isLessThan, template`must be less than ${1}`),
+  ...createBuiltIn('==', isEqual, template`must be the same as ${1}`),
+  ...createBuiltIn('!=', isNotEqual, template`must be not the same as ${1}`),
+  ...createBuiltIn('empty', isNull, 'must be empty'),
+  ...createBuiltIn('required', isRequired, 'is required'),
+  ...createBuiltIn('sumOf', isSumOfOthers, `must be the sum of other values`),
 };
 
 export const field = (field: string) => ({field});
 export const error = (text: string, severity?: ErrorSeverity) => ({text, severity: severity || ErrorSeverity.Error});
 
 export function validator(fn: IValidationFn | BuiltInValidators, ...args: any[]): IValidator {
-  const validation: IValidator = (typeof fn == 'string') ? __builtInValidators[fn] : {fn};
+  const validation: IValidator = (typeof fn == 'string') ? Object.assign({}, __builtInValidators[fn]) : {fn};
   if (!validation) throw new Error('invalid validation function or fn is not a built in validator');
   validation.args = [];
   for (const paramOrError of args) {
@@ -145,7 +158,7 @@ export function validator(fn: IValidationFn | BuiltInValidators, ...args: any[])
 }
 
 export interface IValidationContext {
-  getFieldValue(field: string): any;
+  getField(field: string): {label: string, value: any} | undefined;
   setError(field: string, error?: IError): void;
 }
 
@@ -167,15 +180,41 @@ export default class Validator {
     validators.push(...validator);
   }
 
+  private _get(context: IValidationContext, field: string, validator: IValidator, property: string) {
+    const f    = context.getField(field);
+    let   args = [f && f[property]];
+    for (const f of validator.args!) {
+      if (f.hasOwnProperty('field')) {
+        const field = context.getField(f.field);
+        args.push(field && field[property]);
+        continue;
+      }
+      args.push(f);
+    }
+    return args;
+  }
+
+  private extractArguments(context: IValidationContext, field: string, validator: IValidator) {
+    return this._get(context, field, validator, 'value');
+  }
+
+  private extractLabels(context: IValidationContext, field: string, validator: IValidator) {
+    return this._get(context, field, validator, 'label');
+  }
+
   private isValid(context: IValidationContext, field: string, validator: IValidator, setErrors: boolean): eValidationResult {
-    const args        = validator.args!.map(f => (f.hasOwnProperty('field') ? context.getFieldValue(f): f));
-    let   errorResult = validator.fn.apply(undefined, [context.getFieldValue(field), ...args]);
+    const args        = this.extractArguments(context, field, validator);
+    let   errorResult = validator.fn.apply(undefined, args);
     if (typeof errorResult === 'boolean') {
       // if error result is a simple boolean then true means no error otherwise pull the error from the validator!
       errorResult = (errorResult) ? undefined : validator.error;
     }
     if (errorResult !== undefined) {
-      if (setErrors) context.setError(field, errorResult)
+      if (setErrors) {
+        let {text, severity} = errorResult as IErrorDefn;
+        text                 = (typeof text === 'function') ? text(...this.extractLabels(context, field, validator)) : text;
+        context.setError(field, {text, severity});
+      }
       return eValidationResult.Error;
     }
     if (setErrors) context.setError(field);
