@@ -116,11 +116,21 @@ const createBuiltIn = (builtIn: BuiltInValidators, fn: IValidationFn, error: IEr
 
 export function template(strings: any, ...keys: any[]) {
   return (function(...values: any[]) {
-    var dict = values[values.length - 1] || {};
-    var result = [strings[0]];
+    const dict   = values[values.length - 1] || {};
+    const result = [strings[0]];
+    let all: string;
     keys.forEach(function(key, i) {
-      var value = Number.isInteger(key) ? values[key] : dict[key];
-      result.push(value, strings[i + 1]);
+      let value;
+      if (key === 'all') {
+        if (!all) {
+          const [_, ...rest] = values;
+          all = rest.join(',');
+        }
+        value = all;
+      } else {
+        value = (Number.isInteger(key)) ? values[key].toString() : dict[key];
+      }
+      if (value) result.push(value, strings[i + 1]);
     });
     return result.join('');
   });
@@ -137,7 +147,7 @@ const __builtInValidators: {[type: string]: IValidator} = {
   ...createBuiltIn('!=', isNotEqual, template`must be not the same as ${1}`),
   ...createBuiltIn('empty', isNull, 'must be empty'),
   ...createBuiltIn('required', isRequired, 'is required'),
-  ...createBuiltIn('sumOf', isSumOfOthers, `must be the sum of other values`),
+  ...createBuiltIn('sumOf', isSumOfOthers, template`must be the sum of ${'all'}`),
 };
 
 export const field = (field: string) => ({field});
