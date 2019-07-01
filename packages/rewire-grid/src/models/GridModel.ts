@@ -529,12 +529,6 @@ class GridModel implements IGrid, IDisposable {
         clipboardCellsByColumnPosition[selectedCell.columnPosition] = clipboardCellsByColumnPositionOriginal[selectedCell.columnPosition].slice();
       }
     });
-
-    freeze(() => {
-      for (const r of rows) {
-        (r as RowModel).recomputeHeight();
-      }
-    })
   }
 
   get fixedColumns() {

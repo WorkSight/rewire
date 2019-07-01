@@ -107,12 +107,6 @@ export class RowModel implements IRow, IDisposable, IValidationContext {
     this.cells[field].error = error;
   }
 
-  recomputeHeight() {
-    if (this.grid.rowHeight || this.fixed) return;
-    this.height = 0;
-    (this as any).__computed = undefined;
-  }
-
   createCell(column: IColumn, value: any): ICell {
     return this.cells[column.name] = createCell(this, column, value);
   }

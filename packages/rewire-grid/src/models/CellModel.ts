@@ -179,7 +179,6 @@ export class CellModel implements ICell {
         this.row.mergeStandardColumns();
       }
 
-      (this.row as RowModel).recomputeHeight();
       guard(cell, this.runOnValueChange);
     }
   }

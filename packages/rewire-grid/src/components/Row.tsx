@@ -77,17 +77,39 @@ export const GroupRow = React.memo(withStyles(styles, (props: IGroupProps & {cla
 
 type RowProps = WithStyle<ReturnType<typeof styles>, IRowProps>;
 
+const _queue = new Set();
+
 const Row = withStyles(styles, class extends PureComponent<RowProps, {}> {
   element: React.RefObject<HTMLTableRowElement>;
+  observer: MutationObserver;
 
   constructor(props: RowProps) {
     super(props);
     this.element = React.createRef();
+    if (this.props.height !== undefined) {
+      this.props.row.height = this.props.height;
+      return;
+    }
   }
 
   handleRowClick = () => {
     if (this.props.row.onClick) {
       this.props.row.onClick(this.props.row);
+    }
+  }
+
+  componentDidMount() {
+    if (this.props.height === undefined) {
+      this.calculateDynamicHeight(true);
+      this.observer = new MutationObserver(() => this.calculateDynamicHeight());
+      this.observer.observe(this.element.current!, { childList: true, subtree: true });
+    }
+  }
+
+  componentWillUnmount() {
+    if (this.observer) {
+      this.observer.disconnect();
+      delete this.observer;
     }
   }
 
@@ -101,50 +123,32 @@ const Row = withStyles(styles, class extends PureComponent<RowProps, {}> {
       if ((cell.colSpan ===  0) || (cell.rowSpan === 0)) return;
         cells.push(<Cell key={cell.id} cell={cell} onClick={this.handleRowClick} />);
     });
-    return cells;
+    return <Observe render={() => cells} />;
   }
 
-  recomputeHeight() {
-    const r: any = this.props.row;
+  calculateDynamicHeight(initial: boolean = false) {
     if (this.props.height !== undefined) {
-      return this.props.height;
+      this.props.row.height = this.props.height;
+      return;
     }
 
-    if (r.__computed) return r.__computed;
-
+    if (this.props.columns && (this.props.columns.length > 0) && this.props.columns[0].fixed) return this.props.row.height;
     const el: any = this.element.current;
-    if (el && (el.__pendingClientRect === true)) return r.height; // in the middle of a recalculation so early exit
-    el && (el.__pendingClientRect = true);
-    requestAnimationFrame(() => {
-      const el: any = this.element.current;
-      if (!el) return; // this return should never get hit!
-      const height = (r.__computed = el!.getBoundingClientRect().height);
-      if (height > this.props.row.height) {
-        this.props.row.height  = height;
-      }
-      el.__pendingClientRect = false;
-    });
-
-    return r.height;
+    if (!el) return this.props.row.height;
+    if (!initial) el.style.height = 'auto';
+    const height = el!.getBoundingClientRect().height;
+    this.props.row.height = height;
   }
 
   render() {
     return <Observe render={
       () => {
         const className = cc([this.props.className, {selected: this.props.row.selected}, (this.props.row.visible === false) ?  this.props.classes.hidden : this.props.classes.visible, this.props.row.cls, 'tabrow']);
-        const height    = this.recomputeHeight();
-
-        if (height > this.props.row.height) {
-          this.props.row.height = height;
-        }
-
-        return (
-          <Observe render={() => (
-            <tr className={className} ref={this.element} onClick={this.handleRowClick} style={{height: this.props.row.height}}>
-              {this.renderCells()}
-            </tr>
-          )}/>
-        );
+        return <Observe render={() => (
+          <tr className={className} ref={this.element} onClick={this.handleRowClick} style={{height: this.props.row.height}}>
+            {this.renderCells()}
+          </tr>
+        )} />;
       }
     } />;
   }
