@@ -40,6 +40,7 @@ import DeleteIcon            from '@material-ui/icons/DeleteOutlined';
 import ArchiveIcon           from '@material-ui/icons/ArchiveOutlined';
 import UnarchiveIcon         from '@material-ui/icons/UnarchiveOutlined';
 import { uploadFile }        from './graphqltest';
+import { watch } from 'rewire-core/dist/src';
 
 interface IDocument {
   id:    string;
@@ -447,6 +448,9 @@ const yesAction: ActionFn = () => {
 
 const yesNoModel        = new YesNoModel({ title: 'Confirmation Required', action: yesAction });
 const confirmationModel = new ConfirmationModel({ title: 'Secondary Confirmation', yesAction: confirmationYesAction, noAction: confirmationNoAction});
+grid.setChangeTracking(true);
+console.log('grid has changes =', grid.hasChanges);
+watch(() => grid.hasChanges, () => console.log(`grid has changes ${grid.hasChanges}`));
 
 const HomeActionMenu = (props: any) => {
   const buttonContent               = <span>Action Menu</span>;

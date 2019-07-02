@@ -36,8 +36,34 @@ import {
 }                  from 'rewire-core';
 import {
   compare,
-  Validator
+  Validator,
+  ChangeTracker,
+  IChangeTrackerContext
 }                  from 'rewire-ui';
+
+class GridChangeTrackerContext implements IChangeTrackerContext {
+  constructor(private _grid: GridModel, public isComplete: (value: any) => boolean = (() => true)) {}
+
+  get length(): number {
+    return this._grid.rows.length;
+  }
+
+  onHasChanges(value: boolean): void {
+    this._grid.hasChanges = value;
+  }
+
+  getRow(index: number) {
+    if ((index < 0) || (index >= this._grid.rows.length)) return undefined;
+    return this._grid.rows[index];
+  }
+
+  setRow(index: number, value: any): void {
+    if ((index < 0) || (index >= this._grid.rows.length)) return;
+    const row = this._grid.rows[index];
+    if (!row || !row.data) return;
+    Object.assign(row.data, value);
+  }
+}
 
 let id = 0;
 class GridModel implements IGrid, IDisposable {
@@ -71,8 +97,9 @@ class GridModel implements IGrid, IDisposable {
   staticKeybinds            : IGridStaticKeybinds;
   variableKeybinds          : IGridVariableKeybinds;
   startCell?                : ICell;
+  hasChanges                : boolean;
   __validator               : Validator;
-  changed                   : boolean;
+  __changeTracker?          : ChangeTracker;
   inError                   : boolean;
 
   private _dispose: () => void;
@@ -93,6 +120,7 @@ class GridModel implements IGrid, IDisposable {
     this.focusedCell                = undefined;
     this.fixedWidth                 = '1px';
     this.loading                    = false;
+    this.hasChanges                 = false;
     this.enabled                    = options && !isNullOrUndefined(options.enabled) ? options.enabled! : true;
     this.readOnly                   = options && !isNullOrUndefined(options.readOnly) ? options.readOnly! : false;
     this.verticalAlign              = options && options.verticalAlign || 'middle';
@@ -104,7 +132,6 @@ class GridModel implements IGrid, IDisposable {
     this.clipboard                  = [];
     this.isMouseDown                = false;
     this.startCell                  = undefined;
-    this.changed                    = false;
     this.inError                    = false;
 
     this.rowKeybindPermissions = {
@@ -138,11 +165,45 @@ class GridModel implements IGrid, IDisposable {
 
   dispose() {
     this.disposeRows();
+    this.__changeTracker && this.__changeTracker.dispose();
+    delete this.__changeTracker;
     if (this._dispose) this._dispose();
   }
 
   get validator() {
     return this.__validator;
+  }
+
+  get isChangeTracking(): boolean {
+    return !!this.__changeTracker;
+  }
+
+  setChangeTracking(enable: boolean) {
+    if (enable) {
+      if (this.__changeTracker) return;
+      this.__changeTracker = new ChangeTracker(new GridChangeTrackerContext(this));
+      this.__changeTracker.set(this.rows);
+      return;
+    }
+    if (!this.__changeTracker) return;
+    this.__changeTracker.dispose();
+    delete this.__changeTracker;
+  }
+
+  public getChangeTracker() {
+    return this.__changeTracker;
+  }
+
+  setIsRowCompleteFn(fn: (row: IRowData) => boolean): void {
+    if (this.__changeTracker) this.__changeTracker.setIsCompleteRowFn(fn);
+  }
+
+  revert(): void {
+    if (this.__changeTracker) this.__changeTracker.revert();
+  }
+
+  commit(): void {
+    if (this.__changeTracker) this.__changeTracker.commit();
   }
 
   copy() {
@@ -593,6 +654,10 @@ class GridModel implements IGrid, IDisposable {
     return row;
   }
 
+  recalculateChangeTracker() {
+    this.__changeTracker && this.__changeTracker.recalculate();
+  }
+
   _addRow(data?: IRowData, position?: number): IRow {
     if (data && data.options && data.options.fixed) {
       return this.addFixedRow(data, position);
@@ -686,6 +751,7 @@ class GridModel implements IGrid, IDisposable {
     for (let rowIdx = 0; rowIdx < this.rows.length; rowIdx++) {
       this.rows[rowIdx].position = rowIdx;
     }
+    this.recalculateChangeTracker();
   }
 
   setColumnPositions() {

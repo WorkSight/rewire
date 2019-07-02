@@ -7,7 +7,7 @@ import {
   ISuggestionsContainerComponent,
   Validator,
   IFormValidator,
-  IError,
+  IError
 } from 'rewire-ui';
 import * as merge      from 'deepmerge';
 export { EditorType };
@@ -89,14 +89,18 @@ export interface IGrid extends IRows, IDisposable {
   multiSelect               : boolean;
   allowMergeColumns         : boolean;
   startCell?                : ICell;
-  changed                   : boolean;
   inError                   : boolean;
   clearSelectionOnBlur?     : boolean;
   rowKeybindPermissions     : IGridRowKeybindPermissions;
   staticKeybinds            : IGridStaticKeybinds;
   variableKeybinds          : IGridVariableKeybinds;
   readonly validator        : Validator;
-
+  readonly hasChanges       : boolean;
+  readonly isChangeTracking : boolean;
+  setChangeTracking(enable: boolean): void;
+  setIsRowCompleteFn(fn: (row: IRowData) => boolean): void;
+  revert(): void;
+  commit(): void;
   hasErrors(): boolean;
   getErrors(): IErrorData[];
   validate(): void;
@@ -355,6 +359,7 @@ export interface ICell extends ICellProperties {
   isBottomMostSelection: boolean;
   isLeftMostSelection  : boolean;
   keyForEdit?          : string;
+  hasChanges           : boolean;
 
   hasErrors(): boolean;
   getErrors(): IErrorData[];

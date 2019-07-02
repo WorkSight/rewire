@@ -11,8 +11,8 @@ import {
   TextAlignment,
   VerticalAlignment,
   cloneValue
-}                   from './GridTypes';
-import { RowModel } from './RowModel';
+}                    from './GridTypes';
+import { RowModel }  from './RowModel';
 
 const _guards = new Map();
 function guard<T>(context: any, fn: () => T) {
@@ -44,6 +44,7 @@ export class CellModel implements ICell {
   selected             : boolean;
   error?               : IError;
   editing              : boolean;
+  hasChanges           : boolean;
   options              : any;
   isTopMostSelection   : boolean;
   isRightMostSelection : boolean;
@@ -74,6 +75,7 @@ export class CellModel implements ICell {
     this.isBottomMostSelection = false;
     this.isLeftMostSelection   = false;
     this.keyForEdit            = undefined;
+    this.hasChanges            = false;
     this.__element             = undefined;
     return this;
   }
@@ -159,6 +161,11 @@ export class CellModel implements ICell {
 
   private runOnValueChange() {
     this.onValueChange && this.onValueChange(this, this.value);
+    if (this.grid.isChangeTracking) { // cell change tracking support!
+      const ct: any = (this.grid as any).__changeTracker;
+      ct.recalculate(); // queue grid recalculation!
+      this.hasChanges = ct.valueHasChanges(this.row, this.column.name);
+    }
   }
 
   get value() {
