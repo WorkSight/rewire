@@ -414,6 +414,7 @@ class Cell extends React.PureComponent<CellProps, {}> {
         edit               : this.cell.editing,
         disabled           : !this.cell.enabled,
         fixed              : this.column.fixed,
+        hasChanges         : this.cell.hasChanges,
         notVisible         : !this.column.visible || !this.row.visible,
       }, cell.cls]);
 
