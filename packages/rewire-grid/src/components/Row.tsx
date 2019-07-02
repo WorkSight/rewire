@@ -77,8 +77,6 @@ export const GroupRow = React.memo(withStyles(styles, (props: IGroupProps & {cla
 
 type RowProps = WithStyle<ReturnType<typeof styles>, IRowProps>;
 
-const _queue = new Set();
-
 const Row = withStyles(styles, class extends PureComponent<RowProps, {}> {
   element: React.RefObject<HTMLTableRowElement>;
   observer: MutationObserver;
