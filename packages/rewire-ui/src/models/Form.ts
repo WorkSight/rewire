@@ -113,7 +113,7 @@ class FormContext implements IFormContext {
   constructor() { }
 
   field(field: string): any {
-    return {field}
+    return {field};
   }
 
   error(error: string): any {

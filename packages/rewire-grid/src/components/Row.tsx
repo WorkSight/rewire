@@ -8,6 +8,7 @@ import {
 import * as React              from 'react';
 import cc                      from 'classcat';
 import * as Color              from 'color';
+import {isNullOrUndefined}     from 'rewire-common';
 import {Observe}               from 'rewire-core';
 import {Theme}                 from '@material-ui/core/styles';
 import {WithStyle, withStyles} from 'rewire-ui';
@@ -125,8 +126,8 @@ const Row = withStyles(styles, class extends PureComponent<RowProps, {}> {
   }
 
   calculateDynamicHeight(initial: boolean = false) {
-    if (this.props.height !== undefined) {
-      this.props.row.height = this.props.height;
+    if (!isNullOrUndefined(this.props.height)) {
+      this.props.row.height = this.props.height!;
       return;
     }
 

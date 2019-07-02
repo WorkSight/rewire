@@ -174,6 +174,8 @@ class GridModel implements IGrid, IDisposable {
       this.rows.length                       = 0;
       this.selectedRows.length               = 0;
       this.selectedCells.length              = 0;
+    });
+    freeze(() => {
       this._addRows(data);
     });
     this.loading = false;
@@ -980,6 +982,7 @@ class GridModel implements IGrid, IDisposable {
 
   private selectCellsToMergeHelper(rows: IRow[], columnsToSelect: IColumn[]): IColumn[] {
     rows.forEach((row, idx) => {
+      if (!row.allowMergeColumns) return;
       let colToSelectCount = columnsToSelect.length;
       let rowCells         = columnsToSelect.map(column => row.cells[column.name]);
       rowCells.forEach(rowCell => {
@@ -988,28 +991,24 @@ class GridModel implements IGrid, IDisposable {
         }
 
         if (rowCell.colSpan > 1) {
-          for (let i = 1; i < rowCell.colSpan && rowCell.columnPosition + i < rowCells.length; i++) {
-            columnsToSelect.push(rowCells[rowCell.columnPosition + i].column);
+          for (let i = 1; i < rowCell.colSpan && rowCell.columnPosition + i < this.columns.length; i++) {
+            columnsToSelect.push(this.columns[rowCell.columnPosition + i]);
           }
         } else if (rowCell.colSpan === 0) {
-          if (rowCell.columnPosition > 0) {
-            let prevCell = rowCells[rowCell.columnPosition - 1];
-            columnsToSelect.push(prevCell.column);
-            while (prevCell.colSpan === 0 && prevCell.columnPosition > 0) {
-              prevCell = rowCells[prevCell.columnPosition - 1];
+          let prevCell: ICell | undefined = rowCell;
+          let nextCell: ICell | undefined = rowCell;
+          do {
+            prevCell = this.cellByPos(prevCell.rowPosition, prevCell.columnPosition - 1);
+            if (prevCell) {
               columnsToSelect.push(prevCell.column);
             }
-          }
-          if (rowCell.columnPosition < rowCells.length - 1) {
-            let nextCell = rowCells[rowCell.columnPosition + 1];
-            while (nextCell.colSpan === 0 && nextCell.columnPosition <= rowCells.length - 1) {
+          } while (prevCell && prevCell.colSpan === 0);
+          do {
+            nextCell = this.cellByPos(nextCell.rowPosition, nextCell.columnPosition + 1);
+            if (nextCell && nextCell.colSpan === 0) {
               columnsToSelect.push(nextCell.column);
-              if (nextCell.columnPosition + 1 > rowCells.length - 1) {
-                break;
-              }
-              nextCell = rowCells[nextCell.columnPosition + 1];
             }
-          }
+          } while (nextCell && nextCell.colSpan === 0);
         }
 
         columnsToSelect = [...new Set(columnsToSelect)];

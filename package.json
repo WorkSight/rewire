@@ -1,6 +1,6 @@
 {
   "name": "rewire",
-  "version": "1.0.85",
+  "version": "1.0.89",
   "description": "WorkSight .NEXT core",
   "main": "src/index.js",
   "private": true,
@@ -47,8 +47,8 @@
     "rimraf": "^2.6.3",
     "sass": "^1.17.3",
     "tslib": "^1.9.3",
-    "typescript": "^3.5.2",
     "tslint": "^5.18.0",
+    "typescript": "^3.5.2",
     "uglify-es": "^3.3.9"
   },
   "alias": {

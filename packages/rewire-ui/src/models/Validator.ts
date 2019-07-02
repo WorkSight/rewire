@@ -62,8 +62,8 @@ export const isEmail    = (value: any): boolean  => {
   const re = /(^$|^(([^<>()\[\]\\.,;:\s@"]+(\.[^<>()\[\]\\.,;:\s@"]+)*)|(".+"))@((\[[0-9]{1,3}\.[0-9]{1,3}\.[0-9]{1,3}\.[0-9]{1,3}\])|(([a-zA-Z\-0-9]+\.)+[a-zA-Z]{2,}))$)/;
   return re.test(String(!isNullOrUndefined(value) ? value : ''));
 };
-export const requiredWhenOtherIsNotNull = (value: any, otherValue: any): boolean => {
-  if (isNull(otherValue)) return false;
+export const requiredWhenOthersAreNotNull = (value: any, ...otherValues: any[]): boolean => {
+  if (otherValues.some((v: any) => isNull(v))) return true;
   return isRequired(value);
 };
 
@@ -75,13 +75,13 @@ export const requiredWhenOtherIsValue = (value: any, otherValue: any, requiredVa
 export const isDifferenceOfOthers = (value: number, ...otherValues: number[]): boolean => {
   if (otherValues.some((v: number | undefined) => isNullOrUndefined(v))) return true;
   let difference = otherValues.reduce((totalValue: number, currValue: number) => totalValue - currValue);
-  return value !== difference;
+  return value === difference;
 };
 
 export const isSumOfOthers = (value: number, ...otherValues: number[]): boolean => {
   if (otherValues.some((v: number | undefined) => isNullOrUndefined(v))) return true;
-  let difference = otherValues.reduce((totalValue: number, currValue: number) => totalValue - currValue);
-  return value === difference;
+  let sum = otherValues.reduce((totalValue: number, currValue: number) => totalValue + currValue);
+  return value === sum;
 };
 
 export type IValidationFn = (...args: any[]) => boolean | (IError | undefined);
@@ -101,7 +101,7 @@ export interface IValidator {
 }
 
 export type SingleParameterBuiltInValidator = 'required' | 'email' | 'empty';
-export type BuiltInValidators = SingleParameterBuiltInValidator |  '<' | '>' | '<=' | '>=' | '==' | '!=' | 'regex' | 'sumOf';
+export type BuiltInValidators = SingleParameterBuiltInValidator |  '<' | '>' | '<=' | '>=' | '==' | '!=' | 'regex' | 'sumOf' | 'differenceOf' | 'requiredWhenOthersAreNotNull' | 'requiredWhenOtherIsValue';
 export type IFormValidator = (IValidator | SingleParameterBuiltInValidator | IValidationFn) | (IValidator | SingleParameterBuiltInValidator | IValidationFn)[];
 
 export function validators(v: IFormValidator) {
@@ -147,7 +147,10 @@ const __builtInValidators: {[type: string]: IValidator} = {
   ...createBuiltIn('!=', isNotEqual, template`must be not the same as ${1}`),
   ...createBuiltIn('empty', isNull, 'must be empty'),
   ...createBuiltIn('required', isRequired, 'is required'),
+  ...createBuiltIn('requiredWhenOthersAreNotNull', requiredWhenOthersAreNotNull, 'is required'),
+  ...createBuiltIn('requiredWhenOtherIsValue', requiredWhenOtherIsValue, 'is required'),
   ...createBuiltIn('sumOf', isSumOfOthers, template`must be the sum of ${'all'}`),
+  ...createBuiltIn('differenceOf', isDifferenceOfOthers, template`must be the difference of ${'all'}`),
 };
 
 export const field = (field: string) => ({field});
