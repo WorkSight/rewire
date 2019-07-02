@@ -66,7 +66,7 @@ export const GroupRow = React.memo(withStyles(styles, (props: IGroupProps & {cla
       )} />
       {props.group.rows.map((r, idx) => {
         if (isGroupRow(r)) {
-          return <GroupRow key={r.title} fixed={props.fixed} group={r} columns={props.columns} visibleColumns={props.visibleColumns} />
+          return <GroupRow key={r.title} fixed={props.fixed} group={r} columns={props.columns} visibleColumns={props.visibleColumns} />;
         } else {
           return <Row key={r.id} height={r.grid.rowHeight} columns={props.columns} Cell={Cell} index={idx} className={((idx % 2) === 1) ? 'alt' : ''} row={r} />;
         }

@@ -32,7 +32,7 @@ export class RowModel implements IRow, IDisposable, IValidationContext {
   fixed                 : boolean;
   position              : number;
   dispose               : () => void = EmptyFn;
-  onClick?(row: IRow)   : void;
+  onClick?(row: IRow): void;
 
   static positionCompare(a: IRow, b: IRow): number {
     return a.position < b.position ? -1 : a.position > b.position ? 1 : 0;

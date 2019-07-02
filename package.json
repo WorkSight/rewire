@@ -47,7 +47,8 @@
     "rimraf": "^2.6.3",
     "sass": "^1.17.3",
     "tslib": "^1.9.3",
-    "typescript": "^3.3.3333",
+    "typescript": "^3.5.2",
+    "tslint": "^5.18.0",
     "uglify-es": "^3.3.9"
   },
   "alias": {

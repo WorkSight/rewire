@@ -1,4 +1,4 @@
-import { IRow, IGroupRow }  from "./GridTypes";
+import { IRow, IGroupRow }  from './GridTypes';
 import { value }            from 'rewire-core';
 
 export default class GroupRowModel implements IGroupRow {

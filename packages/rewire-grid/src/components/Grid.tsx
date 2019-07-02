@@ -57,13 +57,13 @@ class ColumnWidth extends React.PureComponent<IColumnProps> {
 type ResizeCallback = (height: {clientHeight: number, scrollHeight: number}) => void;
 interface IResizeWatcherResult {
   watch(callback: ResizeCallback): void;
-};
+}
 
 function verticalResizeWatcher(lifetime: React.Component<any>, element: HTMLElement): IResizeWatcherResult {
   const _previous                    = {scrollHeight: element.scrollHeight, clientHeight: element.clientHeight};
   const _callbacks: ResizeCallback[] = [];
 
-  var observer = new ResizeObserver(function() {
+  const observer = new ResizeObserver(function() {
     const current = {scrollHeight: element.scrollHeight, clientHeight: element.clientHeight};
     if (current && _previous && (current.scrollHeight === _previous.scrollHeight) === (current.clientHeight === _previous.clientHeight)) return;
     for (const callback of _callbacks) {
@@ -75,8 +75,8 @@ function verticalResizeWatcher(lifetime: React.Component<any>, element: HTMLElem
 
   observer.observe(element);
   const oldCWUM = lifetime.componentWillUnmount;
-  lifetime.componentWillUnmount = () => { observer.disconnect(); oldCWUM && oldCWUM(); }
-  return { watch(callback: ResizeCallback) { _callbacks.push(callback); callback(_previous) } };
+  lifetime.componentWillUnmount = () => { observer.disconnect(); oldCWUM && oldCWUM(); };
+  return { watch(callback: ResizeCallback) { _callbacks.push(callback); callback(_previous); } };
 }
 
 export interface IGridProps {
@@ -613,7 +613,7 @@ const GridInternal = withStyles(styles, class extends React.PureComponent<GridPr
       const groupMap = {};
       const groups: IGroupRow[] = [];
       for (const row of this.grid.rows) {
-        let parentGroup : IGroupRow | undefined;
+        let parentGroup: IGroupRow | undefined;
         for (let level = 0; level < this.grid.groupBy.length; level++) {
           const key   = this.getGroupKey(row, this.grid.groupBy, level + 1);
           let   group = groupMap[key];
@@ -636,7 +636,7 @@ const GridInternal = withStyles(styles, class extends React.PureComponent<GridPr
     this._groups = computed<IGroupRow[] | undefined>(() => this.grid.rows.length, computation, undefined, true);
   }
 
-  renderGroups(columns: IColumn[], visibleColumns: number,fixed: boolean) {
+  renderGroups(columns: IColumn[], visibleColumns: number, fixed: boolean) {
     const groups = this._groups();
     return groups && groups.map((group) => <GroupRow fixed={fixed} key={group.title} group={group} columns={columns} visibleColumns={visibleColumns} />);
   }
@@ -644,7 +644,7 @@ const GridInternal = withStyles(styles, class extends React.PureComponent<GridPr
   renderRows = (rows: IRow[], columns: IColumn[], fixed: boolean) => {
     const grid = this.props.grid;
     if (!grid.groupBy || (grid.groupBy.length === 0)) {
-      return <Observe render={() => rows.map((row, index) => <Row key={row.id} height={this.props.grid.rowHeight} columns={columns} Cell={Cell} index={index} className={((index % 2) === 1) ? 'alt' : ''} row={row} />)} />
+      return <Observe render={() => rows.map((row, index) => <Row key={row.id} height={this.props.grid.rowHeight} columns={columns} Cell={Cell} index={index} className={((index % 2) === 1) ? 'alt' : ''} row={row} />)} />;
     }
 
     // group rows yeah!!
@@ -710,7 +710,7 @@ const GridInternal = withStyles(styles, class extends React.PureComponent<GridPr
           buttonContent={buttonContent}
           buttonProps={buttonProps}
           items={toggleableColumns}
-          classes={{menuButton: classes.toggleableColumnsButton, menuItem: classes.toggleableColumnsMenuItem}}
+          classes={{menuButton: classes.toggleableColumnsButton, menuItem: classes.toggleableColumnsMenuItem} as any}
           anchorOrigin={anchorOrigin}
           transformOrigin={transformOrigin}
           onItemClick={onItemClick}

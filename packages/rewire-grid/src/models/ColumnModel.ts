@@ -32,7 +32,7 @@ export class ColumnModel implements IColumn {
   _enabled?      : boolean;
   _readOnly?     : boolean;
   _verticalAlign?: VerticalAlignment;
-  __validators   : IValidator[]
+  __validators   : IValidator[];
 
   id           : number;
   grid         : IGrid;

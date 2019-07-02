@@ -158,7 +158,7 @@ export class CellModel implements ICell {
   }
 
   private runOnValueChange() {
-    this.onValueChange && this.onValueChange(this, this.value)
+    this.onValueChange && this.onValueChange(this, this.value);
   }
 
   get value() {

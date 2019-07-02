@@ -234,7 +234,7 @@ class GridModel implements IGrid, IDisposable {
       let currentRowPosition = cell.rowPosition;
       let row: IRow | undefined = cell.row;
       let rowDirection = (byRows) > 0 ? 1 : -1;
-      while(byRows !== 0 && (currentRowPosition >= 0) && (currentRowPosition < this.rows.length))  {
+      while (byRows !== 0 && (currentRowPosition >= 0) && (currentRowPosition < this.rows.length))  {
         currentRowPosition += rowDirection;
         const r = this.rows[currentRowPosition];
         if (r && r.visible) {
@@ -248,7 +248,7 @@ class GridModel implements IGrid, IDisposable {
       let columnDirection = (byColumns) > 0 ? 1 : -1;
       const c2 = row.cells[column.name];
       if (c2.colSpan === 0 && (byColumns === 0)) byColumns = -1;
-      while(byColumns !== 0 && (currentColumnPosition >= 0) && (currentColumnPosition < this.rows.length))  {
+      while (byColumns !== 0 && (currentColumnPosition >= 0) && (currentColumnPosition < this.rows.length))  {
         currentColumnPosition += columnDirection;
         const c    = this.columns[currentColumnPosition];
         if (c && c.visible && c.enabled) {
@@ -880,7 +880,7 @@ class GridModel implements IGrid, IDisposable {
   updateCellSelectionProperties(cellsToSelect: ICell[]) {
     cellsToSelect.forEach(cell => {
       let adjacentTopCell = this.adjacentTopCell(cell);
-      let sameGroupTop    = !!adjacentTopCell && true; //(adjacentTopCell.row.parentRow && adjacentTopCell.row.parentRow.id) === (cell.row.parentRow && cell.row.parentRow.id);
+      let sameGroupTop    = !!adjacentTopCell && true; // (adjacentTopCell.row.parentRow && adjacentTopCell.row.parentRow.id) === (cell.row.parentRow && cell.row.parentRow.id);
       if (!adjacentTopCell || !sameGroupTop || !adjacentTopCell.selected) {
         cell.isTopMostSelection = true;
       } else {
@@ -895,7 +895,7 @@ class GridModel implements IGrid, IDisposable {
       }
 
       let adjacentBottomCell = this.adjacentBottomCell(cell);
-      let sameGroupBottom    = !!adjacentBottomCell && true; //(adjacentBottomCell.row.parentRow && adjacentBottomCell.row.parentRow.id) === (cell.row.parentRow && cell.row.parentRow.id);
+      let sameGroupBottom    = !!adjacentBottomCell && true; // (adjacentBottomCell.row.parentRow && adjacentBottomCell.row.parentRow.id) === (cell.row.parentRow && cell.row.parentRow.id);
       if (!adjacentBottomCell || !sameGroupBottom || !adjacentBottomCell.selected) {
         cell.isBottomMostSelection = true;
       } else {

@@ -60,7 +60,7 @@ export interface IGridVariableKeybinds {
   'Ctrl+Insert'     : GridKeybindAction;
   'Ctrl+D'          : GridKeybindAction;
   'Ctrl+Delete'     : GridKeybindAction;
-  [keybind : string]: GridKeybindAction;
+  [keybind: string]: GridKeybindAction;
 }
 
 export interface IGrid extends IRows, IDisposable {
@@ -95,7 +95,7 @@ export interface IGrid extends IRows, IDisposable {
   rowKeybindPermissions     : IGridRowKeybindPermissions;
   staticKeybinds            : IGridStaticKeybinds;
   variableKeybinds          : IGridVariableKeybinds;
-  readonly validator        : Validator
+  readonly validator        : Validator;
 
   hasErrors(): boolean;
   getErrors(): IErrorData[];
@@ -183,8 +183,8 @@ export interface IGroupRow {
   rows           : (IRow | IGroupRow)[];
   readonly title : string;
   readonly level : number;
-  expand()       : void;
-  collapse()     : void;
+  expand(): void;
+  collapse(): void;
 }
 
 export interface IGridColors {
