@@ -558,6 +558,8 @@ class GridModel implements IGrid, IDisposable {
   addColumn(column: IColumn): IColumn {
     column.grid     = this;
     column.position = this.columns.length;
+    const c: ColumnModel = (column as ColumnModel);
+    if (c.__validators) this.__validator.addRule(column.name, c.__validators);
     this.columns.push(column);
     return column;
   }
@@ -1035,8 +1037,6 @@ class GridModel implements IGrid, IDisposable {
       grid.loading = true;
       freeze(() => {
         for (const column of columns) {
-          const c: ColumnModel = (column as ColumnModel);
-          if (c.__validators) grid.__validator.addRule(column.name, c.__validators);
           grid.addColumn(column);
         }
       });
