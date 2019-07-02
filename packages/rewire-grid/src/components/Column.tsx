@@ -1,4 +1,4 @@
-import {IColumn, IRow, ICell}             from '../models/GridTypes';
+import {IColumn, ICell}                   from '../models/GridTypes';
 import * as React                         from 'react';
 import {Observe, disposeOnUnmount, watch} from 'rewire-core';
 
@@ -21,10 +21,6 @@ export default class Column extends React.PureComponent<IColumnCellProps> {
     disposeOnUnmount(this, () => {
       watch(() => this.column.visible, () => {
         this.column.grid.setColumnPositions();
-        this.column.grid.dataRowsByPosition.forEach((row: IRow) => {
-          row.cellsByColumnPosition.length = 0;
-          row.cellsByColumnPosition.push(...(Object.values(row.cells) || []).filter((cell: ICell) => cell.column.visible));
-        });
         this.column.grid.mergeColumns();
       });
     });
@@ -59,7 +55,7 @@ export default class Column extends React.PureComponent<IColumnCellProps> {
           // widthToSet       = currColumn.width ? widthToSet - (cellWidth - currColumn.width.slice().replace(new RegExp(/px/, 'g'), '')) : widthToSet;
           // widthToSet       = currColumn.width ? cellWidth + (widthToSet - currColumn.width.slice().replace(new RegExp(/px/, 'g'), '')) : widthToSet;
           currColumn.width = `${widthToSet}px`;
-          currColumn       = currColumn.grid.adjacentRightColumn(currColumn)!;
+          currColumn       = (currColumn.grid as any).adjacentRightColumn(currColumn)!;
         }
       } else {
         this.column.width = `${Math.max(this.startOffset + evt.pageX, 5)}px`;

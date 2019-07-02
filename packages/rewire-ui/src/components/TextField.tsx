@@ -215,7 +215,7 @@ class TextFieldInternal extends React.Component<TextFieldPropsStyled> {
         disabled={this.props.disabled}
         label={this.props.label}
         placeholder={this.props.placeholder}
-        variant={variant}
+        variant={variant as any}
         error={!this.props.disableErrors && !this.props.disabled && !!this.props.error}
         helperText={!this.props.disableErrors && <span>{(!this.props.disabled && this.props.error) || ''}</span>}
         value={value}
@@ -244,7 +244,7 @@ class TextFieldInternal extends React.Component<TextFieldPropsStyled> {
           disabled={props.disabled}
           label={props.label}
           placeholder={props.placeholder}
-          variant={variant}
+          variant={variant as any}
           error={!props.disableErrors && !props.disabled && !!props.error}
           helperText={!props.disableErrors && <span>{(!props.disabled && props.error) || ''}</span>}
           value={props.value}

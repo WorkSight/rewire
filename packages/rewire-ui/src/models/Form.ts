@@ -1,8 +1,8 @@
-import * as React      from 'react';
+import * as React             from 'react';
 import {
   isNullOrUndefined,
   isNullOrUndefinedOrEmpty,
-}                      from 'rewire-common';
+}                             from 'rewire-common';
 import {
   observable,
   replace,
@@ -10,40 +10,46 @@ import {
   computed,
   root,
   observe
-}                      from 'rewire-core';
-import MailOutlineIcon from '@material-ui/icons/MailOutline';
-import PhoneIcon       from '@material-ui/icons/Phone';
-import AccessTimeIcon  from '@material-ui/icons/AccessTime';
-import DateRangeIcon   from '@material-ui/icons/DateRange';
+}                             from 'rewire-core';
+import MailOutlineIcon        from '@material-ui/icons/MailOutline';
+import PhoneIcon              from '@material-ui/icons/Phone';
+import AccessTimeIcon         from '@material-ui/icons/AccessTime';
+import DateRangeIcon          from '@material-ui/icons/DateRange';
 import Validator, {
-  ValidationResult,
-  IValidateFnData}     from './Validator';
+  validator,
+  IValidator,
+  IFormValidator,
+  eValidationResult,
+  IValidationContext,
+  IError,
+  validators,
+}                             from './Validator';
 import editor, {
   EditorType,
   TextAlignment,
   TextVariant,
   IField,
-}                                from '../components/editors';
-import { and, isEmail, isRegEx } from './Validator';
-import { defaultPhoneFormat }    from '../components/PhoneField';
+}                             from '../components/editors';
+import { defaultPhoneFormat } from '../components/PhoneField';
 
-export type IFieldTypes = 'string' | 'multistring' | 'static' | 'reference' | 'select' | 'multiselect' | 'number' | 'boolean' | 'switch' | 'date' | 'time' | 'avatar' | 'password' | 'email' | 'phone' | 'color' | 'mask' | 'multiselectautocomplete';
+export type IFieldTypes    = 'string' | 'multistring' | 'static' | 'reference' | 'select' | 'multiselect' | 'number' | 'boolean' | 'switch' | 'date' | 'time' | 'avatar' | 'password' | 'email' | 'phone' | 'color' | 'mask' | 'multiselectautocomplete';
+export type FormType<T>    = { field : Record<keyof T, IEditorField> } & Form;
 
 export interface IFieldDefn {
-  label(text: string):                                            IFieldDefn;
-  placeholder(text: string):                                      IFieldDefn;
-  align(text: TextAlignment):                                     IFieldDefn;
-  variant(text: TextVariant):                                     IFieldDefn;
-  autoFocus():                                                    IFieldDefn;
-  disabled(action: (field: IEditorField) => boolean):             IFieldDefn;
-  disableErrors(disableErrors?: boolean):                         IFieldDefn;
-  startAdornment(adornment?: () => JSX.Element):                  IFieldDefn;
-  endAdornment(adornment?: () => JSX.Element):                    IFieldDefn;
-  editor(editorType: EditorType, editProps?: any):                IFieldDefn;
-  updateOnChange(updateOnChange?: boolean):                       IFieldDefn;
-  validateOnUpdate(validateOnUpdate?: boolean):                   IFieldDefn;
-  validators(fnData: IValidateFnData):                            IFieldDefn;
-  onValueChange(handleValueChange: (form: Form, v: any) => void): IFieldDefn;
+  label            (text: string):                                    IFieldDefn;
+  placeholder      (text: string):                                    IFieldDefn;
+  align            (text: TextAlignment):                             IFieldDefn;
+  variant          (text: TextVariant):                               IFieldDefn;
+  autoFocus        ():                                                IFieldDefn;
+  disabled         (action: (field: IEditorField) => boolean):        IFieldDefn;
+  disableErrors    (disableErrors?: boolean):                         IFieldDefn;
+  startAdornment   (adornment?: () => JSX.Element):                   IFieldDefn;
+  endAdornment     (adornment?: () => JSX.Element):                   IFieldDefn;
+  editor           (editorType: EditorType, editProps?: any):         IFieldDefn;
+  updateOnChange   (updateOnChange?: boolean):                        IFieldDefn;
+  validateOnUpdate (validateOnUpdate?: boolean):                      IFieldDefn;
+  validators       (...v: IFormValidator[]):                          IFieldDefn;
+  onValueChange    (handleValueChange: (form: Form, v: any) => void): IFieldDefn;
 }
 
 export interface IEditorField extends IField {
@@ -51,7 +57,6 @@ export interface IEditorField extends IField {
   type:             IFieldTypes;
   updateOnChange:   boolean;
   validateOnUpdate: boolean;
-  linkedFieldNames: string[];
 
   onValueChange?(form: Form, v: any): void;
 }
@@ -76,11 +81,124 @@ interface IBaseFieldDefn {
   visible?         : boolean;
   updateOnChange?  : boolean;
   validateOnUpdate?: boolean;
-  validators?      : IValidateFnData;
+  validators?      : IValidator[];
 
   onValueChange?(form: Form, v: any): void;
   startAdornment?(): JSX.Element;
   endAdornment?():   JSX.Element;
+}
+
+export interface IFormContext {
+  email                   (editProps?: any): IFieldDefn;
+  string                  (editProps?: any): IFieldDefn;
+  multistring             (editProps?: any): IFieldDefn;
+  static                  (): IFieldDefn;
+  number                  (editProps?: any): IFieldDefn;
+  boolean                 (editProps?: any): IFieldDefn;
+  switch                  (editProps?: any): IFieldDefn;
+  date                    (editProps?: any): IFieldDefn;
+  time                    (editProps?: any): IFieldDefn;
+  password                (editProps?: any): IFieldDefn;
+  phone                   (editProps?: any): IFieldDefn;
+  select                  (searcher: any, editProps?: any): IFieldDefn;
+  multiselect             (searcher: any, editProps?: any): IFieldDefn;
+  multiselectautocomplete (searcher: any, editProps?: any): IFieldDefn;
+  reference               (searcher: any, editProps?: any): IFieldDefn;
+  avatar                  (editProps?: any): IFieldDefn;
+  color                   (editProps?: any): IFieldDefn;
+  mask                    (editProps?: any): IFieldDefn;
+}
+
+class FormContext implements IFormContext {
+  constructor() { }
+
+  field(field: string): any {
+    return {field}
+  }
+
+  error(error: string): any {
+    return {error};
+  }
+
+  string(editProps?: any): IFieldDefn {
+    return new BaseField('string', editProps);
+  }
+
+  multistring(editProps?: any): IFieldDefn {
+    return new BaseField('multistring', editProps);
+  }
+
+  static(): IFieldDefn {
+    return new BaseField('static');
+  }
+
+  number(editProps?: any): IFieldDefn {
+    return new BaseField('number', editProps);
+  }
+
+  boolean(editProps?: any): IFieldDefn {
+    return new BaseField('boolean', editProps);
+  }
+
+  switch(editProps?: any): IFieldDefn {
+    return new BaseField('switch', editProps);
+  }
+
+  date(editProps?: any): IFieldDefn {
+    return new BaseField('date', editProps);
+  }
+
+  time(editProps?: any): IFieldDefn {
+    return new BaseField('time', editProps);
+  }
+
+  password(editProps?: any): IFieldDefn {
+    return new BaseField('password', editProps);
+  }
+
+  email(editProps?: any): IFieldDefn {
+    return new BaseField('email', editProps).validators('email');
+  }
+
+  phone(editProps?: any): IFieldDefn {
+    let field       = new BaseField('phone', editProps);
+    let phoneLength = ((editProps && editProps.format) || defaultPhoneFormat).replace(new RegExp('[^#]', 'g'), '').length;
+    let phoneRegEx  = new RegExp('^$|^[0-9]{' + phoneLength + '}$');
+    field.validators(validator('regex', phoneRegEx));
+    return field;
+  }
+
+  select(searcher: any, editProps?: any): IFieldDefn {
+    let eProps = Object.assign({}, searcher, editProps);
+    return new BaseField('select', eProps);
+  }
+
+  multiselect(searcher: any, editProps?: any): IFieldDefn {
+    let eProps = Object.assign({}, searcher, editProps);
+    return new BaseField('multiselect', eProps);
+  }
+
+  multiselectautocomplete(searcher: any, editProps?: any): IFieldDefn {
+    let eProps = Object.assign({}, searcher, editProps);
+    return new BaseField('multiselectautocomplete', eProps);
+  }
+
+  reference(searcher: any, editProps?: any): IFieldDefn {
+    let eProps = Object.assign({}, searcher, editProps);
+    return new BaseField('reference', eProps);
+  }
+
+  avatar(editProps?: any): IFieldDefn {
+    return new BaseField('avatar', editProps);
+  }
+
+  color(editProps?: any): IFieldDefn {
+    return new BaseField('color', editProps);
+  }
+
+  mask(editProps?: any): IFieldDefn {
+    return new BaseField('mask', editProps);
+  }
 }
 
 class BaseField implements IFieldDefn {
@@ -152,13 +270,9 @@ class BaseField implements IFieldDefn {
     return this;
   }
 
-  validators(validateFnData: IValidateFnData): IFieldDefn {
-    if (this.typeDefn.validators) {
-      this.typeDefn.validators = and(validateFnData, this.typeDefn.validators);
-    } else {
-      this.typeDefn.validators = validateFnData;
-    }
-
+  validators(...v: IFormValidator[]): IFieldDefn {
+    if (!this.typeDefn.validators) this.typeDefn.validators = [];
+    this.typeDefn.validators.push(...v.flatMap(vs => validators(vs)));
     return this;
   }
 
@@ -179,7 +293,7 @@ export interface IFormOptions {
   validateOnUpdate?:            boolean;
 }
 
-export default class Form {
+export default class Form implements IValidationContext {
   private _value:              ObjectType;
   private dispose:             () => void;
   private _hasChanges:         () => boolean;
@@ -220,7 +334,7 @@ export default class Form {
       field.error = undefined;
     });
 
-    let validationResult: ValidationResult;
+    let validationResult: eValidationResult;
     if (this.initialValuesValidationMode === 'all') {
       validationResult = this.validateForm();
     } else if (this.initialValuesValidationMode === 'withValues') {
@@ -243,7 +357,7 @@ export default class Form {
       const fieldsErrorsChanged = observe(() => this.fields.map(f => f.error));
       this._hasErrors = computed(fieldsErrorsChanged, () => {
         return this.fields.findIndex((field: IEditorField) => !!field.error) >= 0;
-      }, !!validationResult && !validationResult.success);
+      }, validationResult === eValidationResult.Error);
     });
   }
 
@@ -334,7 +448,6 @@ export default class Form {
       visible:          true,
       startAdornment:   fieldDefn.typeDefn.startAdornment,
       endAdornment:     fieldDefn.typeDefn.endAdornment,
-      linkedFieldNames: fieldDefn.typeDefn.validators && fieldDefn.typeDefn.validators.linkedFieldNames || [],
       onValueChange:    fieldDefn.typeDefn.onValueChange,
     } as IEditorField;
 
@@ -392,22 +505,19 @@ export default class Form {
     return success;
   }
 
-  public getFieldValue(fieldName: string): any {
+  public setError(field: string, error?: IError): void {
+    this.field[field].error = (error) ? error.text : undefined;
+  }
+
+  public getField(fieldName: string): any {
     let field = this.field[fieldName];
     if (!field) return;
-    return field.value;
+    return {label: field.label, value: field.value};
   }
 
   private toObjectValues(): ObjectType {
     return this.fields.reduce((prev: ObjectType, current) => {
       if (!isNullOrUndefined(current.value)) prev[current.name] = current.value;
-      return prev;
-    }, {});
-  }
-
-  private toObjectLabelsAndValues(): ObjectType {
-    return this.fields.reduce((prev: ObjectType, current) => {
-      prev[current.name] = {label: current.label && current.label.toLowerCase(), value: current.value};
       return prev;
     }, {});
   }
@@ -440,153 +550,30 @@ export default class Form {
   public submit = (): boolean => {
     if (!this._value) return false;
     let result = this.validateForm();
-    if (!result.success) return false;
+    if (result === eValidationResult.Error) return false;
     replace(this._value, this.toObjectValues());
     return true;
   }
 
-  public validateField(field: IEditorField): ValidationResult {
-    let fieldNamesToValidate = this.fields.filter(f => !f.disableErrors && f.linkedFieldNames.includes(field.name)).map(f => f.name);
-    if (!field.disableErrors) {
-      fieldNamesToValidate.push(field.name);
-    }
-    fieldNamesToValidate = [...new Set(fieldNamesToValidate)];
-    let result = this.validator.validateFields(fieldNamesToValidate, this.toObjectLabelsAndValues());
-    fieldNamesToValidate.forEach(fieldName => {
-      let fld = this.field[fieldName];
-      if (fld) {
-        fld.error = result.errors[fieldName];
-      }
-    });
-    return result;
+  public validateField(field: IEditorField): eValidationResult {
+    return this.validator.validateField(this, field.name);
   }
 
-  public validateFields(fields: IEditorField[]): ValidationResult {
-    let fieldNamesToValidate = this.fields.filter(f => !f.disableErrors && fields.findIndex(field => f.linkedFieldNames.includes(field.name)) >= 0).map(f => f.name);
-    fields.forEach((field: IEditorField) => {
-      if (!field.disableErrors) {
-        fieldNamesToValidate.push(field.name);
-      }
-    });
-
-    fieldNamesToValidate = [...new Set(fieldNamesToValidate)];
-    let result = this.validator.validateFields(fieldNamesToValidate, this.toObjectLabelsAndValues());
-    fieldNamesToValidate.forEach(fieldName => {
-      let fld = this.field[fieldName];
-      if (fld) {
-        fld.error = result.errors[fieldName];
-      }
-    });
-    return result;
-  }
-
-  public validateForm(produceErrors: boolean = true): ValidationResult {
-    let result = this.validator.validateFields(this.fields.filter(field => !field.disableErrors).map(field => field.name), this.toObjectLabelsAndValues());
-    if (produceErrors) {
-      this.fields.forEach(field => {
-        field.error = result.errors[field.name];
-      });
+  public validateFields(fields: IEditorField[]): eValidationResult {
+    let result = eValidationResult.Success
+    for (const f of fields) {
+      if (f.disableErrors) continue;
+      result |= this.validator.validateField(this, f.name);
     }
     return result;
   }
 
-  static create<T>(fields: T, initial?: ObjectType, options?: IFormOptions) {
-    type FormType = {
-      field                   : Record<keyof typeof fields, IEditorField>,
-      fields                  : IEditorField[],
-      value                   : ObjectType,
-      validation              : Validator,
-      isOpen                  : boolean,
-      hasChanges              : boolean,
-      defaultAdornmentsEnabled: boolean,
-      disableErrors           : boolean,
-      updateOnChange          : boolean,
-      validateOnUpdate        : boolean,
-
-      submit(): void;
-    };
-    return new Form(fields as any, initial, options) as any as FormType & Form;
+  public validateForm(produceErrors: boolean = true): eValidationResult {
+    return this.validator.validate(this, produceErrors);
   }
 
-  static string(editProps?: any): IFieldDefn {
-    return new BaseField('string', editProps);
-  }
-
-  static multistring(editProps?: any): IFieldDefn {
-    return new BaseField('multistring', editProps);
-  }
-
-  static static(): IFieldDefn {
-    return new BaseField('static');
-  }
-
-  static number(editProps?: any): IFieldDefn {
-    return new BaseField('number', editProps);
-  }
-
-  static boolean(editProps?: any): IFieldDefn {
-    return new BaseField('boolean', editProps);
-  }
-
-  static switch(editProps?: any): IFieldDefn {
-    return new BaseField('switch', editProps);
-  }
-
-  static date(editProps?: any): IFieldDefn {
-    return new BaseField('date', editProps);
-  }
-
-  static time(editProps?: any): IFieldDefn {
-    return new BaseField('time', editProps);
-  }
-
-  static password(editProps?: any): IFieldDefn {
-    return new BaseField('password', editProps);
-  }
-
-  static email(editProps?: any): IFieldDefn {
-    let field                 = new BaseField('email', editProps);
-    field.typeDefn.validators = isEmail;
-    return field;
-  }
-
-  static phone(editProps?: any): IFieldDefn {
-    let field                 = new BaseField('phone', editProps);
-    let phoneLength           = ((editProps && editProps.format) || defaultPhoneFormat).replace(new RegExp('[^#]', 'g'), '').length;
-    let phoneRegEx            = new RegExp('^$|^[0-9]{' + phoneLength + '}$');
-    field.typeDefn.validators = isRegEx(phoneRegEx, 'phone number is not in a valid format');
-    return field;
-  }
-
-  static select(searcher: any, editProps?: any): IFieldDefn {
-    let eProps = Object.assign({}, searcher, editProps);
-    return new BaseField('select', eProps);
-  }
-
-  static multiselect(searcher: any, editProps?: any): IFieldDefn {
-    let eProps = Object.assign({}, searcher, editProps);
-    return new BaseField('multiselect', eProps);
-  }
-
-  static multiselectautocomplete(searcher: any, editProps?: any): IFieldDefn {
-    let eProps = Object.assign({}, searcher, editProps);
-    return new BaseField('multiselectautocomplete', eProps);
-  }
-
-  static reference(searcher: any, editProps?: any): IFieldDefn {
-    let eProps = Object.assign({}, searcher, editProps);
-    return new BaseField('reference', eProps);
-  }
-
-  static avatar(editProps?: any): IFieldDefn {
-    return new BaseField('avatar', editProps);
-  }
-
-  static color(editProps?: any): IFieldDefn {
-    return new BaseField('color', editProps);
-  }
-
-  static mask(editProps?: any): IFieldDefn {
-    return new BaseField('mask', editProps);
+  static create<T>(fields: (context: IFormContext) => T, initial?: ObjectType, options?: IFormOptions) {
+    const context = new FormContext();
+    return (new Form(fields(context) as any, initial, options) as unknown) as FormType<ReturnType<typeof fields>>;
   }
 }

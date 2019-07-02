@@ -105,9 +105,10 @@ type SelectInternalProps<T>         = WithStyle<ReturnType<typeof styles>, ISele
 class SelectInternal<T> extends React.Component<SelectInternalProps<T>, any> {
   // private _isMounted: boolean;
   private InputRef: React.RefObject<HTMLElement>;
-  state : any;
-  search: SearchFn<T>;
-  map   : MapFn<T>;
+  state      : any;
+  search     : SearchFn<T>;
+  map        : MapFn<T>;
+  _fontSize? : (string | null);
 
   constructor(props: SelectInternalProps<T>) {
     super(props);
@@ -268,7 +269,9 @@ class SelectInternal<T> extends React.Component<SelectInternalProps<T>, any> {
   }
 
   renderSuggestions(v: any, multiple?: boolean) {
-    const fontSize = this.InputRef.current && window.getComputedStyle(this.InputRef.current).getPropertyValue('font-size'); // needed to make the menu items font-size the same as the shown value
+    if (!this._fontSize) {
+      this._fontSize = this.InputRef.current && window.getComputedStyle(this.InputRef.current).getPropertyValue('font-size'); // needed to make the menu items font-size the same as the shown value
+    }
 
     return (
       this.state.suggestions.map((suggestion: any, index: number) => {
@@ -277,7 +280,7 @@ class SelectInternal<T> extends React.Component<SelectInternalProps<T>, any> {
           suggestion,
           index,
           displayName,
-          fontSize,
+          fontSize: this._fontSize,
           isHighlighted: (multiple ? v && v.includes(displayName) : displayName === v)
         });
       })

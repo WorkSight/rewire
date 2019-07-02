@@ -70,6 +70,7 @@ export type TextEditorProps = {
   field                 : IField,
   className?            : string,
   classes?              : React.CSSProperties,
+  initialInputValue?    : any;
   selectOnFocus?        : boolean,
   endOfTextOnFocus?     : boolean,
   cursorPositionOnFocus?: number,

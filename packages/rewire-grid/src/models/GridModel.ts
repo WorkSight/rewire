@@ -5,23 +5,14 @@ import {
   IColumn,
   IErrorData,
   SortDirection,
-  groupRows,
   findColumnByName,
-  findColumnByPosition,
-  fixedRows,
-  allDataRows,
-  allRows,
-  IRowIteratorResult,
   IDisposable,
   findRowById,
-  cloneValue,
   IGridOptions,
   VerticalAlignment,
   IGridRowKeybindPermissions,
   IGridStaticKeybinds,
   IGridVariableKeybinds,
-  ICellDataMap,
-  IRowOptions,
   IRowData,
   IToggleableColumnsOptions,
 }                              from './GridTypes';
@@ -32,8 +23,8 @@ import {CellModel}             from './CellModel';
 import {
   gridStaticKeybinds,
   gridDefaultVariableKeybinds
-}                              from './GridKeybinds';
-import * as merge              from 'deepmerge';
+}                  from './GridKeybinds';
+import * as merge  from 'deepmerge';
 import {
   observable,
   computed,
@@ -41,30 +32,28 @@ import {
   freeze,
   root,
   watch,
+  sample
 }                  from 'rewire-core';
-import { compare } from 'rewire-ui';
+import {
+  compare,
+  Validator
+}                  from 'rewire-ui';
 
 let id = 0;
 class GridModel implements IGrid, IDisposable {
-  __contentElement?         : HTMLDivElement; // __ means non-obserbable property
   _standardColumns          : () => IColumn[];
   _fixedColumns             : () => IColumn[];
-  _columnsByPosition        : () => IColumn[];
   _sort                     : IColumn[];
   id                        : number;
   enabled                   : boolean;
   readOnly                  : boolean;
   verticalAlign             : VerticalAlignment;
-  addedRows                 : IRowIteratorResult[];
-  removedRows               : IRowIteratorResult[];
   rows                      : IRow[];
   fixedRows                 : IRow[];
   headerRowHeight?          : number;
   columns                   : IColumn[];
   toggleableColumns         : IColumn[];
   toggleableColumnsOptions? : IToggleableColumnsOptions;
-  dataRowsByPosition        : IRow[];
-  originalDataRowsByPosition: IRow[];
   editingCell?              : ICell;
   selectedRows              : IRow[];
   selectedCells             : ICell[];
@@ -73,7 +62,7 @@ class GridModel implements IGrid, IDisposable {
   rowHeight?                : number;
   loading                   : boolean;
   isDraggable               : boolean;
-  clipboard                 : ICell[];
+  clipboard                 : {value: any, columnPosition: number}[];
   multiSelect               : boolean;
   allowMergeColumns         : boolean;
   isMouseDown               : boolean;
@@ -82,6 +71,7 @@ class GridModel implements IGrid, IDisposable {
   staticKeybinds            : IGridStaticKeybinds;
   variableKeybinds          : IGridVariableKeybinds;
   startCell?                : ICell;
+  __validator               : Validator;
   changed                   : boolean;
   inError                   : boolean;
 
@@ -90,15 +80,13 @@ class GridModel implements IGrid, IDisposable {
   private constructor() { }
 
   private initialize(dispose: () => void, options?: IGridOptions) {
+    this.__validator                = new Validator();
+    this._dispose                   = dispose;
     this._sort                      = [];
     this.id                         = id++;
-    this.addedRows                  = [];
-    this.removedRows                = [];
     this.rows                       = [];
     this.fixedRows                  = [];
     this.columns                    = [];
-    this.dataRowsByPosition         = [];
-    this.originalDataRowsByPosition = [];
     this.editingCell                = undefined;
     this.selectedRows               = [];
     this.selectedCells              = [];
@@ -132,34 +120,19 @@ class GridModel implements IGrid, IDisposable {
       this.selectedRows = [this.rows[0]];
     }
 
-    this._dispose           = dispose;
-    const columns           = observe(() => {this.columns.length; this.columns.map((column: IColumn) => column.fixed); });
-    const columnsPos        = observe(() => {this.columns.length; this.columns.map((column: IColumn) => column.visible); });
+    const columns           = observe(() => {this.columns.map((column: IColumn) => column.fixed); });
     this._fixedColumns      = computed(columns, () => this.columns.filter((h) => h.fixed), []);
     this._standardColumns   = computed(columns, () => this.columns.filter((h) => !h.fixed), []);
-    this._columnsByPosition = computed(columnsPos, () => this.columns.filter((c) => c.visible).sort(ColumnModel.positionCompare), []);
 
-    watch(() => this.dataRowsByPosition.length, () => {
-      this.changed = this.hasChanges();
+    watch(() => this.rows.length, () => {
       this.inError = this.hasErrors();
     });
     return this;
   }
 
-  setContentElement(element: HTMLDivElement | undefined) {
-    this.__contentElement = element;
-  }
-  get contentElement(): HTMLDivElement | undefined {
-    return this.__contentElement;
-  }
-
   private disposeRows() {
     for (const row of this.rows) {
       row.dispose();
-    }
-
-    for (const row of this.removedRows) {
-      row.row.dispose();
     }
   }
 
@@ -168,15 +141,19 @@ class GridModel implements IGrid, IDisposable {
     if (this._dispose) this._dispose();
   }
 
+  get validator() {
+    return this.__validator;
+  }
+
   copy() {
     let selectedCells = this.selectedCells;
     if (selectedCells.length <= 0) {
       return;
     }
 
-    let copiedCells: ICell[] = [];
+    let copiedCells: any[] = [];
     selectedCells.forEach(cell => {
-      copiedCells.push(cell.clone(cell.row));
+      copiedCells.push({value: cell.value, columnPosition: cell.columnPosition});
     });
     this.clipboard = copiedCells;
   }
@@ -187,44 +164,14 @@ class GridModel implements IGrid, IDisposable {
   }
 
   get(): IRowData[] {
-    const data: IRowData[] = [];
-    for (const row of allDataRows(this.rows)) {
-      let rowData: IRowData = {
-        id: row.row.id,
-        data: row.row.data,
-        options: row.row.options,
-      };
-      data.push(rowData);
-    }
-    return data;
-  }
-
-  getChanges(): ICellDataMap[] {
-    const data: ICellDataMap[] = [];
-    for (const row of allDataRows(this.rows)) {
-      let rowData: ICellDataMap = {};
-      for (const column of this.columns) {
-        let cell = row.row.cells[column.name];
-        if (cell.hasChanges()) {
-          rowData[column.name] = cell.value;
-        }
-      }
-      if (Object.keys(rowData).length > 0) {
-        data.push(rowData);
-      }
-    }
-    return data;
+    return this.rows;
   }
 
   set(data: (IRowData | undefined)[]): void {
-    this.disposeRows();
     this.loading = true;
     freeze(() => {
-      this.addedRows.length                  = 0;
-      this.removedRows.length                = 0;
+      this.disposeRows();
       this.rows.length                       = 0;
-      this.dataRowsByPosition.length         = 0;
-      this.originalDataRowsByPosition.length = 0;
       this.selectedRows.length               = 0;
       this.selectedCells.length              = 0;
       this._addRows(data);
@@ -232,30 +179,14 @@ class GridModel implements IGrid, IDisposable {
     this.loading = false;
     this.validate();
     this.mergeColumns();
-    this._commit();
-  }
-
-  _commit() {
-    this.originalDataRowsByPosition = this.dataRowsByPosition.slice();
-    this.changed                    = false;
-  }
-
-  commit() {
-    for (const row of this.dataRowsByPosition) {
-      if (row) {
-        row.commit();
-      }
-    }
-    this._commit();
   }
 
   getCellsByRange(colStart: number, rowStart: number, colEnd: number, rowEnd: number, allowCollapsed: boolean): ICell[] {
     let cells: ICell[] = [];
     let rows = this.getRowsByRange(rowStart, rowEnd, allowCollapsed);
     rows.forEach(row => {
-      let rowCells = row.cellsByColumnPosition;
       for (let j = colStart; j <= colEnd; j++) {
-        let cellToAdd = rowCells[j];
+        let cellToAdd = row.cells[this.columns[colStart].name];
         if (cellToAdd.rowSpan <= 0) {
           continue;
         }
@@ -269,7 +200,7 @@ class GridModel implements IGrid, IDisposable {
 
   getRowsByRange(rowStart: number, rowEnd: number, allowCollapsed: boolean): IRow[] {
     let rows: IRow[] = [];
-    let rowCount     = this.dataRowsByPosition.length;
+    let rowCount     = this.rows.length;
     let start        = Math.max(0, Math.min(rowStart, rowEnd));
     let end          = Math.min(rowCount - 1, Math.max(rowStart, rowEnd));
 
@@ -289,90 +220,82 @@ class GridModel implements IGrid, IDisposable {
   }
 
   cellByPos(rowPosition: number, columnPosition: number): ICell | undefined {
-    if (rowPosition < 0 || rowPosition >= this.dataRowsByPosition.length) {
+    if (rowPosition < 0 || rowPosition >= this.rows.length || columnPosition < 0 || columnPosition >= this.columns.length) {
       return undefined;
     }
 
-    const rowCells = this.dataRowsByPosition[rowPosition].cellsByColumnPosition;
-    if (columnPosition < 0 || columnPosition >= rowCells.length) {
-      return undefined;
-    }
-
-    const cell = rowCells && rowCells[columnPosition];
+    const cell = this.rows[rowPosition].cells[this.columns[columnPosition].name];
     if (!cell) return undefined;
     return cell;
   }
 
-  adjacentTopCell(cell: ICell, onlySelectable: boolean = false): ICell | undefined {
-    let adjacentTopCell: ICell | undefined;
-    let i = 1;
-    do {
-      adjacentTopCell = this.cellByPos(cell.rowPosition - i++, cell.columnPosition);
-    } while (onlySelectable && adjacentTopCell && (!adjacentTopCell.row.visible || !adjacentTopCell.enabled));
+  move(cell: ICell, byRows: number = 1, byColumns: number = 1) {
+    return sample(() =>  {
+      let currentRowPosition = cell.rowPosition;
+      let row: IRow | undefined = cell.row;
+      let rowDirection = (byRows) > 0 ? 1 : -1;
+      while (byRows !== 0 && (currentRowPosition >= 0) && (currentRowPosition < this.rows.length))  {
+        currentRowPosition += rowDirection;
+        const r = this.rows[currentRowPosition];
+        if (r && r.visible) {
+          byRows -= rowDirection;
+          row = r;
+        }
+      }
 
-    if (adjacentTopCell && adjacentTopCell.colSpan === 0) {
-      adjacentTopCell = this.adjacentLeftCell(adjacentTopCell, onlySelectable);
-    }
+      let currentColumnPosition = cell.columnPosition;
+      let column: IColumn | undefined = cell.column;
+      let columnDirection = (byColumns) > 0 ? 1 : -1;
+      const c2 = row.cells[column.name];
+      if (c2.colSpan === 0 && (byColumns === 0)) byColumns = -1;
+      while (byColumns !== 0 && (currentColumnPosition >= 0) && (currentColumnPosition < this.rows.length))  {
+        currentColumnPosition += columnDirection;
+        const c    = this.columns[currentColumnPosition];
+        if (c && c.visible && c.enabled) {
+          const cell = row.cells[c.name];
+          if (cell && (cell.colSpan > 0)) {
+            byColumns -= columnDirection;
+            column = c;
+          }
+        }
+      }
 
-    return adjacentTopCell;
+      const c = row.cells[column.name];
+      return (c === cell) ? undefined : c;
+    });
   }
 
-  adjacentRightCell(cell: ICell, onlySelectable: boolean = false): ICell | undefined {
-    let adjacentRightCell: ICell | undefined;
-    let i = 1;
-    do {
-      adjacentRightCell = this.cellByPos(cell.rowPosition, cell.columnPosition + i++);
-    } while (adjacentRightCell && (adjacentRightCell.colSpan === 0 || (onlySelectable && !adjacentRightCell.enabled)));
-
-    return adjacentRightCell;
+  adjacentTopCell(cell: ICell, onlySelectable: boolean = false): ICell | undefined {
+    return this.move(cell, -1, 0);
   }
 
   adjacentBottomCell(cell: ICell, onlySelectable: boolean = false): ICell | undefined {
-    let adjacentBottomCell: ICell | undefined;
-    let i = 1;
-    do {
-      adjacentBottomCell = this.cellByPos(cell.rowPosition + i++, cell.columnPosition);
-    } while (onlySelectable && adjacentBottomCell && (!adjacentBottomCell.row.visible || !adjacentBottomCell.enabled));
+    return this.move(cell, 1, 0);
+  }
 
-    if (adjacentBottomCell && adjacentBottomCell.colSpan === 0) {
-      adjacentBottomCell = this.adjacentLeftCell(adjacentBottomCell, onlySelectable);
-    }
-
-    return adjacentBottomCell;
+  adjacentRightCell(cell: ICell, onlySelectable: boolean = false): ICell | undefined {
+    return this.move(cell, 0, 1);
   }
 
   adjacentLeftCell(cell: ICell, onlySelectable: boolean = false): ICell | undefined {
-    let adjacentLeftCell: ICell | undefined;
-    let i = 1;
-    do {
-      adjacentLeftCell = this.cellByPos(cell.rowPosition, cell.columnPosition - i++);
-    } while (adjacentLeftCell && (adjacentLeftCell.colSpan === 0 || (onlySelectable && !adjacentLeftCell.enabled)));
-
-    return adjacentLeftCell;
+    return this.move(cell, 0, -1);
   }
 
   nextCell(cell: ICell, onlySelectable: boolean = false): ICell | undefined {
-    let nextCell = this.adjacentRightCell(cell, onlySelectable);
-    if (!nextCell) {
-      nextCell = this.cellByPos(cell.rowPosition + 1, 0);
-      if (nextCell && (nextCell.colSpan === 0 || (onlySelectable && !nextCell.enabled))) {
-        nextCell = this.adjacentRightCell(nextCell, onlySelectable);
-      }
+    let nextCell = this.move(cell, 0, 1);
+    if (nextCell === undefined) {
+      nextCell = this.move(cell, 1, -cell.columnPosition);
+      if ((nextCell === undefined) || (nextCell.row === cell.row)) return undefined;
     }
-
     return nextCell;
   }
 
   previousCell(cell: ICell, onlySelectable: boolean = false): ICell | undefined {
-    let prevCell = this.adjacentLeftCell(cell, onlySelectable);
-    if (!prevCell) {
-      let prevRow = this.rowByPos(cell.rowPosition - 1);
-      prevCell    = prevRow && this.cellByPos(prevRow.position, prevRow.cellsByColumnPosition.length - 1);
-      if (prevCell && (prevCell.colSpan === 0 || (onlySelectable && !prevCell.enabled))) {
-        prevCell = this.adjacentLeftCell(prevCell, onlySelectable);
-      }
+    let prevCell = this.move(cell, 0, -1);
+    if (prevCell === undefined) {
+      prevCell = this.move(cell, -1, this.columns.length - cell.columnPosition);
+      if ((prevCell === undefined) || (prevCell.row === cell.row)) return undefined;
     }
-
     return prevCell;
   }
 
@@ -386,7 +309,7 @@ class GridModel implements IGrid, IDisposable {
   }
 
   lastCell(onlySelectable: boolean = false): ICell | undefined {
-    let lastCell = this.cellByPos(this.dataRowsByPosition.length - 1, this.columnsByPosition.length - 1);
+    let lastCell = this.cellByPos(this.rows.length - 1, this.columns.length - 1);
     if (lastCell && (lastCell.colSpan === 0 || (onlySelectable && !lastCell.enabled))) {
       lastCell = this.previousCell(lastCell, true);
     }
@@ -404,7 +327,7 @@ class GridModel implements IGrid, IDisposable {
   }
 
   lastCellInRow(row: IRow, onlySelectable: boolean = false): ICell | undefined {
-    let lastCellInRow = this.cellByPos(row.position, this.columnsByPosition.length - 1);
+    let lastCellInRow = this.cellByPos(row.position, this.columns.length - 1);
     if (lastCellInRow && (lastCellInRow.colSpan === 0 || (onlySelectable && !lastCellInRow.enabled))) {
       lastCellInRow = this.adjacentLeftCell(lastCellInRow, true);
     }
@@ -413,174 +336,44 @@ class GridModel implements IGrid, IDisposable {
   }
 
   row(rowId: string): IRow | undefined {
-    const row = findRowById(allDataRows(this.rows), rowId);
-    if (!row) return undefined;
-    return row.row;
+    return findRowById(this.rows, rowId);
   }
 
   rowByPos(rowPosition: number): IRow | undefined {
-    if (rowPosition < 0 || rowPosition >= this.dataRowsByPosition.length) {
+    if (rowPosition < 0 || rowPosition >= this.rows.length) {
       return undefined;
     }
 
-    const row = this.dataRowsByPosition[rowPosition];
-    if (!row) return undefined;
-    return row;
+    return this.rows[rowPosition];
   }
 
   column(columnName: string): IColumn | undefined {
-    const column = findColumnByName(this.columns, columnName);
-    if (!column) return undefined;
-    return column;
+    return findColumnByName(this.columns, columnName);
   }
 
   columnByPos(columnPosition: number): IColumn | undefined {
-    const column = findColumnByPosition(this.columnsByPosition, columnPosition);
-    if (!column) return undefined;
-    return column;
-  }
-
-  adjacentRightColumn(column: IColumn): IColumn | undefined {
-    let adjacentRightColumn: IColumn | undefined;
-    let i = 1;
-    do {
-      adjacentRightColumn = this.columnByPos(column.position + i++);
-    } while (adjacentRightColumn && (adjacentRightColumn.colSpan === 0));
-
-    return adjacentRightColumn;
-  }
-
-  adjacentLeftColumn(column: IColumn): IColumn | undefined {
-    let adjacentLeftColumn: IColumn | undefined;
-    let i = 1;
-    do {
-      adjacentLeftColumn = this.columnByPos(column.position - i++);
-    } while (adjacentLeftColumn && (adjacentLeftColumn.colSpan === 0));
-
-    return adjacentLeftColumn;
-  }
-
-  revert(): void {
-    freeze(() => {
-      let originalDataRowIds = this.originalDataRowsByPosition.map(row => row.id);
-      if (this.removedRows) {
-        for (const removedRow of this.removedRows) {
-          if (!originalDataRowIds.includes(removedRow.row.id)) {
-            continue;
-          }
-          removedRow.rows.splice(removedRow.idx, 0, removedRow.row);
-          this.dataRowsByPosition.splice(removedRow.row.position, 0, removedRow.row);
-          // *** TODO get revert of group row removal (add them back) working.
-          // let parentRow = removedRow.row.parentRow;
-          // if (!parentRow) {
-          //   continue;
-          // }
-          // let grandparentRow = parentRow.parentRow;
-          // while (grandparentRow) {
-          //   if (grandparentRow.rows.find((row: IRow) => row.id === parentRow!.id)) break;
-          //   grandparentRow.rows.push(parentRow);
-          //   parentRow      = grandparentRow;
-          //   grandparentRow = grandparentRow.parentRow;
-          // }
-
-          // if (this.rows.find((row: IRow) => row.id === parentRow!.id)) continue;
-          // this.rows.push(parentRow);
-        }
-        this.removedRows.length = 0;
-      }
-
-      if (this.addedRows) {
-        // remove added rows
-        for (const addedRow of this.addedRows) {
-          if (originalDataRowIds.includes(addedRow.row.id)) {
-            continue;
-          }
-          let idx: number;
-          idx = addedRow.rows.findIndex(row => row.id === addedRow.row.id);
-          if (idx >= 0) addedRow.rows.splice(idx, 1);
-          idx = this.dataRowsByPosition.findIndex(row => row.id === addedRow.row.id);
-          if (idx >= 0) this.dataRowsByPosition.splice(idx, 1);
-          if (addedRow.row.parentRow && addedRow.rows.length <= 0) {
-            this._removeGroupRow(groupRows(this.rows), addedRow.row.parentRow.id);
-          }
-        }
-        this.addedRows.length = 0;
-      }
-    });
-      this.dataRowsByPosition.forEach(row => {
-      row._revert();
-    });
-    this.validate();
-    this.mergeColumns();
-    this.changed = this.hasChanges();
-    this.sort();
-    if (this.focusedCell) {
-      this.focusedCell.setFocus();
-    }
-  }
-
-  revertSelectedCells() {
-    if (this.selectedCells.length <= 0) return;
-
-    this.selectedCells.forEach((selectedCell: ICell) => {
-      selectedCell._revert();
-      });
-
-    let selectedColumnNames = [...new Set(this.selectedCells.map((cell: ICell) => cell.column.name))];
-    this.selectedRows.forEach((selectedRow: IRow) => {
-      selectedRow.validate(selectedColumnNames);
-      selectedRow.mergeAllColumns();
-    });
-    this.changed = this.hasChanges();
-  }
-
-  revertSelectedRows() {
-    if (this.selectedRows.length <= 0) return;
-
-    this.selectedRows.forEach((selectedRow: IRow) => {
-      selectedRow._revert();
-      selectedRow.validate();
-      selectedRow.mergeAllColumns();
-    });
-    this.changed = this.hasChanges();
+    return this.columns[columnPosition];
   }
 
   clear() {
-    this.dataRowsByPosition.forEach((row: IRow) => {
-      row.clear();
-    });
+    this.rows.set([]);
   }
 
   clearSelectedCells() {
     this.selectedCells.forEach(cell => cell.clear());
   }
 
-  _removeGroupRow(iterator: IterableIterator<IRowIteratorResult>, id: string): void {
-    const groupRow = findRowById(iterator, id);
-    if (!groupRow) return;
-    groupRow.rows.splice(groupRow.idx, 1);
-    if (groupRow.row.parentRow && groupRow.rows.length <= 0) {
-      this._removeGroupRow(groupRows(this.rows), groupRow.row.parentRow.id);
-    }
-  }
-
-  _removeRow(iterator: IterableIterator<IRowIteratorResult>, id: string): void {
-    const row = findRowById(iterator, id);
+  _removeRow(position: number): void {
+    const row = this.rows[position];
     if (!row) return;
-    row.rows.splice(row.idx, 1);
-    if (row.row.fixed) return;
-    this.removedRows.push(row);
-    // *** TODO use this code to remove group rows if they are empty, once the revert is working
-    // if (row.row.parentRow && row.rows.length <= 0) {
-    //   this._removeGroupRow(groupRows(this.rows), row.row.parentRow.id);
-    // }
-
-    // unselect the row + any cells that are a part of the removed row.
-    if (row.row.selected) {
-      let selectedRowIdx = this.selectedRows.findIndex((selectedRow: IRow) => selectedRow.id === row.row.id);
+    this.rows.splice(position, 1);
+    if (row.fixed) return;
+    if (row.selected) {
+      let selectedRowIdx = this.selectedRows.findIndex((selectedRow: IRow) => selectedRow.id === row.id);
       this.selectedRows.splice(selectedRowIdx, 1);
-      row.row.selected = false;
-      row.row.cellsByColumnPosition.forEach((cell: ICell) => {
+      row.selected = false;
+      this.columns.forEach((column: IColumn) => {
+        const cell: ICell = row.cells[column.name];
         let cellIdx = this.selectedCells.findIndex((selectedCell: ICell) => selectedCell.id === cell.id);
         if (cellIdx >= 0) {
           this.selectedCells.splice(cellIdx, 1);
@@ -590,22 +383,21 @@ class GridModel implements IGrid, IDisposable {
       this.updateCellSelectionProperties(this.selectedCells);
     }
 
-    this.dataRowsByPosition.splice(row.row.position, 1);
     this.setRowPositions();
   }
 
   removeFixedRow(id: string): void {
-    this._removeRow(fixedRows(this), id);
+    const row = findRowById(this.fixedRows, id);
+    if (row) this._removeRow(row.position);
   }
 
   removeRow(id: string): void {
-    this._removeRow(allDataRows(this.rows), id);
+    const row = findRowById(this.rows, id);
+    if (row) this._removeRow(row.position);
   }
 
   removeRows(ids: string[]): void {
-    ids.forEach(id => {
-      this.removeRow(id);
-    });
+    ids.forEach(id => { this.removeRow(id); });
   }
 
   removeSelectedRows(reselect: boolean = true): void {
@@ -614,7 +406,7 @@ class GridModel implements IGrid, IDisposable {
     let newCellToSelect: ICell | undefined;
     if (reselect) {
       let currCell    = this.focusedCell || (this.selectedCells.length > 0 && this.selectedCells[this.selectedCells.length - 1]) || undefined;
-      newCellToSelect = currCell ? currCell.findVerticallyNearestCellWithUnselectedRow() : undefined;
+      newCellToSelect = currCell ? this.findVerticallyNearestCellWithUnselectedRow(currCell) : undefined;
     }
     this.removeRows(this.selectedRows.map(row => row.id));
     if (reselect && newCellToSelect) {
@@ -649,7 +441,21 @@ class GridModel implements IGrid, IDisposable {
   }
 
   sort() {
+    if (!this._sort || this._sort.length === 0) return;
     let rowCompareFn = (r1: IRow, r2: IRow): number => {
+      if (this.groupBy && (this.groupBy.length > 0)) {
+        for (const column of this.groupBy) {
+          let compareFn = column.compare;
+          let v1 = r1.cells[column.name].value;
+          let v2 = r2.cells[column.name].value;
+          let r  = compareFn ? compareFn(v1, v2) : compare(v1, v2);
+          if (r !== 0) {
+            if (column.sort === 'ascending') return r;
+            return -1 * r;
+          }
+        }
+      }
+
       for (const column of this._sort) {
         let compareFn = column.compare;
         let v1 = r1.cells[column.name].value;
@@ -663,27 +469,9 @@ class GridModel implements IGrid, IDisposable {
       return 0;
     };
 
-    if (this.groupBy.length > 0) {
-      for (let rows of groupRows(this.rows)) {
-        rows.row.rows.sort(rowCompareFn);
-      }
-    } else {
-      this.rows.sort(rowCompareFn);
-    }
+    this.rows.sort(rowCompareFn);
 
-    // recalibrate row positions and recalculate selection flags
-    let newDataRowsByPosition: IRow[] = [];
-    let totalRowCount                 = 0;
-    for (const rows of allDataRows(this.rows)) {
-      rows.row.position = totalRowCount;
-      newDataRowsByPosition.push(rows.row);
-      totalRowCount++;
-    }
-
-    freeze(() => {
-      this.dataRowsByPosition.length = 0;
-      this.dataRowsByPosition.push(...newDataRowsByPosition);
-    });
+    this.setRowPositions();
     this.updateCellSelectionProperties(this.selectedCells);
   }
 
@@ -692,11 +480,11 @@ class GridModel implements IGrid, IDisposable {
   }
 
   mergeColumns() {
-    for (const row of fixedRows(this)) {
-      row.row.mergeAllColumns();
+    for (const row of this.fixedRows) {
+      row.mergeAllColumns();
     }
-    for (const row of allRows(this.rows)) {
-      row.row.mergeAllColumns();
+    for (const row of this.rows) {
+      row.mergeAllColumns();
     }
   }
 
@@ -712,15 +500,15 @@ class GridModel implements IGrid, IDisposable {
 
     let clipboardCellsByColumnPosition         = {};
     let clipboardCellsByColumnPositionOriginal = {};
-    let clipboardCells                         = this.clipboard;
-    clipboardCells.forEach(cell => {
-      let cellColPos = cell.columnPosition;
+    let clipboardValues                        = this.clipboard;
+    clipboardValues.forEach(value => {
+      let cellColPos = value.columnPosition;
       if (!clipboardCellsByColumnPosition[cellColPos]) {
-        clipboardCellsByColumnPosition[cellColPos]         = [cell];
-        clipboardCellsByColumnPositionOriginal[cellColPos] = [cell];
+        clipboardCellsByColumnPosition[cellColPos]         = [value];
+        clipboardCellsByColumnPositionOriginal[cellColPos] = [value];
       } else {
-        clipboardCellsByColumnPosition[cellColPos].push(cell);
-        clipboardCellsByColumnPositionOriginal[cellColPos].push(cell);
+        clipboardCellsByColumnPosition[cellColPos].push(value);
+        clipboardCellsByColumnPositionOriginal[cellColPos].push(value);
       }
     });
 
@@ -732,19 +520,13 @@ class GridModel implements IGrid, IDisposable {
         return;
       }
 
-      let clipboardCell = clipboardCellsForColumn.shift();
-      selectedCell.setValue(cloneValue(clipboardCell.value));
+      let clipboardValue = clipboardCellsForColumn.shift();
+      selectedCell.value = clipboardValue.value;
       rows.add(selectedCell.row);
 
 
       if (clipboardCellsForColumn.length <= 0) {
         clipboardCellsByColumnPosition[selectedCell.columnPosition] = clipboardCellsByColumnPositionOriginal[selectedCell.columnPosition].slice();
-      }
-    });
-
-    freeze(() => {
-      for (const r of rows) {
-        (r as RowModel).recomputeHeight();
       }
     });
   }
@@ -755,10 +537,6 @@ class GridModel implements IGrid, IDisposable {
 
   get standardColumns() {
     return this._standardColumns();
-  }
-
-  get columnsByPosition() {
-    return this._columnsByPosition();
   }
 
   _groups: IColumn[] = [];
@@ -779,29 +557,11 @@ class GridModel implements IGrid, IDisposable {
 
   addColumn(column: IColumn): IColumn {
     column.grid     = this;
-    column.position = this.columnsByPosition.length;
+    column.position = this.columns.length;
+    const c: ColumnModel = (column as ColumnModel);
+    if (c.__validators) this.__validator.addRule(column.name, c.__validators);
     this.columns.push(column);
     return column;
-  }
-
-  addRow(data?: IRowData, position?: number): IRow {
-    let newRow = this._addRow(data, position);
-
-    this.setRowPositions();
-
-    const addedRow = findRowById(allDataRows(this.rows), newRow.id);
-    if (addedRow) {
-      this.addedRows.push(addedRow);
-    }
-
-    return newRow;
-  }
-
-  _addRow(data?: IRowData, position?: number): IRow {
-    if (data && data.options && data.options.fixed) {
-      return this.addFixedRow(data, position);
-    }
-    return createRow(this, this.rows, data, position);
   }
 
   addFixedRow(data?: IRowData, position?: number): IRow {
@@ -821,15 +581,23 @@ class GridModel implements IGrid, IDisposable {
   }
 
   addRows(data: (IRowData | undefined)[], position?: number): IRow[] {
-    let addedRows = this._addRows(data, position);
-    for (const addedRow of addedRows) {
-      const row = findRowById(allDataRows(this.rows), addedRow.id);
-      if (row) {
-        this.addedRows.push(row);
-      }
-    }
+    return this._addRows(data, position);
+  }
 
-    return addedRows;
+  addRow(data?: IRowData, position?: number): IRow {
+    const row = this._addRow(data, position);
+    freeze(() => {
+      this.sort();
+      this.setRowPositions();
+    });
+    return row;
+  }
+
+  _addRow(data?: IRowData, position?: number): IRow {
+    if (data && data.options && data.options.fixed) {
+      return this.addFixedRow(data, position);
+    }
+    return createRow(this, this.rows, data, position);
   }
 
   _addRows(data: (IRowData | undefined)[], position?: number): IRow[] {
@@ -842,32 +610,37 @@ class GridModel implements IGrid, IDisposable {
       }
     }
 
-    this.setRowPositions();
-
+    freeze(() => {
+      this.sort();
+      this.setRowPositions();
+    });
     return addedRows;
   }
 
-  _duplicateRow(iterator: IterableIterator<IRowIteratorResult>, id: string, position?: number): IRow | undefined {
-    const row = findRowById(iterator, id);
-    if (!row) return;
-    let newRow = row.row.clone();
-    let rowCellDataMap: ICellDataMap = {};
-    Object.keys(newRow.cells).forEach(columnName => {
-      rowCellDataMap[columnName] = newRow.cells[columnName].value;
-    });
-    let options: IRowOptions = {
-      cls: newRow.cls,
-      visible: newRow.visible,
-      fixed: newRow.fixed,
-      allowMergeColumns: newRow.allowMergeColumns,
-    };
+  findVerticallyNearestCellWithUnselectedRow(cell: ICell): ICell | undefined {
+    let newCellToSelect: ICell | undefined = cell;
+    let currCell:        ICell | undefined = cell;
+    do {
+      currCell        = newCellToSelect;
+      newCellToSelect = this.adjacentBottomCell(currCell, true);
+    } while (newCellToSelect && newCellToSelect.row.selected);
+    if (!newCellToSelect) {
+      currCell        = cell;
+      newCellToSelect = cell;
+      do {
+        currCell        = newCellToSelect;
+        newCellToSelect = this.adjacentTopCell(currCell, true);
+      } while (newCellToSelect && newCellToSelect.row.selected);
+    }
 
-    let data: IRowData = {data: rowCellDataMap, options: options};
-    return this.addRow(data, position);
+    return newCellToSelect;
   }
 
-  duplicateRow(id: string, position?: number): IRow | undefined {
-    return this._duplicateRow(allDataRows(this.rows), id, position);
+  duplicateRow(rowId: string, position?: number): IRow | undefined {
+    const row = findRowById(this.rows, rowId);
+    if (!row) return;
+    const rowData: IRowData = {id: String(id++), data: Object.assign({}, row.data), options: row.options};
+    return this.addRow(rowData, position);
   }
 
   duplicateRows(ids: string[], position?: number): IRow[] {
@@ -896,7 +669,7 @@ class GridModel implements IGrid, IDisposable {
     let rowToInsertId      = data && data.id;
     let rowToInsertData    = data && data.data || {};
     let rowToInsertOptions = data && data.options;
-    let insertPosition     = this.dataRowsByPosition.length;
+    let insertPosition     = this.rows.length;
     if (this.selectedRows.length > 0) {
     this.groupBy.forEach((column: IColumn) => {
         if (isNullOrUndefined(rowToInsertData[column.name])) {
@@ -910,41 +683,19 @@ class GridModel implements IGrid, IDisposable {
   }
 
   setRowPositions() {
-    let totalRowCount = 0;
-    for (const rows of allDataRows(this.rows)) {
-      rows.row.position = totalRowCount;
-      totalRowCount++;
+    for (let rowIdx = 0; rowIdx < this.rows.length; rowIdx++) {
+      this.rows[rowIdx].position = rowIdx;
     }
   }
 
   setColumnPositions() {
-    let totalColumnCount = 0;
-    for (const column of this.columns) {
-      if (column.visible) {
-        column.position = totalColumnCount;
-        totalColumnCount++;
-      } else {
-        column.position = -1;
-      }
+    for (let colIdx = 0; colIdx < this.columns.length; colIdx++) {
+      this.columns[colIdx].position = colIdx;
     }
-  }
-
-  hasChanges(): boolean {
-    let dataRowsIds         = this.dataRowsByPosition.map(row => row.id);
-    let originalDataRowsIds = this.originalDataRowsByPosition.map(row => row.id);
-    if (!dataRowsIds.every(rowId => originalDataRowsIds.includes(rowId)) || !originalDataRowsIds.every(rowId => dataRowsIds.includes(rowId))) {
-      return true;
-    }
-
-    for (const row of this.dataRowsByPosition) {
-      if (!row) continue;
-      if (row.hasChanges()) return true;
-    }
-    return false;
   }
 
   hasErrors(): boolean {
-    for (const row of this.dataRowsByPosition) {
+    for (const row of this.rows) {
       if (!row) continue;
       if (row.hasErrors()) return true;
     }
@@ -954,7 +705,7 @@ class GridModel implements IGrid, IDisposable {
   getErrors(): IErrorData[] {
     let errors: IErrorData[] = [];
 
-    for (const row of this.dataRowsByPosition) {
+    for (const row of this.rows) {
       if (!row) continue;
       errors.concat(row.getErrors());
     }
@@ -962,7 +713,7 @@ class GridModel implements IGrid, IDisposable {
   }
 
   validate(): void {
-    for (const row of this.dataRowsByPosition) {
+    for (const row of this.rows) {
       if (!row) continue;
       row.validate();
     }
@@ -1111,11 +862,7 @@ class GridModel implements IGrid, IDisposable {
 
     this.updateCellSelectionProperties(cellsToSelect);
     this.selectRows([...new Set(rowsToSelect)]);
-    freeze(() => {
-      this.selectedCells.length = 0;
-      this.selectedCells.push(...cellsToSelect);
-    });
-
+    this.selectedCells.set(...cellsToSelect);
     if (this.selectedCells.length <= 0) {
       this.focusedCell && this.focusedCell.setFocus(false);
       return;
@@ -1135,7 +882,7 @@ class GridModel implements IGrid, IDisposable {
   updateCellSelectionProperties(cellsToSelect: ICell[]) {
     cellsToSelect.forEach(cell => {
       let adjacentTopCell = this.adjacentTopCell(cell);
-      let sameGroupTop    = !!adjacentTopCell && (adjacentTopCell.row.parentRow && adjacentTopCell.row.parentRow.id) === (cell.row.parentRow && cell.row.parentRow.id);
+      let sameGroupTop    = !!adjacentTopCell && true; // (adjacentTopCell.row.parentRow && adjacentTopCell.row.parentRow.id) === (cell.row.parentRow && cell.row.parentRow.id);
       if (!adjacentTopCell || !sameGroupTop || !adjacentTopCell.selected) {
         cell.isTopMostSelection = true;
       } else {
@@ -1150,7 +897,7 @@ class GridModel implements IGrid, IDisposable {
       }
 
       let adjacentBottomCell = this.adjacentBottomCell(cell);
-      let sameGroupBottom    = !!adjacentBottomCell && (adjacentBottomCell.row.parentRow && adjacentBottomCell.row.parentRow.id) === (cell.row.parentRow && cell.row.parentRow.id);
+      let sameGroupBottom    = !!adjacentBottomCell && true; // (adjacentBottomCell.row.parentRow && adjacentBottomCell.row.parentRow.id) === (cell.row.parentRow && cell.row.parentRow.id);
       if (!adjacentBottomCell || !sameGroupBottom || !adjacentBottomCell.selected) {
         cell.isBottomMostSelection = true;
       } else {
@@ -1227,14 +974,14 @@ class GridModel implements IGrid, IDisposable {
     //   cellsToSelect = [...new Set(cellsToSelect.concat(this.selectedCells))];
     // }
 
-    cellsToSelect.sort(CellModel.positionCompare);
+    // cellsToSelect.sort(CellModel.positionCompare);
     this.selectCells(cellsToSelect, cell, false, append);
   }
 
   private selectCellsToMergeHelper(rows: IRow[], columnsToSelect: IColumn[]): IColumn[] {
     rows.forEach((row, idx) => {
       let colToSelectCount = columnsToSelect.length;
-      let rowCells         = row.cellsByColumnPosition;
+      let rowCells         = columnsToSelect.map(column => row.cells[column.name]);
       rowCells.forEach(rowCell => {
         if (rowCell.colSpan === 1 || !columnsToSelect.some(col => col.id === rowCell.column.id)) {
           return;
@@ -1286,20 +1033,12 @@ class GridModel implements IGrid, IDisposable {
   static create(rows: any[], columns: IColumn[], options?: IGridOptions): IGrid {
     return root((dispose: any) => {
       let grid     = observable(new GridModel());
-      grid.loading = true;
       grid.initialize(dispose, options);
+      grid.loading = true;
       freeze(() => {
-        let fixedColumns: IColumn[]    = [];
-        let standardColumns: IColumn[] = [];
         for (const column of columns) {
-          if (column.fixed) {
-            fixedColumns.push(column);
-          } else {
-            standardColumns.push(column);
-          }
+          grid.addColumn(column);
         }
-        fixedColumns.forEach((column: IColumn) => grid.addColumn(column));
-        standardColumns.forEach((column: IColumn) => grid.addColumn(column));
       });
       freeze(() => {
         let headerRow = columns.reduce((previous: any, current: any) => (previous[current.name] = current.title, previous), {});
@@ -1323,7 +1062,6 @@ class GridModel implements IGrid, IDisposable {
       // mergeRows(grid.rows, grid.standardColumns);
       grid.validate();
       grid.mergeColumns();
-      grid._commit();
       return grid;
     });
   }
@@ -1334,8 +1072,8 @@ export function mergeRows(rows: IRow[], columns: IColumn[], mergeEmpty: boolean 
     let previousValue: any;
     let previousCell: ICell | undefined;
     let rowSpan = 1;
-    for (const r of allDataRows(rows)) {
-      let cell = r.row.cells[column.name];
+    for (const r of rows) {
+      let cell = r.cells[column.name];
       if (previousCell && cell && (previousValue === cell.value || (!cell.value && mergeEmpty))) {
         previousCell.rowSpan = ++rowSpan;
         cell.rowSpan = 0;

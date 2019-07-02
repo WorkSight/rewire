@@ -2,8 +2,7 @@ import {
   IGrid,
   IRow,
   IColumn,
-  ICell,
-  ErrorSeverity,
+  ICell
 }                                 from '../models/GridTypes';
 import * as React                 from 'react';
 import * as is                    from 'is';
@@ -11,13 +10,18 @@ import cc                         from 'classcat';
 import classNames                 from 'classnames';
 import {isNullOrUndefinedOrEmpty} from 'rewire-common';
 import {Observe}                  from 'rewire-core';
-import {withStyles, WithStyle}    from 'rewire-ui';
+import {
+  withStyles,
+  WithStyle,
+  ErrorSeverity
+}                                 from 'rewire-ui';
 import {Theme}                    from '@material-ui/core/styles';
 import ErrorIcon                  from '@material-ui/icons/Error';
 import WarningIcon                from '@material-ui/icons/Warning';
 import InfoIcon                   from '@material-ui/icons/Info';
 import Tooltip                    from '@material-ui/core/Tooltip';
 import Fade                       from '@material-ui/core/Fade';
+import { CellModel }              from '../models/CellModel';
 
 const styles = (theme: Theme) => ({
   tableCell: {
@@ -270,7 +274,7 @@ class Cell extends React.PureComponent<CellProps, {}> {
     if (this.cell.error && !this.cell.editing) {
       return (
         <Tooltip
-          title={this.cell.error.messageText}
+          title={this.cell.error.text}
           placement='right-start'
           TransitionComponent={Fade}
           PopperProps={{ style: {pointerEvents: 'none'} }}
@@ -298,7 +302,7 @@ class Cell extends React.PureComponent<CellProps, {}> {
   onValueChange = (v: any) => {
     let value = isNullOrUndefinedOrEmpty(v) ? undefined : v;
     this.cell.keyForEdit = undefined;
-    this.cell.setValue(value);
+    this.cell.value      = value;
     if (this.column.type === 'multiselect' || this.column.type === 'multiselectautocomplete') {
       return;
     }
@@ -319,9 +323,9 @@ class Cell extends React.PureComponent<CellProps, {}> {
   }
 
   setCellRef = (element: HTMLTableDataCellElement) => {
-    if (element && element !== this.cell.element) {
+    if (element && element !== (this.cell as CellModel).element) {
       // this.cell.element = (element as HTMLTableDataCellElement);
-      this.cell.setElement(element as HTMLTableDataCellElement);
+      (this.cell as CellModel).setElement(element as HTMLTableDataCellElement);
     }
   }
 
@@ -430,9 +434,8 @@ class Cell extends React.PureComponent<CellProps, {}> {
         tdClasses                 = classNames(tdClasses, classes.tableCellEditing);
       }
 
-      let colSpan = cell.colSpan;
-      let rowSpan = cell.rowSpan;
-
+      let colSpan   = cell.colSpan;
+      let rowSpan   = cell.rowSpan;
       let innerCell =
         <div className={classNames(classes.cellContainer, 'cellContainer')}>
           <div className={cellInnerContainerClasses}>
