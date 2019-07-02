@@ -42,7 +42,7 @@ import {
 }                  from 'rewire-ui';
 
 class GridChangeTrackerContext implements IChangeTrackerContext {
-  constructor(private _grid: GridModel, public isComplete: (value: any) => boolean = (() => true)) {}
+  constructor(private _grid: GridModel, public isComplete: (value: any) => boolean) {}
 
   get length(): number {
     return this._grid.rows.length;
@@ -100,6 +100,7 @@ class GridModel implements IGrid, IDisposable {
   hasChanges                : boolean;
   __validator               : Validator;
   __changeTracker?          : ChangeTracker;
+  __isRowCompleteFn         : (row: IRowData) => boolean;
   inError                   : boolean;
 
   private _dispose: () => void;
@@ -129,6 +130,7 @@ class GridModel implements IGrid, IDisposable {
     this.allowMergeColumns          = options && !isNullOrUndefined(options.allowMergeColumns) ? options.allowMergeColumns! : false;
     this.clearSelectionOnBlur       = options && !isNullOrUndefined(options.clearSelectionOnBlur) ? options.clearSelectionOnBlur! : true;
     this.toggleableColumnsOptions   = options && options.toggleableColumnsOptions;
+    this.isRowCompleteFn            = () => true;
     this.clipboard                  = [];
     this.isMouseDown                = false;
     this.startCell                  = undefined;
@@ -181,7 +183,7 @@ class GridModel implements IGrid, IDisposable {
   setChangeTracking(enable: boolean) {
     if (enable) {
       if (this.__changeTracker) return;
-      this.__changeTracker = new ChangeTracker(new GridChangeTrackerContext(this));
+      this.__changeTracker = new ChangeTracker(new GridChangeTrackerContext(this, this.isRowCompleteFn));
       this.__changeTracker.set(this.rows);
       return;
     }
@@ -194,8 +196,13 @@ class GridModel implements IGrid, IDisposable {
     return this.__changeTracker;
   }
 
-  setIsRowCompleteFn(fn: (row: IRowData) => boolean): void {
-    if (this.__changeTracker) this.__changeTracker.setIsCompleteRowFn(fn);
+  get isRowCompleteFn() {
+    return this.__isRowCompleteFn;
+  }
+
+  set isRowCompleteFn(value: (row: IRowData) => boolean) {
+    this.__isRowCompleteFn = value || (() => true);
+    if (this.__changeTracker) this.__changeTracker.setIsCompleteRowFn(this.__isRowCompleteFn);
   }
 
   revert(): void {

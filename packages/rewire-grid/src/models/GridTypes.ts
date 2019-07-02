@@ -94,11 +94,12 @@ export interface IGrid extends IRows, IDisposable {
   rowKeybindPermissions     : IGridRowKeybindPermissions;
   staticKeybinds            : IGridStaticKeybinds;
   variableKeybinds          : IGridVariableKeybinds;
+  isRowCompleteFn           : (row: IRowData) => boolean;
   readonly validator        : Validator;
   readonly hasChanges       : boolean;
   readonly isChangeTracking : boolean;
+
   setChangeTracking(enable: boolean): void;
-  setIsRowCompleteFn(fn: (row: IRowData) => boolean): void;
   revert(): void;
   commit(): void;
   hasErrors(): boolean;
