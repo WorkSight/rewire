@@ -1,5 +1,6 @@
 #!/bin/bash
-modules=("rewire-common" "rewire-core" "rewire-ui" "rewire-grid" "rewire-graphql");
+modules=("rewire-grid");
+# modules=("rewire-common" "rewire-core" "rewire-ui" "rewire-grid" "rewire-graphql");
 
 while getopts ":cp" arg "$@"; do
   case $arg in
@@ -55,9 +56,11 @@ do
   cp -r src/* dist/src
   jq ".main |= \"src/index.js\" | del(.alias)" package.json > dist/package.json
   cp ../../tsconfig-build.json dist/tsconfig.json
+  cp ../../tslint.json dist/tslint.json
   cd dist
   tsc
   rm tsconfig.json
+  rm tslint.json
 
   if [ ! -z $PUBLISH ];
   then

@@ -92,20 +92,20 @@ export enum ErrorSeverity {
   Critical
 }
 type IErrorText = string | ((...values: any[]) => string);
-export interface IError     {text: string, severity: ErrorSeverity};
-export interface IErrorDefn {text: string | IErrorText, severity: ErrorSeverity};
+export interface IError     { text: string; severity: ErrorSeverity; }
+export interface IErrorDefn { text: string | IErrorText; severity: ErrorSeverity; }
 export interface IValidator {
   fn     : IValidationFn;
   error? : IErrorDefn;
   args?  : any[];
 }
 
-export type SingleParameterBuiltInValidator = 'required' | 'email' | 'empty'
+export type SingleParameterBuiltInValidator = 'required' | 'email' | 'empty';
 export type BuiltInValidators = SingleParameterBuiltInValidator |  '<' | '>' | '<=' | '>=' | '==' | '!=' | 'regex' | 'sumOf';
 export type IFormValidator = (IValidator | SingleParameterBuiltInValidator | IValidationFn) | (IValidator | SingleParameterBuiltInValidator | IValidationFn)[];
 
 export function validators(v: IFormValidator) {
-  if (!Array.isArray(v)) v = [v]
+  if (!Array.isArray(v)) v = [v];
   return v.map((v: any) => {
     if (v.fn) return v as IValidator;
     return validator(v);
@@ -123,7 +123,7 @@ export function template(strings: any, ...keys: any[]) {
       let value;
       if (key === 'all') {
         if (!all) {
-          const [_, ...rest] = values;
+          const [, ...rest] = values;
           all = rest.join(',');
         }
         value = all;
@@ -154,7 +154,7 @@ export const field = (field: string) => ({field});
 export const error = (text: string, severity?: ErrorSeverity) => ({text, severity: severity || ErrorSeverity.Error});
 
 export function validator(fn: IValidationFn | BuiltInValidators, ...args: any[]): IValidator {
-  const validation: IValidator = (typeof fn == 'string') ? Object.assign({}, __builtInValidators[fn]) : {fn};
+  const validation: IValidator = (typeof fn === 'string') ? Object.assign({}, __builtInValidators[fn]) : {fn};
   if (!validation) throw new Error('invalid validation function or fn is not a built in validator');
   validation.args = [];
   for (const paramOrError of args) {
@@ -172,7 +172,7 @@ export interface IValidationContext {
   setError(field: string, error?: IError): void;
 }
 
-export enum eValidationResult {Success = 0, Error = 1};
+export enum eValidationResult {Success = 0, Error = 1}
 
 export default class Validator {
   private rules: {[index: string]: IValidator[]} = {};
@@ -234,7 +234,7 @@ export default class Validator {
   private _validateField(context: IValidationContext, field: string, setErrors: boolean): eValidationResult {
     const validators = this.rules[field];
     if (validators) {
-      for(const validator of validators) {
+      for (const validator of validators) {
         if (this.isValid(context, field, validator, setErrors) === eValidationResult.Error) {
           return eValidationResult.Error;
         }
