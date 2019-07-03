@@ -9,7 +9,6 @@ import { utc, UTC, TimeSpan, isNullOrUndefined } from 'rewire-common';
 import { Observe, observable }                   from 'rewire-core';
 import {
   ActionFn,
-  TransitionWrapper,
   WithStyle,
   withStyles,
   ActionMenu,
@@ -17,22 +16,21 @@ import {
   ToggleMenu,
   IToggleMenuItem,
   ISuggestionsContainerComponentProps,
+  validator,
+  field,
+  ErrorSeverity,
+  IError,
+  error,
 } from 'rewire-ui';
 import {
   createGrid,
   createColumn,
-  IError,
-  ErrorSeverity,
   Grid,
   IRowData,
   ICell,
   IRow,
-  isGreaterThan        as gridIsGreaterThan,
-  isRequired           as gridIsRequired,
-  isSumOfOthers        as gridIsSumOfOthers,
-  isDifferenceOfOthers as gridIsDifferenceOfOthers,
   IToggleableColumnsOptions,
-  IColumn,
+  IColumn
 }                            from 'rewire-grid';
 import {PopoverOrigin}       from '@material-ui/core/Popover';
 import Paper                 from '@material-ui/core/Paper';
@@ -42,6 +40,7 @@ import DeleteIcon            from '@material-ui/icons/DeleteOutlined';
 import ArchiveIcon           from '@material-ui/icons/ArchiveOutlined';
 import UnarchiveIcon         from '@material-ui/icons/UnarchiveOutlined';
 import { uploadFile }        from './graphqltest';
+import { watch, root } from 'rewire-core/dist/src';
 
 interface IDocument {
   id:    string;
@@ -146,74 +145,63 @@ function createTestGrid(nRows: number, nColumns: number) {
       cell.row.cells.differenceColumn.value = undefined;
       return;
     }
-    cell.value = utc().startOfDay().add(value, TimeSpan.hours);
+    // if (!(value instanceof UTC)) {
+      cell.value = utc().startOfDay().add(value, TimeSpan.hours);
+    //   return;
+    // }
     const diff = cell.row.cells.timeInColumn.value.subtract(cell.row.cells.timeOutColumn.value, TimeSpan.hours, 2);
     cell.row.cells.differenceColumn.value = diff;
   };
 
+  const customNumberValidator = (value: any): IError | undefined => {
+    if (isNullOrUndefined(value)) {
+      return undefined;
+    }
+
+    let error: IError | undefined;
+    let errorMsg: string = '';
+    let errorSeverity: ErrorSeverity = ErrorSeverity.Error;
+    if (value < 2000) {
+      errorMsg = 'Less than 2000';
+      errorSeverity = ErrorSeverity.Warning;
+    } else if (value > 7000) {
+      errorMsg = 'Greater than 7000';
+      errorSeverity = ErrorSeverity.Critical;
+    } else if (value > 4000) {
+      errorMsg = 'Greater than 4000';
+      errorSeverity = ErrorSeverity.Error;
+    } else if (value >= 2000 && value <= 4000) {
+      errorMsg = 'Between 2000 and 4000';
+      errorSeverity = ErrorSeverity.Info;
+    }
+    error = errorMsg ? { text: errorMsg, severity: errorSeverity } : undefined;
+    return error;
+  };
+
   cols.push(createColumn('maskColumn',              'Mask',                { type: { type: 'mask', options: { mask: ['(', /[1-9]/, /\d/, /\d/, ')', ' ', /\d/, /\d/, /\d/, '-', /\d/, /\d/, /\d/, /\d/] } }, width: Math.trunc(Math.random() * 250 + 50) + 'px' }));
   cols.push(createColumn('phoneColumn',             'Phone',               { type: { type: 'phone' }, width: Math.trunc(Math.random() * 250 + 50) + 'px' }));
-  cols.push(createColumn('numberColumn',            'Number',              { type: { type: 'number', options: { decimals: 2, fixed: true, thousandSeparator: false } }, validator: gridIsRequired, width: Math.trunc(Math.random() * 250 + 50) + 'px' }));
+  cols.push(createColumn('numberColumn',            'Number',              { type: { type: 'number', options: { decimals: 2, fixed: true, thousandSeparator: false } }, validators: ['required', customNumberValidator], width: Math.trunc(Math.random() * 250 + 50) + 'px' }));
   cols.push(createColumn('dateColumn',              'Date',                { type: 'date', width: Math.trunc(Math.random() * 250 + 50) + 'px' }));
   cols.push(createColumn('timeOutColumn',           'Time Out',            { type: { type: 'time', options: { disableErrors: false, map: formatTime } }, readOnly: true, onValueChange: timeOnValueChange, width: Math.trunc(Math.random() * 250 + 50) + 'px' }));
-  cols.push(createColumn('timeInColumn',            'Time In',             { type: { type: 'time', options: { disableErrors: false, map: formatTime } }, validator: gridIsGreaterThan('timeOutColumn'), onValueChange: timeOnValueChange, width: Math.trunc(Math.random() * 250 + 50) + 'px' }));
-  cols.push(createColumn('differenceColumn',        'Time Difference',     { type: { type: 'number', options: { decimals: 2 } }, validator: gridIsDifferenceOfOthers(['timeInColumn', 'timeOutColumn']), width: Math.trunc(Math.random() * 250 + 50) + 'px' }));
-  cols.push(createColumn('sumColumn',               'Time Sum',            { type: { type: 'number', options: { decimals: 2 } }, validator: gridIsSumOfOthers(['timeInColumn', 'timeOutColumn']), width: Math.trunc(Math.random() * 250 + 50) + 'px' }));
+  cols.push(createColumn('timeInColumn',            'Time In',             { type: { type: 'time', options: { disableErrors: false, map: formatTime } }, validators: validator('>', field('timeOutColumn')), onValueChange: timeOnValueChange, width: Math.trunc(Math.random() * 250 + 50) + 'px' }));
+  cols.push(createColumn('differenceColumn',        'Time Difference',     { type: { type: 'number', options: { decimals: 2 } }, validators: validator('differenceOf', field('timeInColumn'), field('timeOutColumn')), width: Math.trunc(Math.random() * 250 + 50) + 'px' }));
+  cols.push(createColumn('sumColumn',               'Time Sum',            { type: { type: 'number', options: { decimals: 2 } }, validators: validator('sumOf', field('timeOutColumn'), field('timeInColumn')), width: Math.trunc(Math.random() * 250 + 50) + 'px' }));
   cols.push(createColumn('autoCompleteColumn',      'Auto Complete',       { type: { type: 'auto-complete', options: countries }, width: Math.trunc(Math.random() * 250 + 50) + 'px' }));
   cols.push(createColumn('multiAutoCompleteColumn', 'Multi Auto Complete', { type: { type: 'multiselectautocomplete', options: countries}, width: '250px'}));
   cols.push(createColumn('selectColumn',            'Select',              { type: { type: 'select', options: countries }, width: Math.trunc(Math.random() * 250 + 50) + 'px' }));
   cols.push(createColumn('multiselectColumn',       'MultiSelect',         { type: { type: 'multiselect', options: countries }, width: Math.trunc(Math.random() * 250 + 50) + 'px' }));
   cols.push(createColumn('checkedColumn',           'Checked',             { type: 'checked', width: Math.trunc(Math.random() * 250 + 50) + 'px' }));
 
-  let complexColumnValidator = {
-    linkedColumnNames: [],
-    fn: (row: IRow, value: any): IError | undefined => {
-      if (isNullOrUndefined(value)) {
-        return undefined;
-      }
-
-      let error: IError | undefined;
-      let errorMsg: string = '';
-      let errorSeverity: ErrorSeverity = ErrorSeverity.Error;
-      if (value.name === 'Homer') {
-        errorMsg = 'No Homers allowed!';
-        errorSeverity = ErrorSeverity.Critical;
-      }
-      error = errorMsg ? { messageText: errorMsg, severity: errorSeverity } : undefined;
-      return error;
+  let complexColumnValidator = (value: any): IError | undefined => {
+    if (isNullOrUndefined(value)) {
+      return undefined;
     }
+    return (value.name === 'Homer') ? error('no homers allowed', ErrorSeverity.Critical) : undefined;
   };
 
-  cols.push(createColumn('complexColumn', 'Complex', { type: 'none', renderer: ComplexCell, compare: ComplexCellData.compare, validator: complexColumnValidator, width: Math.trunc(Math.random() * 250 + 50) + 'px' }));
+  cols.push(createColumn('complexColumn', 'Complex', { type: 'none', renderer: ComplexCell, compare: ComplexCellData.compare, validators: complexColumnValidator, width: Math.trunc(Math.random() * 250 + 50) + 'px' }));
   // Override and set some columns to be number!
   cols[5].setEditor({ type: 'number', options: { decimals: 2, thousandSeparator: true } });
-  cols[5].validator  = {
-    linkedColumnNames: [],
-    fn: (row: IRow, value: any): IError | undefined => {
-      if (isNullOrUndefined(value)) {
-        return undefined;
-      }
-
-      let error: IError | undefined;
-      let errorMsg: string = '';
-      let errorSeverity: ErrorSeverity = ErrorSeverity.Error;
-      if (value < 2000) {
-        errorMsg = 'Less than 2000';
-        errorSeverity = ErrorSeverity.Warning;
-      } else if (value > 7000) {
-        errorMsg = 'Greater than 7000';
-        errorSeverity = ErrorSeverity.Critical;
-      } else if (value > 4000) {
-        errorMsg = 'Greater than 4000';
-        errorSeverity = ErrorSeverity.Error;
-      } else if (value >= 2000 && value <= 4000) {
-        errorMsg = 'Between 2000 and 4000';
-        errorSeverity = ErrorSeverity.Info;
-      }
-      error = errorMsg ? { messageText: errorMsg, severity: errorSeverity } : undefined;
-      return error;
-    }
-  };
   cols[6].setEditor({ type: 'number', options: { decimals: 3, thousandSeparator: true } });
 
   const timeIn:  UTC = utc().startOfDay().add(7.5, TimeSpan.hours);
@@ -296,9 +284,10 @@ newRow.data['column2']    = 'RC 2-3';
 newRow.data['column3']    = 'RC 3-3';
 newRow.data['timeColumn'] = '8:11';
 grid.addRow(newRow);
-grid.cellByPos(0, 0)!.setValue('ooga booga boa');
+grid.cellByPos(0, 0)!.value = 'ooga booga boa';
 // grid.dataRowsByPosition.forEach(row => row.cellsByColumnPosition.forEach(cell => cell.row = row));
-grid.commit();
+// grid.headerRowHeight      = 28;
+// grid.commit();
 // const r                          = grid.get();
 // console.log(r);
 // setTimeout(() => grid.rows.length = 0, 4000);
@@ -459,6 +448,12 @@ const yesAction: ActionFn = () => {
 
 const yesNoModel        = new YesNoModel({ title: 'Confirmation Required', action: yesAction });
 const confirmationModel = new ConfirmationModel({ title: 'Secondary Confirmation', yesAction: confirmationYesAction, noAction: confirmationNoAction});
+grid.setChangeTracking(true);
+console.log('grid has changes =', grid.hasChanges);
+root(() => {
+  watch(() => grid.hasChanges, () => console.log(`grid has changes ${grid.hasChanges}`));
+});
+
 
 const HomeActionMenu = (props: any) => {
   const buttonContent               = <span>Action Menu</span>;
@@ -563,13 +558,19 @@ const styles = () => ({
 });
 
 type HomeViewProps = WithStyle<ReturnType<typeof styles>>;
+function setValue(row: IRow, obj: any) {
+  for (const [key, value] of Object.entries(obj)) {
+    const cell = row.cells[key];
+    if (cell) cell.value = value;
+  }
+}
 
 export const HomeView = withStyles(styles, (props: HomeViewProps) => {
   const {classes} = props;
 
   return (
     <Observe render={() => (
-      <TransitionWrapper>
+      // <TransitionWrapper>
       <div>
         <div className={classes.dialogButtonsContainer}>
         <Button className={classes.openDialogButton} color='primary' variant='contained' onClick={() => sampleModel.open()}>Load Dialog Test</Button>
@@ -614,36 +615,35 @@ export const HomeView = withStyles(styles, (props: HomeViewProps) => {
             }}>
               Add Row
             </Button>
-            <Button className={classes.gridActionButton} variant='contained' onClick={() => grid.removeRow(grid.dataRowsByPosition[grid.dataRowsByPosition.length - 1].id)}>Remove Row</Button>
-            <Button className={classes.gridActionButton} variant='contained' onClick={() => grid.dataRowsByPosition.forEach(row => row.cells['numberColumn'].setValue(1337))}>Change Number Cell Value</Button>
-            <Button className={classes.gridActionButton} variant='contained' onClick={() => grid.dataRowsByPosition.forEach(row => row.setValue({'numberColumn': 2222, 'dateColumn': '1985-11-26'}))}>Change Number And Date Cells</Button>
-            <Button className={classes.gridActionButton} variant='contained' onClick={() => grid.dataRowsByPosition.forEach(row => row.clear(['numberColumn', 'dateColumn']))}>Clear Number And Date</Button>
-            <Button className={classes.gridActionButton} variant='contained' onClick={() => grid.dataRowsByPosition.forEach(row => row.cells['complexColumn'].setValue(new ComplexCellData('smithers027', 'Smithers', 57)))}>
+            <Button className={classes.gridActionButton} variant='contained' onClick={() => grid.removeRow(grid.rows[grid.rows.length - 1].id)}>Remove Row</Button>
+            <Button className={classes.gridActionButton} variant='contained' onClick={() => grid.rows.forEach(row => row.cells['numberColumn'].value = 1337)}>Change Number Cell Value</Button>
+            <Button className={classes.gridActionButton} variant='contained' onClick={() => grid.rows.forEach(row => setValue(row, {'numberColumn': 2222, 'dateColumn': '1985-11-26'}))}>Change Number And Date Cells</Button>
+            <Button className={classes.gridActionButton} variant='contained' onClick={() => grid.rows.forEach(row => row.clear(['numberColumn', 'dateColumn']))}>Clear Number And Date</Button>
+            <Button className={classes.gridActionButton} variant='contained' onClick={() => grid.rows.forEach(row => row.cells['complexColumn'].value = new ComplexCellData('smithers027', 'Smithers', 57))}>
               Change Complex Cell Value
             </Button>
           </div>
           <div className={classes.gridActionButtonsContainer}>
             <Observe render={() => (<Button className={classes.gridActionButton} variant='contained' onClick={() => { grid.column('column1')!.visible = !grid.column('column1')!.visible; }}> Toggle Column</Button>)} />
-            <Observe render={() => (<Button className={classes.gridActionButton} variant='contained' disabled={!grid.changed} onClick={() => grid.revert()}>Enabled if has Changes. Reverts Changes</Button>)} />
             <Observe render={() => (<Button className={classes.gridActionButton} variant='contained' disabled={!grid.inError}>Enabled if has Errors</Button>)} />
             <Observe render={() => (<Button className={classes.gridActionButton} variant='contained' onClick={() => console.log(grid.get())}> Save All</Button>)} />
-            <Observe render={() => (<Button className={classes.gridActionButton} variant='contained' onClick={() => console.log(grid.getChanges())}> Save Changes</Button>)} />
           </div>
 
           <Paper className={classes.gridContainer}>
             <Observe render={() => (<Grid grid={grid} gridFontSizes={{header: '0.9rem', body: '0.85rem', groupRow: '0.8rem'}} className={classes.dataGrid} />)} />
           </Paper>
-
-          <Paper className={classes.gridContainer}>
-            <div className={classes.employeesGridButtonsContainer}>
-              <Button className={classes.employeesGridButton} onClick={() => mode.gridMode = 'employees1'} variant='outlined'>Grid 1</Button>
-              <Button className={classes.employeesGridButton} onClick={() => mode.gridMode = 'employees2'} variant='outlined'>Grid 2</Button>
-            </div>
-            <Grid key={mode.gridMode} grid={mode.gridMode === 'employees1' ? employeesGrid1 : employeesGrid2} gridFontSizes={{header: '0.95rem', body: '0.9rem', groupRow: '0.8rem'}} className={classes.employeeGrid} />
-          </Paper>
+          <Observe render={() => (
+            <Paper className={classes.gridContainer}>
+              <div className={classes.employeesGridButtonsContainer}>
+                <Button className={classes.employeesGridButton} onClick={() => mode.gridMode = 'employees1'} variant='outlined'>Grid 1</Button>
+                <Button className={classes.employeesGridButton} onClick={() => mode.gridMode = 'employees2'} variant='outlined'>Grid 2</Button>
+              </div>
+              <Grid key={mode.gridMode} grid={mode.gridMode === 'employees1' ? employeesGrid1 : employeesGrid2} gridFontSizes={{header: '0.95rem', body: '0.9rem', groupRow: '0.8rem'}} className={classes.employeeGrid} />
+            </Paper>
+          )} />
         </div>
       </div>
-      </TransitionWrapper>
+      // </TransitionWrapper>
     )} />
   );
 });

@@ -11,9 +11,7 @@ import {
   Route,
   Link,
 } from 'react-router-dom';
-import { MuiThemeProvider, createMuiTheme } from '@material-ui/core/styles';
-import { observable,  useObserver } from 'rewire-core';
-import { memo } from 'react';
+import { MuiThemeProvider, createMuiTheme }         from '@material-ui/core/styles';
 
 const listStyle = ({
   listStyleType: 'none',
@@ -31,17 +29,9 @@ const contentContainerStyle = {
   padding: '0px 20px',
 };
 
-const xxx = observable({name: 'sandy'});
-// FUNCTIONAL STYLE!!
-const Test = memo((props) => useObserver(() => <div>{xxx.name}</div>));
-// const Test = memo((props) => <Observe>{() => <div>{xxx.name}</div>}</Observe>);
-setTimeout(() => xxx.name = 'douglas', 5000);
-setTimeout(() => xxx.name = 'ryan', 8000);
-
 const BasicExample = (props: any) => {
   return (
     < >
-    <Test />
     <CssBaseline />
     <Router>
       <div>

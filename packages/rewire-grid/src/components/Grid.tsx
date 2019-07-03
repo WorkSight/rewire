@@ -1,17 +1,26 @@
-import {IGrid, IColumn, IGridColors, IGridFontSizes} from '../models/GridTypes';
-import Column                                        from './Column';
-import classNames                                    from 'classnames';
-import Cell                                          from './Cell';
-import Row                                           from './Row';
-import * as React                                    from 'react';
-import * as Color                                    from 'color';
+import {
+  IGrid,
+  IColumn,
+  IGridColors,
+  IGridFontSizes,
+  IRow,
+  IGroupRow
+}                                          from '../models/GridTypes';
 import {
   Observe,
   disposeOnUnmount,
   watch,
   property,
-  DataSignal
-} from 'rewire-core';
+  DataSignal,
+  computed
+}                                          from 'rewire-core';
+import Column                              from './Column';
+import classNames                          from 'classnames';
+import Cell                                from './Cell';
+import Row, {GroupRow}                     from './Row';
+import GroupRowModel                       from '../models/GroupRowModel';
+import * as React                          from 'react';
+import * as Color                          from 'color';
 import {debounce}                          from 'rewire-common';
 import {WithStyle, withStyles, ToggleMenu} from 'rewire-ui';
 import {PopoverOrigin}                     from '@material-ui/core/Popover';
@@ -79,20 +88,16 @@ export interface IGridProps {
   gridFontSizes?: IGridFontSizes;
 }
 
-type BodyType = {grid: IGrid, columns: IColumn[], scrollY: DataSignal<number>, loadMoreRows?: (args: {start: number, end: number}) => Promise<any[]> };
+type BodyType = {grid: IGrid, columns: IColumn[], renderRows: (rows: IRow[], columns: IColumn[], fixed: boolean) => any, scrollY: DataSignal<number>, loadMoreRows?: (args: {start: number, end: number}) => Promise<any[]> };
 class Body extends React.PureComponent<BodyType, {offset: number}> {
   constructor(props: BodyType) {
     super(props);
   }
 
-  get visibleColumns(): number {
-    return  this.props.columns.reduce((prev, current) => prev = prev + (current.visible ? 1 : 0), 0);
-  }
-
   render() {
     return (
       <tbody role='rowgroup'>
-        <Observe render={() => this.props.grid.rows.map((row, index) => <Row key={row.id} height={this.props.grid.rowHeight} columns={this.props.columns} Cell={Cell} index={index} visibleColumns={this.visibleColumns} className={((index % 2) === 1) ? 'alt' : ''} row={row} />)} />
+        {this.props.renderRows(this.props.grid.rows, this.props.columns, false)}
       </tbody>
     );
   }
@@ -107,10 +112,6 @@ class VirtualBody extends React.PureComponent<BodyType, {offset: number, loading
     this.onScroll = debounce(this.onScroll, 25, {leading: false});
   }
 
-  get visibleColumns(): number {
-    return this.props.columns.reduce((prev, current) => prev = prev + (current.visible ? 1 : 0), 0);
-  }
-
   async loadMoreRows(offset: number) {
     if (!this.props.loadMoreRows || this.rowCache[offset + this.viewportCount]) return;
     this.setState({loading: true});
@@ -119,7 +120,7 @@ class VirtualBody extends React.PureComponent<BodyType, {offset: number, loading
     for (let r of rows) {
       let rowIdx = i + offset;
       let rr     = this.props.grid.addRow(r);
-      this.rowCache[offset + i] = <Row key={rowIdx} columns={this.props.columns} height={this.props.grid.rowHeight} Cell={Cell} index={rowIdx} className={((rowIdx % 2) === 1) ? 'alt' : ''} row={rr} visibleColumns={this.visibleColumns} />;
+      this.rowCache[offset + i] = <Row key={rowIdx} columns={this.props.columns} height={this.props.grid.rowHeight} Cell={Cell} index={rowIdx} className={((rowIdx % 2) === 1) ? 'alt' : ''} row={rr} />;
     }
   }
 
@@ -134,19 +135,19 @@ class VirtualBody extends React.PureComponent<BodyType, {offset: number, loading
   }
 
   componentDidMount() {
-    disposeOnUnmount(this, () => {
-      watch(() => this.props.grid.contentElement, () => {
-        let gridContent = this.props.grid.contentElement;
-        if (!gridContent) return;
-        let rows                 = this.props.grid.rows;
-        let totalSize            = Math.trunc(rows.length * 30);
-        gridContent.style.height = totalSize + 'px';
-        this.viewportCount       = Math.trunc(gridContent.parentElement!.clientHeight / 30) + 2;
-        this.forceUpdate();
-      });
+    // disposeOnUnmount(this, () => {
+    //   watch(() => this.contentElement, () => {
+    //     let gridContent = this.contentElement;
+    //     if (!gridContent) return;
+    //     let rows                 = this.props.grid.rows;
+    //     let totalSize            = Math.trunc(rows.length * 30);
+    //     gridContent.style.height = totalSize + 'px';
+    //     this.viewportCount       = Math.trunc(gridContent.parentElement!.clientHeight / 30) + 2;
+    //     this.forceUpdate();
+    //   });
 
-      watch(this.props.scrollY, this.onScroll);
-    });
+    //   watch(this.props.scrollY, this.onScroll);
+    // });
   }
 
   setBodyRef = (element: HTMLTableSectionElement) => {
@@ -173,7 +174,7 @@ class VirtualBody extends React.PureComponent<BodyType, {offset: number, loading
       }
 
       let row   = rows[rowIdx];
-      cachedRow = <Row key={rowIdx} className={((rowIdx % 2) === 1) ? 'alt' : ''} height={this.props.grid.rowHeight} Cell={Cell} row={row} index={rowIdx} columns={this.props.columns} visibleColumns={this.visibleColumns} />;
+      cachedRow = <Row key={rowIdx} className={((rowIdx % 2) === 1) ? 'alt' : ''} height={this.props.grid.rowHeight} Cell={Cell} row={row} index={rowIdx} columns={this.props.columns} />;
       this.rowCache[rowIdx] = cachedRow;
       result.push(cachedRow);
     }
@@ -433,14 +434,6 @@ const GridInternal = withStyles(styles, class extends React.PureComponent<GridPr
     });
   }
 
-  get visibleFixedColumnCount(): number {
-    return this.props.grid.fixedColumns.reduce((prev, current) => prev = prev + (current.visible ? 1 : 0), 0);
-  }
-
-  get visibleStandardColumnCount(): number {
-    return this.props.grid.standardColumns.reduce((prev, current) => prev = prev + (current.visible ? 1 : 0), 0);
-  }
-
   handleExternalMouseUp = (evt: MouseEvent) => {
     if (this.grid.clearSelectionOnBlur && !this.grid.isMouseDown) {
       this.grid.clearSelection();
@@ -451,11 +444,11 @@ const GridInternal = withStyles(styles, class extends React.PureComponent<GridPr
 
   handleScroll = (evt: React.UIEvent<any>) => {
     let target: Element = evt.target as Element;
-    if (target === this.grid.contentElement) {
+    if (target === this.contentElement) {
       this.scrollX(target.scrollLeft);
       this.scrollY(target.scrollTop);
     } else if (target === this._leftLabels && target.scrollTop !== this.scrollY()) {
-      this.grid.contentElement!.scrollTo(this.scrollX(), target.scrollTop);
+      this.contentElement!.scrollTo(this.scrollX(), target.scrollTop);
     }
   }
 
@@ -478,7 +471,7 @@ const GridInternal = withStyles(styles, class extends React.PureComponent<GridPr
 
     if (evt.shiftKey) {
       // simulate a horizontal scroll on the grid content;
-      this.grid.contentElement!.scrollBy(scrollAmount, 0);
+      this.contentElement!.scrollBy(scrollAmount, 0);
       // scrollBySmooth(this.grid.contentElement!, scrollAmount, 0, 150);
       // let variation = this.grid.contentElement!.scrollLeft + scrollAmount;
       // this.grid.contentElement!.scrollTo({left: variation, top: this.grid.contentElement!.scrollTop, behavior: 'auto'});
@@ -486,7 +479,7 @@ const GridInternal = withStyles(styles, class extends React.PureComponent<GridPr
     } else {
       // simulate a vertical scroll on the grid content;
       // scrollBySmooth(this.grid.contentElement!, 0, scrollAmount, 150);
-      this.grid.contentElement!.scrollBy(0, scrollAmount);
+      this.contentElement!.scrollBy(0, scrollAmount);
       // let variation = this.grid.contentElement!.scrollTop + scrollAmount;
       // this.grid.contentElement!.scrollTo({left: this.grid.contentElement!.scrollLeft, top: variation, behavior: 'auto'});
       // this.grid.contentElement!.scroll(this.grid.contentElement!.scrollLeft, variation);
@@ -497,11 +490,11 @@ const GridInternal = withStyles(styles, class extends React.PureComponent<GridPr
     switch (evt.key) {
       case 'PageUp':
         // this.grid.contentElement!.scrollBy(0, -500);
-        scrollBySmooth(this.grid.contentElement!, 0, -500, 100);
+        scrollBySmooth(this.contentElement!, 0, -500, 100);
         break;
       case 'PageDown':
         // this.grid.contentElement!.scrollBy(0, 500);
-        scrollBySmooth(this.grid.contentElement!, 0, 500, 100);
+        scrollBySmooth(this.contentElement!, 0, 500, 100);
         break;
       default:
         return;
@@ -523,9 +516,9 @@ const GridInternal = withStyles(styles, class extends React.PureComponent<GridPr
   }
 
   componentDidMount() {
-    verticalResizeWatcher(this, this.grid.contentElement!).watch((value) => {
+    verticalResizeWatcher(this, this.contentElement!).watch((value) => {
       if (this._columnTableWrapper && this._columnTableWrapper.style) {
-        let node = this.grid.contentElement as HTMLElement;
+        let node = this.contentElement as HTMLElement;
         if (node) {
           this._columnTableWrapper.style.paddingRight = value.clientHeight < value.scrollHeight ? _scrollbarWidth + 'px' : '0';
         }
@@ -535,6 +528,10 @@ const GridInternal = withStyles(styles, class extends React.PureComponent<GridPr
     if (this.grid.multiSelect || this.grid.clearSelectionOnBlur) {
       document.addEventListener('mouseup', this.handleExternalMouseUp);
     }
+  }
+
+  componentWillMount() {
+    disposeOnUnmount(this, () => this.buildGroups());
   }
 
   componentWillUnmount() {
@@ -549,6 +546,7 @@ const GridInternal = withStyles(styles, class extends React.PureComponent<GridPr
       // reset column groups
       this._fixedColGroups = undefined;
       this._colGroups      = undefined;
+      this.grid            = nextProps.grid;
     }
   }
 
@@ -564,9 +562,10 @@ const GridInternal = withStyles(styles, class extends React.PureComponent<GridPr
     this._columnTable = element as HTMLTableElement;
   }
 
+  contentElement: HTMLDivElement;
   setGridContentRef = (element: HTMLDivElement) => {
-    if (element && element !== this.grid.contentElement) {
-      this.grid.setContentElement(element);
+    if (element && element !== this.contentElement) {
+      this.contentElement = element;
     }
   }
 
@@ -581,7 +580,7 @@ const GridInternal = withStyles(styles, class extends React.PureComponent<GridPr
           {this.renderColumnGroups(true)}
           <thead role='rowgroup'>
             <Observe render={() => (
-              this.props.grid.fixedRows.map((row, index) => <Row key={row.id} height={this.props.grid.headerRowHeight} Cell={Column} columns={this.props.grid.fixedColumns} index={index} visibleColumns={this.visibleFixedColumnCount} row={row} />)
+              this.props.grid.fixedRows.map((row, index) => <Row key={row.id} height={this.props.grid.headerRowHeight} Cell={Column} columns={this.props.grid.fixedColumns} index={index} row={row} />)
             )} />
           </thead>
         </table>
@@ -591,6 +590,67 @@ const GridInternal = withStyles(styles, class extends React.PureComponent<GridPr
 
   _fixedColGroups: JSX.Element | undefined;
   _colGroups: JSX.Element | undefined;
+
+  getGroupValue(row: IRow, column: IColumn) {
+    const v = row && row.data && column && row.data[column.name];
+    return (v === null || v === undefined || Number.isNaN(v)) ? '(none)' : (column.map && column.map(v)) || String(v);
+  }
+
+  getGroupKey(row: IRow, groupBy: IColumn[], level: number): string {
+    const key: string[] = [];
+    for (let index = 0; index < level; index++) {
+      const column        = groupBy[index];
+      const valueAsString = this.getGroupValue(row, column);
+      key.push(valueAsString);
+    }
+    return key.join('->');
+  }
+
+  _groups: () => IGroupRow[] | undefined;
+  buildGroups() {
+    const computation = () => {
+      if (!this.grid.groupBy || (this.grid.groupBy.length === 0)) return undefined;
+      const groupMap = {};
+      const groups: IGroupRow[] = [];
+      for (const row of this.grid.rows) {
+        let parentGroup: IGroupRow | undefined;
+        for (let level = 0; level < this.grid.groupBy.length; level++) {
+          const key   = this.getGroupKey(row, this.grid.groupBy, level + 1);
+          let   group = groupMap[key];
+          if (!group) {
+            const value = this.getGroupValue(row, this.grid.groupBy[level]);
+            group = groupMap[key] = new GroupRowModel(value, level);
+            if (!parentGroup) groups.push(group);
+            else parentGroup.rows.push(group);
+          }
+
+          parentGroup = group;
+          if (level === this.grid.groupBy.length - 1) {
+            parentGroup!.rows.push(row);
+          }
+        }
+      }
+      return groups;
+    };
+
+    this._groups = computed<IGroupRow[] | undefined>(() => this.grid.rows.length, computation, undefined, true);
+  }
+
+  renderGroups(columns: IColumn[], visibleColumns: number, fixed: boolean) {
+    const groups = this._groups();
+    return groups && groups.map((group) => <GroupRow fixed={fixed} key={group.title} group={group} columns={columns} visibleColumns={visibleColumns} />);
+  }
+
+  renderRows = (rows: IRow[], columns: IColumn[], fixed: boolean) => {
+    const grid = this.props.grid;
+    if (!grid.groupBy || (grid.groupBy.length === 0)) {
+      return <Observe render={() => rows.map((row, index) => <Row key={row.id} height={this.props.grid.rowHeight} columns={columns} Cell={Cell} index={index} className={((index % 2) === 1) ? 'alt' : ''} row={row} />)} />;
+    }
+
+    // group rows yeah!!
+    const visibleColumns: number = columns.reduce((previous, current) => previous + ((current.visible) ? 1 : 0), 0);
+    return <Observe render={() => this.renderGroups(columns, visibleColumns, fixed)} />;
+  }
 
   renderColumnGroups(fixed: boolean): JSX.Element {
     if (fixed && this._fixedColGroups) {
@@ -622,7 +682,7 @@ const GridInternal = withStyles(styles, class extends React.PureComponent<GridPr
         <table role='grid' style={{width: this.props.grid.fixedWidth, marginBottom: '17px'}}>
           {this.renderColumnGroups(true)}
           <tbody role='rowgroup'>
-            {this.props.grid.rows.map((row, index) => <Row key={row.id} row={row} Cell={Cell} height={this.props.grid.rowHeight} columns={this.props.grid.fixedColumns} isFixedColumnsRow={true} index={index} visibleColumns={this.visibleFixedColumnCount} className={((index % 2) === 1) ? 'alt' : ''} />)}
+            {this.renderRows(this.props.grid.rows, this.props.grid.fixedColumns, true)}
           </tbody>
         </table>
       </div>
@@ -650,7 +710,7 @@ const GridInternal = withStyles(styles, class extends React.PureComponent<GridPr
           buttonContent={buttonContent}
           buttonProps={buttonProps}
           items={toggleableColumns}
-          classes={{menuButton: classes.toggleableColumnsButton, menuItem: classes.toggleableColumnsMenuItem}}
+          classes={{menuButton: classes.toggleableColumnsButton, menuItem: classes.toggleableColumnsMenuItem} as any}
           anchorOrigin={anchorOrigin}
           transformOrigin={transformOrigin}
           onItemClick={onItemClick}
@@ -670,7 +730,7 @@ const GridInternal = withStyles(styles, class extends React.PureComponent<GridPr
               {this.renderColumnGroups(false)}
               <thead role='rowgroup'>
                 <Observe render={() => (
-                  this.props.grid.fixedRows.map((row, index) => <Row key={row.id} height={this.props.grid.headerRowHeight} Cell={Column} columns={this.props.grid.standardColumns} index={index} visibleColumns={this.visibleStandardColumnCount} row={row} />)
+                  this.props.grid.fixedRows.map((row, index) => <Row key={row.id} height={this.props.grid.headerRowHeight} Cell={Column} columns={this.props.grid.standardColumns} index={index} row={row} />)
                 )} />
               </thead>
             </table>
@@ -680,11 +740,15 @@ const GridInternal = withStyles(styles, class extends React.PureComponent<GridPr
     );
   }
 
-  componentDidUpdate(prevProps: GridProps) {
-    if (prevProps.grid !== this.props.grid) {
-      this.grid = this.props.grid;
-    }
-  }
+  // shouldComponentUpdate(nextProps, nextState, nextContext) {
+  //   return nextProps.grid !== this.props.grid;
+  // }
+
+  // componentDidUpdate(prevProps: GridProps) {
+  //   if (prevProps.grid !== this.props.grid) {
+  //     this.grid = this.props.grid;
+  //   }
+  // }
 
   _body: HTMLTableSectionElement | null;
 
@@ -694,12 +758,12 @@ const GridInternal = withStyles(styles, class extends React.PureComponent<GridPr
       <Observe render={() => (
         <div className={classNames('grid-scroll', this.props.classes.gridScroll)} onScroll={this.handleScroll}>
           {this.renderFixedColumnData()}
-            <div className={classNames('grid-content', this.props.classes.gridContent)}  ref={this.setGridContentRef}>
-              <table role='grid'>
-                {this.renderColumnGroups(false)}
-                <BodyRenderer grid={this.props.grid} scrollY={this.scrollY} columns={this.props.grid.standardColumns} />
-              </table>
-            </div>
+          <div className={classNames('grid-content', this.props.classes.gridContent)} ref={this.setGridContentRef}>
+            <table role='grid'>
+              {this.renderColumnGroups(false)}
+              <BodyRenderer grid={this.props.grid} renderRows={this.renderRows} scrollY={this.scrollY} columns={this.props.grid.standardColumns} />
+            </table>
+          </div>
         </div>
       )} />
     );
@@ -707,7 +771,6 @@ const GridInternal = withStyles(styles, class extends React.PureComponent<GridPr
 
   render() {
     const {style, className, classes} = this.props;
-
     return <Observe render={() => (
       <div className={classNames(classes.root, className)} style={{...style}}>
         <div className={classNames('ws-grid', classes.wsGrid)} onMouseDown={(this.grid.multiSelect || this.grid.clearSelectionOnBlur) ? this.handleMouseDown : undefined}>

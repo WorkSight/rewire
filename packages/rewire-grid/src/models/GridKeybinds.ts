@@ -329,9 +329,9 @@
        Ctrl+V:       Paste to selected cell(s)
        Delete:       Delete value(s) of selected cell(s)
       -----------------------------------------------------------------*/
-      'Ctrl+R'      : (evt: React.KeyboardEvent<any>, cell: ICell) => { if (cell.editing) { return; } cell.grid.revertSelectedCells(); evt.stopPropagation(); evt.preventDefault(); },
-      'Ctrl+U'      : (evt: React.KeyboardEvent<any>, cell: ICell) => { if (cell.editing) { return; } cell.grid.revertSelectedRows();  evt.stopPropagation(); evt.preventDefault(); },
-      'Ctrl+Shift+U': (evt: React.KeyboardEvent<any>, cell: ICell) => { if (cell.editing) { return; } cell.grid.revert();              evt.stopPropagation(); evt.preventDefault(); },
+      // 'Ctrl+R'      : (evt: React.KeyboardEvent<any>, cell: ICell) => { if (cell.editing) { return; } cell.grid.revertSelectedCells(); evt.stopPropagation(); evt.preventDefault(); },
+      // 'Ctrl+U'      : (evt: React.KeyboardEvent<any>, cell: ICell) => { if (cell.editing) { return; } cell.grid.revertSelectedRows();  evt.stopPropagation(); evt.preventDefault(); },
+      // 'Ctrl+Shift+U': (evt: React.KeyboardEvent<any>, cell: ICell) => { if (cell.editing) { return; } cell.grid.revert();              evt.stopPropagation(); evt.preventDefault(); },
       'Ctrl+X'      : (evt: React.KeyboardEvent<any>, cell: ICell) => { if (cell.editing) { return; } cell.grid.cut();                 evt.stopPropagation(); evt.preventDefault(); },
       'Ctrl+V'      : (evt: React.KeyboardEvent<any>, cell: ICell) => { if (cell.editing) { return; } cell.grid.paste();               evt.stopPropagation(); evt.preventDefault(); },
       'Delete'      : (evt: React.KeyboardEvent<any>, cell: ICell) => { if (cell.editing) { return; } cell.grid.clearSelectedCells();  evt.stopPropagation(); evt.preventDefault(); },

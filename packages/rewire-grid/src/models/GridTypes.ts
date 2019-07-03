@@ -5,9 +5,11 @@ import {
   MapFn,
   IToggleMenuItem,
   ISuggestionsContainerComponent,
+  Validator,
+  IFormValidator,
+  IError
 } from 'rewire-ui';
-import { IValidateFnData } from './Validator';
-import * as merge          from 'deepmerge';
+import * as merge      from 'deepmerge';
 export { EditorType };
 
 export interface IRows {
@@ -29,35 +31,35 @@ export interface IGridRowKeybindPermissions {
 
 export type GridKeybindAction = (evt: React.KeyboardEvent<any>, cell: ICell) => void;
 export interface IGridStaticKeybinds {
-  'ArrowUp': GridKeybindAction;
-  'ArrowDown': GridKeybindAction;
-  'ArrowLeft': GridKeybindAction;
-  'ArrowRight': GridKeybindAction;
-  'Shift+ArrowUp': GridKeybindAction;
-  'Shift+ArrowDown': GridKeybindAction;
-  'Shift+ArrowLeft': GridKeybindAction;
-  'Shift+ArrowRight': GridKeybindAction;
-  'Tab': GridKeybindAction;
-  'Shift+Tab': GridKeybindAction;
-  'Home': GridKeybindAction;
-  'End': GridKeybindAction;
-  'Ctrl+Home': GridKeybindAction;
-  'Ctrl+End': GridKeybindAction;
-  'Escape': GridKeybindAction;
-  'Enter': GridKeybindAction;
-  'F2': GridKeybindAction;
-  'Ctrl+C': GridKeybindAction;
+  'ArrowUp'          : GridKeybindAction;
+  'ArrowDown'        : GridKeybindAction;
+  'ArrowLeft'        : GridKeybindAction;
+  'ArrowRight'       : GridKeybindAction;
+  'Shift+ArrowUp'    : GridKeybindAction;
+  'Shift+ArrowDown'  : GridKeybindAction;
+  'Shift+ArrowLeft'  : GridKeybindAction;
+  'Shift+ArrowRight' : GridKeybindAction;
+  'Tab'              : GridKeybindAction;
+  'Shift+Tab'        : GridKeybindAction;
+  'Home'             : GridKeybindAction;
+  'End'              : GridKeybindAction;
+  'Ctrl+Home'        : GridKeybindAction;
+  'Ctrl+End'         : GridKeybindAction;
+  'Escape'           : GridKeybindAction;
+  'Enter'            : GridKeybindAction;
+  'F2'               : GridKeybindAction;
+  'Ctrl+C'           : GridKeybindAction;
 }
 export interface IGridVariableKeybinds {
-  'Ctrl+R': GridKeybindAction;
-  'Ctrl+U': GridKeybindAction;
-  'Ctrl+Shift+U': GridKeybindAction;
-  'Ctrl+X': GridKeybindAction;
-  'Ctrl+V': GridKeybindAction;
-  'Delete': GridKeybindAction;
-  'Ctrl+Insert': GridKeybindAction;
-  'Ctrl+D': GridKeybindAction;
-  'Ctrl+Delete': GridKeybindAction;
+  // 'Ctrl+R': GridKeybindAction;
+  // 'Ctrl+U': GridKeybindAction;
+  // 'Ctrl+Shift+U': GridKeybindAction;
+  'Ctrl+X'          : GridKeybindAction;
+  'Ctrl+V'          : GridKeybindAction;
+  'Delete'          : GridKeybindAction;
+  'Ctrl+Insert'     : GridKeybindAction;
+  'Ctrl+D'          : GridKeybindAction;
+  'Ctrl+Delete'     : GridKeybindAction;
   [keybind: string]: GridKeybindAction;
 }
 
@@ -79,31 +81,27 @@ export interface IGrid extends IRows, IDisposable {
   loading                   : boolean;
   readonly fixedColumns     : IColumn[];
   readonly standardColumns  : IColumn[];
-  readonly columnsByPosition: IColumn[];
-  dataRowsByPosition        : IRow[];
-  originalDataRowsByPosition: IRow[];
-  addedRows                 : IRowIteratorResult[];
-  removedRows               : IRowIteratorResult[];
   groupBy                   : IColumn[];
   toggleableColumns         : IColumn[];
   toggleableColumnsOptions? : IToggleableColumnsOptions;
   hasToggleableColumns      : boolean;
-  clipboard                 : ICell[];
   isMouseDown               : boolean;
   multiSelect               : boolean;
   allowMergeColumns         : boolean;
   startCell?                : ICell;
-  changed                   : boolean;
   inError                   : boolean;
   clearSelectionOnBlur?     : boolean;
-  contentElement?           : HTMLDivElement;
   rowKeybindPermissions     : IGridRowKeybindPermissions;
   staticKeybinds            : IGridStaticKeybinds;
   variableKeybinds          : IGridVariableKeybinds;
+  isRowCompleteFn           : (row: IRowData) => boolean;
+  readonly validator        : Validator;
+  readonly hasChanges       : boolean;
+  readonly isChangeTracking : boolean;
 
-  setContentElement(element: HTMLDivElement | undefined): void;
-
-  hasChanges(): boolean;
+  setChangeTracking(enable: boolean): void;
+  revert(): void;
+  commit(): void;
   hasErrors(): boolean;
   getErrors(): IErrorData[];
   validate(): void;
@@ -145,19 +143,11 @@ export interface IGrid extends IRows, IDisposable {
   getRowsByRange(rowStart: number, rowEnd: number, allowCollapsed?: boolean): IRow[];
   column(columnName: string): IColumn | undefined;
   columnByPos(columnPosition: number): IColumn | undefined;
-  adjacentRightColumn(column: IColumn): IColumn | undefined;
-  adjacentLeftColumn(column: IColumn): IColumn | undefined;
 
-  revert(): void;
-  revertSelectedCells(): void;
-  revertSelectedRows(): void;
   clear(): void;
   clearSelectedCells(): void;
   get(): ICellDataMap[];
-  getChanges(): ICellDataMap[];
   set(data: (IRowData | undefined)[]): void;
-  _commit(): void;
-  commit(): void;
 
   addColumn(column: IColumn): IColumn;
   setColumnPositions(): void;
@@ -166,16 +156,11 @@ export interface IGrid extends IRows, IDisposable {
   removeFixedRow(id: string): void;
 
   setRowPositions(): void;
-  _removeRow(rows: IterableIterator<IRowIteratorResult>, id: string): void;
-  _removeGroupRow(rows: IterableIterator<IRowIteratorResult>, id: string): void;
   removeRow(id: string): void;
   removeRows(ids: string[]): void;
   removeSelectedRows(reselect?: boolean): void;
   addRow(data?: IRowData, position?: number): IRow;
-  _addRow(data?: IRowData, position?: number): IRow;
   addRows(data: (IRowData | undefined)[], position?: number): IRow[];
-  _addRows(data: (IRowData | undefined)[], position?: number): IRow[];
-  _duplicateRow(rows: IterableIterator<IRowIteratorResult>, id: string, position?: number): IRow | undefined;
   duplicateRow(id: string, position?: number): IRow | undefined;
   duplicateRows(ids: string[], position?: number): IRow[];
   duplicateSelectedRows(): IRow[];
@@ -195,6 +180,16 @@ export interface IGridOptions {
   toggleableColumnsOptions?: IToggleableColumnsOptions;
   rowKeybindPermissions?   : IGridRowKeybindPermissions;
   variableKeybinds?        : {[keybind: string]: GridKeybindAction};
+}
+
+export interface IGroupRow {
+  expanded       : boolean;
+  visible        : boolean;
+  rows           : (IRow | IGroupRow)[];
+  readonly title : string;
+  readonly level : number;
+  expand(): void;
+  collapse(): void;
 }
 
 export interface IGridColors {
@@ -246,42 +241,26 @@ export interface IRow extends IDisposable {
   id                            : string;
   grid                          : IGrid;
   cells                         : ICellMap;
-  data?                         : any;
+  data                          : any;
   height                        : number;
   selected                      : boolean;
   cls?                          : string;
   allowMergeColumns?            : boolean;
   position                      : number;
-  readonly originalData         : ICellDataMap;
-  cellsByColumnPosition         : ICell[];
-  parentRow?                    : IGroupRow;
   visible                       : boolean;
   fixed                         : boolean;
   options                       : IRowOptions;
 
   onClick?(row: IRow): void;
-  hasChanges(): boolean;
   hasErrors(): boolean;
   getErrors(): IErrorData[];
   createCell(column: IColumn, value: any, type?: string): ICell;
   clear(columnNames?: string[]): void;
-  commit(): void;
-  _setValue(data: ICellDataMap, triggerOnValueChangeHandler?: boolean): boolean;
-  setValue(data: ICellDataMap, triggerOnValueChangeHandler?: boolean): boolean;
   mergeAllColumns(): void;
   mergeFixedColumns(): void;
   mergeStandardColumns(): void;
   clone(): IRow;
-  validate(columnNames?: string[]): void;
-  _revert(): void;
-  revert(): void;
-}
-
-export interface IGroupRow extends IRow, IRows {
-  rows          : IRow[];
-  column        : IColumn;
-  readonly level: number;
-  expanded      : boolean;
+  validate(): void;
 }
 
 export type MaskType = (string | RegExp)[];
@@ -326,7 +305,7 @@ export interface IColumnOptions {
   width?        : string;
   canSort?      : boolean;
   renderer?     : React.SFC<any>;
-  validator?    : IValidateFnData;
+  validators?   : IFormValidator;
 
   onValueChange?(cell: ICell, v: any): void;
   compare?(x: any, y: any): number;
@@ -355,7 +334,6 @@ export interface IColumn extends ICellProperties {
   isGroupByColumn: boolean;
   typeOptions?   : any;
   editor?        : React.SFC<any>;
-  validator?     : IValidateFnData;
 
   map?(value: any): string;
   predicate?(value: any, filter: {value: any}): boolean;
@@ -363,13 +341,6 @@ export interface IColumn extends ICellProperties {
   setEditor(type?: IColumnEditor): void;
 }
 
-export enum ErrorSeverity {
-  Info,
-  Warning,
-  Error,
-  Critical
-}
-export interface IError { messageText: string; severity: ErrorSeverity; }
 export interface IErrorData { name: string; error: IError; }
 
 export interface ICell extends ICellProperties {
@@ -382,7 +353,6 @@ export interface ICell extends ICellProperties {
   enabled              : boolean;
   readOnly             : boolean;
   readonly editing     : boolean;
-  element?             : HTMLTableDataCellElement;
   rowPosition          : number;
   columnPosition       : number;
   isTopMostSelection   : boolean;
@@ -390,8 +360,8 @@ export interface ICell extends ICellProperties {
   isBottomMostSelection: boolean;
   isLeftMostSelection  : boolean;
   keyForEdit?          : string;
+  hasChanges           : boolean;
 
-  hasChanges(): boolean;
   hasErrors(): boolean;
   getErrors(): IErrorData[];
   clone(row: IRow): ICell;
@@ -399,14 +369,8 @@ export interface ICell extends ICellProperties {
   setEditing(editing: boolean): void;
   canFocus(): boolean;
   setFocus(focus?: boolean): void;
-  setElement(element: HTMLTableDataCellElement | undefined): void;
-  _setValue(v?: any, triggerOnValueChangeHandler?: boolean): boolean;
-  setValue(v?: any, triggerOnValueChangeHandler?: boolean): boolean;
   validate(): void;
-  _revert(): void;
-  revert(): void;
   unselect(): void;
-  findVerticallyNearestCellWithUnselectedRow(): ICell | undefined;
   performKeybindAction(evt: React.KeyboardEvent<any>): void;
 }
 
@@ -423,7 +387,7 @@ export function isRow(row: any): row is IRow {
 }
 
 export function isGroupRow(row: any): row is IGroupRow {
-  return (row && 'expanded' in row);
+  return !!row._expanded;
 }
 
 export function isColumn(column: any): column is IColumn {
@@ -432,13 +396,7 @@ export function isColumn(column: any): column is IColumn {
 
 export function getValue(row?: IRow | ObjectType, column?: IColumn): string | undefined {
   if (!row || !column) return undefined;
-  let value: any;
-  if (isGroupRow(row)) {
-    value = row.cells[column.name].value;
-  } else {
-    value = row[column.name];
-  }
-
+  let value: any = row[column.name];
   if (column.map) value = column.map(value);
   return value;
 }
@@ -453,65 +411,7 @@ export function cloneValue(value: any): any {
   }
 }
 
-export interface IRowIteratorResult {
-  rows: IRow[];
-  row: IRow;
-  idx: number;
-}
-
-export interface IGroupRowIteratorResult {
-  rows: IRow[];
-  row: IGroupRow;
-  idx: number;
-}
-
-export function *groupRows(rows: IRow[]): IterableIterator<IGroupRowIteratorResult> {
-  let result: any = {rows: rows, row: undefined, idx: 0};
-  for (const row of rows) {
-    if (isGroupRow(row)) {
-      result.row = row;
-      yield result;
-      result.idx++;
-      yield *groupRows(row.rows);
-    }
-  }
-}
-
-export function *allRows(rows: IRow[]): IterableIterator<IRowIteratorResult> {
-  let result: any = {rows: rows, row: undefined, idx: 0};
-  for (const row of rows) {
-    result.row = row;
-    yield result;
-    result.idx++;
-    if (isGroupRow(row)) {
-      yield *allRows(row.rows);
-    }
-  }
-}
-
-export function *fixedRows(grid: IGrid): IterableIterator<IRowIteratorResult> {
-  let result: any = {rows: grid.fixedRows, row: undefined, idx: 0};
-  for (const row of grid.fixedRows) {
-    result.row = row;
-    yield result;
-    result.idx++;
-  }
-}
-
-export function *allDataRows(rows: IRow[], allowCollapsed: boolean = true): IterableIterator<IRowIteratorResult> {
-  let result: any = {rows: rows, row: undefined, idx: 0};
-  for (const row of rows) {
-    if (isGroupRow(row) && (allowCollapsed || row.expanded)) {
-      yield *allDataRows(row.rows, allowCollapsed);
-    } else {
-      result.row = row;
-      yield result;
-      result.idx++;
-    }
-  }
-}
-
-export function find<T>(rows: IterableIterator<T>, predicate: (row: T) => boolean): T | undefined {
+export function find(rows: Iterable<IRow>, predicate: (row: IRow) => boolean): IRow | undefined {
   if (!predicate) return undefined;
 
   for (const row of rows) {
@@ -520,87 +420,26 @@ export function find<T>(rows: IterableIterator<T>, predicate: (row: T) => boolea
   return undefined;
 }
 
-export function findRowByCellData(rows: IRow[], cell: ICell): IRowIteratorResult | undefined {
-  return find(allDataRows(rows), (r) => {
-    let rCell = r.row.cells[cell.column.name];
-    return !!rCell && (rCell.value === cell.value || (!!rCell.column.compare && rCell.column.compare(rCell.value, cell.value) === 0));
-  });
+export function findRowById(iterator: Iterable<IRow>, id: string): IRow | undefined {
+  return find(iterator, (r) => r.id === id);
 }
 
-export function findRowByRowData(rows: IRow[], row: any): IRowIteratorResult | undefined {
-  return find(allDataRows(rows), (r) => {
-    let match            = false;
-    let rCellDataByName  = r.row.cells;
-    let rowCellDataByPos = row.cellsByColumnPosition;
-
-    for (let i = 0; i < rowCellDataByPos.length; i++) {
-      let rowCell = rowCellDataByPos[i];
-      let rCell   = rCellDataByName[rowCell.column.name];
-      if (!rCell) {
-        continue;
-      }
-
-      if (rCell === rowCell || rCell.value === rowCell.value || (rCell.column.compare && rCell.column.compare(rCell.value, rowCell.value) === 0)) {
-        match = true;
-        break;
-      }
-    }
-    return match;
-  });
-}
-
-export function findRowByRowDataExact(rows: IRow[], row: any): IRowIteratorResult | undefined {
-  return find(allDataRows(rows), (r) => {
-    let rCellData   = r.row.cellsByColumnPosition;
-    let rowCellData = row.cellsByColumnPosition;
-    if (rCellData.length !== rowCellData.length) {
-      return false;
-    }
-
-    let same = true;
-    for (let i = 0; i < rCellData.length; i++) {
-      let rCell   = rCellData[i];
-      let rowCell = rowCellData[i];
-      if (rCell.column.compare) {
-        if (rCell.column.compare(rCell.value, rowCell.value) !== 0) {
-          same = false;
-          break;
-        }
-      } else {
-        if (rCell.value !== rowCell.value) {
-          same = false;
-          break;
-        }
-      }
-    }
-    return same;
-  });
-}
-
-export function findRowById(iterator: IterableIterator<IRowIteratorResult>, id: string): IRowIteratorResult | undefined {
-  return find(iterator, (r) => r.row.id === id);
-}
-
-export function findRowByPosition(iterator: IterableIterator<IRowIteratorResult>, position: number): IRowIteratorResult | undefined {
-  return find(iterator, (r) => r.row.position === position);
+export function findRowByPosition(iterator: Iterable<IRow>, position: number): IRow | undefined {
+  return this.rows[position];
 }
 
 export function findColumnByName(columns: IColumn[], name: string): IColumn | undefined {
   return columns.find((column) => column.name === name);
 }
 
-export function findColumnByPosition(columns: IColumn[], position: number): IColumn | undefined {
-  return columns.find((column) => column.position === position);
-}
+// export function collapseAll(rows: IRow[]) {
+//   for (const groupRow of groupRows(rows)) {
+//     groupRow.row.expanded = false;
+//   }
+// }
 
-export function collapseAll(rows: IRow[]) {
-  for (const groupRow of groupRows(rows)) {
-    groupRow.row.expanded = false;
-  }
-}
-
-export function expandAll(rows: IRow[]) {
-  for (const groupRow of groupRows(rows)) {
-    groupRow.row.expanded = true;
-  }
-}
+// export function expandAll(rows: IRow[]) {
+//   for (const groupRow of groupRows(rows)) {
+//     groupRow.row.expanded = true;
+//   }
+// }

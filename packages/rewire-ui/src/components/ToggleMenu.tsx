@@ -57,7 +57,7 @@ interface IToggleMenuState {
   anchorEl?: HTMLElement;
 }
 
-export type ToggleMenuProps = WithStyle<ReturnType<typeof styles>, MenuProps & IToggleMenuProps>;
+export type ToggleMenuProps = WithStyle<ReturnType<typeof styles>, Partial<MenuProps> & IToggleMenuProps>;
 
 class ToggleMenu extends React.Component<ToggleMenuProps, IToggleMenuState> {
   state: IToggleMenuState = {

@@ -2,6 +2,7 @@ export * from './models/Form';
 export * from './models/Modal';
 export * from './models/search';
 export * from './models/Validator';
+export * from './models/changeTracker';
 export * from './components/ActionMenu';
 export * from './components/AutoComplete';
 export * from './components/AvatarField';
