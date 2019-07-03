@@ -217,7 +217,7 @@ export default class Validator {
 
   private isValid(context: IValidationContext, field: string, validator: IValidator, setErrors: boolean): eValidationResult {
     const args        = this.extractArguments(context, field, validator);
-    let   errorResult = validator.fn.apply(undefined, args);
+    let   errorResult = validator.fn.apply(context, args);
     if (typeof errorResult === 'boolean') {
       // if error result is a simple boolean then true means no error otherwise pull the error from the validator!
       errorResult = (errorResult) ? undefined : validator.error;

@@ -130,7 +130,9 @@ class GridModel implements IGrid, IDisposable {
     this.allowMergeColumns          = options && !isNullOrUndefined(options.allowMergeColumns) ? options.allowMergeColumns! : false;
     this.clearSelectionOnBlur       = options && !isNullOrUndefined(options.clearSelectionOnBlur) ? options.clearSelectionOnBlur! : true;
     this.toggleableColumnsOptions   = options && options.toggleableColumnsOptions;
-    this.isRowCompleteFn            = options && !isNullOrUndefined(options.isRowCompleteFn) ? options.isRowCompleteFn! : () => true;
+    this.isRowCompleteFn            = options && options.isRowCompleteFn || (() => true);
+    this.headerRowHeight            = options && !isNullOrUndefined(options.headerRowHeight) ? options.headerRowHeight : undefined;
+    this.rowHeight                  = options && !isNullOrUndefined(options.rowHeight) ? options.rowHeight : undefined;
     this.clipboard                  = [];
     this.isMouseDown                = false;
     this.startCell                  = undefined;
