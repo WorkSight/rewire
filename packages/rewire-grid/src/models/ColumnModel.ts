@@ -16,7 +16,7 @@ import {
   defaultPhoneFormat,
   defaultPhoneMask,
   IValidator,
-  validators
+  validators,
 } from 'rewire-ui';
 import {isNullOrUndefined, UTC} from 'rewire-common';
 import {

@@ -6,7 +6,7 @@ import { hotkeysModel, HotKeysDialog }           from './HotKeys';
 import { YesNoModel, YesNoDialog }               from './YesNoDialog';
 import { ConfirmationModel, ConfirmationDialog } from './YesNoDialog';
 import { utc, UTC, TimeSpan, isNullOrUndefined } from 'rewire-common';
-import { Observe, observable }                   from 'rewire-core';
+import { Observe, observable, watch, root }      from 'rewire-core';
 import {
   ActionFn,
   WithStyle,
@@ -40,7 +40,6 @@ import DeleteIcon            from '@material-ui/icons/DeleteOutlined';
 import ArchiveIcon           from '@material-ui/icons/ArchiveOutlined';
 import UnarchiveIcon         from '@material-ui/icons/UnarchiveOutlined';
 import { uploadFile }        from './graphqltest';
-import { watch, root } from 'rewire-core/dist/src';
 
 interface IDocument {
   id:    string;
@@ -146,10 +145,11 @@ function createTestGrid(nRows: number, nColumns: number) {
       return;
     }
     // if (!(value instanceof UTC)) {
-      cell.value = utc().startOfDay().add(value, TimeSpan.hours);
+    // cell.value = utc().startOfDay().add(value, TimeSpan.hours);
     //   return;
     // }
-    const diff = cell.row.cells.timeInColumn.value.subtract(cell.row.cells.timeOutColumn.value, TimeSpan.hours, 2);
+    // const diff = cell.row.cells.timeInColumn.value.subtract(cell.row.cells.timeOutColumn.value, TimeSpan.hours, 2);
+    const diff = cell.row.cells.timeInColumn.value - cell.row.cells.timeOutColumn.value;
     cell.row.cells.differenceColumn.value = diff;
   };
 
@@ -204,8 +204,8 @@ function createTestGrid(nRows: number, nColumns: number) {
   cols[5].setEditor({ type: 'number', options: { decimals: 2, thousandSeparator: true } });
   cols[6].setEditor({ type: 'number', options: { decimals: 3, thousandSeparator: true } });
 
-  const timeIn:  UTC = utc().startOfDay().add(7.5, TimeSpan.hours);
-  const timeOut: UTC = utc().startOfDay().add(11,  TimeSpan.hours);
+  // const timeIn:  UTC = utc().startOfDay().add(7.5, TimeSpan.hours);
+  // const timeOut: UTC = utc().startOfDay().add(11,  TimeSpan.hours);
 
   // add some cell data!
   let rows: IRowData[] = [];
@@ -218,8 +218,10 @@ function createTestGrid(nRows: number, nColumns: number) {
       else if (colName === 'autoCompleteColumn' || colName === 'selectColumn') v = { id: '14', name: 'Austria' };
       else if (colName === 'multiAutoCompleteColumn' || colName === 'multiselectColumn') v = [{id: '18', name: 'Bangladesh'}, {id: '19', name: 'Barbados'}];
       else if (colName === 'checkedColumn') v = true;
-      else if (colName === 'timeOutColumn') v = timeIn;
-      else if (colName === 'timeInColumn') v = timeOut;
+      // else if (colName === 'timeOutColumn') v = timeIn;
+      // else if (colName === 'timeInColumn') v = timeOut;
+      else if (colName === 'timeOutColumn') v = 7.5;
+      else if (colName === 'timeInColumn') v = 11;
       else if (colName === 'differenceColumn') v = 4;
       else if (colName === 'sumColumn') v = 19;
       else if (colName === 'maskColumn') v = undefined;

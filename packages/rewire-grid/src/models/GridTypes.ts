@@ -51,15 +51,13 @@ export interface IGridStaticKeybinds {
   'Ctrl+C'           : GridKeybindAction;
 }
 export interface IGridVariableKeybinds {
-  // 'Ctrl+R': GridKeybindAction;
-  // 'Ctrl+U': GridKeybindAction;
-  // 'Ctrl+Shift+U': GridKeybindAction;
-  'Ctrl+X'          : GridKeybindAction;
-  'Ctrl+V'          : GridKeybindAction;
-  'Delete'          : GridKeybindAction;
-  'Ctrl+Insert'     : GridKeybindAction;
-  'Ctrl+D'          : GridKeybindAction;
-  'Ctrl+Delete'     : GridKeybindAction;
+  'Ctrl+Shift+U'   : GridKeybindAction;
+  'Ctrl+X'         : GridKeybindAction;
+  'Ctrl+V'         : GridKeybindAction;
+  'Delete'         : GridKeybindAction;
+  'Ctrl+Insert'    : GridKeybindAction;
+  'Ctrl+D'         : GridKeybindAction;
+  'Ctrl+Delete'    : GridKeybindAction;
   [keybind: string]: GridKeybindAction;
 }
 
@@ -180,6 +178,7 @@ export interface IGridOptions {
   toggleableColumnsOptions?: IToggleableColumnsOptions;
   rowKeybindPermissions?   : IGridRowKeybindPermissions;
   variableKeybinds?        : {[keybind: string]: GridKeybindAction};
+  isRowCompleteFn?         : (row: IRowData) => boolean;
 }
 
 export interface IGroupRow {
