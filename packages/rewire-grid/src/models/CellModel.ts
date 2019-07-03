@@ -166,6 +166,7 @@ export class CellModel implements ICell {
       ct.recalculate(); // queue grid recalculation!
       this.hasChanges = ct.valueHasChanges(this.row, this.column.name);
     }
+    this.validate();
   }
 
   get value() {
@@ -177,16 +178,12 @@ export class CellModel implements ICell {
     this.row.data[this.column.name] = value;
     if (this.row.fixed) return;
     if (!this.grid.loading) {
-      const cell = this.row.cells[this.column.name];
-      cell.validate();
-
       if (this.column.fixed) {
         this.row.mergeFixedColumns();
       } else {
         this.row.mergeStandardColumns();
       }
-
-      guard(cell, this.runOnValueChange);
+      guard(this.row.cells[this.column.name], this.runOnValueChange);
     }
   }
 
