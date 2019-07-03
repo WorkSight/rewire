@@ -87,7 +87,6 @@ export interface IGrid extends IRows, IDisposable {
   multiSelect               : boolean;
   allowMergeColumns         : boolean;
   startCell?                : ICell;
-  inError                   : boolean;
   clearSelectionOnBlur?     : boolean;
   rowKeybindPermissions     : IGridRowKeybindPermissions;
   staticKeybinds            : IGridStaticKeybinds;
@@ -96,6 +95,7 @@ export interface IGrid extends IRows, IDisposable {
   readonly validator        : Validator;
   readonly hasChanges       : boolean;
   readonly isChangeTracking : boolean;
+  onError?                  : (row: IRow, field: string, error: IError | undefined) => void;
 
   setChangeTracking(enable: boolean): void;
   revert(): void;

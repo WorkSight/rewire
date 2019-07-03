@@ -452,6 +452,7 @@ const yesNoModel        = new YesNoModel({ title: 'Confirmation Required', actio
 const confirmationModel = new ConfirmationModel({ title: 'Secondary Confirmation', yesAction: confirmationYesAction, noAction: confirmationNoAction});
 grid.setChangeTracking(true);
 console.log('grid has changes =', grid.hasChanges);
+grid.onError = (row, field, error) => console.log(`${row.id} ${field} ${error && error.text}`);
 root(() => {
   watch(() => grid.hasChanges, () => console.log(`grid has changes ${grid.hasChanges}`));
 });
@@ -627,7 +628,7 @@ export const HomeView = withStyles(styles, (props: HomeViewProps) => {
           </div>
           <div className={classes.gridActionButtonsContainer}>
             <Observe render={() => (<Button className={classes.gridActionButton} variant='contained' onClick={() => { grid.column('column1')!.visible = !grid.column('column1')!.visible; }}> Toggle Column</Button>)} />
-            <Observe render={() => (<Button className={classes.gridActionButton} variant='contained' disabled={!grid.inError}>Enabled if has Errors</Button>)} />
+            <Observe render={() => (<Button className={classes.gridActionButton} variant='contained' disabled={!grid.hasErrors()}>Enabled if has Errors</Button>)} />
             <Observe render={() => (<Button className={classes.gridActionButton} variant='contained' onClick={() => console.log(grid.get())}> Save All</Button>)} />
           </div>
 

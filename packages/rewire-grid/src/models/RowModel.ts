@@ -105,6 +105,7 @@ export class RowModel implements IRow, IDisposable, IValidationContext {
   // IValidationContext
   setError(field: string, error?: IError): void {
     this.cells[field].error = error;
+    if (this.grid.onError) this.grid.onError(this, field, error);
   }
 
   createCell(column: IColumn, value: any): ICell {

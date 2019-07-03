@@ -249,7 +249,6 @@ export class CellModel implements ICell {
   validate() {
     if (this.row.fixed) return;
     this.grid.validator.validateField((this.row as RowModel), this.column.name);
-    this.grid.inError = this.grid.hasErrors();
   }
 
   unselect() {

@@ -31,7 +31,6 @@ import {
   observe,
   freeze,
   root,
-  watch,
   sample
 }                  from 'rewire-core';
 import {
@@ -101,7 +100,6 @@ class GridModel implements IGrid, IDisposable {
   __validator               : Validator;
   __changeTracker?          : ChangeTracker;
   __isRowCompleteFn         : (row: IRowData) => boolean;
-  inError                   : boolean;
 
   private _dispose: () => void;
 
@@ -136,7 +134,6 @@ class GridModel implements IGrid, IDisposable {
     this.clipboard                  = [];
     this.isMouseDown                = false;
     this.startCell                  = undefined;
-    this.inError                    = false;
 
     this.rowKeybindPermissions = {
       insertRow:    options && options.rowKeybindPermissions && !isNullOrUndefined(options.rowKeybindPermissions.insertRow) ? options.rowKeybindPermissions.insertRow : true,
@@ -155,9 +152,6 @@ class GridModel implements IGrid, IDisposable {
     this._fixedColumns      = computed(columns, () => this.columns.filter((h) => h.fixed), []);
     this._standardColumns   = computed(columns, () => this.columns.filter((h) => !h.fixed), []);
 
-    watch(() => this.rows.length, () => {
-      this.inError = this.hasErrors();
-    });
     return this;
   }
 
