@@ -179,6 +179,8 @@ export interface IGridOptions {
   rowKeybindPermissions?   : IGridRowKeybindPermissions;
   variableKeybinds?        : {[keybind: string]: GridKeybindAction};
   isRowCompleteFn?         : (row: IRowData) => boolean;
+  headerRowHeight?         : number;
+  rowHeight?               : number;
 }
 
 export interface IGroupRow {
