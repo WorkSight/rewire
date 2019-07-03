@@ -9,12 +9,12 @@ import {
   IDisposable,
   cloneValue,
   IRowData
-}                          from './GridTypes';
-import {isNullOrUndefined} from 'rewire-common';
-import createCell          from './CellModel';
-import * as nanoid         from 'nanoid';
-import * as deepEqual      from 'fast-deep-equal';
-import { observable }      from 'rewire-core';
+}                                     from './GridTypes';
+import {isNullOrUndefined}            from 'rewire-common';
+import createCell                     from './CellModel';
+import * as nanoid                    from 'nanoid';
+import * as deepEqual                 from 'fast-deep-equal';
+import { observable }                 from 'rewire-core';
 import { IValidationContext, IError } from 'rewire-ui';
 
 const EmptyFn = () => {};

@@ -153,7 +153,7 @@ function createTestGrid(nRows: number, nColumns: number) {
     cell.row.cells.differenceColumn.value = diff;
   };
 
-  const customNumberValidator = (value: any): IError | undefined => {
+  const customNumberValidator = function(value: any): IError | undefined {
     if (isNullOrUndefined(value)) {
       return undefined;
     }

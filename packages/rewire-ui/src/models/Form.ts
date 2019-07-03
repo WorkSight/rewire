@@ -560,7 +560,7 @@ export default class Form implements IValidationContext {
   }
 
   public validateFields(fields: IEditorField[]): eValidationResult {
-    let result = eValidationResult.Success
+    let result = eValidationResult.Success;
     for (const f of fields) {
       if (f.disableErrors) continue;
       result |= this.validator.validateField(this, f.name);

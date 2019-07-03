@@ -8,10 +8,10 @@ export interface IRowData {
 
 export interface IChangeTrackerContext {
   length: number;
-  getRow     (index: number): IRowData | undefined;
-  setRow     (index: number, value: IRowData): void;
+  getRow      (index: number): IRowData | undefined;
+  setRow      (index: number, value: IRowData): void;
   onHasChanges(changes: boolean): void;
-  isComplete (value: IRowData): boolean;
+  isComplete  (value: IRowData): boolean;
 }
 
 export class ArrayChangeTrackerContext implements IChangeTrackerContext {
