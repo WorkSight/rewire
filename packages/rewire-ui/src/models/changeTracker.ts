@@ -87,6 +87,7 @@ export class ChangeTracker {
   private _working?       : IRowData[];
   private _recalculating? : Promise<boolean>;
   private _dispose        : () => void;
+  private _interval       : NodeJS.Timeout;
   constructor(private _context: IChangeTrackerContext) {
     root((dispose) => {
       this._dispose = dispose;
@@ -95,6 +96,7 @@ export class ChangeTracker {
   }
 
   public dispose() {
+    this.stop();
     this._dispose && this._dispose();
     delete this._dispose;
   }
@@ -180,6 +182,17 @@ export class ChangeTracker {
       this._hasChanges(value);
       this._context.onHasChanges(value);
     }
+  }
+
+  public start(ms: number) {
+    this.stop();
+    this._interval = setInterval(() => this.recalculate(), ms);
+  }
+
+  public stop() {
+    if (!this._interval) return;
+    clearInterval(this._interval);
+    delete this._interval;
   }
 
   public rowByIdHasChanges(id: string) {
@@ -270,6 +283,14 @@ async function run() {
   test('a different row should not have changes', false, ct.rowByIdHasChanges('10'));
   test('a different column same row should not have changes 2', false, ct.valueHasChanges(rows[10], 'column_5'));
   test('a different row should not have changes 2', false, ct.rowHasChanges(rows[10]));
+  ct.commit();
+  ct.start(250);
+  test('no changes', false, ct.hasChanges);
+  r['column_4'] = 'blahh!!';
+  setTimeout(() => {
+    test('should have changes', true, ct.hasChanges);
+    ct.dispose();
+  }, 750);
 }
 setTimeout(run, 2000);
 */
