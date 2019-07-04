@@ -161,7 +161,7 @@ function createHandler(eq: EQType, parent?: () => void) {
         while (proto !== _objectProto) {
           let propDesc = Object.getOwnPropertyDescriptor(proto, property);
           if (propDesc && propDesc.set && typeof propDesc.set === 'function') {
-            target[property] = value;
+            propDesc.set.call(receiver, value);
             return true;
           }
           proto = Object.getPrototypeOf(proto);

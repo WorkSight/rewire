@@ -15,10 +15,10 @@ import {
 import { RowModel }  from './RowModel';
 
 const _guards = new Map();
-function guard<T>(context: any, fn: () => T) {
+function guard<T>(context: any, fn: (...args: any[]) => T, ...args: any[]) {
   if (_guards.has(context)) return;
   _guards.set(context, true);
-  const result = fn.call(context);
+  const result = fn.apply(context, args);
   _guards.delete(context);
   return result;
 }
@@ -183,7 +183,7 @@ export class CellModel implements ICell {
       } else {
         this.row.mergeStandardColumns();
       }
-      guard(this.row.cells[this.column.name], this.runOnValueChange);
+      guard(this, this.runOnValueChange, value);
     }
   }
 
