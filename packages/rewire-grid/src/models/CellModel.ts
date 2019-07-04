@@ -159,8 +159,8 @@ export class CellModel implements ICell {
     this.value = undefined;
   }
 
-  private runOnValueChange() {
-    this.onValueChange && this.onValueChange(this, this.value);
+  private runOnValueChange(value: any) {
+    this.onValueChange && this.onValueChange(this, value);
     if (this.grid.isChangeTracking) { // cell change tracking support!
       const ct: any = (this.grid as any).__changeTracker;
       ct.recalculate(); // queue grid recalculation!
