@@ -247,7 +247,7 @@ export class CellModel implements ICell {
   }
 
   validate() {
-    if (this.row.fixed) return;
+    if (this.row.fixed || !this.grid.isRowCompleteFn(this.row)) return;
     this.grid.validator.validateField((this.row as RowModel), this.column.name);
   }
 
