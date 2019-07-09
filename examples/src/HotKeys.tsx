@@ -45,96 +45,96 @@ export const HotKeysDialog = withStyles(styles, (props: HotKeysDialogProps) => {
         <div className={classes.dialogContentsContainer}>
           <div className={classes.dialogContents}>
             <div className={classes.hotkeyContainer}>
-              <Typography className={classes.hotkeyLabel}>Ctrl + C:</Typography>
-              <Typography>Copy Selected Cell(s)</Typography>
+              <Typography variant='body2' className={classes.hotkeyLabel}>Ctrl + C:</Typography>
+              <Typography variant='body2'>Copy Selected Cell(s)</Typography>
             </div>
             <div className={classes.hotkeyContainer}>
-              <Typography className={classes.hotkeyLabel}>Ctrl + V:</Typography>
-              <Typography>Paste To Selected Cell(s)</Typography>
+              <Typography variant='body2' className={classes.hotkeyLabel}>Ctrl + V:</Typography>
+              <Typography variant='body2'>Paste To Selected Cell(s)</Typography>
             </div>
             <div className={classes.hotkeyContainer}>
-              <Typography className={classes.hotkeyLabel}>Ctrl + X:</Typography>
-              <Typography>Cut Selected Cell(s)</Typography>
+              <Typography variant='body2' className={classes.hotkeyLabel}>Ctrl + X:</Typography>
+              <Typography variant='body2'>Cut Selected Cell(s)</Typography>
             </div>
             <div className={classes.hotkeyContainer}>
-              <Typography className={classes.hotkeyLabel}>Ctrl + R:</Typography>
-              <Typography>Revert Selected Cell(s)</Typography>
+              <Typography variant='body2' className={classes.hotkeyLabel}>Ctrl + R:</Typography>
+              <Typography variant='body2'>Revert Selected Cell(s)</Typography>
             </div>
             <div className={classes.hotkeyContainer}>
-              <Typography className={classes.hotkeyLabel}>Ctrl + U:</Typography>
-              <Typography>Revert Selected Row(s)</Typography>
+              <Typography variant='body2' className={classes.hotkeyLabel}>Ctrl + U:</Typography>
+              <Typography variant='body2'>Revert Selected Row(s)</Typography>
             </div>
             <div className={classes.hotkeyContainer}>
-              <Typography className={classes.hotkeyLabel}>Ctrl + Insert:</Typography>
-              <Typography>Insert Row below selected row(s)</Typography>
+              <Typography variant='body2' className={classes.hotkeyLabel}>Ctrl + Insert:</Typography>
+              <Typography variant='body2'>Insert Row below selected row(s)</Typography>
             </div>
             <div className={classes.hotkeyContainer}>
-              <Typography className={classes.hotkeyLabel}>Ctrl + D:</Typography>
-              <Typography>Duplicate selected row(s)</Typography>
+              <Typography variant='body2' className={classes.hotkeyLabel}>Ctrl + D:</Typography>
+              <Typography variant='body2'>Duplicate selected row(s)</Typography>
             </div>
             <div className={classes.hotkeyContainer}>
-              <Typography className={classes.hotkeyLabel}>Ctrl + Delete:</Typography>
-              <Typography>Delete selected row(s)</Typography>
+              <Typography variant='body2' className={classes.hotkeyLabel}>Ctrl + Delete:</Typography>
+              <Typography variant='body2'>Delete selected row(s)</Typography>
             </div>
             <div className={classes.hotkeyContainer}>
-              <Typography className={classes.hotkeyLabel}>Escape:</Typography>
-              <Typography>If editing, exit editing without changes. Otherwise, de-select cell(s)</Typography>
+              <Typography variant='body2' className={classes.hotkeyLabel}>Escape:</Typography>
+              <Typography variant='body2'>If editing, exit editing without changes. Otherwise, de-select cell(s)</Typography>
             </div>
             <div className={classes.hotkeyContainer}>
-              <Typography className={classes.hotkeyLabel}>Enter:</Typography>
-              <Typography>If editing, exit editing with changes</Typography>
+              <Typography variant='body2' className={classes.hotkeyLabel}>Enter:</Typography>
+              <Typography variant='body2'>If editing, exit editing with changes</Typography>
             </div>
             <div className={classes.hotkeyContainer}>
-              <Typography className={classes.hotkeyLabel}>Delete:</Typography>
-              <Typography>If not editing, delete value of selected cell(s)</Typography>
+              <Typography variant='body2' className={classes.hotkeyLabel}>Delete:</Typography>
+              <Typography variant='body2'>If not editing, delete value of selected cell(s)</Typography>
             </div>
             <div className={classes.hotkeyContainer}>
-              <Typography className={classes.hotkeyLabel}>Arrow Up:</Typography>
-              <Typography>Move up one cell</Typography>
+              <Typography variant='body2' className={classes.hotkeyLabel}>Arrow Up:</Typography>
+              <Typography variant='body2'>Move up one cell</Typography>
             </div>
             <div className={classes.hotkeyContainer}>
-              <Typography className={classes.hotkeyLabel}>Arrow Down:</Typography>
-              <Typography>Move down one cell</Typography>
+              <Typography variant='body2' className={classes.hotkeyLabel}>Arrow Down:</Typography>
+              <Typography variant='body2'>Move down one cell</Typography>
             </div>
             <div className={classes.hotkeyContainer}>
-              <Typography className={classes.hotkeyLabel}>Arrow Left:</Typography>
-              <Typography>Move left one cell. If end of line, attempt to wrap to line above</Typography>
+              <Typography variant='body2' className={classes.hotkeyLabel}>Arrow Left:</Typography>
+              <Typography variant='body2'>Move left one cell. If end of line, attempt to wrap to line above</Typography>
             </div>
             <div className={classes.hotkeyContainer}>
-              <Typography className={classes.hotkeyLabel}>Arrow Right:</Typography>
-              <Typography>Move right one cell. If end of line, attempt to wrap to line below</Typography>
+              <Typography variant='body2' className={classes.hotkeyLabel}>Arrow Right:</Typography>
+              <Typography variant='body2'>Move right one cell. If end of line, attempt to wrap to line below</Typography>
             </div>
             <div className={classes.hotkeyContainer}>
-              <Typography className={classes.hotkeyLabel}>Home:</Typography>
-              <Typography>Go to the first selectable cell of the row</Typography>
+              <Typography variant='body2' className={classes.hotkeyLabel}>Home:</Typography>
+              <Typography variant='body2'>Go to the first selectable cell of the row</Typography>
             </div>
             <div className={classes.hotkeyContainer}>
-              <Typography className={classes.hotkeyLabel}>End:</Typography>
-              <Typography>Go to the last selectable cell of the row</Typography>
+              <Typography variant='body2' className={classes.hotkeyLabel}>End:</Typography>
+              <Typography variant='body2'>Go to the last selectable cell of the row</Typography>
             </div>
             <div className={classes.hotkeyContainer}>
-              <Typography className={classes.hotkeyLabel}>Ctrl + Home:</Typography>
-              <Typography>Go to the first selectable cell of the grid</Typography>
+              <Typography variant='body2' className={classes.hotkeyLabel}>Ctrl + Home:</Typography>
+              <Typography variant='body2'>Go to the first selectable cell of the grid</Typography>
             </div>
             <div className={classes.hotkeyContainer}>
-              <Typography className={classes.hotkeyLabel}>Ctrl + End:</Typography>
-              <Typography>Go to the last selectable cell of the grid</Typography>
+              <Typography variant='body2' className={classes.hotkeyLabel}>Ctrl + End:</Typography>
+              <Typography variant='body2'>Go to the last selectable cell of the grid</Typography>
             </div>
             <div className={classes.hotkeyContainer}>
-              <Typography className={classes.hotkeyLabel}>Ctrl + Click:</Typography>
-              <Typography>If Multiselect, append selection</Typography>
+              <Typography variant='body2' className={classes.hotkeyLabel}>Ctrl + Click:</Typography>
+              <Typography variant='body2'>If Multiselect, append selection</Typography>
             </div>
             <div className={classes.hotkeyContainer}>
-              <Typography className={classes.hotkeyLabel}>Ctrl + Drag:</Typography>
-              <Typography>If Multiselect, append dragged cells</Typography>
+              <Typography variant='body2' className={classes.hotkeyLabel}>Ctrl + Drag:</Typography>
+              <Typography variant='body2'>If Multiselect, append dragged cells</Typography>
             </div>
             <div className={classes.hotkeyContainer}>
-              <Typography className={classes.hotkeyLabel}>Shift + Click:</Typography>
-              <Typography>If Multiselect, append cells between start and clicked cell</Typography>
+              <Typography variant='body2' className={classes.hotkeyLabel}>Shift + Click:</Typography>
+              <Typography variant='body2'>If Multiselect, append cells between start and clicked cell</Typography>
             </div>
             <div className={classes.hotkeyContainer}>
-              <Typography className={classes.hotkeyLabel}>Shift + Drag:</Typography>
-              <Typography>If Multiselect, append cells between start and dragged cells</Typography>
+              <Typography variant='body2' className={classes.hotkeyLabel}>Shift + Drag:</Typography>
+              <Typography variant='body2'>If Multiselect, append cells between start and dragged cells</Typography>
             </div>
           </div>
         </div>

@@ -33,7 +33,11 @@ const styles = (theme: Theme) => ({
   },
   listItemText: {
   },
+  listItemTypography: {
+  },
   listItemIcon: {
+    minWidth: '0px',
+    marginRight: '16px',
   },
   menuItem: {
   },
@@ -82,7 +86,7 @@ class ActionMenu extends React.Component<ActionMenuProps, IActionMenuState> {
     this.setState({anchorEl: undefined});
   }
 
-  renderMenuContent = React.memo((): JSX.Element => {
+  renderMenuContent = React.memo(React.forwardRef((): JSX.Element => {
     return <Observe render={() => {
       const {classes, items} = this.props;
       return (
@@ -103,14 +107,14 @@ class ActionMenu extends React.Component<ActionMenuProps, IActionMenuState> {
               <ListItemIcon className={classes.listItemIcon}>
                 {item.icon ? <item.icon /> : <LabelIcon />}
               </ListItemIcon>
-              <ListItemText className={classes.listItemText} primary={item.title} />
+              <ListItemText className={classes.listItemText} primary={item.title} primaryTypographyProps={{classes: {root: classes.listItemTypography}}} />
             </MenuItem>
           );
         })}
         </>
       );
     }} />;
-  });
+  }));
 
   render() {
     const {classes, menuId, buttonContent, buttonProps, items, marginThreshold, MenuListProps, ...restProps} = this.props;

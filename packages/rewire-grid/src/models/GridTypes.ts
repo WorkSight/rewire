@@ -217,6 +217,7 @@ export interface IGridFontSizes {
   header?: string;
   body?: string;
   groupRow?: string;
+  toggleMenu?: string;
 }
 
 export interface IToggleableColumnsOptions {

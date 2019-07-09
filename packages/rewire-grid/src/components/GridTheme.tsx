@@ -10,6 +10,7 @@ declare module '@material-ui/core/styles/createMuiTheme' {
       header: string,
       body: string,
       groupRow: string,
+      toggleMenu: string,
     };
   }
 
@@ -18,6 +19,7 @@ declare module '@material-ui/core/styles/createMuiTheme' {
       header?: string,
       body?: string,
       groupRow?: string,
+      toggleMenu?: string,
     };
   }
 }
@@ -258,19 +260,29 @@ const defaultGridFontSizes: IGridFontSizes = {
   header: '1rem',
   body: '1rem',
   groupRow: '0.9rem',
+  toggleMenu: '1rem',
 };
 
 const defaultGridTypography: any = {
-  useNextVariants: true,
 };
 
-export default function createGridTheme(options: ThemeOptions = {}): Theme {
-  let defaultPalette: any = {};
+export default function createGridTheme(options: ThemeOptions = {}, outerTheme?: Theme): Theme {
+  let fontSizes    = defaultGridFontSizes;
+  let typography   = defaultGridTypography;
+  let palette: any = {};
   Object.keys(defaultGridColors).forEach(colorName => {
-    defaultPalette[colorName] = {main: defaultGridColors[colorName]};
+    palette[colorName] = {main: defaultGridColors[colorName]};
   });
 
-  let defaultThemeOptions: ThemeOptions = {palette: defaultPalette, fontSizes: defaultGridFontSizes, typography: defaultGridTypography};
+  if (outerTheme) {
+    palette    = merge(outerTheme.palette, palette);
+    fontSizes  = merge(outerTheme.fontSizes, fontSizes);
+    typography = merge(outerTheme.typography, typography);
+  }
+
+  let defaultThemeOptions: ThemeOptions = {...outerTheme, palette: palette, fontSizes: fontSizes, typography: typography};
   let gridThemeOptions: ThemeOptions    = merge(defaultThemeOptions, options);
-  return createMuiTheme(gridThemeOptions);
+  let gridTheme = createMuiTheme(gridThemeOptions);
+
+  return gridTheme;
 }
