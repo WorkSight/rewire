@@ -20,11 +20,15 @@ const styles = (theme: Theme) => ({
     paddingTop: '0.75em',
     paddingBottom: '0.75em',
   },
+  inputMultiline: {
+    paddingTop: '0.28125em !important',
+    paddingBottom: '0.34375em !important',
+  },
   inputOutlinedMultilineInput: {
     paddingTop: 0,
     paddingBottom: 0,
-    marginTop: '0.75em',
-    marginBottom: '0.75em',
+    marginTop: '0.65625em',
+    marginBottom: '0.65625em',
   },
   inputOutlinedMultiline: {
     paddingTop: 0,
@@ -47,9 +51,6 @@ const styles = (theme: Theme) => ({
     marginTop: '1em !important',
   },
   formControlRoot: {
-  },
-  inputType: {
-    height: 'auto',
   },
   inputAdornmentRoot: {
     height: 'auto',
@@ -190,8 +191,7 @@ class TextFieldInternal extends React.Component<TextFieldPropsStyled> {
     const {classes, type, variant, multiline} = this.props;
     const startAdornment                      = this.props.startAdornment ? <InputAdornment position='start' classes={{root: classes.inputAdornmentRoot}}>{this.props.startAdornment}</InputAdornment> : undefined;
     const endAdornment                        = this.props.endAdornment ? <InputAdornment position='end' classes={{root: classes.inputAdornmentRoot}}>{this.props.endAdornment}</InputAdornment> : undefined;
-    const inputTypeClassName                  = type !== 'date' ? classes.inputType : undefined;
-    const multilineClassName                  = variant === 'outlined' ? classes.inputOutlinedMultiline : startAdornment || endAdornment ? classes.inputMultilineWithAdornment : classes.inputInput;
+    const multilineClassName                  = variant === 'outlined' ? classes.inputOutlinedMultiline : startAdornment || endAdornment ? classes.inputMultilineWithAdornment : classes.inputMultiline;
     const inputFormControlClassName           = variant === 'standard' && this.props.label ? classes.inputFormControlWithLabel : undefined;
     let inputClassName: string | undefined    = undefined;
     if (variant === 'outlined') {
@@ -225,7 +225,7 @@ class TextFieldInternal extends React.Component<TextFieldPropsStyled> {
         onKeyDown={this.handleKeyDown}
         onChange={(evt: React.ChangeEvent<HTMLInputElement>) => this.onValueChange(evt.target.value)}
         inputProps={{spellCheck: !!multiline, className: classes.nativeInput, style: {textAlign: this.props.align || 'left'}}}
-        InputProps={{startAdornment: startAdornment, endAdornment: endAdornment, classes: {root: classes.inputRoot, multiline: multilineClassName, input: inputClassName, inputType: inputTypeClassName, formControl: inputFormControlClassName}}}
+        InputProps={{startAdornment: startAdornment, endAdornment: endAdornment, classes: {root: classes.inputRoot, multiline: multilineClassName, input: inputClassName, formControl: inputFormControlClassName}}}
         InputLabelProps={{shrink: true, classes: {root: classes.inputLabelRoot, outlined: classes.inputLabelOutlined, shrink: classes.inputLabelShrink}}}
         FormHelperTextProps={{classes: {root: classes.helperTextRoot, contained: classes.helperTextContained}}}
       />);
@@ -254,7 +254,7 @@ class TextFieldInternal extends React.Component<TextFieldPropsStyled> {
           onKeyDown={this.handleKeyDown}
           onChange={props.onChange}
           inputProps={{spellCheck: !!multiline, className: classes.nativeInput, style: {textAlign: props.align || 'left'}}}
-          InputProps={{startAdornment: startAdornment, endAdornment: endAdornment, classes: {root: classes.inputRoot, multiline: multilineClassName, input: inputClassName, inputType: inputTypeClassName, formControl: inputFormControlClassName}}}
+          InputProps={{startAdornment: startAdornment, endAdornment: endAdornment, classes: {root: classes.inputRoot, multiline: multilineClassName, input: inputClassName, formControl: inputFormControlClassName}}}
           InputLabelProps={{shrink: true, classes: {root: classes.inputLabelRoot, outlined: classes.inputLabelOutlined, shrink: classes.inputLabelShrink}}}
           FormHelperTextProps={{classes: {root: classes.helperTextRoot, contained: classes.helperTextContained}}}
         />

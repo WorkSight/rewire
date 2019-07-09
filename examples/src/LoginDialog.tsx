@@ -51,7 +51,7 @@ class LoginDialog extends Modal {
 }
 
 const loginDialog = new LoginDialog();
-const LoginFormView = ({form}: {form: typeof loginDialog.form}) => (
+const LoginFormView = React.memo(React.forwardRef(({form}: {form: typeof loginDialog.form}) => (
   <Observe render={() => (
     <div style={{fontSize: '16px'}}>
     <FormView form={form} onSubmit={loginDialog.actionFn('login')}>
@@ -78,7 +78,7 @@ const LoginFormView = ({form}: {form: typeof loginDialog.form}) => (
     </FormView>
     </div>
   )} />
-);
+)));
 
 const getLoginTitle = (dialog: Modal): JSX.Element => {
   return <div>Login</div>;

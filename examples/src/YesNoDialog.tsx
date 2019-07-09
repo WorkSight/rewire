@@ -44,7 +44,7 @@ export class ConfirmationModel extends Modal {
 export const ConfirmationDialog = (props: any) => (
   <Dialog dialog={props.viewModel} maxWidth='xs'>
     <div style={{ textAlign: 'center', margin: 16 }}>
-      <Typography>Are you really sure?</Typography>
+      <Typography variant='body2'>Are you really sure?</Typography>
     </div>
   </Dialog>
 );

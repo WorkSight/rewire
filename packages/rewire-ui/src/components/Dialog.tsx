@@ -84,7 +84,7 @@ export const DefaultActionRenderer: ActionRenderType = ({label, action, isDisabl
 );
 
 const TRANSITION_TIMEOUT = 220;
-const Transition = (props: any) => <Grow {...props} timeout={TRANSITION_TIMEOUT} onEntered={(node => node.style.transform = 'none')} />;
+const Transition = React.forwardRef((props: any, ref: any) => <Grow {...props} ref={ref} timeout={TRANSITION_TIMEOUT} onEntered={(node => node.style.transform = 'none')} />);
 
 export interface IDialogProps {
   dialog                : Modal;
@@ -121,7 +121,7 @@ class DialogInternal extends React.Component<DialogProps> {
     });
   }
 
-  renderDialogContent = React.memo((): JSX.Element => {
+  renderDialogContent = React.memo(React.forwardRef((): JSX.Element => {
     const {classes, children, dialog, ButtonRenderer, title, buttonVariant} = this.props;
     const {buttonRoot, buttonIcon, buttonLabel} = classes;
     const buttonClasses                         = {root: buttonRoot, icon: buttonIcon, label: buttonLabel};
@@ -152,7 +152,7 @@ class DialogInternal extends React.Component<DialogProps> {
         </>
       )} />
     );
-  });
+  }));
 
   render() {
     const {classes, dialog, fullWidth, fullScreen, maxWidth, disableEscapeKeyDown, hideBackdrop, transition, transitionDuration, disableTransition, disableEnforceFocus} = this.props;

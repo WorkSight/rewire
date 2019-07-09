@@ -118,11 +118,11 @@ const TestFormView = ({form}: {form: typeof testDialog.form}) => (
   )} />
 );
 
-export const AboutView = (props: any) => (
+export const AboutView = React.memo((props: any) => (
   <TransitionWrapper>
     <div>
       <h2>About</h2>
       <TestFormView form={testDialog.form} />
     </div>
   </TransitionWrapper>
-);
+));

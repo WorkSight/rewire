@@ -33,7 +33,7 @@ let sortableItems: TItem[] = observable([
   { id: '4-item', name: 'Fourth Item' }
 ]);
 
-export const TopicsView = ({ match }: any) => (
+export const TopicsView = React.memo(({ match }: any) => (
   <TransitionWrapper>
   <div>
     <h2>Topics</h2>
@@ -67,13 +67,15 @@ export const TopicsView = ({ match }: any) => (
     )}/>
   </div>
   </TransitionWrapper>
-);
+));
 
 const sortableItemRenderer = (item: TItem): JSX.Element => {
   return (
-    <ListItem key={item.id} component={NavLink} to={`/topics/props-v-state`} activeClassName={'activeLink'} >
-      <Typography>{item.name}</Typography>
-    </ListItem>
+    <NavLink style={{textDecoration: 'none'}} to={`/topics/props-v-state`} activeClassName={'activeLink'}>
+      <ListItem key={item.id}>
+        <Typography>{item.name}</Typography>
+      </ListItem>
+    </NavLink>
   );
 };
 

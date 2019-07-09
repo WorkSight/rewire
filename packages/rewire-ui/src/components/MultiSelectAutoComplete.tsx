@@ -67,7 +67,7 @@ const styles = (theme: Theme) => ({
   chip: {
     fontSize: '0.8em',
     height: '24px',
-    margin: `${theme.spacing.unit / 2}px ${theme.spacing.unit / 8}px`,
+    margin: `${theme.spacing(0.5)}px ${theme.spacing(0.2)}px`,
   },
   inputRoot: {
     lineHeight: 'inherit',
@@ -113,7 +113,6 @@ const styles = (theme: Theme) => ({
   menuItem: {
     fontSize: 'inherit',
     height: 'auto',
-    lineHeight: '1em',
   },
   noResults: {
     padding: '11px 16px',
@@ -331,7 +330,7 @@ class MultiSelectAutoComplete<T> extends React.Component<MultiSelectAutoComplete
 
     if (!suggestions || suggestions.length <= 0) {
       if (showEmpty) {
-       suggestions = <Typography className={classNames(classes.menuItem, classes.noResults)}>No Results</Typography>;
+       suggestions = <Typography variant='body2' className={classNames(classes.menuItem, classes.noResults)}>No Results</Typography>;
       } else {
         return null;
       }

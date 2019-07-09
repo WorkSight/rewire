@@ -10,22 +10,19 @@ const styles = (theme: Theme) => ({
   inputRoot: {
   },
   switchRoot: {
-    width: '3.875em',
+    width: 'auto',
+    height: 'auto',
     fontSize: '1em',
   },
   switchBase: {
     fontSize: '1em',
-    width: '3em',
-    height: '3em',
   },
-  switchBar: {
+  switchTrack: {
     width: '2.125em',
     height: '0.875em',
-    marginTop: '-0.4375em',
-    marginLeft: '-1.0625em',
     borderRadius: '0.4375em',
   },
-  switchIcon: {
+  switchThumb: {
     width: '1.25em',
     height: '1.25em',
   },
@@ -36,7 +33,6 @@ const styles = (theme: Theme) => ({
     marginLeft: '0px',
   },
   formControlLabelLabel: {
-    marginLeft: '-0.375em',
     fontSize: '0.875em',
   },
   switchContainerNoLabel: {
@@ -89,7 +85,7 @@ class SwitchInternal extends React.Component<SwitchPropsStyled> {
               inputProps={{}}
               checked={this.props.value}
               onChange={(evt: React.ChangeEvent<HTMLInputElement>) => this.props.onValueChange(evt.target.checked)}
-              classes={{root: classes.switchRoot, switchBase: classes.switchBase, bar: classes.switchBar, icon: classes.switchIcon, checked: classes.switchChecked}}
+              classes={{root: classes.switchRoot, switchBase: classes.switchBase, track: classes.switchTrack, thumb: classes.switchThumb, checked: classes.switchChecked}}
             />
           }
           disabled={this.props.disabled}
@@ -107,7 +103,7 @@ class SwitchInternal extends React.Component<SwitchPropsStyled> {
           inputProps={{}}
           checked={this.props.value}
           onChange={(evt: React.ChangeEvent<HTMLInputElement>) => this.props.onValueChange(evt.target.checked)}
-          classes={{root: classes.switchRoot, switchBase: classes.switchBase, bar: classes.switchBar, icon: classes.switchIcon, checked: classes.switchChecked}}
+          classes={{root: classes.switchRoot, switchBase: classes.switchBase, track: classes.switchTrack, thumb: classes.switchThumb, checked: classes.switchChecked}}
         />
       </div>
     );

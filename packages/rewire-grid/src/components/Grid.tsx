@@ -5,7 +5,7 @@ import {
   IGridFontSizes,
   IRow,
   IGroupRow
-}                                          from '../models/GridTypes';
+}                                            from '../models/GridTypes';
 import {
   Observe,
   disposeOnUnmount,
@@ -13,23 +13,23 @@ import {
   property,
   DataSignal,
   computed
-}                                          from 'rewire-core';
-import Column                              from './Column';
-import classNames                          from 'classnames';
-import Cell                                from './Cell';
-import Row, {GroupRow}                     from './Row';
-import GroupRowModel                       from '../models/GroupRowModel';
-import * as React                          from 'react';
-import * as Color                          from 'color';
-import {debounce}                          from 'rewire-common';
-import {WithStyle, withStyles, ToggleMenu} from 'rewire-ui';
-import {PopoverOrigin}                     from '@material-ui/core/Popover';
-import {ButtonProps}                       from '@material-ui/core/Button';
-import {MuiThemeProvider, Theme}           from '@material-ui/core/styles';
-import SettingsIcon                        from '@material-ui/icons/Settings';
-import createGridTheme                     from './GridTheme';
-import {scrollBySmooth}                    from '../models/SmoothScroll';
-import ResizeObserver                      from 'resize-observer-polyfill';
+}                                            from 'rewire-core';
+import Column                                from './Column';
+import classNames                            from 'classnames';
+import Cell                                  from './Cell';
+import Row, {GroupRow}                       from './Row';
+import GroupRowModel                         from '../models/GroupRowModel';
+import * as React                            from 'react';
+import * as Color                            from 'color';
+import {debounce}                            from 'rewire-common';
+import {WithStyle, withStyles, ToggleMenu}   from 'rewire-ui';
+import {PopoverOrigin}                       from '@material-ui/core/Popover';
+import {ButtonProps}                         from '@material-ui/core/Button';
+import {MuiThemeProvider, Theme}             from '@material-ui/core/styles';
+import SettingsIcon                          from '@material-ui/icons/Settings';
+import createGridTheme                       from './GridTheme';
+import {scrollBySmooth}                      from '../models/SmoothScroll';
+import ResizeObserver                        from 'resize-observer-polyfill';
 import './data-grid.scss';
 
 interface IColumnProps {
@@ -226,7 +226,7 @@ export default class Grid extends React.PureComponent<IGridProps> {
     });
 
     return (
-      <MuiThemeProvider theme={createGridTheme({palette: paletteObj, fontSizes: gridFontSizes})}>
+      <MuiThemeProvider theme={(outerTheme?: Theme) => createGridTheme({palette: paletteObj, fontSizes: gridFontSizes}, outerTheme)}>
         <GridInternal {...this.props} />
       </MuiThemeProvider>
     );
@@ -375,10 +375,18 @@ const styles = (theme: Theme) => {
       fontSize: '1.5em',
     },
     toggleableColumnsMenuItem: {
-      minWidth: '200x',
-      paddingTop: '6px',
-      paddingBottom: '6px',
-    }
+      minWidth: '200px',
+      paddingTop: `calc(${theme.fontSizes.toggleMenu} / 2.5)`,
+      paddingBottom: `calc(${theme.fontSizes.toggleMenu} / 2.5)`,
+    },
+    toggleColumnsListItemTypography: {
+      fontSize: theme.fontSizes.toggleMenu,
+    },
+    toggleColumnsListItemIcon: {
+      '& svg': {
+        fontSize: `calc(${theme.fontSizes.toggleMenu} * 1.5)`,
+      },
+    },
   };
   return styleObj;
 };
@@ -710,7 +718,7 @@ const GridInternal = withStyles(styles, class extends React.PureComponent<GridPr
           buttonContent={buttonContent}
           buttonProps={buttonProps}
           items={toggleableColumns}
-          classes={{menuButton: classes.toggleableColumnsButton, menuItem: classes.toggleableColumnsMenuItem} as any}
+          classes={{menuButton: classes.toggleableColumnsButton, menuItem: classes.toggleableColumnsMenuItem, listItemTypography: classes.toggleColumnsListItemTypography, listItemIcon: classes.toggleColumnsListItemIcon} as any}
           anchorOrigin={anchorOrigin}
           transformOrigin={transformOrigin}
           onItemClick={onItemClick}

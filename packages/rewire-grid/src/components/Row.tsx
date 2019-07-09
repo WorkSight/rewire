@@ -131,12 +131,13 @@ const Row = withStyles(styles, class extends PureComponent<RowProps, {}> {
       return;
     }
 
-    // if (this.props.columns && (this.props.columns.length > 0) && this.props.columns[0].fixed) return this.props.row.height;
     const el: any = this.element.current;
     if (!el) return this.props.row.height;
-    if (!initial) el.style.height = 'auto';
+    // if (!initial) el.style.height = 'auto';
     const height = el!.getBoundingClientRect().height;
-    this.props.row.height = height;
+    if (height > this.props.row.height) {
+      this.props.row.height = height;
+    }
   }
 
   render() {

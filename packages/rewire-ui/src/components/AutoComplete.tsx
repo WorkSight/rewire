@@ -101,7 +101,6 @@ const styles = (theme: Theme) => ({
   menuItem: {
     fontSize: 'inherit',
     height: 'auto',
-    lineHeight: '1em',
   },
   noResults: {
     padding: '11px 16px',
@@ -348,7 +347,7 @@ class AutoComplete<T> extends React.Component<AutoCompleteProps<T>, IAutoComplet
 
     if (!suggestions || suggestions.length <= 0) {
       if (showEmpty) {
-       suggestions = <Typography className={classNames(classes.menuItem, classes.noResults)}>No Results</Typography>;
+       suggestions = <Typography variant='body2' className={classNames(classes.menuItem, classes.noResults)}>No Results</Typography>;
       } else {
         return null;
       }

@@ -23,12 +23,12 @@ const styles = (theme: Theme) => ({
     fontSize: 'inherit',
   },
   inputInput: {
-    paddingTop: '0.375em',
-    paddingBottom: '0.4375em',
+    paddingTop: '0.28125em',
+    paddingBottom: '0.34375em',
   },
   inputOutlinedInput: {
-    paddingTop: '0.75em',
-    paddingBottom: '0.75em',
+    paddingTop: '0.65625em',
+    paddingBottom: '0.65625em',
   },
   inputLabelRoot: {
     fontSize: 'inherit',
@@ -69,7 +69,6 @@ const styles = (theme: Theme) => ({
   selectMenuItem: {
     fontSize: 'inherit',
     height: 'auto',
-    lineHeight: '1em',
   },
   inputAdornmentRoot: {
     height: 'auto',
@@ -369,7 +368,7 @@ class SelectInternal<T> extends React.Component<SelectInternalProps<T>, any> {
           onChange={this.handleChanged}
           autoFocus={this.props.autoFocus}
           inputProps={{spellCheck: false, className: classes.nativeInput, style: {textAlign: this.props.align || 'left'}}}
-          InputProps={{startAdornment: startAdornment, endAdornment: endAdornment, classes: {root: classes.inputRoot, input: inputClassName, inputType: classes.inputType, formControl: inputFormControlClassName}}}
+          InputProps={{startAdornment: startAdornment, endAdornment: endAdornment, classes: {root: classes.inputRoot, input: inputClassName, formControl: inputFormControlClassName}}}
           InputLabelProps={{shrink: true, classes: {root: classes.inputLabelRoot, outlined: classes.inputLabelOutlined, shrink: classes.inputLabelShrink}}}
           FormHelperTextProps={{classes: {root: classes.helperTextRoot, contained: classes.helperTextContained}}}
           SelectProps={{

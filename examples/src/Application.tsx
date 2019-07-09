@@ -56,7 +56,7 @@ const BasicExample = (props: any) => {
 
 // async function login() {
   // await fetch.post('accounts/login', { username: 'Administrator', password: '324#$as(lkf)' });
-  let theme = createMuiTheme({typography: {useNextVariants: true}});
+  let theme = createMuiTheme();
   ReactDOM.render(<MuiThemeProvider theme={theme}><BasicExample /></MuiThemeProvider>, document.getElementById('root'));
 // }
 

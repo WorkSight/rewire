@@ -29,8 +29,11 @@ const styles = (theme: Theme) => ({
   },
   listItemText: {
   },
+  listItemTypography: {
+  },
   listItemIcon: {
     marginRight: '0px',
+    minWidth: '0px',
     color: '#669639',
   },
   menuItem: {
@@ -80,7 +83,7 @@ class ToggleMenu extends React.Component<ToggleMenuProps, IToggleMenuState> {
     this.setState({anchorEl: undefined});
   }
 
-  renderMenuContent = React.memo((): JSX.Element => {
+  renderMenuContent = React.memo(React.forwardRef((): JSX.Element => {
     return <Observe render={() => {
       const {classes, items, onItemClick} = this.props;
       return (
@@ -91,7 +94,7 @@ class ToggleMenu extends React.Component<ToggleMenuProps, IToggleMenuState> {
           let clickHandler = !disabled ? ( onItemClick ? () => onItemClick(item) : () => this.handleItemClick(item) ) : undefined;
           return (
             <MenuItem key={item.name} classes={{root: rootClasses, selected: classes.menuItemSelected}} disableRipple={disabled} onClick={clickHandler}>
-              <ListItemText className={classes.listItemText} primary={item.title} />
+              <ListItemText className={classes.listItemText} primary={item.title} primaryTypographyProps={{classes: {root: classes.listItemTypography}}} />
               <Observe render={() => (
                 item.visible
                   ? <ListItemIcon className={classes.listItemIcon}>
@@ -105,7 +108,7 @@ class ToggleMenu extends React.Component<ToggleMenuProps, IToggleMenuState> {
         </>
       );
     }} />;
-  });
+  }));
 
   render() {
     const {classes, menuId, buttonContent, buttonProps, items, onItemClick, marginThreshold, MenuListProps, ...restProps} = this.props;
