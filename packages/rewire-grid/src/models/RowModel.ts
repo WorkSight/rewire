@@ -76,7 +76,7 @@ export class RowModel implements IRow, IDisposable, IValidationContext {
   }
 
   validate() {
-    if (this.grid.isRowCompleteFn(this)) this.grid.validator.validate(this);
+    if (!this.fixed && this.grid.isRowCompleteFn(this)) this.grid.validator.validate(this);
   }
 
   set allowMergeColumns(value: boolean) {
