@@ -655,7 +655,6 @@ const GridInternal = withStyles(styles, class extends React.PureComponent<GridPr
       return <Observe render={() => rows.map((row, index) => <Row key={row.id} height={this.props.grid.rowHeight} columns={columns} Cell={Cell} index={index} className={((index % 2) === 1) ? 'alt' : ''} row={row} />)} />;
     }
 
-    // group rows yeah!!
     const visibleColumns: number = columns.reduce((previous, current) => previous + ((current.visible) ? 1 : 0), 0);
     return <Observe render={() => this.renderGroups(columns, visibleColumns, fixed)} />;
   }

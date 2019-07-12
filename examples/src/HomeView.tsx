@@ -113,6 +113,21 @@ const ComplexCell: React.SFC<ICell> = (cell) => {
       <div style={{fontSize: '0.85em'}}>
         {cell.value && cell.value.age}
       </div>
+      <div style={{fontSize: '0.85em'}}>
+        Surprise
+      </div>
+    </div>
+  );
+};
+const ComplexCell2: React.SFC<ICell> = (cell) => {
+  return (
+    <div style={{width: '100%', textAlign: cell.align}}>
+      <div style={{fontSize: '0.9em', fontWeight: 'bold', color: '#14809D'}}>
+        {cell.value && cell.value.name}
+      </div>
+      <div style={{fontSize: '0.85em'}}>
+        {cell.value && cell.value.age}
+      </div>
     </div>
   );
 };
@@ -200,6 +215,7 @@ function createTestGrid(nRows: number, nColumns: number) {
   };
 
   cols.push(createColumn('complexColumn', 'Complex', { type: 'none', renderer: ComplexCell, compare: ComplexCellData.compare, validators: complexColumnValidator, width: Math.trunc(Math.random() * 250 + 50) + 'px' }));
+  cols.push(createColumn('complexColumn2', 'Complex', { type: 'none', fixed: true, renderer: ComplexCell2, compare: ComplexCellData.compare, validators: complexColumnValidator, width: Math.trunc(Math.random() * 250 + 50) + 'px' }));
   // Override and set some columns to be number!
   cols[5].setEditor({ type: 'number', options: { decimals: 2, thousandSeparator: true } });
   cols[6].setEditor({ type: 'number', options: { decimals: 3, thousandSeparator: true } });
@@ -227,6 +243,7 @@ function createTestGrid(nRows: number, nColumns: number) {
       else if (colName === 'maskColumn') v = undefined;
       else if (colName === 'dateColumn') v = utc();
       else if (colName === 'complexColumn') v = row > 3 ? new ComplexCellData(nanoid(10), 'Homer', 45) : undefined;
+      else if (colName === 'complexColumn2') v = row > 3 ? new ComplexCellData(nanoid(10), 'Smithers', 56) : undefined;
       else if (colName === 'phoneColumn') v = Number.parseInt('1250' + Math.round(Math.random() * 100000000).toString());
       else if (((column >= 5) && (column <= 6)) || colName === 'numberColumn') v = Math.random() * 10000;
       r.data![colName] = v;

@@ -15,11 +15,11 @@ import {
   IGridVariableKeybinds,
   IRowData,
   IToggleableColumnsOptions,
-}                              from './GridTypes';
-import {isNullOrUndefined}     from 'rewire-common';
-import createRow, {RowModel}   from './RowModel';
-import {ColumnModel}           from './ColumnModel';
-import {CellModel}             from './CellModel';
+}                                       from './GridTypes';
+import {isNullOrUndefined}              from 'rewire-common';
+import createRow, {RowModel}            from './RowModel';
+import {ColumnModel}                    from './ColumnModel';
+import {CellModel}                      from './CellModel';
 import {
   gridStaticKeybinds,
   gridDefaultVariableKeybinds
@@ -507,9 +507,9 @@ class GridModel implements IGrid, IDisposable {
   }
 
   sort() {
-    if (!this._sort || this._sort.length === 0) return;
+    if ( (!this.groupBy || !this.groupBy.length) && (!this._sort || this._sort.length === 0) ) return;
     let rowCompareFn = (r1: IRow, r2: IRow): number => {
-      if (this.groupBy && (this.groupBy.length > 0)) {
+      if (this.groupBy && this.groupBy.length) {
         for (const column of this.groupBy) {
           let compareFn = column.compare;
           let v1 = r1.cells[column.name].value;
@@ -760,9 +760,20 @@ class GridModel implements IGrid, IDisposable {
   }
 
   setColumnPositions() {
-    for (let colIdx = 0; colIdx < this.columns.length; colIdx++) {
-      this.columns[colIdx].position = colIdx;
-    }
+    freeze(() => {
+      let colIdx = 0;
+      this.fixedColumns.forEach((column: IColumn) => {
+        column.position = colIdx;
+        colIdx++;
+      });
+      this.standardColumns.forEach((column: IColumn) => {
+        column.position = colIdx;
+        colIdx++;
+      });
+    });
+    freeze(() => {
+      this.columns.sort(ColumnModel.positionCompare);
+    });
   }
 
   hasErrors(): boolean {
@@ -1108,6 +1119,7 @@ class GridModel implements IGrid, IDisposable {
           grid.addColumn(column);
         }
       });
+      grid.setColumnPositions();
       freeze(() => {
         let headerRow = columns.reduce((previous: any, current: any) => (previous[current.name] = current.title, previous), {});
         grid.addFixedRow({data: headerRow});
@@ -1121,7 +1133,6 @@ class GridModel implements IGrid, IDisposable {
                                    : [];
       });
       freeze(() => {
-        grid.setColumnPositions();
         grid._addRows(rows);
       });
       grid.loading = false;
