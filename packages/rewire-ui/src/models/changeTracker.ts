@@ -133,7 +133,7 @@ export class ChangeTracker {
       if (!this._working || !this._original) return;
       this.setHasChanges(false);
       this._working!.length = this._original.size;
-      for (const value of Object.values(this._original) as any[]) {
+      for (const value of Object.values(this._original.data) as any[]) {
         this._context.setRow(value.index, clone(value.data, 2));
       }
     });
@@ -263,6 +263,10 @@ async function run() {
   ct.recalculate();
   rows.push({ooga: 'ooga'});
   test('after repushing should be true', true, await ct.recalculate());
+  ct.revert();
+  test('after rejecting changes should be false', false, await ct.recalculate());
+  rows[6]['column_4'] = 'yikes';
+  test('after changing value should be true', true, await ct.recalculate());
   ct.revert();
   test('after rejecting changes should be false', false, await ct.recalculate());
   const oldValue = rows[8]['column_4'];
