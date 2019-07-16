@@ -77,6 +77,24 @@ export const GroupRow = React.memo(withStyles(styles, (props: IGroupProps & {cla
 }));
 
 type RowProps = WithStyle<ReturnType<typeof styles>, IRowProps>;
+const rowElementMap = new Map<IRow, HTMLTableRowElement[]>();
+function addElement(row: IRow, element: HTMLTableRowElement) {
+  const e = rowElementMap.get(row);
+  if (!e) rowElementMap.set(row, [element]);
+  else e.push(element);
+}
+
+function getElements(row: IRow): HTMLTableRowElement[] {
+  return rowElementMap.get(row) || [];
+}
+
+function removeElement(row: IRow, element: HTMLTableRowElement) {
+  const e = rowElementMap.get(row);
+  if (!e) return;
+
+  e.splice(e.indexOf(element, 1));
+  if (e.length === 0) rowElementMap.delete(row);
+}
 
 const Row = withStyles(styles, class extends PureComponent<RowProps, {}> {
   element: React.RefObject<HTMLTableRowElement>;
@@ -97,9 +115,7 @@ const Row = withStyles(styles, class extends PureComponent<RowProps, {}> {
   }
 
   componentDidMount() {
-    const r = this.props.row as any;
-    if (!r.__element) r.__element = [this.element.current];
-    else r.__element.push(this.element.current);
+    addElement(this.props.row, this.element.current!);
     this.calculateInitialHeight();
     if (this.props.height === undefined) {
       this.observer = new MutationObserver(() => this.calculateDynamicHeight());
@@ -113,9 +129,7 @@ const Row = withStyles(styles, class extends PureComponent<RowProps, {}> {
       delete this.observer;
     }
 
-    const r = this.props.row as any;
-    if (!r.__element) return;
-    (r.__element as any[]).splice(r.__element.indexOf(this.element.current), 1);
+    removeElement(this.props.row, this.element.current!);
   }
 
   renderCells = () => {
@@ -132,20 +146,21 @@ const Row = withStyles(styles, class extends PureComponent<RowProps, {}> {
   }
 
   calculateInitialHeight() {
-    const r = this.props.row as any;
+    const elements = getElements(this.props.row);
+
     if (!isNullOrUndefined(this.props.height)) {
-      for (const e of r.__element) {
+      for (const e of elements) {
         e.style.height = `${this.props.height}px`;
       }
       return;
     }
 
     let newHeight = 0;
-    for (const e of r.__element) {
+    for (const e of elements) {
       newHeight = Math.max(newHeight, e.getBoundingClientRect().height);
     }
 
-    for (const e of r.__element) {
+    for (const e of elements) {
       e.style.height = `${newHeight}px`;
     }
   }
@@ -156,13 +171,13 @@ const Row = withStyles(styles, class extends PureComponent<RowProps, {}> {
     }
 
     let newHeight = 0;
-    const r = this.props.row as any;
-    for (const e of r.__element) {
+    const elements = getElements(this.props.row);
+    for (const e of elements) {
       e.style.height = 'auto';
       newHeight = Math.max(newHeight, e.getBoundingClientRect().height);
     }
 
-    for (const e of r.__element) {
+    for (const e of elements) {
       e.style.height = `${newHeight}px`;
     }
   }
