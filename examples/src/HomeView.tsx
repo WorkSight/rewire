@@ -113,21 +113,6 @@ const ComplexCell: React.SFC<ICell> = (cell) => {
       <div style={{fontSize: '0.85em'}}>
         {cell.value && cell.value.age}
       </div>
-      <div style={{fontSize: '0.85em'}}>
-        Surprise
-      </div>
-    </div>
-  );
-};
-const ComplexCell2: React.SFC<ICell> = (cell) => {
-  return (
-    <div style={{width: '100%', textAlign: cell.align}}>
-      <div style={{fontSize: '0.9em', fontWeight: 'bold', color: '#14809D'}}>
-        {cell.value && cell.value.name}
-      </div>
-      <div style={{fontSize: '0.85em'}}>
-        {cell.value && cell.value.age}
-      </div>
     </div>
   );
 };
@@ -215,7 +200,7 @@ function createTestGrid(nRows: number, nColumns: number) {
   };
 
   cols.push(createColumn('complexColumn', 'Complex', { type: 'none', renderer: ComplexCell, compare: ComplexCellData.compare, validators: complexColumnValidator, width: Math.trunc(Math.random() * 250 + 50) + 'px' }));
-  cols.push(createColumn('complexColumn2', 'Complex', { type: 'none', fixed: true, renderer: ComplexCell2, compare: ComplexCellData.compare, validators: complexColumnValidator, width: Math.trunc(Math.random() * 250 + 50) + 'px' }));
+  cols.push(createColumn('complexColumn2', 'Complex2', { type: 'none', renderer: ComplexCell, compare: ComplexCellData.compare, validators: complexColumnValidator, width: Math.trunc(Math.random() * 250 + 50) + 'px' }));
   // Override and set some columns to be number!
   cols[5].setEditor({ type: 'number', options: { decimals: 2, thousandSeparator: true } });
   cols[6].setEditor({ type: 'number', options: { decimals: 3, thousandSeparator: true } });
@@ -261,10 +246,11 @@ function createTestGrid(nRows: number, nColumns: number) {
   let grid = createGrid(rows, cols, { groupBy: ['column2', 'column3'], toggleableColumns: ['column8', 'column9'], multiSelect: true, allowMergeColumns: true });
 
   grid.addFixedRow({ data: { column5: '2017', column6: '2018' } });
-
+  setTimeout(() => {cols[28].fixed = true; }, 3000);
+  setTimeout(() => {cols[28].fixed = false; }, 6000);
   // sort first by  column7 then by column6
-  grid.addSort(cols[7], 'ascending')
-      .addSort(cols[6], 'descending');
+  // grid.addSort(cols[7], 'ascending')
+  //     .addSort(cols[6], 'descending');
 
   // test changing colum and cell properties
   // setTimeout(() => {
@@ -296,14 +282,14 @@ function createTestGrid(nRows: number, nColumns: number) {
   return grid;
 }
 
-let grid                  = createTestGrid(40, 14);
-let newRow                = {id: 'newRowxycdij', data: {}, options: {allowMergeColumns: false}};
-newRow.data['column0']    = 'AHHH';
-newRow.data['column2']    = 'RC 2-3';
-newRow.data['column3']    = 'RC 3-3';
-newRow.data['timeColumn'] = '8:11';
-grid.addRow(newRow);
-grid.cellByPos(0, 0)!.value = 'ooga booga boa';
+let grid                     = createTestGrid(40, 14);
+// let newRow                = {id: 'newRowxycdij', data: {}, options: {allowMergeColumns: false}};
+// newRow.data['column0']    = 'AHHH';
+// newRow.data['column2']    = 'RC 2-3';
+// newRow.data['column3']    = 'RC 3-3';
+// newRow.data['timeColumn'] = '8:11';
+// grid.addRow(newRow);
+// grid.cellByPos(0, 0)!.value = 'ooga booga boa';
 // grid.dataRowsByPosition.forEach(row => row.cellsByColumnPosition.forEach(cell => cell.row = row));
 // grid.headerRowHeight      = 28;
 // grid.commit();
@@ -442,6 +428,8 @@ function createEmployeesGrid2() {
 
 let employeesGrid1 = createEmployeesGrid1();
 let employeesGrid2 = createEmployeesGrid2();
+employeesGrid1.setChangeTracking(true);
+employeesGrid2.setChangeTracking(true);
 
 // observable dates don't work, but not sure if they ever need to.
 // let testDate = observable(new Date());

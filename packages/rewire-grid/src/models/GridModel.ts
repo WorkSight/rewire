@@ -202,7 +202,10 @@ class GridModel implements IGrid, IDisposable {
   }
 
   revert(): void {
-    if (this.__changeTracker) this.__changeTracker.revert();
+    if (this.__changeTracker) {
+      this.__changeTracker.revert();
+      this.mergeColumns();
+    }
   }
 
   commit(): void {
@@ -621,11 +624,20 @@ class GridModel implements IGrid, IDisposable {
     return this.toggleableColumns && this.toggleableColumns.length > 0;
   }
 
-  addColumn(column: IColumn): IColumn {
+  _addColumn(column: IColumn): IColumn {
     column.grid     = this;
     column.position = this.columns.length;
     const c: ColumnModel = (column as ColumnModel);
     if (c.__validators) this.__validator.addRule(column.name, c.__validators);
+    c.__watchColumnVisible(() => c.visible, () => {
+      this.mergeColumns();
+    });
+    c.__watchColumnFixed(() => c.fixed, () => {
+      setTimeout(() => {
+        this.setColumnPositions();
+        this.mergeColumns();
+      }, 0);
+    });
     this.columns.push(column);
     return column;
   }
@@ -1115,23 +1127,23 @@ class GridModel implements IGrid, IDisposable {
       grid.initialize(dispose, options);
       grid.loading = true;
       freeze(() => {
-        for (const column of columns) {
-          grid.addColumn(column);
+        let groupBy  = options && options.groupBy;
+        if (groupBy) {
+          grid.groupBy = groupBy.map((name: string) => findColumnByName(columns, name)).filter((column: IColumn | undefined) => !isNullOrUndefined(column)) as IColumn[];
         }
       });
-      grid.setColumnPositions();
       freeze(() => {
-        let headerRow = columns.reduce((previous: any, current: any) => (previous[current.name] = current.title, previous), {});
-        grid.addFixedRow({data: headerRow});
-        let groupBy = options && options.groupBy;
-        if (groupBy) {
-          grid.groupBy = groupBy.map((name: string) => grid.column(name)).filter((column: IColumn | undefined) => !isNullOrUndefined(column)) as IColumn[];
+        for (const column of columns) {
+          grid._addColumn(column);
         }
         let toggleableColumns  = options && options.toggleableColumns;
         grid.toggleableColumns = toggleableColumns
-                                   ? toggleableColumns.map((name: string) => grid.column(name)).filter((column: IColumn | undefined) => !isNullOrUndefined(column) && !column!.isGroupByColumn) as IColumn[]
+                                   ? toggleableColumns.map((name: string) => findColumnByName(columns, name)).filter((column: IColumn | undefined) => !isNullOrUndefined(column) && !column!.isGroupByColumn) as IColumn[]
                                    : [];
+                                   let headerRow = columns.reduce((previous: any, current: any) => (previous[current.name] = current.title, previous), {});
+                                   grid.addFixedRow({data: headerRow});
       });
+      grid.setColumnPositions();
       freeze(() => {
         grid._addRows(rows);
       });

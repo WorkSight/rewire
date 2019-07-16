@@ -83,6 +83,7 @@ export interface INumberFieldProps {
   startAdornment?       : JSX.Element;
   endAdornment?         : JSX.Element;
 
+  isAllowed?: (values: any) => boolean;
   onValueChange: (value?: number | string) => void;
 }
 
@@ -108,6 +109,7 @@ class NumberTextField extends React.Component<NumberFieldProps> {
       (nextProps.decimals          !== this.props.decimals)          ||
       (nextProps.thousandSeparator !== this.props.thousandSeparator) ||
       (nextProps.allowNegative     !== this.props.allowNegative)     ||
+      (nextProps.isAllowed         !== this.props.isAllowed)         ||
       (nextProps.fixed             !== this.props.fixed)             ||
       (nextProps.error             !== this.props.error)             ||
       (nextProps.label             !== this.props.label)             ||
@@ -165,6 +167,7 @@ class NumberTextField extends React.Component<NumberFieldProps> {
           onFocus={this.handleFocus}
           thousandSeparator={this.props.thousandSeparator || undefined}
           allowNegative={this.props.allowNegative}
+          isAllowed={this.props.isAllowed}
           decimalScale={this.props.decimals}
           fixedDecimalScale={this.props.fixed}
           format={this.props.format}
@@ -200,6 +203,7 @@ class NumberTextField extends React.Component<NumberFieldProps> {
             onFocus={this.handleFocus}
             thousandSeparator={props.thousandSeparator || undefined}
             allowNegative={this.props.allowNegative}
+            isAllowed={this.props.isAllowed}
             decimalScale={props.decimals}
             fixedDecimalScale={props.fixed}
             format={props.format}

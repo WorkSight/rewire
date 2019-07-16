@@ -21,6 +21,8 @@ import {
 import {isNullOrUndefined, UTC} from 'rewire-common';
 import {
   freeze,
+  createWatcherFn,
+  WatcherTypeFn,
   observable,
 } from 'rewire-core';
 import * as is             from 'is';
@@ -29,10 +31,12 @@ let id            = 0;
 const toLowerCase = (value: string) => String(value).toLowerCase();
 
 export class ColumnModel implements IColumn {
-  _enabled?      : boolean;
-  _readOnly?     : boolean;
-  _verticalAlign?: VerticalAlignment;
-  __validators   : IValidator[];
+  _enabled?            : boolean;
+  _readOnly?           : boolean;
+  _verticalAlign?      : VerticalAlignment;
+  __validators         : IValidator[];
+  __watchColumnVisible : WatcherTypeFn;
+  __watchColumnFixed   : WatcherTypeFn;
 
   id           : number;
   grid         : IGrid;
@@ -93,6 +97,10 @@ export class ColumnModel implements IColumn {
       this.__validators = validators(options.validators);
     }
     this.setEditor(options && options.type);
+
+    this.__watchColumnVisible = createWatcherFn();
+    this.__watchColumnFixed   = createWatcherFn();
+
     return this;
   }
 
