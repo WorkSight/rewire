@@ -244,7 +244,6 @@ export interface IRow extends IDisposable {
   grid                          : IGrid;
   cells                         : ICellMap;
   data                          : any;
-  height                        : number;
   selected                      : boolean;
   cls?                          : string;
   allowMergeColumns?            : boolean;

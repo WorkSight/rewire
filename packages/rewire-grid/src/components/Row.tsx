@@ -86,7 +86,6 @@ const Row = withStyles(styles, class extends PureComponent<RowProps, {}> {
     super(props);
     this.element = React.createRef();
     if (this.props.height !== undefined) {
-      this.props.row.height = this.props.height;
       return;
     }
   }
@@ -98,8 +97,11 @@ const Row = withStyles(styles, class extends PureComponent<RowProps, {}> {
   }
 
   componentDidMount() {
+    const r = this.props.row as any;
+    if (!r.__element) r.__element = [this.element.current];
+    else r.__element.push(this.element.current);
+    this.calculateInitialHeight();
     if (this.props.height === undefined) {
-      this.calculateDynamicHeight(true);
       this.observer = new MutationObserver(() => this.calculateDynamicHeight());
       this.observer.observe(this.element.current!, { childList: true, subtree: true });
     }
@@ -110,6 +112,10 @@ const Row = withStyles(styles, class extends PureComponent<RowProps, {}> {
       this.observer.disconnect();
       delete this.observer;
     }
+
+    const r = this.props.row as any;
+    if (!r.__element) return;
+    (r.__element as any[]).splice(r.__element.indexOf(this.element.current), 1);
   }
 
   renderCells = () => {
@@ -125,18 +131,39 @@ const Row = withStyles(styles, class extends PureComponent<RowProps, {}> {
     return <Observe render={() => cells} />;
   }
 
-  calculateDynamicHeight(initial: boolean = false) {
+  calculateInitialHeight() {
+    const r = this.props.row as any;
     if (!isNullOrUndefined(this.props.height)) {
-      this.props.row.height = this.props.height!;
+      for (const e of r.__element) {
+        e.style.height = `${this.props.height}px`;
+      }
       return;
     }
 
-    const el: any = this.element.current;
-    if (!el) return this.props.row.height;
-    // if (!initial) el.style.height = 'auto';
-    const height = el!.getBoundingClientRect().height;
-    if (height > this.props.row.height) {
-      this.props.row.height = height;
+    let newHeight = 0;
+    for (const e of r.__element) {
+      newHeight = Math.max(newHeight, e.getBoundingClientRect().height);
+    }
+
+    for (const e of r.__element) {
+      e.style.height = `${newHeight}px`;
+    }
+  }
+
+  calculateDynamicHeight() {
+    if (!isNullOrUndefined(this.props.height)) {
+      return;
+    }
+
+    let newHeight = 0;
+    const r = this.props.row as any;
+    for (const e of r.__element) {
+      e.style.height = 'auto';
+      newHeight = Math.max(newHeight, e.getBoundingClientRect().height);
+    }
+
+    for (const e of r.__element) {
+      e.style.height = `${newHeight}px`;
     }
   }
 
@@ -145,7 +172,7 @@ const Row = withStyles(styles, class extends PureComponent<RowProps, {}> {
       () => {
         const className = cc([this.props.className, {selected: this.props.row.selected}, (this.props.row.visible === false) ?  this.props.classes.hidden : this.props.classes.visible, this.props.row.cls, 'tabrow']);
         return <Observe render={() => (
-          <tr className={className} ref={this.element} onClick={this.handleRowClick} style={{height: this.props.row.height}}>
+          <tr className={className} ref={this.element} onClick={this.handleRowClick}>
             {this.renderCells()}
           </tr>
         )} />;

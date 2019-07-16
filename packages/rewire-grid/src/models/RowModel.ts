@@ -25,7 +25,6 @@ export class RowModel implements IRow, IDisposable, IValidationContext {
   grid                  : IGrid;
   cells                 : ICellMap;
   selected              : boolean;
-  height                : number;
   cls?                  : string;
   data                  : any;
   visible               : boolean;
@@ -41,7 +40,6 @@ export class RowModel implements IRow, IDisposable, IValidationContext {
   protected constructor() { }
   protected initialize(grid: IGrid, data?: IRowData, position: number = 0) {
     this.grid               = grid;
-    this.height             = 28; // default value
     this.cells              = {};
     this.selected           = false;
     this.position           = position;
