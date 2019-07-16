@@ -147,7 +147,6 @@ export interface IGrid extends IRows, IDisposable {
   get(): ICellDataMap[];
   set(data: (IRowData | undefined)[]): void;
 
-  addColumn(column: IColumn): IColumn;
   setColumnPositions(): void;
 
   addFixedRow(data?: IRowData, position?: number): IRow;

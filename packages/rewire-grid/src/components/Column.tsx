@@ -1,6 +1,6 @@
-import {IColumn, ICell}                   from '../models/GridTypes';
-import * as React                         from 'react';
-import {Observe, disposeOnUnmount, watch} from 'rewire-core';
+import {IColumn, ICell} from '../models/GridTypes';
+import * as React       from 'react';
+import {Observe}        from 'rewire-core';
 
 export interface IColumnCellProps {
   cell: ICell;
@@ -17,13 +17,6 @@ export default class Column extends React.PureComponent<IColumnCellProps> {
     this.startOffset = 0;
     this.isResizing  = false;
     this.column      = this.props.cell.column;
-
-    disposeOnUnmount(this, () => {
-      watch(() => this.column.visible, () => {
-        this.column.grid.setColumnPositions();
-        this.column.grid.mergeColumns();
-      });
-    });
   }
 
   handleMouseUp = (evt: MouseEvent) => {
