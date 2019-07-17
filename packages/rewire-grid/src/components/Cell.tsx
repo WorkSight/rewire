@@ -329,56 +329,55 @@ class Cell extends React.PureComponent<CellProps, {}> {
     }
   }
 
-  renderCell() {
-    let cell = this.cell;
-    if (cell.editing) {
-      let Editor = this.column.editor;
-      if (!Editor) return;
-      let cellType              = this.column.type;
-      let additionalProps       = {};
-      let endOfTextOnFocus      = false;
-      let selectOnFocus         = true;
-      let cursorPositionOnFocus = undefined;
-      let value                 = cell.value;
-      if (this.cell.keyForEdit) {
-        value            = cell.keyForEdit;
-        endOfTextOnFocus = true;
-        selectOnFocus    = false;
-        if (cellType === 'number') {
-          endOfTextOnFocus      = false;
-          cursorPositionOnFocus = 1;
+  renderCell = React.memo((): JSX.Element | null => {
+    return <Observe render={() => {
+      let cell = this.cell;
+      if (cell.editing) {
+        let Editor = this.column.editor;
+        if (!Editor) return null;
+        let cellType              = this.column.type;
+        let additionalProps       = {};
+        let endOfTextOnFocus      = false;
+        let selectOnFocus         = true;
+        let cursorPositionOnFocus = undefined;
+        let value                 = cell.value;
+        if (this.cell.keyForEdit) {
+          value            = cell.keyForEdit;
+          endOfTextOnFocus = true;
+          selectOnFocus    = false;
+          if (cellType === 'number') {
+            endOfTextOnFocus      = false;
+            cursorPositionOnFocus = 1;
+          }
+          if (cellType === 'auto-complete' || cellType === 'multiselectautocomplete') {
+            value                                = undefined;
+            additionalProps['initialInputValue'] = cell.keyForEdit;
+          }
         }
+        let editorClasses = undefined;
+        if (cellType === 'select' || cellType === 'multiselect') {
+          editorClasses = {inputRoot: this.props.classes.editorSelectInputRoot, select: this.props.classes.editorSelectSelect};
+        } else if (cellType === 'checked') {
+          editorClasses = {checkboxRoot: this.props.classes.editorCheckboxRoot};
+        } else if (cellType === 'text' || cellType === 'date' || cellType === 'email' || cellType === 'password' || cellType === 'time' || cellType === 'number' || cellType === 'phone' || cellType === 'auto-complete' || 'mask') {
+          editorClasses = {formControlRoot: this.props.classes.editorFormControlRoot, inputRoot: this.props.classes.editorInputRoot};
+        }
+
         if (cellType === 'auto-complete' || cellType === 'multiselectautocomplete') {
-          value                                = undefined;
-          additionalProps['initialInputValue'] = cell.keyForEdit;
+          Object.assign(editorClasses, {container: this.props.classes.editorAutoCompleteContainer});
         }
-      }
-      let editorClasses = undefined;
-      if (cellType === 'select' || cellType === 'multiselect') {
-        editorClasses = {inputRoot: this.props.classes.editorSelectInputRoot, select: this.props.classes.editorSelectSelect};
-      } else if (cellType === 'checked') {
-        editorClasses = {checkboxRoot: this.props.classes.editorCheckboxRoot};
-      } else if (cellType === 'text' || cellType === 'date' || cellType === 'email' || cellType === 'password' || cellType === 'time' || cellType === 'number' || cellType === 'phone' || cellType === 'auto-complete' || 'mask') {
-        editorClasses = {formControlRoot: this.props.classes.editorFormControlRoot, inputRoot: this.props.classes.editorInputRoot};
-      }
 
-      if (cellType === 'auto-complete' || cellType === 'multiselectautocomplete') {
-        Object.assign(editorClasses, {container: this.props.classes.editorAutoCompleteContainer});
+        const height = (this.cell as CellModel).element!.getBoundingClientRect().height - 2;
+        return <Observe render={() => (
+          <div className={this.props.classes.editorContainer} style={{height}}>
+            <Editor field={{...cell, value: value, autoFocus: true, align: cell.align, error: undefined, disableErrors: true}} endOfTextOnFocus={endOfTextOnFocus} selectOnFocus={selectOnFocus} cursorPositionOnFocus={cursorPositionOnFocus} className={cell.cls} onValueChange={this.onValueChange} classes={editorClasses} {...additionalProps}/>
+          </div>
+        )} />;
       }
 
-      const height = (this.cell as CellModel).element!.getBoundingClientRect().height;
-      return (
-        <div className={this.props.classes.editorContainer} style={{height}}>
-          <Editor field={{...cell, value: value, autoFocus: true, align: cell.align, error: undefined, disableErrors: true}} endOfTextOnFocus={endOfTextOnFocus} selectOnFocus={selectOnFocus} cursorPositionOnFocus={cursorPositionOnFocus} className={cell.cls} onValueChange={this.onValueChange} classes={editorClasses} {...additionalProps}/>
-        </div>
-      );
-    }
-
-    return <Observe render={
-      () => {
+      return <Observe render={() => {
         let hasError = !!cell.error;
         let value    = !isNullOrUndefinedOrEmpty(this.value) ? this.value : <span>&nbsp;</span>;
-
         return (
           < >
             {cell.renderer
@@ -392,9 +391,9 @@ class Cell extends React.PureComponent<CellProps, {}> {
             {hasError && this.renderErrorIcon()}
           </>
         );
-      }
-    } />;
-  }
+      }} />;
+    }} />;
+  });
 
   render() {
     const {classes} = this.props;
@@ -441,7 +440,7 @@ class Cell extends React.PureComponent<CellProps, {}> {
       let innerCell =
         <div className={classNames(classes.cellContainer, 'cellContainer')}>
           <div className={cellInnerContainerClasses}>
-            {this.renderCell()}
+            <this.renderCell />
           </div>
         </div>;
       let cellContent = innerCell;

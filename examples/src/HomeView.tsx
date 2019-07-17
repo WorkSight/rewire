@@ -246,8 +246,8 @@ function createTestGrid(nRows: number, nColumns: number) {
   let grid = createGrid(rows, cols, { groupBy: ['column2', 'column3'], toggleableColumns: ['column8', 'column9'], multiSelect: true, allowMergeColumns: true });
 
   grid.addFixedRow({ data: { column5: '2017', column6: '2018' } });
-  setTimeout(() => {cols[28].fixed = true; }, 3000);
-  setTimeout(() => {cols[28].fixed = false; }, 6000);
+  // setTimeout(() => {cols[28].fixed = true; }, 3000);
+  // setTimeout(() => {cols[28].fixed = false; }, 6000);
   // sort first by  column7 then by column6
   // grid.addSort(cols[7], 'ascending')
   //     .addSort(cols[6], 'descending');

@@ -204,6 +204,7 @@ class GridModel implements IGrid, IDisposable {
   revert(): void {
     if (this.__changeTracker) {
       this.__changeTracker.revert();
+      this.validate();
       this.mergeColumns();
     }
   }
@@ -975,35 +976,37 @@ class GridModel implements IGrid, IDisposable {
 
   updateCellSelectionProperties(cellsToSelect: ICell[]) {
     cellsToSelect.forEach(cell => {
-      let adjacentTopCell = this.adjacentTopCell(cell);
-      let sameGroupTop    = !!adjacentTopCell && true; // (adjacentTopCell.row.parentRow && adjacentTopCell.row.parentRow.id) === (cell.row.parentRow && cell.row.parentRow.id);
-      if (!adjacentTopCell || !sameGroupTop || !adjacentTopCell.selected) {
-        cell.isTopMostSelection = true;
-      } else {
-        cell.isTopMostSelection = false;
-      }
+      freeze(() => {
+        let adjacentTopCell = this.adjacentTopCell(cell);
+        let sameGroupTop    = !!adjacentTopCell && true; // (adjacentTopCell.row.parentRow && adjacentTopCell.row.parentRow.id) === (cell.row.parentRow && cell.row.parentRow.id);
+        if (!adjacentTopCell || !sameGroupTop || !adjacentTopCell.selected) {
+          cell.isTopMostSelection = true;
+        } else {
+          cell.isTopMostSelection = false;
+        }
 
-      let adjacentRightCell = this.adjacentRightCell(cell);
-      if (!adjacentRightCell || !adjacentRightCell.selected) {
-        cell.isRightMostSelection = true;
-      } else {
-        cell.isRightMostSelection = false;
-      }
+        let adjacentRightCell = this.adjacentRightCell(cell);
+        if (!adjacentRightCell || !adjacentRightCell.selected) {
+          cell.isRightMostSelection = true;
+        } else {
+          cell.isRightMostSelection = false;
+        }
 
-      let adjacentBottomCell = this.adjacentBottomCell(cell);
-      let sameGroupBottom    = !!adjacentBottomCell && true; // (adjacentBottomCell.row.parentRow && adjacentBottomCell.row.parentRow.id) === (cell.row.parentRow && cell.row.parentRow.id);
-      if (!adjacentBottomCell || !sameGroupBottom || !adjacentBottomCell.selected) {
-        cell.isBottomMostSelection = true;
-      } else {
-        cell.isBottomMostSelection = false;
-      }
+        let adjacentBottomCell = this.adjacentBottomCell(cell);
+        let sameGroupBottom    = !!adjacentBottomCell && true; // (adjacentBottomCell.row.parentRow && adjacentBottomCell.row.parentRow.id) === (cell.row.parentRow && cell.row.parentRow.id);
+        if (!adjacentBottomCell || !sameGroupBottom || !adjacentBottomCell.selected) {
+          cell.isBottomMostSelection = true;
+        } else {
+          cell.isBottomMostSelection = false;
+        }
 
-      let adjacentLeftCell = this.adjacentLeftCell(cell);
-      if (!adjacentLeftCell || !adjacentLeftCell.selected) {
-        cell.isLeftMostSelection = true;
-      } else {
-        cell.isLeftMostSelection = false;
-      }
+        let adjacentLeftCell = this.adjacentLeftCell(cell);
+        if (!adjacentLeftCell || !adjacentLeftCell.selected) {
+          cell.isLeftMostSelection = true;
+        } else {
+          cell.isLeftMostSelection = false;
+        }
+      });
     });
   }
 

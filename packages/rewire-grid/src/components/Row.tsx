@@ -138,18 +138,20 @@ class InternalRow extends PureComponent<RowProps, {}> {
     removeElement(this.props.row, this);
   }
 
-  renderCells = () => {
-    if (!this.props.row.cells) return [];
+  renderCells = React.memo((): JSX.Element | null => {
+    return <Observe render={() => {
+      if (!this.props.row.cells) return null;
 
-    let cells: JSX.Element[] = [];
-    this.props.columns.forEach((column: IColumn) => {
-      let cell = this.props.row.cells[column.name];
-      let Cell = this.props.Cell;
-      if ((cell.colSpan ===  0) || (cell.rowSpan === 0)) return;
-        cells.push(<Cell key={cell.id} cell={cell} onClick={this.handleRowClick} />);
-    });
-    return <Observe render={() => cells} />;
-  }
+      let cells: JSX.Element[] = [];
+      this.props.columns.forEach((column: IColumn) => {
+        let cell = this.props.row.cells[column.name];
+        let Cell = this.props.Cell;
+        if ((cell.colSpan ===  0) || (cell.rowSpan === 0)) return;
+          cells.push(<Cell key={cell.id} cell={cell} onClick={this.handleRowClick} />);
+      });
+      return cells;
+    }} />;
+  });
 
   calculateInitialHeight() {
     const components = getComponents(this.props.row);
@@ -197,7 +199,7 @@ class InternalRow extends PureComponent<RowProps, {}> {
         const className = cc([this.props.className, {selected: this.props.row.selected}, (this.props.row.visible === false) ?  this.props.classes.hidden : this.props.classes.visible, this.props.row.cls, 'tabrow']);
         return <Observe render={() => (
           <tr className={className} ref={this.element} onClick={this.handleRowClick}>
-            {this.renderCells()}
+            <this.renderCells />
           </tr>
         )} />;
       }
