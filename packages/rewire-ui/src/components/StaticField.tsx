@@ -42,10 +42,10 @@ class StaticFieldInternal extends React.Component<StaticFieldProps> {
 
   shouldComponentUpdate(nextProps: IStaticFieldProps) {
     return (
-      (nextProps.value !== this.props.value) ||
+      (nextProps.value   !== this.props.value)   ||
       (nextProps.visible !== this.props.visible) ||
-      (nextProps.label !== this.props.label) ||
-      (nextProps.align !== this.props.align)
+      (nextProps.label   !== this.props.label)   ||
+      (nextProps.align   !== this.props.align)
     );
   }
 

@@ -1,19 +1,28 @@
-import * as React       from 'react';
-import {TextFieldProps} from '@material-ui/core/TextField';
-import {InputProps}      from '@material-ui/core/Input';
+import * as React         from 'react';
+import { TextFieldProps } from '@material-ui/core/TextField';
+import { InputProps }     from '@material-ui/core/Input';
+import { TextAlignment }  from './editors';
 
 export interface IBlurState {
   readonly value?: string | number | React.ReactText[];
   currentExternalValue?: string | number | React.ReactText[];
 }
 
-export type IBlurProps = {render<T>(props: TextFieldProps & T): JSX.Element | null, onValueChange(value?: string | number | React.ReactText[]): void} & TextFieldProps & InputProps;
+export type IBlurProps = {
+  align?: TextAlignment,
+  disableErrors?: boolean,
+  render<T>(props: TextFieldProps & T): JSX.Element | null,
+  onValueChange(value?: string | number | React.ReactText[]): void
+} & TextFieldProps & InputProps;
 
 export default class BlurInputHOC extends React.Component<IBlurProps, IBlurState> {
   state: IBlurState = {value: undefined};
   constructor(props: IBlurProps) {
     super(props);
-    this.state = {value: props.value, currentExternalValue: props.value};
+    this.state = {
+      value: props.value,
+      currentExternalValue: props.value
+    };
   }
 
   componentWillReceiveProps (nextProps: IBlurProps) {
@@ -24,21 +33,21 @@ export default class BlurInputHOC extends React.Component<IBlurProps, IBlurState
 
   shouldComponentUpdate(nextProps: IBlurProps, nextState: IBlurState) {
     return (
-      (nextProps.value !== this.props.value) ||
-      (nextProps.type !== this.props.type) ||
-      (nextProps.error !== this.props.error) ||
-      (nextProps.disabled !== this.props.disabled) ||
-      (nextProps.label !== this.props.label) ||
-      (nextProps.placeholder !== this.props.placeholder) ||
-      (nextProps.align !== this.props.align) ||
-      (nextProps.multiline !== this.props.multiline) ||
-      (nextProps.rows !== this.props.rows) ||
-      (nextProps.rowsMax !== this.props.rowsMax) ||
-      (nextProps.variant !== this.props.variant) ||
-      (nextProps.disableErrors !== this.props.disableErrors) ||
-      (nextProps.startAdornment !== this.props.startAdornment) ||
-      (nextProps.endAdornment !== this.props.endAdornment) ||
-      (nextState.value !== this.state.value) ||
+      (nextProps.value                !== this.props.value)                ||
+      (nextProps.type                 !== this.props.type)                 ||
+      (nextProps.error                !== this.props.error)                ||
+      (nextProps.disabled             !== this.props.disabled)             ||
+      (nextProps.label                !== this.props.label)                ||
+      (nextProps.placeholder          !== this.props.placeholder)          ||
+      (nextProps.align                !== this.props.align)                ||
+      (nextProps.multiline            !== this.props.multiline)            ||
+      (nextProps.rows                 !== this.props.rows)                 ||
+      (nextProps.rowsMax              !== this.props.rowsMax)              ||
+      (nextProps.variant              !== this.props.variant)              ||
+      (nextProps.disableErrors        !== this.props.disableErrors)        ||
+      (nextProps.startAdornment       !== this.props.startAdornment)       ||
+      (nextProps.endAdornment         !== this.props.endAdornment)         ||
+      (nextState.value                !== this.state.value)                ||
       (nextState.currentExternalValue !== this.state.currentExternalValue)
     );
   }

@@ -130,24 +130,25 @@ class TextFieldInternal extends React.Component<TextFieldPropsStyled> {
 
     return (
       !equalValue ||
-      (nextProps.disabled !== this.props.disabled) ||
-      (nextProps.visible !== this.props.visible) ||
-      (nextProps.error !== this.props.error) ||
-      (nextProps.label !== this.props.label) ||
-      (nextProps.placeholder !== this.props.placeholder) ||
-      (nextProps.align !== this.props.align) ||
-      (nextProps.multiline !== this.props.multiline) ||
-      (nextProps.rows !== this.props.rows) ||
-      (nextProps.rowsMax !== this.props.rowsMax) ||
-      (nextProps.variant !== this.props.variant) ||
-      (nextProps.disableErrors !== this.props.disableErrors) ||
+      (nextProps.disabled       !== this.props.disabled)       ||
+      (nextProps.visible        !== this.props.visible)        ||
+      (nextProps.error          !== this.props.error)          ||
+      (nextProps.label          !== this.props.label)          ||
+      (nextProps.placeholder    !== this.props.placeholder)    ||
+      (nextProps.align          !== this.props.align)          ||
+      (nextProps.multiline      !== this.props.multiline)      ||
+      (nextProps.rows           !== this.props.rows)           ||
+      (nextProps.rowsMax        !== this.props.rowsMax)        ||
+      (nextProps.variant        !== this.props.variant)        ||
+      (nextProps.disableErrors  !== this.props.disableErrors)  ||
       (nextProps.startAdornment !== this.props.startAdornment) ||
-      (nextProps.endAdornment !== this.props.endAdornment)
+      (nextProps.endAdornment   !== this.props.endAdornment)
     );
   }
 
   onValueChange = (value?: string | UTC) => {
     let v = value;
+    console.log('TextField.onValueChange()', v);
     if (this.props.type === 'date') {
       v = v ? utc(v).startOfDay() : undefined;
     }

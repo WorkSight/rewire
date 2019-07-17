@@ -109,16 +109,16 @@ class PasswordFieldInternal extends React.Component<PasswordFieldPropsStyled, IP
 
   shouldComponentUpdate(nextProps: PasswordFieldPropsStyled, nextState: IPasswordFieldState) {
     return (
-      (nextProps.value !== this.props.value) ||
-      (nextProps.disabled !== this.props.disabled) ||
-      (nextProps.visible !== this.props.visible) ||
-      (nextProps.error !== this.props.error) ||
-      (nextState.showPassword !== this.state.showPassword) ||
-      (nextProps.hasAdornment !== this.props.hasAdornment) ||
-      (nextProps.label !== this.props.label) ||
-      (nextProps.placeholder !== this.props.placeholder) ||
-      (nextProps.align !== this.props.align) ||
-      (nextProps.variant !== this.props.variant) ||
+      (nextProps.value         !== this.props.value)        ||
+      (nextProps.disabled      !== this.props.disabled)     ||
+      (nextProps.visible       !== this.props.visible)      ||
+      (nextProps.error         !== this.props.error)        ||
+      (nextState.showPassword  !== this.state.showPassword) ||
+      (nextProps.hasAdornment  !== this.props.hasAdornment) ||
+      (nextProps.label         !== this.props.label)        ||
+      (nextProps.placeholder   !== this.props.placeholder)  ||
+      (nextProps.align         !== this.props.align)        ||
+      (nextProps.variant       !== this.props.variant)      ||
       (nextProps.disableErrors !== this.props.disableErrors)
     );
   }
