@@ -95,8 +95,7 @@ class NumberTextField extends React.Component<NumberFieldProps> {
   }
 
   handleValueChanged = (values: any) => {
-    const isNumericString = ((typeof this.props.value === 'string') || this.props.isNumericString);
-    let value = isNumericString ? values.value : values.floatValue;
+    let value = values.floatValue;
     this.props.onValueChange(value);
   }
 
@@ -203,7 +202,7 @@ class NumberTextField extends React.Component<NumberFieldProps> {
             error={!props.disableErrors && !props.disabled && !!props.error}
             value={props.value}
             label={props.label}
-            onValueChange={(values: any) => props.onChange && props.onChange({target: {value: isNumericString ? values.value : values.floatValue}} as any)}
+            onValueChange={(values: any) => props.onChange && props.onChange({target: {value: values.floatValue}} as any)}
             onBlur={props.onBlur}
             autoFocus={props.autoFocus}
             onFocus={this.handleFocus}
