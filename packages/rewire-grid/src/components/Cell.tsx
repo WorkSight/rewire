@@ -151,7 +151,7 @@ class Cell extends React.PureComponent<CellProps, {}> {
 
     if (evt.keyCode >= 65 && evt.keyCode <= 90) {
       evt.key = evt.key.toUpperCase();
-        }
+    }
     if (evt.shiftKey) { evt.key = 'Shift+' + evt.key; }
     if (evt.ctrlKey)  { evt.key = 'Ctrl+' + evt.key; }
     if (evt.altKey)   { evt.key = 'Alt+' + evt.key; }
@@ -366,8 +366,9 @@ class Cell extends React.PureComponent<CellProps, {}> {
         Object.assign(editorClasses, {container: this.props.classes.editorAutoCompleteContainer});
       }
 
+      const height = (this.cell as CellModel).element!.getBoundingClientRect().height;
       return (
-        <div className={this.props.classes.editorContainer} style={{height: this.row.height - 2}}>
+        <div className={this.props.classes.editorContainer} style={{height}}>
           <Editor field={{...cell, value: value, autoFocus: true, align: cell.align, error: undefined, disableErrors: true}} endOfTextOnFocus={endOfTextOnFocus} selectOnFocus={selectOnFocus} cursorPositionOnFocus={cursorPositionOnFocus} className={cell.cls} onValueChange={this.onValueChange} classes={editorClasses} {...additionalProps}/>
         </div>
       );

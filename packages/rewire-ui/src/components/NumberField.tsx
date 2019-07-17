@@ -95,7 +95,8 @@ class NumberTextField extends React.Component<NumberFieldProps> {
   }
 
   handleValueChanged = (values: any) => {
-    let value = this.props.isNumericString ? values.value : values.floatValue;
+    const isNumericString = ((typeof this.props.value === 'string') || this.props.isNumericString);
+    let value = isNumericString ? values.value : values.floatValue;
     this.props.onValueChange(value);
   }
 
@@ -123,6 +124,10 @@ class NumberTextField extends React.Component<NumberFieldProps> {
   }
 
   handleFocus = (evt: React.FocusEvent<HTMLInputElement>) => {
+    if ((this.props.value as unknown as string) === '.') {
+      evt.target.setSelectionRange(2, 2);
+      return;
+    }
     if (this.props.selectOnFocus) {
       evt.target.setSelectionRange(0, evt.target.value.length);
     } else if (this.props.endOfTextOnFocus) {
@@ -145,7 +150,8 @@ class NumberTextField extends React.Component<NumberFieldProps> {
     if (visible === false) {
       return null;
     }
-    let value                       = this.props.isNumericString ? this.props.value : this.parse(this.props.value);
+    const isNumericString           = ((typeof this.props.value === 'string') || this.props.isNumericString);
+    let value                       = isNumericString ? this.props.value : this.parse(this.props.value);
     const startAdornment            = this.props.startAdornment ? <InputAdornment position='start' classes={{root: this.props.classes.inputAdornmentRoot}}>{this.props.startAdornment}</InputAdornment> : undefined;
     const endAdornment              = this.props.endAdornment ? <InputAdornment position='end' classes={{root: this.props.classes.inputAdornmentRoot}}>{this.props.endAdornment}</InputAdornment> : undefined;
     const inputClassName            = this.props.variant === 'outlined' ? this.props.classes.inputOutlinedInput : this.props.classes.inputInput;
@@ -172,7 +178,7 @@ class NumberTextField extends React.Component<NumberFieldProps> {
           fixedDecimalScale={this.props.fixed}
           format={this.props.format}
           mask={this.props.mask}
-          isNumericString={this.props.isNumericString}
+          isNumericString={isNumericString}
           inputProps={{spellCheck: false, className: this.props.classes.nativeInput, style: {textAlign: this.props.align || 'left'}}}
           InputProps={{startAdornment: startAdornment, endAdornment: endAdornment, classes: {root: this.props.classes.inputRoot, input: inputClassName, formControl: inputFormControlClassName}}}
           InputLabelProps={{shrink: true, classes: {root: this.props.classes.inputLabelRoot, outlined: this.props.classes.inputLabelOutlined, shrink: this.props.classes.inputLabelShrink}}}
@@ -197,7 +203,7 @@ class NumberTextField extends React.Component<NumberFieldProps> {
             error={!props.disableErrors && !props.disabled && !!props.error}
             value={props.value}
             label={props.label}
-            onValueChange={(values: any) => props.onChange && props.onChange({target: {value: props.isNumericString ? values.value : values.floatValue}} as any)}
+            onValueChange={(values: any) => props.onChange && props.onChange({target: {value: isNumericString ? values.value : values.floatValue}} as any)}
             onBlur={props.onBlur}
             autoFocus={props.autoFocus}
             onFocus={this.handleFocus}
@@ -208,7 +214,7 @@ class NumberTextField extends React.Component<NumberFieldProps> {
             fixedDecimalScale={props.fixed}
             format={props.format}
             mask={props.mask}
-            isNumericString={props.isNumericString}
+            isNumericString={isNumericString}
             inputProps={{spellCheck: false, className: props.classes.nativeInput, style: {textAlign: props.align || 'left'}}}
             InputProps={{startAdornment: startAdornment, endAdornment: endAdornment, classes: {root: props.classes.inputRoot, input: inputClassName, formControl: inputFormControlClassName}}}
             InputLabelProps={{shrink: true, classes: {root: props.classes.inputLabelRoot, outlined: props.classes.inputLabelOutlined, shrink: props.classes.inputLabelShrink}}}

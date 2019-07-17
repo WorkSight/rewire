@@ -13,6 +13,7 @@ import {Observe}               from 'rewire-core';
 import {Theme}                 from '@material-ui/core/styles';
 import {WithStyle, withStyles} from 'rewire-ui';
 import Cell                    from './Cell';
+import * as fastdom            from 'fastdom';
 
 export interface IRowProps {
   row               : IRow;
@@ -156,13 +157,17 @@ const Row = withStyles(styles, class extends PureComponent<RowProps, {}> {
     }
 
     let newHeight = 0;
-    for (const e of elements) {
-      newHeight = Math.max(newHeight, e.getBoundingClientRect().height);
-    }
+    fastdom.measure(() => {
+      for (const e of elements) {
+        newHeight = Math.max(newHeight, e.offsetHeight);
+      }
+    });
 
-    for (const e of elements) {
-      e.style.height = `${newHeight}px`;
-    }
+    fastdom.mutate(() => {
+      for (const e of elements) {
+        e.style.height = `${newHeight}px`;
+      }
+    });
   }
 
   calculateDynamicHeight() {
@@ -170,16 +175,20 @@ const Row = withStyles(styles, class extends PureComponent<RowProps, {}> {
       return;
     }
 
-    let newHeight = 0;
-    const elements = getElements(this.props.row);
-    for (const e of elements) {
-      e.style.height = 'auto';
-      newHeight = Math.max(newHeight, e.getBoundingClientRect().height);
-    }
+    const elements  = getElements(this.props.row);
+    let   newHeight = 0;
+    fastdom.measure(() => {
+      for (const e of elements) {
+        e.style.height = 'auto';
+        newHeight = Math.max(newHeight, e.offsetHeight);
+      }
+    });
 
-    for (const e of elements) {
-      e.style.height = `${newHeight}px`;
-    }
+    fastdom.mutate(() => {
+      for (const e of elements) {
+        e.style.height = `${newHeight}px`;
+      }
+    });
   }
 
   render() {

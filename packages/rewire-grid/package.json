@@ -1,6 +1,6 @@
 {
   "name": "rewire-grid",
-  "version": "1.0.105",
+  "version": "1.0.108",
   "description": "A lightweight reactive grid implementation built using rewire-core.",
   "repository": {
     "type": "git",
@@ -32,6 +32,7 @@
     "classcat": "^3.2.5",
     "deepmerge": "^3.2.0",
     "fast-deep-equal": "^2.0.1",
+    "fastdom": "^1.0.9",
     "is": "^3.3.0",
     "nanoid": "^2.0.1",
     "react": "^16.8.4",
