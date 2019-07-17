@@ -216,18 +216,18 @@ class TimeInputField extends React.Component<TimeFieldProps, ITimeState> {
 
   shouldComponentUpdate(nextProps: TimeFieldProps, nextState: ITimeState) {
     return (
-      (nextState.text !== this.state.text) ||
-      (nextProps.disabled !== this.props.disabled) ||
-      (nextProps.visible !== this.props.visible) ||
-      (nextProps.error !== this.props.error) ||
-      (nextProps.rounding !== this.props.rounding) ||
-      (nextProps.label !== this.props.label) ||
-      (nextProps.placeholder !== this.props.placeholder) ||
-      (nextProps.align !== this.props.align) ||
-      (nextProps.variant !== this.props.variant) ||
-      (nextProps.disableErrors !== this.props.disableErrors) ||
+      (nextState.text           !== this.state.text)           ||
+      (nextProps.disabled       !== this.props.disabled)       ||
+      (nextProps.visible        !== this.props.visible)        ||
+      (nextProps.error          !== this.props.error)          ||
+      (nextProps.rounding       !== this.props.rounding)       ||
+      (nextProps.label          !== this.props.label)          ||
+      (nextProps.placeholder    !== this.props.placeholder)    ||
+      (nextProps.align          !== this.props.align)          ||
+      (nextProps.variant        !== this.props.variant)        ||
+      (nextProps.disableErrors  !== this.props.disableErrors)  ||
       (nextProps.startAdornment !== this.props.startAdornment) ||
-      (nextProps.endAdornment !== this.props.endAdornment)
+      (nextProps.endAdornment   !== this.props.endAdornment)
     );
   }
 

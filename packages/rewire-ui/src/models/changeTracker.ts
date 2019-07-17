@@ -1,4 +1,4 @@
-import { DataSignal, property, sample, freeze, root } from 'rewire-core';
+import { observable, DataSignal, property, sample, freeze, root } from 'rewire-core';
 import * as deepEqual                                 from 'fast-deep-equal';
 
 export interface IRowData {
@@ -134,7 +134,11 @@ export class ChangeTracker {
       this.setHasChanges(false);
       this._working!.length = this._original.size;
       for (const value of Object.values(this._original.data) as any[]) {
-        this._context.setRow(value.index, clone(value.data, 2));
+        const original: any = this._context.getRow(value.index);
+        console.warn(original);
+        const theClone: any = clone(value.data, 2);
+        this._context.setRow(value.index, theClone);
+        console.log(theClone, this._context.getRow(value.index));
       }
     });
   }
@@ -231,10 +235,10 @@ testing comment this out after every change to the tracker to make sure tests pa
 */
 /*
 function sample2() {
-  let rows: any[] = [];
-  for (let index = 0; index < 100; index++) {
+  let rows: any[] = observable([]);
+  for (let index = 0; index < 1; index++) {
     const row = {id: String(index)};
-    for (let c = 0; c < 30; c++) {
+    for (let c = 4; c < 5; c++) {
       row[`column_${c}`] = `row ${index} col ${c}`;
       row['nested'] = {ooga: 'ooga', booga: 'booga'};
     }
@@ -256,40 +260,58 @@ async function run() {
   ct.recalculate();
   ct.recalculate();
   test('after set should be false', false, await ct.recalculate());
+
   rows.push({ooga: 'ooga'});
   test('after row change show be true', true, await ct.recalculate());
+
   rows.pop();
   test('after popping row should be false', false, await ct.recalculate());
   ct.recalculate();
+
   rows.push({ooga: 'ooga'});
   test('after repushing should be true', true, await ct.recalculate());
+
   ct.revert();
   test('after rejecting changes should be false', false, await ct.recalculate());
-  rows[6]['column_4'] = 'yikes';
+
+  rows[0]['column_4'] = 'yikes';
   test('after changing value should be true', true, await ct.recalculate());
+
   ct.revert();
   test('after rejecting changes should be false', false, await ct.recalculate());
-  const oldValue = rows[8]['column_4'];
-  rows[8]['column_4'] = 'ooga';
+
+  rows.splice(0, 1);
+  test('after removing row should be true', true, await ct.recalculate());
+
+  ct.revert();
+  test('after rejecting changes should be false', false, await ct.recalculate());
+
+  const oldValue = rows[0]['column_4'];
+  rows[0]['column_4'] = 'ooga';
   test('changing a value should be true', true, await ct.recalculate());
-  rows[8]['column_4'] = oldValue;
+
+  rows[0]['column_4'] = oldValue;
   test('restoring the old value should be false', false, await ct.recalculate());
-  rows[8]['column_4'] = 'ooga';
+
+  rows[0]['column_4'] = 'ooga';
   ct.commit();
   test('after committing changes should be false', false, await ct.recalculate());
-  const r = rows[8];
+
+  const r = rows[0];
   r['column_4'] = 'booga';
   test('setting a value in a row should have changes', true, ct.rowByIdHasChanges(r.id));
   test('setting a value in a row should have changes 2', true, ct.rowHasChanges(r));
   test('also the value should have changes', true, ct.valueByIdHasChanges(r.id, 'column_4'));
   test('also the value should have changes 2', true, ct.valueHasChanges(r, 'column_4'));
-  test('a different column same row should be false', false, ct.valueByIdHasChanges(r.id, 'column_5'));
-  test('a different row should not have changes', false, ct.rowByIdHasChanges('10'));
-  test('a different column same row should not have changes 2', false, ct.valueHasChanges(rows[10], 'column_5'));
-  test('a different row should not have changes 2', false, ct.rowHasChanges(rows[10]));
+  // test('a different column same row should be false', false, ct.valueByIdHasChanges(r.id, 'column_5'));
+  // test('a different row should not have changes', false, ct.rowByIdHasChanges('10'));
+  // test('a different column same row should not have changes 2', false, ct.valueHasChanges(rows[10], 'column_5'));
+  // test('a different row should not have changes 2', false, ct.rowHasChanges(rows[10]));
+
   ct.commit();
   ct.start(250);
   test('no changes', false, ct.hasChanges);
+
   r['column_4'] = 'blahh!!';
   setTimeout(() => {
     test('should have changes', true, ct.hasChanges);

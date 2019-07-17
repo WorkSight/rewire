@@ -3,11 +3,11 @@ import * as NumberFormat             from 'react-number-format';
 import * as is                       from 'is';
 import TextField, { TextFieldProps } from '@material-ui/core/TextField';
 import InputAdornment                from '@material-ui/core/InputAdornment';
-import {Theme}                       from '@material-ui/core/styles';
-import {isNullOrUndefined}           from 'rewire-common';
+import { Theme }                     from '@material-ui/core/styles';
+import { isNullOrUndefined }         from 'rewire-common';
 import BlurInputHOC                  from './BlurInputHOC';
-import {TextAlignment, TextVariant}  from './editors';
-import {withStyles, WithStyle}       from './styles';
+import { TextAlignment }             from './editors';
+import { withStyles, WithStyle }     from './styles';
 
 const styles = (theme: Theme) => ({
   inputRoot: {

@@ -50,10 +50,10 @@ class CheckboxInternal extends React.Component<CheckboxPropsStyled> {
 
   shouldComponentUpdate(nextProps: CheckboxPropsStyled) {
     return (
-      (nextProps.value !== this.props.value) ||
+      (nextProps.value    !== this.props.value)    ||
       (nextProps.disabled !== this.props.disabled) ||
-      (nextProps.visible !== this.props.visible) ||
-      (nextProps.label !== this.props.label)
+      (nextProps.visible  !== this.props.visible)  ||
+      (nextProps.label    !== this.props.label)
     );
   }
 

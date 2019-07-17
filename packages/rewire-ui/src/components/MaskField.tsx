@@ -184,21 +184,21 @@ class MaskField extends React.Component<MaskFieldProps> {
 
   shouldComponentUpdate(nextProps: MaskFieldProps) {
     return (
-      (nextProps.value !== this.props.value) ||
-      (nextProps.disabled !== this.props.disabled) ||
-      (nextProps.visible !== this.props.visible) ||
-      (nextProps.error !== this.props.error) ||
-      (nextProps.label !== this.props.label) ||
-      (nextProps.placeholder !== this.props.placeholder) ||
-      (nextProps.align !== this.props.align) ||
-      (nextProps.variant !== this.props.variant) ||
-      (nextProps.mask !== this.props.mask) ||
-      (nextProps.guide !== this.props.guide) ||
+      (nextProps.value           !== this.props.value)           ||
+      (nextProps.disabled        !== this.props.disabled)        ||
+      (nextProps.visible         !== this.props.visible)         ||
+      (nextProps.error           !== this.props.error)           ||
+      (nextProps.label           !== this.props.label)           ||
+      (nextProps.placeholder     !== this.props.placeholder)     ||
+      (nextProps.align           !== this.props.align)           ||
+      (nextProps.variant         !== this.props.variant)         ||
+      (nextProps.mask            !== this.props.mask)            ||
+      (nextProps.guide           !== this.props.guide)           ||
       (nextProps.placeholderChar !== this.props.placeholderChar) ||
-      (nextProps.showMask !== this.props.showMask) ||
-      (nextProps.disableErrors !== this.props.disableErrors) ||
-      (nextProps.startAdornment !== this.props.startAdornment) ||
-      (nextProps.endAdornment !== this.props.endAdornment)
+      (nextProps.showMask        !== this.props.showMask)        ||
+      (nextProps.disableErrors   !== this.props.disableErrors)   ||
+      (nextProps.startAdornment  !== this.props.startAdornment)  ||
+      (nextProps.endAdornment    !== this.props.endAdornment)
     );
   }
 
