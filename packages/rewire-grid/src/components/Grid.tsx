@@ -30,6 +30,7 @@ import SettingsIcon                          from '@material-ui/icons/Settings';
 import createGridTheme                       from './GridTheme';
 import {scrollBySmooth}                      from '../models/SmoothScroll';
 import ResizeObserver                        from 'resize-observer-polyfill';
+import * as fastdom                          from 'fastdom';
 import './data-grid.scss';
 
 interface IColumnProps {
@@ -60,23 +61,32 @@ interface IResizeWatcherResult {
 }
 
 function verticalResizeWatcher(lifetime: React.Component<any>, element: HTMLElement): IResizeWatcherResult {
-  const _previous                    = {scrollHeight: element.scrollHeight, clientHeight: element.clientHeight};
+  const _previous                    = {scrollHeight: -1, clientHeight: -1};
   const _callbacks: ResizeCallback[] = [];
+  fastdom.measure(() => {
+    _previous.clientHeight = element.clientHeight;
+    _previous.scrollHeight = element.scrollHeight;
+    for (const callback of _callbacks) {
+      callback(_previous);
+    }
+  });
 
   const observer = new ResizeObserver(function() {
-    const current = {scrollHeight: element.scrollHeight, clientHeight: element.clientHeight};
-    if (current && _previous && (current.scrollHeight === _previous.scrollHeight) === (current.clientHeight === _previous.clientHeight)) return;
-    for (const callback of _callbacks) {
-      callback(current);
-    }
-    _previous.clientHeight = current.clientHeight;
-    _previous.scrollHeight = current.scrollHeight;
+    fastdom.measure(() => {
+      const current = {scrollHeight: element.scrollHeight, clientHeight: element.clientHeight};
+      if (current && _previous && (current.scrollHeight === _previous.scrollHeight) === (current.clientHeight === _previous.clientHeight)) return;
+      for (const callback of _callbacks) {
+        callback(current);
+      }
+      _previous.clientHeight = current.clientHeight;
+      _previous.scrollHeight = current.scrollHeight;
+    });
   });
 
   observer.observe(element);
   const oldCWUM = lifetime.componentWillUnmount;
   lifetime.componentWillUnmount = () => { observer.disconnect(); oldCWUM && oldCWUM(); };
-  return { watch(callback: ResizeCallback) { _callbacks.push(callback); callback(_previous); } };
+  return { watch(callback: ResizeCallback) { _callbacks.push(callback); } };
 }
 
 export interface IGridProps {
