@@ -30,6 +30,7 @@ import SettingsIcon                          from '@material-ui/icons/Settings';
 import createGridTheme                       from './GridTheme';
 import {scrollBySmooth}                      from '../models/SmoothScroll';
 import ResizeObserver                        from 'resize-observer-polyfill';
+import * as fastdom                          from 'fastdom';
 import './data-grid.scss';
 
 interface IColumnProps {
@@ -60,23 +61,32 @@ interface IResizeWatcherResult {
 }
 
 function verticalResizeWatcher(lifetime: React.Component<any>, element: HTMLElement): IResizeWatcherResult {
-  const _previous                    = {scrollHeight: element.scrollHeight, clientHeight: element.clientHeight};
+  const _previous                    = {scrollHeight: -1, clientHeight: -1};
   const _callbacks: ResizeCallback[] = [];
+  fastdom.measure(() => {
+    _previous.clientHeight = element.clientHeight;
+    _previous.scrollHeight = element.scrollHeight;
+    for (const callback of _callbacks) {
+      callback(_previous);
+    }
+  });
 
   const observer = new ResizeObserver(function() {
-    const current = {scrollHeight: element.scrollHeight, clientHeight: element.clientHeight};
-    if (current && _previous && (current.scrollHeight === _previous.scrollHeight) === (current.clientHeight === _previous.clientHeight)) return;
-    for (const callback of _callbacks) {
-      callback(current);
-    }
-    _previous.clientHeight = current.clientHeight;
-    _previous.scrollHeight = current.scrollHeight;
+    fastdom.measure(() => {
+      const current = {scrollHeight: element.scrollHeight, clientHeight: element.clientHeight};
+      if (current && _previous && (current.scrollHeight === _previous.scrollHeight) === (current.clientHeight === _previous.clientHeight)) return;
+      for (const callback of _callbacks) {
+        callback(current);
+      }
+      _previous.clientHeight = current.clientHeight;
+      _previous.scrollHeight = current.scrollHeight;
+    });
   });
 
   observer.observe(element);
   const oldCWUM = lifetime.componentWillUnmount;
   lifetime.componentWillUnmount = () => { observer.disconnect(); oldCWUM && oldCWUM(); };
-  return { watch(callback: ResizeCallback) { _callbacks.push(callback); callback(_previous); } };
+  return { watch(callback: ResizeCallback) { _callbacks.push(callback); } };
 }
 
 export interface IGridProps {
@@ -540,6 +550,7 @@ const GridInternal = withStyles(styles, class extends React.PureComponent<GridPr
 
   componentWillMount() {
     disposeOnUnmount(this, () => this.buildGroups());
+    disposeOnUnmount(this, () => this.buildColumnGroups());
   }
 
   componentWillUnmount() {
@@ -551,10 +562,7 @@ const GridInternal = withStyles(styles, class extends React.PureComponent<GridPr
 
   componentWillReceiveProps(nextProps: GridProps) {
     if (nextProps.grid !== this.grid) {
-      // reset column groups
-      this._fixedColGroups = undefined;
-      this._colGroups      = undefined;
-      this.grid            = nextProps.grid;
+      this.grid = nextProps.grid;
     }
   }
 
@@ -595,9 +603,6 @@ const GridInternal = withStyles(styles, class extends React.PureComponent<GridPr
       </div>
     );
   }
-
-  _fixedColGroups: JSX.Element | undefined;
-  _colGroups: JSX.Element | undefined;
 
   getGroupValue(row: IRow, column: IColumn) {
     const v = row && row.data && column && row.data[column.name];
@@ -649,6 +654,35 @@ const GridInternal = withStyles(styles, class extends React.PureComponent<GridPr
     return groups && groups.map((group) => <GroupRow fixed={fixed} key={group.title} group={group} columns={columns} visibleColumns={visibleColumns} />);
   }
 
+  _fixedColGroups: () => JSX.Element | undefined;
+  _colGroups: () => JSX.Element | undefined;
+  buildColumnGroups() {
+    const fixedComputation = () => {
+      let fixedGroups = this.props.grid.fixedColumns.reduce((prev: JSX.Element[], column) => {
+        prev.push(<ColumnWidth key={'cg_' + column.id} column={column} />);
+        return prev;
+      }, []);
+      return <colgroup>{fixedGroups}</colgroup>;
+    };
+    const standardComputation = () => {
+      let standardGroups = this.props.grid.standardColumns.reduce((prev: JSX.Element[], column) => {
+        prev.push(<ColumnWidth key={'cg_' + column.id} column={column} />);
+        return prev;
+      }, []);
+      return <colgroup>{standardGroups}</colgroup>;
+    };
+    this._fixedColGroups = computed(() => this.props.grid.fixedColumns.length, fixedComputation, undefined, true);
+    this._colGroups      = computed(() => this.props.grid.standardColumns.length, standardComputation, undefined, true);
+  }
+
+  renderColumnGroups(fixed: boolean): JSX.Element | undefined {
+    if (fixed) {
+      return this._fixedColGroups();
+    } else {
+      return this._colGroups();
+    }
+  }
+
   renderRows = (rows: IRow[], columns: IColumn[], fixed: boolean) => {
     const grid = this.props.grid;
     if (!grid.groupBy || (grid.groupBy.length === 0)) {
@@ -657,26 +691,6 @@ const GridInternal = withStyles(styles, class extends React.PureComponent<GridPr
 
     const visibleColumns: number = columns.reduce((previous, current) => previous + ((current.visible) ? 1 : 0), 0);
     return <Observe render={() => this.renderGroups(columns, visibleColumns, fixed)} />;
-  }
-
-  renderColumnGroups(fixed: boolean): JSX.Element {
-    if (fixed && this._fixedColGroups) {
-      return this._fixedColGroups;
-    } else if (this._colGroups) {
-      return this._colGroups;
-    }
-
-    let groups = this.props.grid.columns.reduce((prev: JSX.Element[], column) => {
-      if (column.fixed === fixed) {
-        prev.push(<ColumnWidth key={'cg_' + column.id} column={column} />);
-      }
-      return prev;
-    }, []);
-
-    let result = <colgroup>{groups}</colgroup>;
-    if (fixed) this._fixedColGroups = result;
-    else       this._colGroups      = result;
-    return result;
   }
 
   renderFixedColumnData(): JSX.Element | null {

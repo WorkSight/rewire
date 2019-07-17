@@ -147,7 +147,6 @@ export interface IGrid extends IRows, IDisposable {
   get(): ICellDataMap[];
   set(data: (IRowData | undefined)[]): void;
 
-  addColumn(column: IColumn): IColumn;
   setColumnPositions(): void;
 
   addFixedRow(data?: IRowData, position?: number): IRow;
@@ -244,7 +243,6 @@ export interface IRow extends IDisposable {
   grid                          : IGrid;
   cells                         : ICellMap;
   data                          : any;
-  height                        : number;
   selected                      : boolean;
   cls?                          : string;
   allowMergeColumns?            : boolean;
