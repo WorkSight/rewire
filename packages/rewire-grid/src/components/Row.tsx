@@ -78,28 +78,30 @@ export const GroupRow = React.memo(withStyles(styles, (props: IGroupProps & {cla
 }));
 
 type RowProps = WithStyle<ReturnType<typeof styles>, IRowProps>;
-const rowElementMap = new Map<IRow, HTMLTableRowElement[]>();
-function addElement(row: IRow, element: HTMLTableRowElement) {
+
+const rowElementMap = new Map<IRow, InternalRow[]>();
+function addElement(row: IRow, component: InternalRow) {
   const e = rowElementMap.get(row);
-  if (!e) rowElementMap.set(row, [element]);
-  else e.push(element);
+  if (!e) rowElementMap.set(row, [component]);
+  else e.push(component);
 }
 
-function getElements(row: IRow): HTMLTableRowElement[] {
+function getComponents(row: IRow): InternalRow[] {
   return rowElementMap.get(row) || [];
 }
 
-function removeElement(row: IRow, element: HTMLTableRowElement) {
+function removeElement(row: IRow, component: InternalRow) {
   const e = rowElementMap.get(row);
   if (!e) return;
 
-  e.splice(e.indexOf(element, 1));
+  e.splice(e.indexOf(component, 1));
   if (e.length === 0) rowElementMap.delete(row);
 }
 
-const Row = withStyles(styles, class extends PureComponent<RowProps, {}> {
+class InternalRow extends PureComponent<RowProps, {}> {
   element: React.RefObject<HTMLTableRowElement>;
   observer: MutationObserver;
+  desiredHeight: number = 0;
 
   constructor(props: RowProps) {
     super(props);
@@ -116,12 +118,15 @@ const Row = withStyles(styles, class extends PureComponent<RowProps, {}> {
   }
 
   componentDidMount() {
-    addElement(this.props.row, this.element.current!);
-    this.calculateInitialHeight();
-    if (this.props.height === undefined) {
-      this.observer = new MutationObserver(() => this.calculateDynamicHeight());
-      this.observer.observe(this.element.current!, { childList: true, subtree: true });
+    if (!isNullOrUndefined(this.props.height)) {
+      this.element.current!.style.height = `${this.props.height}px`;
+      return;
     }
+
+    addElement(this.props.row, this);
+    this.calculateInitialHeight();
+    this.observer = new MutationObserver(() => this.calculateDynamicHeight());
+    this.observer.observe(this.element.current!, { childList: true, subtree: true });
   }
 
   componentWillUnmount() {
@@ -130,7 +135,7 @@ const Row = withStyles(styles, class extends PureComponent<RowProps, {}> {
       delete this.observer;
     }
 
-    removeElement(this.props.row, this.element.current!);
+    removeElement(this.props.row, this);
   }
 
   renderCells = () => {
@@ -147,25 +152,19 @@ const Row = withStyles(styles, class extends PureComponent<RowProps, {}> {
   }
 
   calculateInitialHeight() {
-    const elements = getElements(this.props.row);
-
-    if (!isNullOrUndefined(this.props.height)) {
-      for (const e of elements) {
-        e.style.height = `${this.props.height}px`;
-      }
-      return;
-    }
+    const components = getComponents(this.props.row);
 
     let newHeight = 0;
     fastdom.measure(() => {
-      for (const e of elements) {
-        newHeight = Math.max(newHeight, e.offsetHeight);
+      this.desiredHeight = this.element.current!.getBoundingClientRect().height;
+      for (const component of components) {
+        newHeight = Math.max(newHeight, component.desiredHeight);
       }
     });
 
     fastdom.mutate(() => {
-      for (const e of elements) {
-        e.style.height = `${newHeight}px`;
+      for (const component of components) {
+        component.element.current!.style.height = `${newHeight}px`;
       }
     });
   }
@@ -175,18 +174,19 @@ const Row = withStyles(styles, class extends PureComponent<RowProps, {}> {
       return;
     }
 
-    const elements  = getElements(this.props.row);
-    let   newHeight = 0;
+    const components = getComponents(this.props.row);
+    let   newHeight  = 0;
     fastdom.measure(() => {
-      for (const e of elements) {
-        e.style.height = 'auto';
-        newHeight = Math.max(newHeight, e.offsetHeight);
+      this.element.current!.style.height = 'auto';
+      this.desiredHeight = this.element.current!.getBoundingClientRect().height;
+      for (const component of components) {
+        newHeight = Math.max(newHeight, component.desiredHeight);
       }
     });
 
     fastdom.mutate(() => {
-      for (const e of elements) {
-        e.style.height = `${newHeight}px`;
+      for (const component of components) {
+        component.element.current!.style.height = `${newHeight}px`;
       }
     });
   }
@@ -203,6 +203,7 @@ const Row = withStyles(styles, class extends PureComponent<RowProps, {}> {
       }
     } />;
   }
-});
+}
 
+const Row = withStyles(styles, InternalRow);
 export default Row;
