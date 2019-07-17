@@ -64,7 +64,11 @@ export default class BlurInputHOC extends React.Component<IBlurProps, IBlurState
 
   handleOnBlur = (evt: any) => {
     if (this.props.onValueChange) {
-      this.props.onValueChange(this.state.value);
+      if (isNaN(this.state.value)) {
+        this.props.onValueChange(this.state.value);
+      } else {
+        this.props.onValueChange(parseFloat(this.state.value));
+      }
     }
   }
 
