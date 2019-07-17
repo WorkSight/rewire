@@ -1,6 +1,6 @@
 {
   "name": "rewire",
-  "version": "1.0.109",
+  "version": "1.0.110",
   "description": "WorkSight .NEXT core",
   "main": "src/index.js",
   "private": true,
