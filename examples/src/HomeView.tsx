@@ -476,6 +476,7 @@ const HomeActionMenu = (props: any) => {
 
   return (
     <ActionMenu
+      title={() => <span>Action Menu</span>}
       menuId='home-action-menu'
       items={items}
       buttonContent={buttonContent}
@@ -499,6 +500,7 @@ const HomeToggleMenu = (props: any) => {
   ]);
   return (
     <ToggleMenu
+      title='Toggle Menu'
       menuId='home-toggle-menu'
       buttonContent={buttonContent}
       buttonProps={buttonProps}

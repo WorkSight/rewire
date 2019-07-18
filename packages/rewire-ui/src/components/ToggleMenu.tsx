@@ -8,6 +8,7 @@ import Menu, {MenuProps}       from '@material-ui/core/Menu';
 import MenuItem                from '@material-ui/core/MenuItem';
 import ListItemText            from '@material-ui/core/ListItemText';
 import ListItemIcon            from '@material-ui/core/ListItemIcon';
+import ListSubheader           from '@material-ui/core/ListSubheader';
 import {SvgIconProps}          from '@material-ui/core/SvgIcon';
 import CheckIcon               from '@material-ui/icons/Check';
 import {WithStyle, withStyles} from './styles';
@@ -26,6 +27,12 @@ const styles = (theme: Theme) => ({
     minWidth: '0px',
   },
   menu: {
+  },
+  menuTitleContainer: {
+    paddingTop: '8px',
+    paddingBottom: '8px',
+    lineHeight: '1.75',
+    color: 'inherit',
   },
   listItemText: {
   },
@@ -48,6 +55,7 @@ const styles = (theme: Theme) => ({
 });
 
 interface IToggleMenuProps {
+  title:         string | JSX.Element | (() => JSX.Element);
   menuId:        string;
   buttonContent: JSX.Element | string;
   buttonProps:   ButtonProps;
@@ -83,6 +91,18 @@ class ToggleMenu extends React.Component<ToggleMenuProps, IToggleMenuState> {
     this.setState({anchorEl: undefined});
   }
 
+  renderTitle = React.memo((): JSX.Element | null => {
+    return <Observe render={() => {
+      const {title, classes} = this.props;
+      const titleDisplay = typeof title === 'function' ? title() : title;
+      return (
+        <ListSubheader component='div' className={classes.menuTitleContainer}>
+          {titleDisplay}
+        </ListSubheader>
+      );
+    }} />;
+  });
+
   renderMenuContent = React.memo(React.forwardRef((): JSX.Element => {
     return <Observe render={() => {
       const {classes, items, onItemClick} = this.props;
@@ -111,7 +131,7 @@ class ToggleMenu extends React.Component<ToggleMenuProps, IToggleMenuState> {
   }));
 
   render() {
-    const {classes, menuId, buttonContent, buttonProps, items, onItemClick, marginThreshold, MenuListProps, ...restProps} = this.props;
+    const {classes, menuId, buttonContent, buttonProps, items, onItemClick, marginThreshold, MenuListProps, title, ...restProps} = this.props;
     const {anchorEl} = this.state;
 
     return <Observe render={() => (
@@ -132,7 +152,7 @@ class ToggleMenu extends React.Component<ToggleMenuProps, IToggleMenuState> {
           open={Boolean(anchorEl)}
           onClose={this.handleMenuClose}
           marginThreshold={!isNullOrUndefined(marginThreshold) ? marginThreshold : 8}
-          MenuListProps={{dense: true, disablePadding: true, ...MenuListProps}}
+          MenuListProps={{dense: true, disablePadding: true, subheader: title ? <this.renderTitle /> : undefined, ...MenuListProps}}
           {...restProps}
         >
           <this.renderMenuContent />
