@@ -348,8 +348,12 @@ class Cell extends React.PureComponent<CellProps, {}> {
           if (cellType === 'number') {
             endOfTextOnFocus      = false;
             cursorPositionOnFocus = 1;
+            let num               = parseFloat(value);
+            if (!Number.isNaN(num)) {
+              value = num;
+            }
           }
-          if (cellType === 'auto-complete' || cellType === 'multiselectautocomplete') {
+          else if (cellType === 'auto-complete' || cellType === 'multiselectautocomplete') {
             value                                = undefined;
             additionalProps['initialInputValue'] = cell.keyForEdit;
           }

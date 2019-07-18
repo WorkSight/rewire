@@ -6,6 +6,8 @@ import Menu, {MenuProps}       from '@material-ui/core/Menu';
 import MenuItem                from '@material-ui/core/MenuItem';
 import ListItemText            from '@material-ui/core/ListItemText';
 import ListItemIcon            from '@material-ui/core/ListItemIcon';
+import ListSubheader           from '@material-ui/core/ListSubheader';
+import Divider                 from '@material-ui/core/Divider';
 import {SvgIconProps}          from '@material-ui/core/SvgIcon';
 import {Theme}                 from '@material-ui/core/styles';
 import LabelIcon               from '@material-ui/icons/LabelOutlined';
@@ -31,6 +33,12 @@ const styles = (theme: Theme) => ({
   },
   menu: {
   },
+  menuTitleContainer: {
+    paddingTop: '8px',
+    paddingBottom: '8px',
+    lineHeight: '1.75',
+    color: 'inherit',
+  },
   listItemText: {
   },
   listItemTypography: {
@@ -50,6 +58,7 @@ const styles = (theme: Theme) => ({
 });
 
 interface IActionMenuProps {
+  title: string | JSX.Element | (() => JSX.Element);
   menuId: string;
   buttonContent: JSX.Element;
   buttonProps: ButtonProps;
@@ -86,6 +95,20 @@ class ActionMenu extends React.Component<ActionMenuProps, IActionMenuState> {
     this.setState({anchorEl: undefined});
   }
 
+  renderTitle = React.memo((): JSX.Element | null => {
+    return <Observe render={() => {
+      const {title, classes} = this.props;
+      const titleDisplay = typeof title === 'function' ? title() : title;
+      return (
+        <>
+        <ListSubheader component='div' className={classes.menuTitleContainer}>
+          {titleDisplay}
+        </ListSubheader>
+        </>
+      );
+    }} />;
+  });
+
   renderMenuContent = React.memo(React.forwardRef((): JSX.Element => {
     return <Observe render={() => {
       const {classes, items} = this.props;
@@ -117,7 +140,7 @@ class ActionMenu extends React.Component<ActionMenuProps, IActionMenuState> {
   }));
 
   render() {
-    const {classes, menuId, buttonContent, buttonProps, items, marginThreshold, MenuListProps, ...restProps} = this.props;
+    const {classes, menuId, buttonContent, buttonProps, items, marginThreshold, MenuListProps, title, ...restProps} = this.props;
     const {anchorEl} = this.state;
 
     return <Observe render={() => (
@@ -139,7 +162,7 @@ class ActionMenu extends React.Component<ActionMenuProps, IActionMenuState> {
           onClose={this.handleMenuClose}
           marginThreshold={!isNullOrUndefined(marginThreshold) ? marginThreshold : 5}
           disableEnforceFocus={true}
-          MenuListProps={{dense: true, disablePadding: true, ...MenuListProps}}
+          MenuListProps={{dense: true, disablePadding: true, subheader: title ? <this.renderTitle /> : undefined, ...MenuListProps}}
           {...restProps}
         >
           <this.renderMenuContent />
