@@ -148,7 +148,6 @@ class TextFieldInternal extends React.Component<TextFieldPropsStyled> {
 
   onValueChange = (value?: string | UTC) => {
     let v = value;
-    console.log('TextField.onValueChange()', v);
     if (this.props.type === 'date') {
       v = v ? utc(v).startOfDay() : undefined;
     }

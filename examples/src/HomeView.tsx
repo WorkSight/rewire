@@ -104,7 +104,8 @@ class ComplexCellData {
   }
 }
 
-const ComplexCell: React.SFC<ICell> = (cell) => {
+const ComplexCell: React.SFC<{cell: ICell}> = (props) => {
+  const {cell} = props;
   return (
     <div style={{width: '100%', textAlign: cell.align}}>
       <div style={{fontSize: '0.9em', fontWeight: 'bold', color: '#14809D'}}>
@@ -259,8 +260,8 @@ function createTestGrid(nRows: number, nColumns: number) {
     // grid.columnByPos(6).readOnly = true;
   //   grid.columnByPos(7).enabled = false;
   //   grid.columnByPos(8).enabled = false;
-  //   grid.columnByPos(8).renderer = (cell) => <div>{cell.value + ' Col'}</div>;
-  //   grid.cellByPos(0, 9).renderer = (cell) => <div>{cell.value + ' Cell'}</div>;
+  //   grid.columnByPos(8).renderer = (props) => <div>{props.cell.value + ' Col'}</div>;
+  //   grid.cellByPos(0, 9).renderer = (props) => <div>{props.cell.value + ' Cell'}</div>;
   //   grid.cellByPos(0, 7).align = 'right';
   //   grid.cellByPos(0, 7).enabled = true;
   //   grid.columnByPos(7).align = 'center';
@@ -276,7 +277,7 @@ function createTestGrid(nRows: number, nColumns: number) {
   // }, 5000);
   // grid.cellByPos(0, 5).editable = false;
   // grid.cellByPos(0, 6).readOnly = false;
-  // grid.cellByPos(0, 8).renderer = (cell) => <div>{cell.value + ' Cell'}</div>;
+  // grid.cellByPos(0, 8).renderer = (props) => <div>{props.cell.value + ' Cell'}</div>;
 
   console.timeEnd('start tester'); // how long did it take to create the reactive model?
   return grid;

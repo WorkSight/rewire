@@ -25,7 +25,8 @@ import {
   ICustomProps,
   SearchFn,
   MapFn,
-  defaultMap
+  defaultMap,
+  IRenderSuggestionFnProps,
 } from '../models/search';
 
 const styles = (theme: Theme) => ({
@@ -122,11 +123,9 @@ const styles = (theme: Theme) => ({
   },
 });
 
-export interface IAutoCompleteRenderSuggestionFnOptions {
-  theme:         any;
-  isHighlighted: boolean;
-  inputValue?:   any;
-  parts:         {highlight: boolean, text: string}[];
+export interface IAutoCompleteRenderSuggestionFnProps<T> extends IRenderSuggestionFnProps<T> {
+  inputValue: any;
+  parts: {highlight: boolean, text: string}[];
 }
 
 export interface ISuggestionsContainerComponentProps {
@@ -135,7 +134,7 @@ export interface ISuggestionsContainerComponentProps {
 
 export type ISuggestionsContainerComponent = (props?: ISuggestionsContainerComponentProps) => JSX.Element;
 
-export interface IAutoCompleteProps {
+export interface IAutoCompleteProps<T> {
   selectOnFocus?        : boolean;
   endOfTextOnFocus?     : boolean;
   cursorPositionOnFocus?: number;
@@ -144,6 +143,7 @@ export interface IAutoCompleteProps {
   showEmptySuggestions? : boolean;
   hasTransition?        : boolean;
   transitionTimeout?    : number;
+  renderSuggestion?     : (props: IAutoCompleteRenderSuggestionFnProps<T>) => JSX.Element;
 
   suggestionsContainerHeader?: ISuggestionsContainerComponent;
   suggestionsContainerFooter?: ISuggestionsContainerComponent;
@@ -155,7 +155,7 @@ interface IAutoCompleteState {
   suggestions: any[];
 }
 
-export type AutoCompleteProps<T> = WithStyle<ReturnType<typeof styles>, IAutoCompleteProps & ICustomProps<T> & React.InputHTMLAttributes<any>>;
+export type AutoCompleteProps<T> = WithStyle<ReturnType<typeof styles>, ICustomProps<T> & IAutoCompleteProps<T> & React.InputHTMLAttributes<any>>;
 
 class AutoComplete<T> extends React.Component<AutoCompleteProps<T>, IAutoCompleteState> {
   state = {
@@ -165,6 +165,8 @@ class AutoComplete<T> extends React.Component<AutoCompleteProps<T>, IAutoComplet
   };
 
   _fontSize?: string;
+  _inputComponentNode?: any;
+  _suggestionsContainerWidth?: string;
   downShift: any;
   search: SearchFn<T>;
   map: MapFn<T>;
@@ -259,16 +261,28 @@ class AutoComplete<T> extends React.Component<AutoCompleteProps<T>, IAutoComplet
     return results;
   }
 
-  renderSuggestion = (params: any) => {
-    const { suggestion, index, itemProps, theme, highlightedIndex, inputValue, classes } = params;
-    const isHighlighted = highlightedIndex === index;
-    const name          = this.map(suggestion);
-    const parts         = this.parse(inputValue, name);
+  suggestionComparisonFn = (prevProps: any, nextProps: any): boolean => {
+    let prevAriaSelected = prevProps.itemProps && prevProps.itemProps['aria-selected'];
+    let nextAriaSelected = nextProps.itemProps && nextProps.itemProps['aria-selected'];
+    return (
+      (prevProps.suggestion === nextProps.suggestion) &&
+      (prevProps.index === nextProps.index) &&
+      (prevAriaSelected === nextAriaSelected) &&
+      (prevProps.isHighlighted === nextProps.isHighlighted) &&
+      (prevProps.inputValue === nextProps.inputValue) &&
+      (prevProps.classes === nextProps.classes)
+    );
+  }
+
+  renderSuggestion = React.memo((props: any) => {
+    const { suggestion, index, itemProps, isHighlighted, inputValue, classes } = props;
+    const name  = this.map(suggestion);
+    const parts = this.parse(inputValue, name);
 
     if (this.props.renderSuggestion) {
       return (
         <MenuItem {...itemProps} selected={isHighlighted} component='div' key={index} className={classes.menuItem}>
-          {this.props.renderSuggestion(suggestion, {theme, isHighlighted, inputValue, parts} as IAutoCompleteRenderSuggestionFnOptions)}
+          <this.props.renderSuggestion suggestion={suggestion} isHighlighted={isHighlighted} inputValue={inputValue} parts={parts} />
         </MenuItem>
       );
     }
@@ -289,11 +303,10 @@ class AutoComplete<T> extends React.Component<AutoCompleteProps<T>, IAutoComplet
         })}
       </MenuItem>
     );
-  }
+  }, this.suggestionComparisonFn);
 
-  renderSuggestionsContainerContents = (props: any) => {
-    const { suggestionsContainerHeader, suggestionsContainerFooter, suggestions, options } = props;
-    const { getMenuProps, isOpen, classes } = options;
+  renderSuggestionsContainerContents = React.memo((props: any) => {
+    const { suggestionsContainerHeader, suggestionsContainerFooter, suggestions, getMenuProps, isOpen, classes } = props;
     const menuProps = {
       onMouseDown: this.handleMenuMouseDown,
       onMouseUp: this.handleMenuMouseUp,
@@ -323,22 +336,24 @@ class AutoComplete<T> extends React.Component<AutoCompleteProps<T>, IAutoComplet
       downShift: this.downShift,
     };
 
+    const SuggestionsHeader = suggestionsContainerHeader;
+    const SuggestionsFooter = suggestionsContainerFooter;
+
     return (
       <div {...(isOpen ? getMenuProps({}, {suppressRefError: true}) : {})} {...menuProps}>
         <Paper elevation={4} className={classNames(...suggestionsPaperClasses)} style={{fontSize: this._fontSize}}>
-          {suggestionsContainerHeader && suggestionsContainerHeader(suggestionsContainerComponentProps)}
+          {SuggestionsHeader && <SuggestionsHeader suggestionsContainerComponentProps={suggestionsContainerComponentProps} />}
           <div className={classNames(...suggestionsClasses)}>
             {suggestions}
           </div>
-          {suggestionsContainerFooter && suggestionsContainerFooter(suggestionsContainerComponentProps)}
+          {SuggestionsFooter && <SuggestionsFooter suggestionsContainerComponentProps={suggestionsContainerComponentProps} />}
         </Paper>
       </div>
     );
-  }
+  });
 
-  renderSuggestionsContainer = (options: any) => {
-    const { openOnFocus, showEmptySuggestions, suggestionsContainerHeader, suggestionsContainerFooter, hasTransition, transitionTimeout, label } = this.props;
-    const { isOpen, children, classes } = options;
+  renderSuggestionsContainer = React.memo((props: any) => {
+    const { openOnFocus, showEmptySuggestions, suggestionsContainerHeader, suggestionsContainerFooter, hasTransition, transitionTimeout, label, isOpen, children, classes, getMenuProps } = props;
 
     let transition  = !isNullOrUndefined(hasTransition) ? hasTransition : true;
     let timeout     = !isNullOrUndefined(transitionTimeout) && transitionTimeout! >= 0 ? transitionTimeout : 350;
@@ -358,24 +373,27 @@ class AutoComplete<T> extends React.Component<AutoCompleteProps<T>, IAutoComplet
         boundariesElement: 'viewport',
       },
     };
-
-    const inputComponentNode = this.textFieldRef.current && (label ? this.textFieldRef.current.children[1] : this.textFieldRef.current.children[0]);
-
+    if (!this._inputComponentNode) {
+      this._inputComponentNode = this.textFieldRef.current && (label ? this.textFieldRef.current.children[1] : this.textFieldRef.current.children[0]);
+    }
+    if (!this._suggestionsContainerWidth) {
+      this._suggestionsContainerWidth = this._inputComponentNode.clientWidth;
+    }
     return (
-      <Popper open={isOpen} placement='bottom-start' anchorEl={inputComponentNode} transition={transition} modifiers={popperModifiers} className={classes.popper} style={{minWidth: inputComponentNode ? inputComponentNode.clientWidth : 'auto'}}>
+      <Popper open={isOpen} placement='bottom-start' anchorEl={this._inputComponentNode} transition={transition} modifiers={popperModifiers} className={classes.popper} style={{minWidth: this._suggestionsContainerWidth}}>
         {transition
           ? ({ TransitionProps }) => (
               <Fade {...TransitionProps} timeout={timeout}>
                 <div>
-                  <this.renderSuggestionsContainerContents suggestions={suggestions} suggestionsContainerHeader={suggestionsContainerHeader} suggestionsContainerFooter={suggestionsContainerFooter} options={...options} />
+                  <this.renderSuggestionsContainerContents suggestions={suggestions} suggestionsContainerHeader={suggestionsContainerHeader} suggestionsContainerFooter={suggestionsContainerFooter} getMenuProps={getMenuProps} isOpen={isOpen} classes={classes} />
                 </div>
               </Fade>
             )
-          : <this.renderSuggestionsContainerContents suggestions={suggestions} suggestionsContainerHeader={suggestionsContainerHeader} suggestionsContainerFooter={suggestionsContainerFooter} options={...options} />
+          : <this.renderSuggestionsContainerContents suggestions={suggestions} suggestionsContainerHeader={suggestionsContainerHeader} suggestionsContainerFooter={suggestionsContainerFooter} getMenuProps={getMenuProps} isOpen={isOpen} classes={classes} />
         }
       </Popper>
     );
-  }
+  });
 
   handleFocus = (evt: React.FocusEvent<HTMLInputElement>) => {
     this.setState({isFocused: true});
@@ -507,7 +525,7 @@ class AutoComplete<T> extends React.Component<AutoCompleteProps<T>, IAutoComplet
     }
   }
 
-  shouldComponentUpdate(nextProps: IAutoCompleteProps & ICustomProps<T> & React.InputHTMLAttributes<any>, nextState: any, nextContext: any) {
+  shouldComponentUpdate(nextProps: IAutoCompleteProps<T> & ICustomProps<T> & React.InputHTMLAttributes<any>, nextState: any, nextContext: any) {
     return (
         (nextProps.selectedItem !== this.props.selectedItem) ||
         (nextProps.error !== this.props.error) ||
@@ -547,7 +565,7 @@ class AutoComplete<T> extends React.Component<AutoCompleteProps<T>, IAutoComplet
   }
 
   render() {
-    const {classes, theme, disabled, visible, error, label, placeholder, autoFocus, align, disableErrors, variant, initialInputValue} = this.props;
+    const {classes, disabled, visible, error, label, placeholder, autoFocus, align, disableErrors, variant, initialInputValue, showEmptySuggestions, openOnFocus, suggestionsContainerHeader, suggestionsContainerFooter, hasTransition, transitionTimeout} = this.props;
     if (visible === false) {
       return null;
     }
@@ -574,7 +592,11 @@ class AutoComplete<T> extends React.Component<AutoCompleteProps<T>, IAutoComplet
             inputValue,
             selectedItem,
             highlightedIndex,
-          }) => (
+          }) => {
+            if (!isOpen) {
+              this._suggestionsContainerWidth = undefined;
+            }
+            return (
             <div className={classes.container + ' ' + (this.props.className || '')}>
               {this.renderInput(classes, error,
                 getInputProps({
@@ -594,25 +616,36 @@ class AutoComplete<T> extends React.Component<AutoCompleteProps<T>, IAutoComplet
                   endAdornment: (< >{this.renderDeleteButton()}{endAdornment}</>)
                 },
               )}
-              {this.renderSuggestionsContainer({
-                getMenuProps: getMenuProps,
-                isOpen: isOpen,
-                classes: classes,
-                children: this.state.suggestions.map((suggestion, index) =>
-                  this.renderSuggestion({
-                    suggestion,
-                    index,
-                    inputValue,
-                    theme,
-                    classes: classes,
-                    itemProps: getItemProps({ item: suggestion }),
-                    highlightedIndex,
-                    selectedItem,
-                  }),
-                ),
-              })}
+              {isOpen
+              ? <this.renderSuggestionsContainer
+                 getMenuProps={getMenuProps}
+                 isOpen={isOpen}
+                 classes={classes}
+                 openOnFocus={openOnFocus}
+                 showEmptySuggestions={showEmptySuggestions}
+                 suggestionsContainerHeader={suggestionsContainerHeader}
+                 suggestionsContainerFooter={suggestionsContainerFooter}
+                 hasTransition={hasTransition}
+                 transitionTimeout={transitionTimeout}
+                 label={label}
+                >
+                  {this.state.suggestions.map((suggestion, index) =>
+                    <this.renderSuggestion
+                      key={index}
+                      suggestion={suggestion}
+                      index={index}
+                      inputValue={inputValue}
+                      classes={classes}
+                      itemProps={getItemProps({ item: suggestion })}
+                      isHighlighted={highlightedIndex === index}
+                      selectedItem={selectedItem}
+                    />
+                  )}
+                </this.renderSuggestionsContainer>
+              : null}
             </div>
-          )}
+            );
+          }}
       </Downshift>
     );
   }

@@ -1,4 +1,5 @@
 import {fetch, match}               from 'rewire-common';
+import {Theme}                      from '@material-ui/core/styles';
 import {TextAlignment, TextVariant} from '../components/editors';
 
 export interface ISearchOptions {
@@ -67,7 +68,11 @@ export function documentSearch(documentType: string) {
   };
 }
 
-export type RenderSuggestionFn<T> = (suggestion: T, {theme, isHighlighted}: any) => JSX.Element;
+export interface IRenderSuggestionFnProps<T> {
+  suggestion:    T;
+  isHighlighted: boolean;
+}
+export type RenderSuggestionFn<T> = (props: IRenderSuggestionFnProps<T>) => JSX.Element;
 
 export interface ICustomProps<T> {
   readonly selectedItem?: T;
