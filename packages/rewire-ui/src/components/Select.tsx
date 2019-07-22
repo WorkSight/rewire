@@ -12,7 +12,8 @@ import {
   ICustomProps,
   SearchFn,
   MapFn,
-  defaultMap
+  defaultMap,
+  IRenderSuggestionFnProps,
 }                              from '../models/search';
 import {withStyles, WithStyle} from './styles';
 
@@ -98,7 +99,15 @@ const styles = (theme: Theme) => ({
   },
 });
 
-export type ISelectInternalProps<T> = ICustomProps<T> & React.InputHTMLAttributes<any> & SelectProps;
+export interface ISelectRenderSuggestionFnProps<T> extends IRenderSuggestionFnProps<T> {
+  displayName: string;
+}
+
+interface ISelectProps<T> {
+  renderSuggestion?: (props: ISelectRenderSuggestionFnProps<T>) => JSX.Element;
+}
+
+export type ISelectInternalProps<T> = ICustomProps<T> & React.InputHTMLAttributes<any> & SelectProps & ISelectProps<T>;
 type SelectInternalProps<T>         = WithStyle<ReturnType<typeof styles>, ISelectInternalProps<T>>;
 
 class SelectInternal<T> extends React.Component<SelectInternalProps<T>, any> {
@@ -271,7 +280,6 @@ class SelectInternal<T> extends React.Component<SelectInternalProps<T>, any> {
     if (!this._fontSize) {
       this._fontSize = this.InputRef.current && window.getComputedStyle(this.InputRef.current).getPropertyValue('font-size'); // needed to make the menu items font-size the same as the shown value
     }
-
     return (
       this.state.suggestions.map((suggestion: any, index: number) => {
         const displayName = this.map(suggestion);
@@ -286,12 +294,12 @@ class SelectInternal<T> extends React.Component<SelectInternalProps<T>, any> {
     );
   }
 
-  renderSuggestion = (params: any) => {
-    const { suggestion, index, isHighlighted, displayName, fontSize} = params;
+  renderSuggestion = (props: any) => {
+    const { suggestion, displayName, fontSize, isHighlighted, index } = props;
     if (this.props.renderSuggestion) {
       return (
-        <MenuItem value={displayName} key={index} classes={{root: this.props.classes.selectMenuItem}} style={{fontSize: fontSize}}>
-          {this.props.renderSuggestion(suggestion, {isHighlighted, displayName, index})}
+        <MenuItem key={index} selected={isHighlighted} value={displayName} classes={{root: this.props.classes.selectMenuItem}} style={{fontSize: fontSize}}>
+          <this.props.renderSuggestion suggestion={suggestion} isHighlighted={isHighlighted} displayName={displayName} />
         </MenuItem>
       );
     }
@@ -299,9 +307,8 @@ class SelectInternal<T> extends React.Component<SelectInternalProps<T>, any> {
     if (isHighlighted) {
       s.fontWeight = '500';
     }
-
     return (
-      <MenuItem key={index} component='div' value={displayName} style={s} classes={{root: this.props.classes.selectMenuItem}}><span>{displayName}</span></MenuItem>
+      <MenuItem key={index} component='div' selected={isHighlighted} value={displayName} style={s} classes={{root: this.props.classes.selectMenuItem}}><span>{displayName}</span></MenuItem>
     );
   }
 

@@ -380,13 +380,14 @@ class Cell extends React.PureComponent<CellProps, {}> {
       }
 
       return <Observe render={() => {
-        let hasError = !!cell.error;
-        let value    = !isNullOrUndefinedOrEmpty(this.value) ? this.value : <span>&nbsp;</span>;
+        let hasError     = !!cell.error;
+        let value        = !isNullOrUndefinedOrEmpty(this.value) ? this.value : <span>&nbsp;</span>;
+        let CellRenderer = cell.renderer;
         return (
           < >
-            {cell.renderer
+            {CellRenderer
               ? <div onMouseEnter={this.handleTooltipForDiv} style={{width: '100%', textAlign: cell.align}}>
-                  {cell.renderer(cell)}
+                  <CellRenderer cell={cell} />
             </div>
               : <span onMouseEnter={this.handleTooltipForSpan} style={{width: '100%', textAlign: cell.align}}>
                   {value}
