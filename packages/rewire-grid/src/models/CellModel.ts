@@ -1,7 +1,7 @@
-import * as React                    from 'react';
-import { isNullOrUndefined }         from 'rewire-common';
-import { observable, defaultEquals } from 'rewire-core';
-import { IError }                    from 'rewire-ui';
+import * as React                            from 'react';
+import { isNullOrUndefined }                 from 'rewire-common';
+import { observable, defaultEquals, freeze } from 'rewire-core';
+import { IError }                            from 'rewire-ui';
 import {
   IGrid,
   IColumn,
@@ -252,11 +252,13 @@ export class CellModel implements ICell {
   }
 
   unselect() {
-    this.selected              = false;
-    this.isTopMostSelection    = false;
-    this.isRightMostSelection  = false;
-    this.isBottomMostSelection = false;
-    this.isLeftMostSelection   = false;
+    freeze(() => {
+      this.selected              = false;
+      this.isTopMostSelection    = false;
+      this.isRightMostSelection  = false;
+      this.isBottomMostSelection = false;
+      this.isLeftMostSelection   = false;
+    });
   }
 
   performKeybindAction(evt: React.KeyboardEvent<any>): void {

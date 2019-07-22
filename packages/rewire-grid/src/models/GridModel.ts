@@ -754,15 +754,17 @@ class GridModel implements IGrid, IDisposable {
     let rowToInsertOptions = data && data.options;
     let insertPosition     = this.rows.length;
     if (this.selectedRows.length > 0) {
-    this.groupBy.forEach((column: IColumn) => {
+      this.groupBy.forEach((column: IColumn) => {
         if (isNullOrUndefined(rowToInsertData[column.name])) {
           rowToInsertData[column.name] = this.selectedRows[0].cells[column.name].value;
-      }
-    });
+        }
+      });
       insertPosition = Math.max(...this.selectedRows.map(row => row.position)) + 1;
     }
     let insertData: IRowData = {id: rowToInsertId, data: rowToInsertData, options: rowToInsertOptions};
-    return this.addRow(insertData, insertPosition);
+    let insertedRow = this._addRow(insertData, insertPosition);
+    this.setRowPositions();
+    return insertedRow;
   }
 
   setRowPositions() {
