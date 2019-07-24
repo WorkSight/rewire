@@ -68,6 +68,9 @@ let id = 0;
 class GridModel implements IGrid, IDisposable {
   _standardColumns          : () => IColumn[];
   _fixedColumns             : () => IColumn[];
+  _visibleFixedColumns      : () => IColumn[];
+  _visibleStandardColumns   : () => IColumn[];
+  _groups                   : IColumn[];
   _sort                     : IColumn[];
   id                        : number;
   enabled                   : boolean;
@@ -109,6 +112,7 @@ class GridModel implements IGrid, IDisposable {
     this.__validator                = new Validator();
     this._dispose                   = dispose;
     this._sort                      = [];
+    this._groups                    = [];
     this.id                         = id++;
     this.rows                       = [];
     this.fixedRows                  = [];
@@ -148,9 +152,13 @@ class GridModel implements IGrid, IDisposable {
       this.selectedRows = [this.rows[0]];
     }
 
-    const columns           = observe(() => {this.columns.map((column: IColumn) => column.fixed); });
-    this._fixedColumns      = computed(columns, () => this.columns.filter((h) => h.fixed), []);
-    this._standardColumns   = computed(columns, () => this.columns.filter((h) => !h.fixed), []);
+    const columnsFixedObs   = observe(() => {this.columns.map((column: IColumn) => column.fixed); });
+    this._fixedColumns      = computed(columnsFixedObs, () => this.columns.filter((h) => h.fixed), []);
+    this._standardColumns   = computed(columnsFixedObs, () => this.columns.filter((h) => !h.fixed), []);
+
+    const columnsVisibleFixedObs = observe(() => {this.columns.map((column: IColumn) => column.visible && column.fixed); });
+    this._visibleFixedColumns    = computed(columnsVisibleFixedObs, () => this.columns.filter((c) => c.visible && c.fixed), []);
+    this._visibleStandardColumns = computed(columnsVisibleFixedObs, () => this.columns.filter((c) => c.visible && !c.fixed), []);
 
     return this;
   }
@@ -609,16 +617,29 @@ class GridModel implements IGrid, IDisposable {
     return this._standardColumns();
   }
 
-  _groups: IColumn[] = [];
+  get visibleFixedColumns() {
+    return this._visibleFixedColumns();
+  }
+
+  get visibleStandardColumns() {
+    return this._visibleStandardColumns();
+  }
+
   get groupBy(): IColumn[] {
     return this._groups;
   }
   set groupBy(value: IColumn[]) {
-    this._groups.length = 0;
-    for (const column of value) {
-      this._groups.push(column);
-      column.visible = false;
-    }
+    let groupsToMakeVisible = this._groups.filter((g: IColumn) => value.findIndex((g2: IColumn) => g2.id === g.id) < 0));
+    freeze(() => {
+      this._groups.length = 0;
+      for (const column of groupsToMakeVisible) {
+        column.visible = true;
+      }
+      for (const column of value) {
+        this._groups.push(column);
+        column.visible = false;
+      }
+    });
   }
 
   get hasToggleableColumns(): boolean {

@@ -515,7 +515,7 @@ export default class Form implements IValidationContext {
     return {label: field.label, value: field.value};
   }
 
-  private toObjectValues(): ObjectType {
+  public toObjectValues(): ObjectType {
     return this.fields.reduce((prev: ObjectType, current) => {
       if (!isNullOrUndefined(current.value)) prev[current.name] = current.value;
       return prev;

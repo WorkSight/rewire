@@ -646,12 +646,12 @@ const GridInternal = withStyles(styles, class extends React.PureComponent<GridPr
       return groups;
     };
 
-    this._groups = computed<IGroupRow[] | undefined>(() => this.grid.rows.length, computation, undefined, true);
+    this._groups = computed<IGroupRow[] | undefined>(() => this.grid.rows.length && this.grid.groupBy.length, computation, undefined, true);
   }
 
-  renderGroups(columns: IColumn[], visibleColumns: number, fixed: boolean) {
+  renderGroups(columns: IColumn[], fixed: boolean) {
     const groups = this._groups();
-    return groups && groups.map((group) => <GroupRow fixed={fixed} key={group.title} group={group} columns={columns} visibleColumns={visibleColumns} />);
+    return groups && groups.map((group) => <GroupRow fixed={fixed} key={group.title} group={group} columns={columns} numVisibleColumns={fixed ? this.grid.visibleFixedColumns.length : this.grid.visibleStandardColumns.length} />);
   }
 
   _fixedColGroups: () => JSX.Element | undefined;
@@ -689,8 +689,7 @@ const GridInternal = withStyles(styles, class extends React.PureComponent<GridPr
       return <Observe render={() => rows.map((row, index) => <Row key={row.id} height={this.props.grid.rowHeight} columns={columns} Cell={Cell} index={index} className={((index % 2) === 1) ? 'alt' : ''} row={row} />)} />;
     }
 
-    const visibleColumns: number = columns.reduce((previous, current) => previous + ((current.visible) ? 1 : 0), 0);
-    return <Observe render={() => this.renderGroups(columns, visibleColumns, fixed)} />;
+    return <Observe render={() => this.renderGroups(columns, fixed)} />;
   }
 
   renderFixedColumnData(): JSX.Element | null {
