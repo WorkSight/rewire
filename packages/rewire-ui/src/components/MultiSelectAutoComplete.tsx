@@ -64,10 +64,14 @@ const styles = (theme: Theme) => ({
   textField: {
     width: '100%',
   },
+  // make chips size responsive.
   chip: {
     fontSize: '0.8em',
-    height: '24px',
-    margin: `${theme.spacing(0.5)}px ${theme.spacing(0.2)}px`,
+    height: '1.85em',
+    margin: '0px 2px 0.15em 2px',
+  },
+  chipDeleteIcon: {
+    fontSize: '1.6em',
   },
   inputRoot: {
     lineHeight: 'inherit',
@@ -550,6 +554,7 @@ class MultiSelectAutoComplete<T> extends React.Component<MultiSelectAutoComplete
           tabIndex={-1}
           label={this.map(item)}
           className={classes.chip}
+          classes={{deleteIcon: classes.chipDeleteIcon}}
           onDelete={this.handleDelete(item)}
         />
     ));
