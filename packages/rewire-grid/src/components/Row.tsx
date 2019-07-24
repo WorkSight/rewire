@@ -54,21 +54,21 @@ const styles = (theme: Theme) => {
   return styleObj;
 };
 
-type IGroupProps = {group: IGroupRow, columns: IColumn[], visibleColumns: number, fixed: boolean} & React.Props<any>;
+type IGroupProps = {group: IGroupRow, columns: IColumn[], numVisibleColumns: number, fixed: boolean} & React.Props<any>;
 
 export const GroupRow = React.memo(withStyles(styles, (props: IGroupProps & {classes?: any}) => {
   return (
     < >
       <Observe render={() => (
         <tr onClick={() => props.group.expanded ? props.group.collapse() : props.group.expand()} className={(props.group.visible === false) ? props.classes.hidden : props.classes.visible} style={{height: 28}}>
-          <td colSpan={props.visibleColumns} className={cc([props.classes.group, props.classes[`groupLevel${props.group.level}`], 'group', {expanded: (props.group.expanded && props.fixed), collapsed: !props.group.expanded && props.fixed}, 'level-' + props.group.level, props.classes.collapsed])}>
+          <td colSpan={props.numVisibleColumns} className={cc([props.classes.group, props.classes[`groupLevel${props.group.level}`], 'group', {expanded: (props.group.expanded && props.fixed), collapsed: !props.group.expanded && props.fixed}, 'level-' + props.group.level, props.classes.collapsed])}>
             <div><span>{props.fixed ? props.group.title : ''}</span></div>
           </td>
         </tr>
       )} />
       {props.group.rows.map((r, idx) => {
         if (isGroupRow(r)) {
-          return <GroupRow key={r.title} fixed={props.fixed} group={r} columns={props.columns} visibleColumns={props.visibleColumns} />;
+          return <GroupRow key={r.title} fixed={props.fixed} group={r} columns={props.columns} numVisibleColumns={props.numVisibleColumns} />;
         } else {
           return <Row key={r.id} height={r.grid.rowHeight} columns={props.columns} Cell={Cell} index={idx} className={((idx % 2) === 1) ? 'alt' : ''} row={r} />;
         }
@@ -94,7 +94,7 @@ function removeElement(row: IRow, component: InternalRow) {
   const e = rowElementMap.get(row);
   if (!e) return;
 
-  e.splice(e.indexOf(component, 1));
+  e.splice(e.indexOf(component), 1);
   if (e.length === 0) rowElementMap.delete(row);
 }
 
@@ -166,7 +166,7 @@ class InternalRow extends PureComponent<RowProps, {}> {
 
     fastdom.mutate(() => {
       for (const component of components) {
-        component.element.current!.style.height = `${newHeight}px`;
+        if (component.element.current) component.element.current.style.height = `${newHeight}px`;
       }
     });
   }
@@ -188,7 +188,7 @@ class InternalRow extends PureComponent<RowProps, {}> {
 
     fastdom.mutate(() => {
       for (const component of components) {
-        component.element.current!.style.height = `${newHeight}px`;
+        if (component.element.current) component.element.current.style.height = `${newHeight}px`;
       }
     });
   }
