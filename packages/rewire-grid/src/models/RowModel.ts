@@ -181,7 +181,7 @@ export class RowModel implements IRow, IDisposable, IValidationContext {
       }
     }
 
-    if (!cellsToSelect.length && !this.grid.selectedCells.length) {
+    if (this.grid.editingCell || (!cellsToSelect.length && !this.grid.selectedCells.length)) {
       return;
     }
 

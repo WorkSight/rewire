@@ -157,11 +157,14 @@ export type MultiSelectAutoCompleteProps<T> = WithStyle<ReturnType<typeof styles
 
 class MultiSelectAutoComplete<T> extends React.Component<MultiSelectAutoCompleteProps<T>, IMultiSelectAutoCompleteState> {
   state = {suggestions: [], deleting: false};
-  downShift:                any;
-  search:                   SearchFn<T>;
-  map:                      MapFn<T>;
-  suggestionsContainerNode: HTMLElement;
-  textFieldRef:             React.RefObject<HTMLElement>;
+  _fontSize?:                  string;
+  _inputComponentNode?:        any;
+  _suggestionsContainerWidth?: string;
+  downShift:                   any;
+  search:                      SearchFn<T>;
+  map:                         MapFn<T>;
+  suggestionsContainerNode:    HTMLElement;
+  textFieldRef:                React.RefObject<HTMLElement>;
 
   constructor(props: MultiSelectAutoCompleteProps<T>) {
     super(props);
@@ -317,7 +320,9 @@ class MultiSelectAutoComplete<T> extends React.Component<MultiSelectAutoComplete
       }
     }
 
-    let fontSize = window.getComputedStyle(this.suggestionsContainerNode).getPropertyValue('font-size'); // needed to keep the suggestions the same font size as the input
+    if (!this._fontSize) {
+      this._fontSize = window.getComputedStyle(this.suggestionsContainerNode).getPropertyValue('font-size'); // needed to keep the suggestions the same font size as the input
+    }
     let suggestionsContainerComponentProps: ISuggestionsContainerComponentProps = {
       downShift: this.downShift,
     };
@@ -327,7 +332,7 @@ class MultiSelectAutoComplete<T> extends React.Component<MultiSelectAutoComplete
 
     return (
       <div {...(isOpen ? getMenuProps({}, {suppressRefError: true}) : {})} {...menuProps}>
-        <Paper elevation={4} className={classNames(...suggestionsPaperClasses)} style={{fontSize: fontSize}}>
+        <Paper elevation={4} className={classNames(...suggestionsPaperClasses)} style={{fontSize: this._fontSize}}>
           {SuggestionsHeader && <SuggestionsHeader suggestionsContainerComponentProps={suggestionsContainerComponentProps} />}
           <div className={classNames(...suggestionsClasses)}>
             {suggestions}
@@ -360,10 +365,15 @@ class MultiSelectAutoComplete<T> extends React.Component<MultiSelectAutoComplete
       },
     };
 
-    const inputComponentNode = this.textFieldRef.current && (label ? this.textFieldRef.current.children[1] : this.textFieldRef.current.children[0]);
+    if (!this._inputComponentNode && this.textFieldRef.current) {
+      this._inputComponentNode = this.textFieldRef.current && (label ? this.textFieldRef.current.children[1] : this.textFieldRef.current.children[0]);
+    }
+    if (!this._suggestionsContainerWidth && this._inputComponentNode) {
+      this._suggestionsContainerWidth = this._inputComponentNode.clientWidth;
+    }
 
     return (
-      <Popper open={isOpen} placement='bottom-start' anchorEl={inputComponentNode} transition={transition} modifiers={popperModifiers} className={classes.popper} style={{minWidth: inputComponentNode ? inputComponentNode.clientWidth : 'auto'}}>
+      <Popper open={isOpen} placement='bottom-start' anchorEl={this._inputComponentNode} transition={transition} modifiers={popperModifiers} className={classes.popper} style={{minWidth: this._suggestionsContainerWidth}}>
         {transition
           ? ({ TransitionProps }) => (
               <Fade {...TransitionProps} timeout={timeout}>
