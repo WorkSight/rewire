@@ -373,10 +373,10 @@ class AutoComplete<T> extends React.Component<AutoCompleteProps<T>, IAutoComplet
         boundariesElement: 'viewport',
       },
     };
-    if (!this._inputComponentNode) {
+    if (!this._inputComponentNode && this.textFieldRef.current) {
       this._inputComponentNode = this.textFieldRef.current && (label ? this.textFieldRef.current.children[1] : this.textFieldRef.current.children[0]);
     }
-    if (!this._suggestionsContainerWidth) {
+    if (!this._suggestionsContainerWidth && this._inputComponentNode) {
       this._suggestionsContainerWidth = this._inputComponentNode.clientWidth;
     }
     return (
