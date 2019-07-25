@@ -59,7 +59,7 @@ export class RowModel implements IRow, IDisposable, IValidationContext {
     }
 
     for (const column of this.grid.columns) {
-      this.createCell(column, data && data.data && data.data[column.name]);
+      this.createCell(column, (column as any).__getter(data && data.data));
     }
 
     if (!this.grid.loading && !this.fixed) {

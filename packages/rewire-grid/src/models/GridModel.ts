@@ -1166,7 +1166,7 @@ class GridModel implements IGrid, IDisposable {
         grid.toggleableColumns = toggleableColumns
                                    ? toggleableColumns.map((name: string) => findColumnByName(columns, name)).filter((column: IColumn | undefined) => !isNullOrUndefined(column) && !column!.isGroupByColumn) as IColumn[]
                                    : [];
-                                   let headerRow = columns.reduce((previous: any, current: any) => (previous[current.name] = current.title, previous), {});
+                                   let headerRow = columns.reduce((previous: any, current: any) => (current.__setter(previous, current.title), previous), {});
                                    grid.addFixedRow({data: headerRow});
       });
       grid.setColumnPositions();

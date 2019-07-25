@@ -170,12 +170,14 @@ export class CellModel implements ICell {
   }
 
   get value() {
-    return this.row.data[this.column.name];
+    return (this.column as any).__getter(this.row.data);
+    // return this.row.data[this.column.name];
   }
   set value(value: any) {
-    const oldValue = this.row.data[this.column.name];
+    const oldValue = (this.column as any).__getter(this.row.data);
     if (defaultEquals(value, oldValue)) return;
-    this.row.data[this.column.name] = value;
+    (this.column as any).__setter(this.row.data, value);
+    // this.row.data[this.column.name] = value;
     if (this.row.fixed) return;
     if (!this.grid.loading) {
       if (this.column.fixed) {

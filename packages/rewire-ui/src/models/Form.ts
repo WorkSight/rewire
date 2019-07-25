@@ -2,6 +2,8 @@ import * as React             from 'react';
 import {
   isNullOrUndefined,
   isNullOrUndefinedOrEmpty,
+  createGetter,
+  createSetter,
 }                             from 'rewire-common';
 import {
   observable,
@@ -31,12 +33,14 @@ import editor, {
   IField,
 }                             from '../components/editors';
 import { defaultPhoneFormat } from '../components/PhoneField';
+import { any } from 'prop-types';
 
 export type IFieldTypes    = 'string' | 'multistring' | 'static' | 'reference' | 'select' | 'multiselect' | 'number' | 'boolean' | 'switch' | 'date' | 'time' | 'avatar' | 'password' | 'email' | 'phone' | 'color' | 'mask' | 'multiselectautocomplete';
 export type FormType<T>    = { field : Record<keyof T, IEditorField> } & Form;
 
 export interface IFieldDefn {
   label            (text: string):                                    IFieldDefn;
+  accessor         (path: string):                                    IFieldDefn;
   placeholder      (text: string):                                    IFieldDefn;
   align            (text: TextAlignment):                             IFieldDefn;
   variant          (text: TextVariant):                               IFieldDefn;
@@ -67,6 +71,7 @@ export interface IFieldDefns {
 
 interface IBaseFieldDefn {
   type             : IFieldTypes;
+  accessor?        : string;
   editorType?      : EditorType;
   autoFocus?       : boolean;
   editProps?       : any;
@@ -209,6 +214,11 @@ class BaseField implements IFieldDefn {
 
   label(text: string): IFieldDefn {
     this.typeDefn.label = text;
+    return this;
+  }
+
+  accessor(path: string): IFieldDefn {
+    this.typeDefn.accessor = path;
     return this;
   }
 
@@ -446,10 +456,12 @@ export default class Form implements IValidationContext {
       updateOnChange:   !isNullOrUndefined(fieldDefn.typeDefn.updateOnChange) ? fieldDefn.typeDefn.updateOnChange : this.updateOnChange,
       validateOnUpdate: !isNullOrUndefined(fieldDefn.typeDefn.validateOnUpdate) ? fieldDefn.typeDefn.validateOnUpdate : this.validateOnUpdate,
       visible:          true,
+      __getter:         createGetter(fieldDefn.typeDefn.accessor || name),
+      __setter:         createSetter(fieldDefn.typeDefn.accessor || name),
       startAdornment:   fieldDefn.typeDefn.startAdornment,
       endAdornment:     fieldDefn.typeDefn.endAdornment,
       onValueChange:    fieldDefn.typeDefn.onValueChange,
-    } as IEditorField;
+    } as IEditorField & {__getter: any, __setter: any};
 
     if (this.defaultAdornmentsEnabled && !Object.prototype.hasOwnProperty.call(fieldDefn.typeDefn, 'endAdornment')) {
       // add default end adornment to field depending on field type if using defaults, and it wasn't explicitly set to something (including undefined)

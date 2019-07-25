@@ -18,7 +18,7 @@ import {
   IValidator,
   validators,
 } from 'rewire-ui';
-import {isNullOrUndefined, UTC} from 'rewire-common';
+import {isNullOrUndefined, UTC, createGetter, createSetter} from 'rewire-common';
 import {
   freeze,
   createWatcherFn,
@@ -37,6 +37,8 @@ export class ColumnModel implements IColumn {
   __validators         : IValidator[];
   __watchColumnVisible : WatcherTypeFn;
   __watchColumnFixed   : WatcherTypeFn;
+  __getter             : (obj: any) => any;
+  __setter             : (obj: any, value: any) => void;
 
   id           : number;
   grid         : IGrid;
@@ -73,6 +75,8 @@ export class ColumnModel implements IColumn {
   private initialize(name: string, title: string, options?: IColumnOptions) {
     this.id             = id++;
     this.name           = name;
+    this.__getter       = createGetter(name);
+    this.__setter       = createSetter(name);
     this.title          = title;
     this.position       = 0;
     this.sort           = undefined;
