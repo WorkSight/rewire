@@ -344,7 +344,7 @@ function createEmployeesGrid1() {
   cols.push(createColumn('selectColumn',               'Select',                 {type: {type: 'select', options: countries}, width: '150px'}));
   cols.push(createColumn('multiselectColumn',          'Multiselect',            {type: {type: 'multiselect', options: countries}, width: '150px'}));
   cols.push(createColumn('autoCompleteColumn',         'Auto Complete',          {type: {type: 'auto-complete', options: countries}, width: '150px'}));
-  cols.push(createColumn('advancedAutoCompleteColumn', 'Advanced Auto Complete', {type: {type: 'auto-complete', options: {search: countries.search, map: countries.map, openOnFocus: true, suggestionsContainerHeader: suggestionsContainerHeader, suggestionsContainerFooter: suggestionsContainerFooter}}, width: '150px'}));
+  cols.push(createColumn('advancedAutoCompleteColumn', 'Advanced Auto Complete', {type: {type: 'auto-complete', options: {search: countries.search, map: countries.map, suggestionsContainerHeader: suggestionsContainerHeader, suggestionsContainerFooter: suggestionsContainerFooter}}, width: '150px'}));
   cols.push(createColumn('multiAutoCompleteColumn',    'Multi Auto Complete',    {type: {type: 'multiselectautocomplete', options: countries}, width: '250px'}));
 
   // add employee rows
