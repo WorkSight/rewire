@@ -629,7 +629,7 @@ class GridModel implements IGrid, IDisposable {
     return this._groups;
   }
   set groupBy(value: IColumn[]) {
-    let groupsToMakeVisible = this._groups.filter((g: IColumn) => value.findIndex((g2: IColumn) => g2.id === g.id) < 0));
+    let groupsToMakeVisible = this._groups.filter((g: IColumn) => value.findIndex((g2: IColumn) => g2.id === g.id) < 0);
     freeze(() => {
       this._groups.length = 0;
       for (const column of groupsToMakeVisible) {
