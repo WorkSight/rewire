@@ -33,7 +33,6 @@ import editor, {
   IField,
 }                             from '../components/editors';
 import { defaultPhoneFormat } from '../components/PhoneField';
-import { any } from 'prop-types';
 
 export type IFieldTypes    = 'string' | 'multistring' | 'static' | 'reference' | 'select' | 'multiselect' | 'number' | 'boolean' | 'switch' | 'date' | 'time' | 'avatar' | 'password' | 'email' | 'phone' | 'color' | 'mask' | 'multiselectautocomplete';
 export type FormType<T>    = { field : Record<keyof T, IEditorField> } & Form;
@@ -340,7 +339,7 @@ export default class Form implements IValidationContext {
 
     replace(this._value, value);
     this.fields.forEach(field => {
-      field.value = field.type === 'boolean' || field.type === 'switch' ? value[field.name] || false : value[field.name];
+      field.value = field.type === 'boolean' || field.type === 'switch' ? this._getFieldValue(field, value) || false : this._getFieldValue(field, value);
       field.error = undefined;
     });
 
@@ -358,7 +357,7 @@ export default class Form implements IValidationContext {
       this._hasChanges    = computed(fieldsChanged, () => {
         if (!this._value) return false;
         for (const field of this.fields) {
-          if (!defaultEquals(field.value, this._value[field.name]))
+          if (!defaultEquals(field.value, this._getFieldValue(field, this._value)))
             return true;
         }
         return false;
@@ -387,11 +386,23 @@ export default class Form implements IValidationContext {
     return this._value;
   }
 
+  private _getFieldValue(field: IEditorField, obj: any) {
+    if (!field) return undefined;
+    return (field as any).__getter(obj);
+  }
+
+  private _setFieldValue(field: IEditorField, obj: any, value: any) {
+    if (!field) return;
+    (field as any).__setter(obj, value);
+  }
+
   getChanges(): {[s: string]: any} {
     let changesObj = {};
     for (const field of this.fields) {
-      if (!defaultEquals(field.value, this._value[field.name]))
-        changesObj[field.name] = field.value;
+      const v = this._getFieldValue(field, this._value);
+      if (!defaultEquals(field.value, v)) {
+        this._setFieldValue(field, changesObj, field.value);
+      }
     }
     return changesObj;
   }
@@ -529,14 +540,15 @@ export default class Form implements IValidationContext {
 
   public toObjectValues(): ObjectType {
     return this.fields.reduce((prev: ObjectType, current) => {
-      if (!isNullOrUndefined(current.value)) prev[current.name] = current.value;
+      if (!isNullOrUndefined(current.value)) this._setFieldValue(current, prev, current.value);
       return prev;
     }, {});
   }
 
   public toObject(): ObjectType {
     return this.fields.reduce((prev: ObjectType, current) => {
-      prev[current.name] = current;
+      // this._setFieldValue(current, prev, current);
+      prev[current.name] = current; // ? maybe
       return prev;
     }, {});
   }

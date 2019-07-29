@@ -118,6 +118,19 @@ function createHandler(eq: EQType, parent?: () => void) {
   }
 
   return {
+    // this may cause problems... however if we don't do this when you delete an observable property is will retain it's current value and
+    // the eq() test in set will not work correctly if you set the property back (especially to the same value, i.e. you will not recieve the notification).
+    deleteProperty(target: ObjectType, property: string) {
+      if (property in target) {
+        delete target[property];
+        let v = dependencyCache[property];
+        if (v) {
+          v(undefined);
+        }
+      }
+      return true;
+    },
+
     get(target: ObjectType, property: string, receiver: Object) {
       if (property === proxyProperty) { // dynamically add a is_proxy property
         return true;
@@ -242,15 +255,13 @@ export function watch<T = any>(fn: (prevResult?: T) => T, action: (result?: T) =
 }
 
 export function replace(obs: any, ...obj: any[]) {
-  freeze(() => {
-    Object.keys(obs).forEach((prop) => {
-      delete obs[prop];
-    });
+  // freeze(() => {
+    Object.keys(obs).forEach((prop) => delete obs[prop]);
 
     if (obj) {
       Object.assign(obs, ...obj);
     }
-  });
+  // });
 }
 
 /**
