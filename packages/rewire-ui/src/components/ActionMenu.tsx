@@ -58,7 +58,7 @@ const styles = (theme: Theme) => ({
 });
 
 interface IActionMenuProps {
-  title: string | JSX.Element | (() => JSX.Element);
+  title?: string | JSX.Element | (() => JSX.Element);
   menuId: string;
   buttonContent: JSX.Element;
   buttonProps: ButtonProps;
