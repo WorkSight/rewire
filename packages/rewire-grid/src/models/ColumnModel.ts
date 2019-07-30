@@ -96,6 +96,8 @@ export class ColumnModel implements IColumn {
     this.cls            = options && !isNullOrUndefined(options.cls) ? options.cls! : undefined;
     this.renderer       = options && !isNullOrUndefined(options.renderer) ? options.renderer! : undefined;
     this.onValueChange  = options && !isNullOrUndefined(options.onValueChange) ? options.onValueChange! : undefined;
+    this.map            = options && !isNullOrUndefined(options.map) ? options.map! : undefined;
+    this.predicate      = options && !isNullOrUndefined(options.predicate) ? options.predicate! : undefined;
     this.compare        = options && !isNullOrUndefined(options.compare) ? options.compare! : undefined;
     if (options && options.validators) {
       this.__validators = validators(options.validators);
@@ -154,18 +156,19 @@ export class ColumnModel implements IColumn {
         this.editor = editor(t, this.typeOptions);
       }
 
-      this.editable  = !!this.editor;
-      this.map       = undefined;
-      this.predicate = undefined;
-      this.compare   = this.typeOptions.compare;
+      this.editable   = !!this.editor;
+      let align       = 'left';
+      let mapFn       = this.typeOptions.map;
+      let compareFn   = this.typeOptions.compare;
+      let predicateFn = undefined;
 
       if (t === 'number') {
-        this.map   = getNumberString;
-        this.align = this.align || 'right';
+        mapFn = getNumberString;
+        align = 'right';
       } else if (t === 'checked') {
-        this.map = (value: boolean) => value ? 'True' : 'False';
+        mapFn = (value: boolean) => value ? 'True' : 'False';
       } else if (t === 'date') {
-         this.map = (value: UTC) => value ? value.toDateString() : '';
+        mapFn = (value: UTC) => value ? value.toDateString() : '';
       } else if (t === 'phone') {
         if (!this.typeOptions.format) {
           this.typeOptions.format = defaultPhoneFormat;
@@ -173,22 +176,24 @@ export class ColumnModel implements IColumn {
         if (!this.typeOptions.mask) {
           this.typeOptions.mask = defaultPhoneMask;
         }
-        this.map = getPhoneString;
+        mapFn = getPhoneString;
+      } else if (t === 'select' || t === 'auto-complete' || (t === 'time' && mapFn)) {
+        predicateFn = (value: any, filter: any) => toLowerCase(mapFn(value)).includes(toLowerCase(filter.value));
+        if (compareFn) {
+          compareFn = (x: any, y: any) => compareFn!(mapFn(x), mapFn(y));
+        } else {
+          compareFn = (x: any, y: any) => compare(mapFn(x), mapFn(y));
+        }
       } else if (t === 'multiselect' || t === 'multiselectautocomplete') {
-        this.map       = getArrayString(this.typeOptions.map);
-        this.predicate = (value: any, filter: any) => toLowerCase(this.map!(value)).includes(toLowerCase(filter.value));
-        this.compare   = arrayCompare(this.typeOptions);
+        compareFn   = arrayCompare(mapFn, compareFn);
+        mapFn       = getArrayString(mapFn);
+        predicateFn = (value: any, filter: any) => toLowerCase(mapFn!(value)).includes(toLowerCase(filter.value));
       }
 
-      if (this.typeOptions.map && t !== 'multiselect' && t !== 'multiselectautocomplete') {
-        this.map       = (value: any) => this.typeOptions.map(value);
-        this.predicate = (value: any, filter: any) => toLowerCase(this.typeOptions.map(value)).includes(toLowerCase(filter.value));
-        if (this.compare) {
-          this.compare = (x: any, y: any) => this.compare!(this.typeOptions.map(x), this.typeOptions.map(y));
-        } else {
-          this.compare = (x: any, y: any) => compare(this.typeOptions.map(x), this.typeOptions.map(y));
-        }
-      }
+      this.align     = this.align || align;
+      this.map       = this.map || mapFn;
+      this.compare   = this.compare || compareFn;
+      this.predicate = this.predicate || predicateFn;
     });
   }
 
@@ -204,15 +209,15 @@ const getArrayString = (map?: (v: any) => string) => (value: any): string => {
   return values.join(', ');
 };
 
-const arrayCompare = (options?: any) => (x: any, y: any): number => {
+const arrayCompare = (mapFn?: any, compareFn?: any) => (x: any, y: any): number => {
   if (!x && !y) return 0;
   if (!x) return -1;
   if (!y) return 1;
 
   for (let i = 0; i < x.length && i < y.length; i++) {
-    let xVal = options && options.map ? options.map(x[i]) : x[i];
-    let yVal = options && options.map ? options.map(y[i]) : y[i];
-    let c    = options && options.compare ? options.compare(xVal, yVal) : compare(xVal, yVal);
+    let xVal = mapFn ? mapFn(x[i]) : x[i];
+    let yVal = mapFn ? mapFn(y[i]) : y[i];
+    let c    = compareFn ? compareFn(xVal, yVal) : compare(xVal, yVal);
     if (c !== 0) {
       return c;
     }
