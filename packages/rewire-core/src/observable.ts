@@ -254,14 +254,17 @@ export function watch<T = any>(fn: (prevResult?: T) => T, action: (result?: T) =
   S.on(fn, action, seed, !doAction);
 }
 
-export function replace(obs: any, ...obj: any[]) {
-  // freeze(() => {
-    Object.keys(obs).forEach((prop) => delete obs[prop]);
-
-    if (obj) {
-      Object.assign(obs, ...obj);
+export function replace(obs: any, ...objs: any[]) {
+  freeze(() => {
+    const keys: string[] = [];
+    for (const o of objs) {
+      for (const [k, v] of Object.entries(o)) {
+        obs[k] = v;
+        keys.push(k);
+      }
     }
-  // });
+    Object.keys(obs).forEach((prop) => !keys.includes(prop) && delete obs[prop]);
+  });
 }
 
 /**
