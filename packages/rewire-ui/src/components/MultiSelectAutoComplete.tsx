@@ -70,6 +70,10 @@ const styles = (theme: Theme) => ({
     height: '1.85em',
     margin: '0px 2px 0.15em 2px',
   },
+  chipDisabled: {
+    color: 'rgba(0, 0, 0, 0.40)',
+    backgroundColor: 'rgba(0, 0, 0, 0.06)',
+  },
   chipDeleteIcon: {
     fontSize: '1.6em',
   },
@@ -559,14 +563,14 @@ class MultiSelectAutoComplete<T> extends React.Component<MultiSelectAutoComplete
     const chipLimit     = this.props.chipLimit || 3;
     const itemsToRender = this.props.selectedItems.slice(0, chipLimit);
     const returnValue   = itemsToRender.map((item: any, index: number) => (
-        <Chip
-          key={this.map(item)}
-          tabIndex={-1}
-          label={this.map(item)}
-          className={classes.chip}
-          classes={{deleteIcon: classes.chipDeleteIcon}}
-          onDelete={this.handleDelete(item)}
-        />
+      <Chip
+        key={this.map(item)}
+        tabIndex={-1}
+        label={this.map(item)}
+        className={classNames(classes.chip, this.props.disabled ? classes.chipDisabled : undefined)}
+        classes={{deleteIcon: classes.chipDeleteIcon}}
+        onDelete={!this.props.disabled && this.handleDelete(item)}
+      />
     ));
     const showMore = this.props.selectedItems.length > itemsToRender.length;
     if (showMore) {
@@ -574,7 +578,7 @@ class MultiSelectAutoComplete<T> extends React.Component<MultiSelectAutoComplete
         <Chip
           key='...'
           label='...'
-          className={classes.chip}
+          className={classNames(classes.chip, this.props.disabled ? classes.chipDisabled : undefined)}
         />
       );
     }
