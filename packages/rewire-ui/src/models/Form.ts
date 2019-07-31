@@ -2,6 +2,8 @@ import * as React             from 'react';
 import {
   isNullOrUndefined,
   isNullOrUndefinedOrEmpty,
+  createGetter,
+  createSetter,
 }                             from 'rewire-common';
 import {
   observable,
@@ -37,6 +39,7 @@ export type FormType<T>    = { field : Record<keyof T, IEditorField> } & Form;
 
 export interface IFieldDefn {
   label            (text: string):                                    IFieldDefn;
+  accessor         (path: string):                                    IFieldDefn;
   placeholder      (text: string):                                    IFieldDefn;
   align            (text: TextAlignment):                             IFieldDefn;
   variant          (text: TextVariant):                               IFieldDefn;
@@ -67,6 +70,7 @@ export interface IFieldDefns {
 
 interface IBaseFieldDefn {
   type             : IFieldTypes;
+  accessor?        : string;
   editorType?      : EditorType;
   autoFocus?       : boolean;
   editProps?       : any;
@@ -212,6 +216,11 @@ class BaseField implements IFieldDefn {
     return this;
   }
 
+  accessor(path: string): IFieldDefn {
+    this.typeDefn.accessor = path;
+    return this;
+  }
+
   placeholder(text: string): IFieldDefn {
     this.typeDefn.placeholder = text;
     return this;
@@ -330,7 +339,7 @@ export default class Form implements IValidationContext {
 
     replace(this._value, value);
     this.fields.forEach(field => {
-      field.value = field.type === 'boolean' || field.type === 'switch' ? value[field.name] || false : value[field.name];
+      field.value = field.type === 'boolean' || field.type === 'switch' ? this._getFieldValue(field, value) || false : this._getFieldValue(field, value);
       field.error = undefined;
     });
 
@@ -348,7 +357,7 @@ export default class Form implements IValidationContext {
       this._hasChanges    = computed(fieldsChanged, () => {
         if (!this._value) return false;
         for (const field of this.fields) {
-          if (!defaultEquals(field.value, this._value[field.name]))
+          if (!defaultEquals(field.value, this._getFieldValue(field, this._value)))
             return true;
         }
         return false;
@@ -377,11 +386,23 @@ export default class Form implements IValidationContext {
     return this._value;
   }
 
+  private _getFieldValue(field: IEditorField, obj: any) {
+    if (!field) return undefined;
+    return (field as any).__getter(obj);
+  }
+
+  private _setFieldValue(field: IEditorField, obj: any, value: any) {
+    if (!field) return;
+    (field as any).__setter(obj, value);
+  }
+
   getChanges(): {[s: string]: any} {
     let changesObj = {};
     for (const field of this.fields) {
-      if (!defaultEquals(field.value, this._value[field.name]))
-        changesObj[field.name] = field.value;
+      const v = this._getFieldValue(field, this._value);
+      if (!defaultEquals(field.value, v)) {
+        this._setFieldValue(field, changesObj, field.value);
+      }
     }
     return changesObj;
   }
@@ -446,10 +467,12 @@ export default class Form implements IValidationContext {
       updateOnChange:   !isNullOrUndefined(fieldDefn.typeDefn.updateOnChange) ? fieldDefn.typeDefn.updateOnChange : this.updateOnChange,
       validateOnUpdate: !isNullOrUndefined(fieldDefn.typeDefn.validateOnUpdate) ? fieldDefn.typeDefn.validateOnUpdate : this.validateOnUpdate,
       visible:          true,
+      __getter:         createGetter(fieldDefn.typeDefn.accessor || name),
+      __setter:         createSetter(fieldDefn.typeDefn.accessor || name),
       startAdornment:   fieldDefn.typeDefn.startAdornment,
       endAdornment:     fieldDefn.typeDefn.endAdornment,
       onValueChange:    fieldDefn.typeDefn.onValueChange,
-    } as IEditorField;
+    } as IEditorField & {__getter: any, __setter: any};
 
     if (this.defaultAdornmentsEnabled && !Object.prototype.hasOwnProperty.call(fieldDefn.typeDefn, 'endAdornment')) {
       // add default end adornment to field depending on field type if using defaults, and it wasn't explicitly set to something (including undefined)
@@ -517,14 +540,15 @@ export default class Form implements IValidationContext {
 
   public toObjectValues(): ObjectType {
     return this.fields.reduce((prev: ObjectType, current) => {
-      if (!isNullOrUndefined(current.value)) prev[current.name] = current.value;
+      if (!isNullOrUndefined(current.value)) this._setFieldValue(current, prev, current.value);
       return prev;
     }, {});
   }
 
   public toObject(): ObjectType {
     return this.fields.reduce((prev: ObjectType, current) => {
-      prev[current.name] = current;
+      // this._setFieldValue(current, prev, current);
+      prev[current.name] = current; // ? maybe
       return prev;
     }, {});
   }

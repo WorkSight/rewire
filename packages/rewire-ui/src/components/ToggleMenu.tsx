@@ -35,6 +35,7 @@ const styles = (theme: Theme) => ({
     color: 'inherit',
   },
   listItemText: {
+    marginRight: '16px',
   },
   listItemTypography: {
   },
@@ -55,7 +56,7 @@ const styles = (theme: Theme) => ({
 });
 
 interface IToggleMenuProps {
-  title:         string | JSX.Element | (() => JSX.Element);
+  title?:        string | JSX.Element | (() => JSX.Element);
   menuId:        string;
   buttonContent: JSX.Element | string;
   buttonProps:   ButtonProps;

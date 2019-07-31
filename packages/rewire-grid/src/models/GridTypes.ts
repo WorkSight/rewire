@@ -308,6 +308,8 @@ export interface IColumnOptions {
   validators?   : IFormValidator;
 
   onValueChange?(cell: ICell, v: any): void;
+  map?(value: any): string;
+  predicate?(value: any, filter: {value: any}): boolean;
   compare?(x: any, y: any): number;
 }
 

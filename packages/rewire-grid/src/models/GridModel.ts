@@ -629,7 +629,7 @@ class GridModel implements IGrid, IDisposable {
     return this._groups;
   }
   set groupBy(value: IColumn[]) {
-    let groupsToMakeVisible = this._groups.filter((g: IColumn) => value.findIndex((g2: IColumn) => g2.id === g.id) < 0));
+    let groupsToMakeVisible = this._groups.filter((g: IColumn) => value.findIndex((g2: IColumn) => g2.id === g.id) < 0);
     freeze(() => {
       this._groups.length = 0;
       for (const column of groupsToMakeVisible) {
@@ -1166,7 +1166,7 @@ class GridModel implements IGrid, IDisposable {
         grid.toggleableColumns = toggleableColumns
                                    ? toggleableColumns.map((name: string) => findColumnByName(columns, name)).filter((column: IColumn | undefined) => !isNullOrUndefined(column) && !column!.isGroupByColumn) as IColumn[]
                                    : [];
-                                   let headerRow = columns.reduce((previous: any, current: any) => (previous[current.name] = current.title, previous), {});
+                                   let headerRow = columns.reduce((previous: any, current: any) => (current.__setter(previous, current.title), previous), {});
                                    grid.addFixedRow({data: headerRow});
       });
       grid.setColumnPositions();
