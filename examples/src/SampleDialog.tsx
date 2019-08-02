@@ -49,7 +49,7 @@ function createForm() {
     custom:                  _.number().label('> 10').validators((a) => a ? a > 10 : true),
     multi:                   _.multistring({ rows: 1 }).label('Multiline').placeholder('enter multistring').validators('required'),
     color:                   _.color().label('Color'),
-    phone:                   _.phone().label('Phone').accessor('phone.home'),
+    phone:                   _.phone().label('Phone').accessor(['phone', 'home']),
     mask:                    _.mask({mask: ['(', /[1-9]/, /\d/, /\d/, ')', ' ', /\d/, /\d/, /\d/, '-', /\d/, /\d/, /\d/, /\d/]}).label('MyMask').validators('required'),
     trigger:                 _.string().label('Trigger').placeholder('Change me to trigger handler').onValueChange((form: Form, v: any) => {form.setFieldValue('email', 'Triggered!@hotmail.com'); form.setFieldValue('money', 1337); }),
     advancedAutoComplete:    _.reference(countries, { suggestionsContainerHeader: suggestionsContainerHeader, suggestionsContainerFooter: suggestionsContainerFooter, openOnFocus: true }).label('Advanced AutoComplete').validators('required').placeholder('select a country'),

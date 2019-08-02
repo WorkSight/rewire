@@ -648,7 +648,6 @@ class GridModel implements IGrid, IDisposable {
 
   _addColumn(column: IColumn): IColumn {
     column.grid     = this;
-    column.position = this.columns.length;
     const c: ColumnModel = (column as ColumnModel);
     if (c.__validators) this.__validator.addRule(column.name, c.__validators);
     c.__watchColumnVisible(() => c.visible, () => {
@@ -660,7 +659,17 @@ class GridModel implements IGrid, IDisposable {
         this.mergeColumns();
       }, 0);
     });
-    this.columns.push(column);
+    for (const row of this.rows) {
+      if (!row.cells[column.name]) {
+        row.createCell(column, (column as any).__getter(row.data));
+      }
+    }
+    for (const row of this.fixedRows) {
+      if (!row.cells[column.name]) {
+        (column as any).__setter(row.data, column.title);
+        row.createCell(column, column.title);
+      }
+    }
     return column;
   }
 
@@ -1147,6 +1156,24 @@ class GridModel implements IGrid, IDisposable {
     this.selectCells([]);
   }
 
+  spliceColumns(start: number, deleteCount: number, ...columns: IColumn[]): void {
+    const columnsToAdd: any[] = [];
+    for (let colIdx = 0; colIdx < this.columns.length; colIdx++) {
+      const column = this.columns[colIdx];
+      column.position = colIdx < start ? colIdx : start + colIdx + columns.length;
+    }
+
+    for (let colIdx = 0; colIdx < columns.length; colIdx++) {
+      const column = columns[colIdx];
+      const idx    = this.columns.findIndex(c => c.name === column.name);
+      if ((idx >= 0) && !((idx >= start) && (idx < (start + deleteCount)))) continue;
+      const newColumn    = this._addColumn(column);
+      newColumn.position = colIdx + start;
+      columnsToAdd.push(newColumn);
+    }
+    this.columns.splice(start, deleteCount, ...columnsToAdd);
+  }
+
   static create(rows: any[], columns: IColumn[], options?: IGridOptions): IGrid {
     return root((dispose: any) => {
       let grid     = observable(new GridModel());
@@ -1159,24 +1186,17 @@ class GridModel implements IGrid, IDisposable {
         }
       });
       freeze(() => {
-        for (const column of columns) {
-          grid._addColumn(column);
-        }
+        grid.addFixedRow({data: {}});
+        grid.spliceColumns(0, 0, ...columns);
         let toggleableColumns  = options && options.toggleableColumns;
         grid.toggleableColumns = toggleableColumns
                                    ? toggleableColumns.map((name: string) => findColumnByName(columns, name)).filter((column: IColumn | undefined) => !isNullOrUndefined(column) && !column!.isGroupByColumn) as IColumn[]
                                    : [];
-                                   let headerRow = columns.reduce((previous: any, current: any) => (current.__setter(previous, current.title), previous), {});
-                                   grid.addFixedRow({data: headerRow});
       });
-      grid.setColumnPositions();
       freeze(() => {
         grid._addRows(rows);
       });
       grid.loading = false;
-      // mergeRows(grid.fixedRows, grid.fixedColumns);
-      // mergeRows(grid.fixedRows, grid.standardColumns);
-      // mergeRows(grid.rows, grid.standardColumns);
       grid.validate();
       grid.mergeColumns();
       return grid;

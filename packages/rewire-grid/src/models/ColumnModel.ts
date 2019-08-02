@@ -72,9 +72,9 @@ export class ColumnModel implements IColumn {
 
   private constructor() { }
 
-  private initialize(name: string, title: string, options?: IColumnOptions) {
+  private initialize(name: string | string[], title: string, options?: IColumnOptions) {
     this.id             = id++;
-    this.name           = name;
+    this.name           = Array.isArray(name) ? name.join('.') : name;
     this.__getter       = createGetter(name);
     this.__setter       = createSetter(name);
     this.title          = title;
@@ -148,18 +148,18 @@ export class ColumnModel implements IColumn {
     }
 
     this.type        = t;
-    this.typeOptions = typeOptions || {};
+    this.typeOptions = typeOptions = (typeOptions || {});
     freeze(() => {
       if (this.type === 'none') {
         this.editor = undefined;
       } else {
-        this.editor = editor(t, this.typeOptions);
+        this.editor = editor(t, typeOptions);
       }
 
       this.editable   = !!this.editor;
       let align       = 'left';
-      let mapFn       = this.typeOptions.map;
-      let compareFn   = this.typeOptions.compare;
+      let mapFn       = typeOptions.map;
+      let compareFn   = typeOptions.compare;
       let predicateFn = undefined;
 
       if (t === 'number') {
@@ -170,11 +170,11 @@ export class ColumnModel implements IColumn {
       } else if (t === 'date') {
         mapFn = (value: UTC) => value ? value.toDateString() : '';
       } else if (t === 'phone') {
-        if (!this.typeOptions.format) {
-          this.typeOptions.format = defaultPhoneFormat;
+        if (!typeOptions.format) {
+          typeOptions.format = defaultPhoneFormat;
         }
-        if (!this.typeOptions.mask) {
-          this.typeOptions.mask = defaultPhoneMask;
+        if (!typeOptions.mask) {
+          typeOptions.mask = defaultPhoneMask;
         }
         mapFn = getPhoneString;
       } else if (t === 'select' || t === 'auto-complete' || (t === 'time' && mapFn)) {
@@ -190,14 +190,14 @@ export class ColumnModel implements IColumn {
         predicateFn = (value: any, filter: any) => toLowerCase(mapFn!(value)).includes(toLowerCase(filter.value));
       }
 
-      this.align     = this.align || align;
+      this.align     = (this.align || align) as TextAlignment;
       this.map       = this.map || mapFn;
       this.compare   = this.compare || compareFn;
       this.predicate = this.predicate || predicateFn;
     });
   }
 
-  static create(name: string, title: string, options?: IColumnOptions): IColumn {
+  static create(name: string | string[], title: string, options?: IColumnOptions): IColumn {
     return observable(new ColumnModel()).initialize(name, title, options);
   }
 }
