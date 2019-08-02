@@ -39,7 +39,7 @@ export type FormType<T>    = { field : Record<keyof T, IEditorField> } & Form;
 
 export interface IFieldDefn {
   label            (text: string):                                    IFieldDefn;
-  accessor         (path: string):                                    IFieldDefn;
+  accessor         (path: string[]):                                  IFieldDefn;
   placeholder      (text: string):                                    IFieldDefn;
   align            (text: TextAlignment):                             IFieldDefn;
   variant          (text: TextVariant):                               IFieldDefn;
@@ -70,7 +70,7 @@ export interface IFieldDefns {
 
 interface IBaseFieldDefn {
   type             : IFieldTypes;
-  accessor?        : string;
+  accessor?        : string[];
   editorType?      : EditorType;
   autoFocus?       : boolean;
   editProps?       : any;
@@ -216,7 +216,7 @@ class BaseField implements IFieldDefn {
     return this;
   }
 
-  accessor(path: string): IFieldDefn {
+  accessor(path: string[]): IFieldDefn {
     this.typeDefn.accessor = path;
     return this;
   }

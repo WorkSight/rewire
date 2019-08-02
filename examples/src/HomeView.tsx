@@ -179,7 +179,7 @@ function createTestGrid(nRows: number, nColumns: number) {
     return error;
   };
 
-  cols.push(createColumn('nestedColumn.value',      'Nested Column',       { type: 'text', width: Math.trunc(Math.random() * 250 + 50) + 'px' }));
+  cols.push(createColumn(['nestedColumn', 'value'], 'Nested Column',       { type: 'text', width: Math.trunc(Math.random() * 250 + 50) + 'px' }));
   cols.push(createColumn('maskColumn',              'Mask',                { type: { type: 'mask', options: { mask: ['(', /[1-9]/, /\d/, /\d/, ')', ' ', /\d/, /\d/, /\d/, '-', /\d/, /\d/, /\d/, /\d/] } }, width: Math.trunc(Math.random() * 250 + 50) + 'px' }));
   cols.push(createColumn('phoneColumn',             'Phone',               { type: { type: 'phone' }, width: Math.trunc(Math.random() * 250 + 50) + 'px' }));
   cols.push(createColumn('numberColumn',            'Number',              { type: { type: 'number', options: { decimals: 2, fixed: true, thousandSeparator: false } }, validators: ['required', customNumberValidator], width: Math.trunc(Math.random() * 250 + 50) + 'px' }));

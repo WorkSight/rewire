@@ -139,6 +139,7 @@ export interface IGrid extends IRows, IDisposable {
   row(rowId: string): IRow | undefined;
   rowByPos(rowPosition: number): IRow | undefined;
   getRowsByRange(rowStart: number, rowEnd: number, allowCollapsed?: boolean): IRow[];
+  spliceColumns(start: number, deleteCount: number, ...columns: IColumn[]): void;
   column(columnName: string): IColumn | undefined;
   columnByPos(columnPosition: number): IColumn | undefined;
 

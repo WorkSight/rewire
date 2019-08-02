@@ -1,22 +1,26 @@
-function generateBody(path: string, setter: boolean) {
-  const ps         = path.split('.');
+function generateBody(path: string[], setter: boolean) {
   let   lets       = '';
   let   currentVar = 'obj';
   let   exp        = '';
-  for (let i = 0; i < ps.length - 1; i++) {
-    const p      = ps[i];
+  for (let i = 0; i < path.length - 1; i++) {
+    const p      = path[i];
     const newVar = 'a' + i;
     lets += `${i > 0 ? ',' : ''}${newVar}`;
     exp  += setter ? `(${newVar} = (${currentVar}['${p}'] || (${currentVar}['${p}'] = {}))) && ` : `(${newVar} = ${currentVar}['${p}']) && `;
     currentVar = newVar;
   }
-  exp += setter ? `(${currentVar}['${ps[ps.length - 1]}'] = value)` : `${currentVar}['${ps[ps.length - 1]}']`;
+  exp += setter ? `(${currentVar}['${path[path.length - 1]}'] = value)` : `${currentVar}['${path[path.length - 1]}']`;
   return [lets, exp];
 }
 
+const defaultGetter = (path: string) => (obj: any) => obj && obj[path];
+const defaultSetter = (path: string) => (obj: any, value: any) => obj && (obj[path] = value);
+
 const getterCache = {};
-export function createGetter(path: string) {
-  const fn = getterCache[path];
+export function createGetter(path: string | string[]) {
+  if (!Array.isArray(path)) return defaultGetter(path);
+  const k  = path.join();
+  const fn = getterCache[k];
   if (fn) return fn;
 
   const [lets, exp] = generateBody(path, false);
@@ -24,12 +28,15 @@ export function createGetter(path: string) {
   ${(lets.length > 0) ? `let ${lets};` : ''}
   return ${exp};
 }`;
-  return (getterCache[path] = new Function('obj', body));
+  return (getterCache[k] = new Function('obj', body));
 }
 
+
 const setterCache = {};
-export function createSetter(path: string) {
-  const fn = setterCache[path];
+export function createSetter(path: string | string[]) {
+  if (!Array.isArray(path)) return defaultSetter(path);
+  const k  = path.join();
+  const fn = setterCache[k];
   if (fn) return fn;
 
   const [lets, exp] = generateBody(path, true);
@@ -37,7 +44,7 @@ export function createSetter(path: string) {
   ${(lets.length > 0) ? `let ${lets};` : ''}
   ${exp};
 }`;
-  return (setterCache[path] = new Function('obj', 'value', body));
+  return (setterCache[k] = new Function('obj', 'value', body));
 }
 
 // let x = {a: {b: {c: {d: {e: 'ooga'}, booga: [{a: 'test'}, {b: {c: 'test'}}]}}}};
