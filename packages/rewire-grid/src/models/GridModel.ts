@@ -666,7 +666,6 @@ class GridModel implements IGrid, IDisposable {
     }
     for (const row of this.fixedRows) {
       if (!row.cells[column.name]) {
-        (column as any).__setter(row.data, column.title);
         row.createCell(column, column.title);
       }
     }

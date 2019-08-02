@@ -98,7 +98,7 @@ export interface IGridProps {
   gridFontSizes?: IGridFontSizes;
 }
 
-type BodyType = {grid: IGrid, columns: IColumn[], renderRows: (rows: IRow[], columns: IColumn[], fixed: boolean) => any, scrollY: DataSignal<number>, loadMoreRows?: (args: {start: number, end: number}) => Promise<any[]> };
+type BodyType = {grid: IGrid, columns: () => IColumn[], renderRows: (rows: IRow[], columns: () => IColumn[], fixed: boolean) => any, scrollY: DataSignal<number>, loadMoreRows?: (args: {start: number, end: number}) => Promise<any[]> };
 class Body extends React.PureComponent<BodyType, {offset: number}> {
   constructor(props: BodyType) {
     super(props);
@@ -596,7 +596,7 @@ const GridInternal = withStyles(styles, class extends React.PureComponent<GridPr
           {this.renderColumnGroups(true)}
           <thead role='rowgroup'>
             <Observe render={() => (
-              this.props.grid.fixedRows.map((row, index) => <Row key={row.id} height={this.props.grid.headerRowHeight} Cell={Column} columns={this.props.grid.fixedColumns} index={index} row={row} />)
+              this.props.grid.fixedRows.map((row, index) => <Row key={row.id} height={this.props.grid.headerRowHeight} Cell={Column} columns={() => this.props.grid.fixedColumns} index={index} row={row} />)
             )} />
           </thead>
         </table>
@@ -649,7 +649,7 @@ const GridInternal = withStyles(styles, class extends React.PureComponent<GridPr
     this._groups = computed<IGroupRow[] | undefined>(() => this.grid.rows.length && this.grid.groupBy.length, computation, undefined, true);
   }
 
-  renderGroups(columns: IColumn[], fixed: boolean) {
+  renderGroups(columns: () => IColumn[], fixed: boolean) {
     const groups = this._groups();
     return groups && groups.map((group) => <GroupRow fixed={fixed} key={group.title} group={group} columns={columns} numVisibleColumns={fixed ? this.grid.visibleFixedColumns.length : this.grid.visibleStandardColumns.length} />);
   }
@@ -683,7 +683,7 @@ const GridInternal = withStyles(styles, class extends React.PureComponent<GridPr
     }
   }
 
-  renderRows = (rows: IRow[], columns: IColumn[], fixed: boolean) => {
+  renderRows = (rows: IRow[], columns: () => IColumn[], fixed: boolean) => {
     const grid = this.props.grid;
     if (!grid.groupBy || (grid.groupBy.length === 0)) {
       return <Observe render={() => rows.map((row, index) => <Row key={row.id} height={this.props.grid.rowHeight} columns={columns} Cell={Cell} index={index} className={((index % 2) === 1) ? 'alt' : ''} row={row} />)} />;
@@ -702,7 +702,7 @@ const GridInternal = withStyles(styles, class extends React.PureComponent<GridPr
         <table role='grid' style={{width: this.props.grid.fixedWidth, marginBottom: '17px'}}>
           {this.renderColumnGroups(true)}
           <tbody role='rowgroup'>
-            {this.renderRows(this.props.grid.rows, this.props.grid.fixedColumns, true)}
+            {this.renderRows(this.props.grid.rows, () => this.props.grid.fixedColumns, true)}
           </tbody>
         </table>
       </div>
@@ -750,7 +750,7 @@ const GridInternal = withStyles(styles, class extends React.PureComponent<GridPr
               {this.renderColumnGroups(false)}
               <thead role='rowgroup'>
                 <Observe render={() => (
-                  this.props.grid.fixedRows.map((row, index) => <Row key={row.id} height={this.props.grid.headerRowHeight} Cell={Column} columns={this.props.grid.standardColumns} index={index} row={row} />)
+                  this.props.grid.fixedRows.map((row, index) => <Row key={row.id} height={this.props.grid.headerRowHeight} Cell={Column} columns={() => this.props.grid.standardColumns} index={index} row={row} />)
                 )} />
               </thead>
             </table>
@@ -781,7 +781,7 @@ const GridInternal = withStyles(styles, class extends React.PureComponent<GridPr
           <div className={classNames('grid-content', this.props.classes.gridContent)} ref={this.setGridContentRef}>
             <table role='grid'>
               {this.renderColumnGroups(false)}
-              <BodyRenderer grid={this.props.grid} renderRows={this.renderRows} scrollY={this.scrollY} columns={this.props.grid.standardColumns} />
+              <BodyRenderer grid={this.props.grid} renderRows={this.renderRows} scrollY={this.scrollY} columns={() => this.props.grid.standardColumns} />
             </table>
           </div>
         </div>

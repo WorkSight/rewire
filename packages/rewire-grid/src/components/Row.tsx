@@ -18,7 +18,7 @@ import * as fastdom            from 'fastdom';
 export interface IRowProps {
   row               : IRow;
   height?           : number;
-  columns           : IColumn[];
+  columns           : () => IColumn[];
   Cell              : React.ComponentType<any>;
   isFixedColumnsRow?: boolean;
   index             : number;
@@ -54,7 +54,7 @@ const styles = (theme: Theme) => {
   return styleObj;
 };
 
-type IGroupProps = {group: IGroupRow, columns: IColumn[], numVisibleColumns: number, fixed: boolean} & React.Props<any>;
+type IGroupProps = {group: IGroupRow, columns: () => IColumn[], numVisibleColumns: number, fixed: boolean} & React.Props<any>;
 
 export const GroupRow = React.memo(withStyles(styles, (props: IGroupProps & {classes?: any}) => {
   return (
@@ -141,9 +141,11 @@ class InternalRow extends PureComponent<RowProps, {}> {
   renderCells = React.memo((): JSX.Element | null => {
     return <Observe render={() => {
       if (!this.props.row.cells) return null;
+      // this.props.grid.standardColumns      // console.log(this.props.isFixedColumnsRow);
+      // const columns = this.props.isFixedColumnsRow ? this.props.row.grid.fixedColumns : this.props.row.grid.standardColumns;
 
       let cells: JSX.Element[] = [];
-      this.props.columns.forEach((column: IColumn) => {
+      this.props.columns().forEach((column: IColumn) => {
         let cell = this.props.row.cells[column.name];
         let Cell = this.props.Cell;
         if ((cell.colSpan ===  0) || (cell.rowSpan === 0)) return;
