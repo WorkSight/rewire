@@ -1,5 +1,5 @@
 import * as React                    from 'react';
-import * as NumberFormat             from 'react-number-format';
+import NumberFormat                  from 'react-number-format';
 import * as is                       from 'is';
 import TextField, { TextFieldProps } from '@material-ui/core/TextField';
 import InputAdornment                from '@material-ui/core/InputAdornment';
