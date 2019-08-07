@@ -580,6 +580,7 @@ export default class Form implements IValidationContext {
   }
 
   public validateField(field: IEditorField): eValidationResult {
+    if (field.disableErrors) return eValidationResult.Success;
     return this.validator.validateField(this, field.name);
   }
 
