@@ -329,7 +329,7 @@ class GridModel implements IGrid, IDisposable {
       while (byColumns !== 0 && (currentColumnPosition >= 0) && (currentColumnPosition < this.columns.length))  {
         currentColumnPosition += columnDirection;
         const c                = this.columns[currentColumnPosition];
-        if (c && c.visible && c.enabled && !c.readOnly) {
+        if (c && c.visible && c.enabled) {
           const cell = row.cells[c.name];
           if (cell && (cell.colSpan > 0)) {
             byColumns -= columnDirection;
