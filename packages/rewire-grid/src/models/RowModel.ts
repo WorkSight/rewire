@@ -100,6 +100,10 @@ export class RowModel implements IRow, IDisposable, IValidationContext {
     return {label: cell.column.title, value: this.data[field]};
   }
 
+  shouldValidate(field: string) {
+    return true;
+  }
+
   // IValidationContext
   setError(field: string, error?: IError): void {
     this.cells[field].error = error;
