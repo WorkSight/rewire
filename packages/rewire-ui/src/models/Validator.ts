@@ -171,6 +171,7 @@ export function validator(fn: IValidationFn | BuiltInValidators, ...args: any[])
 }
 
 export interface IValidationContext {
+  shouldValidate(field: string): boolean;
   getField(field: string): {label: string, value: any} | undefined;
   setError(field: string, error?: IError): void;
 }
@@ -216,6 +217,7 @@ export default class Validator {
   }
 
   private isValid(context: IValidationContext, field: string, validator: IValidator, setErrors: boolean): eValidationResult {
+    if (!context.shouldValidate(field)) return eValidationResult.Success;
     const args        = this.extractArguments(context, field, validator);
     let   errorResult = validator.fn.apply(context, args);
     if (typeof errorResult === 'boolean') {

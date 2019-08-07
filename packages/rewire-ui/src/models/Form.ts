@@ -538,6 +538,12 @@ export default class Form implements IValidationContext {
     return {label: field.label, value: field.value};
   }
 
+  public shouldValidate(fieldName: string): boolean {
+    let field = this.field[fieldName];
+    if (!field) return false;
+    return !field.disableErrors;
+  }
+
   public toObjectValues(): ObjectType {
     return this.fields.reduce((prev: ObjectType, current) => {
       if (!isNullOrUndefined(current.value)) this._setFieldValue(current, prev, current.value);
@@ -580,14 +586,12 @@ export default class Form implements IValidationContext {
   }
 
   public validateField(field: IEditorField): eValidationResult {
-    if (field.disableErrors) return eValidationResult.Success;
     return this.validator.validateField(this, field.name);
   }
 
   public validateFields(fields: IEditorField[]): eValidationResult {
     let result = eValidationResult.Success;
     for (const f of fields) {
-      if (f.disableErrors) continue;
       result |= this.validator.validateField(this, f.name);
     }
     return result;
