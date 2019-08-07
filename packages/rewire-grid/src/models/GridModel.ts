@@ -309,31 +309,31 @@ class GridModel implements IGrid, IDisposable {
 
   move(cell: ICell, byRows: number = 1, byColumns: number = 1) {
     return sample(() =>  {
-      let currentRowPosition = cell.rowPosition;
+      let currentRowPosition    = cell.rowPosition;
       let row: IRow | undefined = cell.row;
-      let rowDirection = (byRows) > 0 ? 1 : -1;
+      let rowDirection          = (byRows) > 0 ? 1 : -1;
       while (byRows !== 0 && (currentRowPosition >= 0) && (currentRowPosition < this.rows.length))  {
         currentRowPosition += rowDirection;
-        const r = this.rows[currentRowPosition];
+        const r             = this.rows[currentRowPosition];
         if (r && r.visible) {
           byRows -= rowDirection;
-          row = r;
+          row     = r;
         }
       }
 
-      let currentColumnPosition = cell.columnPosition;
-      let column: IColumn | undefined = cell.column;
-      let columnDirection = (byColumns) > 0 ? 1 : -1;
-      const c2 = row.cells[column.name];
+      let   currentColumnPosition       = cell.columnPosition;
+      let   column: IColumn | undefined = cell.column;
+      let   columnDirection             = (byColumns) > 0 ? 1 : -1;
+      const c2                          = row.cells[column.name];
       if (c2.colSpan === 0 && (byColumns === 0)) byColumns = -1;
       while (byColumns !== 0 && (currentColumnPosition >= 0) && (currentColumnPosition < this.columns.length))  {
         currentColumnPosition += columnDirection;
-        const c    = this.columns[currentColumnPosition];
-        if (c && c.visible && c.enabled) {
+        const c                = this.columns[currentColumnPosition];
+        if (c && c.visible && c.enabled && !c.readOnly) {
           const cell = row.cells[c.name];
           if (cell && (cell.colSpan > 0)) {
             byColumns -= columnDirection;
-            column = c;
+            column     = c;
           }
         }
       }
