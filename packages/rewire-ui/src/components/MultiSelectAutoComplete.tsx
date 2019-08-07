@@ -569,7 +569,7 @@ class MultiSelectAutoComplete<T> extends React.Component<MultiSelectAutoComplete
         label={this.map(item)}
         className={classNames(classes.chip, this.props.disabled ? classes.chipDisabled : undefined)}
         classes={{deleteIcon: classes.chipDeleteIcon}}
-        onDelete={!this.props.disabled && this.handleDelete(item)}
+        onDelete={!this.props.disabled ? this.handleDelete(item) : undefined}
       />
     ));
     const showMore = this.props.selectedItems.length > itemsToRender.length;
