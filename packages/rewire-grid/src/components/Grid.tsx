@@ -726,6 +726,7 @@ const GridInternal = withStyles(styles, class extends React.PureComponent<GridPr
     return <Observe render={() => (
       <div className={classes.toggleableColumnsContainer}>
         <ToggleMenu
+          title='Toggleable Columns'
           menuId={`grid${this.grid.id}-toggleable-columns`}
           buttonContent={buttonContent}
           buttonProps={buttonProps}
