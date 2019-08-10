@@ -39,7 +39,7 @@ function createForm() {
     password_confirmation:   _.password().label('Confirm Password').validators('required').placeholder('confirm your password'),
     country:                 _.reference(countries).label('Country').validators('required').placeholder('type to lookup'),
     time:                    _.time().label('Time').validators('required').onValueChange((form: Form, v: any) => form.setFieldValue('email', 'hi@hi.com')),
-    multiselectAutoComplete: _.multiselectautocomplete(countries, { chipLimit: 2 }).label('Multiselect AutoComplete Country').validators('required').placeholder('select all that apply'),
+    multiselectAutoComplete: _.multiselectautocomplete(countries, { chipLimit: 2, inputAdd: (v: string) => ({id: v, name: v}) }).label('Multiselect AutoComplete Country').validators('required').placeholder('select all that apply'),
     multiselectCountry:      _.multiselect(countries).label('Multiselect Country').validators('required').placeholder('select countries'),
     selectCountry:           _.select(countries).label('Select Country').validators('required').placeholder('click to select'),
     money:                   _.number().label('Show Me').validators('required').placeholder('The Money'),

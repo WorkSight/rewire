@@ -142,6 +142,7 @@ interface IMultiSelectAutoCompleteProps<T> {
   initialInputValue?:     any;
   selectedItems:          any[];
   chipLimit?:             number;
+  inputAdd?:              (value: string) => any;
   openOnFocus?          : boolean;
   showEmptySuggestions? : boolean;
   hasTransition?        : boolean;
@@ -463,6 +464,11 @@ class MultiSelectAutoComplete<T> extends React.Component<MultiSelectAutoComplete
               type: '__autocomplete_keydown_enter__'
             });
           } else {
+            if (this.props.inputAdd && state.inputValue && state.inputValue.length > 0) {
+              const value = this.props.inputAdd(state.inputValue);
+              if (value) this.props.selectedItems.push(value);
+            }
+
             this.downShift.selectItem(state.selectedItem, {
               type: '__autocomplete_keydown_enter__'
             });
