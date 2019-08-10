@@ -466,7 +466,13 @@ class MultiSelectAutoComplete<T> extends React.Component<MultiSelectAutoComplete
           } else {
             if (this.props.inputAdd && state.inputValue && state.inputValue.length > 0) {
               const value = this.props.inputAdd(state.inputValue);
-              if (value) this.props.selectedItems.push(value);
+              if (value) {
+                this.props.onSelectItem && this.props.onSelectItem([...this.props.selectedItems, value]);
+                event.preventDefault();
+                event.stopPropagation();
+                event.nativeEvent.stopImmediatePropagation();
+                return;
+              }
             }
 
             this.downShift.selectItem(state.selectedItem, {
@@ -483,6 +489,7 @@ class MultiSelectAutoComplete<T> extends React.Component<MultiSelectAutoComplete
         const st = this.downShift.getState();
         if (st.isOpen) {
           event.nativeEvent.preventDownshiftDefault = false;
+          event.stopPropagation();
         } else {
           event.nativeEvent.preventDownshiftDefault = true;
         }
