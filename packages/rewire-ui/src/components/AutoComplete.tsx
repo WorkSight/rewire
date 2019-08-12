@@ -473,6 +473,7 @@ class AutoComplete<T> extends React.Component<AutoCompleteProps<T>, IAutoComplet
         const st = this.downShift.getState();
         if (st.isOpen) {
           event.nativeEvent.preventDownshiftDefault = false;
+          event.stopPropagation();
         } else {
           event.nativeEvent.preventDownshiftDefault = true;
         }
