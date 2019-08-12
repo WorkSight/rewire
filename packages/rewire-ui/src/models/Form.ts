@@ -33,6 +33,7 @@ import editor, {
   IField,
 }                             from '../components/editors';
 import { defaultPhoneFormat } from '../components/PhoneField';
+import { freeze }             from 'rewire-core';
 
 export type IFieldTypes    = 'string' | 'multistring' | 'static' | 'reference' | 'select' | 'multiselect' | 'number' | 'boolean' | 'switch' | 'date' | 'time' | 'avatar' | 'password' | 'email' | 'phone' | 'color' | 'mask' | 'multiselectautocomplete';
 export type FormType<T>    = { field : Record<keyof T, IEditorField> } & Form;
@@ -334,6 +335,24 @@ export default class Form implements IValidationContext {
     this._initial = Object.assign({}, this.value);
   }
 
+  public addFields(fields: (context: IFormContext) => IFieldDefns, initial?: ObjectType) {
+    this.initializeFields(fields(new FormContext()));
+    this.value    = Object.assign({}, this.value, initial);
+  }
+
+  public removeFields(fieldNames: string[]) {
+    if (!this.fields) return;
+    freeze(() => {
+      for (const fieldName of fieldNames) {
+        const fieldIdx = this.fields.findIndex(f => f.name === fieldName);
+        if (fieldIdx) {
+          this.fields.splice(fieldIdx, 1);
+          delete this.field[fieldName];
+        }
+      }
+    });
+  }
+
   set value(value: ObjectType)  {
     if (this.dispose) this.dispose();
 
@@ -408,11 +427,12 @@ export default class Form implements IValidationContext {
   }
 
   private initializeFields(fields: IFieldDefns) {
-    this.fields = [];
+    const flds: any[] = [];
     for (let fieldName in fields) {
       const field = fields[fieldName];
-      this.fields.push(this.createField(fieldName, field as BaseField));
+      flds.push(this.createField(fieldName, field as BaseField));
     }
+    this.fields ? this.fields.push(...flds) : this.fields = observable(flds);
   }
 
   private static editorDefaults: {[K in IFieldTypes]: EditorType} = {
@@ -454,7 +474,7 @@ export default class Form implements IValidationContext {
   }
 
   private createField(name: string, fieldDefn: BaseField): IEditorField {
-    this.field[name] = {
+    const field = observable({
       name,
       autoFocus:        fieldDefn.typeDefn.autoFocus,
       type:             fieldDefn.typeDefn.type,
@@ -472,34 +492,35 @@ export default class Form implements IValidationContext {
       startAdornment:   fieldDefn.typeDefn.startAdornment,
       endAdornment:     fieldDefn.typeDefn.endAdornment,
       onValueChange:    fieldDefn.typeDefn.onValueChange,
-    } as IEditorField & {__getter: any, __setter: any};
+    }) as IEditorField & {__getter: any, __setter: any};
 
     if (this.defaultAdornmentsEnabled && !Object.prototype.hasOwnProperty.call(fieldDefn.typeDefn, 'endAdornment')) {
       // add default end adornment to field depending on field type if using defaults, and it wasn't explicitly set to something (including undefined)
-      switch (this.field[name].type) {
+      switch (field.type) {
         case 'date':
-          this.field[name].endAdornment = () => React.createElement(DateRangeIcon, undefined, undefined);
+          field.endAdornment = () => React.createElement(DateRangeIcon, undefined, undefined);
           break;
         case 'time':
-          this.field[name].endAdornment = () => React.createElement(AccessTimeIcon, undefined, undefined);
+          field.endAdornment = () => React.createElement(AccessTimeIcon, undefined, undefined);
           break;
         case 'email':
-          this.field[name].endAdornment = () => React.createElement(MailOutlineIcon, undefined, undefined);
+          field.endAdornment = () => React.createElement(MailOutlineIcon, undefined, undefined);
           break;
         case 'phone':
-          this.field[name].endAdornment = () => React.createElement(PhoneIcon, {style: {transform: 'scaleX(-1)'}}, undefined);
+          field.endAdornment = () => React.createElement(PhoneIcon, {style: {transform: 'scaleX(-1)'}}, undefined);
           break;
         case 'password':
-          this.field[name].endAdornment = () => React.createElement('span', undefined, undefined);
+          field.endAdornment = () => React.createElement('span', undefined, undefined);
           break;
       }
     }
 
-    this.field[name].Editor = this.createEditor(fieldDefn.typeDefn.editorType, this.field[name], fieldDefn.typeDefn.editProps);
+    field.Editor = this.createEditor(fieldDefn.typeDefn.editorType, field, fieldDefn.typeDefn.editProps);
     if (fieldDefn.typeDefn.validators) {
       this.validator.addRule(name, fieldDefn.typeDefn.validators);
     }
-    return this.field[name];
+
+    return (this.field[name] = field);
   }
 
   public setFieldValue(fieldName: string, value: any): boolean {

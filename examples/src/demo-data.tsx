@@ -74,4 +74,4 @@ export let employees = [
 ];
 
 export const countries = arraySearch(suggestions, (item?) => (item && item.name) || '');
-export const searcher  = arraySearch(['Yes', 'No', 'Maybe', 'Uncertain', 'Definitely Not'], (item?) => item || '');
+export const searcher  = arraySearch(['Yes', 'No', 'Maybe', 'Uncertain', 'Definitely Not'], (item?) => Array.isArray(item) ? '' : (item || ''));

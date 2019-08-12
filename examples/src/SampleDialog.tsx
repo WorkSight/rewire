@@ -13,7 +13,7 @@ import { Observe }   from 'rewire-core';
 import { delay }     from 'rewire-common';
 import Typography    from '@material-ui/core/Typography';
 import Button        from '@material-ui/core/Button';
-import { countries } from './demo-data';
+import { countries, searcher } from './demo-data';
 
 const clickHandler = (props: ISuggestionsContainerComponentProps) => () => {
   console.log('Add Item!');
@@ -40,6 +40,7 @@ function createForm() {
     country:                 _.reference(countries).label('Country').validators('required').placeholder('type to lookup'),
     time:                    _.time().label('Time').validators('required').onValueChange((form: Form, v: any) => form.setFieldValue('email', 'hi@hi.com')),
     multiselectAutoComplete: _.multiselectautocomplete(countries, { chipLimit: 2, inputAdd: (v: string) => ({id: v, name: v}) }).label('Multiselect AutoComplete Country').validators('required').placeholder('select all that apply'),
+    searchers:               _.multiselectautocomplete(searcher, { chipLimit: 2, inputAdd: (v: string) => v}).label('Multiselect AutoComplete Searcher').validators('required').placeholder('select all that apply'),
     multiselectCountry:      _.multiselect(countries).label('Multiselect Country').validators('required').placeholder('select countries'),
     selectCountry:           _.select(countries).label('Select Country').validators('required').placeholder('click to select'),
     money:                   _.number().label('Show Me').validators('required').placeholder('The Money'),
@@ -89,6 +90,17 @@ export class SampleModel extends Modal {
 }
 
 export const sampleModel = new SampleModel();
+// setInterval(() => {
+//   if (sampleModel.form.fields.find(f => f.name === 'dynamic_field')) {
+//     sampleModel.form.removeFields(['dynamic_field']);
+//     return;
+//   }
+
+//   sampleModel.form.addFields((_) => ({
+//     dynamic_field: _.string().label('Dynamic Field').placeholder('dynamic field!')
+//   }), {dynamic_field: 'ooga'});
+// }, 5000);
+
 const SampleFormView = React.memo(({ form }: { form: typeof sampleModel.form }) => (
   <Observe render={() => (
     <div style={{ fontSize: '16px' }}>
@@ -118,7 +130,14 @@ const SampleFormView = React.memo(({ form }: { form: typeof sampleModel.form }) 
         </div>
         <div className='content'>
           <form.field.multiselectAutoComplete.Editor />
-        </div>
+          <form.field.searchers.Editor />
+          {/* <Observe render={() => (
+            <>
+              {!form.field.dynamic_field ? null : <form.field.dynamic_field.Editor />}
+              {!form.field.dynamic_field ? null : <form.field.dynamic_field.Editor />}
+            </>
+          )} /> */}
+          </div>
       </FormView>
     </div>
   )} />
