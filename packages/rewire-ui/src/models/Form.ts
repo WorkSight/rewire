@@ -429,8 +429,10 @@ export default class Form implements IValidationContext {
   private initializeFields(fields: IFieldDefns) {
     const flds: any[] = [];
     for (let fieldName in fields) {
-      const field = fields[fieldName];
-      flds.push(this.createField(fieldName, field as BaseField));
+      if (!this.field[fieldName]) {
+        const field = fields[fieldName];
+        flds.push(this.createField(fieldName, field as BaseField));
+      }
     }
     this.fields ? this.fields.push(...flds) : this.fields = observable(flds);
   }
