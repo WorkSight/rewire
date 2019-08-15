@@ -11,7 +11,8 @@ import {
   defaultEquals,
   computed,
   root,
-  observe
+  observe,
+  version
 }                             from 'rewire-core';
 import MailOutlineIcon        from '@material-ui/icons/MailOutline';
 import PhoneIcon              from '@material-ui/icons/Phone';
@@ -354,12 +355,12 @@ export default class Form implements IValidationContext {
   }
 
   set value(value: ObjectType)  {
-    if (this.dispose) this.dispose();
-
-    replace(this._value, value);
-    this.fields.forEach(field => {
-      field.value = field.type === 'boolean' || field.type === 'switch' ? this._getFieldValue(field, value) || false : this._getFieldValue(field, value);
-      field.error = undefined;
+    freeze(() => {
+      replace(this._value, value);
+      this.fields.forEach(field => {
+        field.value = field.type === 'boolean' || field.type === 'switch' ? this._getFieldValue(field, value) || false : this._getFieldValue(field, value);
+        field.error = undefined;
+      });
     });
 
     let validationResult: eValidationResult;
@@ -370,23 +371,26 @@ export default class Form implements IValidationContext {
       validationResult     = this.validateFields(fieldsToValidate);
     }
 
-    root((dispose) => {
-      this.dispose        = dispose;
-      const fieldsChanged = observe(() => { Object.keys(this._value).map(k => this._value[k]); this.fields.map(f => f.value); });
-      this._hasChanges    = computed(fieldsChanged, () => {
-        if (!this._value) return false;
-        for (const field of this.fields) {
-          if (!defaultEquals(field.value, this._getFieldValue(field, this._value)))
-            return true;
-        }
-        return false;
-      }, false);
+    if (!this.dispose) {
+      root((dispose) => {
+        this.dispose        = dispose;
+        const fieldsChanged = observe(() => { version(this._value); this.fields.forEach(v => v.value); });
+        this._hasChanges    = computed(fieldsChanged, () => {
+          if (!this._value) return false;
+          for (const field of this.fields) {
+            const v = field.type === 'boolean' || field.type === 'switch' ? this._getFieldValue(field, this._value) || false : this._getFieldValue(field, this._value);
+            if (!defaultEquals(field.value, v))
+              return true;
+          }
+          return false;
+        }, false);
 
-      const fieldsErrorsChanged = observe(() => this.fields.map(f => f.error));
-      this._hasErrors = computed(fieldsErrorsChanged, () => {
-        return this.fields.findIndex((field: IEditorField) => !!field.error) >= 0;
-      }, validationResult === eValidationResult.Error);
-    });
+        const fieldsErrorsChanged = observe(() => this.fields.map(f => f.error));
+        this._hasErrors = computed(fieldsErrorsChanged, () => {
+          return this.fields.findIndex((field: IEditorField) => !!field.error) >= 0;
+        }, validationResult === eValidationResult.Error);
+      });
+    }
   }
 
   get hasChanges() {
@@ -576,8 +580,7 @@ export default class Form implements IValidationContext {
 
   public toObject(): ObjectType {
     return this.fields.reduce((prev: ObjectType, current) => {
-      // this._setFieldValue(current, prev, current);
-      prev[current.name] = current; // ? maybe
+      this._setFieldValue(current, prev, current.value);
       return prev;
     }, {});
   }

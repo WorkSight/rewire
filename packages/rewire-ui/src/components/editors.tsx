@@ -255,7 +255,7 @@ export default function editor(type: EditorType, propsForEdit?: any): React.SFC<
             endOfTextOnFocus={endOfTextOnFocus}
             selectOnFocus={selectOnFocus}
             cursorPositionOnFocus={cursorPositionOnFocus}
-            onValueChange={onValueChange}
+            onValueChange={(v) => onValueChange(v && String(v))}
             error={field.error}
             disabled={field.disabled && field.disabled(field)}
             visible={field.visible}
