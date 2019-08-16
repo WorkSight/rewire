@@ -64,11 +64,11 @@ export default class Modal {
   }
 
   private async dispatch(disabled: () => boolean, action?: ActionFn) {
-    if (!this.state.enable || disabled()) return;
+    if (!this.state.enable || disabled.call(this)) return;
     let close         = true;
     this.state.enable = false;
     try {
-      if (action) close = await action();
+      if (action) close = await action.call(this);
     } catch (err) {
       close = false;
     } finally {
