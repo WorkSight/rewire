@@ -1,5 +1,5 @@
 #!/bin/bash
-modules=("rewire-ui");
+modules=("rewire-common" "rewire-core" "rewire-ui" "rewire-grid" "rewire-graphql");
 
 while getopts ":cp" arg "$@"; do
   case $arg in

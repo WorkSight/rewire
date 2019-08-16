@@ -4,6 +4,8 @@ import {
   isNullOrUndefinedOrEmpty,
   createGetter,
   createSetter,
+  defaultGetter,
+  defaultSetter,
 }                             from 'rewire-common';
 import {
   observable,
@@ -38,9 +40,12 @@ import { freeze }             from 'rewire-core';
 
 export type IFieldTypes    = 'string' | 'multistring' | 'static' | 'reference' | 'select' | 'multiselect' | 'number' | 'boolean' | 'switch' | 'date' | 'time' | 'avatar' | 'password' | 'email' | 'phone' | 'color' | 'mask' | 'multiselectautocomplete';
 export type FormType<T>    = { field : Record<keyof T, IEditorField> } & Form;
+export type TGetter        = (obj: any) => any;
+export type TSetter        = (obj: any, value: any) => void;
 
 export interface IFieldDefn {
   label            (text: string):                                    IFieldDefn;
+  accessor         (getter: TGetter, setter: TSetter):                IFieldDefn;
   accessor         (path: string[]):                                  IFieldDefn;
   placeholder      (text: string):                                    IFieldDefn;
   align            (text: TextAlignment):                             IFieldDefn;
@@ -72,7 +77,7 @@ export interface IFieldDefns {
 
 interface IBaseFieldDefn {
   type             : IFieldTypes;
-  accessor?        : string[];
+  accessor?        : {getter: TGetter, setter: TSetter};
   editorType?      : EditorType;
   autoFocus?       : boolean;
   editProps?       : any;
@@ -218,8 +223,17 @@ class BaseField implements IFieldDefn {
     return this;
   }
 
-  accessor(path: string[]): IFieldDefn {
-    this.typeDefn.accessor = path;
+  accessor(getter: TGetter, setter: TSetter): IFieldDefn;
+  accessor(path: string[]): IFieldDefn;
+  accessor(porg: string[] | TGetter, setter?: TSetter): IFieldDefn {
+    if (setter) {
+      const getter           = porg as TGetter;
+      this.typeDefn.accessor = {getter, setter};
+      return this;
+    }
+
+    const path = porg as string[];
+    this.typeDefn.accessor = {getter: createGetter(path), setter: createSetter(path)};
     return this;
   }
 
@@ -378,8 +392,9 @@ export default class Form implements IValidationContext {
         this._hasChanges    = computed(fieldsChanged, () => {
           if (!this._value) return false;
           for (const field of this.fields) {
-            const v = field.type === 'boolean' || field.type === 'switch' ? this._getFieldValue(field, this._value) || false : this._getFieldValue(field, this._value);
-            if (!defaultEquals(field.value, v))
+            const value = this._getFieldValue(field, this._value);
+            if (value === field.value) continue; // short circuit easy case!
+            if (!defaultEquals(field.value, field.type === 'boolean' || field.type === 'switch' ? value || false : value))
               return true;
           }
           return false;
@@ -480,6 +495,7 @@ export default class Form implements IValidationContext {
   }
 
   private createField(name: string, fieldDefn: BaseField): IEditorField {
+    const accessor = fieldDefn.typeDefn.accessor;
     const field = observable({
       name,
       autoFocus:        fieldDefn.typeDefn.autoFocus,
@@ -493,8 +509,8 @@ export default class Form implements IValidationContext {
       updateOnChange:   !isNullOrUndefined(fieldDefn.typeDefn.updateOnChange) ? fieldDefn.typeDefn.updateOnChange : this.updateOnChange,
       validateOnUpdate: !isNullOrUndefined(fieldDefn.typeDefn.validateOnUpdate) ? fieldDefn.typeDefn.validateOnUpdate : this.validateOnUpdate,
       visible:          true,
-      __getter:         createGetter(fieldDefn.typeDefn.accessor || name),
-      __setter:         createSetter(fieldDefn.typeDefn.accessor || name),
+      __getter:         (accessor && accessor.getter) || defaultGetter(name),
+      __setter:         (accessor && accessor.setter) || defaultSetter(name),
       startAdornment:   fieldDefn.typeDefn.startAdornment,
       endAdornment:     fieldDefn.typeDefn.endAdornment,
       onValueChange:    fieldDefn.typeDefn.onValueChange,
@@ -593,10 +609,15 @@ export default class Form implements IValidationContext {
     this.value = this.value;
   }
 
-  public clear() {
-    this.fields.forEach(field => {
-      field.value = undefined;
-      field.error = undefined;
+  public clear(reinitialize: boolean = false) {
+    freeze(() => {
+      this.fields.forEach(field => {
+        field.value = undefined;
+        field.error = undefined;
+      });
+      if (reinitialize) {
+        replace(this._value, {});
+      }
     });
     if (this.initialValuesValidationMode === 'all') {
       this.validateForm();

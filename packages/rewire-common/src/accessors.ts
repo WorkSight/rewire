@@ -13,8 +13,8 @@ function generateBody(path: string[], setter: boolean) {
   return [lets, exp];
 }
 
-const defaultGetter = (path: string) => (obj: any) => obj && obj[path];
-const defaultSetter = (path: string) => (obj: any, value: any) => obj && (obj[path] = value);
+export const defaultGetter = (path: string) => (obj: any) => obj && obj[path];
+export const defaultSetter = (path: string) => (obj: any, value: any) => obj && (obj[path] = value);
 
 const getterCache = {};
 export function createGetter(path: string | string[]) {
