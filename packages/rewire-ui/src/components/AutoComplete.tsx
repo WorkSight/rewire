@@ -514,7 +514,7 @@ class AutoComplete<T> extends React.Component<AutoCompleteProps<T>, IAutoComplet
     event.nativeEvent.stopImmediatePropagation();
   }
 
-  componentWillReceiveProps (nextProps: ICustomProps<T>) {
+  UNSAFE_componentWillReceiveProps (nextProps: ICustomProps<T>) {
     if (isNullOrUndefined(nextProps.selectedItem) && (nextProps.selectedItem !== this.props.selectedItem) && this.downShift) {
       this.downShift.clearSelection();
     }
