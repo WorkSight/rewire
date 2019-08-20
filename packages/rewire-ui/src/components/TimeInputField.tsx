@@ -209,7 +209,7 @@ class TimeInputField extends React.Component<TimeFieldProps, ITimeState> {
     this.state     = this._valueToSet(map(props.value));
   }
 
-  componentWillReceiveProps (nextProps: TimeFieldProps) {
+  UNSAFE_componentWillReceiveProps (nextProps: TimeFieldProps) {
     const map = nextProps.map || defaultMap;
     this.setValue(map(nextProps.value));
   }

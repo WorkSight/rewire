@@ -188,7 +188,7 @@ export type SortableListProps = {
 const manager: Record<string, any> = {};
 
 class SortableListInternal extends React.Component<SortableListProps & SortableStyles> {
-  componentWillMount () {
+  UNSAFE_componentWillMount () {
     manager[(this.props.listType || 'DEFAULT') + this.props.listId] = this.props.items;
   }
 
