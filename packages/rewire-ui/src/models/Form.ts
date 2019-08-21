@@ -632,6 +632,20 @@ export default class Form implements IValidationContext {
     return true;
   }
 
+  public submitAsync = async (cb?: () => Promise<boolean | undefined>): Promise<boolean> => {
+    if (!this._value) return false;
+    let result = this.validateForm();
+    if (result === eValidationResult.Error) return false;
+    try {
+      const r = cb && (await cb());
+      if (r === false) return false;
+    } catch (err) {
+      return false;
+    }
+    replace(this._value, this.toObjectValues());
+    return true;
+  }
+
   public validateField(field: IEditorField): eValidationResult {
     return this.validator.validateField(this, field.name);
   }
