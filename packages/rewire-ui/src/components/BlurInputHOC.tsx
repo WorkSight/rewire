@@ -25,7 +25,7 @@ export default class BlurInputHOC extends React.Component<IBlurProps, IBlurState
     };
   }
 
-  componentWillReceiveProps (nextProps: IBlurProps) {
+  UNSAFE_componentWillReceiveProps (nextProps: IBlurProps) {
     if (nextProps.value !== this.state.currentExternalValue) { // only override the internal state if the value has been changed outside the control!!
       this.setState({value: nextProps.value, currentExternalValue: nextProps.value});
     }

@@ -548,7 +548,7 @@ const GridInternal = withStyles(styles, class extends React.PureComponent<GridPr
     }
   }
 
-  componentWillMount() {
+  UNSAFE_componentWillMount() {
     disposeOnUnmount(this, () => this.buildGroups());
     disposeOnUnmount(this, () => this.buildColumnGroups());
   }
@@ -560,7 +560,7 @@ const GridInternal = withStyles(styles, class extends React.PureComponent<GridPr
     this.grid.isMouseDown = false;
   }
 
-  componentWillReceiveProps(nextProps: GridProps) {
+  UNSAFE_componentWillReceiveProps(nextProps: GridProps) {
     if (nextProps.grid !== this.grid) {
       this.grid = nextProps.grid;
     }

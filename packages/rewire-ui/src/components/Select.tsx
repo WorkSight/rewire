@@ -139,7 +139,7 @@ class SelectInternal<T> extends React.Component<SelectInternalProps<T>, any> {
     this.setState({suggestions: suggestions});
   }
 
-  componentWillReceiveProps (nextProps: ICustomProps<T>) {
+  UNSAFE_componentWillReceiveProps (nextProps: ICustomProps<T>) {
     if (nextProps.options) {
       if (nextProps.options.parentId !== (this.props.options && this.props.options.parentId)) {
         this.props.onSelectItem(undefined);

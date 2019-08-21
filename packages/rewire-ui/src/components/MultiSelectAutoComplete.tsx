@@ -543,7 +543,7 @@ class MultiSelectAutoComplete<T> extends React.Component<MultiSelectAutoComplete
     event.nativeEvent.stopImmediatePropagation();
   }
 
-  componentWillReceiveProps (nextProps: any) {
+  UNSAFE_componentWillReceiveProps (nextProps: any) {
     if (isNullOrUndefined(nextProps.selectedItems) && (nextProps.selectedItems !== this.props.selectedItems) && this.downShift) {
       this.downShift.clearSelection();
     }
