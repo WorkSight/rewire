@@ -75,8 +75,8 @@ export class ColumnModel implements IColumn {
   private initialize(name: string | string[], title: string, options?: IColumnOptions) {
     this.id             = id++;
     this.name           = Array.isArray(name) ? name.join('.') : name;
-    this.__getter       = createGetter(name);
-    this.__setter       = createSetter(name);
+    this.__getter       = (options && options.accessor && options.accessor.getter) || createGetter(name);
+    this.__setter       = (options && options.accessor && options.accessor.setter) || createSetter(name);
     this.title          = title;
     this.position       = 0;
     this.sort           = undefined;

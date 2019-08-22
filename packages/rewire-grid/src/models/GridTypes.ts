@@ -7,7 +7,9 @@ import {
   ISuggestionsContainerComponent,
   Validator,
   IFormValidator,
-  IError
+  IError,
+  TGetter,
+  TSetter
 } from 'rewire-ui';
 import * as merge      from 'deepmerge';
 export { EditorType };
@@ -305,6 +307,7 @@ export interface IColumnOptions {
   tooltip?      : string;
   width?        : string;
   canSort?      : boolean;
+  accessor?     : {getter: TGetter, setter: TSetter};
   renderer?     : React.SFC<any>;
   validators?   : IFormValidator;
 

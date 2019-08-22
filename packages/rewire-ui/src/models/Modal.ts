@@ -19,12 +19,12 @@ export interface IModalState {
   enable: boolean;
 }
 
-export default class Modal {
-  protected state:  IModalState;
+export default class Modal<TState = {}> {
+  protected state:  IModalState & TState;
   readonly actions: {[index: string]: ActionType};
 
   constructor(title?: string, open?: boolean) {
-    this.state   = observable({open: open || false, title, enable: true});
+    this.state   = observable({open: open || false, title, enable: true}) as IModalState & TState;
     this.actions = {};
   }
 
