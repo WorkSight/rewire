@@ -69,12 +69,21 @@ let styles = (theme: Theme) => ({
 });
 
 export interface IDefaultActionRendererStyles {
-  button?: string;
+  root?:   string;
   icon?:   string;
   label?:  string;
 }
-export type ActionRenderType = (props: {label: string, action: ActionType, isDisabled: boolean, variant?: ButtonProps['variant'], classes?: IDefaultActionRendererStyles}) => JSX.Element;
-export const DefaultActionRenderer: ActionRenderType = ({label, action, isDisabled, variant, classes}) => (
+
+export interface IActionRenderTypeProps {
+  label:      string;
+  action:     ActionType;
+  isDisabled: boolean;
+  variant?:   ButtonProps['variant'];
+  classes?:   IDefaultActionRendererStyles;
+}
+
+export type ActionRenderType = (props: IActionRenderTypeProps) => JSX.Element;
+export const DefaultActionRenderer: ActionRenderType = ({label, action, isDisabled, variant, classes}: IActionRenderTypeProps) => (
   <Observe render={() => (
     <Button className={classes && classes.root} type={action.type} color={action.type ? 'primary' : action.color} variant={action.variant || variant} disabled={isDisabled || action.disabled()} onClick={action.action}>
       {action.icon && <Icon className={classes && classes.icon} style={{marginRight: '8px'}}>{action.icon}</Icon>}
