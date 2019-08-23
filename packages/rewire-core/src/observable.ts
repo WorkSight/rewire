@@ -211,9 +211,12 @@ function createHandler(eq: EQType, parent?: () => void) {
 
 export function defaultEquals(v1: any, v2: any) {
   if (v1 === v2) return true;
-  if (v1 && !isNullOrUndefinedOrEmpty(v1.id) && v2 && !isNullOrUndefinedOrEmpty(v2.id)) {
-    if (v1.id === v2.id)          return true;
-    // if (v1.valueOf && v2.valueOf) return v1.valueOf() === v2.valueOf();
+  if (v1 && v2) {
+    if (!isNullOrUndefinedOrEmpty(v1.id) && !isNullOrUndefinedOrEmpty(v2.id)) {
+      return v1.id === v2.id;
+    } else if (v1.valueOf && v2.valueOf) {
+      return v1.valueOf() === v2.valueOf();
+    }
   }
 
   const undefinedOrNullOrEmpty1 = isNullOrUndefinedOrEmpty(v1);
