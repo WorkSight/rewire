@@ -392,6 +392,7 @@ export default class Form implements IValidationContext {
         this._hasChanges    = computed(fieldsChanged, () => {
           if (!this._value) return false;
           for (const field of this.fields) {
+            if (!field.visible) continue;
             const value = this._getFieldValue(field, this._value);
             if (value === field.value) continue; // short circuit easy case!
             if (!defaultEquals(field.value, field.type === 'boolean' || field.type === 'switch' ? value || false : value))
@@ -589,14 +590,14 @@ export default class Form implements IValidationContext {
 
   public toObjectValues(): ObjectType {
     return this.fields.reduce((prev: ObjectType, current) => {
-      if (!isNullOrUndefined(current.value)) this._setFieldValue(current, prev, current.value);
+      if (!isNullOrUndefined(current.value) && current.visible) this._setFieldValue(current, prev, current.value);
       return prev;
     }, {});
   }
 
   public toObject(): ObjectType {
     return this.fields.reduce((prev: ObjectType, current) => {
-      this._setFieldValue(current, prev, current.value);
+      if (current.visible) this._setFieldValue(current, prev, current.value);
       return prev;
     }, {});
   }

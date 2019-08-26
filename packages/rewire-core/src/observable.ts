@@ -214,6 +214,12 @@ export function defaultEquals(v1: any, v2: any) {
   if (v1 && v2) {
     if (!isNullOrUndefinedOrEmpty(v1.id) && !isNullOrUndefinedOrEmpty(v2.id)) {
       return v1.id === v2.id;
+    } else if (Array.isArray(v1) && Array.isArray(v2)) { // had to move this here as array implements valueOf who knew? ¯\_(ツ)_/¯
+      if (v1.length !== v2.length) return false;
+      for (let i = 0; i < v1.length; i++) {
+        if (!defaultEquals(v1[i], v2[i])) return false;
+      }
+      return true;
     } else if (v1.valueOf && v2.valueOf) {
       return v1.valueOf() === v2.valueOf();
     }
@@ -222,13 +228,6 @@ export function defaultEquals(v1: any, v2: any) {
   const undefinedOrNullOrEmpty1 = isNullOrUndefinedOrEmpty(v1);
   const undefinedOrNullOrEmpty2 = isNullOrUndefinedOrEmpty(v2);
   if (undefinedOrNullOrEmpty1 && undefinedOrNullOrEmpty2) return true;
-  if (Array.isArray(v1) && Array.isArray(v2)) {
-    if (v1.length !== v2.length) return false;
-    for (let i = 0; i < v1.length; i++) {
-      if (!defaultEquals(v1[i], v2[i])) return false;
-    }
-    return true;
-  }
   return false;
 }
 
