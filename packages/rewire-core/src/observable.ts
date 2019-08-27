@@ -220,8 +220,14 @@ export function defaultEquals(v1: any, v2: any) {
         if (!defaultEquals(v1[i], v2[i])) return false;
       }
       return true;
-    } else if (v1.valueOf && v2.valueOf) {
-      return v1.valueOf() === v2.valueOf();
+    } else {
+      if (v1.equals && v2.equals) {
+        let p1 = Object.getPrototypeOf(v1);
+        let p2 = Object.getPrototypeOf(v2);
+        if (p1 && p2 && p1.constructor === p2.constructor) return v1.equals(v2);
+      } else if (v1.valueOf && v2.valueOf) {
+        return v1.valueOf() === v2.valueOf();
+      }
     }
   }
 
