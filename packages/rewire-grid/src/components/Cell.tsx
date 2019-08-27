@@ -211,6 +211,7 @@ class Cell extends React.PureComponent<CellProps, {}> {
   }
 
   handleFocus = (evt: React.FocusEvent<any>) => {
+    evt.stopPropagation();
     if (!this.grid.focusedCell && this.grid.selectedCells.length <= 0) {
       this.grid.selectCells([this.cell]);
     } else {
