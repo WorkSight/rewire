@@ -149,7 +149,7 @@ export default class TimestampRange {
   }
 
   intersects(range: TimestampRange) {
-    return (!((this._start >= range._end) || (this._end <= range._start)));
+    return Math.max(this._start.date, range._start.date) < Math.min(this._end.date, range._end.date);
   }
 
   inRange(effective: DateType) {
@@ -158,16 +158,16 @@ export default class TimestampRange {
   }
 
   equals(range: TimestampRange) {
-    return (this._start.equals(range._start) || this._end.equals(range._end));
+    return (this._start.equals(range._start) && this._end.equals(range._end));
   }
 
   intesection(range: TimestampRange) {
     if (this.isEmpty) return TimestampRange.Empty;
     let r = new TimestampRange(this);
 
-    if (range._start > r._start) r._start = range._start;
-    if (range._end < r._end) r._end = range._end;
-    return r.isValid ? r : TimestampRange.Empty;
+    r._start = r._start >= range._start ? r._start : range._start;
+    r._end   = r._end <= range._end ? r._end : range._end;
+    return r.isValid && r._start !== r._end ? r : TimestampRange.Empty;
   }
 
   contains(range: TimestampRange) {
