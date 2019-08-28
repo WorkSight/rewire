@@ -951,25 +951,30 @@ class GridModel implements IGrid, IDisposable {
     }
 
     this.editCell(undefined);
-    let rowsToSelect: IRow[]   = [];
+    let rowsToSelect:  IRow[]  = [];
     let cellsToSelect: ICell[] = [];
 
     cells.forEach(cell => {
-      if (!cell.enabled || !cell.row.visible) {
+      // if (!cell.enabled || !cell.row.visible) {
+      if (!cell.row.visible) {
         return;
       }
-      cell.selected = true;
+      if (cell.enabled) {
+        cell.selected = true;
+      }
       rowsToSelect.push(cell.row);
-      cellsToSelect.push(cell);
+      if (cell.enabled) {
+        cellsToSelect.push(cell);
 
-      if (handleMergedCells) {
-        for (let i = 1; i < cell.colSpan; i++) {
-          let additionalCell = this.cellByPos(cell.rowPosition, cell.columnPosition + i);
-          if (!additionalCell) {
-            continue;
+        if (handleMergedCells) {
+          for (let i = 1; i < cell.colSpan; i++) {
+            let additionalCell = this.cellByPos(cell.rowPosition, cell.columnPosition + i);
+            if (!additionalCell) {
+              continue;
+            }
+            additionalCell.selected = true;
+            cellsToSelect.push(additionalCell);
           }
-          additionalCell.selected = true;
-          cellsToSelect.push(additionalCell);
         }
       }
     });
