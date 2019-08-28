@@ -63,7 +63,7 @@ do
 
   if [ ! -z $PUBLISH ];
   then
-    npm publish --registry https://npm.worksight.services/ --force
+    npm publish --force
     sleep 3s
   fi
   cd ../..
