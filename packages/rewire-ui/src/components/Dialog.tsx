@@ -47,6 +47,8 @@ let styles = (theme: Theme) => ({
     },
   },
   childrenContainer: {
+    display: 'flex',
+    flexDirection: 'column',
     overflowY: 'auto',
     margin: '1px 0px',
     paddingTop: '15px',
