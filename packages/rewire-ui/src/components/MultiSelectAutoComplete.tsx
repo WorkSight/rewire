@@ -203,11 +203,13 @@ class MultiSelectAutoComplete<T> extends React.Component<MultiSelectAutoComplete
   map:                         MapFn<T>;
   suggestionsContainerNode:    HTMLElement;
   textFieldRef:                React.RefObject<HTMLElement>;
+  showMoreSelectedItemsRef:    React.RefObject<HTMLElement>;
 
   constructor(props: MultiSelectAutoCompleteProps<T>) {
     super(props);
-    this.textFieldRef = React.createRef();
-    this.search       = props.search;
+    this.textFieldRef             = React.createRef();
+    this.showMoreSelectedItemsRef = React.createRef();
+    this.search                   = props.search;
     if (props.debounce) {
       const wait = is.number(props.debounce) ? props.debounce as number : 150;
       this.search = debounce(this.search, wait);
@@ -639,7 +641,7 @@ class MultiSelectAutoComplete<T> extends React.Component<MultiSelectAutoComplete
         classes={{paper: classes.showMoreSelectedItemsPopup}}
         open={open}
         onClose={this.closeShowMoreSelectedItemsPopup}
-        anchorEl={this.textFieldRef && this.textFieldRef.current}
+        anchorEl={this.showMoreSelectedItemsRef && this.showMoreSelectedItemsRef.current}
         marginThreshold={5}
       >
         <div style={{fontSize: this._fontSize}}>
@@ -682,12 +684,14 @@ class MultiSelectAutoComplete<T> extends React.Component<MultiSelectAutoComplete
     if (showMore) {
       const showMoreItems = this.props.selectedItems.slice(chipLimit);
       returnValue.push(
-        <Chip
-          key='...'
-          label='...'
-          className={classNames(classes.chip, classes.showMoreChip, this.props.disabled ? classes.chipDisabled : undefined)}
-          onClick={this.openShowMoreSelectedItemsPopup}
-        />
+        <RootRef rootRef={this.showMoreSelectedItemsRef}>
+          <Chip
+            key='...'
+            label='...'
+            className={classNames(classes.chip, classes.showMoreChip, this.props.disabled ? classes.chipDisabled : undefined)}
+            onClick={this.openShowMoreSelectedItemsPopup}
+          />
+        </RootRef>
       );
       returnValue.push(<this.renderShowMoreSelectedItemsPopup key='showMoreSelectedItemsPopup' classes={classes} open={this.state.showMoreSelectedItemsPopupIsOpen} items={showMoreItems} />);
     }
