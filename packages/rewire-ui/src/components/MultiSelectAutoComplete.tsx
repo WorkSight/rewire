@@ -9,12 +9,16 @@ import TextField                        from '@material-ui/core/TextField';
 import Chip                             from '@material-ui/core/Chip';
 import Paper                            from '@material-ui/core/Paper';
 import Popper                           from '@material-ui/core/Popper';
+import Popover                          from '@material-ui/core/Popover';
+import IconButton                       from '@material-ui/core/IconButton';
 import MenuItem                         from '@material-ui/core/MenuItem';
 import InputAdornment                   from '@material-ui/core/InputAdornment';
 import Typography                       from '@material-ui/core/Typography';
 import RootRef                          from '@material-ui/core/RootRef';
 import Fade                             from '@material-ui/core/Fade';
 import {Theme}                          from '@material-ui/core/styles';
+import CloseIcon                        from '@material-ui/icons/Close';
+import CancelIcon                       from '@material-ui/icons/Cancel';
 
 import {
   debounce,
@@ -77,6 +81,9 @@ const styles = (theme: Theme) => ({
   chipDeleteIcon: {
     fontSize: '1.6em',
   },
+  showMoreChip: {
+    cursor: 'pointer',
+  },
   inputRoot: {
     lineHeight: 'inherit',
     fontSize: 'inherit',
@@ -133,6 +140,31 @@ const styles = (theme: Theme) => ({
     marginLeft: '14px',
     marginRight: '14px',
   },
+  showMoreSelectedItemsPopup: {
+    lineHeight: '1.5em',
+    padding: '15px',
+  },
+  showMoreSelectedItemsPopupHeader: {
+    display: 'flex',
+    justifyContent: 'flex-end',
+    paddingBottom: '15px',
+  },
+  showMoreSelectedItemsPopupIconButton: {
+    marginLeft: '10px',
+    padding: '0px',
+  },
+  showMoreSelectedItemsPopupIcon: {
+    fontSize: '1.5em',
+  },
+  showMoreSelectedItemsPopupItemContainer: {
+    display: 'flex',
+    alignItems: 'center',
+    justifyContent: 'space-between',
+    lineHeight: '1.25em',
+  },
+  showMoreSelectedItemsPopupItemSpacing: {
+    paddingTop: '10px',
+  },
 });
 
 interface IMultiSelectAutoCompleteProps<T> {
@@ -155,13 +187,14 @@ interface IMultiSelectAutoCompleteProps<T> {
 
 interface IMultiSelectAutoCompleteState {
   suggestions: any[];
-  deleting: boolean;
+  manualFocusing: boolean;
+  showMoreSelectedItemsPopupIsOpen: boolean;
 }
 
 export type MultiSelectAutoCompleteProps<T> = WithStyle<ReturnType<typeof styles>, ICustomProps<T> & IMultiSelectAutoCompleteProps<T> & React.InputHTMLAttributes<any>>;
 
 class MultiSelectAutoComplete<T> extends React.Component<MultiSelectAutoCompleteProps<T>, IMultiSelectAutoCompleteState> {
-  state = {suggestions: [], deleting: false};
+  state = {suggestions: [], manualFocusing: false, showMoreSelectedItemsPopupIsOpen: false};
   _fontSize?:                  string;
   _inputComponentNode?:        any;
   _suggestionsContainerWidth?: string;
@@ -186,212 +219,23 @@ class MultiSelectAutoComplete<T> extends React.Component<MultiSelectAutoComplete
     }
   }
 
-  performSearch = async (value: string) => {
-    const suggestions = await this.search(value, this.props.options);
-    this.setState({
-      suggestions
-    });
-  }
-
-  renderInput = (classes: Record<any, string>, error: string | undefined, inputProps: any, InputProps: any, ref: (node: any) => any) => {
-    const {label, disabled, autoFocus, value, ...other}                 = inputProps;
-    const {startAdornment, endAdornment, align, variant, disableErrors} = InputProps;
-    const inputClassName            = variant === 'outlined' ? classes.inputOutlinedInput : classes.inputInput;
-    const inputFormControlClassName = variant === 'standard' && this.props.label ? classes.inputFormControlWithLabel : undefined;
-
+  shouldComponentUpdate(nextProps: MultiSelectAutoCompleteProps<T>, nextState: any, nextContext: any) {
     return (
-      <RootRef rootRef={this.textFieldRef}>
-        <TextField
-          className={classes.textField}
-          classes={{root: classes.formControlRoot}}
-          value={value}
-          label={label}
-          variant={variant}
-          error={!disableErrors && !disabled && !!error}
-          helperText={!disableErrors && <span>{(!disabled && error) || ''}</span>}
-          inputRef={ref}
-          disabled={disabled}
-          autoFocus={autoFocus}
-          inputProps={{spellCheck: false, className: classes.nativeInput, style: {textAlign: align || 'left'}}}
-          InputProps={{startAdornment: startAdornment, endAdornment: endAdornment, classes: {root: classes.inputRoot, input: inputClassName, formControl: inputFormControlClassName}}}
-          InputLabelProps={{shrink: true, classes: {root: classes.inputLabelRoot, outlined: classes.inputLabelOutlined, shrink: classes.inputLabelShrink}}}
-          FormHelperTextProps={{classes: {root: classes.helperTextRoot, contained: classes.helperTextContained}}}
-          {...other}
-        />
-      </RootRef>
+      (nextProps.selectedItems !== this.props.selectedItems) ||
+      (nextProps.error !== this.props.error) ||
+      (nextProps.disabled !== this.props.disabled) ||
+      (nextProps.visible !== this.props.visible) ||
+      (nextState.suggestions !== this.state.suggestions) ||
+      (nextState.showMoreSelectedItemsPopupIsOpen !== this.state.showMoreSelectedItemsPopupIsOpen) ||
+      (nextProps.label !== this.props.label) ||
+      (nextProps.placeholder !== this.props.placeholder) ||
+      (nextProps.align !== this.props.align) ||
+      (nextProps.variant !== this.props.variant) ||
+      (nextProps.disableErrors !== this.props.disableErrors) ||
+      (nextProps.startAdornment !== this.props.startAdornment) ||
+      (nextProps.endAdornment !== this.props.endAdornment)
     );
   }
-
-  html(str: string) {
-    if (str && (str.length > 0)) {
-      return str.replace(/^\s+|\s+$/gm, '&nbsp;');
-    }
-    return str;
-  }
-
-  parse(searchText: string, value: string): {highlight: boolean, text: string}[] {
-    let results: {highlight: boolean, text: string}[] = [];
-    if (searchText && searchText.length > 0) {
-      let regex = match(searchText);
-      let prevIndex = 0;
-      for (let i = 0; i < 10; i++) {
-        let matches = regex.exec(value);
-        if (!matches) {
-          break;
-        }
-        let match: string = matches[0];
-        let index = matches.index;
-        if (prevIndex < index) {
-          results.push({highlight: false, text: this.html(value.substring(prevIndex, index))});
-        }
-        results.push({highlight: true, text: this.html(match)});
-        prevIndex = index + match.length;
-      }
-
-      if (prevIndex < value.length) {
-        results.push({highlight: false, text: this.html(value.substring(prevIndex, value.length))});
-      }
-      return results;
-    }
-    results.push({highlight: false, text: this.html(value)});
-    return results;
-  }
-
-  suggestionComparisonFn = (prevProps: any, nextProps: any): boolean => {
-    let prevAriaSelected = prevProps.itemProps && prevProps.itemProps['aria-selected'];
-    let nextAriaSelected = nextProps.itemProps && nextProps.itemProps['aria-selected'];
-    return (
-      (prevProps.suggestion === nextProps.suggestion) &&
-      (prevProps.index === nextProps.index) &&
-      (prevAriaSelected === nextAriaSelected) &&
-      (prevProps.isHighlighted === nextProps.isHighlighted) &&
-      (prevProps.inputValue === nextProps.inputValue) &&
-      (prevProps.classes === nextProps.classes)
-    );
-  }
-
-  renderSuggestion = React.memo((props: any) => {
-    const { suggestion, index, itemProps, isHighlighted, inputValue, classes } = props;
-    const name  = this.map(suggestion);
-    const parts = this.parse(inputValue, name);
-
-    if (this.props.renderSuggestion) {
-      return (
-        <MenuItem {...itemProps} selected={isHighlighted} component='div' key={index} className={classes.menuItem} >
-          <this.props.renderSuggestion suggestion={suggestion} isHighlighted={isHighlighted} inputValue={inputValue} parts={parts} />
-        </MenuItem>
-      );
-    }
-
-    return (
-      <MenuItem
-        {...itemProps}
-        key={index}
-        selected={isHighlighted}
-        component='div'
-        className={classes.menuItem}
-      >{parts.map((part, index) => {
-          return part.highlight ? (
-            <span key={String(index)} style={{ fontWeight: 700 }} dangerouslySetInnerHTML={{__html: part.text}} />
-          ) : (
-            <strong key={String(index)} style={{ fontWeight: 300 }} dangerouslySetInnerHTML={{__html: part.text}} />
-          );
-        })}
-      </MenuItem>
-    );
-  }, this.suggestionComparisonFn);
-
-  renderSuggestionsContainerContents = React.memo((props: any) => {
-    const { suggestionsContainerHeader, suggestionsContainerFooter, suggestions, getMenuProps, isOpen, classes } = props;
-    const menuProps = {
-      onMouseDown: this.handleMenuMouseDown,
-      onMouseUp: this.handleMenuMouseUp,
-      onClick: this.handleMenuClick,
-      onDoubleClick: this.handleMenuDoubleClick,
-    };
-
-    let suggestionsPaperClasses: string[] = [classes.suggestionsPaper];
-    let suggestionsClasses: string[]      = [classes.suggestions];
-    if (suggestionsContainerHeader || suggestionsContainerFooter) {
-      suggestionsPaperClasses.push(classes.suggestionsPaperContained);
-      suggestionsClasses.push(classes.suggestionsContained);
-
-      if (suggestionsContainerHeader) {
-        suggestionsClasses.push(classes.suggestionsHasHeader);
-      }
-
-      if (suggestionsContainerFooter) {
-        suggestionsClasses.push(classes.suggestionsHasFooter);
-      }
-    }
-
-    if (!this._fontSize) {
-      this._fontSize = window.getComputedStyle(this.suggestionsContainerNode).getPropertyValue('font-size'); // needed to keep the suggestions the same font size as the input
-    }
-    let suggestionsContainerComponentProps: ISuggestionsContainerComponentProps = {
-      downShift: this.downShift,
-    };
-
-    const SuggestionsHeader = suggestionsContainerHeader;
-    const SuggestionsFooter = suggestionsContainerFooter;
-
-    return (
-      <div {...(isOpen ? getMenuProps({}, {suppressRefError: true}) : {})} {...menuProps}>
-        <Paper elevation={4} className={classNames(...suggestionsPaperClasses)} style={{fontSize: this._fontSize}}>
-          {SuggestionsHeader && <SuggestionsHeader suggestionsContainerComponentProps={suggestionsContainerComponentProps} />}
-          <div className={classNames(...suggestionsClasses)}>
-            {suggestions}
-          </div>
-          {SuggestionsFooter && <SuggestionsFooter suggestionsContainerComponentProps={suggestionsContainerComponentProps} />}
-        </Paper>
-      </div>
-    );
-  });
-
-  renderSuggestionsContainer = React.memo((props: any) => {
-    const { openOnFocus, showEmptySuggestions, suggestionsContainerHeader, suggestionsContainerFooter, hasTransition, transitionTimeout, label, isOpen, children, classes, getMenuProps } = props;
-
-    let transition  = !isNullOrUndefined(hasTransition) ? hasTransition : true;
-    let timeout     = !isNullOrUndefined(transitionTimeout) && transitionTimeout! >= 0 ? transitionTimeout : 350;
-    let showEmpty   = !isNullOrUndefined(showEmptySuggestions) ? showEmptySuggestions : openOnFocus ? true : false;
-    let suggestions = children;
-
-    if (!suggestions || suggestions.length <= 0) {
-      if (showEmpty) {
-       suggestions = <Typography variant='body2' className={classNames(classes.menuItem, classes.noResults)}>No Results</Typography>;
-      } else {
-        return null;
-      }
-    }
-
-    const popperModifiers = {
-      preventOverflow: {
-        boundariesElement: 'viewport',
-      },
-    };
-
-    if (!this._inputComponentNode && this.textFieldRef.current) {
-      this._inputComponentNode = this.textFieldRef.current && (label ? this.textFieldRef.current.children[1] : this.textFieldRef.current.children[0]);
-    }
-    if (!this._suggestionsContainerWidth && this._inputComponentNode) {
-      this._suggestionsContainerWidth = this._inputComponentNode.clientWidth;
-    }
-
-    return (
-      <Popper open={isOpen} placement='bottom-start' anchorEl={this._inputComponentNode} transition={transition} modifiers={popperModifiers} className={classes.popper} style={{minWidth: this._suggestionsContainerWidth}}>
-        {transition
-          ? ({ TransitionProps }) => (
-              <Fade {...TransitionProps} timeout={timeout}>
-                <div>
-                  <this.renderSuggestionsContainerContents suggestions={suggestions} suggestionsContainerHeader={suggestionsContainerHeader} suggestionsContainerFooter={suggestionsContainerFooter} getMenuProps={getMenuProps} isOpen={isOpen} classes={classes} />
-                </div>
-              </Fade>
-            )
-          : <this.renderSuggestionsContainerContents suggestions={suggestions} suggestionsContainerHeader={suggestionsContainerHeader} suggestionsContainerFooter={suggestionsContainerFooter} getMenuProps={getMenuProps} isOpen={isOpen} classes={classes} />
-        }
-      </Popper>
-    );
-  });
 
   handleFocus = (evt: React.FocusEvent<HTMLInputElement>) => {
     if (this.props.selectOnFocus) {
@@ -403,7 +247,7 @@ class MultiSelectAutoComplete<T> extends React.Component<MultiSelectAutoComplete
       evt.target.setSelectionRange(cursorPosition, cursorPosition);
     }
 
-    if (this.props.openOnFocus && !this.state.deleting) {
+    if (this.props.openOnFocus && !this.state.manualFocusing) {
       this.handleOpenOnFocus();
     }
   }
@@ -434,11 +278,11 @@ class MultiSelectAutoComplete<T> extends React.Component<MultiSelectAutoComplete
         this.props.onSelectItem && this.props.onSelectItem(newItems);
       }
 
-        this.downShift.setState({
-          inputValue: '',
-          highlightedIndex: null,
-          selectedItem: null
-        });
+      this.downShift.setState({
+        inputValue: '',
+        highlightedIndex: null,
+        selectedItem: null
+      });
     }
   }
 
@@ -506,16 +350,27 @@ class MultiSelectAutoComplete<T> extends React.Component<MultiSelectAutoComplete
     }
   }
 
-  handleDelete = (item: any) => () => {
+  deleteItem = (item: any) => {
     const selectedItems = [...this.props.selectedItems];
     const selectedItem  = this.map(item);
     selectedItems.splice(selectedItems.findIndex(i => this.map(i) === selectedItem), 1);
     this.props.onSelectItem && this.props.onSelectItem(selectedItems);
+  }
+
+  handleDelete = (item: any) => () => {
+    this.deleteItem(item);
 
     if (this.props.openOnFocus) {
-      this.setState({deleting: true}, () => { this.suggestionsContainerNode.focus(); this.setState({deleting: false}); });
+      this.setState({manualFocusing: true}, () => { this.suggestionsContainerNode.focus(); this.setState({manualFocusing: false}); } );
     } else {
       this.suggestionsContainerNode.focus();
+    }
+  }
+
+  handlePopupDelete = (item: any, isLastItem: boolean) => () => {
+    this.deleteItem(item);
+    if (isLastItem) {
+      this.closeShowMoreSelectedItemsPopup();
     }
   }
 
@@ -555,22 +410,260 @@ class MultiSelectAutoComplete<T> extends React.Component<MultiSelectAutoComplete
     }
   }
 
-  shouldComponentUpdate(nextProps: MultiSelectAutoCompleteProps<T>, nextState: any, nextContext: any) {
-    return (
-        (nextProps.selectedItems !== this.props.selectedItems) ||
-        (nextProps.error !== this.props.error) ||
-        (nextProps.disabled !== this.props.disabled) ||
-        (nextProps.visible !== this.props.visible) ||
-        (nextState.suggestions !== this.state.suggestions) ||
-        (nextProps.label !== this.props.label) ||
-        (nextProps.placeholder !== this.props.placeholder) ||
-        (nextProps.align !== this.props.align) ||
-        (nextProps.variant !== this.props.variant) ||
-        (nextProps.disableErrors !== this.props.disableErrors) ||
-        (nextProps.startAdornment !== this.props.startAdornment) ||
-        (nextProps.endAdornment !== this.props.endAdornment)
-      );
+  performSearch = async (value: string) => {
+    const suggestions = await this.search(value, this.props.options);
+    this.setState({
+      suggestions
+    });
   }
+
+  html(str: string) {
+    if (str && (str.length > 0)) {
+      return str.replace(/^\s+|\s+$/gm, '&nbsp;');
+    }
+    return str;
+  }
+
+  parse(searchText: string, value: string): {highlight: boolean, text: string}[] {
+    let results: {highlight: boolean, text: string}[] = [];
+    if (searchText && searchText.length > 0) {
+      let regex = match(searchText);
+      let prevIndex = 0;
+      for (let i = 0; i < 10; i++) {
+        let matches = regex.exec(value);
+        if (!matches) {
+          break;
+        }
+        let match: string = matches[0];
+        let index = matches.index;
+        if (prevIndex < index) {
+          results.push({highlight: false, text: this.html(value.substring(prevIndex, index))});
+        }
+        results.push({highlight: true, text: this.html(match)});
+        prevIndex = index + match.length;
+      }
+
+      if (prevIndex < value.length) {
+        results.push({highlight: false, text: this.html(value.substring(prevIndex, value.length))});
+      }
+      return results;
+    }
+    results.push({highlight: false, text: this.html(value)});
+    return results;
+  }
+
+  suggestionComparisonFn = (prevProps: any, nextProps: any): boolean => {
+    let prevAriaSelected = prevProps.itemProps && prevProps.itemProps['aria-selected'];
+    let nextAriaSelected = nextProps.itemProps && nextProps.itemProps['aria-selected'];
+    return (
+      (prevProps.suggestion === nextProps.suggestion) &&
+      (prevProps.index === nextProps.index) &&
+      (prevAriaSelected === nextAriaSelected) &&
+      (prevProps.isHighlighted === nextProps.isHighlighted) &&
+      (prevProps.inputValue === nextProps.inputValue) &&
+      (prevProps.classes === nextProps.classes)
+    );
+  }
+
+  openShowMoreSelectedItemsPopup = () => {
+    this.setState({showMoreSelectedItemsPopupIsOpen: true});
+  }
+
+  closeShowMoreSelectedItemsPopup = () => {
+    if (this.props.openOnFocus) {
+      this.setState({manualFocusing: true, showMoreSelectedItemsPopupIsOpen: false}, () => setTimeout(() => { this.suggestionsContainerNode.focus(); this.setState({manualFocusing: false}); }));
+    } else {
+      this.setState({showMoreSelectedItemsPopupIsOpen: false}, () => setTimeout(() => this.suggestionsContainerNode.focus(), 0));
+    }
+  }
+
+  renderInput = (classes: Record<any, string>, error: string | undefined, inputProps: any, InputProps: any, ref: (node: any) => any) => {
+    const {label, disabled, autoFocus, value, ...other}                 = inputProps;
+    const {startAdornment, endAdornment, align, variant, disableErrors} = InputProps;
+    const inputClassName            = variant === 'outlined' ? classes.inputOutlinedInput : classes.inputInput;
+    const inputFormControlClassName = variant === 'standard' && this.props.label ? classes.inputFormControlWithLabel : undefined;
+
+    return (
+      <RootRef rootRef={this.textFieldRef}>
+        <TextField
+          className={classes.textField}
+          classes={{root: classes.formControlRoot}}
+          value={value}
+          label={label}
+          variant={variant}
+          error={!disableErrors && !disabled && !!error}
+          helperText={!disableErrors && <span>{(!disabled && error) || ''}</span>}
+          inputRef={ref}
+          disabled={disabled}
+          autoFocus={autoFocus}
+          inputProps={{spellCheck: false, className: classes.nativeInput, style: {textAlign: align || 'left'}}}
+          InputProps={{startAdornment: startAdornment, endAdornment: endAdornment, classes: {root: classes.inputRoot, input: inputClassName, formControl: inputFormControlClassName}}}
+          InputLabelProps={{shrink: true, classes: {root: classes.inputLabelRoot, outlined: classes.inputLabelOutlined, shrink: classes.inputLabelShrink}}}
+          FormHelperTextProps={{classes: {root: classes.helperTextRoot, contained: classes.helperTextContained}}}
+          {...other}
+        />
+      </RootRef>
+    );
+  }
+
+  renderSuggestion = React.memo((props: any) => {
+    const { suggestion, index, itemProps, isHighlighted, inputValue, classes } = props;
+    const name  = this.map(suggestion);
+    const parts = this.parse(inputValue, name);
+
+    if (this.props.renderSuggestion) {
+      return (
+        <MenuItem {...itemProps} selected={isHighlighted} component='div' key={index} className={classes.menuItem} >
+          <this.props.renderSuggestion suggestion={suggestion} isHighlighted={isHighlighted} inputValue={inputValue} parts={parts} />
+        </MenuItem>
+      );
+    }
+
+    return (
+      <MenuItem
+        {...itemProps}
+        key={index}
+        selected={isHighlighted}
+        component='div'
+        className={classes.menuItem}
+      >{parts.map((part, index) => {
+          return part.highlight ? (
+            <span key={String(index)} style={{ fontWeight: 700 }} dangerouslySetInnerHTML={{__html: part.text}} />
+          ) : (
+            <strong key={String(index)} style={{ fontWeight: 300 }} dangerouslySetInnerHTML={{__html: part.text}} />
+          );
+        })}
+      </MenuItem>
+    );
+  }, this.suggestionComparisonFn);
+
+  renderSuggestionsContainerContents = React.memo((props: any) => {
+    const { suggestionsContainerHeader, suggestionsContainerFooter, suggestions, getMenuProps, isOpen, classes } = props;
+    const menuProps = {
+      onMouseDown: this.handleMenuMouseDown,
+      onMouseUp: this.handleMenuMouseUp,
+      onClick: this.handleMenuClick,
+      onDoubleClick: this.handleMenuDoubleClick,
+    };
+
+    let suggestionsPaperClasses: string[] = [classes.suggestionsPaper];
+    let suggestionsClasses: string[]      = [classes.suggestions];
+    if (suggestionsContainerHeader || suggestionsContainerFooter) {
+      suggestionsPaperClasses.push(classes.suggestionsPaperContained);
+      suggestionsClasses.push(classes.suggestionsContained);
+
+      if (suggestionsContainerHeader) {
+        suggestionsClasses.push(classes.suggestionsHasHeader);
+      }
+
+      if (suggestionsContainerFooter) {
+        suggestionsClasses.push(classes.suggestionsHasFooter);
+      }
+    }
+
+    if (!this._fontSize) {
+      this._fontSize = this.textFieldRef && this.textFieldRef.current && window.getComputedStyle(this.textFieldRef.current).getPropertyValue('font-size') || undefined; // needed to keep the suggestions the same font size as the input
+    }
+    let suggestionsContainerComponentProps: ISuggestionsContainerComponentProps = {
+      downShift: this.downShift,
+    };
+
+    const SuggestionsHeader = suggestionsContainerHeader;
+    const SuggestionsFooter = suggestionsContainerFooter;
+
+    return (
+      <div {...(isOpen ? getMenuProps({}, {suppressRefError: true}) : {})} {...menuProps}>
+        <Paper elevation={4} className={classNames(...suggestionsPaperClasses)} style={{fontSize: this._fontSize}}>
+          {SuggestionsHeader && <SuggestionsHeader suggestionsContainerComponentProps={suggestionsContainerComponentProps} />}
+          <div className={classNames(...suggestionsClasses)}>
+            {suggestions}
+          </div>
+          {SuggestionsFooter && <SuggestionsFooter suggestionsContainerComponentProps={suggestionsContainerComponentProps} />}
+        </Paper>
+      </div>
+    );
+  });
+
+  renderSuggestionsContainer = React.memo((props: any) => {
+    const { openOnFocus, showEmptySuggestions, suggestionsContainerHeader, suggestionsContainerFooter, hasTransition, transitionTimeout, label, isOpen, children, classes, getMenuProps } = props;
+
+    let transition  = !isNullOrUndefined(hasTransition) ? hasTransition : true;
+    let timeout     = !isNullOrUndefined(transitionTimeout) && transitionTimeout! >= 0 ? transitionTimeout : 350;
+    let showEmpty   = !isNullOrUndefined(showEmptySuggestions) ? showEmptySuggestions : openOnFocus ? true : false;
+    let suggestions = children;
+
+    if (!suggestions || suggestions.length <= 0) {
+      if (showEmpty) {
+       suggestions = <Typography variant='body2' className={classNames(classes.menuItem, classes.noResults)}>No Results</Typography>;
+      } else {
+        return null;
+      }
+    }
+
+    const popperModifiers = {
+      preventOverflow: {
+        boundariesElement: 'viewport',
+      },
+    };
+
+    if (!this._inputComponentNode && this.textFieldRef.current) {
+      this._inputComponentNode = this.textFieldRef.current && (label ? this.textFieldRef.current.children[1] : this.textFieldRef.current.children[0]);
+    }
+    if (!this._suggestionsContainerWidth && this._inputComponentNode) {
+      this._suggestionsContainerWidth = this._inputComponentNode.clientWidth;
+    }
+
+    return (
+      <Popper open={isOpen} placement='bottom-start' anchorEl={this._inputComponentNode} transition={transition} modifiers={popperModifiers} className={classes.popper} style={{minWidth: this._suggestionsContainerWidth}}>
+        {transition
+          ? ({ TransitionProps }) => (
+              <Fade {...TransitionProps} timeout={timeout}>
+                <div>
+                  <this.renderSuggestionsContainerContents suggestions={suggestions} suggestionsContainerHeader={suggestionsContainerHeader} suggestionsContainerFooter={suggestionsContainerFooter} getMenuProps={getMenuProps} isOpen={isOpen} classes={classes} />
+                </div>
+              </Fade>
+            )
+          : <this.renderSuggestionsContainerContents suggestions={suggestions} suggestionsContainerHeader={suggestionsContainerHeader} suggestionsContainerFooter={suggestionsContainerFooter} getMenuProps={getMenuProps} isOpen={isOpen} classes={classes} />
+        }
+      </Popper>
+    );
+  });
+
+  renderShowMoreSelectedItemsPopup = React.memo((props: any) => {
+    const {classes, open, items} = props;
+    if (!this._fontSize) {
+      this._fontSize = this.textFieldRef && this.textFieldRef.current && window.getComputedStyle(this.textFieldRef.current).getPropertyValue('font-size') || undefined; // needed to keep the suggestions the same font size as the input
+    }
+    return (
+      <Popover
+        classes={{paper: classes.showMoreSelectedItemsPopup}}
+        open={open}
+        onClose={this.closeShowMoreSelectedItemsPopup}
+        anchorEl={this.textFieldRef && this.textFieldRef.current}
+        marginThreshold={5}
+      >
+        <div style={{fontSize: this._fontSize}}>
+          <div className={classes.showMoreSelectedItemsPopupHeader}>
+            <IconButton className={classes.showMoreSelectedItemsPopupIconButton} style={{fontSize: this._fontSize}} onClick={this.closeShowMoreSelectedItemsPopup}>
+              <CloseIcon className={classes.showMoreSelectedItemsPopupIcon} />
+            </IconButton>
+          </div>
+          {items.map((item: any, idx: number) =>
+            <div key={idx} className={idx > 0 ? classes.showMoreSelectedItemsPopupItemSpacing : undefined}>
+              <div className={classes.showMoreSelectedItemsPopupItemContainer}>
+                <span>{this.map(item)}</span>
+                {!this.props.disabled &&
+                  <IconButton className={classes.showMoreSelectedItemsPopupIconButton} style={{fontSize: this._fontSize}} onClick={this.handlePopupDelete(item, items.length <= 1)}>
+                    <CancelIcon className={classes.showMoreSelectedItemsPopupIcon} />
+                  </IconButton>
+                }
+              </div>
+            </div>
+          )}
+        </div>
+      </Popover>
+    );
+  });
 
   renderChips(classes: Record<any, string>) {
     const chipLimit     = this.props.chipLimit || 3;
@@ -587,13 +680,16 @@ class MultiSelectAutoComplete<T> extends React.Component<MultiSelectAutoComplete
     ));
     const showMore = this.props.selectedItems.length > itemsToRender.length;
     if (showMore) {
+      const showMoreItems = this.props.selectedItems.slice(chipLimit);
       returnValue.push(
         <Chip
           key='...'
           label='...'
-          className={classNames(classes.chip, this.props.disabled ? classes.chipDisabled : undefined)}
+          className={classNames(classes.chip, classes.showMoreChip, this.props.disabled ? classes.chipDisabled : undefined)}
+          onClick={this.openShowMoreSelectedItemsPopup}
         />
       );
+      returnValue.push(<this.renderShowMoreSelectedItemsPopup key='showMoreSelectedItemsPopup' classes={classes} open={this.state.showMoreSelectedItemsPopupIsOpen} items={showMoreItems} />);
     }
     return returnValue;
   }
