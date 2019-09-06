@@ -187,7 +187,11 @@ class Cell extends React.PureComponent<CellProps, {}> {
   }
 
   handleClick = (evt: React.MouseEvent<any>) => {
-    if (this.cell.editing || !this.cell.enabled) {
+    if (this.cell.editing) {
+      return;
+    }
+
+    if (!this.cell.enabled) {
       // allow processing of cell rows, even if cell is not enabled
       this.grid.selectCells([this.cell]);
       return;
