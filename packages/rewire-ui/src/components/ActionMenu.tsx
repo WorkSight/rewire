@@ -58,11 +58,12 @@ const styles = (theme: Theme) => ({
 });
 
 interface IActionMenuProps {
-  title?: string | JSX.Element | (() => JSX.Element);
-  menuId: string;
+  tooltip?:      string;
+  title?:        string | JSX.Element | (() => JSX.Element);
+  menuId:        string;
   buttonContent: JSX.Element;
-  buttonProps: ButtonProps;
-  items: IActionMenuItem[];
+  buttonProps:   ButtonProps;
+  items:         IActionMenuItem[];
 }
 
 interface IActionMenuState {
@@ -140,12 +141,13 @@ class ActionMenu extends React.Component<ActionMenuProps, IActionMenuState> {
   }));
 
   render() {
-    const {classes, menuId, buttonContent, buttonProps, items, marginThreshold, MenuListProps, title, ...restProps} = this.props;
+    const {classes, menuId, buttonContent, buttonProps, items, marginThreshold, MenuListProps, title, tooltip, ...restProps} = this.props;
     const {anchorEl} = this.state;
 
     return <Observe render={() => (
       < >
         <Button
+          title={tooltip}
           className={classes.menuButton}
           aria-owns={anchorEl ? menuId : undefined}
           aria-haspopup='true'
