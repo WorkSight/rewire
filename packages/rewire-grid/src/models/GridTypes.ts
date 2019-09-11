@@ -277,7 +277,7 @@ export type IColumnEditor =
   {type: 'phone', options?: {format?: string, mask?: string}} |
   {type: 'mask', options?: {mask?: MaskType | (() => MaskType), guide?: boolean, placeholderChar?: string, showMask?: boolean}} |
   {type: 'auto-complete', options: {search: SearchFn<any>, map: MapFn<any>, openOnFocus?: boolean, showEmptySuggestions?: boolean, suggestionsContainerHeader?: ISuggestionsContainerComponent, suggestionsContainerFooter?: ISuggestionsContainerComponent}} |
-  {type: 'multiselectautocomplete', options: {search: SearchFn<any>, map: MapFn<any>, openOnFocus?: boolean, showEmptySuggestions?: boolean, suggestionsContainerHeader?: ISuggestionsContainerComponent, suggestionsContainerFooter?: ISuggestionsContainerComponent}};
+  {type: 'multiselectautocomplete', options: {search: SearchFn<any>, map: MapFn<any>, openOnFocus?: boolean, showEmptySuggestions?: boolean, suggestionsContainerHeader?: ISuggestionsContainerComponent, suggestionsContainerFooter?: ISuggestionsContainerComponent, chipLimit?: number}};
 
 export interface ICellProperties {
   id        : number;

@@ -25,6 +25,7 @@ import {
   match,
   isNullOrUndefined,
 }                                       from 'rewire-common';
+import { defaultEquals }                from 'rewire-core';
 import {withStyles, WithStyle}          from './styles';
 import {
   ISuggestionsContainerComponent,
@@ -68,6 +69,13 @@ const styles = (theme: Theme) => ({
   textField: {
     width: '100%',
   },
+  textFieldInputContainer: {
+    width: '100%',
+    display: 'flex',
+    alignItems: 'center',
+    flexWrap: 'wrap',
+    overflow: 'visible',
+  },
   // make chips size responsive.
   chip: {
     fontSize: '0.8em',
@@ -87,11 +95,12 @@ const styles = (theme: Theme) => ({
   inputRoot: {
     lineHeight: 'inherit',
     fontSize: 'inherit',
-    overflow: 'hidden',
   },
   inputInput: {
     paddingTop: '0.375em',
     paddingBottom: '0.4375em',
+    width: 'auto',
+    flexGrow: 1,
   },
   inputOutlinedInput: {
     paddingTop: '0.75em',
@@ -312,7 +321,7 @@ class MultiSelectAutoComplete<T> extends React.Component<MultiSelectAutoComplete
           } else {
             if (this.props.inputAdd && state.inputValue && state.inputValue.length > 0) {
               const value = this.props.inputAdd(state.inputValue);
-              if (value) {
+              if (value && (this.props.selectedItems.findIndex((item: any) => defaultEquals(item, value)) < 0)) {
                 this.props.onSelectItem && this.props.onSelectItem([...this.props.selectedItems, value]);
                 event.preventDefault();
                 event.stopPropagation();
@@ -479,6 +488,13 @@ class MultiSelectAutoComplete<T> extends React.Component<MultiSelectAutoComplete
     }
   }
 
+  renderCustomInnerInputComponent = (props: any) => {
+    const {inputRef, ...inputProps} = props;
+    return (
+      <div className={this.props.classes.textFieldInputContainer}>{this.renderChips(this.props.classes)}<input ref={inputRef} {...inputProps}></input></div>
+    );
+  }
+
   renderInput = (classes: Record<any, string>, error: string | undefined, inputProps: any, InputProps: any, ref: (node: any) => any) => {
     const {label, disabled, autoFocus, value, ...other}                 = inputProps;
     const {startAdornment, endAdornment, align, variant, disableErrors} = InputProps;
@@ -499,7 +515,7 @@ class MultiSelectAutoComplete<T> extends React.Component<MultiSelectAutoComplete
           disabled={disabled}
           autoFocus={autoFocus}
           inputProps={{spellCheck: false, className: classes.nativeInput, style: {textAlign: align || 'left'}}}
-          InputProps={{startAdornment: startAdornment, endAdornment: endAdornment, classes: {root: classes.inputRoot, input: inputClassName, formControl: inputFormControlClassName}}}
+          InputProps={{inputComponent: this.renderCustomInnerInputComponent, startAdornment: startAdornment, endAdornment: endAdornment, classes: {root: classes.inputRoot, input: inputClassName, formControl: inputFormControlClassName}}}
           InputLabelProps={{shrink: true, classes: {root: classes.inputLabelRoot, outlined: classes.inputLabelOutlined, shrink: classes.inputLabelShrink}}}
           FormHelperTextProps={{classes: {root: classes.helperTextRoot, contained: classes.helperTextContained}}}
           {...other}
@@ -684,7 +700,7 @@ class MultiSelectAutoComplete<T> extends React.Component<MultiSelectAutoComplete
     if (showMore) {
       const showMoreItems = this.props.selectedItems.slice(chipLimit);
       returnValue.push(
-        <RootRef rootRef={this.showMoreSelectedItemsRef}>
+        <RootRef key='....' rootRef={this.showMoreSelectedItemsRef}>
           <Chip
             key='...'
             label='...'
@@ -741,7 +757,7 @@ class MultiSelectAutoComplete<T> extends React.Component<MultiSelectAutoComplete
                   align: align,
                   variant: variant,
                   disableErrors: disableErrors,
-                  startAdornment: (< >{startAdornment}{this.renderChips(classes)}</>),
+                  startAdornment: startAdornment,
                   endAdornment: endAdornment,
                 },
                 (node => {
