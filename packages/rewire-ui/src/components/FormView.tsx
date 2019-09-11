@@ -34,6 +34,7 @@ class FormView extends React.Component<FormViewProps> {
 
   handleKeyDown = (evt: React.KeyboardEvent<any>) => {
     if (evt.keyCode === 13) {
+      evt.preventDefault();
       let activeElement = document.activeElement as HTMLElement;
       if (activeElement) {
         activeElement.blur();

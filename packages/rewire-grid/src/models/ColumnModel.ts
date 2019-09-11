@@ -153,6 +153,9 @@ export class ColumnModel implements IColumn {
       if (this.type === 'none') {
         this.editor = undefined;
       } else {
+        if (t === 'multiselectautocomplete' && isNullOrUndefined(typeOptions.chipLimit)) {
+          typeOptions.chipLimit = 2;
+        }
         this.editor = editor(t, typeOptions);
       }
 

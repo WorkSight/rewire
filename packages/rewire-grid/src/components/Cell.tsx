@@ -109,6 +109,10 @@ const styles = (theme: Theme) => ({
     flex: '1',
     flexDirection: 'row',
   },
+  editorMultiSelectAutoCompleteTextFieldInputContainer: {
+    overflow: 'hidden',
+    flexWrap: 'nowrap',
+  },
   editorAutoCompleteContainer: {
     display: 'flex',
   },
@@ -376,6 +380,10 @@ class Cell extends React.PureComponent<CellProps, {}> {
 
         if (cellType === 'auto-complete' || cellType === 'multiselectautocomplete') {
           Object.assign(editorClasses, {container: this.props.classes.editorAutoCompleteContainer});
+        }
+
+        if (cellType === 'multiselectautocomplete') {
+          Object.assign(editorClasses, {textFieldInputContainer: this.props.classes.editorMultiSelectAutoCompleteTextFieldInputContainer});
         }
 
         const height = (this.cell as CellModel).element!.getBoundingClientRect().height - 2;
