@@ -25,6 +25,7 @@ import { CellModel }              from '../models/CellModel';
 
 const styles = (theme: Theme) => ({
   tableCell: {
+    height: 'inherit',
     position: 'relative !important',
     overflow: 'hidden !important',
     padding: '0px !important',
@@ -108,6 +109,10 @@ const styles = (theme: Theme) => ({
     flex: '1',
     flexDirection: 'row',
   },
+  editorMultiSelectAutoCompleteTextFieldInputContainer: {
+    overflow: 'hidden',
+    flexWrap: 'nowrap',
+  },
   editorAutoCompleteContainer: {
     display: 'flex',
   },
@@ -186,7 +191,11 @@ class Cell extends React.PureComponent<CellProps, {}> {
   }
 
   handleClick = (evt: React.MouseEvent<any>) => {
-    if (this.cell.editing || !this.cell.enabled) {
+    if (this.cell.editing) {
+      return;
+    }
+
+    if (!this.cell.enabled) {
       // allow processing of cell rows, even if cell is not enabled
       this.grid.selectCells([this.cell]);
       return;
@@ -277,7 +286,7 @@ class Cell extends React.PureComponent<CellProps, {}> {
       return (
         <Tooltip
           title={this.cell.error.text}
-          placement='right-start'
+          placement='right'
           TransitionComponent={Fade}
           PopperProps={{ style: {pointerEvents: 'none'} }}
           classes={{popper: this.props.classes.tooltipPopper, tooltip: this.props.classes.tooltip}}
@@ -317,11 +326,11 @@ class Cell extends React.PureComponent<CellProps, {}> {
   }
 
   handleTooltipForSpan = (evt: React.MouseEvent<HTMLSpanElement>) => {
-    this.handleTooltip(evt.target as HTMLElement);
+    this.handleTooltip(evt.currentTarget as HTMLElement);
   }
 
   handleTooltipForDiv = (evt: React.MouseEvent<HTMLDivElement>) => {
-    this.handleTooltip(evt.target as HTMLElement);
+    this.handleTooltip(evt.currentTarget as HTMLElement);
   }
 
   setCellRef = (element: HTMLTableDataCellElement) => {
@@ -373,6 +382,10 @@ class Cell extends React.PureComponent<CellProps, {}> {
           Object.assign(editorClasses, {container: this.props.classes.editorAutoCompleteContainer});
         }
 
+        if (cellType === 'multiselectautocomplete') {
+          Object.assign(editorClasses, {textFieldInputContainer: this.props.classes.editorMultiSelectAutoCompleteTextFieldInputContainer});
+        }
+
         const height = (this.cell as CellModel).element!.getBoundingClientRect().height - 2;
         return <Observe render={() => (
           <div className={this.props.classes.editorContainer} style={{height}}>
@@ -388,9 +401,9 @@ class Cell extends React.PureComponent<CellProps, {}> {
         return (
           < >
             {CellRenderer
-              ? <div onMouseEnter={this.handleTooltipForDiv} style={{width: '100%', textAlign: cell.align}}>
+              ? <div onMouseEnter={this.handleTooltipForDiv} style={{width: '100%', height: '100%', textAlign: cell.align}}>
                   <CellRenderer cell={cell} />
-            </div>
+                </div>
               : <span onMouseEnter={this.handleTooltipForSpan} style={{width: '100%', textAlign: cell.align}}>
                   {value}
                 </span>

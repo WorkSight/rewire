@@ -56,6 +56,7 @@ const styles = (theme: Theme) => ({
 });
 
 interface IToggleMenuProps {
+  tooltip?:      string;
   title?:        string | JSX.Element | (() => JSX.Element);
   menuId:        string;
   buttonContent: JSX.Element | string;
@@ -132,12 +133,13 @@ class ToggleMenu extends React.Component<ToggleMenuProps, IToggleMenuState> {
   }));
 
   render() {
-    const {classes, menuId, buttonContent, buttonProps, items, onItemClick, marginThreshold, MenuListProps, title, ...restProps} = this.props;
+    const {classes, menuId, buttonContent, buttonProps, items, onItemClick, marginThreshold, MenuListProps, title, tooltip, ...restProps} = this.props;
     const {anchorEl} = this.state;
 
     return <Observe render={() => (
       < >
         <Button
+          title={tooltip}
           className={classes.menuButton}
           aria-owns={anchorEl ? menuId : undefined}
           aria-haspopup='true'

@@ -106,7 +106,7 @@ export default function editor(type: EditorType, propsForEdit?: any): React.SFC<
       );
 
     case 'multiselectautocomplete':
-      return ({ field, className, classes, onValueChange, endOfTextOnFocus, selectOnFocus, cursorPositionOnFocus, initialInputValue }: TextEditorProps) => (
+      return ({ field, className, classes, onValueChange, endOfTextOnFocus, selectOnFocus, cursorPositionOnFocus, initialInputValue}: TextEditorProps) => (
         <Observe render={() => (
           <MultiSelectAutoComplete
             placeholder={field.placeholder}

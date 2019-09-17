@@ -47,6 +47,8 @@ let styles = (theme: Theme) => ({
     },
   },
   childrenContainer: {
+    display: 'flex',
+    flexDirection: 'column',
     overflowY: 'auto',
     margin: '1px 0px',
     paddingTop: '15px',
@@ -110,6 +112,7 @@ export interface IDialogProps {
   title?                : (dialog: Modal) => JSX.Element;
   maxWidth?             : 'xs' | 'sm' | 'md' | 'lg' | false;
   buttonVariant?        : ButtonProps['variant'];
+  actions?              : string[];
   ButtonRenderer?       : ActionRenderType;
 }
 
@@ -130,12 +133,13 @@ class DialogInternal extends React.Component<DialogProps> {
     });
   }
 
-  renderDialogContent = React.memo(React.forwardRef((): JSX.Element => {
+  RenderDialogContent = React.memo(React.forwardRef((): JSX.Element => {
     const {classes, children, dialog, ButtonRenderer, title, buttonVariant} = this.props;
     const {buttonRoot, buttonIcon, buttonLabel} = classes;
     const buttonClasses                         = {root: buttonRoot, icon: buttonIcon, label: buttonLabel};
     const hasTitle                              = dialog.title || title;
-    const hasActions                            = dialog.actions && Object.keys(dialog.actions).length > 0;
+    const actions                               = this.props.actions || (dialog.actions && Object.keys(dialog.actions));
+    const hasActions                            = actions && (actions.length > 0);
     const hasDivider                            = hasActions && !isNullOrUndefined(this.props.hasDivider) ? this.props.hasDivider : true;
 
     return (
@@ -154,7 +158,7 @@ class DialogInternal extends React.Component<DialogProps> {
         {hasActions &&
           <div className={classes.buttons}>
             <Observe render={() => (
-              Object.keys(dialog.actions).map(label => ((ButtonRenderer && <ButtonRenderer key={label} classes={buttonClasses} label={label} action={dialog.actions[label]} isDisabled={dialog.isDisabled} variant={buttonVariant} />) || <DefaultActionRenderer key={label} classes={buttonClasses} label={label} action={dialog.actions[label]} isDisabled={dialog.isDisabled} variant={buttonVariant} />))
+              actions.map(label => ((ButtonRenderer && <ButtonRenderer key={label} classes={buttonClasses} label={label} action={dialog.actions[label]} isDisabled={dialog.isDisabled} variant={buttonVariant} />) || <DefaultActionRenderer key={label} classes={buttonClasses} label={label} action={dialog.actions[label]} isDisabled={dialog.isDisabled} variant={buttonVariant} />))
             )} />
           </div>
         }
@@ -174,7 +178,7 @@ class DialogInternal extends React.Component<DialogProps> {
     return (
       <Observe render={() => (
         <Dialog classes={{paper: classes.root, paperScrollPaper: classes.scrollPaper}} open={dialog.isOpen} disableEnforceFocus={disableEnforceFocus} maxWidth={maxWidth} hideBackdrop={hideBackdrop} transitionDuration={transitionTime} TransitionComponent={transitionAction} fullWidth={fullWidth} fullScreen={fullScreen} disableEscapeKeyDown={disableEscapeKeyDown} onEscapeKeyDown={escapeAction}>
-          <this.renderDialogContent />
+          <this.RenderDialogContent />
         </Dialog>
       )} />
     );
