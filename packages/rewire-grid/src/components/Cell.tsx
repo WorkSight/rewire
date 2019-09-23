@@ -165,7 +165,9 @@ class Cell extends React.PureComponent<CellProps, {}> {
   }
 
   handleMouseDown = (evt: React.MouseEvent<any>) => {
-    if (this.cell.editing) {
+    evt.preventDefault();
+    evt.stopPropagation();
+    if (this.cell.editing || !this.grid.multiSelect) {
       return;
     }
 
@@ -174,9 +176,6 @@ class Cell extends React.PureComponent<CellProps, {}> {
     if (!evt.shiftKey || !this.grid.startCell) {
       this.grid.startCell = this.cell;
     }
-
-    evt.preventDefault();
-    evt.stopPropagation();
   }
 
   handleMouseEnter = (evt: React.MouseEvent<any>) => {
@@ -488,7 +487,7 @@ class Cell extends React.PureComponent<CellProps, {}> {
           ref={this.setCellRef}
           onDoubleClick={this.handleDoubleClick}
           onClick={this.handleClick}
-          onMouseDown={this.grid.multiSelect ? this.handleMouseDown : undefined}
+          onMouseDown={this.handleMouseDown}
           onMouseEnter={this.grid.multiSelect ? this.handleMouseEnter : undefined}
           className={tdClasses}
          >
