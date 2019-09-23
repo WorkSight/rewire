@@ -167,11 +167,12 @@ class Cell extends React.PureComponent<CellProps, {}> {
   handleMouseDown = (evt: React.MouseEvent<any>) => {
     evt.preventDefault();
     evt.stopPropagation();
+
+    this.grid.isMouseDown = true;
+
     if (this.cell.editing || !this.grid.multiSelect) {
       return;
     }
-
-    this.grid.isMouseDown = true;
 
     if (!evt.shiftKey || !this.grid.startCell) {
       this.grid.startCell = this.cell;
