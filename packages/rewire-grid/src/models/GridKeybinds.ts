@@ -97,12 +97,13 @@
       },
 
       'Shift+ArrowUp': (evt: React.KeyboardEvent<any>, cell: ICell) => {
-        // Select all selectable cells between the starting cell and the first selectable cell above the currently selected and focused cell
-        evt.preventDefault();
-        evt.stopPropagation();
+        // Select all selectable cells between the starting cell and the first selectable cell above the currently selected and focused cell if multiselect is enabled
         if (!cell.grid.multiSelect) {
+          gridStaticKeybinds['ArrowUp'](evt, cell);
           return;
         }
+        evt.preventDefault();
+        evt.stopPropagation();
         let upCell = cell.grid.adjacentTopCell(cell, true);
         if (!upCell) {
           return;
@@ -114,12 +115,13 @@
       },
 
       'Shift+ArrowDown': (evt: React.KeyboardEvent<any>, cell: ICell) => {
-        // Select all selectable cells between the starting cell and the first selectable cell below the currently selected and focused cell
-        evt.preventDefault();
-        evt.stopPropagation();
+        // Select all selectable cells between the starting cell and the first selectable cell below the currently selected and focused cell if multiselect is enabled
         if (!cell.grid.multiSelect) {
+          gridStaticKeybinds['ArrowDown'](evt, cell);
           return;
         }
+        evt.preventDefault();
+        evt.stopPropagation();
         let downCell = cell.grid.adjacentBottomCell(cell, true);
         if (!downCell) {
           return;
@@ -131,7 +133,7 @@
       },
 
       'Shift+ArrowLeft': (evt: React.KeyboardEvent<any>, cell: ICell) => {
-        // Select all selectable cells between the starting cell and the first selectable cell that is to the left of the currently selected and focused cell
+        // Select all selectable cells between the starting cell and the first selectable cell that is to the left of the currently selected and focused cell if multiselect is enabled
         if (cell.editing) {
           evt.stopPropagation();
           if (cell.column.type === 'select' || cell.column.type === 'multiselect' || cell.column.type === 'checked') {
@@ -139,11 +141,12 @@
           }
           return;
         }
-        evt.preventDefault();
-        evt.stopPropagation();
         if (!cell.grid.multiSelect) {
+          gridStaticKeybinds['ArrowLeft'](evt, cell);
           return;
         }
+        evt.preventDefault();
+        evt.stopPropagation();
         let leftCell: ICell | undefined;
         leftCell = cell.grid.adjacentLeftCell(cell, true);
         if (!leftCell) {
@@ -156,7 +159,7 @@
       },
 
       'Shift+ArrowRight': (evt: React.KeyboardEvent<any>, cell: ICell) => {
-        // Select all selectable cells between the starting cell and the first selectable cell that is to the right of the currently selected and focused cell
+        // Select all selectable cells between the starting cell and the first selectable cell that is to the right of the currently selected and focused cell if multiselect is enabled
         if (cell.editing) {
           evt.stopPropagation();
           if (cell.column.type === 'select' || cell.column.type === 'multiselect' || cell.column.type === 'checked') {
@@ -164,11 +167,12 @@
           }
           return;
         }
-        evt.preventDefault();
-        evt.stopPropagation();
         if (!cell.grid.multiSelect) {
+          gridStaticKeybinds['ArrowRight'](evt, cell);
           return;
         }
+        evt.preventDefault();
+        evt.stopPropagation();
         let rightCell: ICell | undefined;
         rightCell = cell.grid.adjacentRightCell(cell, true);
         if (!rightCell) {
