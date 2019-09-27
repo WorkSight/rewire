@@ -188,6 +188,10 @@ export default class Validator {
     existingValidators.push(...validator);
   }
 
+  reset() {
+    this.rules = {};
+  }
+
   setRule(field: string, validator: IValidator | IValidator[]) {
     if (!Array.isArray(validator)) validator = [validator];
     const validators = this.rules[field] = [] as IValidator[];
