@@ -189,11 +189,13 @@ class GridModel implements IGrid, IDisposable {
       if (this.__changeTracker) return;
       this.__changeTracker = new ChangeTracker(new GridChangeTrackerContext(this, this.isRowCompleteFn));
       this.__changeTracker.set(this.rows);
+      this.hasChanges      = false;
       return;
     }
     if (!this.__changeTracker) return;
     this.__changeTracker.dispose();
     delete this.__changeTracker;
+    this.hasChanges = false;
   }
 
   public getChangeTracker() {
@@ -214,11 +216,15 @@ class GridModel implements IGrid, IDisposable {
       this.__changeTracker.revert();
       this.validate();
       this.mergeColumns();
+      this.hasChanges = false;
     }
   }
 
   commit(): void {
-    if (this.__changeTracker) this.__changeTracker.commit();
+    if (this.__changeTracker) {
+      this.__changeTracker.commit();
+      this.hasChanges = false;
+    }
   }
 
   copy() {
