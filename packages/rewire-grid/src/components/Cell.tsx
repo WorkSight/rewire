@@ -395,7 +395,6 @@ class Cell extends React.PureComponent<CellProps, {}> {
       }
 
       return <Observe render={() => {
-        let hasError     = !!cell.error;
         let value        = !isNullOrUndefinedOrEmpty(this.value) ? this.value : <span>&nbsp;</span>;
         let CellRenderer = cell.renderer;
         return (
@@ -408,7 +407,6 @@ class Cell extends React.PureComponent<CellProps, {}> {
                   {value}
                 </span>
             }
-            {hasError && this.renderErrorIcon()}
           </>
         );
       }} />;
@@ -461,6 +459,11 @@ class Cell extends React.PureComponent<CellProps, {}> {
         <div className={classNames(classes.cellContainer, 'cellContainer')}>
           <div className={cellInnerContainerClasses}>
             <this.renderCell />
+            <Observe render={() => {
+              if (this.cell.editing || !this.cell.error) return null;
+              return this.renderErrorIcon();
+            }} />
+            {}
           </div>
         </div>;
       let cellContent = innerCell;

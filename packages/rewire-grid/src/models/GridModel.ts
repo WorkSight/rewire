@@ -216,14 +216,12 @@ class GridModel implements IGrid, IDisposable {
       this.__changeTracker.revert();
       this.validate();
       this.mergeColumns();
-      this.hasChanges = false;
     }
   }
 
   commit(): void {
     if (this.__changeTracker) {
       this.__changeTracker.commit();
-      this.hasChanges = false;
     }
   }
 
