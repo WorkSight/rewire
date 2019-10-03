@@ -29,8 +29,9 @@ import {
   IRowData,
   ICell,
   IRow,
-  IToggleableColumnsOptions,
-  IColumn
+  IColumn,
+  IColumnsToggleMenuOptions,
+  createColumnsToggleMenuItems,
 }                            from 'rewire-grid';
 import {PopoverOrigin}       from '@material-ui/core/Popover';
 import Paper                 from '@material-ui/core/Paper';
@@ -246,7 +247,7 @@ function createTestGrid(nRows: number, nColumns: number) {
   cols[1].width = '65px';
   cols[1].align = 'right';
   // create the grid model and group by 'column2' and 'column3'
-  let grid = createGrid(rows, cols, { groupBy: ['column2', 'column3'], toggleableColumns: ['column8', 'column9'], multiSelect: true, allowMergeColumns: true });
+  let grid = createGrid(rows, cols, { groupBy: ['column2', 'column3'], optionsMenu: () => ({ items: createColumnsToggleMenuItems(cols, ['column8', 'column9']) }), multiSelect: true, allowMergeColumns: true });
 
   grid.addFixedRow({ data: { column5: '2017', column6: '2018' } });
   // setTimeout(() => { grid.groupBy = [cols[5]]; }, 4000);
@@ -305,8 +306,7 @@ let grid                     = createTestGrid(40, 14);
 // setTimeout(() => grid.columns[3].visible = false, 7000);
 // setTimeout(() => grid.columns[3].visible = true, 8000);
 
-function toggleMenuHandleItemClick(item: IToggleMenuItem) {
-  const column   = item as IColumn;
+function toggleMenuHandleItemClick(item: IToggleMenuItem, column: IColumn) {
   column.visible = !column.visible;
 
   if (column.name === 'email') {
@@ -373,7 +373,12 @@ function createEmployeesGrid1() {
   }
 
   // create the grid model
-  let grid = createGrid(rows, cols, {multiSelect: true, allowMergeColumns: true, toggleableColumns: ['timeColumn', 'email', 'isActive', 'autoCompleteColumn'], toggleableColumnsOptions: {onItemClick: toggleMenuHandleItemClick} as IToggleableColumnsOptions });
+  const actionItems: IActionMenuItem[]    = [
+    {name: 'delete',    title: 'Delete', subheader: 'Grid Actions', icon: DeleteIcon,    onClick: () => { console.log('Performing Delete Action...'); },    closeOnClick: true},
+    {name: 'archive',   title: 'Archive',                           icon: ArchiveIcon,   onClick: () => { console.log('Performing Archive Action...'); },   closeOnClick: true},
+    {name: 'unarchive', title: 'Unarchive',                         icon: UnarchiveIcon, onClick: () => { console.log('Performing Unarchive Action...'); }, closeOnClick: true},
+  ];
+  let grid = createGrid(rows, cols, { multiSelect: true, allowMergeColumns: true, optionsMenu: () => ({ items: [...createColumnsToggleMenuItems(cols, ['timeColumn', 'email', 'isActive', 'autoCompleteColumn'], {onItemClick: toggleMenuHandleItemClick}), ...actionItems] }) });
   // sort by employee names
   grid.addSort(cols[0], 'ascending');
   grid.headerRowHeight = 32;

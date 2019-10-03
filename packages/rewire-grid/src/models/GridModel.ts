@@ -14,7 +14,7 @@ import {
   IGridStaticKeybinds,
   IGridVariableKeybinds,
   IRowData,
-  IToggleableColumnsOptions,
+  IGridOptionsMenu,
 }                                       from './GridTypes';
 import {isNullOrUndefined}              from 'rewire-common';
 import createRow, {RowModel}            from './RowModel';
@@ -80,8 +80,6 @@ class GridModel implements IGrid, IDisposable {
   fixedRows                 : IRow[];
   headerRowHeight?          : number;
   columns                   : IColumn[];
-  toggleableColumns         : IColumn[];
-  toggleableColumnsOptions? : IToggleableColumnsOptions;
   editingCell?              : ICell;
   selectedRows              : IRow[];
   selectedCells             : ICell[];
@@ -100,6 +98,7 @@ class GridModel implements IGrid, IDisposable {
   variableKeybinds          : IGridVariableKeybinds;
   startCell?                : ICell;
   hasChanges                : boolean;
+  optionsMenu?              : () => IGridOptionsMenu;
   __validator               : Validator;
   __changeTracker?          : ChangeTracker;
   __isRowCompleteFn         : (row: IRowData) => boolean;
@@ -131,10 +130,10 @@ class GridModel implements IGrid, IDisposable {
     this.multiSelect                = options && !isNullOrUndefined(options.multiSelect) ? options.multiSelect! : false;
     this.allowMergeColumns          = options && !isNullOrUndefined(options.allowMergeColumns) ? options.allowMergeColumns! : false;
     this.clearSelectionOnBlur       = options && !isNullOrUndefined(options.clearSelectionOnBlur) ? options.clearSelectionOnBlur! : true;
-    this.toggleableColumnsOptions   = options && options.toggleableColumnsOptions;
     this.isRowCompleteFn            = options && options.isRowCompleteFn || (() => true);
     this.headerRowHeight            = options && !isNullOrUndefined(options.headerRowHeight) ? options.headerRowHeight : undefined;
     this.rowHeight                  = options && !isNullOrUndefined(options.rowHeight) ? options.rowHeight : undefined;
+    this.optionsMenu                = options && options.optionsMenu;
     this.clipboard                  = [];
     this.isMouseDown                = false;
     this.startCell                  = undefined;
@@ -644,10 +643,6 @@ class GridModel implements IGrid, IDisposable {
         column.visible = false;
       }
     });
-  }
-
-  get hasToggleableColumns(): boolean {
-    return this.toggleableColumns && this.toggleableColumns.length > 0;
   }
 
   _addColumn(column: IColumn): IColumn {
@@ -1196,10 +1191,6 @@ class GridModel implements IGrid, IDisposable {
       freeze(() => {
         grid.addFixedRow({data: {}});
         grid.spliceColumns(0, 0, ...columns);
-        let toggleableColumns  = options && options.toggleableColumns;
-        grid.toggleableColumns = toggleableColumns
-                                   ? toggleableColumns.map((name: string) => findColumnByName(columns, name)).filter((column: IColumn | undefined) => !isNullOrUndefined(column) && !column!.isGroupByColumn) as IColumn[]
-                                   : [];
       });
       freeze(() => {
         grid._addRows(rows);

@@ -22,7 +22,7 @@ import GroupRowModel                         from '../models/GroupRowModel';
 import * as React                            from 'react';
 import * as Color                            from 'color';
 import {debounce}                            from 'rewire-common';
-import {WithStyle, withStyles, ToggleMenu}   from 'rewire-ui';
+import {WithStyle, withStyles, MixedMenu}    from 'rewire-ui';
 import {PopoverOrigin}                       from '@material-ui/core/Popover';
 import {ButtonProps}                         from '@material-ui/core/Button';
 import {MuiThemeProvider, Theme}             from '@material-ui/core/styles';
@@ -362,7 +362,7 @@ const styles = (theme: Theme) => {
     gridScroll: {
       fontSize: theme.fontSizes.body,
     },
-    toggleableColumnsContainer: {
+    optionsMenuContainer: {
       position: 'absolute',
       display: 'flex',
       height: '100%',
@@ -371,7 +371,7 @@ const styles = (theme: Theme) => {
       right: '0px',
       zIndex: 1,
     },
-    toggleableColumnsButton: {
+    optionsMenuButton: {
       minWidth: '0px',
       padding: '0px 2px 0px 0px',
       fontSize: 'inherit',
@@ -381,18 +381,21 @@ const styles = (theme: Theme) => {
         background: theme.palette.headerBackground.main,
       },
     },
-    toggleableColumnsIcon: {
+    optionsMenuIcon: {
       fontSize: '1.5em',
     },
-    toggleableColumnsMenuItem: {
+    optionsMenuMenuItem: {
       minWidth: '200px',
       paddingTop: `calc(${theme.fontSizes.toggleMenu} / 2.5)`,
       paddingBottom: `calc(${theme.fontSizes.toggleMenu} / 2.5)`,
     },
-    toggleColumnsListItemTypography: {
+    optionsMenuTitleContainer: {
       fontSize: theme.fontSizes.toggleMenu,
     },
-    toggleColumnsListItemIcon: {
+    optionsMenuListItemTypography: {
+      fontSize: theme.fontSizes.toggleMenu,
+    },
+    optionsMenuListItemIcon: {
       '& svg': {
         fontSize: `calc(${theme.fontSizes.toggleMenu} * 1.5)`,
       },
@@ -710,29 +713,34 @@ const GridInternal = withStyles(styles, class extends React.PureComponent<GridPr
     );
   }
 
-  renderToggleableColumnsMenu(): JSX.Element | null {
-    if (!this.grid.hasToggleableColumns) {
+  renderOptionsMenu(): JSX.Element | null {
+    if (!this.grid.optionsMenu) {
       return null;
     }
 
     const {classes}                   = this.props;
-    const toggleableColumns           = this.grid.toggleableColumns;
-    const toggleableColumnsOptions    = this.grid.toggleableColumnsOptions;
-    const buttonContent               = <SettingsIcon classes={{root: classes.toggleableColumnsIcon}}/>;
-    const buttonProps: ButtonProps    = {disableRipple: true};
-    const anchorOrigin: PopoverOrigin = {vertical: 'top', horizontal: 'right'};
-    const transformOrigin             = anchorOrigin;
-    const onItemClick                 = toggleableColumnsOptions && toggleableColumnsOptions.onItemClick;
+    const optionsMenu                 = this.grid.optionsMenu && this.grid.optionsMenu();
+    const items                       = optionsMenu.items;
+    const defaultTitle                = 'Grid Options';
+    const tooltip                     = optionsMenu.tooltip || defaultTitle;
+    const title                       = optionsMenu.title || (items && items[0] && items[0].subheader ? undefined : defaultTitle);
+    const menuId                      = optionsMenu.menuId || `grid${this.grid.id}-options-menu`;
+    const buttonContent               = optionsMenu.buttonContent || <SettingsIcon classes={{root: classes.optionsMenuIcon}}/>;
+    const buttonProps: ButtonProps    = {disableRipple: true, ...optionsMenu.buttonProps};
+    const anchorOrigin: PopoverOrigin = optionsMenu.anchorOrigin || {vertical: 'top', horizontal: 'right'};
+    const transformOrigin             = optionsMenu.transformOrigin || anchorOrigin;
+    const onItemClick                 = optionsMenu.onItemClick;
 
     return <Observe render={() => (
-      <div className={classes.toggleableColumnsContainer}>
-        <ToggleMenu
-          title='Toggleable Columns'
-          menuId={`grid${this.grid.id}-toggleable-columns`}
+      <div className={classes.optionsMenuContainer}>
+        <MixedMenu
+          title={title}
+          tooltip={tooltip}
+          menuId={menuId}
           buttonContent={buttonContent}
           buttonProps={buttonProps}
-          items={toggleableColumns}
-          classes={{menuButton: classes.toggleableColumnsButton, menuItem: classes.toggleableColumnsMenuItem, listItemTypography: classes.toggleColumnsListItemTypography, listItemIcon: classes.toggleColumnsListItemIcon} as any}
+          items={items}
+          classes={{menuButton: classes.optionsMenuButton, menuItem: classes.optionsMenuMenuItem, menuTitleContainer: classes.optionsMenuTitleContainer, listItemTypography: classes.optionsMenuListItemTypography, listItemIcon: classes.optionsMenuListItemIcon} as any}
           anchorOrigin={anchorOrigin}
           transformOrigin={transformOrigin}
           onItemClick={onItemClick}
@@ -745,7 +753,7 @@ const GridInternal = withStyles(styles, class extends React.PureComponent<GridPr
     return (
       <Observe render={() => (
         <div className={classNames('top-labels', this.props.classes.topLabels)}>
-          {this.renderToggleableColumnsMenu()}
+          {this.renderOptionsMenu()}
           {this.renderFixedColumnHeaders()}
           <div className='column-wrapper' ref={this.setColumnTableWrapperRef}>
             <table role='grid' ref={this.setColumnTableRef}>
