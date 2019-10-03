@@ -344,14 +344,14 @@ class Cell extends React.PureComponent<CellProps, {}> {
     return <Observe render={() => {
       let cell = this.cell;
       if (cell.editing) {
-        let Editor = this.column.editor;
-        if (!Editor) return null;
-        let cellType              = this.column.type;
-        let additionalProps       = {};
-        let endOfTextOnFocus      = false;
-        let selectOnFocus         = true;
-        let cursorPositionOnFocus = undefined;
-        let value                 = cell.value;
+        if (!this.column.editor) return null;
+        let Editor                                    = this.column.editor;
+        let cellType                                  = this.column.type;
+        let additionalProps                           = {};
+        let endOfTextOnFocus                          = false;
+        let selectOnFocus                             = true;
+        let cursorPositionOnFocus: number | undefined = undefined;
+        let value                                     = cell.value;
         if (this.cell.keyForEdit) {
           value            = cell.keyForEdit;
           endOfTextOnFocus = true;
@@ -369,7 +369,7 @@ class Cell extends React.PureComponent<CellProps, {}> {
             additionalProps['initialInputValue'] = cell.keyForEdit;
           }
         }
-        let editorClasses = undefined;
+        let editorClasses: Object | undefined = undefined;
         if (cellType === 'select' || cellType === 'multiselect') {
           editorClasses = {inputRoot: this.props.classes.editorSelectInputRoot, select: this.props.classes.editorSelectSelect};
         } else if (cellType === 'checked') {

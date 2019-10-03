@@ -654,7 +654,8 @@ const GridInternal = withStyles(styles, class extends React.PureComponent<GridPr
 
   renderGroups(columns: () => IColumn[], fixed: boolean) {
     const groups = this._groups();
-    return groups && groups.map((group) => <GroupRow fixed={fixed} key={group.title} group={group} columns={columns} numVisibleColumns={fixed ? this.grid.visibleFixedColumns.length : this.grid.visibleStandardColumns.length} />);
+    const grid   = this.grid as any;
+    return groups && groups.map((group) => <GroupRow fixed={fixed} key={group.title} group={group} columns={columns} numVisibleColumns={fixed ? grid.visibleFixedColumns.length : grid.visibleStandardColumns.length} />);
   }
 
   _fixedColGroups: () => JSX.Element | undefined;
