@@ -88,6 +88,8 @@ const styles = (theme: Theme) => ({
   },
   chipDeleteIcon: {
     fontSize: '1.6em',
+    width: '1em',
+    height: 'auto',
   },
   showMoreChip: {
     cursor: 'pointer',

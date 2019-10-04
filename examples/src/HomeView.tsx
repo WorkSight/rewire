@@ -648,7 +648,7 @@ export const HomeView = React.memo(withStyles(styles, (props: HomeViewProps) => 
           </div>
 
           <Paper className={classes.gridContainer}>
-            <Observe render={() => (<Grid grid={grid} gridFontSizes={{header: '0.9rem', body: '0.85rem', groupRow: '0.8rem', toggleMenu: '0.9rem'}} className={classes.dataGrid} />)} />
+            <Observe render={() => (<Grid grid={grid} gridFontSizes={{header: '0.9rem', body: '0.9rem', groupRow: '0.9rem', toggleMenu: '0.9rem'}} className={classes.dataGrid} />)} />
           </Paper>
           <Observe render={() => (
             <Paper className={classes.gridContainer}>
@@ -656,7 +656,7 @@ export const HomeView = React.memo(withStyles(styles, (props: HomeViewProps) => 
                 <Button className={classes.employeesGridButton} onClick={() => mode.gridMode = 'employees1'} variant='outlined'>Grid 1</Button>
                 <Button className={classes.employeesGridButton} onClick={() => mode.gridMode = 'employees2'} variant='outlined'>Grid 2</Button>
               </div>
-              <Grid key={mode.gridMode} grid={mode.gridMode === 'employees1' ? employeesGrid1 : employeesGrid2} gridFontSizes={{header: '0.95rem', body: '0.9rem', groupRow: '0.8rem', toggleMenu: '0.95rem'}} className={classes.employeeGrid} />
+              <Grid key={mode.gridMode} grid={mode.gridMode === 'employees1' ? employeesGrid1 : employeesGrid2} gridFontSizes={{header: '0.95rem', body: '0.95rem', groupRow: '0.95rem', toggleMenu: '0.95rem'}} className={classes.employeeGrid} />
             </Paper>
           )} />
         </div>
