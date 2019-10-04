@@ -44,7 +44,7 @@ const menuBaseStyles = (theme: Theme) => ({
   menuTitleContainer: {
     paddingTop: '8px',
     paddingBottom: '8px',
-    lineHeight: '1.75',
+    lineHeight: '1.5',
     color: 'inherit',
   },
   listItemText: {

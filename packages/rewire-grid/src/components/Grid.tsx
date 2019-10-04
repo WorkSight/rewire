@@ -388,6 +388,7 @@ const styles = (theme: Theme) => {
       minWidth: '200px',
       paddingTop: `calc(${theme.fontSizes.toggleMenu} / 2.5)`,
       paddingBottom: `calc(${theme.fontSizes.toggleMenu} / 2.5)`,
+      fontSize: 'inherit',
     },
     optionsMenuTitleContainer: {
       fontSize: theme.fontSizes.toggleMenu,
