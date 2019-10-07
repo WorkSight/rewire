@@ -196,6 +196,7 @@ class MenuBase extends React.Component<MenuBaseProps, IMenuBaseState> {
           onClose={this.handleMenuClose}
           marginThreshold={!isNullOrUndefined(marginThreshold) ? marginThreshold : 5}
           disableEnforceFocus={true}
+          disableAutoFocusItem={true}
           MenuListProps={{dense: true, disablePadding: true, subheader: title ? <this.renderTitle title={title} /> : undefined, ...MenuListProps}}
           {...restProps}
         >

@@ -1,4 +1,5 @@
 import * as React              from 'react';
+import * as is                 from 'is';
 import {Observe}               from 'rewire-core';
 import {Theme}                 from '@material-ui/core/styles';
 import MenuItem                from '@material-ui/core/MenuItem';
@@ -14,7 +15,7 @@ import MenuBase, {
 import {WithStyle, withStyles} from './styles';
 
 export interface IToggleMenuItem extends IMenuBaseItem {
-  visible: boolean;
+  visible: boolean | (() => boolean);
 
   onClick?(item: IToggleMenuItem): void;
 }
@@ -60,11 +61,11 @@ export const ToggleItemRenderer = React.memo(withStyles(toggleItemRendererStyles
       <MenuItem key={item.name} divider={item.divider} classes={{root: rootClasses, selected: classes.menuItemSelected}} disableRipple={disabled} onClick={clickHandler}>
         <ListItemText className={classes.listItemText} primary={item.title} primaryTypographyProps={{classes: {root: classes.listItemTypography}}} />
         <Observe render={() => (
-          item.visible
-            ? <ListItemIcon className={classes.listItemIcon}>
-                {item.icon ? <item.icon /> : <CheckIcon />}
-              </ListItemIcon>
-            : null
+          (is.function(item.visible) ? item.visible() : item.visible) &&
+            <ListItemIcon className={classes.listItemIcon}>
+              {item.icon ? <item.icon /> : <CheckIcon />}
+            </ListItemIcon>
+          || null
         )} />
       </MenuItem>
     );
@@ -83,7 +84,9 @@ class ToggleMenu extends React.Component<IToggleMenuProps> {
   }
 
   defaultOnItemClick = (item: IToggleMenuItem) => {
-    item.visible = !item.visible;
+    if (!is.function(item.visible)) {
+      item.visible = !item.visible;
+    }
   }
 
   render() {

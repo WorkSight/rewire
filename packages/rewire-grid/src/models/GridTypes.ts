@@ -108,7 +108,7 @@ export interface IGrid extends IRows, IDisposable {
   staticKeybinds            : IGridStaticKeybinds;
   variableKeybinds          : IGridVariableKeybinds;
   isRowCompleteFn           : (row: IRowData) => boolean;
-  optionsMenu?              : () => IGridOptionsMenu;
+  optionsMenu?              : IGridOptionsMenu;
   readonly validator        : Validator;
   readonly hasChanges       : boolean;
   readonly isChangeTracking : boolean;
@@ -196,7 +196,7 @@ export interface IGridOptions {
   isRowCompleteFn?         : (row: IRowData) => boolean;
   headerRowHeight?         : number;
   rowHeight?               : number;
-  optionsMenu?             : () => IGridOptionsMenu;
+  optionsMenuFn?           : () => IGridOptionsMenu;
 }
 
 export interface IGroupRow {
@@ -464,7 +464,7 @@ export function createColumnsToggleMenuItems(columns: IColumn[], columnNames: st
   return toggleableColumns.map((column: IColumn, idx: number) => ({
     name: column.name,
     title: column.title,
-    visible: column.visible,
+    visible: () => column.visible,
     subheader: idx === 0 ? 'Toggleable Columns' : undefined,
     onClick: onToggleMenuItemClick(column),
   } as IToggleMenuItem));

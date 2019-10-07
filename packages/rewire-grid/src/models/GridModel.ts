@@ -98,7 +98,7 @@ class GridModel implements IGrid, IDisposable {
   variableKeybinds          : IGridVariableKeybinds;
   startCell?                : ICell;
   hasChanges                : boolean;
-  optionsMenu?              : () => IGridOptionsMenu;
+  optionsMenu?              : IGridOptionsMenu;
   __validator               : Validator;
   __changeTracker?          : ChangeTracker;
   __isRowCompleteFn         : (row: IRowData) => boolean;
@@ -133,7 +133,6 @@ class GridModel implements IGrid, IDisposable {
     this.isRowCompleteFn            = options && options.isRowCompleteFn || (() => true);
     this.headerRowHeight            = options && !isNullOrUndefined(options.headerRowHeight) ? options.headerRowHeight : undefined;
     this.rowHeight                  = options && !isNullOrUndefined(options.rowHeight) ? options.rowHeight : undefined;
-    this.optionsMenu                = options && options.optionsMenu;
     this.clipboard                  = [];
     this.isMouseDown                = false;
     this.startCell                  = undefined;
@@ -1195,7 +1194,8 @@ class GridModel implements IGrid, IDisposable {
       freeze(() => {
         grid._addRows(rows);
       });
-      grid.loading = false;
+      grid.optionsMenu = options && options.optionsMenuFn && options.optionsMenuFn();
+      grid.loading     = false;
       grid.validate();
       grid.mergeColumns();
       return grid;

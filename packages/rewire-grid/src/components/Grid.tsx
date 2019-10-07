@@ -720,7 +720,7 @@ const GridInternal = withStyles(styles, class extends React.PureComponent<GridPr
     }
 
     const {classes}                   = this.props;
-    const optionsMenu                 = this.grid.optionsMenu && this.grid.optionsMenu();
+    const optionsMenu                 = this.grid.optionsMenu;
     const items                       = optionsMenu.items;
     const defaultTitle                = 'Grid Options';
     const tooltip                     = optionsMenu.tooltip || defaultTitle;
@@ -784,7 +784,7 @@ const GridInternal = withStyles(styles, class extends React.PureComponent<GridPr
   _body: HTMLTableSectionElement | null;
 
   renderData(): JSX.Element {
-    let BodyRenderer     = (this.props.virtual) ? VirtualBody : Body;
+    let BodyRenderer = (this.props.virtual) ? VirtualBody : Body;
     return (
       <Observe render={() => (
         <div className={classNames('grid-scroll', this.props.classes.gridScroll)} onScroll={this.handleScroll}>

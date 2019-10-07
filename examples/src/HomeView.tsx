@@ -247,7 +247,7 @@ function createTestGrid(nRows: number, nColumns: number) {
   cols[1].width = '65px';
   cols[1].align = 'right';
   // create the grid model and group by 'column2' and 'column3'
-  let grid = createGrid(rows, cols, { groupBy: ['column2', 'column3'], optionsMenu: () => ({ items: createColumnsToggleMenuItems(cols, ['column8', 'column9']) }), multiSelect: true, allowMergeColumns: true });
+  let grid = createGrid(rows, cols, { groupBy: ['column2', 'column3'], optionsMenuFn: () => ({ items: createColumnsToggleMenuItems(cols, ['column8', 'column9']) }), multiSelect: true, allowMergeColumns: true });
 
   grid.addFixedRow({ data: { column5: '2017', column6: '2018' } });
   // setTimeout(() => { grid.groupBy = [cols[5]]; }, 4000);
@@ -373,12 +373,12 @@ function createEmployeesGrid1() {
   }
 
   // create the grid model
-  const actionItems: IActionMenuItem[]    = [
-    {name: 'delete',    title: 'Delete', subheader: 'Grid Actions', icon: DeleteIcon,    onClick: () => { console.log('Performing Delete Action...'); },    closeOnClick: true},
-    {name: 'archive',   title: 'Archive',                           icon: ArchiveIcon,   onClick: () => { console.log('Performing Archive Action...'); },   closeOnClick: true},
-    {name: 'unarchive', title: 'Unarchive',                         icon: UnarchiveIcon, onClick: () => { console.log('Performing Unarchive Action...'); }, closeOnClick: true},
-  ];
-  let grid = createGrid(rows, cols, { multiSelect: true, allowMergeColumns: true, optionsMenu: () => ({ items: [...createColumnsToggleMenuItems(cols, ['timeColumn', 'email', 'isActive', 'autoCompleteColumn'], {onItemClick: toggleMenuHandleItemClick}), ...actionItems] }) });
+  const toggleItems: IToggleMenuItem[] = observable([
+    {name: 'delete',    title: 'Delete', subheader: 'Grid Toggles', visible: true, onClick: (item: IToggleMenuItem) => { item.visible = !item.visible; } },
+    {name: 'archive',   title: 'Archive',                           visible: true, onClick: (item: IToggleMenuItem) => { item.visible = !item.visible; } },
+    {name: 'unarchive', title: 'Unarchive',                         visible: true, onClick: (item: IToggleMenuItem) => { item.visible = !item.visible; } },
+  ]);
+  let grid = createGrid(rows, cols, { multiSelect: true, allowMergeColumns: true, optionsMenuFn: () => ({ items: [...createColumnsToggleMenuItems(cols, ['timeColumn', 'email', 'isActive', 'autoCompleteColumn'], {onItemClick: toggleMenuHandleItemClick}), ...toggleItems] }) });
   // sort by employee names
   grid.addSort(cols[0], 'ascending');
   grid.headerRowHeight = 32;
