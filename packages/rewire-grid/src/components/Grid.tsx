@@ -94,11 +94,14 @@ export interface IGridProps {
   virtual?: boolean;
   className?: string;
   style?: React.CSSProperties;
+  classes?: any;
+  rowClasses?: any;
+  cellClasses?: any;
   gridColors?: IGridColors;
   gridFontSizes?: IGridFontSizes;
 }
 
-type BodyType = {grid: IGrid, columns: () => IColumn[], renderRows: (rows: IRow[], columns: () => IColumn[], fixed: boolean) => any, scrollY: DataSignal<number>, loadMoreRows?: (args: {start: number, end: number}) => Promise<any[]> };
+type BodyType = {grid: IGrid, columns: () => IColumn[], renderRows: (rows: IRow[], columns: () => IColumn[], fixed: boolean) => any, scrollY: DataSignal<number>, rowClasses?: any, cellClasses?: any, loadMoreRows?: (args: {start: number, end: number}) => Promise<any[]> };
 class Body extends React.PureComponent<BodyType, {offset: number}> {
   constructor(props: BodyType) {
     super(props);
@@ -130,7 +133,7 @@ class VirtualBody extends React.PureComponent<BodyType, {offset: number, loading
     for (let r of rows) {
       let rowIdx = i + offset;
       let rr     = this.props.grid.addRow(r);
-      this.rowCache[offset + i] = <Row key={rowIdx} columns={this.props.columns} height={this.props.grid.rowHeight} Cell={Cell} index={rowIdx} className={((rowIdx % 2) === 1) ? 'alt' : ''} row={rr} />;
+      this.rowCache[offset + i] = <Row key={rowIdx} classes={this.props.rowClasses} cellClasses={this.props.cellClasses} columns={this.props.columns} height={this.props.grid.rowHeight} Cell={Cell} index={rowIdx} className={((rowIdx % 2) === 1) ? 'alt' : ''} row={rr} />;
     }
   }
 
@@ -184,7 +187,7 @@ class VirtualBody extends React.PureComponent<BodyType, {offset: number, loading
       }
 
       let row   = rows[rowIdx];
-      cachedRow = <Row key={rowIdx} className={((rowIdx % 2) === 1) ? 'alt' : ''} height={this.props.grid.rowHeight} Cell={Cell} row={row} index={rowIdx} columns={this.props.columns} />;
+      cachedRow = <Row key={rowIdx} className={((rowIdx % 2) === 1) ? 'alt' : ''} classes={this.props.rowClasses} cellClasses={this.props.cellClasses} height={this.props.grid.rowHeight} Cell={Cell} row={row} index={rowIdx} columns={this.props.columns} />;
       this.rowCache[rowIdx] = cachedRow;
       result.push(cachedRow);
     }
@@ -600,7 +603,7 @@ const GridInternal = withStyles(styles, class extends React.PureComponent<GridPr
           {this.renderColumnGroups(true)}
           <thead role='rowgroup'>
             <Observe render={() => (
-              this.props.grid.fixedRows.map((row, index) => <Row key={row.id} height={this.props.grid.headerRowHeight} Cell={Column} columns={() => this.props.grid.fixedColumns} index={index} row={row} />)
+              this.props.grid.fixedRows.map((row, index) => <Row key={row.id} classes={this.props.rowClasses} cellClasses={this.props.cellClasses} height={this.props.grid.headerRowHeight} Cell={Column} columns={() => this.props.grid.fixedColumns} index={index} row={row} />)
             )} />
           </thead>
         </table>
@@ -656,7 +659,7 @@ const GridInternal = withStyles(styles, class extends React.PureComponent<GridPr
   renderGroups(columns: () => IColumn[], fixed: boolean) {
     const groups = this._groups();
     const grid   = this.grid as any;
-    return groups && groups.map((group) => <GroupRow fixed={fixed} key={group.title} group={group} columns={columns} numVisibleColumns={fixed ? grid.visibleFixedColumns.length : grid.visibleStandardColumns.length} />);
+    return groups && groups.map((group) => <GroupRow classes={this.props.rowClasses} cellClasses={this.props.cellClasses} fixed={fixed} key={group.title} group={group} columns={columns} numVisibleColumns={fixed ? grid.visibleFixedColumns.length : grid.visibleStandardColumns.length} />);
   }
 
   _fixedColGroups: () => JSX.Element | undefined;
@@ -691,7 +694,7 @@ const GridInternal = withStyles(styles, class extends React.PureComponent<GridPr
   renderRows = (rows: IRow[], columns: () => IColumn[], fixed: boolean) => {
     const grid = this.props.grid;
     if (!grid.groupBy || (grid.groupBy.length === 0)) {
-      return <Observe render={() => rows.map((row, index) => <Row key={row.id} height={this.props.grid.rowHeight} columns={columns} Cell={Cell} index={index} className={((index % 2) === 1) ? 'alt' : ''} row={row} />)} />;
+      return <Observe render={() => rows.map((row, index) => <Row key={row.id} classes={this.props.rowClasses} cellClasses={this.props.cellClasses} height={this.props.grid.rowHeight} columns={columns} Cell={Cell} index={index} className={((index % 2) === 1) ? 'alt' : ''} row={row} />)} />;
     }
 
     return <Observe render={() => this.renderGroups(columns, fixed)} />;
@@ -761,7 +764,7 @@ const GridInternal = withStyles(styles, class extends React.PureComponent<GridPr
               {this.renderColumnGroups(false)}
               <thead role='rowgroup'>
                 <Observe render={() => (
-                  this.props.grid.fixedRows.map((row, index) => <Row key={row.id} height={this.props.grid.headerRowHeight} Cell={Column} columns={() => this.props.grid.standardColumns} index={index} row={row} />)
+                  this.props.grid.fixedRows.map((row, index) => <Row key={row.id} classes={this.props.rowClasses} cellClasses={this.props.cellClasses} height={this.props.grid.headerRowHeight} Cell={Column} columns={() => this.props.grid.standardColumns} index={index} row={row} />)
                 )} />
               </thead>
             </table>
