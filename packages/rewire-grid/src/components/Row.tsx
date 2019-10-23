@@ -23,6 +23,8 @@ export interface IRowProps {
   isFixedColumnsRow?: boolean;
   index             : number;
   className?        : string;
+  classes?          : any;
+  cellClasses?      : any;
 }
 
 const styles = (theme: Theme) => {
@@ -56,7 +58,7 @@ const styles = (theme: Theme) => {
 
 type IGroupProps = {group: IGroupRow, columns: () => IColumn[], numVisibleColumns: number, fixed: boolean} & React.Props<any>;
 
-export const GroupRow = React.memo(withStyles(styles, (props: IGroupProps & {classes?: any}) => {
+export const GroupRow = React.memo(withStyles(styles, (props: IGroupProps & {classes?: any, cellClasses?: any}) => {
   return (
     < >
       <Observe render={() => (
@@ -68,9 +70,9 @@ export const GroupRow = React.memo(withStyles(styles, (props: IGroupProps & {cla
       )} />
       {props.group.rows.map((r, idx) => {
         if (isGroupRow(r)) {
-          return <GroupRow key={r.title} fixed={props.fixed} group={r} columns={props.columns} numVisibleColumns={props.numVisibleColumns} />;
+          return <GroupRow key={r.title} classes={props.classes} cellClasses={props.cellClasses} fixed={props.fixed} group={r} columns={props.columns} numVisibleColumns={props.numVisibleColumns} />;
         } else {
-          return <Row key={r.id} height={r.grid.rowHeight} columns={props.columns} Cell={Cell} index={idx} className={((idx % 2) === 1) ? 'alt' : ''} row={r} />;
+          return <Row key={r.id} classes={props.classes} cellClasses={props.cellClasses} height={r.grid.rowHeight} columns={props.columns} Cell={Cell} index={idx} className={((idx % 2) === 1) ? 'alt' : ''} row={r} />;
         }
       })}
     </>
@@ -149,7 +151,7 @@ class InternalRow extends PureComponent<RowProps, {}> {
         let cell = this.props.row.cells[column.name];
         let Cell = this.props.Cell;
         if ((cell.colSpan ===  0) || (cell.rowSpan === 0)) return;
-          cells.push(<Cell key={cell.id} cell={cell} onClick={this.handleRowClick} />);
+          cells.push(<Cell key={cell.id} classes={this.props.cellClasses} cell={cell} onClick={this.handleRowClick} />);
       });
       return cells;
     }} />;

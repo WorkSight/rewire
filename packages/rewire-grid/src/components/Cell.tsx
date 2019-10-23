@@ -91,6 +91,13 @@ const styles = (theme: Theme) => ({
   critical: {
     color: '#AA0000',
   },
+  rendererContainer: {
+    width: '100%',
+    overflow: 'hidden',
+  },
+  customRendererContainer: {
+    height: '100%',
+  },
   editorContainer: {
     display: 'flex',
     flex: '1',
@@ -400,10 +407,10 @@ class Cell extends React.PureComponent<CellProps, {}> {
         return (
           < >
             {CellRenderer
-              ? <div onMouseEnter={this.handleTooltipForDiv} style={{width: '100%', height: '100%', overflow: 'hidden', textAlign: cell.align}}>
+              ? <div onMouseEnter={this.handleTooltipForDiv} className={classNames(this.props.classes.rendererContainer, this.props.classes.customRendererContainer)} style={{textAlign: cell.align}}>
                   <CellRenderer cell={cell} />
                 </div>
-              : <span onMouseEnter={this.handleTooltipForSpan} style={{width: '100%', overflow: 'hidden', textAlign: cell.align}}>
+              : <span onMouseEnter={this.handleTooltipForSpan} className={this.props.classes.rendererContainer} style={{textAlign: cell.align}}>
                   {value}
                 </span>
             }
