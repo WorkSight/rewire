@@ -51,7 +51,6 @@ const styles = (theme: Theme) => ({
     width: '100%',
   },
   cellInnerContainer: {
-    overflow: 'hidden',
     flex: '1',
     height: '100%',
     alignItems: 'center',
@@ -95,6 +94,7 @@ const styles = (theme: Theme) => ({
   editorContainer: {
     display: 'flex',
     flex: '1',
+    overflow: 'hidden',
   },
   editorSelectSelect: {
     padding: '0px 3px',
@@ -400,10 +400,10 @@ class Cell extends React.PureComponent<CellProps, {}> {
         return (
           < >
             {CellRenderer
-              ? <div onMouseEnter={this.handleTooltipForDiv} style={{width: '100%', height: '100%', textAlign: cell.align}}>
+              ? <div onMouseEnter={this.handleTooltipForDiv} style={{width: '100%', height: '100%', overflow: 'hidden', textAlign: cell.align}}>
                   <CellRenderer cell={cell} />
                 </div>
-              : <span onMouseEnter={this.handleTooltipForSpan} style={{width: '100%', textAlign: cell.align}}>
+              : <span onMouseEnter={this.handleTooltipForSpan} style={{width: '100%', overflow: 'hidden', textAlign: cell.align}}>
                   {value}
                 </span>
             }

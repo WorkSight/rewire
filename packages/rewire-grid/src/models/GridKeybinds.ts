@@ -1,5 +1,6 @@
     import * as React from 'react';
     import {
+      IRow,
       ICell,
       IGridStaticKeybinds,
       IGridVariableKeybinds
@@ -344,7 +345,7 @@
        Ctrl+D:      Duplicate selected row(s) below them
        Ctrl+Delete: Delete selected row(s)
       ---------------------------------------------------*/
-      'Ctrl+Insert': (evt: React.KeyboardEvent<any>, cell: ICell) => { if (cell.editing) { return; } let newRow = cell.grid.rowKeybindPermissions.insertRow && cell.grid.insertRowAtSelection();     evt.stopPropagation(); evt.preventDefault(); return newRow; },
-      'Ctrl+D'     : (evt: React.KeyboardEvent<any>, cell: ICell) => { if (cell.editing) { return; } let newRow = cell.grid.rowKeybindPermissions.duplicateRow && cell.grid.duplicateSelectedRows(); evt.stopPropagation(); evt.preventDefault(); return newRow; },
-      'Ctrl+Delete': (evt: React.KeyboardEvent<any>, cell: ICell) => { if (cell.editing) { return; } cell.grid.rowKeybindPermissions.deleteRow && cell.grid.removeSelectedRows();                    evt.stopPropagation(); evt.preventDefault(); },
+      'Ctrl+Insert': (evt: React.KeyboardEvent<any>, cell: ICell): IRow | undefined   => { if (cell.editing) { return; } let newRow = cell.grid.rowKeybindPermissions.insertRow && cell.grid.insertRowAtSelection() || undefined;     evt.stopPropagation(); evt.preventDefault(); return newRow; },
+      'Ctrl+D'     : (evt: React.KeyboardEvent<any>, cell: ICell): IRow[] | undefined => { if (cell.editing) { return; } let newRow = cell.grid.rowKeybindPermissions.duplicateRow && cell.grid.duplicateSelectedRows() || undefined; evt.stopPropagation(); evt.preventDefault(); return newRow; },
+      'Ctrl+Delete': (evt: React.KeyboardEvent<any>, cell: ICell)                     => { if (cell.editing) { return; } cell.grid.rowKeybindPermissions.deleteRow && cell.grid.removeSelectedRows();                                 evt.stopPropagation(); evt.preventDefault(); },
     };
