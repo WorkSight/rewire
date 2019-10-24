@@ -24,6 +24,7 @@ export default class Column extends React.PureComponent<IColumnCellProps> {
     this.isResizing = false;
     document.removeEventListener('mouseup', this.handleMouseUp, true);
     document.removeEventListener('mousemove', this.handleMouseMove, true);
+    evt.stopPropagation();
     evt.preventDefault();
   }
 
@@ -33,6 +34,7 @@ export default class Column extends React.PureComponent<IColumnCellProps> {
     this.startOffset = this.node.offsetWidth - evt.pageX;
     document.addEventListener('mouseup', this.handleMouseUp, true);
     document.addEventListener('mousemove', this.handleMouseMove, true);
+    evt.stopPropagation();
     evt.preventDefault();
   }
 
