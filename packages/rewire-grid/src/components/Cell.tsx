@@ -118,7 +118,6 @@ const styles = (theme: Theme) => ({
   },
   editorMultiSelectAutoCompleteTextFieldInputContainer: {
     overflow: 'hidden',
-    flexWrap: 'nowrap',
   },
   editorAutoCompleteContainer: {
     display: 'flex',

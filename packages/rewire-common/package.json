@@ -1,6 +1,6 @@
 {
   "name": "rewire-common",
-  "version": "1.0.163",
+  "version": "1.0.164",
   "description": "Common utilities used by the rewire suite of reactive components",
   "main": "./src/index.ts",
   "typings": "./src/index.ts",

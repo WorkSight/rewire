@@ -9,6 +9,7 @@ export * from './components/Cell';
 export * from './components/Column';
 export * from './components/Grid';
 export * from './components/Row';
+export * from './components/gridEditors';
 
 export {default as createCell}   from './models/CellModel';
 export {default as createColumn} from './models/ColumnModel';
