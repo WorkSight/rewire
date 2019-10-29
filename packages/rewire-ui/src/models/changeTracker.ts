@@ -134,11 +134,8 @@ export class ChangeTracker {
       this.setHasChanges(false);
       this._working!.length = this._original.size;
       for (const value of Object.values(this._original.data) as any[]) {
-        const original: any = this._context.getRow(value.index);
-        console.warn(original);
         const theClone: any = clone(value.data, 2);
         this._context.setRow(value.index, theClone);
-        console.log(theClone, this._context.getRow(value.index));
       }
     });
   }
