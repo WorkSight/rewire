@@ -1,8 +1,10 @@
-import * as is from 'is';
+import * as is             from 'is';
+import {isNullOrUndefined} from 'rewire-common';
 import {
   EditorType,
   SearchFn,
   MapFn,
+  IActionMenuItem,
   IToggleMenuItem,
   ISuggestionsContainerComponent,
   Validator,
@@ -12,6 +14,8 @@ import {
   TSetter
 } from 'rewire-ui';
 import * as merge      from 'deepmerge';
+import { ButtonProps } from '@material-ui/core/Button';
+import {PopoverOrigin} from '@material-ui/core/Popover';
 export { EditorType };
 
 export interface IRows {
@@ -63,6 +67,19 @@ export interface IGridVariableKeybinds {
   [keybind: string]: GridKeybindAction;
 }
 
+export interface IGridOptionsMenu {
+  tooltip?:         string;
+  title?:           string | JSX.Element | (() => JSX.Element);
+  menuId?:          string;
+  buttonContent?:   JSX.Element;
+  buttonProps?:     ButtonProps;
+  anchorOrigin?:    PopoverOrigin;
+  transformOrigin?: PopoverOrigin;
+  items:            (IActionMenuItem | IToggleMenuItem)[];
+
+  onItemClick?(item: IActionMenuItem | IToggleMenuItem): void;
+}
+
 export interface IGrid extends IRows, IDisposable {
   id                        : number;
   enabled                   : boolean;
@@ -82,9 +99,6 @@ export interface IGrid extends IRows, IDisposable {
   readonly fixedColumns     : IColumn[];
   readonly standardColumns  : IColumn[];
   groupBy                   : IColumn[];
-  toggleableColumns         : IColumn[];
-  toggleableColumnsOptions? : IToggleableColumnsOptions;
-  hasToggleableColumns      : boolean;
   isMouseDown               : boolean;
   multiSelect               : boolean;
   allowMergeColumns         : boolean;
@@ -94,6 +108,7 @@ export interface IGrid extends IRows, IDisposable {
   staticKeybinds            : IGridStaticKeybinds;
   variableKeybinds          : IGridVariableKeybinds;
   isRowCompleteFn           : (row: IRowData) => boolean;
+  optionsMenu?              : IGridOptionsMenu;
   readonly validator        : Validator;
   readonly hasChanges       : boolean;
   readonly isChangeTracking : boolean;
@@ -176,13 +191,12 @@ export interface IGridOptions {
   allowMergeColumns?       : boolean;
   clearSelectionOnBlur?    : boolean;
   groupBy?                 : string[];
-  toggleableColumns?       : string[];
-  toggleableColumnsOptions?: IToggleableColumnsOptions;
   rowKeybindPermissions?   : IGridRowKeybindPermissions;
   variableKeybinds?        : {[keybind: string]: GridKeybindAction};
   isRowCompleteFn?         : (row: IRowData) => boolean;
   headerRowHeight?         : number;
   rowHeight?               : number;
+  optionsMenuFn?           : () => IGridOptionsMenu;
 }
 
 export interface IGroupRow {
@@ -220,10 +234,6 @@ export interface IGridFontSizes {
   body?: string;
   groupRow?: string;
   toggleMenu?: string;
-}
-
-export interface IToggleableColumnsOptions {
-  onItemClick?(item: IToggleMenuItem): void;
 }
 
 export interface IRowOptions {
@@ -437,6 +447,30 @@ export function findRowByPosition(iterator: Iterable<IRow>, position: number): I
 export function findColumnByName(columns: IColumn[], name: string): IColumn | undefined {
   return columns.find((column) => column.name === name);
 }
+
+export interface IColumnsToggleMenuOptions {
+  onItemClick?(item: IToggleMenuItem, column: IColumn): void;
+}
+
+export function createColumnsToggleMenuItems(columns: IColumn[], columnNames: string[], options?: IColumnsToggleMenuOptions): IToggleMenuItem[] {
+  const onToggleMenuItemClick = (column: IColumn) => (item: IToggleMenuItem) => {
+    if (options && options.onItemClick) {
+      options.onItemClick(item, column);
+    } else {
+      column.visible = !column.visible;
+    }
+  };
+  const toggleableColumns = columnNames.map((name: string) => findColumnByName(columns, name)).filter((column: IColumn | undefined) => !isNullOrUndefined(column) && !column!.isGroupByColumn) as IColumn[];
+  return toggleableColumns.map((column: IColumn, idx: number) => ({
+    name: column.name,
+    title: column.title,
+    visible: () => column.visible,
+    subheader: idx === 0 ? 'Toggleable Columns' : undefined,
+    onClick: onToggleMenuItemClick(column),
+  } as IToggleMenuItem));
+}
+
+
 
 // export function collapseAll(rows: IRow[]) {
 //   for (const groupRow of groupRows(rows)) {

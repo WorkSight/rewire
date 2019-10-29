@@ -128,7 +128,7 @@ export function *combine<T>(r1: Iterable<T>, fn: (p1: T, p2: T) => T | undefined
   let current = iter.next().value;
   while (current) {
     let next = iter.next().value;
-    let c    = fn(current, next);
+    let c    = fn(current, next as T);
     if (!c) {
       yield current;
       current = next;
@@ -292,7 +292,7 @@ class LQ2<T> implements ILQ<T> {
   }
 
   first(): T | undefined {
-    return take(this.iterator, 1).next().value;
+    return take(this.iterator, 1).next().value as T;
   }
 
   last() {

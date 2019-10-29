@@ -29,8 +29,9 @@ import {
   IRowData,
   ICell,
   IRow,
-  IToggleableColumnsOptions,
-  IColumn
+  IColumn,
+  IColumnsToggleMenuOptions,
+  createColumnsToggleMenuItems,
 }                            from 'rewire-grid';
 import {PopoverOrigin}       from '@material-ui/core/Popover';
 import Paper                 from '@material-ui/core/Paper';
@@ -246,7 +247,7 @@ function createTestGrid(nRows: number, nColumns: number) {
   cols[1].width = '65px';
   cols[1].align = 'right';
   // create the grid model and group by 'column2' and 'column3'
-  let grid = createGrid(rows, cols, { groupBy: ['column2', 'column3'], toggleableColumns: ['column8', 'column9'], multiSelect: true, allowMergeColumns: true });
+  let grid = createGrid(rows, cols, { groupBy: ['column2', 'column3'], optionsMenuFn: () => ({ items: createColumnsToggleMenuItems(cols, ['column8', 'column9']) }), multiSelect: true, allowMergeColumns: true });
 
   grid.addFixedRow({ data: { column5: '2017', column6: '2018' } });
   // setTimeout(() => { grid.groupBy = [cols[5]]; }, 4000);
@@ -305,8 +306,7 @@ let grid                     = createTestGrid(40, 14);
 // setTimeout(() => grid.columns[3].visible = false, 7000);
 // setTimeout(() => grid.columns[3].visible = true, 8000);
 
-function toggleMenuHandleItemClick(item: IToggleMenuItem) {
-  const column   = item as IColumn;
+function toggleMenuHandleItemClick(item: IToggleMenuItem, column: IColumn) {
   column.visible = !column.visible;
 
   if (column.name === 'email') {
@@ -373,7 +373,12 @@ function createEmployeesGrid1() {
   }
 
   // create the grid model
-  let grid = createGrid(rows, cols, {multiSelect: true, allowMergeColumns: true, toggleableColumns: ['timeColumn', 'email', 'isActive', 'autoCompleteColumn'], toggleableColumnsOptions: {onItemClick: toggleMenuHandleItemClick} as IToggleableColumnsOptions });
+  const toggleItems: IToggleMenuItem[] = observable([
+    {name: 'delete',    title: 'Delete', subheader: 'Grid Toggles', visible: true, onClick: (item: IToggleMenuItem) => { item.visible = !item.visible; } },
+    {name: 'archive',   title: 'Archive',                           visible: true, onClick: (item: IToggleMenuItem) => { item.visible = !item.visible; } },
+    {name: 'unarchive', title: 'Unarchive',                         visible: true, onClick: (item: IToggleMenuItem) => { item.visible = !item.visible; } },
+  ]);
+  let grid = createGrid(rows, cols, { multiSelect: true, allowMergeColumns: true, optionsMenuFn: () => ({ items: [...createColumnsToggleMenuItems(cols, ['timeColumn', 'email', 'isActive', 'autoCompleteColumn'], {onItemClick: toggleMenuHandleItemClick}), ...toggleItems] }) });
   // sort by employee names
   grid.addSort(cols[0], 'ascending');
   grid.headerRowHeight = 32;
@@ -643,7 +648,7 @@ export const HomeView = React.memo(withStyles(styles, (props: HomeViewProps) => 
           </div>
 
           <Paper className={classes.gridContainer}>
-            <Observe render={() => (<Grid grid={grid} gridFontSizes={{header: '0.9rem', body: '0.85rem', groupRow: '0.8rem', toggleMenu: '0.9rem'}} className={classes.dataGrid} />)} />
+            <Observe render={() => (<Grid grid={grid} gridFontSizes={{header: '0.9rem', body: '0.9rem', groupRow: '0.9rem', toggleMenu: '0.9rem'}} className={classes.dataGrid} />)} />
           </Paper>
           <Observe render={() => (
             <Paper className={classes.gridContainer}>
@@ -651,7 +656,7 @@ export const HomeView = React.memo(withStyles(styles, (props: HomeViewProps) => 
                 <Button className={classes.employeesGridButton} onClick={() => mode.gridMode = 'employees1'} variant='outlined'>Grid 1</Button>
                 <Button className={classes.employeesGridButton} onClick={() => mode.gridMode = 'employees2'} variant='outlined'>Grid 2</Button>
               </div>
-              <Grid key={mode.gridMode} grid={mode.gridMode === 'employees1' ? employeesGrid1 : employeesGrid2} gridFontSizes={{header: '0.95rem', body: '0.9rem', groupRow: '0.8rem', toggleMenu: '0.95rem'}} className={classes.employeeGrid} />
+              <Grid key={mode.gridMode} grid={mode.gridMode === 'employees1' ? employeesGrid1 : employeesGrid2} gridFontSizes={{header: '0.95rem', body: '0.95rem', groupRow: '0.95rem', toggleMenu: '0.95rem'}} className={classes.employeeGrid} />
             </Paper>
           )} />
         </div>

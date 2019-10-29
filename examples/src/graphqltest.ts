@@ -1,8 +1,8 @@
 import gql                                  from 'graphql-tag';
 import {client as create, uploadMiddleware} from 'rewire-graphql';
 
-// const client = create('http://localhost:3010/graphql', {mode: 'cors'});
-const client = create('http://api.worksight.services:3010/graphql');
+const client = create('http://localhost:3010/graphql', {mode: 'cors'});
+// const client = create('http://api.worksight.services:3010/graphql');
 
 const query = gql`
   query($type: EntityType!, $search: String, $filter: FieldFilter, $count: Int) {
@@ -76,9 +76,9 @@ const query4 = gql`
 
 export const subscriptionQuery = gql`
 subscription s {
-  timecardChanges(groupIds: "cc3246fa-85ef-4348-b85c-209ecc8e5d37", effective: "[2012,2018]") {
-    operation
-    timecard
+  processedRules(employeeIds: "3fda47c4-f689-4f62-a147-6f0bd2636c45", effective: "[2019-10-01,2019-11-30]") {
+    employeeId
+    effective
   }
 }`;
 
@@ -154,28 +154,36 @@ export async function uploadFile(file: File) {
 
 async function run() {
   // client.bearer = '0ab38f1096494eb96aa206a7053370b9e171743058f8ce70';
-  client.bearer = '7d2bc12c97f090d9e12a295d71fc0979b69737669c1a47b8';
-  client.use(uploadMiddleware);
-  client.use((q, req, next) => {
-    next();
-  });
-  // console.log(await client.query(employees));
-  // const r = client.subscribe(subscriptionQuery);
-  // r.observe((data: any) => {
-  //   console.log(data);
+  client.bearer = '421029e4df937eaa4047fdcd81d1583d77a449d526c341cd';
+  // client.use(uploadMiddleware);
+  // client.use((q, req, next) => {
+  //   next();
   // });
+  // console.log(await client.query(employees));
+  const r = client.subscribe(subscriptionQuery);
+  const s = r.subscribe({
+    next(data: any) {
+      console.log(data);
+    },
+    error(err: Error) {},
+    // complete value parameter is deprecated
+    complete(value?: any) {}
+  });
+
+  // setTimeout(() => s.unsubscribe(), 15000);
+  // s.unsubscribe();
   // let r2: any = await client.query(employees);
   // console.log(r2);
   // let r1 = await client.query(query, {type: 'employees', filter: {field: 'name', eq: 'dsafsfsffs'}});
   // let r2 = await client.query(query2, {ids: ['a42afb4a-a253-48c5-a980-d65d85d4e223']});
   // let r3 = await client.query(query3, {filter: {id: ['476e3575-cee5-4126-a484-012b7ef5796b']}});
   // let r4 = await client.query(query3);
-  let r5 = await client.query(te);
+  // let r5 = await client.query(te);
   // console.log(r1);
   // console.log(r2);
   // console.log(r3);
   // console.log(r4);
-  console.log(r5);
+  // console.log(r5);
   // let r3: any = await client.query(query2, {size: 2});
   // console.log(await r2);
   // console.log();

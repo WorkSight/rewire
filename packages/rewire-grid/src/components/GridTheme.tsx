@@ -259,7 +259,7 @@ defaultGridColors.rowSelectedBorder      = Color(defaultGridColors.rowSelectedBa
 const defaultGridFontSizes: IGridFontSizes = {
   header: '1rem',
   body: '1rem',
-  groupRow: '0.9rem',
+  groupRow: '1rem',
   toggleMenu: '1rem',
 };
 

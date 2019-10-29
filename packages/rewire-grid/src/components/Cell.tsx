@@ -51,7 +51,6 @@ const styles = (theme: Theme) => ({
     width: '100%',
   },
   cellInnerContainer: {
-    overflow: 'hidden',
     flex: '1',
     height: '100%',
     alignItems: 'center',
@@ -92,9 +91,17 @@ const styles = (theme: Theme) => ({
   critical: {
     color: '#AA0000',
   },
+  rendererContainer: {
+    width: '100%',
+    overflow: 'hidden',
+  },
+  customRendererContainer: {
+    height: '100%',
+  },
   editorContainer: {
     display: 'flex',
     flex: '1',
+    overflow: 'hidden',
   },
   editorSelectSelect: {
     padding: '0px 3px',
@@ -165,18 +172,18 @@ class Cell extends React.PureComponent<CellProps, {}> {
   }
 
   handleMouseDown = (evt: React.MouseEvent<any>) => {
-    if (this.cell.editing) {
-      return;
-    }
+    evt.preventDefault();
+    evt.stopPropagation();
 
     this.grid.isMouseDown = true;
+
+    if (this.cell.editing || !this.grid.multiSelect) {
+      return;
+    }
 
     if (!evt.shiftKey || !this.grid.startCell) {
       this.grid.startCell = this.cell;
     }
-
-    evt.preventDefault();
-    evt.stopPropagation();
   }
 
   handleMouseEnter = (evt: React.MouseEvent<any>) => {
@@ -344,14 +351,14 @@ class Cell extends React.PureComponent<CellProps, {}> {
     return <Observe render={() => {
       let cell = this.cell;
       if (cell.editing) {
-        let Editor = this.column.editor;
-        if (!Editor) return null;
-        let cellType              = this.column.type;
-        let additionalProps       = {};
-        let endOfTextOnFocus      = false;
-        let selectOnFocus         = true;
-        let cursorPositionOnFocus = undefined;
-        let value                 = cell.value;
+        if (!this.column.editor) return null;
+        let Editor                                    = this.column.editor;
+        let cellType                                  = this.column.type;
+        let additionalProps                           = {};
+        let endOfTextOnFocus                          = false;
+        let selectOnFocus                             = true;
+        let cursorPositionOnFocus: number | undefined = undefined;
+        let value                                     = cell.value;
         if (this.cell.keyForEdit) {
           value            = cell.keyForEdit;
           endOfTextOnFocus = true;
@@ -369,7 +376,7 @@ class Cell extends React.PureComponent<CellProps, {}> {
             additionalProps['initialInputValue'] = cell.keyForEdit;
           }
         }
-        let editorClasses = undefined;
+        let editorClasses: Object | undefined = undefined;
         if (cellType === 'select' || cellType === 'multiselect') {
           editorClasses = {inputRoot: this.props.classes.editorSelectInputRoot, select: this.props.classes.editorSelectSelect};
         } else if (cellType === 'checked') {
@@ -395,20 +402,18 @@ class Cell extends React.PureComponent<CellProps, {}> {
       }
 
       return <Observe render={() => {
-        let hasError     = !!cell.error;
         let value        = !isNullOrUndefinedOrEmpty(this.value) ? this.value : <span>&nbsp;</span>;
         let CellRenderer = cell.renderer;
         return (
           < >
             {CellRenderer
-              ? <div onMouseEnter={this.handleTooltipForDiv} style={{width: '100%', height: '100%', textAlign: cell.align}}>
+              ? <div onMouseEnter={this.handleTooltipForDiv} className={classNames(this.props.classes.rendererContainer, this.props.classes.customRendererContainer)} style={{textAlign: cell.align}}>
                   <CellRenderer cell={cell} />
                 </div>
-              : <span onMouseEnter={this.handleTooltipForSpan} style={{width: '100%', textAlign: cell.align}}>
+              : <span onMouseEnter={this.handleTooltipForSpan} className={this.props.classes.rendererContainer} style={{textAlign: cell.align}}>
                   {value}
                 </span>
             }
-            {hasError && this.renderErrorIcon()}
           </>
         );
       }} />;
@@ -461,6 +466,11 @@ class Cell extends React.PureComponent<CellProps, {}> {
         <div className={classNames(classes.cellContainer, 'cellContainer')}>
           <div className={cellInnerContainerClasses}>
             <this.renderCell />
+            <Observe render={() => {
+              if (this.cell.editing || !this.cell.error) return null;
+              return this.renderErrorIcon();
+            }} />
+            {}
           </div>
         </div>;
       let cellContent = innerCell;
@@ -488,7 +498,7 @@ class Cell extends React.PureComponent<CellProps, {}> {
           ref={this.setCellRef}
           onDoubleClick={this.handleDoubleClick}
           onClick={this.handleClick}
-          onMouseDown={this.grid.multiSelect ? this.handleMouseDown : undefined}
+          onMouseDown={this.handleMouseDown}
           onMouseEnter={this.grid.multiSelect ? this.handleMouseEnter : undefined}
           className={tdClasses}
          >

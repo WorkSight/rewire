@@ -141,7 +141,7 @@ const __builtInValidators: {[type: string]: IValidator} = {
   ...createBuiltIn('email', isEmail, 'must be a valid email address'),
   ...createBuiltIn('>', isGreaterThan, template`must be greater than ${1}`),
   ...createBuiltIn('>=', isGreaterThanOrEquals, template`must be greater than or equal to ${1}`),
-  ...createBuiltIn('<=', isLessThanOrEquals, template`must be greater less than or equal to ${1}`),
+  ...createBuiltIn('<=', isLessThanOrEquals, template`must be less than or equal to ${1}`),
   ...createBuiltIn('<', isLessThan, template`must be less than ${1}`),
   ...createBuiltIn('==', isEqual, template`must be the same as ${1}`),
   ...createBuiltIn('!=', isNotEqual, template`must be not the same as ${1}`),
@@ -186,6 +186,10 @@ export default class Validator {
     if (!Array.isArray(validator)) validator = [validator];
     const existingValidators = this.rules[field] || (this.rules[field] = []);
     existingValidators.push(...validator);
+  }
+
+  reset() {
+    this.rules = {};
   }
 
   setRule(field: string, validator: IValidator | IValidator[]) {

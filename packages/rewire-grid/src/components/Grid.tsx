@@ -22,7 +22,7 @@ import GroupRowModel                         from '../models/GroupRowModel';
 import * as React                            from 'react';
 import * as Color                            from 'color';
 import {debounce}                            from 'rewire-common';
-import {WithStyle, withStyles, ToggleMenu}   from 'rewire-ui';
+import {WithStyle, withStyles, MixedMenu}    from 'rewire-ui';
 import {PopoverOrigin}                       from '@material-ui/core/Popover';
 import {ButtonProps}                         from '@material-ui/core/Button';
 import {MuiThemeProvider, Theme}             from '@material-ui/core/styles';
@@ -94,11 +94,14 @@ export interface IGridProps {
   virtual?: boolean;
   className?: string;
   style?: React.CSSProperties;
+  classes?: any;
+  rowClasses?: any;
+  cellClasses?: any;
   gridColors?: IGridColors;
   gridFontSizes?: IGridFontSizes;
 }
 
-type BodyType = {grid: IGrid, columns: () => IColumn[], renderRows: (rows: IRow[], columns: () => IColumn[], fixed: boolean) => any, scrollY: DataSignal<number>, loadMoreRows?: (args: {start: number, end: number}) => Promise<any[]> };
+type BodyType = {grid: IGrid, columns: () => IColumn[], renderRows: (rows: IRow[], columns: () => IColumn[], fixed: boolean) => any, scrollY: DataSignal<number>, rowClasses?: any, cellClasses?: any, loadMoreRows?: (args: {start: number, end: number}) => Promise<any[]> };
 class Body extends React.PureComponent<BodyType, {offset: number}> {
   constructor(props: BodyType) {
     super(props);
@@ -130,7 +133,7 @@ class VirtualBody extends React.PureComponent<BodyType, {offset: number, loading
     for (let r of rows) {
       let rowIdx = i + offset;
       let rr     = this.props.grid.addRow(r);
-      this.rowCache[offset + i] = <Row key={rowIdx} columns={this.props.columns} height={this.props.grid.rowHeight} Cell={Cell} index={rowIdx} className={((rowIdx % 2) === 1) ? 'alt' : ''} row={rr} />;
+      this.rowCache[offset + i] = <Row key={rowIdx} classes={this.props.rowClasses} cellClasses={this.props.cellClasses} columns={this.props.columns} height={this.props.grid.rowHeight} Cell={Cell} index={rowIdx} className={((rowIdx % 2) === 1) ? 'alt' : ''} row={rr} />;
     }
   }
 
@@ -184,7 +187,7 @@ class VirtualBody extends React.PureComponent<BodyType, {offset: number, loading
       }
 
       let row   = rows[rowIdx];
-      cachedRow = <Row key={rowIdx} className={((rowIdx % 2) === 1) ? 'alt' : ''} height={this.props.grid.rowHeight} Cell={Cell} row={row} index={rowIdx} columns={this.props.columns} />;
+      cachedRow = <Row key={rowIdx} className={((rowIdx % 2) === 1) ? 'alt' : ''} classes={this.props.rowClasses} cellClasses={this.props.cellClasses} height={this.props.grid.rowHeight} Cell={Cell} row={row} index={rowIdx} columns={this.props.columns} />;
       this.rowCache[rowIdx] = cachedRow;
       result.push(cachedRow);
     }
@@ -362,7 +365,7 @@ const styles = (theme: Theme) => {
     gridScroll: {
       fontSize: theme.fontSizes.body,
     },
-    toggleableColumnsContainer: {
+    optionsMenuContainer: {
       position: 'absolute',
       display: 'flex',
       height: '100%',
@@ -371,7 +374,7 @@ const styles = (theme: Theme) => {
       right: '0px',
       zIndex: 1,
     },
-    toggleableColumnsButton: {
+    optionsMenuButton: {
       minWidth: '0px',
       padding: '0px 2px 0px 0px',
       fontSize: 'inherit',
@@ -381,18 +384,22 @@ const styles = (theme: Theme) => {
         background: theme.palette.headerBackground.main,
       },
     },
-    toggleableColumnsIcon: {
+    optionsMenuIcon: {
       fontSize: '1.5em',
     },
-    toggleableColumnsMenuItem: {
+    optionsMenuMenuItem: {
       minWidth: '200px',
       paddingTop: `calc(${theme.fontSizes.toggleMenu} / 2.5)`,
       paddingBottom: `calc(${theme.fontSizes.toggleMenu} / 2.5)`,
+      fontSize: 'inherit',
     },
-    toggleColumnsListItemTypography: {
+    optionsMenuTitleContainer: {
       fontSize: theme.fontSizes.toggleMenu,
     },
-    toggleColumnsListItemIcon: {
+    optionsMenuListItemTypography: {
+      fontSize: theme.fontSizes.toggleMenu,
+    },
+    optionsMenuListItemIcon: {
       '& svg': {
         fontSize: `calc(${theme.fontSizes.toggleMenu} * 1.5)`,
       },
@@ -596,7 +603,7 @@ const GridInternal = withStyles(styles, class extends React.PureComponent<GridPr
           {this.renderColumnGroups(true)}
           <thead role='rowgroup'>
             <Observe render={() => (
-              this.props.grid.fixedRows.map((row, index) => <Row key={row.id} height={this.props.grid.headerRowHeight} Cell={Column} columns={() => this.props.grid.fixedColumns} index={index} row={row} />)
+              this.props.grid.fixedRows.map((row, index) => <Row key={row.id} classes={this.props.rowClasses} cellClasses={this.props.cellClasses} height={this.props.grid.headerRowHeight} Cell={Column} columns={() => this.props.grid.fixedColumns} index={index} row={row} />)
             )} />
           </thead>
         </table>
@@ -651,7 +658,8 @@ const GridInternal = withStyles(styles, class extends React.PureComponent<GridPr
 
   renderGroups(columns: () => IColumn[], fixed: boolean) {
     const groups = this._groups();
-    return groups && groups.map((group) => <GroupRow fixed={fixed} key={group.title} group={group} columns={columns} numVisibleColumns={fixed ? this.grid.visibleFixedColumns.length : this.grid.visibleStandardColumns.length} />);
+    const grid   = this.grid as any;
+    return groups && groups.map((group) => <GroupRow classes={this.props.rowClasses} cellClasses={this.props.cellClasses} fixed={fixed} key={group.title} group={group} columns={columns} numVisibleColumns={fixed ? grid.visibleFixedColumns.length : grid.visibleStandardColumns.length} />);
   }
 
   _fixedColGroups: () => JSX.Element | undefined;
@@ -686,7 +694,7 @@ const GridInternal = withStyles(styles, class extends React.PureComponent<GridPr
   renderRows = (rows: IRow[], columns: () => IColumn[], fixed: boolean) => {
     const grid = this.props.grid;
     if (!grid.groupBy || (grid.groupBy.length === 0)) {
-      return <Observe render={() => rows.map((row, index) => <Row key={row.id} height={this.props.grid.rowHeight} columns={columns} Cell={Cell} index={index} className={((index % 2) === 1) ? 'alt' : ''} row={row} />)} />;
+      return <Observe render={() => rows.map((row, index) => <Row key={row.id} classes={this.props.rowClasses} cellClasses={this.props.cellClasses} height={this.props.grid.rowHeight} columns={columns} Cell={Cell} index={index} className={((index % 2) === 1) ? 'alt' : ''} row={row} />)} />;
     }
 
     return <Observe render={() => this.renderGroups(columns, fixed)} />;
@@ -709,29 +717,34 @@ const GridInternal = withStyles(styles, class extends React.PureComponent<GridPr
     );
   }
 
-  renderToggleableColumnsMenu(): JSX.Element | null {
-    if (!this.grid.hasToggleableColumns) {
+  renderOptionsMenu(): JSX.Element | null {
+    if (!this.grid.optionsMenu) {
       return null;
     }
 
     const {classes}                   = this.props;
-    const toggleableColumns           = this.grid.toggleableColumns;
-    const toggleableColumnsOptions    = this.grid.toggleableColumnsOptions;
-    const buttonContent               = <SettingsIcon classes={{root: classes.toggleableColumnsIcon}}/>;
-    const buttonProps: ButtonProps    = {disableRipple: true};
-    const anchorOrigin: PopoverOrigin = {vertical: 'top', horizontal: 'right'};
-    const transformOrigin             = anchorOrigin;
-    const onItemClick                 = toggleableColumnsOptions && toggleableColumnsOptions.onItemClick;
+    const optionsMenu                 = this.grid.optionsMenu;
+    const items                       = optionsMenu.items;
+    const defaultTitle                = 'Grid Options';
+    const tooltip                     = optionsMenu.tooltip || defaultTitle;
+    const title                       = optionsMenu.title || (items && items[0] && items[0].subheader ? undefined : defaultTitle);
+    const menuId                      = optionsMenu.menuId || `grid${this.grid.id}-options-menu`;
+    const buttonContent               = optionsMenu.buttonContent || <SettingsIcon classes={{root: classes.optionsMenuIcon}}/>;
+    const buttonProps: ButtonProps    = {disableRipple: true, ...optionsMenu.buttonProps};
+    const anchorOrigin: PopoverOrigin = optionsMenu.anchorOrigin || {vertical: 'top', horizontal: 'right'};
+    const transformOrigin             = optionsMenu.transformOrigin || anchorOrigin;
+    const onItemClick                 = optionsMenu.onItemClick;
 
     return <Observe render={() => (
-      <div className={classes.toggleableColumnsContainer}>
-        <ToggleMenu
-          title='Toggleable Columns'
-          menuId={`grid${this.grid.id}-toggleable-columns`}
+      <div className={classes.optionsMenuContainer}>
+        <MixedMenu
+          title={title}
+          tooltip={tooltip}
+          menuId={menuId}
           buttonContent={buttonContent}
           buttonProps={buttonProps}
-          items={toggleableColumns}
-          classes={{menuButton: classes.toggleableColumnsButton, menuItem: classes.toggleableColumnsMenuItem, listItemTypography: classes.toggleColumnsListItemTypography, listItemIcon: classes.toggleColumnsListItemIcon} as any}
+          items={items}
+          classes={{menuButton: classes.optionsMenuButton, menuItem: classes.optionsMenuMenuItem, menuTitleContainer: classes.optionsMenuTitleContainer, listItemTypography: classes.optionsMenuListItemTypography, listItemIcon: classes.optionsMenuListItemIcon} as any}
           anchorOrigin={anchorOrigin}
           transformOrigin={transformOrigin}
           onItemClick={onItemClick}
@@ -744,14 +757,14 @@ const GridInternal = withStyles(styles, class extends React.PureComponent<GridPr
     return (
       <Observe render={() => (
         <div className={classNames('top-labels', this.props.classes.topLabels)}>
-          {this.renderToggleableColumnsMenu()}
+          {this.renderOptionsMenu()}
           {this.renderFixedColumnHeaders()}
           <div className='column-wrapper' ref={this.setColumnTableWrapperRef}>
             <table role='grid' ref={this.setColumnTableRef}>
               {this.renderColumnGroups(false)}
               <thead role='rowgroup'>
                 <Observe render={() => (
-                  this.props.grid.fixedRows.map((row, index) => <Row key={row.id} height={this.props.grid.headerRowHeight} Cell={Column} columns={() => this.props.grid.standardColumns} index={index} row={row} />)
+                  this.props.grid.fixedRows.map((row, index) => <Row key={row.id} classes={this.props.rowClasses} cellClasses={this.props.cellClasses} height={this.props.grid.headerRowHeight} Cell={Column} columns={() => this.props.grid.standardColumns} index={index} row={row} />)
                 )} />
               </thead>
             </table>
@@ -774,7 +787,7 @@ const GridInternal = withStyles(styles, class extends React.PureComponent<GridPr
   _body: HTMLTableSectionElement | null;
 
   renderData(): JSX.Element {
-    let BodyRenderer     = (this.props.virtual) ? VirtualBody : Body;
+    let BodyRenderer = (this.props.virtual) ? VirtualBody : Body;
     return (
       <Observe render={() => (
         <div className={classNames('grid-scroll', this.props.classes.gridScroll)} onScroll={this.handleScroll}>
