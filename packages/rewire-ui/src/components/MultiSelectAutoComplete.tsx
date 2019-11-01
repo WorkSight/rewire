@@ -205,7 +205,7 @@ interface IMultiSelectAutoCompleteState {
 export type MultiSelectAutoCompleteProps<T> = WithStyle<ReturnType<typeof styles>, ICustomProps<T> & IMultiSelectAutoCompleteProps<T> & React.InputHTMLAttributes<any>>;
 
 class MultiSelectAutoComplete<T> extends React.Component<MultiSelectAutoCompleteProps<T>, IMultiSelectAutoCompleteState> {
-  state = {suggestions: [], manualFocusing: false, showMoreSelectedItemsPopupIsOpen: false};
+  state:                       IMultiSelectAutoCompleteState;
   _fontSize?:                  string;
   _inputComponentNode?:        any;
   _suggestionsContainerWidth?: string;
@@ -225,8 +225,8 @@ class MultiSelectAutoComplete<T> extends React.Component<MultiSelectAutoComplete
       const wait = is.number(props.debounce) ? props.debounce as number : 150;
       this.search = debounce(this.search, wait);
     }
-    this.map = props.map || defaultMap;
-
+    this.map   = props.map || defaultMap;
+    this.state = {suggestions: [], manualFocusing: false, showMoreSelectedItemsPopupIsOpen: false};
     if (!isNullOrUndefined(props.initialInputValue)) {
       this.performSearch(props.initialInputValue);
     }
