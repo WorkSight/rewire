@@ -67,11 +67,11 @@ import {Theme}      from '@material-ui/core/styles';
 // });
 
 // export function createMultiSelectAutoCompleteEditor(options: any) {
+//   const E      = editor('multiselectautocomplete', options);
 //   const Editor = withStyles(styles, (props: TextEditorProps) => {
 //     const {classes, ...restProps}            = props;
 //     const {paper, ...editorClasses}          = classes;
 //     const {field, onValueChange}             = restProps;
-//     const E                                  = editor('multiselectautocomplete', options);
 //     const multiSelectAutoCompleteEditorModel = new MultiSelectAutoCompleteEditorModel(field, onValueChange);
 
 //     function handleKeyDown(evt: React.KeyboardEvent<any>) {
@@ -129,11 +129,11 @@ const styles = (theme: Theme) => ({
 });
 
 export function createMultiSelectAutoCompleteEditor(options: any) {
+  const E      = editor('multiselectautocomplete', options);
   const Editor = withStyles(styles, (props: TextEditorProps) => {
     const {classes, ...restProps}   = props;
     const {paper, ...editorClasses} = classes;
     const {field}                   = restProps;
-    const E                         = editor('multiselectautocomplete', options);
 
     return (
       <Observe render={() => (
