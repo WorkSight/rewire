@@ -149,7 +149,7 @@ class Cell extends React.PureComponent<CellProps, {}> {
   }
 
   handleDoubleClick = (evt: React.MouseEvent<any>) => {
-    if (!this.cell.enabled || this.cell.readOnly || !this.cell.editable || evt.ctrlKey || evt.shiftKey || !this.column.editor) {
+    if (!this.cell.canSelect || this.cell.readOnly || !this.cell.editable || evt.ctrlKey || evt.shiftKey || !this.column.editor) {
       return;
     }
 
@@ -201,7 +201,7 @@ class Cell extends React.PureComponent<CellProps, {}> {
       return;
     }
 
-    if (!this.cell.enabled) {
+    if (!this.cell.canSelect) {
       // allow processing of cell rows, even if cell is not enabled
       this.grid.selectCells([this.cell]);
       return;
@@ -241,7 +241,7 @@ class Cell extends React.PureComponent<CellProps, {}> {
   }
 
   handleKeyDownToEnterEditMode = (evt: React.KeyboardEvent<any>) => {
-    if (this.cell.editing || !this.cell.enabled || this.cell.readOnly || !this.cell.editable || !this.column.editor) {
+    if (this.cell.editing || this.cell.readOnly || !this.cell.editable || !this.column.editor || !this.cell.canSelect) {
       return;
     }
 

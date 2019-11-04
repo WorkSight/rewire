@@ -219,6 +219,7 @@
         let firstCellInRow = cell.grid.firstCellInRow(cell.row, true);
         if (firstCellInRow) {
           cell.grid.selectCells([firstCellInRow]);
+          cell.grid.startCell = firstCellInRow;
         }
       },
 
@@ -232,6 +233,7 @@
         let lastCellInRow = cell.grid.lastCellInRow(cell.row, true);
         if (lastCellInRow) {
           cell.grid.selectCells([lastCellInRow]);
+          cell.grid.startCell = lastCellInRow;
         }
       },
 
@@ -245,6 +247,7 @@
         let firstCell = cell.grid.firstCell(true);
         if (firstCell) {
           cell.grid.selectCells([firstCell]);
+          cell.grid.startCell = firstCell;
         }
       },
 
@@ -258,6 +261,7 @@
         let lastCell = cell.grid.lastCell(true);
         if (lastCell) {
           cell.grid.selectCells([lastCell]);
+          cell.grid.startCell = lastCell;
         }
       },
 
@@ -296,7 +300,7 @@
         // Enter editing mode on selected cell
         evt.preventDefault();
         evt.stopPropagation();
-        if (cell.enabled && !cell.readOnly && cell.editable && cell.column.editor) {
+        if (!cell.readOnly && cell.editable && cell.column.editor && cell.canSelect) {
           cell.keyForEdit = undefined;
           cell.grid.editCell(cell);
         }
