@@ -146,7 +146,7 @@ export class RowModel implements IRow, IDisposable, IValidationContext {
       }
 
       let cell = this.cells[column.name];
-      if (previousCell && cell && previousCell.enabled === cell.enabled && ((previousCell.row.fixed && cell.row.fixed) || (previousCell.readOnly === cell.readOnly && previousCell.editable === cell.editable &&
+      if (previousCell && cell && previousCell.enabled === cell.enabled && previousCell.canSelect === cell.canSelect && ((previousCell.row.fixed && cell.row.fixed) || (previousCell.readOnly === cell.readOnly && previousCell.editable === cell.editable &&
           !previousCell.error && !cell.error && previousCell.column.type === cell.column.type)) && deepEqual(previousValue, cell.value)) {
         colSpan++;
         cell.colSpan = 0;

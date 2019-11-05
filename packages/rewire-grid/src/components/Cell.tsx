@@ -149,7 +149,7 @@ class Cell extends React.PureComponent<CellProps, {}> {
   }
 
   handleDoubleClick = (evt: React.MouseEvent<any>) => {
-    if (!this.cell.enabled || this.cell.readOnly || !this.cell.editable || evt.ctrlKey || evt.shiftKey || !this.column.editor) {
+    if (!this.cell.canSelect || this.cell.readOnly || !this.cell.editable || evt.ctrlKey || evt.shiftKey || !this.column.editor) {
       return;
     }
 
@@ -176,11 +176,13 @@ class Cell extends React.PureComponent<CellProps, {}> {
 
     this.grid.isMouseDown = true;
 
-    if (this.cell.editing || !this.grid.multiSelect) {
+    if (this.cell.editing || !this.grid.multiSelect || (evt.shiftKey && this.grid.startCell)) {
       return;
     }
 
-    if (!evt.shiftKey || !this.grid.startCell) {
+    this.grid.startCell = undefined;
+
+    if (this.cell.canSelect) {
       this.grid.startCell = this.cell;
     }
   }
@@ -193,17 +195,23 @@ class Cell extends React.PureComponent<CellProps, {}> {
     if (!this.grid.startCell) {
       this.grid.startCell = this.cell;
     }
-    this.grid.selectCellsTo(this.cell, evt.ctrlKey);
+
+    const startCellIsSelected = this.grid.startCell && (this.grid.selectedCells.findIndex((cell: ICell) => cell.id === this.grid.startCell!.id) >= 0);
+    if (!startCellIsSelected && this.grid.startCell && this.grid.startCell.id !== this.cell.id) {
+      if (!evt.shiftKey && !evt.ctrlKey) {
+        this.grid.selectCells([]);
+      }
+      if (this.grid.startCell.canSelect) {
+        this.grid.selectCells([this.grid.startCell], undefined, undefined, evt.ctrlKey);
+      }
+    }
+    if (this.cell.canSelect) {
+      this.grid.selectCellsTo(this.cell, evt.ctrlKey);
+    }
   }
 
   handleClick = (evt: React.MouseEvent<any>) => {
     if (this.cell.editing) {
-      return;
-    }
-
-    if (!this.cell.enabled) {
-      // allow processing of cell rows, even if cell is not enabled
-      this.grid.selectCells([this.cell]);
       return;
     }
 
@@ -215,13 +223,23 @@ class Cell extends React.PureComponent<CellProps, {}> {
         if (cellToUnselect) {
           this.grid.unselectCells([cellToUnselect], cellToUnselect);
         } else {
+          if (!this.cell.canSelect) {
+            return;
+          }
           this.grid.selectCells([this.cell], this.cell, true, true);
         }
       } else if (evt.shiftKey) {
+        if (!this.cell.canSelect) {
+          return;
+        }
         this.grid.selectCellsTo(this.cell);
       }
     } else {
+      this.grid.startCell = undefined;
       this.grid.selectCells([this.cell]);
+      if (this.cell.canSelect) {
+        this.grid.startCell = this.cell;
+      }
     }
     // commented out to allow row click handling
     // evt.stopPropagation();
@@ -241,7 +259,7 @@ class Cell extends React.PureComponent<CellProps, {}> {
   }
 
   handleKeyDownToEnterEditMode = (evt: React.KeyboardEvent<any>) => {
-    if (this.cell.editing || !this.cell.enabled || this.cell.readOnly || !this.cell.editable || !this.column.editor) {
+    if (this.cell.editing || this.cell.readOnly || !this.cell.editable || !this.column.editor || !this.cell.canSelect) {
       return;
     }
 

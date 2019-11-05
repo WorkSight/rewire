@@ -151,6 +151,10 @@ export class CellModel implements ICell {
     return this.column.position;
   }
 
+  get canSelect(): boolean {
+    return this.enabled && this.grid.canSelectCellFn(this);
+  }
+
   clear() {
     if (this.readOnly || !this.enabled) {
       return;
@@ -222,7 +226,7 @@ export class CellModel implements ICell {
   }
 
   setEditing(isEditing: boolean): void {
-    if (this.readOnly || !this.enabled || !this.editable || !this.column.editor) {
+    if (this.readOnly || !this.editable || !this.column.editor || !this.canSelect) {
       this.editing = false;
       return;
     }
