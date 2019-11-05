@@ -176,11 +176,13 @@ class Cell extends React.PureComponent<CellProps, {}> {
 
     this.grid.isMouseDown = true;
 
-    if (this.cell.editing || !this.grid.multiSelect) {
+    if (this.cell.editing || !this.grid.multiSelect || (evt.shiftKey && this.grid.startCell)) {
       return;
     }
 
-    if (!evt.shiftKey || !this.grid.startCell) {
+    this.grid.startCell = undefined;
+
+    if (this.cell.canSelect) {
       this.grid.startCell = this.cell;
     }
   }
@@ -193,7 +195,19 @@ class Cell extends React.PureComponent<CellProps, {}> {
     if (!this.grid.startCell) {
       this.grid.startCell = this.cell;
     }
-    this.grid.selectCellsTo(this.cell, evt.ctrlKey);
+
+    const startCellIsSelected = this.grid.startCell && (this.grid.selectedCells.findIndex((cell: ICell) => cell.id === this.grid.startCell!.id) >= 0);
+    if (!startCellIsSelected && this.grid.startCell && this.grid.startCell.id !== this.cell.id) {
+      if (!evt.shiftKey && !evt.ctrlKey) {
+        this.grid.selectCells([]);
+      }
+      if (this.grid.startCell.canSelect) {
+        this.grid.selectCells([this.grid.startCell], undefined, undefined, evt.ctrlKey);
+      }
+    }
+    if (this.cell.canSelect) {
+      this.grid.selectCellsTo(this.cell, evt.ctrlKey);
+    }
   }
 
   handleClick = (evt: React.MouseEvent<any>) => {
@@ -221,7 +235,11 @@ class Cell extends React.PureComponent<CellProps, {}> {
         this.grid.selectCellsTo(this.cell);
       }
     } else {
+      this.grid.startCell = undefined;
       this.grid.selectCells([this.cell]);
+      if (this.cell.canSelect) {
+        this.grid.startCell = this.cell;
+      }
     }
     // commented out to allow row click handling
     // evt.stopPropagation();
