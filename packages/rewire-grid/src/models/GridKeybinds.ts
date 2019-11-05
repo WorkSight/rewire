@@ -284,6 +284,7 @@
           }, 0);
         } else {
           cell.grid.selectCells([]);
+          cell.grid.startCell = undefined;
           cell.setFocus(false);
         }
       },

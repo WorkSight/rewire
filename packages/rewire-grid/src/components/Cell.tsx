@@ -201,12 +201,6 @@ class Cell extends React.PureComponent<CellProps, {}> {
       return;
     }
 
-    if (!this.cell.canSelect) {
-      // allow processing of cell rows, even if cell is not enabled
-      this.grid.selectCells([this.cell]);
-      return;
-    }
-
     let selectedCells = this.grid.selectedCells;
 
     if (this.grid.multiSelect && selectedCells.length > 0 && (evt.ctrlKey || evt.shiftKey)) {
@@ -215,9 +209,15 @@ class Cell extends React.PureComponent<CellProps, {}> {
         if (cellToUnselect) {
           this.grid.unselectCells([cellToUnselect], cellToUnselect);
         } else {
+          if (!this.cell.canSelect) {
+            return;
+          }
           this.grid.selectCells([this.cell], this.cell, true, true);
         }
       } else if (evt.shiftKey) {
+        if (!this.cell.canSelect) {
+          return;
+        }
         this.grid.selectCellsTo(this.cell);
       }
     } else {

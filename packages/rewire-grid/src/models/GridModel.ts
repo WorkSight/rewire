@@ -328,8 +328,11 @@ class GridModel implements IGrid, IDisposable {
         currentRowPosition += rowDirection;
         const r             = this.rows[currentRowPosition];
         if (r && r.visible) {
-          byRows -= rowDirection;
-          row     = r;
+          const c = r.cells[cell.column.name];
+          if (c && (c.rowSpan > 0) && (!onlySelectable || c.canSelect)) {
+            byRows -= rowDirection;
+            row     = r;
+          }
         }
       }
 
@@ -342,16 +345,16 @@ class GridModel implements IGrid, IDisposable {
         currentColumnPosition += columnDirection;
         const col              = this.columns[currentColumnPosition];
         if (col && col.visible) {
-          const cell = row.cells[col.name];
-          if (cell && (cell.colSpan > 0) && (!onlySelectable || cell.canSelect)) {
+          const c3 = row.cells[col.name];
+          if (c3 && (c3.colSpan > 0) && (!onlySelectable || c3.canSelect)) {
             byColumns -= columnDirection;
             column     = col;
           }
         }
       }
 
-      const c = row.cells[column.name];
-      return (c === cell) ? undefined : c;
+      const c4 = row.cells[column.name];
+      return (c4 === cell) ? undefined : c4;
     });
   }
 
@@ -1117,7 +1120,8 @@ class GridModel implements IGrid, IDisposable {
     // }
 
     // cellsToSelect.sort(CellModel.positionCompare);
-    this.selectCells(cellsToSelect, cell, false, append);
+    const cellToFocus = cell.canSelect ? cell : undefined;
+    this.selectCells(cellsToSelect, cellToFocus, false, append);
   }
 
   private selectCellsToMergeHelper(rows: IRow[], columnsToSelect: IColumn[]): IColumn[] {
