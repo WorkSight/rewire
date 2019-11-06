@@ -43,17 +43,17 @@ export class TimeValidator {
       return undefined;
     }
 
-    let result = this.parseMilitary(value.match(/^([0-9]?[0-9])[:;\/]([0-5][0-9])$/));
+    let result = this.parseMilitary(value.match(/^(-?[0-9]?[0-9])[:;\/]([0-5][0-9])$/));
     if (!isNullOrUndefined(result)) {
       return result;
     }
 
-    result = this.parseAMPM(value.match(/^(0?[1-9]|1[0-2])([:;\/]([0-5][0-9]))? *(am|pm)?$/i));
+    result = this.parseAMPM(value.match(/^(-?0?[1-9]|1[0-2])([:;\/]([0-5][0-9]))? *(am|pm)?$/i));
     if (!isNullOrUndefined(result)) {
       return result;
     }
 
-    result = this._parseFloat(value.match(/^[0-9]?[0-9]?([\.][0-9]*)?$/));
+    result = this._parseFloat(value.match(/^-?[0-9]?[0-9]?([\.][0-9]*)?$/));
     if (!isNullOrUndefined(result)) {
       return parseFloat(result!.toFixed(2));
     }
