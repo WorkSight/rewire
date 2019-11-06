@@ -552,7 +552,7 @@ class AutoComplete<T> extends React.Component<AutoCompleteProps<T>, IAutoComplet
   }
 
   renderDeleteButton(): JSX.Element | null {
-    if (!this.props.selectedItem || (!this.state.isHovered && !this.state.isFocused)) {
+    if (this.props.disabled || !this.props.selectedItem || (!this.state.isHovered && !this.state.isFocused)) {
       return null;
     }
 
