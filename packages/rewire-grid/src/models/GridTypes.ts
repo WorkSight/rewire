@@ -108,6 +108,7 @@ export interface IGrid extends IRows, IDisposable {
   staticKeybinds            : IGridStaticKeybinds;
   variableKeybinds          : IGridVariableKeybinds;
   isRowCompleteFn           : (row: IRowData) => boolean;
+  canSelectCellFn           : (cell: ICell) => boolean;
   optionsMenu?              : IGridOptionsMenu;
   readonly validator        : Validator;
   readonly hasChanges       : boolean;
@@ -194,6 +195,7 @@ export interface IGridOptions {
   rowKeybindPermissions?   : IGridRowKeybindPermissions;
   variableKeybinds?        : {[keybind: string]: GridKeybindAction};
   isRowCompleteFn?         : (row: IRowData) => boolean;
+  canSelectCellFn          : (cell: ICell) => boolean;
   headerRowHeight?         : number;
   rowHeight?               : number;
   optionsMenuFn?           : () => IGridOptionsMenu;
@@ -368,6 +370,7 @@ export interface ICell extends ICellProperties {
   verticalAlign        : VerticalAlignment;
   enabled              : boolean;
   readOnly             : boolean;
+  canSelect            : boolean;
   readonly editing     : boolean;
   rowPosition          : number;
   columnPosition       : number;

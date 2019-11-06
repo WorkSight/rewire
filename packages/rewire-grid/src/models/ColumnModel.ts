@@ -25,6 +25,7 @@ import {
   WatcherTypeFn,
   observable,
 } from 'rewire-core';
+import {createMultiSelectAutoCompleteEditor} from '../components/gridEditors';
 import * as is             from 'is';
 
 let id            = 0;
@@ -153,10 +154,14 @@ export class ColumnModel implements IColumn {
       if (this.type === 'none') {
         this.editor = undefined;
       } else {
-        if (t === 'multiselectautocomplete' && isNullOrUndefined(typeOptions.chipLimit)) {
-          typeOptions.chipLimit = 2;
+        if (t === 'multiselectautocomplete') {
+          if (isNullOrUndefined(typeOptions.chipLimit)) {
+            typeOptions.chipLimit = 4;
+          }
+          this.editor = createMultiSelectAutoCompleteEditor(typeOptions);
+        } else {
+          this.editor = editor(t, typeOptions);
         }
-        this.editor = editor(t, typeOptions);
       }
 
       this.editable   = !!this.editor;

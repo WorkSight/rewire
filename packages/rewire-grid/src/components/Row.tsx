@@ -43,6 +43,7 @@ const styles = (theme: Theme) => {
     },
     hidden: {
       visibility: 'collapse',
+      height: '0px !important',
     },
   };
 

@@ -85,6 +85,7 @@ const styles = (theme: Theme) => ({
   chipDisabled: {
     color: 'rgba(0, 0, 0, 0.40)',
     backgroundColor: 'rgba(0, 0, 0, 0.06)',
+    cursor: 'initial !important',
   },
   chipDeleteIcon: {
     fontSize: '1.6em',
@@ -205,7 +206,7 @@ interface IMultiSelectAutoCompleteState {
 export type MultiSelectAutoCompleteProps<T> = WithStyle<ReturnType<typeof styles>, ICustomProps<T> & IMultiSelectAutoCompleteProps<T> & React.InputHTMLAttributes<any>>;
 
 class MultiSelectAutoComplete<T> extends React.Component<MultiSelectAutoCompleteProps<T>, IMultiSelectAutoCompleteState> {
-  state = {suggestions: [], manualFocusing: false, showMoreSelectedItemsPopupIsOpen: false};
+  state:                       IMultiSelectAutoCompleteState;
   _fontSize?:                  string;
   _inputComponentNode?:        any;
   _suggestionsContainerWidth?: string;
@@ -225,8 +226,8 @@ class MultiSelectAutoComplete<T> extends React.Component<MultiSelectAutoComplete
       const wait = is.number(props.debounce) ? props.debounce as number : 150;
       this.search = debounce(this.search, wait);
     }
-    this.map = props.map || defaultMap;
-
+    this.map   = props.map || defaultMap;
+    this.state = {suggestions: [], manualFocusing: false, showMoreSelectedItemsPopupIsOpen: false};
     if (!isNullOrUndefined(props.initialInputValue)) {
       this.performSearch(props.initialInputValue);
     }
@@ -707,7 +708,7 @@ class MultiSelectAutoComplete<T> extends React.Component<MultiSelectAutoComplete
             key='...'
             label='...'
             className={classNames(classes.chip, classes.showMoreChip, this.props.disabled ? classes.chipDisabled : undefined)}
-            onClick={this.openShowMoreSelectedItemsPopup}
+            onClick={!this.props.disabled ? this.openShowMoreSelectedItemsPopup : undefined}
           />
         </RootRef>
       );
