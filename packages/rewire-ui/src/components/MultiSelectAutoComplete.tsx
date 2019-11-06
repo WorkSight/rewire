@@ -85,6 +85,7 @@ const styles = (theme: Theme) => ({
   chipDisabled: {
     color: 'rgba(0, 0, 0, 0.40)',
     backgroundColor: 'rgba(0, 0, 0, 0.06)',
+    cursor: 'initial !important',
   },
   chipDeleteIcon: {
     fontSize: '1.6em',
@@ -707,7 +708,7 @@ class MultiSelectAutoComplete<T> extends React.Component<MultiSelectAutoComplete
             key='...'
             label='...'
             className={classNames(classes.chip, classes.showMoreChip, this.props.disabled ? classes.chipDisabled : undefined)}
-            onClick={this.openShowMoreSelectedItemsPopup}
+            onClick={!this.props.disabled ? this.openShowMoreSelectedItemsPopup : undefined}
           />
         </RootRef>
       );
