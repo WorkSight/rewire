@@ -195,7 +195,7 @@ export interface IGridOptions {
   rowKeybindPermissions?   : IGridRowKeybindPermissions;
   variableKeybinds?        : {[keybind: string]: GridKeybindAction};
   isRowCompleteFn?         : (row: IRowData) => boolean;
-  canSelectCellFn          : (cell: ICell) => boolean;
+  canSelectCellFn?         : (cell: ICell) => boolean;
   headerRowHeight?         : number;
   rowHeight?               : number;
   optionsMenuFn?           : () => IGridOptionsMenu;

@@ -5,7 +5,7 @@ import { sampleModel, SampleDialog }             from './SampleDialog';
 import { hotkeysModel, HotKeysDialog }           from './HotKeys';
 import { YesNoModel, YesNoDialog }               from './YesNoDialog';
 import { ConfirmationModel, ConfirmationDialog } from './YesNoDialog';
-import { utc, UTC, TimeSpan, isNullOrUndefined } from 'rewire-common';
+import { utc, UTC, isNullOrUndefined }           from 'rewire-common';
 import { Observe, observable, watch, root }      from 'rewire-core';
 import {
   ActionFn,
@@ -30,7 +30,6 @@ import {
   ICell,
   IRow,
   IColumn,
-  IColumnsToggleMenuOptions,
   createColumnsToggleMenuItems,
 }                            from 'rewire-grid';
 import {PopoverOrigin}       from '@material-ui/core/Popover';
@@ -603,8 +602,8 @@ export const HomeView = React.memo(withStyles(styles, (props: HomeViewProps) => 
           accept='image/*'
           id='contained-button-file'
           type='file'
-          onChange={({ target: { validity, files: [file] } }) => {
-            validity.valid && uploadFile(file);
+          onChange={({ target: { validity, files } }) => {
+            validity.valid && uploadFile(files![0]);
           }}
         />
         <label htmlFor='contained-button-file'>

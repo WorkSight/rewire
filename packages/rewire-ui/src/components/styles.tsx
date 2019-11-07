@@ -1,19 +1,22 @@
+import * as React       from 'react';
 import {
   withStyles as withStylesMUI,
   Theme
-} from '@material-ui/core/styles';
-import * as React from 'react';
+}                        from '@material-ui/core/styles';
+import { CSSProperties } from '@material-ui/styles';
 
 export {Theme as Theme};
 
 export type StylesOf<T> = {
-  [P in keyof T]: string;
+  [P in keyof T]?: string;
 };
 
 export type StyleProps<T> = {
   classes: StylesOf<T>;
-  theme: Theme;
+  theme?:  Theme;
 };
+
+export type CSSTheme = { [field: string]: CSSProperties };
 
 export interface Func<T> {
   ([...args]: any, args2?: any): T;
