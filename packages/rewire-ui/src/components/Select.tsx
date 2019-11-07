@@ -24,12 +24,12 @@ const styles = (theme: Theme) => ({
     fontSize: 'inherit',
   },
   inputInput: {
-    paddingTop: '0.28125em',
-    paddingBottom: '0.34375em',
+    paddingTop: '0.375em',
+    paddingBottom: '0.4375em',
   },
   inputOutlinedInput: {
-    paddingTop: '0.65625em',
-    paddingBottom: '0.65625em',
+    paddingTop: '0.75em',
+    paddingBottom: '0.75em',
   },
   inputLabelRoot: {
     fontSize: 'inherit',
@@ -64,9 +64,13 @@ const styles = (theme: Theme) => ({
       backgroundColor: 'transparent',
     }
   },
+  selectMenu: {
+    height: '1.1875em',
+  },
   selectMenuPaper: {
     minWidth: '250px !important',
   },
+
   selectMenuItem: {
     fontSize: 'inherit',
     height: 'auto',
@@ -385,7 +389,7 @@ class SelectInternal<T> extends React.Component<SelectInternalProps<T>, any> {
             onClose: this.handleOnClose,
             value: v,
             displayEmpty: true,
-            classes: {root: selectRootClasses, select: classes.select},
+            classes: {root: selectRootClasses, select: classes.select, selectMenu: classes.selectMenu},
             SelectDisplayProps: {onKeyDown: this.handleKeyDown},
             MenuProps: {classes: {paper: classes.selectMenuPaper}, MenuListProps: menuListProps},
             renderValue: (() => (
