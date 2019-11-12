@@ -1,12 +1,8 @@
-import * as React               from 'react';
-import { Observe, observable }  from 'rewire-core';
+import * as React   from 'react';
+import { Observe }  from 'rewire-core';
 import {
   editor,
   TextEditorProps,
-  Modal,
-  Dialog,
-  IField,
-  IModalState,
   withStyles,
 }                   from 'rewire-ui';
 import Popover      from '@material-ui/core/Popover';
@@ -131,9 +127,9 @@ const styles = (theme: Theme) => ({
 export function createMultiSelectAutoCompleteEditor(options: any) {
   const E      = editor('multiselectautocomplete', options);
   const Editor = withStyles(styles, (props: TextEditorProps) => {
-    const {classes, ...restProps}   = props;
-    const {paper, ...editorClasses} = classes;
-    const {field}                   = restProps;
+    const {classes, ...restProps} = props;
+    const {...editorClasses}      = classes;
+    const {field}                 = restProps;
 
     return (
       <Observe render={() => (

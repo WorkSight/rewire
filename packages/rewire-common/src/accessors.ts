@@ -31,7 +31,6 @@ export function createGetter(path: string | string[]) {
   return (getterCache[k] = new Function('obj', body));
 }
 
-
 const setterCache = {};
 export function createSetter(path: string | string[]) {
   if (!Array.isArray(path)) return defaultSetter(path);

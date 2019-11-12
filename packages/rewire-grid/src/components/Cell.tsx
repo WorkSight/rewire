@@ -289,7 +289,7 @@ class Cell extends React.PureComponent<CellProps, {}> {
     let errorCls = cc([{hidden: this.cell.editing}]);
 
     let ErrorIconToUse: React.ComponentType<any>;
-    let errorColorClass: string;
+    let errorColorClass: string | undefined;
     switch (this.cell!.error!.severity) {
       case ErrorSeverity.Info:
         ErrorIconToUse  = InfoIcon;

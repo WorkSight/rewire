@@ -1,3 +1,25 @@
+import { isNullOrUndefined }   from 'rewire-common';
+import {
+  observable,
+  computed,
+  observe,
+  freeze,
+  root,
+  sample
+}                              from 'rewire-core';
+import {
+  compare,
+  Validator,
+  ChangeTracker,
+  IChangeTrackerContext
+}                              from 'rewire-ui';
+import * as merge              from 'deepmerge';
+import { CellModel }           from './CellModel';
+import { ColumnModel }         from './ColumnModel';
+import {
+  gridStaticKeybinds,
+  gridDefaultVariableKeybinds
+}                              from './GridKeybinds';
 import {
   IGrid,
   ICell,
@@ -15,30 +37,8 @@ import {
   IGridVariableKeybinds,
   IRowData,
   IGridOptionsMenu,
-}                                       from './GridTypes';
-import {isNullOrUndefined}              from 'rewire-common';
-import createRow, {RowModel}            from './RowModel';
-import {ColumnModel}                    from './ColumnModel';
-import {CellModel}                      from './CellModel';
-import {
-  gridStaticKeybinds,
-  gridDefaultVariableKeybinds
-}                  from './GridKeybinds';
-import * as merge  from 'deepmerge';
-import {
-  observable,
-  computed,
-  observe,
-  freeze,
-  root,
-  sample
-}                  from 'rewire-core';
-import {
-  compare,
-  Validator,
-  ChangeTracker,
-  IChangeTrackerContext
-}                  from 'rewire-ui';
+}                              from './GridTypes';
+import createRow, { RowModel } from './RowModel';
 
 class GridChangeTrackerContext implements IChangeTrackerContext {
   constructor(private _grid: GridModel, public isComplete: (value: any) => boolean) {}
