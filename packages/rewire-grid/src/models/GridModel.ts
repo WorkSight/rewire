@@ -1,3 +1,4 @@
+import * as nanoid             from 'nanoid';
 import { isNullOrUndefined }   from 'rewire-common';
 import {
   observable,
@@ -657,6 +658,10 @@ class GridModel implements IGrid, IDisposable {
     });
   }
 
+  recalculateChangeTracker() {
+    this.__changeTracker && this.__changeTracker.recalculate();
+  }
+
   _addColumn(column: IColumn): IColumn {
     column.grid     = this;
     const c: ColumnModel = (column as ColumnModel);
@@ -712,10 +717,6 @@ class GridModel implements IGrid, IDisposable {
     return row;
   }
 
-  recalculateChangeTracker() {
-    this.__changeTracker && this.__changeTracker.recalculate();
-  }
-
   _addRow(data?: IRowData, position?: number): IRow {
     if (data && data.options && data.options.fixed) {
       return this.addFixedRow(data, position);
@@ -759,18 +760,11 @@ class GridModel implements IGrid, IDisposable {
     return newCellToSelect;
   }
 
-  duplicateRow(rowId: string, position?: number): IRow | undefined {
-    const row = findRowById(this.rows, rowId);
-    if (!row) return;
-    const rowData: IRowData = {id: String(id++), data: Object.assign({}, row.data), options: row.options};
-    return this.addRow(rowData, position);
-  }
-
   duplicateRows(ids: string[], position?: number): IRow[] {
     let duplicatedRows: IRow[] = [];
     let pos = position;
     ids.forEach(id => {
-      let duplicatedRow = this.duplicateRow(id, pos);
+      let duplicatedRow = this._duplicateRow(id, pos);
       if (duplicatedRow) {
         duplicatedRows.push(duplicatedRow);
       }
@@ -779,7 +773,27 @@ class GridModel implements IGrid, IDisposable {
       }
     });
 
+    freeze(() => {
+      this.sort();
+      this.setRowPositions();
+    });
     return duplicatedRows;
+  }
+
+  duplicateRow(rowId: string, position?: number): IRow | undefined {
+    const row = this._duplicateRow(rowId, position);
+    if (!row) return;
+    freeze(() => {
+      this.sort();
+      this.setRowPositions();
+    });
+  }
+
+  _duplicateRow(rowId: string, position?: number): IRow | undefined {
+    const row = findRowById(this.rows, rowId);
+    if (!row) return;
+    const rowData: IRowData = {id: nanoid(10), data: Object.assign({}, row.data), options: row.options};
+    return this._addRow(rowData, position);
   }
 
   duplicateSelectedRows(): IRow[] {
