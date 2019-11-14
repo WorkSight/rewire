@@ -1,18 +1,18 @@
-import * as React              from 'react';
-import {Observe}               from 'rewire-core';
-import classNames              from 'classnames';
-import Button, {ButtonProps}   from '@material-ui/core/Button';
-import Menu, {MenuProps}       from '@material-ui/core/Menu';
-import MenuItem                from '@material-ui/core/MenuItem';
-import ListItemText            from '@material-ui/core/ListItemText';
-import ListItemIcon            from '@material-ui/core/ListItemIcon';
-import ListSubheader           from '@material-ui/core/ListSubheader';
-import {SvgIconProps}          from '@material-ui/core/SvgIcon';
-import {Theme}                 from '@material-ui/core/styles';
-import {PopoverOrigin}         from '@material-ui/core/Popover';
-import LabelIcon               from '@material-ui/icons/LabelOutlined';
-import {isNullOrUndefined}     from 'rewire-common';
-import {WithStyle, withStyles} from './styles';
+import * as React                   from 'react';
+import {isNullOrUndefined, Without} from 'rewire-common';
+import {Observe}                    from 'rewire-core';
+import classNames                   from 'classnames';
+import Button, {ButtonProps}        from '@material-ui/core/Button';
+import Menu, {MenuProps}            from '@material-ui/core/Menu';
+import MenuItem                     from '@material-ui/core/MenuItem';
+import ListItemText                 from '@material-ui/core/ListItemText';
+import ListItemIcon                 from '@material-ui/core/ListItemIcon';
+import ListSubheader                from '@material-ui/core/ListSubheader';
+import {SvgIconProps}               from '@material-ui/core/SvgIcon';
+import {Theme}                      from '@material-ui/core/styles';
+import {PopoverOrigin}              from '@material-ui/core/Popover';
+import LabelIcon                    from '@material-ui/icons/LabelOutlined';
+import {WithStyle, withStyles}      from './styles';
 
 export interface IMenuBaseItem {
   name: string;
@@ -66,7 +66,7 @@ const menuBaseStyles = (theme: Theme) => ({
   },
 });
 
-interface IMenuBaseProps {
+interface IMenuBaseProps extends Without<Partial<MenuProps>, 'title'> {
   tooltip?:         string;
   title?:           string | JSX.Element | (() => JSX.Element);
   menuId:           string;
@@ -85,7 +85,7 @@ export interface IMenuBaseState {
 }
 
 export type MenuBaseStylesType = ReturnType<typeof menuBaseStyles>;
-export type MenuBaseProps      = WithStyle<MenuBaseStylesType, Partial<MenuProps> & IMenuBaseProps>;
+export type MenuBaseProps      = WithStyle<MenuBaseStylesType, IMenuBaseProps>;
 
 class MenuBase extends React.Component<MenuBaseProps, IMenuBaseState> {
   state: IMenuBaseState = {
@@ -150,7 +150,7 @@ class MenuBase extends React.Component<MenuBaseProps, IMenuBaseState> {
 
   renderMenuContent = React.memo(React.forwardRef((): JSX.Element => {
     return <Observe render={() => {
-      const {classes, items, itemRenderer} = this.props;
+      const {classes, items, itemRenderer} = this.props as any;
       return (
         < >
         {items.map((item: IMenuBaseItem, idx: number) => {
