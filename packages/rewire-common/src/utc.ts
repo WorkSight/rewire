@@ -5,7 +5,7 @@ export function getTimezoneOffset(date: Date) {
   return (date.getTimezoneOffset() * 60000);
 }
 
-const _maxValue = 253402214400000;
+const _maxValue = 218342563200000;
 const _minValue = -62135596800000;
 
 export class UTC {
