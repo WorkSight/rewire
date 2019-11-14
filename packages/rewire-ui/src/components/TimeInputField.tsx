@@ -39,21 +39,21 @@ export class TimeValidator {
   }
 
   private _parse(value?: string): number | undefined {
-    if (!value) {
+    if (isNullOrUndefined(value)) {
       return undefined;
     }
 
-    let result = this.parseMilitary(value.match(/^(-?[0-9]?[0-9])[:;\/]([0-5][0-9])$/));
+    let result = this.parseMilitary(value!.match(/^(-?[0-9]?[0-9])[:;\/]([0-5][0-9])$/));
     if (!isNullOrUndefined(result)) {
       return result;
     }
 
-    result = this.parseAMPM(value.match(/^(-?0?[1-9]|1[0-2])([:;\/]([0-5][0-9]))? *(am|pm)?$/i));
+    result = this.parseAMPM(value!.match(/^(-?0?[1-9]|1[0-2])([:;\/]([0-5][0-9]))? *(am|pm)?$/i));
     if (!isNullOrUndefined(result)) {
       return result;
     }
 
-    result = this._parseFloat(value.match(/^-?[0-9]?[0-9]?([\.][0-9]*)?$/));
+    result = this._parseFloat(value!.match(/^-?[0-9]?[0-9]?([\.][0-9]*)?$/));
     if (!isNullOrUndefined(result)) {
       return parseFloat(result!.toFixed(2));
     }
@@ -237,7 +237,7 @@ class TimeInputField extends React.Component<TimeFieldProps, ITimeState> {
 
   _valueToSet(value?: number | string): any {
     const state = this.validator.parse(value);
-    return {...state, text: state.value ? `${state.value}` : ''};
+    return {...state, text: !isNullOrUndefined(state.value) ? `${state.value}` : ''};
   }
 
   handleChange = (evt: React.ChangeEvent<HTMLInputElement>) => {
@@ -247,7 +247,7 @@ class TimeInputField extends React.Component<TimeFieldProps, ITimeState> {
 
   handleBlur = (evt: React.FocusEvent<HTMLInputElement>) => {
     if (this.state.value === this.props.value) {
-      this.setState({text: this.state.value ? `${this.state.value}` : ''});
+      this.setState({text: !isNullOrUndefined(this.state.value) ? `${this.state.value}` : ''});
     }
     this.props.onValueChange(this.state.value);
   }
