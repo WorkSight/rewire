@@ -184,98 +184,98 @@ export interface IGrid extends IRows, IDisposable {
 }
 
 export interface IGridOptions {
-  enabled?                 : boolean;
-  readOnly?                : boolean;
-  verticalAlign?           : VerticalAlignment;
-  isDraggable?             : boolean;
-  multiSelect?             : boolean;
-  allowMergeColumns?       : boolean;
-  clearSelectionOnBlur?    : boolean;
-  groupBy?                 : string[];
-  rowKeybindPermissions?   : IGridRowKeybindPermissions;
-  variableKeybinds?        : {[keybind: string]: GridKeybindAction};
-  isRowCompleteFn?         : (row: IRowData) => boolean;
-  canSelectCellFn          : (cell: ICell) => boolean;
-  headerRowHeight?         : number;
-  rowHeight?               : number;
-  optionsMenuFn?           : () => IGridOptionsMenu;
+  enabled?:               boolean;
+  readOnly?:              boolean;
+  verticalAlign?:         VerticalAlignment;
+  isDraggable?:           boolean;
+  multiSelect?:           boolean;
+  allowMergeColumns?:     boolean;
+  clearSelectionOnBlur?:  boolean;
+  groupBy?:               string[];
+  rowKeybindPermissions?: IGridRowKeybindPermissions;
+  variableKeybinds?:      {[keybind: string]: GridKeybindAction};
+  isRowCompleteFn?:       (row: IRowData) => boolean;
+  canSelectCellFn?:       (cell: ICell)   => boolean;
+  headerRowHeight?:       number;
+  rowHeight?:             number;
+  optionsMenuFn?:         () => IGridOptionsMenu;
 }
 
 export interface IGroupRow {
-  expanded       : boolean;
-  visible        : boolean;
-  rows           : (IRow | IGroupRow)[];
-  readonly title : string;
-  readonly level : number;
-  expand(): void;
-  collapse(): void;
+  expanded:       boolean;
+  visible:        boolean;
+  rows:           (IRow | IGroupRow)[];
+  readonly title: string;
+  readonly level: number;
+  expand():       void;
+  collapse():     void;
 }
 
 export interface IGridColors {
-  headerBackground?: string;
-  headerText?: string;
-  headerBorder?: string;
-  gridBackground?: string;
-  gridSettingsIcon?: string;
-  gridText?: string;
-  gridBorder?: string;
-  gridBorderSelected?: string;
-  groupRowBackground?: string;
-  rowSelectedBackground?: string;
-  rowSelectedBorder?: string;
-  cellSelectedBackground?: string;
-  rowSelectedText?: string;
-  rowStripedBackground?: string;
+  headerBackground?:             string;
+  headerText?:                   string;
+  headerBorder?:                 string;
+  gridBackground?:               string;
+  gridSettingsIcon?:             string;
+  gridText?:                     string;
+  gridBorder?:                   string;
+  gridBorderSelected?:           string;
+  groupRowBackground?:           string;
+  rowSelectedBackground?:        string;
+  rowSelectedBorder?:            string;
+  cellSelectedBackground?:       string;
+  rowSelectedText?:              string;
+  rowStripedBackground?:         string;
   rowStripedSelectedBackground?: string;
-  leftLabelBackground?: string;
-  cellOutline?: string;
+  leftLabelBackground?:          string;
+  cellOutline?:                  string;
 }
 
 export interface IGridFontSizes {
-  header?: string;
-  body?: string;
-  groupRow?: string;
+  header?:     string;
+  body?:       string;
+  groupRow?:   string;
   toggleMenu?: string;
 }
 
 export interface IRowOptions {
-  cls?: string;
-  visible?: boolean;
-  fixed?: boolean;
+  cls?:               string;
+  visible?:           boolean;
+  fixed?:             boolean;
   allowMergeColumns?: boolean;
 
   onClick?(row: IRow): void;
 }
 
 export interface IRowData {
-  id?: string;
-  data?: ICellDataMap;
+  id?:      string;
+  data?:    ICellDataMap;
   options?: IRowOptions;
 }
 
 export interface IRow extends IDisposable {
-  id                            : string;
-  grid                          : IGrid;
-  cells                         : ICellMap;
-  data                          : any;
-  selected                      : boolean;
-  cls?                          : string;
-  allowMergeColumns?            : boolean;
-  position                      : number;
-  visible                       : boolean;
-  fixed                         : boolean;
-  options                       : IRowOptions;
+  id:                 string;
+  grid:               IGrid;
+  cells:              ICellMap;
+  data:               any;
+  selected:           boolean;
+  cls?:               string;
+  allowMergeColumns?: boolean;
+  position:           number;
+  visible:            boolean;
+  fixed:              boolean;
+  options:            IRowOptions;
 
-  onClick?(row: IRow): void;
-  hasErrors(): boolean;
-  getErrors(): IErrorData[];
+  onClick?(row: IRow):                                    void;
+  hasErrors():                                            boolean;
+  getErrors():                                            IErrorData[];
   createCell(column: IColumn, value: any, type?: string): ICell;
-  clear(columnNames?: string[]): void;
-  mergeAllColumns(): void;
-  mergeFixedColumns(): void;
-  mergeStandardColumns(): void;
-  clone(): IRow;
-  validate(): void;
+  clear(columnNames?: string[]):                          void;
+  mergeAllColumns():                                      void;
+  mergeFixedColumns():                                    void;
+  mergeStandardColumns():                                 void;
+  clone():                                                IRow;
+  validate():                                             void;
 }
 
 export type MaskType = (string | RegExp)[];
@@ -292,66 +292,66 @@ export type IColumnEditor =
   {type: 'multiselectautocomplete', options: {search: SearchFn<any>, map: MapFn<any>, openOnFocus?: boolean, showEmptySuggestions?: boolean, suggestionsContainerHeader?: ISuggestionsContainerComponent, suggestionsContainerFooter?: ISuggestionsContainerComponent, chipLimit?: number}};
 
 export interface ICellProperties {
-  id        : number;
-  grid      : IGrid;
-  cls?      : any;
-  editable  : boolean;
-  align?    : TextAlignment;
-  renderer? : React.SFC<any>;
-  colSpan   : number;
-  rowSpan   : number;
+  id:        number;
+  grid:      IGrid;
+  cls?:      any;
+  editable:  boolean;
+  align?:    TextAlignment;
+  renderer?: React.SFC<any>;
+  colSpan:   number;
+  rowSpan:   number;
 
   onValueChange?(cell: ICell, v: any): void;
 }
 
 export interface IColumnOptions {
-  type?         : IColumnEditor;
-  cls?          : any;
-  enabled?      : boolean;
-  readOnly?     : boolean;
-  editable?     : boolean;
-  fixed?        : boolean;
-  visible?      : boolean;
-  align?        : TextAlignment;
+  type?:          IColumnEditor;
+  cls?:           any;
+  enabled?:       boolean;
+  readOnly?:      boolean;
+  editable?:      boolean;
+  fixed?:         boolean;
+  visible?:       boolean;
+  align?:         TextAlignment;
   verticalAlign?: VerticalAlignment;
-  rowSpan?      : number;
-  colSpan?      : number;
-  tooltip?      : string;
-  width?        : string;
-  canSort?      : boolean;
-  accessor?     : {getter: TGetter, setter: TSetter};
-  renderer?     : React.SFC<any>;
-  validators?   : IFormValidator;
+  rowSpan?:       number;
+  colSpan?:       number;
+  tooltip?:       string;
+  width?:         string;
+  canSort?:       boolean;
+  accessor?:      {getter: TGetter, setter: TSetter};
+  renderer?:      React.SFC<any>;
+  validators?:    IFormValidator;
 
   onValueChange?(cell: ICell, v: any): void;
-  map?(value: any): string;
+  map?(value: any):                             string;
   predicate?(value: any, filter: {value: any}): boolean;
-  compare?(x: any, y: any): number;
+  compare?(x: any, y: any):                     number;
 }
 
 export interface IColumnData {
-  name: string;
-  title: string;
+  name:     string;
+  title:    string;
   options?: IColumnOptions;
 }
 
 export interface IColumn extends ICellProperties {
-  name           : string;
-  title          : string;
-  type           : EditorType;
-  tooltip?       : string;
-  width?         : string;
-  fixed          : boolean;
-  visible        : boolean;
-  verticalAlign  : VerticalAlignment;
-  enabled        : boolean;
-  readOnly       : boolean;
-  position       : number;
-  sort?          : SortDirection;
-  canSort        : boolean;
+  name:            string;
+  title:           string;
+  type:            EditorType;
+  tooltip?:        string;
+  width?:          string;
+  fixed:           boolean;
+  visible:         boolean;
+  verticalAlign:   VerticalAlignment;
+  enabled:         boolean;
+  readOnly:        boolean;
+  position:        number;
+  sort?:           SortDirection;
+  canSort:         boolean;
   isGroupByColumn: boolean;
-  typeOptions?   : any;
-  editor?        : React.SFC<any>;
+  typeOptions?:    any;
+  editor?:         React.SFC<any>;
 
   map?(value: any): string;
   predicate?(value: any, filter: {value: any}): boolean;
@@ -362,34 +362,34 @@ export interface IColumn extends ICellProperties {
 export interface IErrorData { name: string; error: IError; }
 
 export interface ICell extends ICellProperties {
-  row                  : IRow;
-  column               : IColumn;
-  error?               : IError;
-  selected             : boolean;
-  value                : any;
-  verticalAlign        : VerticalAlignment;
-  enabled              : boolean;
-  readOnly             : boolean;
-  canSelect            : boolean;
-  readonly editing     : boolean;
-  rowPosition          : number;
-  columnPosition       : number;
-  isTopMostSelection   : boolean;
-  isRightMostSelection : boolean;
+  row:                   IRow;
+  column:                IColumn;
+  error?:                IError;
+  selected:              boolean;
+  value:                 any;
+  verticalAlign:         VerticalAlignment;
+  enabled:               boolean;
+  readOnly:              boolean;
+  canSelect:             boolean;
+  readonly editing:      boolean;
+  rowPosition:           number;
+  columnPosition:        number;
+  isTopMostSelection:    boolean;
+  isRightMostSelection:  boolean;
   isBottomMostSelection: boolean;
-  isLeftMostSelection  : boolean;
-  keyForEdit?          : string;
-  hasChanges           : boolean;
+  isLeftMostSelection:   boolean;
+  keyForEdit?:           string;
+  hasChanges:            boolean;
 
-  hasErrors(): boolean;
-  getErrors(): IErrorData[];
-  clone(row: IRow): ICell;
-  clear(): void;
+  hasErrors():                  boolean;
+  getErrors():                  IErrorData[];
+  clone(row: IRow):             ICell;
+  clear():                      void;
   setEditing(editing: boolean): void;
-  canFocus(): boolean;
-  setFocus(focus?: boolean): void;
-  validate(): void;
-  unselect(): void;
+  canFocus():                   boolean;
+  setFocus(focus?: boolean):    void;
+  validate():                   void;
+  unselect():                   void;
   performKeybindAction(evt: React.KeyboardEvent<any>): void;
 }
 
@@ -397,7 +397,7 @@ export type ICellMap     = {[columnName: string]: ICell};
 export type ICellDataMap = {[columnName: string]: any};
 
 export interface ICellCustomValue {
-  clone?(): any;
+  clone?():    any;
   toString?(): string;
 }
 
@@ -472,8 +472,6 @@ export function createColumnsToggleMenuItems(columns: IColumn[], columnNames: st
     onClick: onToggleMenuItemClick(column),
   } as IToggleMenuItem));
 }
-
-
 
 // export function collapseAll(rows: IRow[]) {
 //   for (const groupRow of groupRows(rows)) {
