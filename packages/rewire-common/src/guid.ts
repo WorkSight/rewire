@@ -1,6 +1,6 @@
 import * as generate from 'nanoid/generate';
 
-const guidAlphabet = '0123456789ABCDEFGHIJKLMNOPQRSTUVWXYZabcdefghijklmnopqrstuvwxyz';
+const guidAlphabet = '0123456789abcdef';
 const guidLength   = 32;
 
 export default function guid(): string {
