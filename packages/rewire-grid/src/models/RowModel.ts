@@ -10,9 +10,8 @@ import {
   cloneValue,
   IRowData
 }                                     from './GridTypes';
-import {isNullOrUndefined}            from 'rewire-common';
+import { isNullOrUndefined, guid }    from 'rewire-common';
 import createCell                     from './CellModel';
-import * as nanoid                    from 'nanoid';
 import * as deepEqual                 from 'fast-deep-equal';
 import { observable }                 from 'rewire-core';
 import { IValidationContext, IError } from 'rewire-ui';
@@ -55,7 +54,7 @@ export class RowModel implements IRow, IDisposable, IValidationContext {
     if (data && data.id) {
       this.id = String(data.id);
     } else {
-      this.id = nanoid(10);
+      this.id = guid();
     }
 
     for (const column of this.grid.columns) {

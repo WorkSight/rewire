@@ -1,6 +1,6 @@
 {
   "name": "rewire-common",
-  "version": "1.0.176",
+  "version": "1.0.177",
   "description": "Common utilities used by the rewire suite of reactive components",
   "main": "./src/index.ts",
   "typings": "./src/index.ts",
@@ -20,6 +20,8 @@
   },
   "homepage": "https://github.com/worksight/rewire",
   "dependencies": {
+    "@types/nanoid": "^2.1.0",
+    "nanoid": "^2.1.6",
     "query-string": "^6.8.2"
   },
   "devDependencies": {
