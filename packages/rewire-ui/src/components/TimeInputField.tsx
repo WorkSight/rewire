@@ -1,10 +1,10 @@
-import * as React                    from 'react';
-import {isNullOrUndefined}           from 'rewire-common';
-import {Theme}                       from '@material-ui/core/styles';
-import TextField, { TextFieldProps } from '@material-ui/core/TextField';
-import InputAdornment                from '@material-ui/core/InputAdornment';
-import {TextAlignment, TextVariant}  from './editors';
-import {withStyles, WithStyle}       from './styles';
+import * as React                                    from 'react';
+import {isNullOrUndefined, isNullOrUndefinedOrEmpty} from 'rewire-common';
+import {Theme}                                       from '@material-ui/core/styles';
+import TextField, { TextFieldProps }                 from '@material-ui/core/TextField';
+import InputAdornment                                from '@material-ui/core/InputAdornment';
+import {TextAlignment, TextVariant}                  from './editors';
+import {withStyles, WithStyle}                       from './styles';
 
 type MapFn<T> = (item?: T) => string;
 
@@ -46,7 +46,7 @@ export class TimeValidator {
   }
 
   private _parse(value?: string): number | undefined {
-    if (isNullOrUndefined(value)) {
+    if (isNullOrUndefinedOrEmpty(value)) {
       return undefined;
     }
 
@@ -244,7 +244,7 @@ class TimeInputField extends React.Component<TimeFieldProps, ITimeState> {
 
   _valueToSet(value?: number | string): any {
     const state = this.validator.parse(value);
-    return {...state, text: !isNullOrUndefined(state.value) ? `${state.value}` : ''};
+    return {...state, text: !isNullOrUndefinedOrEmpty(state.value) ? `${state.value}` : ''};
   }
 
   handleChange = (evt: React.ChangeEvent<HTMLInputElement>) => {
@@ -254,7 +254,7 @@ class TimeInputField extends React.Component<TimeFieldProps, ITimeState> {
 
   handleBlur = (evt: React.FocusEvent<HTMLInputElement>) => {
     if (this.state.value === this.props.value) {
-      this.setState({text: !isNullOrUndefined(this.state.value) ? `${this.state.value}` : ''});
+      this.setState({text: !isNullOrUndefinedOrEmpty(this.state.value) ? `${this.state.value}` : ''});
     }
     this.props.onValueChange(this.state.value);
   }
