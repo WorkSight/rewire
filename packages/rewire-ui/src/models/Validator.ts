@@ -220,7 +220,7 @@ export default class Validator {
     return this._get(context, field, validator, 'label');
   }
 
-  private isValid(context: IValidationContext, field: string, validator: IValidator, setErrors: boolean): eValidationResult {
+  public isValid(context: IValidationContext, field: string, validator: IValidator, setErrors: boolean): eValidationResult {
     if (!context.shouldValidate(field)) return eValidationResult.Success;
     const args        = this.extractArguments(context, field, validator);
     let   errorResult = validator.fn.apply(context, args);
