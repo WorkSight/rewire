@@ -100,7 +100,8 @@ class Client implements IClient {
   subscribe<T>(query: GQL, variables?: object): Stream<ExecutionResult<T>> {
     if (!this.subscriptionClient) {
       const url = new URL(this.url);
-      this.subscriptionClient = new SubscriptionClient(`ws://${url.host}${url.pathname}`, {reconnect: true, lazy: true, connectionParams: {token: this.bearer}});
+      const protocol = (url.protocol == 'https:') ? 'wss:' : 'ws:';
+      this.subscriptionClient = new SubscriptionClient(`${protocol}//${url.host}${url.pathname}`, {reconnect: true, lazy: true, connectionParams: {token: this.bearer}});
     }
 
     return from(this.subscriptionClient!.request({query: (isGQL(query)) ? query.loc.source.body : query, variables})) as Stream<ExecutionResult<T>>;
