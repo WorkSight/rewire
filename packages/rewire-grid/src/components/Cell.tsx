@@ -110,7 +110,7 @@ const styles = (theme: Theme) => ({
     height: 'auto',
   },
   editorSelectInputRoot: {
-    alignItems: 'stretch',
+    flex: '1',
   },
   editorInputRoot: {
     flex: '1',
@@ -121,9 +121,6 @@ const styles = (theme: Theme) => ({
   },
   editorMultiSelectAutoCompleteTextFieldInputContainer: {
     overflow: 'hidden',
-  },
-  editorAutoCompleteContainer: {
-    display: 'flex',
   },
   editorCheckboxRoot: {
     height: '100%',
@@ -397,19 +394,15 @@ class Cell extends React.PureComponent<CellProps, {}> {
           }
         }
         let editorClasses: Object | undefined = undefined;
-        if (cellType === 'select' || cellType === 'multiselect') {
-          editorClasses = {inputRoot: this.props.classes.editorSelectInputRoot, select: this.props.classes.editorSelectSelect, selectMenu: this.props.classes.editorSelectSelectMenu};
-        } else if (cellType === 'checked') {
+        if (cellType === 'checked') {
           editorClasses = {checkboxRoot: this.props.classes.editorCheckboxRoot};
-        } else if (cellType === 'text' || cellType === 'date' || cellType === 'email' || cellType === 'password' || cellType === 'time' || cellType === 'number' || cellType === 'phone' || cellType === 'auto-complete' || 'mask') {
+        } else if (cellType === 'text' || cellType === 'date' || cellType === 'email' || cellType === 'password' || cellType === 'time' || cellType === 'number' || cellType === 'phone' || cellType === 'auto-complete' || 'select' || 'multiSelect' || 'mask') {
           editorClasses = {formControlRoot: this.props.classes.editorFormControlRoot, inputRoot: this.props.classes.editorInputRoot};
         }
 
-        if (cellType === 'auto-complete' || cellType === 'multiselectautocomplete') {
-          Object.assign(editorClasses, {container: this.props.classes.editorAutoCompleteContainer});
-        }
-
-        if (cellType === 'multiselectautocomplete') {
+        if (cellType === 'select' || cellType === 'multiselect') {
+          editorClasses = Object.assign(editorClasses, {select: this.props.classes.editorSelectSelect, selectMenu: this.props.classes.editorSelectSelectMenu});
+        } else if (cellType === 'multiselectautocomplete') {
           Object.assign(editorClasses, {textFieldInputContainer: this.props.classes.editorMultiSelectAutoCompleteTextFieldInputContainer});
         }
 
