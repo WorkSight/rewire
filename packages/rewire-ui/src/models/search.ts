@@ -81,6 +81,8 @@ export interface ICustomProps<T> {
   align?                : TextAlignment;
   variant?              : TextVariant;
   label?                : string;
+  placeholder?          : string;
+  autoFocus?            : boolean;
   disableErrors?        : boolean;
   startAdornment?       : JSX.Element;
   endAdornment?         : JSX.Element;
