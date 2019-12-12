@@ -32,9 +32,14 @@ const suggestionsContainerFooter = (props: ISuggestionsContainerComponentProps) 
   </div>
 );
 
+const CustomEditor = (props: any) => {
+  return <span>{props.value}</span>;
+}
+
 function createForm() {
   return Form.create((_) => ({
     email:                   _.email().label('Email').validators('email').placeholder('enter a valid email').autoFocus(),
+    custom2:                 _.custom(CustomEditor).label('OOGA').placeholder('enter a valid email'),
     password:                _.password().label('Password').validators('required', validator('==', field('password_confirmation'), error('passwords must be the same'))).placeholder('enter a password'),
     password_confirmation:   _.password().label('Confirm Password').validators('required').placeholder('confirm your password'),
     country:                 _.reference(countries).label('Country').validators('required').placeholder('type to lookup'),
@@ -56,6 +61,7 @@ function createForm() {
     advancedAutoComplete:    _.reference(countries, { suggestionsContainerHeader: suggestionsContainerHeader, suggestionsContainerFooter: suggestionsContainerFooter, openOnFocus: true }).label('Advanced AutoComplete').validators('required').placeholder('select a country'),
   }), {
     email:                 'my_email@gmail.com',
+    custom2:               'my_email@gmail.com',
     country:               {id: 2, name: 'Albania'},
     selectCountry:         {id: 0, name: 'Afghanistan'},
     time:                  '10:30',
@@ -107,6 +113,7 @@ const SampleFormView = React.memo(({ form }: { form: typeof sampleModel.form }) 
       <FormView form={form} onSubmit={sampleModel.actionFn('login')}>
         <div className='content'>
           <form.field.email.Editor />
+          <form.field.custom2.Editor />
           <form.field.country.Editor />
           <form.field.selectCountry.Editor />
           <form.field.multiselectCountry.Editor className='span2' />

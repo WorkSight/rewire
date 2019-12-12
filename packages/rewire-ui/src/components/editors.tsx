@@ -221,7 +221,7 @@ export default function editor(type: EditorType, propsForEdit?: any): React.SFC<
     case 'custom':
       return ({field, className, classes, onValueChange, endOfTextOnFocus, selectOnFocus, cursorPositionOnFocus}: TextEditorProps) => (
         <Observe render={() => (
-          <propsForEdit.Editor
+          <propsForEdit.__Editor
             placeholder={field.placeholder}
             label={field.label}
             value={field.value}

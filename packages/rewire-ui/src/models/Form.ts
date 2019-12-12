@@ -130,7 +130,7 @@ class FormContext implements IFormContext {
 
   custom(Editor: any, editProps?: any): any {
     editProps = editProps || {};
-    editProps.Editor = Editor;
+    editProps.__Editor = Editor;
     return new BaseField('custom', editProps);
   }
 
