@@ -1,6 +1,13 @@
-import * as React                               from 'react';
-import { Modal, Dialog, WithStyle, withStyles } from 'rewire-ui';
-import Typography                               from '@material-ui/core/Typography';
+import * as React            from 'react';
+import {
+  Modal,
+  Dialog,
+  WithStyle,
+  withStyles,
+  CSSTheme
+}                            from 'rewire-ui';
+import { Theme, makeStyles } from '@material-ui/core/styles';
+import Typography            from '@material-ui/core/Typography';
 
 class HotkeysModel extends Modal {
   constructor() {
@@ -15,7 +22,7 @@ const getGridDialogTitle = (dialog: Modal): JSX.Element => {
   return <div>Grid Hotkeys List</div>;
 };
 
-const styles = () => ({
+const styles = (theme: Theme) => ({
   dialogContentsContainer: {
     padding: '16px',
     maxHeight: '600px',
@@ -33,12 +40,12 @@ const styles = () => ({
   hotkeyLabel: {
     width: '125px',
   },
-});
+}) as CSSTheme;
 
-type HotKeysDialogProps = WithStyle<ReturnType<typeof styles>>;
+const useHotKeyStyles = makeStyles(styles);
 
-export const HotKeysDialog = withStyles(styles, (props: HotKeysDialogProps) => {
-    const {classes} = props;
+export const HotKeysDialog = (props: any) => {
+    const classes = useHotKeyStyles();
 
     return (
       <Dialog dialog={hotkeysModel} title={getGridDialogTitle} maxWidth='sm'>
@@ -140,4 +147,4 @@ export const HotKeysDialog = withStyles(styles, (props: HotKeysDialogProps) => {
         </div>
       </ Dialog>
     );
-});
+};

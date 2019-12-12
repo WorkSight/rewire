@@ -1,3 +1,25 @@
+import { isNullOrUndefined, guid } from 'rewire-common';
+import {
+  observable,
+  computed,
+  observe,
+  freeze,
+  root,
+  sample
+}                                  from 'rewire-core';
+import {
+  compare,
+  Validator,
+  ChangeTracker,
+  IChangeTrackerContext
+}                                  from 'rewire-ui';
+import * as merge                  from 'deepmerge';
+import { CellModel }               from './CellModel';
+import { ColumnModel }             from './ColumnModel';
+import {
+  gridStaticKeybinds,
+  gridDefaultVariableKeybinds
+}                                  from './GridKeybinds';
 import {
   IGrid,
   ICell,
@@ -15,31 +37,8 @@ import {
   IGridVariableKeybinds,
   IRowData,
   IGridOptionsMenu,
-}                                       from './GridTypes';
-import {isNullOrUndefined}              from 'rewire-common';
-import createRow, {RowModel}            from './RowModel';
-import {ColumnModel}                    from './ColumnModel';
-import {CellModel}                      from './CellModel';
-import {
-  gridStaticKeybinds,
-  gridDefaultVariableKeybinds
-}                  from './GridKeybinds';
-import * as nanoid from 'nanoid';
-import * as merge  from 'deepmerge';
-import {
-  observable,
-  computed,
-  observe,
-  freeze,
-  root,
-  sample
-}                  from 'rewire-core';
-import {
-  compare,
-  Validator,
-  ChangeTracker,
-  IChangeTrackerContext
-}                  from 'rewire-ui';
+}                                  from './GridTypes';
+import createRow, { RowModel }     from './RowModel';
 
 class GridChangeTrackerContext implements IChangeTrackerContext {
   constructor(private _grid: GridModel, public isComplete: (value: any) => boolean) {}
@@ -792,7 +791,7 @@ class GridModel implements IGrid, IDisposable {
   _duplicateRow(rowId: string, position?: number): IRow | undefined {
     const row = findRowById(this.rows, rowId);
     if (!row) return;
-    const rowData: IRowData = {id: nanoid(10), data: Object.assign({}, row.data), options: row.options};
+    const rowData: IRowData = {id: guid(), data: Object.assign({}, row.data, row.data.id ? {id: guid()} : undefined), options: row.options};
     return this._addRow(rowData, position);
   }
 

@@ -19,7 +19,6 @@ import {withStyles, WithStyle} from './styles';
 
 const styles = (theme: Theme) => ({
   inputRoot: {
-    flex: '1',
     lineHeight: 'inherit',
     fontSize: 'inherit',
   },
@@ -70,7 +69,6 @@ const styles = (theme: Theme) => ({
   selectMenuPaper: {
     minWidth: '250px !important',
   },
-
   selectMenuItem: {
     fontSize: 'inherit',
     height: 'auto',
@@ -99,7 +97,11 @@ const styles = (theme: Theme) => ({
     marginRight: '14px',
   },
   formControlRoot: {
-    flex: '1',
+    width: 'auto !important',
+  },
+  icon: {
+    fontSize: '1.5em',
+    top: 'calc(50% - 0.5em)',
   },
 });
 
@@ -389,7 +391,7 @@ class SelectInternal<T> extends React.Component<SelectInternalProps<T>, any> {
             onClose: this.handleOnClose,
             value: v,
             displayEmpty: true,
-            classes: {root: selectRootClasses, select: classes.select, selectMenu: classes.selectMenu},
+            classes: {root: selectRootClasses, select: classes.select, selectMenu: classes.selectMenu, icon: classes.icon},
             SelectDisplayProps: {onKeyDown: this.handleKeyDown},
             MenuProps: {classes: {paper: classes.selectMenuPaper}, MenuListProps: menuListProps},
             renderValue: (() => (

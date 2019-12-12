@@ -1,10 +1,10 @@
-import * as React                    from 'react';
-import {isNullOrUndefined}           from 'rewire-common';
-import {Theme}                       from '@material-ui/core/styles';
-import TextField, { TextFieldProps } from '@material-ui/core/TextField';
-import InputAdornment                from '@material-ui/core/InputAdornment';
-import {TextAlignment, TextVariant}  from './editors';
-import {withStyles, WithStyle}       from './styles';
+import * as React                                    from 'react';
+import {isNullOrUndefined, isNullOrUndefinedOrEmpty} from 'rewire-common';
+import {Theme}                                       from '@material-ui/core/styles';
+import TextField, { TextFieldProps }                 from '@material-ui/core/TextField';
+import InputAdornment                                from '@material-ui/core/InputAdornment';
+import {TextAlignment, TextVariant}                  from './editors';
+import {withStyles, WithStyle}                       from './styles';
 
 type MapFn<T> = (item?: T) => string;
 
@@ -14,12 +14,19 @@ export class TimeValidator {
     this.rounding = !isNullOrUndefined(rounding) ? rounding! : 0.25;
   }
 
-  parse(value?: string | number): {value?: number, isValid: boolean} {
+  parse(value?: string | number): {value?: '-' | number, isValid: boolean} {
     if (typeof value === 'number') {
       const rounded = this.round(value);
       return {
         value   : rounded,
         isValid : true
+      };
+    }
+
+    if (value === '-') {
+      return {
+        value:   value,
+        isValid: false
       };
     }
 
@@ -39,21 +46,21 @@ export class TimeValidator {
   }
 
   private _parse(value?: string): number | undefined {
-    if (!value) {
+    if (isNullOrUndefinedOrEmpty(value)) {
       return undefined;
     }
 
-    let result = this.parseMilitary(value.match(/^(-?[0-9]?[0-9])[:;\/]([0-5][0-9])$/));
+    let result = this.parseMilitary(value!.match(/^(-?[0-9]?[0-9])[:;\/]([0-5][0-9])$/));
     if (!isNullOrUndefined(result)) {
       return result;
     }
 
-    result = this.parseAMPM(value.match(/^(-?0?[1-9]|1[0-2])([:;\/]([0-5][0-9]))? *(am|pm)?$/i));
+    result = this.parseAMPM(value!.match(/^(-?0?[1-9]|1[0-2])([:;\/]([0-5][0-9]))? *(am|pm)?$/i));
     if (!isNullOrUndefined(result)) {
       return result;
     }
 
-    result = this._parseFloat(value.match(/^-?[0-9]?[0-9]?([\.][0-9]*)?$/));
+    result = this._parseFloat(value!.match(/^-?[0-9]?[0-9]?([\.][0-9]*)?$/));
     if (!isNullOrUndefined(result)) {
       return parseFloat(result!.toFixed(2));
     }
@@ -189,9 +196,9 @@ export interface ITimeFieldProps {
 }
 
 export interface ITimeState {
-  value?: number;
+  value?:  '-' | number;
   isValid: boolean;
-  text: string;
+  text:    string;
 }
 
 type TimeFieldProps = WithStyle<ReturnType<typeof styles>, TextFieldProps & ITimeFieldProps>;
@@ -237,7 +244,7 @@ class TimeInputField extends React.Component<TimeFieldProps, ITimeState> {
 
   _valueToSet(value?: number | string): any {
     const state = this.validator.parse(value);
-    return {...state, text: state.value ? `${state.value}` : ''};
+    return {...state, text: !isNullOrUndefinedOrEmpty(state.value) ? `${state.value}` : ''};
   }
 
   handleChange = (evt: React.ChangeEvent<HTMLInputElement>) => {
@@ -247,7 +254,7 @@ class TimeInputField extends React.Component<TimeFieldProps, ITimeState> {
 
   handleBlur = (evt: React.FocusEvent<HTMLInputElement>) => {
     if (this.state.value === this.props.value) {
-      this.setState({text: this.state.value ? `${this.state.value}` : ''});
+      this.setState({text: !isNullOrUndefinedOrEmpty(this.state.value) ? `${this.state.value}` : ''});
     }
     this.props.onValueChange(this.state.value);
   }

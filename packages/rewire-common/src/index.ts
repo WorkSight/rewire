@@ -10,6 +10,8 @@ export * from './isNullOrUndefined';
 export * from './isNullOrUndefinedOrEmpty';
 export * from './nullToUndefined';
 export * from './LQ';
+export * from './Without';
+export * from './guid';
 
 export {default as debounce}                 from './debounce';
 export {default as delay}                    from './delay';
@@ -23,4 +25,5 @@ export {default as isNullOrUndefined}        from './isNullOrUndefined';
 export {default as isNullOrUndefinedOrEmpty} from './isNullOrUndefinedOrEmpty';
 export {default as nullToUndefined}          from './nullToUndefined';
 export {default as LQ}                       from './LQ';
+export {default as guid}                     from './guid';
 export *                                     from './accessors';

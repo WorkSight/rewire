@@ -2,6 +2,7 @@ import * as React              from 'react';
 import * as is                 from 'is';
 import {Observe}               from 'rewire-core';
 import {utc}                   from 'rewire-common';
+import { CSSProperties }       from '@material-ui/styles';
 import AutoComplete            from './AutoComplete';
 import AvatarField             from './AvatarField';
 import CheckField              from './CheckField';
@@ -69,7 +70,7 @@ export function compare<T>(x?: T, y?: T) {
 export type TextEditorProps = {
   field                 : IField,
   className?            : string,
-  classes?              : React.CSSProperties,
+  classes?              : CSSProperties,
   initialInputValue?    : any;
   selectOnFocus?        : boolean,
   endOfTextOnFocus?     : boolean,
@@ -519,5 +520,4 @@ export default function editor(type: EditorType, propsForEdit?: any): React.SFC<
     case 'none':
       return () => null;
   }
-  throw new Error(`unknown editor for type:${type}`);
 }

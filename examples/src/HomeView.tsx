@@ -1,11 +1,10 @@
 import * as React                                from 'react';
-import * as nanoid                               from 'nanoid';
 import { countries, employees }                  from './demo-data';
 import { sampleModel, SampleDialog }             from './SampleDialog';
 import { hotkeysModel, HotKeysDialog }           from './HotKeys';
 import { YesNoModel, YesNoDialog }               from './YesNoDialog';
 import { ConfirmationModel, ConfirmationDialog } from './YesNoDialog';
-import { utc, UTC, TimeSpan, isNullOrUndefined } from 'rewire-common';
+import { utc, UTC, isNullOrUndefined, guid }     from 'rewire-common';
 import { Observe, observable, watch, root }      from 'rewire-core';
 import {
   ActionFn,
@@ -30,7 +29,6 @@ import {
   ICell,
   IRow,
   IColumn,
-  IColumnsToggleMenuOptions,
   createColumnsToggleMenuItems,
 }                            from 'rewire-grid';
 import {PopoverOrigin}       from '@material-ui/core/Popover';
@@ -231,8 +229,8 @@ function createTestGrid(nRows: number, nColumns: number) {
       else if (colName === 'nestedColumn.value') { r.data!['nestedColumn'] = {value: 'ooga ' + row}; continue; }
       else if (colName === 'maskColumn') v = undefined;
       else if (colName === 'dateColumn') v = utc();
-      else if (colName === 'complexColumn') v = row > 3 ? new ComplexCellData(nanoid(10), 'Homer', 45) : undefined;
-      else if (colName === 'complexColumn2') v = row > 3 ? new ComplexCellData(nanoid(10), 'Smithers', 56) : undefined;
+      else if (colName === 'complexColumn') v = row > 3 ? new ComplexCellData(guid(), 'Homer', 45) : undefined;
+      else if (colName === 'complexColumn2') v = row > 3 ? new ComplexCellData(guid(), 'Smithers', 56) : undefined;
       else if (colName === 'phoneColumn') v = Number.parseInt('1250' + Math.round(Math.random() * 100000000).toString());
       else if (((column >= 5) && (column <= 6)) || colName === 'numberColumn') v = Math.random() * 10000;
       r.data![colName] = v;
@@ -603,8 +601,8 @@ export const HomeView = React.memo(withStyles(styles, (props: HomeViewProps) => 
           accept='image/*'
           id='contained-button-file'
           type='file'
-          onChange={({ target: { validity, files: [file] } }) => {
-            validity.valid && uploadFile(file);
+          onChange={({ target: { validity, files } }) => {
+            validity.valid && uploadFile(files![0]);
           }}
         />
         <label htmlFor='contained-button-file'>
