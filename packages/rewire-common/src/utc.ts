@@ -43,8 +43,8 @@ export class UTC {
   }
 
   static toNumber(dt: DateType) {
-    if (dt instanceof UTC) {
-      return dt.utc;
+    if (dt && (dt as any).utc) {
+      return (dt as any).utc;
     }
 
     if (dt instanceof Date) {

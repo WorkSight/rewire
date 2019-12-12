@@ -131,6 +131,10 @@ function createHandler(eq: EQType, parent?: () => void) {
       return true;
     },
 
+    getPrototypeOf(target: ObjectType) {
+      return Object.getPrototypeOf(target);
+    },
+
     get(target: ObjectType, property: string, receiver: Object) {
       if (property === proxyProperty) { // dynamically add a is_proxy property
         return true;

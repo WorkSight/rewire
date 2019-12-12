@@ -38,7 +38,7 @@ import editor, {
 import { defaultPhoneFormat } from '../components/PhoneField';
 import { freeze }             from 'rewire-core';
 
-export type IFieldTypes    = 'string' | 'multistring' | 'static' | 'reference' | 'select' | 'multiselect' | 'number' | 'boolean' | 'switch' | 'date' | 'time' | 'avatar' | 'password' | 'email' | 'phone' | 'color' | 'mask' | 'multiselectautocomplete';
+export type IFieldTypes    = 'string' | 'multistring' | 'static' | 'reference' | 'select' | 'multiselect' | 'number' | 'boolean' | 'switch' | 'date' | 'time' | 'avatar' | 'password' | 'email' | 'phone' | 'color' | 'mask' | 'multiselectautocomplete' | 'custom';
 export type FormType<T>    = { field : Record<keyof T, IEditorField> } & Form;
 export type TGetter        = (obj: any) => any;
 export type TSetter        = (obj: any, value: any) => void;
@@ -100,6 +100,7 @@ interface IBaseFieldDefn {
 }
 
 export interface IFormContext {
+  custom                  (Editor: any, editProps?: any): IFieldDefn;
   email                   (editProps?: any): IFieldDefn;
   string                  (editProps?: any): IFieldDefn;
   multistring             (editProps?: any): IFieldDefn;
@@ -125,6 +126,12 @@ class FormContext implements IFormContext {
 
   field(field: string): any {
     return {field};
+  }
+
+  custom(Editor: any, editProps?: any): any {
+    editProps = editProps || {};
+    editProps.Editor = Editor;
+    return new BaseField('custom', editProps);
   }
 
   error(error: string): any {
@@ -475,6 +482,7 @@ export default class Form implements IValidationContext {
     'avatar'                  : 'avatar',
     'color'                   : 'color',
     'mask'                    : 'mask',
+    'custom'                  : 'custom',
     'multiselectautocomplete' : 'multiselectautocomplete'
   };
 

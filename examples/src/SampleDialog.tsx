@@ -69,7 +69,7 @@ function createForm() {
     multiselectAutoComplete: [{ id: '0', name: 'Afghanistan' }, { id: '23', name: 'Benin' }, { id: '24', name: 'Bermuda' }],
     advancedAutoComplete: {id: 0, name: 'Afghanistan'},
   }
-)
+);
 }
 
 export class SampleModel extends Modal {
