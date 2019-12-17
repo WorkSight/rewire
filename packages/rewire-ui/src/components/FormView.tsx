@@ -23,6 +23,9 @@ class FormView extends React.Component<FormViewProps> {
   shouldComponentUpdate(nextProps: FormViewProps) {
     return (
       nextProps.form !== this.props.form ||
+      (!!nextProps.children && !this.props.children) ||
+      (!nextProps.children && !!this.props.children) ||
+      (nextProps.children && this.props.children && React.Children.count(nextProps.children) !== React.Children.count(this.props.children)) ||
       nextProps.onSubmit !== this.props.onSubmit
     );
   }
