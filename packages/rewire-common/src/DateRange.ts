@@ -166,7 +166,7 @@ export default class DateRange implements Iterable<UTC> {
     return ((this._start.equals(range._start)) && (this._end.equals(range._end)));
   }
 
-  intesection(range: DateRange) {
+  intersection(range: DateRange) {
     if (this.isEmpty) return DateRange.Empty;
     let r = new DateRange(this);
 

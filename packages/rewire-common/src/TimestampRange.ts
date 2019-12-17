@@ -161,7 +161,7 @@ export default class TimestampRange {
     return (this._start.equals(range._start) && this._end.equals(range._end));
   }
 
-  intesection(range: TimestampRange) {
+  intersection(range: TimestampRange) {
     if (this.isEmpty) return TimestampRange.Empty;
     let r = new TimestampRange(this);
 
