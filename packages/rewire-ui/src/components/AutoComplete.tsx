@@ -151,7 +151,7 @@ const styles = (theme: Theme) => ({
     },
   },
   deleteButtonHidden: {
-    visibility: 'hidden',
+    display: 'none',
   },
 });
 
