@@ -556,7 +556,7 @@ class MultiSelectAutoComplete<T> extends React.Component<MultiSelectAutoComplete
   renderCustomInnerInputComponent = (props: any) => {
     const {inputRef, ...inputProps} = props;
     return (
-      <div className={this.props.classes.textFieldInputContainer}>{this.renderChips(this.props.classes)}<input ref={inputRef} {...inputProps}></input></div>
+      <div className={this.props.classes.textFieldInputContainer}><this.renderChips selectedItems={this.props.selectedItems} /><input ref={inputRef} {...inputProps}></input></div>
     );
   }
 
@@ -761,11 +761,13 @@ class MultiSelectAutoComplete<T> extends React.Component<MultiSelectAutoComplete
     );
   });
 
-  renderChips(classes: Record<any, string>) {
-    const baseChipClass = this.props.variant === 'outlined' ? classNames(classes.chip, classes.inputOutlinedChip) : classes.chip;
-    const chipLimit     = this.props.chipLimit || 3;
-    const itemsToRender = this.props.selectedItems.slice(0, chipLimit);
-    const returnValue   = itemsToRender.map((item: any, index: number) => (
+  renderChips = React.memo((props: {selectedItems: any[]}) => {
+    const {classes}       = this.props;
+    const {selectedItems} = props;
+    const baseChipClass   = this.props.variant === 'outlined' ? classNames(classes.chip, classes.inputOutlinedChip) : classes.chip;
+    const chipLimit       = this.props.chipLimit || 3;
+    const itemsToRender   = selectedItems.slice(0, chipLimit);
+    const returnValue     = itemsToRender.map((item: any, index: number) => (
       <Chip
         key={this.map(item)}
         tabIndex={-1}
@@ -776,9 +778,9 @@ class MultiSelectAutoComplete<T> extends React.Component<MultiSelectAutoComplete
         onDelete={this.handleDelete(item)}
       />
     ));
-    const showMore = this.props.selectedItems.length > itemsToRender.length;
+    const showMore = selectedItems.length > itemsToRender.length;
     if (showMore) {
-      const showMoreItems = this.props.selectedItems.slice(chipLimit);
+      const showMoreItems = selectedItems.slice(chipLimit);
       returnValue.push(
         <RootRef key='....' rootRef={this.showMoreSelectedItemsRef}>
           <Chip
@@ -792,8 +794,8 @@ class MultiSelectAutoComplete<T> extends React.Component<MultiSelectAutoComplete
       );
       returnValue.push(<Observe render={() => <this.renderShowMoreSelectedItemsPopup key='showMoreSelectedItemsPopup' classes={classes} open={this.showMoreSelectedItemsPopupIsOpen} items={showMoreItems} /> } />);
     }
-    return returnValue;
-  }
+    return < >{returnValue}</>;
+  });
 
   render() {
     const {classes, disabled, visible, error, label, placeholder, autoFocus, align, disableErrors, variant, startAdornment, initialInputValue, selectedItems, showEmptySuggestions, openOnFocus, suggestionsContainerHeader, suggestionsContainerFooter, hasTransition, transitionTimeout} = this.props;
@@ -841,6 +843,7 @@ class MultiSelectAutoComplete<T> extends React.Component<MultiSelectAutoComplete
                 startAdornment={startAdornment}
                 isOpen={isOpen}
                 inputValue={inputValue}
+                selectedItem={selectedItem}
               />}
               {isOpen
               ? <this.renderSuggestionsContainer
