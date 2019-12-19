@@ -7,7 +7,8 @@ export interface IRowData {
 }
 
 export interface IChangeTrackerContext {
-  length: number;
+  length:     number;
+  depth:      number;
   getRow      (index: number): IRowData | undefined;
   setRow      (index: number, value: IRowData): void;
   onHasChanges(changes: boolean): void;
@@ -15,7 +16,7 @@ export interface IChangeTrackerContext {
 }
 
 export class ArrayChangeTrackerContext implements IChangeTrackerContext {
-  constructor(private _rows: IRowData[], public isComplete: (value: any) => boolean = () => true) {}
+  constructor(private _rows: IRowData[], public isComplete: (value: any) => boolean = () => true, public depth: number = 2) {}
 
   get length() {
     return this._rows.length;
@@ -38,14 +39,14 @@ export class ArrayChangeTrackerContext implements IChangeTrackerContext {
 }
 
 function clone(source: any, depth: number = 1) {
-  if (!source || (depth === 0)) return source;
+  if (!source || (depth <= 0)) return source;
   const type = (typeof source);
   if (type !== 'object') return source;
 
   if (Array.isArray(source)) {
     const v: any[] = [];
     for (let index = 0; index < source.length; index++) {
-      v[index] = clone(source[index], 1);
+      v[index] = clone(source[index], depth - 1);
     }
     return v;
   }
@@ -118,7 +119,7 @@ export class ChangeTracker {
         if (!id) throw new Error(`your data must have id's to use change tracking`);
         if (!this._context.isComplete(row)) continue; // skip incomplete rows
         original.size++;
-        original.data[id] = {index, data: clone(this.workingData(row), 2)};
+        original.data[id] = {index, data: clone(this.workingData(row), this._context.depth)};
       }
       this._original = original;
     });
@@ -134,7 +135,7 @@ export class ChangeTracker {
       this.setHasChanges(false);
       this._working!.length = this._original.size;
       for (const value of Object.values(this._original.data) as any[]) {
-        const theClone: any = clone(value.data, 2);
+        const theClone: any = clone(value.data, this._context.depth);
         this._context.setRow(value.index, theClone);
       }
     });
@@ -171,6 +172,10 @@ export class ChangeTracker {
 
   public setIsCompleteRowFn(completeFn: (value: any) => boolean) {
     this._context.isComplete = completeFn;
+  }
+
+  public setDepth(depth: number) {
+    this._context.depth = depth;
   }
 
   public get hasChanges() {

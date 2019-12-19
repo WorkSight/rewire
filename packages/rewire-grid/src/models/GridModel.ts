@@ -41,7 +41,7 @@ import {
 import createRow, { RowModel }     from './RowModel';
 
 class GridChangeTrackerContext implements IChangeTrackerContext {
-  constructor(private _grid: GridModel, public isComplete: (value: any) => boolean) {}
+  constructor(private _grid: GridModel, public isComplete: (value: any) => boolean, public depth: number = 2) {}
 
   get length(): number {
     return this._grid.rows.length;
