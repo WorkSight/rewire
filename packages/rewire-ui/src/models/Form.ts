@@ -359,7 +359,7 @@ export default class Form implements IValidationContext {
 
   public addFields(fields: (context: IFormContext) => IFieldDefns, initial?: ObjectType) {
     this.initializeFields(fields(new FormContext()));
-    this.value    = Object.assign({}, this.value, initial);
+    this.value = Object.assign({}, this.value, initial);
   }
 
   public removeFields(fieldNames: string[]) {
@@ -515,6 +515,8 @@ export default class Form implements IValidationContext {
       disabled:         fieldDefn.typeDefn.disabled,
       disableErrors:    !isNullOrUndefined(fieldDefn.typeDefn.disableErrors) ? fieldDefn.typeDefn.disableErrors : this.disableErrors,
       variant:          fieldDefn.typeDefn.variant || this.variant,
+      error:            undefined,
+      value:            undefined,
       updateOnChange:   !isNullOrUndefined(fieldDefn.typeDefn.updateOnChange) ? fieldDefn.typeDefn.updateOnChange : this.updateOnChange,
       validateOnUpdate: !isNullOrUndefined(fieldDefn.typeDefn.validateOnUpdate) ? fieldDefn.typeDefn.validateOnUpdate : this.validateOnUpdate,
       visible:          true,
