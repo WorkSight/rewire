@@ -607,7 +607,7 @@ export default class Form implements IValidationContext {
   public shouldValidate(fieldName: string): boolean {
     let field = this.field[fieldName];
     if (!field) return false;
-    return !field.disableErrors && !field.disabled;
+    return !field.disableErrors && !(field.disabled?.(field));
   }
 
   public toObjectValues(): ObjectType {
