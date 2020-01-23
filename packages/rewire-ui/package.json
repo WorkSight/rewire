@@ -1,6 +1,6 @@
 {
   "name": "rewire-ui",
-  "version": "1.0.194",
+  "version": "1.0.195",
   "description": "A lightweight set of material-ui-next components built using the reactive library rewire-core.",
   "repository": {
     "type": "git",
