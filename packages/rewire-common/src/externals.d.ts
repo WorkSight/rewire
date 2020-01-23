@@ -1,1 +1,1 @@
-declare module 'nanoid';
+declare module 'nanoid/generate';

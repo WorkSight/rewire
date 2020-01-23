@@ -39,7 +39,7 @@ export function createSetter(path: string | string[]) {
   if (fn) return fn;
 
   const [lets, exp] = generateBody(path, true);
-  let body = `{ if (!obj || (value === undefined || value === null)) return;
+  let body = `{ if (!obj) return;
   ${(lets.length > 0) ? `let ${lets};` : ''}
   ${exp};
 }`;
