@@ -1,11 +1,14 @@
 import * as React                      from 'react';
 import * as is                         from 'is';
+import classNames                      from 'classnames';
 import BlurInputHOC                    from './BlurInputHOC';
 import {TextMask}                      from 'react-text-mask-hoc';
 import TextField, {TextFieldProps}     from '@material-ui/core/TextField';
 import InputAdornment                  from '@material-ui/core/InputAdornment';
+import RootRef                         from '@material-ui/core/RootRef';
 import {Theme}                         from '@material-ui/core/styles';
 import {isNullOrUndefined}             from 'rewire-common';
+import ErrorTooltip                    from './ErrorTooltip';
 import {TextAlignment, TextVariant}    from './editors';
 import {withStyles, WithStyle}         from './styles';
 
@@ -67,9 +70,14 @@ const styles = (theme: Theme) => ({
     marginTop: '6px',
     fontSize: '0.8em',
   },
+  helperTextRootErrorIcon: {
+    fontSize: '1.2em',
+  },
   helperTextContained: {
     marginLeft: '14px',
     marginRight: '14px',
+  },
+  errorIcon: {
   },
 });
 
@@ -155,6 +163,7 @@ export interface IMaskFieldProps {
   visible?              : boolean;
   disabled?             : boolean;
   disableErrors?        : boolean;
+  useTooltipForErrors?  : boolean;
   error?                : string;
   value?                : string;
   label?                : string;
@@ -178,27 +187,31 @@ export interface IMaskFieldProps {
 type MaskFieldProps = WithStyle<ReturnType<typeof styles>, TextFieldProps & IMaskFieldProps>;
 
 class MaskField extends React.Component<MaskFieldProps> {
+  textFieldRef: React.RefObject<HTMLInputElement>;
+
   constructor(props: MaskFieldProps) {
     super(props);
+    this.textFieldRef = React.createRef();
   }
 
   shouldComponentUpdate(nextProps: MaskFieldProps) {
     return (
-      (nextProps.value           !== this.props.value)           ||
-      (nextProps.disabled        !== this.props.disabled)        ||
-      (nextProps.visible         !== this.props.visible)         ||
-      (nextProps.error           !== this.props.error)           ||
-      (nextProps.label           !== this.props.label)           ||
-      (nextProps.placeholder     !== this.props.placeholder)     ||
-      (nextProps.align           !== this.props.align)           ||
-      (nextProps.variant         !== this.props.variant)         ||
-      (nextProps.mask            !== this.props.mask)            ||
-      (nextProps.guide           !== this.props.guide)           ||
-      (nextProps.placeholderChar !== this.props.placeholderChar) ||
-      (nextProps.showMask        !== this.props.showMask)        ||
-      (nextProps.disableErrors   !== this.props.disableErrors)   ||
-      (nextProps.startAdornment  !== this.props.startAdornment)  ||
-      (nextProps.endAdornment    !== this.props.endAdornment)
+      (nextProps.value               !== this.props.value)               ||
+      (nextProps.disabled            !== this.props.disabled)            ||
+      (nextProps.visible             !== this.props.visible)             ||
+      (nextProps.error               !== this.props.error)               ||
+      (nextProps.label               !== this.props.label)               ||
+      (nextProps.placeholder         !== this.props.placeholder)         ||
+      (nextProps.align               !== this.props.align)               ||
+      (nextProps.variant             !== this.props.variant)             ||
+      (nextProps.mask                !== this.props.mask)                ||
+      (nextProps.guide               !== this.props.guide)               ||
+      (nextProps.placeholderChar     !== this.props.placeholderChar)     ||
+      (nextProps.showMask            !== this.props.showMask)            ||
+      (nextProps.disableErrors       !== this.props.disableErrors)       ||
+      (nextProps.useTooltipForErrors !== this.props.useTooltipForErrors) ||
+      (nextProps.startAdornment      !== this.props.startAdornment)      ||
+      (nextProps.endAdornment        !== this.props.endAdornment)
     );
   }
 
@@ -230,6 +243,22 @@ class MaskField extends React.Component<MaskFieldProps> {
     return maskPlaceholder || '';
   }
 
+  renderError = React.memo((props: any) => {
+    const {classes, error, useTooltipForErrors} = props;
+
+    if (!useTooltipForErrors) {
+      return error;
+    }
+
+    return (
+      <ErrorTooltip
+        inputRef={this.textFieldRef}
+        error={error}
+        classes={{errorIcon: classes.errorIcon}}
+      />
+    );
+  });
+
   render() {
     if (this.props.visible === false) {
       return null;
@@ -253,6 +282,7 @@ class MaskField extends React.Component<MaskFieldProps> {
 
     if (this.props.updateOnChange) {
       return (
+      <RootRef rootRef={this.textFieldRef}>
       <TextField
         className={this.props.className}
         classes={{root: classes.formControlRoot}}
@@ -261,7 +291,7 @@ class MaskField extends React.Component<MaskFieldProps> {
         placeholder={maskPlaceholder}
         variant={variant}
         error={!this.props.disableErrors && !this.props.disabled && !!this.props.error}
-        helperText={!this.props.disableErrors && <span>{(!this.props.disabled && this.props.error) || ''}</span>}
+        helperText={!this.props.disableErrors && <span>{(!this.props.disabled && this.props.error ? <this.renderError classes={this.props.classes} error={this.props.error} useTooltipForErrors={this.props.useTooltipForErrors} /> : '')}</span>}
         value={value}
         autoFocus={this.props.autoFocus}
         onFocus={this.handleFocus}
@@ -270,13 +300,16 @@ class MaskField extends React.Component<MaskFieldProps> {
         inputProps={{spellCheck: false, className: classes.nativeInput, style: {textAlign: this.props.align || 'left'}, ...maskProps}}
         InputProps={{inputComponent: TextMaskCustom, startAdornment: startAdornment, endAdornment: endAdornment, classes: {root: classes.inputRoot, input: inputClassName, formControl: inputFormControlClassName}}}
         InputLabelProps={{shrink: true, classes: {root: classes.inputLabelRoot, outlined: classes.inputLabelOutlined, shrink: classes.inputLabelShrink}}}
-        FormHelperTextProps={{classes: {root: classes.helperTextRoot, contained: classes.helperTextContained}}}
-      />);
+        FormHelperTextProps={{classes: {root: classNames(classes.helperTextRoot, this.props.useTooltipForErrors ? classes.helperTextRootErrorIcon : undefined), contained: classes.helperTextContained}}}
+      />
+      </RootRef>
+      );
     }
 
     return (
     <BlurInputHOC {...this.props} value={value} onValueChange={this.props.onValueChange}
       render={(props: MaskFieldProps) =>
+        <RootRef rootRef={this.textFieldRef}>
         <TextField
           className={props.className}
           classes={{root: classes.formControlRoot}}
@@ -285,7 +318,7 @@ class MaskField extends React.Component<MaskFieldProps> {
           placeholder={maskPlaceholder}
           variant={variant}
           error={!props.disableErrors && !props.disabled && !!props.error}
-          helperText={!props.disableErrors && <span>{(!props.disabled && props.error) || ''}</span>}
+          helperText={!props.disableErrors && <span>{(!props.disabled && props.error ? <this.renderError classes={props.classes} error={props.error} useTooltipForErrors={props.useTooltipForErrors} /> : '')}</span>}
           value={props.value}
           autoFocus={props.autoFocus}
           onFocus={this.handleFocus}
@@ -294,10 +327,12 @@ class MaskField extends React.Component<MaskFieldProps> {
           inputProps={{spellCheck: false, className: classes.nativeInput, style: {textAlign: props.align || 'left'}, ...maskProps}}
           InputProps={{inputComponent: TextMaskCustom, startAdornment: startAdornment, endAdornment: endAdornment, classes: {root: classes.inputRoot, input: inputClassName, formControl: inputFormControlClassName}}}
           InputLabelProps={{shrink: true, classes: {root: classes.inputLabelRoot, outlined: classes.inputLabelOutlined, shrink: classes.inputLabelShrink}}}
-          FormHelperTextProps={{classes: {root: classes.helperTextRoot, contained: classes.helperTextContained}}}
+          FormHelperTextProps={{classes: {root: classNames(props.classes.helperTextRoot, props.useTooltipForErrors ? props.classes.helperTextRootErrorIcon : undefined), contained: props.classes.helperTextContained}}}
         />
+        </RootRef>
       }
-    />);
+    />
+    );
   }
 }
 

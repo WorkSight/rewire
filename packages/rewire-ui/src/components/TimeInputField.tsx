@@ -1,8 +1,10 @@
 import * as React                                    from 'react';
+import classNames                                    from 'classnames';
 import {isNullOrUndefined, isNullOrUndefinedOrEmpty} from 'rewire-common';
 import {Theme}                                       from '@material-ui/core/styles';
 import TextField, { TextFieldProps }                 from '@material-ui/core/TextField';
 import InputAdornment                                from '@material-ui/core/InputAdornment';
+import ErrorTooltip                                  from './ErrorTooltip';
 import {TextAlignment, TextVariant}                  from './editors';
 import {withStyles, WithStyle}                       from './styles';
 
@@ -168,9 +170,14 @@ const styles = (theme: Theme) => ({
     marginTop: '6px',
     fontSize: '0.8em',
   },
+  helperTextRootErrorIcon: {
+    fontSize: '1.2em',
+  },
   helperTextContained: {
     marginLeft: '14px',
     marginRight: '14px',
+  },
+  errorIcon: {
   },
 });
 
@@ -178,6 +185,7 @@ export interface ITimeFieldProps {
   visible?              : boolean;
   disabled?             : boolean;
   disableErrors?        : boolean;
+  useTooltipForErrors?  : boolean;
   error?                : string;
   value?                : number | string;
   label?                : string;
@@ -209,9 +217,11 @@ function defaultMap(v: any): any {
 
 class TimeInputField extends React.Component<TimeFieldProps, ITimeState> {
   validator: TimeValidator;
+  inputRef: React.RefObject<HTMLInputElement>;
   constructor(props: TimeFieldProps) {
     super(props);
     this.validator = new TimeValidator(props.rounding);
+    this.inputRef  = React.createRef();
     const map      = props.map || defaultMap;
     this.state     = this._valueToSet(map(props.value));
   }
@@ -223,18 +233,19 @@ class TimeInputField extends React.Component<TimeFieldProps, ITimeState> {
 
   shouldComponentUpdate(nextProps: TimeFieldProps, nextState: ITimeState) {
     return (
-      (nextState.text           !== this.state.text)           ||
-      (nextProps.disabled       !== this.props.disabled)       ||
-      (nextProps.visible        !== this.props.visible)        ||
-      (nextProps.error          !== this.props.error)          ||
-      (nextProps.rounding       !== this.props.rounding)       ||
-      (nextProps.label          !== this.props.label)          ||
-      (nextProps.placeholder    !== this.props.placeholder)    ||
-      (nextProps.align          !== this.props.align)          ||
-      (nextProps.variant        !== this.props.variant)        ||
-      (nextProps.disableErrors  !== this.props.disableErrors)  ||
-      (nextProps.startAdornment !== this.props.startAdornment) ||
-      (nextProps.endAdornment   !== this.props.endAdornment)
+      (nextState.text                !== this.state.text)                ||
+      (nextProps.disabled            !== this.props.disabled)            ||
+      (nextProps.visible             !== this.props.visible)             ||
+      (nextProps.error               !== this.props.error)               ||
+      (nextProps.rounding            !== this.props.rounding)            ||
+      (nextProps.label               !== this.props.label)               ||
+      (nextProps.placeholder         !== this.props.placeholder)         ||
+      (nextProps.align               !== this.props.align)               ||
+      (nextProps.variant             !== this.props.variant)             ||
+      (nextProps.disableErrors       !== this.props.disableErrors)       ||
+      (nextProps.useTooltipForErrors !== this.props.useTooltipForErrors) ||
+      (nextProps.startAdornment      !== this.props.startAdornment)      ||
+      (nextProps.endAdornment        !== this.props.endAdornment)
     );
   }
 
@@ -270,8 +281,24 @@ class TimeInputField extends React.Component<TimeFieldProps, ITimeState> {
     }
   }
 
+  renderError = React.memo((props: any) => {
+    const {classes, error, useTooltipForErrors} = props;
+
+    if (!useTooltipForErrors) {
+      return error;
+    }
+
+    return (
+      <ErrorTooltip
+        inputRef={this.inputRef}
+        error={error}
+        classes={{errorIcon: classes.errorIcon}}
+      />
+    );
+  });
+
   render() {
-    const {classes, className, visible, disabled, error, label, placeholder, align, disableErrors, autoFocus, variant} = this.props;
+    const {classes, className, visible, disabled, error, label, placeholder, align, disableErrors, autoFocus, variant, useTooltipForErrors} = this.props;
     if (visible === false) {
       return null;
     }
@@ -289,17 +316,18 @@ class TimeInputField extends React.Component<TimeFieldProps, ITimeState> {
         error={!disableErrors && !disabled && (!!error || (!!this.state.text && !this.state.isValid))}
         value={this.state.text}
         label={label}
-        helperText={!disableErrors && <span>{(!disabled && error) || ''}</span>}
+        helperText={!disableErrors && <span>{(!disabled && error ? <this.renderError classes={classes} error={error} useTooltipForErrors={useTooltipForErrors} /> : '')}</span>}
         onChange={this.handleChange}
         onBlur={this.handleBlur}
         onFocus={this.handleFocus}
         autoFocus={autoFocus}
         placeholder={placeholder}
         variant={variant as any}
+        inputRef={this.inputRef}
         inputProps={{spellCheck: false, className: classes.nativeInput, style: {textAlign: align || 'left'}}}
         InputProps={{startAdornment: startAdornment, endAdornment: endAdornment, classes: {root: classes.inputRoot, input: inputClassName, formControl: inputFormControlClassName}}}
         InputLabelProps={{shrink: true, classes: {root: classes.inputLabelRoot, outlined: classes.inputLabelOutlined, shrink: classes.inputLabelShrink}}}
-        FormHelperTextProps={{classes: {root: classes.helperTextRoot, contained: classes.helperTextContained}}}
+        FormHelperTextProps={{classes: {root: classNames(classes.helperTextRoot, this.props.useTooltipForErrors ? classes.helperTextRootErrorIcon : undefined), contained: classes.helperTextContained}}}
       />);
   }
 }

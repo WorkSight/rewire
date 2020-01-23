@@ -13,14 +13,14 @@ import {Observe}                  from 'rewire-core';
 import {
   withStyles,
   WithStyle,
-  ErrorSeverity
+  ErrorSeverity,
+  ErrorTooltip,
 }                                 from 'rewire-ui';
+import {SvgIconProps}             from '@material-ui/core/SvgIcon';
 import {Theme}                    from '@material-ui/core/styles';
 import ErrorIcon                  from '@material-ui/icons/Error';
 import WarningIcon                from '@material-ui/icons/Warning';
 import InfoIcon                   from '@material-ui/icons/Info';
-import Tooltip                    from '@material-ui/core/Tooltip';
-import Fade                       from '@material-ui/core/Fade';
 import { CellModel }              from '../models/CellModel';
 
 const styles = (theme: Theme) => ({
@@ -62,22 +62,19 @@ const styles = (theme: Theme) => ({
   cellInnerContainerEditing: {
     padding: '0px 0px 0px 1px',
   },
-  tooltipPopper: {
-    // marginLeft: '-8px',
-  },
-  tooltip: {
-    fontSize: `calc(${theme.fontSizes.body} * 0.95)`,
-    padding: `calc(${theme.fontSizes.body} * 0.25) calc(${theme.fontSizes.body} * 0.5)`,
-  },
-  errorContainer: {
+  errorTooltipRoot: {
     display: 'flex',
     height: '100%',
     marginLeft: '0.3125em',
     alignItems: 'center',
     justifyContent: 'center',
   },
+  errorTooltip: {
+    fontSize: `calc(${theme.fontSizes.body} * 0.9)`,
+    padding: `calc(${theme.fontSizes.body} * 0.25) calc(${theme.fontSizes.body} * 0.5)`,
+  },
   errorIcon: {
-    fontSize: '1.125em',
+    fontSize: '1.2em',
   },
   info: {
     color: '#1A51A8',
@@ -276,9 +273,7 @@ class Cell extends React.PureComponent<CellProps, {}> {
   }
 
   renderErrorIcon(): JSX.Element {
-    let errorCls = cc([{hidden: this.cell.editing}]);
-
-    let ErrorIconToUse: React.ComponentType<any>;
+    let ErrorIconToUse: (props: SvgIconProps) => JSX.Element;
     let errorColorClass: string | undefined;
     switch (this.cell!.error!.severity) {
       case ErrorSeverity.Info:
@@ -299,20 +294,14 @@ class Cell extends React.PureComponent<CellProps, {}> {
         errorColorClass = this.props.classes.error;
         break;
     }
-    if (this.cell.error && !this.cell.editing) {
-      return (
-        <Tooltip
-          title={this.cell.error.text}
-          placement='right'
-          TransitionComponent={Fade}
-          PopperProps={{ style: {pointerEvents: 'none'} }}
-          classes={{popper: this.props.classes.tooltipPopper, tooltip: this.props.classes.tooltip}}
-        >
-          <div className={this.props.classes.errorContainer}><ErrorIconToUse className={classNames(this.props.classes.errorIcon, errorColorClass, errorCls)} /></div>
-        </Tooltip>
-      );
-    }
-    return <div className={this.props.classes.errorContainer}><ErrorIconToUse className={classNames(this.props.classes.errorIcon, errorColorClass, errorCls)} /></div>;
+
+    return (
+      <ErrorTooltip
+        classes={{root: this.props.classes.errorTooltipRoot, tooltip: this.props.classes.errorTooltip, errorIcon: classNames(this.props.classes.errorIcon, errorColorClass)}}
+        error={this.cell.error?.text}
+        Icon={ErrorIconToUse}
+      />
+    );
   }
 
   get value(): string {
@@ -480,17 +469,6 @@ class Cell extends React.PureComponent<CellProps, {}> {
           </div>
         </div>;
       let cellContent = innerCell;
-      // let cellContent = cell.error && !cell.editing
-      //   ? <Tooltip
-      //       title={cell.error.messageText}
-      //       placement='right-start'
-      //       TransitionComponent={Fade}
-      //       PopperProps={{ style: {pointerEvents: 'none'} }}
-      //       classes={{popper: classes.tooltipPopper, tooltip: classes.tooltip}}
-      //     >
-      //       {innerCell}
-      //     </Tooltip>
-      //   : innerCell;
 
       return (
         <td tabIndex={0}

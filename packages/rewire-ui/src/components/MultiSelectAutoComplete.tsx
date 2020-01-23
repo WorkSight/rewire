@@ -34,6 +34,7 @@ import {
   ISuggestionsContainerComponentProps,
   IAutoCompleteRenderSuggestionFnProps,
 }                                       from './AutoComplete';
+import ErrorTooltip                     from './ErrorTooltip';
 import {
   ICustomProps,
   SearchFn,
@@ -158,6 +159,9 @@ const styles = (theme: Theme) => ({
     marginTop: '6px',
     fontSize: '0.8em',
   },
+  helperTextRootErrorIcon: {
+    fontSize: '1.2em',
+  },
   helperTextContained: {
     marginLeft: '14px',
     marginRight: '14px',
@@ -203,6 +207,8 @@ const styles = (theme: Theme) => ({
   openButtonClosed: {
     transform: 'rotate(0deg)',
   },
+  errorIcon: {
+  },
 });
 
 interface IMultiSelectAutoCompleteProps<T> {
@@ -244,7 +250,7 @@ class MultiSelectAutoComplete<T> extends React.Component<MultiSelectAutoComplete
   downShift:                   any;
   search:                      SearchFn<T>;
   map:                         MapFn<T>;
-  inputRef:                    React.RefObject<HTMLElement>;
+  inputRef:                    React.RefObject<HTMLInputElement>;
   textFieldRef:                React.RefObject<HTMLElement>;
   showMoreSelectedItemsRef:    React.RefObject<HTMLElement>;
 
@@ -280,6 +286,7 @@ class MultiSelectAutoComplete<T> extends React.Component<MultiSelectAutoComplete
       (nextProps.align !== this.props.align) ||
       (nextProps.variant !== this.props.variant) ||
       (nextProps.disableErrors !== this.props.disableErrors) ||
+      (nextProps.useTooltipForErrors !== this.props.useTooltipForErrors) ||
       (nextProps.startAdornment !== this.props.startAdornment) ||
       (nextProps.endAdornment !== this.props.endAdornment)
     );
@@ -541,6 +548,29 @@ class MultiSelectAutoComplete<T> extends React.Component<MultiSelectAutoComplete
     setTimeout(() => { this.inputRef.current && this.inputRef.current.focus(); this._manualFocusing = false; }, 0);
   }
 
+  setFontSize() {
+    if (!this._fontSize) {
+      this._fontSize = (this.inputRef.current && window.getComputedStyle(this.inputRef.current).getPropertyValue('font-size')) ?? undefined; // needed to make the menu items font-size the same as the shown value
+    }
+  }
+
+  renderError = React.memo((props: any) => {
+    const {classes, error, useTooltipForErrors} = props;
+
+    if (!useTooltipForErrors) {
+      return error;
+    }
+
+    return (
+      <ErrorTooltip
+        fontSize={this._fontSize!}
+        inputRef={this.inputRef}
+        error={error}
+        classes={{errorIcon: classes.errorIcon}}
+      />
+    );
+  });
+
   renderOpenButton = React.memo((props: {disabled: boolean, isOpen: boolean}) => {
     const {classes}          = this.props;
     const {isOpen, disabled} = props;
@@ -561,7 +591,7 @@ class MultiSelectAutoComplete<T> extends React.Component<MultiSelectAutoComplete
   }
 
   renderInput = React.memo((props: any) => {
-    const {classes, error, getInputProps, startAdornment, isOpen, align, variant, disableErrors, label, disabled, autoFocus, placeholder} = props;
+    const {classes, error, getInputProps, startAdornment, isOpen, align, variant, disableErrors, useTooltipForErrors, label, disabled, autoFocus, placeholder} = props;
     let inputProps = getInputProps({
       disabled: disabled,
       onKeyDown: this.handleKeyDown,
@@ -583,12 +613,12 @@ class MultiSelectAutoComplete<T> extends React.Component<MultiSelectAutoComplete
           classes={{root: classes.formControlRoot}}
           variant={variant}
           error={!disableErrors && !disabled && !!error}
-          helperText={!disableErrors && <span>{(!disabled && error) || ''}</span>}
+          helperText={!disableErrors && <span>{(!disabled && error ? <this.renderError classes={classes} error={error} useTooltipForErrors={useTooltipForErrors} /> : '')}</span>}
           inputRef={this.inputRef}
           inputProps={{spellCheck: false, className: classes.nativeInput, style: {textAlign: align || 'left'}}}
           InputProps={{inputComponent: this.renderCustomInnerInputComponent, startAdornment: sAdornment, endAdornment: eAdornment, classes: {root: classes.inputRoot, input: inputClassName, formControl: inputFormControlClassName, adornedEnd: adornedEndClassName}}}
           InputLabelProps={{shrink: true, classes: {root: classes.inputLabelRoot, outlined: classes.inputLabelOutlined, shrink: classes.inputLabelShrink}}}
-          FormHelperTextProps={{classes: {root: classes.helperTextRoot, contained: classes.helperTextContained}}}
+          FormHelperTextProps={{classes: {root: classNames(classes.helperTextRoot, useTooltipForErrors ? classes.helperTextRootErrorIcon : undefined), contained: classes.helperTextContained}}}
           {...inputProps}
         />
       </RootRef>
@@ -649,9 +679,7 @@ class MultiSelectAutoComplete<T> extends React.Component<MultiSelectAutoComplete
       }
     }
 
-    if (!this._fontSize) {
-      this._fontSize = this.inputRef && this.inputRef.current && window.getComputedStyle(this.inputRef.current!).getPropertyValue('font-size') || undefined; // needed to keep the suggestions the same font size as the input
-    }
+    this.setFontSize();
     let suggestionsContainerComponentProps: ISuggestionsContainerComponentProps = {
       downShift: this.downShift,
     };
@@ -798,7 +826,7 @@ class MultiSelectAutoComplete<T> extends React.Component<MultiSelectAutoComplete
   });
 
   render() {
-    const {classes, disabled, visible, error, label, placeholder, autoFocus, align, disableErrors, variant, startAdornment, initialInputValue, selectedItems, showEmptySuggestions, openOnFocus, suggestionsContainerHeader, suggestionsContainerFooter, hasTransition, transitionTimeout} = this.props;
+    const {classes, disabled, visible, error, label, placeholder, autoFocus, align, disableErrors, useTooltipForErrors, variant, startAdornment, initialInputValue, selectedItems, showEmptySuggestions, openOnFocus, suggestionsContainerHeader, suggestionsContainerFooter, hasTransition, transitionTimeout} = this.props;
     if (visible === false) {
       return null;
     }
@@ -840,6 +868,7 @@ class MultiSelectAutoComplete<T> extends React.Component<MultiSelectAutoComplete
                 align={align}
                 variant={variant}
                 disableErrors={disableErrors}
+                useTooltipForErrors={useTooltipForErrors}
                 startAdornment={startAdornment}
                 isOpen={isOpen}
                 inputValue={inputValue}

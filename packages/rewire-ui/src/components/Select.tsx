@@ -1,13 +1,14 @@
 import * as React              from 'react';
+import classNames              from 'classnames';
 import { ChangeEvent }         from 'react';
 import {disposeOnUnmount}      from 'rewire-core';
-import classNames              from 'classnames';
 import RootRef                 from '@material-ui/core/RootRef';
 import {Theme}                 from '@material-ui/core/styles';
 import TextField               from '@material-ui/core/TextField';
 import MenuItem                from '@material-ui/core/MenuItem';
 import {SelectProps}           from '@material-ui/core/Select';
 import InputAdornment          from '@material-ui/core/InputAdornment';
+import ErrorTooltip            from './ErrorTooltip';
 import {
   ICustomProps,
   SearchFn,
@@ -92,6 +93,9 @@ const styles = (theme: Theme) => ({
     marginTop: '6px',
     fontSize: '0.8em',
   },
+  helperTextRootErrorIcon: {
+    fontSize: '1.2em',
+  },
   helperTextContained: {
     marginLeft: '14px',
     marginRight: '14px',
@@ -102,6 +106,8 @@ const styles = (theme: Theme) => ({
   icon: {
     fontSize: '1.5em',
     top: 'calc(50% - 0.5em)',
+  },
+  errorIcon: {
   },
 });
 
@@ -118,11 +124,11 @@ type SelectInternalProps<T>         = WithStyle<ReturnType<typeof styles>, ISele
 
 class SelectInternal<T> extends React.Component<SelectInternalProps<T>, any> {
   // private _isMounted: boolean;
-  private InputRef: React.RefObject<HTMLElement>;
-  state      : any;
-  search     : SearchFn<T>;
-  map        : MapFn<T>;
-  _fontSize? : (string | null);
+  inputRef  : React.RefObject<HTMLInputElement>;
+  state     : any;
+  search    : SearchFn<T>;
+  map       : MapFn<T>;
+  _fontSize?: string;
 
   constructor(props: SelectInternalProps<T>) {
     super(props);
@@ -130,7 +136,7 @@ class SelectInternal<T> extends React.Component<SelectInternalProps<T>, any> {
     this.state         = {suggestions: [], isOpen: false, labelWidth: 0};
     this.search        = props.search;
     this.map           = props.map || defaultMap;
-    this.InputRef      = React.createRef();
+    this.inputRef      = React.createRef();
   }
 
   componentDidMount() {
@@ -151,6 +157,26 @@ class SelectInternal<T> extends React.Component<SelectInternalProps<T>, any> {
         this.props.onSelectItem(undefined);
       }
     }
+  }
+
+  shouldComponentUpdate(nextProps: ICustomProps<T> & React.InputHTMLAttributes<any>, nextState: any, nextContext: any) {
+    return (
+        (nextProps.selectedItem        !== this.props.selectedItem)        ||
+        (nextProps.error               !== this.props.error)               ||
+        (nextProps.disabled            !== this.props.disabled)            ||
+        (nextProps.visible             !== this.props.visible)             ||
+        (nextState.suggestions         !== this.state.suggestions)         ||
+        (nextState.isOpen              !== this.state.isOpen)              ||
+        (nextProps.label               !== this.props.label)               ||
+        (nextProps.placeholder         !== this.props.placeholder)         ||
+        (nextProps.align               !== this.props.align)               ||
+        (nextProps.variant             !== this.props.variant)             ||
+        (nextProps.multiple            !== this.props.multiple)            ||
+        (nextProps.disableErrors       !== this.props.disableErrors)       ||
+        (nextProps.useTooltipForErrors !== this.props.useTooltipForErrors) ||
+        (nextProps.startAdornment      !== this.props.startAdornment)      ||
+        (nextProps.endAdornment        !== this.props.endAdornment)
+      );
   }
 
   handleOnClose = (event: object) => {
@@ -263,29 +289,14 @@ class SelectInternal<T> extends React.Component<SelectInternalProps<T>, any> {
     }
   }
 
-  shouldComponentUpdate(nextProps: ICustomProps<T> & React.InputHTMLAttributes<any>, nextState: any, nextContext: any) {
-    return (
-        (nextProps.selectedItem   !== this.props.selectedItem)   ||
-        (nextProps.error          !== this.props.error)          ||
-        (nextProps.disabled       !== this.props.disabled)       ||
-        (nextProps.visible        !== this.props.visible)        ||
-        (nextState.suggestions    !== this.state.suggestions)    ||
-        (nextState.isOpen         !== this.state.isOpen)         ||
-        (nextProps.label          !== this.props.label)          ||
-        (nextProps.placeholder    !== this.props.placeholder)    ||
-        (nextProps.align          !== this.props.align)          ||
-        (nextProps.variant        !== this.props.variant)        ||
-        (nextProps.multiple       !== this.props.multiple)       ||
-        (nextProps.disableErrors  !== this.props.disableErrors)  ||
-        (nextProps.startAdornment !== this.props.startAdornment) ||
-        (nextProps.endAdornment   !== this.props.endAdornment)
-      );
+  setFontSize() {
+    if (!this._fontSize) {
+      this._fontSize = (this.inputRef.current && window.getComputedStyle(this.inputRef.current).getPropertyValue('font-size')) ?? undefined; // needed to make the menu items font-size the same as the shown value
+    }
   }
 
   renderSuggestions(v: any, multiple?: boolean) {
-    if (!this._fontSize) {
-      this._fontSize = this.InputRef.current && window.getComputedStyle(this.InputRef.current).getPropertyValue('font-size'); // needed to make the menu items font-size the same as the shown value
-    }
+    this.setFontSize();
     return (
       this.state.suggestions.map((suggestion: any, index: number) => {
         const displayName = this.map(suggestion);
@@ -317,6 +328,23 @@ class SelectInternal<T> extends React.Component<SelectInternalProps<T>, any> {
       <MenuItem key={index} component='div' selected={isHighlighted} value={displayName} style={s} classes={{root: this.props.classes.selectMenuItem}}><span>{displayName}</span></MenuItem>
     );
   }
+
+  renderError = React.memo((props: any) => {
+    const {classes, error, useTooltipForErrors} = props;
+
+    if (!useTooltipForErrors) {
+      return error;
+    }
+
+    return (
+      <ErrorTooltip
+        fontSize={this._fontSize}
+        inputRef={this.inputRef}
+        error={error}
+        classes={{errorIcon: classes.errorIcon}}
+      />
+    );
+  });
 
   renderValue(v: any, multiple?: boolean, placeholder?: string) {
     if (!v || (multiple && v.length <= 0)) {
@@ -365,7 +393,7 @@ class SelectInternal<T> extends React.Component<SelectInternalProps<T>, any> {
     let cls = (this.props.className || '') + ' select';
 
     return (
-      <RootRef rootRef={this.InputRef}>
+      <RootRef rootRef={this.inputRef}>
         <TextField
           className={cls}
           classes={{root: classes.formControlRoot}}
@@ -376,14 +404,14 @@ class SelectInternal<T> extends React.Component<SelectInternalProps<T>, any> {
           placeholder={this.props.placeholder}
           variant={variant}
           error={!this.props.disableErrors && !this.props.disabled && !!this.props.error}
-          helperText={!this.props.disableErrors && <span>{(!this.props.disabled && this.props.error) || ''}</span>}
+          helperText={!this.props.disableErrors && <span>{(!this.props.disabled && this.props.error ? <this.renderError classes={this.props.classes} error={this.props.error} useTooltipForErrors={this.props.useTooltipForErrors} /> : '')}</span>}
           value={v}
           onChange={this.handleChanged}
           autoFocus={this.props.autoFocus}
           inputProps={{spellCheck: false, className: classes.nativeInput, style: {textAlign: this.props.align || 'left'}}}
           InputProps={{startAdornment: startAdornment, endAdornment: endAdornment, classes: {root: classes.inputRoot, input: inputClassName, formControl: inputFormControlClassName}}}
           InputLabelProps={{shrink: true, classes: {root: classes.inputLabelRoot, outlined: classes.inputLabelOutlined, shrink: classes.inputLabelShrink}}}
-          FormHelperTextProps={{classes: {root: classes.helperTextRoot, contained: classes.helperTextContained}}}
+          FormHelperTextProps={{classes: {root: classNames(classes.helperTextRoot, this.props.useTooltipForErrors ? classes.helperTextRootErrorIcon : undefined), contained: classes.helperTextContained}}}
           SelectProps={{
             multiple: this.props.multiple,
             open: this.state.isOpen,

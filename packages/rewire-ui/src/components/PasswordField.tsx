@@ -1,4 +1,5 @@
 import * as React                    from 'react';
+import classNames                    from 'classnames';
 import TextField, { TextFieldProps } from '@material-ui/core/TextField';
 import InputAdornment                from '@material-ui/core/InputAdornment';
 import IconButton                    from '@material-ui/core/IconButton';
@@ -6,6 +7,7 @@ import {Theme}                       from '@material-ui/core/styles';
 import VisibilityIcon                from '@material-ui/icons/Visibility';
 import VisibilityOffIcon             from '@material-ui/icons/VisibilityOff';
 import {isNullOrUndefined}           from 'rewire-common';
+import ErrorTooltip                  from './ErrorTooltip';
 import BlurInputHOC                  from './BlurInputHOC';
 import {TextAlignment, TextVariant}  from './editors';
 import {withStyles, WithStyle}       from './styles';
@@ -64,9 +66,14 @@ const styles = (theme: Theme) => ({
     marginTop: '6px',
     fontSize: '0.8em',
   },
+  helperTextRootErrorIcon: {
+    fontSize: '1.2em',
+  },
   helperTextContained: {
     marginLeft: '14px',
     marginRight: '14px',
+  },
+  errorIcon: {
   },
 });
 
@@ -74,6 +81,7 @@ export interface IPasswordFieldProps {
   visible?              : boolean;
   disabled?             : boolean;
   disableErrors?        : boolean;
+  useTooltipForErrors?  : boolean;
   error?                : string;
   value?                : string;
   label?                : string;
@@ -96,10 +104,10 @@ export interface IPasswordFieldState {
 type PasswordFieldPropsStyled = WithStyle<ReturnType<typeof styles>, TextFieldProps & IPasswordFieldProps>;
 
 class PasswordFieldInternal extends React.Component<PasswordFieldPropsStyled, IPasswordFieldState> {
+  inputRef: React.RefObject<HTMLInputElement>;
   state: IPasswordFieldState = {
     showPassword: false,
   };
-  inputRef: React.RefObject<HTMLInputElement>;
 
   constructor(props: PasswordFieldPropsStyled) {
     super(props);
@@ -109,17 +117,18 @@ class PasswordFieldInternal extends React.Component<PasswordFieldPropsStyled, IP
 
   shouldComponentUpdate(nextProps: PasswordFieldPropsStyled, nextState: IPasswordFieldState) {
     return (
-      (nextProps.value         !== this.props.value)        ||
-      (nextProps.disabled      !== this.props.disabled)     ||
-      (nextProps.visible       !== this.props.visible)      ||
-      (nextProps.error         !== this.props.error)        ||
-      (nextState.showPassword  !== this.state.showPassword) ||
-      (nextProps.hasAdornment  !== this.props.hasAdornment) ||
-      (nextProps.label         !== this.props.label)        ||
-      (nextProps.placeholder   !== this.props.placeholder)  ||
-      (nextProps.align         !== this.props.align)        ||
-      (nextProps.variant       !== this.props.variant)      ||
-      (nextProps.disableErrors !== this.props.disableErrors)
+      (nextProps.value               !== this.props.value)         ||
+      (nextProps.disabled            !== this.props.disabled)      ||
+      (nextProps.visible             !== this.props.visible)       ||
+      (nextProps.error               !== this.props.error)         ||
+      (nextState.showPassword        !== this.state.showPassword)  ||
+      (nextProps.hasAdornment        !== this.props.hasAdornment)  ||
+      (nextProps.label               !== this.props.label)         ||
+      (nextProps.placeholder         !== this.props.placeholder)   ||
+      (nextProps.align               !== this.props.align)         ||
+      (nextProps.variant             !== this.props.variant)       ||
+      (nextProps.disableErrors       !== this.props.disableErrors) || 
+      (nextProps.useTooltipForErrors !== this.props.useTooltipForErrors)
     );
   }
 
@@ -138,6 +147,22 @@ class PasswordFieldInternal extends React.Component<PasswordFieldPropsStyled, IP
     this.setState(state => ({showPassword: !state.showPassword}));
     setTimeout(() => this.inputRef.current && this.inputRef.current.focus(), 0);
   }
+
+  renderError = React.memo((props: any) => {
+    const {classes, error, useTooltipForErrors} = props;
+
+    if (!useTooltipForErrors) {
+      return error;
+    }
+      
+    return (
+      <ErrorTooltip
+        inputRef={this.inputRef}
+        error={error}
+        classes={{errorIcon: classes.errorIcon}}
+      />
+    );
+  });
 
   render() {
     if (this.props.visible === false) {
@@ -173,7 +198,7 @@ class PasswordFieldInternal extends React.Component<PasswordFieldPropsStyled, IP
           placeholder={this.props.placeholder}
           variant={this.props.variant}
           error={!this.props.disableErrors && !this.props.disabled && !!this.props.error}
-          helperText={!this.props.disableErrors && <span>{(!this.props.disabled && this.props.error) || ''}</span>}
+          helperText={!this.props.disableErrors && <span>{(!this.props.disabled && this.props.error ? <this.renderError classes={this.props.classes} error={this.props.error} useTooltipForErrors={this.props.useTooltipForErrors} /> : '')}</span>}
           value={value}
           inputRef={this.inputRef}
           autoFocus={this.props.autoFocus}
@@ -184,7 +209,7 @@ class PasswordFieldInternal extends React.Component<PasswordFieldPropsStyled, IP
           inputProps={{spellCheck: false, className: this.props.classes.nativeInput, style: {textAlign: this.props.align || 'left'}}}
           InputProps={{endAdornment: adornment, classes: {root: this.props.classes.inputRoot, input: inputClassName, formControl: inputFormControlClassName}}}
           InputLabelProps={{shrink: true, classes: {root: this.props.classes.inputLabelRoot, outlined: this.props.classes.inputLabelOutlined, shrink: this.props.classes.inputLabelShrink}}}
-          FormHelperTextProps={{classes: {root: this.props.classes.helperTextRoot, contained: this.props.classes.helperTextContained}}}
+          FormHelperTextProps={{classes: {root: classNames(this.props.classes.helperTextRoot, this.props.useTooltipForErrors ? this.props.classes.helperTextRootErrorIcon : undefined), contained: this.props.classes.helperTextContained}}}
         />
       );
     }
@@ -201,7 +226,7 @@ class PasswordFieldInternal extends React.Component<PasswordFieldPropsStyled, IP
             placeholder={props.placeholder}
             variant={props.variant}
             error={!props.disableErrors && !props.disabled && !!props.error}
-            helperText={!props.disableErrors && <span>{(!props.disabled && props.error) || ''}</span>}
+            helperText={!props.disableErrors && <span>{(!props.disabled && props.error ? <this.renderError classes={props.classes} error={props.error} useTooltipForErrors={props.useTooltipForErrors} /> : '')}</span>}
             value={props.value}
             inputRef={this.inputRef}
             autoFocus={props.autoFocus}
@@ -212,7 +237,7 @@ class PasswordFieldInternal extends React.Component<PasswordFieldPropsStyled, IP
             inputProps={{spellCheck: false, className: props.classes.nativeInput, style: {textAlign: props.align || 'left'}}}
             InputProps={{endAdornment: adornment, classes: {root: props.classes.inputRoot, input: inputClassName, formControl: inputFormControlClassName}}}
             InputLabelProps={{shrink: true, classes: {root: props.classes.inputLabelRoot, outlined: props.classes.inputLabelOutlined, shrink: props.classes.inputLabelShrink}}}
-            FormHelperTextProps={{classes: {root: props.classes.helperTextRoot, contained: props.classes.helperTextContained}}}
+            FormHelperTextProps={{classes: {root: classNames(props.classes.helperTextRoot, props.useTooltipForErrors ? props.classes.helperTextRootErrorIcon : undefined), contained: props.classes.helperTextContained}}}
           />
         }
       />
