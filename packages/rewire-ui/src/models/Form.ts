@@ -44,22 +44,23 @@ export type TGetter        = (obj: any) => any;
 export type TSetter        = (obj: any, value: any) => void;
 
 export interface IFieldDefn {
-  label            (text: string):                                    IFieldDefn;
-  accessor         (getter: TGetter, setter: TSetter):                IFieldDefn;
-  accessor         (path: string[]):                                  IFieldDefn;
-  placeholder      (text: string):                                    IFieldDefn;
-  align            (text: TextAlignment):                             IFieldDefn;
-  variant          (text: TextVariant):                               IFieldDefn;
-  autoFocus        ():                                                IFieldDefn;
-  disabled         (action: (field: IEditorField) => boolean):        IFieldDefn;
-  disableErrors    (disableErrors?: boolean):                         IFieldDefn;
-  startAdornment   (adornment?: () => JSX.Element):                   IFieldDefn;
-  endAdornment     (adornment?: () => JSX.Element):                   IFieldDefn;
-  editor           (editorType: EditorType, editProps?: any):         IFieldDefn;
-  updateOnChange   (updateOnChange?: boolean):                        IFieldDefn;
-  validateOnUpdate (validateOnUpdate?: boolean):                      IFieldDefn;
-  validators       (...v: IFormValidator[]):                          IFieldDefn;
-  onValueChange    (handleValueChange: (form: Form, v: any) => void): IFieldDefn;
+  label               (text: string):                                    IFieldDefn;
+  accessor            (getter: TGetter, setter: TSetter):                IFieldDefn;
+  accessor            (path: string[]):                                  IFieldDefn;
+  placeholder         (text: string):                                    IFieldDefn;
+  align               (text: TextAlignment):                             IFieldDefn;
+  variant             (text: TextVariant):                               IFieldDefn;
+  autoFocus           ():                                                IFieldDefn;
+  disabled            (action: (field: IEditorField) => boolean):        IFieldDefn;
+  disableErrors       (disableErrors?: boolean):                         IFieldDefn;
+  useTooltipForErrors (useTooltipForErrors?: boolean):                   IFieldDefn;
+  startAdornment      (adornment?: () => JSX.Element):                   IFieldDefn;
+  endAdornment        (adornment?: () => JSX.Element):                   IFieldDefn;
+  editor              (editorType: EditorType, editProps?: any):         IFieldDefn;
+  updateOnChange      (updateOnChange?: boolean):                        IFieldDefn;
+  validateOnUpdate    (validateOnUpdate?: boolean):                      IFieldDefn;
+  validators          (...v: IFormValidator[]):                          IFieldDefn;
+  onValueChange       (handleValueChange: (form: Form, v: any) => void): IFieldDefn;
 }
 
 export interface IEditorField extends IField {
@@ -76,23 +77,24 @@ export interface IFieldDefns {
 }
 
 interface IBaseFieldDefn {
-  type             : IFieldTypes;
-  accessor?        : {getter: TGetter, setter: TSetter};
-  editorType?      : EditorType;
-  autoFocus?       : boolean;
-  editProps?       : any;
-  label?           : string;
-  placeholder?     : string;
-  align?           : TextAlignment;
-  variant?         : TextVariant;
-  error?           : string;
-  value?           : any;
-  disabled?        : (field: IEditorField) => boolean;
-  disableErrors?   : boolean;
-  visible?         : boolean;
-  updateOnChange?  : boolean;
-  validateOnUpdate?: boolean;
-  validators?      : IValidator[];
+  type                : IFieldTypes;
+  accessor?           : {getter: TGetter, setter: TSetter};
+  editorType?         : EditorType;
+  autoFocus?          : boolean;
+  editProps?          : any;
+  label?              : string;
+  placeholder?        : string;
+  align?              : TextAlignment;
+  variant?            : TextVariant;
+  error?              : string;
+  value?              : any;
+  disabled?           : (field: IEditorField) => boolean;
+  disableErrors?      : boolean;
+  useTooltipForErrors?: boolean;
+  visible?            : boolean;
+  updateOnChange?     : boolean;
+  validateOnUpdate?   : boolean;
+  validators?         : IValidator[];
 
   onValueChange?(form: Form, v: any): void;
   startAdornment?(): JSX.Element;
@@ -274,6 +276,11 @@ class BaseField implements IFieldDefn {
     return this;
   }
 
+  useTooltipForErrors(useTooltipForErrors: boolean = true): IFieldDefn {
+    this.typeDefn.useTooltipForErrors = useTooltipForErrors;
+    return this;
+  }
+
   startAdornment(adornment?: () => JSX.Element): IFieldDefn {
     this.typeDefn.startAdornment = adornment;
     return this;
@@ -320,6 +327,7 @@ export interface IFormOptions {
   defaultAdornmentsEnabled?:    boolean;
   initialValuesValidationMode?: IInitialValuesValidationModeType;
   disableErrors?:               boolean;
+  useTooltipForErrors?:         boolean;
   variant?:                     TextVariant;
   updateOnChange?:              boolean;
   validateOnUpdate?:            boolean;
@@ -334,6 +342,7 @@ export default class Form implements IValidationContext {
   defaultAdornmentsEnabled:    boolean;
   initialValuesValidationMode: IInitialValuesValidationModeType;
   disableErrors:               boolean;
+  useTooltipForErrors:         boolean;
   variant:                     TextVariant;
   updateOnChange:              boolean;
   validateOnUpdate:            boolean;
@@ -348,6 +357,7 @@ export default class Form implements IValidationContext {
     this.defaultAdornmentsEnabled    = options && !isNullOrUndefined(options.defaultAdornmentsEnabled) ? options.defaultAdornmentsEnabled! : true;
     this.initialValuesValidationMode = options && options.initialValuesValidationMode ? options.initialValuesValidationMode : 'withValues';
     this.disableErrors               = options && options.disableErrors || false;
+    this.useTooltipForErrors         = options && options.useTooltipForErrors || false;
     this.variant                     = options && options.variant || 'standard';
     // this.updateOnChange              = options && !isNullOrUndefined(options.updateOnChange) ? options.updateOnChange! : true;
     this.updateOnChange              = options && options.updateOnChange || false;
@@ -367,7 +377,8 @@ export default class Form implements IValidationContext {
     freeze(() => {
       for (const fieldName of fieldNames) {
         const fieldIdx = this.fields.findIndex(f => f.name === fieldName);
-        if (fieldIdx) {
+        if (fieldIdx >= 0) {
+          this.validator.removeRule(fieldName);
           this.fields.splice(fieldIdx, 1);
           delete this.field[fieldName];
         }
@@ -507,24 +518,25 @@ export default class Form implements IValidationContext {
     const accessor = fieldDefn.typeDefn.accessor;
     const field = observable({
       name,
-      autoFocus:        fieldDefn.typeDefn.autoFocus,
-      type:             fieldDefn.typeDefn.type,
-      placeholder:      fieldDefn.typeDefn.placeholder,
-      align:            fieldDefn.typeDefn.align,
-      label:            fieldDefn.typeDefn.label,
-      disabled:         fieldDefn.typeDefn.disabled,
-      disableErrors:    !isNullOrUndefined(fieldDefn.typeDefn.disableErrors) ? fieldDefn.typeDefn.disableErrors : this.disableErrors,
-      variant:          fieldDefn.typeDefn.variant || this.variant,
-      error:            undefined,
-      value:            undefined,
-      updateOnChange:   !isNullOrUndefined(fieldDefn.typeDefn.updateOnChange) ? fieldDefn.typeDefn.updateOnChange : this.updateOnChange,
-      validateOnUpdate: !isNullOrUndefined(fieldDefn.typeDefn.validateOnUpdate) ? fieldDefn.typeDefn.validateOnUpdate : this.validateOnUpdate,
-      visible:          true,
-      __getter:         (accessor && accessor.getter) || defaultGetter(name),
-      __setter:         (accessor && accessor.setter) || defaultSetter(name),
-      startAdornment:   fieldDefn.typeDefn.startAdornment,
-      endAdornment:     fieldDefn.typeDefn.endAdornment,
-      onValueChange:    fieldDefn.typeDefn.onValueChange,
+      autoFocus:           fieldDefn.typeDefn.autoFocus,
+      type:                fieldDefn.typeDefn.type,
+      placeholder:         fieldDefn.typeDefn.placeholder,
+      align:               fieldDefn.typeDefn.align,
+      label:               fieldDefn.typeDefn.label,
+      disabled:            fieldDefn.typeDefn.disabled,
+      disableErrors:       !isNullOrUndefined(fieldDefn.typeDefn.disableErrors) ? fieldDefn.typeDefn.disableErrors : this.disableErrors,
+      useTooltipForErrors: !isNullOrUndefined(fieldDefn.typeDefn.useTooltipForErrors) ? fieldDefn.typeDefn.useTooltipForErrors : this.useTooltipForErrors,
+      variant:             fieldDefn.typeDefn.variant || this.variant,
+      error:               undefined,
+      value:               undefined,
+      updateOnChange:      !isNullOrUndefined(fieldDefn.typeDefn.updateOnChange) ? fieldDefn.typeDefn.updateOnChange : this.updateOnChange,
+      validateOnUpdate:    !isNullOrUndefined(fieldDefn.typeDefn.validateOnUpdate) ? fieldDefn.typeDefn.validateOnUpdate : this.validateOnUpdate,
+      visible:             true,
+      __getter:            (accessor && accessor.getter) || defaultGetter(name),
+      __setter:            (accessor && accessor.setter) || defaultSetter(name),
+      startAdornment:      fieldDefn.typeDefn.startAdornment,
+      endAdornment:        fieldDefn.typeDefn.endAdornment,
+      onValueChange:       fieldDefn.typeDefn.onValueChange,
     }) as IEditorField & {__getter: any, __setter: any};
 
     if (this.defaultAdornmentsEnabled && !Object.prototype.hasOwnProperty.call(fieldDefn.typeDefn, 'endAdornment')) {
@@ -595,7 +607,7 @@ export default class Form implements IValidationContext {
   public shouldValidate(fieldName: string): boolean {
     let field = this.field[fieldName];
     if (!field) return false;
-    return !field.disableErrors;
+    return !field.disableErrors && !field.disabled;
   }
 
   public toObjectValues(): ObjectType {

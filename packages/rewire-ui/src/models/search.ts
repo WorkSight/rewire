@@ -84,6 +84,7 @@ export interface ICustomProps<T> {
   placeholder?          : string;
   autoFocus?            : boolean;
   disableErrors?        : boolean;
+  useTooltipForErrors?  : boolean;
   startAdornment?       : JSX.Element;
   endAdornment?         : JSX.Element;
   onSelectItem          : (value?: T) => void;

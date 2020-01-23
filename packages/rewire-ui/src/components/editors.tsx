@@ -19,17 +19,18 @@ import TextField               from './TextField';
 import TimeInputField          from './TimeInputField';
 
 export interface IField {
-  name           : string;
-  label?         : string;
-  placeholder?   : string;
-  align?         : TextAlignment;
-  variant?       : TextVariant;
-  autoFocus?     : boolean;
-  error?         : string;
-  value?         : any;
-  disabled?      : (field: IField) => boolean;
-  visible?       : boolean;
-  disableErrors? : boolean;
+  name                : string;
+  label?              : string;
+  placeholder?        : string;
+  align?              : TextAlignment;
+  variant?            : TextVariant;
+  autoFocus?          : boolean;
+  error?              : string;
+  value?              : any;
+  disabled?           : (field: IField) => boolean;
+  visible?            : boolean;
+  disableErrors?      : boolean;
+  useTooltipForErrors?: boolean;
 
   startAdornment?(): JSX.Element;
   endAdornment?():   JSX.Element;
@@ -92,6 +93,7 @@ export default function editor(type: EditorType, propsForEdit?: any): React.SFC<
             disabled={field.disabled && field.disabled(field)}
             visible={field.visible}
             disableErrors={field.disableErrors}
+            useTooltipForErrors={field.useTooltipForErrors}
             style={{width: '100%', minWidth: '120px', textAlign: field.align || 'left'}}
             align={field.align || 'left'}
             variant={field.variant}
@@ -122,6 +124,7 @@ export default function editor(type: EditorType, propsForEdit?: any): React.SFC<
             disabled={field.disabled && field.disabled(field)}
             visible={field.visible}
             disableErrors={field.disableErrors}
+            useTooltipForErrors={field.useTooltipForErrors}
             align={field.align || 'left'}
             variant={field.variant}
             selectedItems={field.value || []}
@@ -148,6 +151,7 @@ export default function editor(type: EditorType, propsForEdit?: any): React.SFC<
             disabled={field.disabled && field.disabled(field)}
             visible={field.visible}
             disableErrors={field.disableErrors}
+            useTooltipForErrors={field.useTooltipForErrors}
             style={{width: '100%', minWidth: '120px', textAlign: field.align || 'left'}}
             align={field.align || 'left'}
             variant={field.variant}
@@ -177,6 +181,7 @@ export default function editor(type: EditorType, propsForEdit?: any): React.SFC<
             disabled={field.disabled && field.disabled(field)}
             visible={field.visible}
             disableErrors={field.disableErrors}
+            useTooltipForErrors={field.useTooltipForErrors}
             align={field.align || 'left'}
             variant={field.variant}
             value={field.value && utc(field.value).toDateString()}
@@ -207,6 +212,7 @@ export default function editor(type: EditorType, propsForEdit?: any): React.SFC<
             disabled={field.disabled && field.disabled(field)}
             visible={field.visible}
             disableErrors={field.disableErrors}
+            useTooltipForErrors={field.useTooltipForErrors}
             align={field.align || 'left'}
             variant={field.variant}
             className={className}
@@ -234,6 +240,7 @@ export default function editor(type: EditorType, propsForEdit?: any): React.SFC<
             disabled={field.disabled && field.disabled(field)}
             visible={field.visible}
             disableErrors={field.disableErrors}
+            useTooltipForErrors={field.useTooltipForErrors}
             align={field.align || 'left'}
             variant={field.variant}
             className={className}
@@ -261,6 +268,7 @@ export default function editor(type: EditorType, propsForEdit?: any): React.SFC<
             disabled={field.disabled && field.disabled(field)}
             visible={field.visible}
             disableErrors={field.disableErrors}
+            useTooltipForErrors={field.useTooltipForErrors}
             align={field.align || 'left'}
             variant={field.variant}
             multiline={true}
@@ -288,6 +296,7 @@ export default function editor(type: EditorType, propsForEdit?: any): React.SFC<
             disabled={field.disabled && field.disabled(field)}
             visible={field.visible}
             disableErrors={field.disableErrors}
+            useTooltipForErrors={field.useTooltipForErrors}
             align={field.align || 'left'}
             variant={field.variant}
             className={className}
@@ -331,6 +340,7 @@ export default function editor(type: EditorType, propsForEdit?: any): React.SFC<
             disabled={field.disabled && field.disabled(field)}
             visible={field.visible}
             disableErrors={field.disableErrors}
+            useTooltipForErrors={field.useTooltipForErrors}
             align={field.align || 'left'}
             variant={field.variant}
             className={className}
@@ -357,6 +367,7 @@ export default function editor(type: EditorType, propsForEdit?: any): React.SFC<
             autoFocus={field.autoFocus}
             visible={field.visible}
             disableErrors={field.disableErrors}
+            useTooltipForErrors={field.useTooltipForErrors}
             align={field.align || 'left'}
             variant={field.variant}
             className={className}
@@ -384,6 +395,7 @@ export default function editor(type: EditorType, propsForEdit?: any): React.SFC<
             disabled={field.disabled && field.disabled(field)}
             visible={field.visible}
             disableErrors={field.disableErrors}
+            useTooltipForErrors={field.useTooltipForErrors}
             align={field.align || 'left'}
             variant={field.variant}
             className={className}
@@ -445,6 +457,7 @@ export default function editor(type: EditorType, propsForEdit?: any): React.SFC<
             disabled={field.disabled && field.disabled(field)}
             visible={field.visible}
             disableErrors={field.disableErrors}
+            useTooltipForErrors={field.useTooltipForErrors}
             align={field.align || 'left'}
             variant={field.variant}
             selectedItem={field.value}
@@ -506,6 +519,7 @@ export default function editor(type: EditorType, propsForEdit?: any): React.SFC<
             disabled={field.disabled && field.disabled(field)}
             visible={field.visible}
             disableErrors={field.disableErrors}
+            useTooltipForErrors={field.useTooltipForErrors}
             align={field.align || 'left'}
             variant={field.variant}
             className={className}

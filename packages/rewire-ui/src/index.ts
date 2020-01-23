@@ -28,6 +28,7 @@ export * from './components/TextField';
 export * from './components/TimeInputField';
 export * from './components/ToggleMenu';
 export * from './components/TransitionWrapper';
+export * from './components/ErrorTooltip';
 
 export {default as Form}               from './models/Form';
 export {default as Modal}              from './models/Modal';
@@ -57,3 +58,4 @@ export {default as TextField}          from './components/TextField';
 export {default as TimeInputField}     from './components/TimeInputField';
 export {default as ToggleMenu}         from './components/ToggleMenu';
 export {default as TransitionWrapper}  from './components/TransitionWrapper';
+export {default as ErrorTooltip}       from './components/ErrorTooltip';

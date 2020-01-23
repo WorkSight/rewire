@@ -188,6 +188,12 @@ export default class Validator {
     existingValidators.push(...validator);
   }
 
+  removeRule(field: string) {
+    if (this.rules.hasOwnProperty(field)) {
+      delete this.rules[field];
+    }
+  }
+
   reset() {
     this.rules = {};
   }

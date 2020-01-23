@@ -1,9 +1,11 @@
 import * as React                    from 'react';
+import classNames                    from 'classnames';
 import {isNullOrUndefined, utc, UTC} from 'rewire-common';
 import BlurInputHOC                  from './BlurInputHOC';
 import TextField, { TextFieldProps } from '@material-ui/core/TextField';
 import InputAdornment                from '@material-ui/core/InputAdornment';
 import {Theme}                       from '@material-ui/core/styles';
+import ErrorTooltip                  from './ErrorTooltip';
 import {TextAlignment, TextVariant}  from './editors';
 import {withStyles, WithStyle}       from './styles';
 
@@ -83,9 +85,14 @@ const styles = (theme: Theme) => ({
     marginTop: '6px',
     fontSize: '0.8em',
   },
+  helperTextRootErrorIcon: {
+    fontSize: '1.2em',
+  },
   helperTextContained: {
     marginLeft: '14px',
     marginRight: '14px',
+  },
+  errorIcon: {
   },
 });
 
@@ -93,6 +100,7 @@ export interface ITextFieldProps {
   visible?              : boolean;
   disabled?             : boolean;
   disableErrors?        : boolean;
+  useTooltipForErrors?  : boolean;
   error?                : string;
   value?                : string;
   label?                : string;
@@ -115,8 +123,12 @@ export interface ITextFieldProps {
 type TextFieldPropsStyled = WithStyle<ReturnType<typeof styles>, TextFieldProps & ITextFieldProps>;
 
 class TextFieldInternal extends React.Component<TextFieldPropsStyled> {
+  inputRef: React.RefObject<HTMLInputElement>;
+
   constructor(props: TextFieldPropsStyled) {
     super(props);
+
+    this.inputRef = React.createRef();
   }
 
   shouldComponentUpdate(nextProps: TextFieldPropsStyled) {
@@ -130,19 +142,20 @@ class TextFieldInternal extends React.Component<TextFieldPropsStyled> {
 
     return (
       !equalValue ||
-      (nextProps.disabled       !== this.props.disabled)       ||
-      (nextProps.visible        !== this.props.visible)        ||
-      (nextProps.error          !== this.props.error)          ||
-      (nextProps.label          !== this.props.label)          ||
-      (nextProps.placeholder    !== this.props.placeholder)    ||
-      (nextProps.align          !== this.props.align)          ||
-      (nextProps.multiline      !== this.props.multiline)      ||
-      (nextProps.rows           !== this.props.rows)           ||
-      (nextProps.rowsMax        !== this.props.rowsMax)        ||
-      (nextProps.variant        !== this.props.variant)        ||
-      (nextProps.disableErrors  !== this.props.disableErrors)  ||
-      (nextProps.startAdornment !== this.props.startAdornment) ||
-      (nextProps.endAdornment   !== this.props.endAdornment)
+      (nextProps.disabled            !== this.props.disabled)            ||
+      (nextProps.visible             !== this.props.visible)             ||
+      (nextProps.error               !== this.props.error)               ||
+      (nextProps.label               !== this.props.label)               ||
+      (nextProps.placeholder         !== this.props.placeholder)         ||
+      (nextProps.align               !== this.props.align)               ||
+      (nextProps.multiline           !== this.props.multiline)           ||
+      (nextProps.rows                !== this.props.rows)                ||
+      (nextProps.rowsMax             !== this.props.rowsMax)             ||
+      (nextProps.variant             !== this.props.variant)             ||
+      (nextProps.disableErrors       !== this.props.disableErrors)       ||
+      (nextProps.useTooltipForErrors !== this.props.useTooltipForErrors) ||
+      (nextProps.startAdornment      !== this.props.startAdornment)      ||
+      (nextProps.endAdornment        !== this.props.endAdornment)
     );
   }
 
@@ -183,6 +196,22 @@ class TextFieldInternal extends React.Component<TextFieldPropsStyled> {
     }
   }
 
+  renderError = React.memo((props: any) => {
+    const {classes, error, useTooltipForErrors} = props;
+
+    if (!useTooltipForErrors) {
+      return error;
+    }
+
+    return (
+      <ErrorTooltip
+        inputRef={this.inputRef}
+        error={error}
+        classes={{errorIcon: classes.errorIcon}}
+      />
+    );
+  });
+
   render() {
     if (this.props.visible === false) {
       return null;
@@ -217,17 +246,18 @@ class TextFieldInternal extends React.Component<TextFieldPropsStyled> {
         placeholder={this.props.placeholder}
         variant={variant as any}
         error={!this.props.disableErrors && !this.props.disabled && !!this.props.error}
-        helperText={!this.props.disableErrors && <span>{(!this.props.disabled && this.props.error) || ''}</span>}
+        helperText={!this.props.disableErrors && <span>{(!this.props.disabled && this.props.error ? <this.renderError classes={classes} error={this.props.error} useTooltipForErrors={this.props.useTooltipForErrors} /> : '')}</span>}
         value={value}
         autoFocus={this.props.autoFocus}
         onFocus={this.handleFocus}
         onBlur={this.props.onBlur}
         onKeyDown={this.handleKeyDown}
         onChange={(evt: React.ChangeEvent<HTMLInputElement>) => this.onValueChange(evt.target.value)}
+        inputRef={this.inputRef}
         inputProps={{spellCheck: !!multiline, className: classes.nativeInput, style: {textAlign: this.props.align || 'left'}}}
         InputProps={{startAdornment: startAdornment, endAdornment: endAdornment, classes: {root: classes.inputRoot, multiline: multilineClassName, input: inputClassName, formControl: inputFormControlClassName}}}
         InputLabelProps={{shrink: true, classes: {root: classes.inputLabelRoot, outlined: classes.inputLabelOutlined, shrink: classes.inputLabelShrink}}}
-        FormHelperTextProps={{classes: {root: classes.helperTextRoot, contained: classes.helperTextContained}}}
+        FormHelperTextProps={{classes: {root: classNames(classes.helperTextRoot, this.props.useTooltipForErrors ? classes.helperTextRootErrorIcon : undefined), contained: classes.helperTextContained}}}
       />);
     }
 
@@ -236,7 +266,7 @@ class TextFieldInternal extends React.Component<TextFieldPropsStyled> {
       render={(props: TextFieldPropsStyled) =>
         <TextField
           className={props.className}
-          classes={{root: classes.formControlRoot}}
+          classes={{root: props.classes.formControlRoot}}
           type={type}
           multiline={multiline}
           rows={props.rows || 2}
@@ -246,17 +276,18 @@ class TextFieldInternal extends React.Component<TextFieldPropsStyled> {
           placeholder={props.placeholder}
           variant={variant as any}
           error={!props.disableErrors && !props.disabled && !!props.error}
-          helperText={!props.disableErrors && <span>{(!props.disabled && props.error) || ''}</span>}
+          helperText={!props.disableErrors && <span>{(!props.disabled && props.error ? <this.renderError classes={props.classes} error={props.error} useTooltipForErrors={props.useTooltipForErrors} /> : '')}</span>}
           value={props.value}
           autoFocus={props.autoFocus}
           onFocus={this.handleFocus}
           onBlur={props.onBlur}
           onKeyDown={this.handleKeyDown}
           onChange={props.onChange}
-          inputProps={{spellCheck: !!multiline, className: classes.nativeInput, style: {textAlign: props.align || 'left'}}}
-          InputProps={{startAdornment: startAdornment, endAdornment: endAdornment, classes: {root: classes.inputRoot, multiline: multilineClassName, input: inputClassName, formControl: inputFormControlClassName}}}
-          InputLabelProps={{shrink: true, classes: {root: classes.inputLabelRoot, outlined: classes.inputLabelOutlined, shrink: classes.inputLabelShrink}}}
-          FormHelperTextProps={{classes: {root: classes.helperTextRoot, contained: classes.helperTextContained}}}
+          inputRef={this.inputRef}
+          inputProps={{spellCheck: !!multiline, className: props.classes.nativeInput, style: {textAlign: props.align || 'left'}}}
+          InputProps={{startAdornment: startAdornment, endAdornment: endAdornment, classes: {root: props.classes.inputRoot, multiline: multilineClassName, input: inputClassName, formControl: inputFormControlClassName}}}
+          InputLabelProps={{shrink: true, classes: {root: props.classes.inputLabelRoot, outlined: props.classes.inputLabelOutlined, shrink: props.classes.inputLabelShrink}}}
+          FormHelperTextProps={{classes: {root: classNames(props.classes.helperTextRoot, props.useTooltipForErrors ? props.classes.helperTextRootErrorIcon : undefined), contained: props.classes.helperTextContained}}}
         />
       }
     />);

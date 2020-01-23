@@ -17,7 +17,6 @@
             "call-signature": "nospace",
             "index-signature": "nospace",
             "parameter": "nospace",
-            "property-declaration": false,
             "variable-declaration": "nospace"
         }],
         "variable-name": [true, "ban-keywords"],

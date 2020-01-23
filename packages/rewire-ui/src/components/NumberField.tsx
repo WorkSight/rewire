@@ -1,10 +1,12 @@
 import * as React                    from 'react';
 import NumberFormat                  from 'react-number-format';
 import * as is                       from 'is';
+import classNames                    from 'classnames';
 import TextField, { TextFieldProps } from '@material-ui/core/TextField';
 import InputAdornment                from '@material-ui/core/InputAdornment';
 import { Theme }                     from '@material-ui/core/styles';
 import { isNullOrUndefined }         from 'rewire-common';
+import ErrorTooltip                  from './ErrorTooltip';
 import BlurInputHOC                  from './BlurInputHOC';
 import { TextAlignment }             from './editors';
 import { withStyles, WithStyle }     from './styles';
@@ -54,9 +56,14 @@ const styles = (theme: Theme) => ({
     marginTop: '6px',
     fontSize: '0.8em',
   },
+  helperTextRootErrorIcon: {
+    fontSize: '1.2em',
+  },
   helperTextContained: {
     marginLeft: '14px',
     marginRight: '14px',
+  },
+  errorIcon: {
   },
 });
 
@@ -64,6 +71,7 @@ export interface INumberFieldProps {
   visible?              : boolean;
   disabled?             : boolean;
   disableErrors?        : boolean;
+  useTooltipForErrors?  : boolean;
   error?                : string;
   value?                : number;
   label?                : string;
@@ -90,8 +98,12 @@ export interface INumberFieldProps {
 type NumberFieldProps = WithStyle<ReturnType<typeof styles>, TextFieldProps & INumberFieldProps>;
 
 class NumberTextField extends React.Component<NumberFieldProps> {
+  inputRef: React.RefObject<HTMLInputElement>;
+
   constructor(props: NumberFieldProps) {
     super(props);
+
+    this.inputRef = React.createRef();
   }
 
   handleValueChanged = (values: any) => {
@@ -100,25 +112,26 @@ class NumberTextField extends React.Component<NumberFieldProps> {
   }
 
   shouldComponentUpdate(nextProps: NumberFieldProps) {
-    return (
-      (nextProps.value             !== this.props.value)             ||
-      (nextProps.disabled          !== this.props.disabled)          ||
-      (nextProps.visible           !== this.props.visible)           ||
-      (nextProps.format            !== this.props.format)            ||
-      (nextProps.mask              !== this.props.mask)              ||
-      (nextProps.decimals          !== this.props.decimals)          ||
-      (nextProps.thousandSeparator !== this.props.thousandSeparator) ||
-      (nextProps.allowNegative     !== this.props.allowNegative)     ||
-      (nextProps.isAllowed         !== this.props.isAllowed)         ||
-      (nextProps.fixed             !== this.props.fixed)             ||
-      (nextProps.error             !== this.props.error)             ||
-      (nextProps.label             !== this.props.label)             ||
-      (nextProps.placeholder       !== this.props.placeholder)       ||
-      (nextProps.align             !== this.props.align)             ||
-      (nextProps.variant           !== this.props.variant)           ||
-      (nextProps.disableErrors     !== this.props.disableErrors)     ||
-      (nextProps.startAdornment    !== this.props.startAdornment)    ||
-      (nextProps.endAdornment      !== this.props.endAdornment)
+    return (  
+      (nextProps.value               !== this.props.value)               ||
+      (nextProps.disabled            !== this.props.disabled)            ||
+      (nextProps.visible             !== this.props.visible)             ||
+      (nextProps.format              !== this.props.format)              ||
+      (nextProps.mask                !== this.props.mask)                ||
+      (nextProps.decimals            !== this.props.decimals)            ||
+      (nextProps.thousandSeparator   !== this.props.thousandSeparator)   ||
+      (nextProps.allowNegative       !== this.props.allowNegative)       ||
+      (nextProps.isAllowed           !== this.props.isAllowed)           ||
+      (nextProps.fixed               !== this.props.fixed)               ||
+      (nextProps.error               !== this.props.error)               ||
+      (nextProps.label               !== this.props.label)               ||
+      (nextProps.placeholder         !== this.props.placeholder)         ||
+      (nextProps.align               !== this.props.align)               ||
+      (nextProps.variant             !== this.props.variant)             ||
+      (nextProps.disableErrors       !== this.props.disableErrors)       ||
+      (nextProps.useTooltipForErrors !== this.props.useTooltipForErrors) ||
+      (nextProps.startAdornment      !== this.props.startAdornment)      ||
+      (nextProps.endAdornment        !== this.props.endAdornment)
     );
   }
 
@@ -144,6 +157,22 @@ class NumberTextField extends React.Component<NumberFieldProps> {
     return v;
   }
 
+  renderError = React.memo((props: any) => {
+    const {classes, error, useTooltipForErrors} = props;
+
+    if (!useTooltipForErrors) {
+      return error;
+    }
+
+    return (
+      <ErrorTooltip
+        inputRef={this.inputRef}
+        error={error}
+        classes={{errorIcon: classes.errorIcon}}
+      />
+    );
+  });
+
   render(): any {
     const {visible, updateOnChange} = this.props;
     if (visible === false) {
@@ -164,6 +193,7 @@ class NumberTextField extends React.Component<NumberFieldProps> {
           classes={{root: this.props.classes.formControlRoot}}
           disabled={this.props.disabled}
           error={!this.props.disableErrors && !this.props.disabled && !!this.props.error}
+          helperText={!this.props.disableErrors && <span>{(!this.props.disabled && this.props.error ? <this.renderError classes={this.props.classes} error={this.props.error} useTooltipForErrors={this.props.useTooltipForErrors} /> : '')}</span>}
           value={value}
           label={this.props.label}
           onValueChange={this.handleValueChanged}
@@ -178,14 +208,14 @@ class NumberTextField extends React.Component<NumberFieldProps> {
           format={this.props.format}
           mask={this.props.mask}
           isNumericString={isNumericString}
+          inputRef={this.inputRef}
           inputProps={{spellCheck: false, className: this.props.classes.nativeInput, style: {textAlign: this.props.align || 'left'}}}
           InputProps={{startAdornment: startAdornment, endAdornment: endAdornment, classes: {root: this.props.classes.inputRoot, input: inputClassName, formControl: inputFormControlClassName}}}
           InputLabelProps={{shrink: true, classes: {root: this.props.classes.inputLabelRoot, outlined: this.props.classes.inputLabelOutlined, shrink: this.props.classes.inputLabelShrink}}}
-          FormHelperTextProps={{classes: {root: this.props.classes.helperTextRoot, contained: this.props.classes.helperTextContained}}}
+          FormHelperTextProps={{classes: {root: classNames(this.props.classes.helperTextRoot, this.props.useTooltipForErrors ? this.props.classes.helperTextRootErrorIcon : undefined), contained: this.props.classes.helperTextContained}}}
           customInput={TextField}
           placeholder={this.props.placeholder}
           variant={this.props.variant}
-          helperText={!this.props.disableErrors && <span>{(!this.props.disabled && this.props.error) || ''}</span>}
         />);
     }
 
@@ -200,6 +230,7 @@ class NumberTextField extends React.Component<NumberFieldProps> {
             classes={{root: props.classes.formControlRoot}}
             disabled={props.disabled}
             error={!props.disableErrors && !props.disabled && !!props.error}
+            helperText={!props.disableErrors && <span>{(!props.disabled && props.error ? <this.renderError classes={props.classes} error={props.error} useTooltipForErrors={props.useTooltipForErrors} /> : '')}</span>}
             value={props.value}
             label={props.label}
             onValueChange={(values: any) => props.onChange && props.onChange({target: {value: values.floatValue}} as any)}
@@ -214,14 +245,14 @@ class NumberTextField extends React.Component<NumberFieldProps> {
             format={props.format}
             mask={props.mask}
             isNumericString={isNumericString}
+            inputRef={this.inputRef}
             inputProps={{spellCheck: false, className: props.classes.nativeInput, style: {textAlign: props.align || 'left'}}}
             InputProps={{startAdornment: startAdornment, endAdornment: endAdornment, classes: {root: props.classes.inputRoot, input: inputClassName, formControl: inputFormControlClassName}}}
             InputLabelProps={{shrink: true, classes: {root: props.classes.inputLabelRoot, outlined: props.classes.inputLabelOutlined, shrink: props.classes.inputLabelShrink}}}
-            FormHelperTextProps={{classes: {root: props.classes.helperTextRoot, contained: props.classes.helperTextContained}}}
+            FormHelperTextProps={{classes: {root: classNames(props.classes.helperTextRoot, props.useTooltipForErrors ? props.classes.helperTextRootErrorIcon : undefined), contained: props.classes.helperTextContained}}}
             customInput={TextField}
             placeholder={props.placeholder}
             variant={props.variant}
-            helperText={!props.disableErrors && <span>{(!props.disabled && props.error) || ''}</span>}
           />)
         }
       />);
