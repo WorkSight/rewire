@@ -32,7 +32,7 @@ export interface IErrorTooltipProps {
   classes  : any;
   error?   : string;
   fontSize?: string | number;
-  inputRef?: React.RefObject<HTMLElement>
+  inputRef?: React.RefObject<HTMLElement>;
   Icon?    : (props: SvgIconProps) => JSX.Element;
 }
 

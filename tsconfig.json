@@ -33,7 +33,6 @@
     "strictNullChecks": true,
     "suppressImplicitAnyIndexErrors": true,
     "target": "es2019",
-    "lib": ["es2019", "dom"],
     "traceResolution": false,
     "plugins": [
       { "name": "tslint-language-service" }

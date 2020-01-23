@@ -301,8 +301,9 @@ class MaskField extends React.Component<MaskFieldProps> {
         InputProps={{inputComponent: TextMaskCustom, startAdornment: startAdornment, endAdornment: endAdornment, classes: {root: classes.inputRoot, input: inputClassName, formControl: inputFormControlClassName}}}
         InputLabelProps={{shrink: true, classes: {root: classes.inputLabelRoot, outlined: classes.inputLabelOutlined, shrink: classes.inputLabelShrink}}}
         FormHelperTextProps={{classes: {root: classNames(classes.helperTextRoot, this.props.useTooltipForErrors ? classes.helperTextRootErrorIcon : undefined), contained: classes.helperTextContained}}}
-      />);
+      />
       </RootRef>
+      );
     }
 
     return (
@@ -330,7 +331,8 @@ class MaskField extends React.Component<MaskFieldProps> {
         />
         </RootRef>
       }
-    />);
+    />
+    );
   }
 }
 

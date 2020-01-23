@@ -338,7 +338,7 @@ class SelectInternal<T> extends React.Component<SelectInternalProps<T>, any> {
 
     return (
       <ErrorTooltip
-        fontSize={this._fontSize!}
+        fontSize={this._fontSize}
         inputRef={this.inputRef}
         error={error}
         classes={{errorIcon: classes.errorIcon}}
