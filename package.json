@@ -1,6 +1,6 @@
 {
   "name": "rewire",
-  "version": "1.0.198",
+  "version": "1.0.199",
   "description": "WorkSight .NEXT core",
   "main": "src/index.js",
   "private": true,
@@ -63,9 +63,10 @@
     "packages/*"
   ],
   "dependencies": {
-    "@material-ui/core": "^4.7.1",
+    "@material-ui/core": "^4.9.0",
     "@material-ui/icons": "^4.5.1",
-    "@material-ui/styles": "^4.7.1",
+    "@material-ui/styles": "^4.9.0",
+    "@types/material-ui": "^0.21.7",
     "graphql": "^14.1.1",
     "react": "^16.8.6",
     "react-dom": "^16.8.6",

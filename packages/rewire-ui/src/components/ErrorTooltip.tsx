@@ -19,6 +19,9 @@ const styles = (theme: Theme) => ({
   },
   tooltip: {
   },
+  popper: {
+    top: 0, // fixes offset calculation bug
+  },
 });
 
 const useTooltipStyles = makeStyles({
