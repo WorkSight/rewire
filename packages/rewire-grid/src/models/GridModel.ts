@@ -539,11 +539,11 @@ class GridModel implements IGrid, IDisposable {
       if (this.groupBy && this.groupBy.length) {
         for (const column of this.groupBy) {
           let compareFn = column.compare;
-          let v1 = r1.cells[column.name].value;
-          let v2 = r2.cells[column.name].value;
-          let r  = compareFn ? compareFn(v1, v2) : compare(v1, v2);
+          let v1        = r1.cells[column.name].value;
+          let v2        = r2.cells[column.name].value;
+          let r         = compareFn ? compareFn(v1, v2) : compare(v1, v2);
           if (r !== 0) {
-            if (column.sort === 'ascending') return r;
+            if (!column.sort || column.sort === 'ascending') return r;
             return -1 * r;
           }
         }
@@ -551,11 +551,11 @@ class GridModel implements IGrid, IDisposable {
 
       for (const column of this._sort) {
         let compareFn = column.compare;
-        let v1 = r1.cells[column.name].value;
-        let v2 = r2.cells[column.name].value;
-        let r  = compareFn ? compareFn(v1, v2) : compare(v1, v2);
+        let v1        = r1.cells[column.name].value;
+        let v2        = r2.cells[column.name].value;
+        let r         = compareFn ? compareFn(v1, v2) : compare(v1, v2);
         if (r !== 0) {
-          if (column.sort === 'ascending') return r;
+          if (!column.sort || column.sort === 'ascending') return r;
           return -1 * r;
         }
       }
