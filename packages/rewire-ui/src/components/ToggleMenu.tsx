@@ -15,7 +15,7 @@ import MenuBase, {
 import {WithStyle, withStyles} from './styles';
 
 export interface IToggleMenuItem extends IMenuBaseItem {
-  visible: boolean | (() => boolean);
+  active: boolean | (() => boolean);
 
   onClick?(item: IToggleMenuItem): void;
 }
@@ -53,21 +53,23 @@ export type ToggleMenuItemRendererProps = WithStyle<MenuBaseStylesType, IToggleM
 export const ToggleItemRenderer = React.memo(withStyles(toggleItemRendererStyles, React.forwardRef((props: ToggleMenuItemRendererProps, ref: any): JSX.Element => {
   return <Observe render={() => {
     const item         = props.item;
+    const visible      = props.visible;
     const disabled     = props.disabled;
     const classes      = props.classes;
     const rootClasses  = props.rootClasses;
     const clickHandler = props.clickHandler;
     return (
-      <MenuItem key={item.name} divider={item.divider} classes={{root: rootClasses, selected: classes.menuItemSelected}} disableRipple={disabled} onClick={clickHandler}>
-        <ListItemText className={classes.listItemText} primary={item.title} primaryTypographyProps={{classes: {root: classes.listItemTypography}}} />
-        <Observe render={() => (
-          (is.function(item.visible) ? item.visible() : item.visible) &&
-            <ListItemIcon className={classes.listItemIcon}>
-              {item.icon ? <item.icon /> : <CheckIcon />}
-            </ListItemIcon>
-          || null
-        )} />
-      </MenuItem>
+      visible &&
+        <MenuItem key={item.name} divider={item.divider} classes={{root: rootClasses, selected: classes.menuItemSelected}} disableRipple={disabled} onClick={clickHandler}>
+          <ListItemText className={classes.listItemText} primary={item.title} primaryTypographyProps={{classes: {root: classes.listItemTypography}}} />
+          <Observe render={() => (
+            (is.function(item.active) ? item.active() : item.active) &&
+              <ListItemIcon className={classes.listItemIcon}>
+                {item.icon ? <item.icon /> : <CheckIcon />}
+              </ListItemIcon>
+            || null
+          )} />
+        </MenuItem>
     );
   }} />;
 })));
@@ -84,8 +86,8 @@ class ToggleMenu extends React.Component<IToggleMenuProps> {
   }
 
   defaultOnItemClick = (item: IToggleMenuItem) => {
-    if (!is.function(item.visible)) {
-      item.visible = !item.visible;
+    if (!is.function(item.active)) {
+      item.active = !item.active;
     }
   }
 

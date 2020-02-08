@@ -1,4 +1,5 @@
 import * as React                   from 'react';
+import * as is                      from 'is';
 import {isNullOrUndefined, Without} from 'rewire-common';
 import {Observe}                    from 'rewire-core';
 import classNames                   from 'classnames';
@@ -21,13 +22,15 @@ export interface IMenuBaseItem {
   divider?: boolean;
   subheader?: string | JSX.Element | (() => JSX.Element);
   closeOnClick?: boolean;
+  visible?: boolean | (() => boolean);
+  disabled?: boolean | (() => boolean);
 
-  disabled?(): boolean;
   onClick?(item: IMenuBaseItem): void;
 }
 
 export interface IMenuBaseItemRendererProps {
   item:          IMenuBaseItem;
+  visible:       boolean;
   disabled:      boolean;
   classes:       Record<any, string>;
   rootClasses?:  string;
@@ -133,17 +136,19 @@ class MenuBase extends React.Component<MenuBaseProps, IMenuBaseState> {
   renderItem = React.memo(React.forwardRef((props: IMenuBaseItemRendererProps, ref: any): JSX.Element => {
     return <Observe render={() => {
       const item         = props.item;
+      const visible      = props.visible;
       const disabled     = props.disabled;
       const classes      = props.classes;
       const rootClasses  = props.rootClasses;
       const clickHandler = props.clickHandler;
       return (
-        <MenuItem key={item.name} divider={item.divider} disableRipple={disabled} classes={{root: rootClasses, selected: classes.menuItemSelected}} onClick={clickHandler}>
-          <ListItemIcon className={classes.listItemIcon}>
-            {item.icon ? <item.icon /> : <LabelIcon />}
-          </ListItemIcon>
-          <ListItemText className={classes.listItemText} primary={item.title} primaryTypographyProps={{classes: {root: classes.listItemTypography}}} />
-        </MenuItem>
+        visible &&
+          <MenuItem key={item.name} divider={item.divider} disableRipple={disabled} classes={{root: rootClasses, selected: classes.menuItemSelected}} onClick={clickHandler}>
+            <ListItemIcon className={classes.listItemIcon}>
+              {item.icon ? <item.icon /> : <LabelIcon />}
+            </ListItemIcon>
+            <ListItemText className={classes.listItemText} primary={item.title} primaryTypographyProps={{classes: {root: classes.listItemTypography}}} />
+          </MenuItem>
       );
     }} />;
   }));
@@ -154,7 +159,8 @@ class MenuBase extends React.Component<MenuBaseProps, IMenuBaseState> {
       return (
         < >
         {items.map((item: IMenuBaseItem, idx: number) => {
-          let disabled     = !!(item.disabled && item.disabled());
+          let disabled     = !!(item.disabled && is.function(item.disabled) ? item.disabled() : item.disabled);
+          let visible      = !!(item.visible && is.function(item.visible) ? item.visible() : !isNullOrUndefined(item.visible) ? item.visible : true);
           let rootClasses  = classNames(classes.menuItem, disabled ? classes.menuItemDisabled : undefined);
           let clickHandler = !disabled ? this.handleItemClick(item) : undefined;
           let subheader    = item.subheader;
@@ -163,7 +169,7 @@ class MenuBase extends React.Component<MenuBaseProps, IMenuBaseState> {
           return (
             <React.Fragment key={idx}>
               {subheader && <this.renderTitle title={subheader} />}
-              <ItemRenderer item={item} rootClasses={rootClasses} classes={classes} disabled={disabled} clickHandler={clickHandler} />
+              <ItemRenderer item={item} rootClasses={rootClasses} classes={classes} visible={visible} disabled={disabled} clickHandler={clickHandler} />
             </React.Fragment>
           );
         })}
