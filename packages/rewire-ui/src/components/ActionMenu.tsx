@@ -52,6 +52,7 @@ export type ActionMenuItemRendererProps = WithStyle<MenuBaseStylesType, IActionM
 export const ActionItemRenderer = React.memo(withStyles(actionItemRendererStyles, React.forwardRef((props: ActionMenuItemRendererProps, ref: any): JSX.Element => {
   return <Observe render={() => {
     const item         = props.item;
+    const visible      = props.visible;
     const disabled     = props.disabled;
     const classes      = props.classes;
     const rootClasses  = props.rootClasses;
@@ -63,6 +64,7 @@ export const ActionItemRenderer = React.memo(withStyles(actionItemRendererStyles
         externalLinkProps.href      = item.href || '';
     }
     return (
+      visible &&
         <MenuItem key={item.name} {...externalLinkProps} divider={item.divider} disableRipple={disabled} classes={{root: rootClasses, selected: classes.menuItemSelected}} onClick={clickHandler}>
           <ListItemIcon className={classes.listItemIcon}>
             {item.icon ? <item.icon /> : <LabelIcon />}

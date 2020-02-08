@@ -37,7 +37,7 @@ class MixedMenu extends React.Component<IMixedMenuProps> {
   itemRenderer = React.memo(React.forwardRef((props: MixedMenuItemRendererProps, ref: any): JSX.Element => {
     return <Observe render={() => {
       return (
-        props.item.hasOwnProperty('visible')
+        props.item.hasOwnProperty('active')
           ? <ToggleItemRenderer {...props as ToggleMenuItemRendererProps} />
           : <ActionItemRenderer {...props as ActionMenuItemRendererProps} />
       );

@@ -467,7 +467,7 @@ export function createColumnsToggleMenuItems(columns: IColumn[], columnNames: st
   return toggleableColumns.map((column: IColumn, idx: number) => ({
     name: column.name,
     title: column.title,
-    visible: () => column.visible,
+    active: () => column.visible,
     subheader: idx === 0 ? 'Toggleable Columns' : undefined,
     onClick: onToggleMenuItemClick(column),
   } as IToggleMenuItem));

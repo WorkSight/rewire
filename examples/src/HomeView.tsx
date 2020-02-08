@@ -372,9 +372,9 @@ function createEmployeesGrid1() {
 
   // create the grid model
   const toggleItems: IToggleMenuItem[] = observable([
-    {name: 'delete',    title: 'Delete', subheader: 'Grid Toggles', visible: true, onClick: (item: IToggleMenuItem) => { item.visible = !item.visible; } },
-    {name: 'archive',   title: 'Archive',                           visible: true, onClick: (item: IToggleMenuItem) => { item.visible = !item.visible; } },
-    {name: 'unarchive', title: 'Unarchive',                         visible: true, onClick: (item: IToggleMenuItem) => { item.visible = !item.visible; } },
+    {name: 'delete',    title: 'Delete', subheader: 'Grid Toggles', active: true, onClick: (item: IToggleMenuItem) => { item.active = !item.active; } },
+    {name: 'archive',   title: 'Archive',                           active: true, onClick: (item: IToggleMenuItem) => { item.active = !item.active; } },
+    {name: 'unarchive', title: 'Unarchive',                         active: true, onClick: (item: IToggleMenuItem) => { item.active = !item.active; } },
   ]);
   let grid = createGrid(rows, cols, { multiSelect: true, allowMergeColumns: true, optionsMenuFn: () => ({ items: [...createColumnsToggleMenuItems(cols, ['timeColumn', 'email', 'isActive', 'autoCompleteColumn'], {onItemClick: toggleMenuHandleItemClick}), ...toggleItems] }) });
   // sort by employee names
@@ -500,9 +500,9 @@ const HomeToggleMenu = (props: any) => {
   const anchorOrigin: PopoverOrigin = {vertical: 'top', horizontal: 'left'};
   const transformOrigin             = anchorOrigin;
   const items: IToggleMenuItem[]    = observable([
-    {name: 'toggle1', title: 'Toggle 1', visible: true},
-    {name: 'toggle2', title: 'Toggle 2', visible: true},
-    {name: 'toggle3', title: 'Toggle 3', visible: true},
+    {name: 'toggle1', title: 'Toggle 1', active: true},
+    {name: 'toggle2', title: 'Toggle 2', active: true},
+    {name: 'toggle3', title: 'Toggle 3', active: true},
   ]);
   return (
     <ToggleMenu
