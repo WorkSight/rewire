@@ -44,7 +44,7 @@ export {default as editor}             from './components/editors';
 export {default as FormView}           from './components/FormView';
 export {default as KeyboardNavigation} from './components/KeyboardNavigation';
 export {default as Loader}             from './components/Loader';
-export {default as MenuBase}          from './components/MenuBase';
+export {default as MenuBase}           from './components/MenuBase';
 export {default as MixedMenu}          from './components/MixedMenu';
 export {default as NumberField}        from './components/NumberField';
 export {default as PasswordField}      from './components/PasswordField';

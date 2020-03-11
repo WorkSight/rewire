@@ -6,7 +6,7 @@ export default class GroupRowModel implements IGroupRow {
   private _expanded: any;
   private _visible: any;
 
-  constructor(public title: string, public level: number) {
+  constructor(public title: string, public level: number, public id: string) {
     this._expanded = value(true);
     this._visible  = value(true);
     this.rows      = [];

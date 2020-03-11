@@ -217,9 +217,9 @@ export class CellModel implements ICell {
     return !!(!this.editing && this.element);
   }
 
-  setFocus(focus: boolean = true) {
+  setFocus(focus: boolean = true, preventScroll: boolean = false) {
     if (focus && this.canFocus()) {
-      this.element!.focus();
+      this.element!.focus({preventScroll: preventScroll});
     } else if (!focus && this.canBlur()) {
       this.element!.blur();
     }

@@ -1,5 +1,5 @@
-import * as is             from 'is';
-import {isNullOrUndefined} from 'rewire-common';
+import * as is                           from 'is';
+import {isNullOrUndefined}               from 'rewire-common';
 import {
   EditorType,
   SearchFn,
@@ -13,9 +13,10 @@ import {
   TGetter,
   TSetter
 } from 'rewire-ui';
-import * as merge      from 'deepmerge';
-import { ButtonProps } from '@material-ui/core/Button';
-import {PopoverOrigin} from '@material-ui/core/Popover';
+import * as merge                        from 'deepmerge';
+import { ButtonProps }                   from '@material-ui/core/Button';
+import { PopoverOrigin }                 from '@material-ui/core/Popover';
+import { IReorderableGridRowsCellProps } from '../components/ReorderableGridRows';
 export { EditorType };
 
 export interface IRows {
@@ -81,39 +82,46 @@ export interface IGridOptionsMenu {
 }
 
 export interface IGrid extends IRows, IDisposable {
-  id                        : number;
-  enabled                   : boolean;
-  readOnly                  : boolean;
-  verticalAlign             : VerticalAlignment;
-  rows                      : IRow[];
-  fixedRows                 : IRow[];
-  columns                   : IColumn[];
-  editingCell?              : ICell;
-  selectedRows              : IRow[];
-  selectedCells             : ICell[];
-  focusedCell?              : ICell;
-  fixedWidth                : string;
-  headerRowHeight?          : number;
-  rowHeight?                : number;
-  loading                   : boolean;
-  readonly fixedColumns     : IColumn[];
-  readonly standardColumns  : IColumn[];
-  groupBy                   : IColumn[];
-  isMouseDown               : boolean;
-  multiSelect               : boolean;
-  allowMergeColumns         : boolean;
-  startCell?                : ICell;
-  clearSelectionOnBlur?     : boolean;
-  rowKeybindPermissions     : IGridRowKeybindPermissions;
-  staticKeybinds            : IGridStaticKeybinds;
-  variableKeybinds          : IGridVariableKeybinds;
-  isRowCompleteFn           : (row: IRowData) => boolean;
-  canSelectCellFn           : (cell: ICell) => boolean;
-  optionsMenu?              : IGridOptionsMenu;
-  readonly validator        : Validator;
-  readonly hasChanges       : boolean;
-  readonly isChangeTracking : boolean;
-  onError?                  : (row: IRow, field: string, error: IError | undefined) => void;
+  id                              : number;
+  enabled                         : boolean;
+  readOnly                        : boolean;
+  verticalAlign                   : VerticalAlignment;
+  isReorderable                   : boolean;
+  reorderableCellRenderer         : (props: IReorderableGridRowsCellProps) => JSX.Element;
+  rows                            : IRow[];
+  fixedRows                       : IRow[];
+  columns                         : IColumn[];
+  editingCell?                    : ICell;
+  selectedRows                    : IRow[];
+  selectedCells                   : ICell[];
+  focusedCell?                    : ICell;
+  previousFocusedCell?            : ICell;
+  fixedWidth                      : string;
+  headerRowHeight?                : number;
+  rowHeight?                      : number;
+  loading                         : boolean;
+  readonly fixedColumns           : IColumn[];
+  readonly standardColumns        : IColumn[];
+  readonly visibleFixedColumns    : IColumn[];
+  readonly visibleStandardColumns : IColumn[];
+  readonly groupRows              : IGroupRow[];
+  groupBy                         : IColumn[];
+  isMouseDown                     : boolean;
+  isReorderingMouseDown           : boolean;
+  multiSelect                     : boolean;
+  allowMergeColumns               : boolean;
+  startCell?                      : ICell;
+  clearSelectionOnBlur?           : boolean;
+  rowKeybindPermissions           : IGridRowKeybindPermissions;
+  staticKeybinds                  : IGridStaticKeybinds;
+  variableKeybinds                : IGridVariableKeybinds;
+  isRowCompleteFn                 : (row: IRowData) => boolean;
+  canSelectCellFn                 : (cell: ICell) => boolean;
+  optionsMenu?                    : IGridOptionsMenu;
+  readonly validator              : Validator;
+  readonly hasChanges             : boolean;
+  readonly isChangeTracking       : boolean;
+  onError?                        : (row: IRow, field: string, error: IError | undefined) => void;
 
   setChangeTracking(enable: boolean): void;
   revert(): void;
@@ -156,6 +164,7 @@ export interface IGrid extends IRows, IDisposable {
   lastCellInRow(row: IRow, onlySelectable?: boolean): ICell | undefined;
   row(rowId: string): IRow | undefined;
   rowByPos(rowPosition: number): IRow | undefined;
+  groupRow(groupRowId: string): IGroupRow | undefined;
   getRowsByRange(rowStart: number, rowEnd: number, allowCollapsed?: boolean): IRow[];
   spliceColumns(start: number, deleteCount: number, ...columns: IColumn[]): void;
   column(columnName: string): IColumn | undefined;
@@ -172,6 +181,8 @@ export interface IGrid extends IRows, IDisposable {
   removeFixedRow(id: string): void;
 
   setRowPositions(): void;
+  moveRow(rowId: string, byRows: number): boolean;
+  swapRows(rowId1: string, rowId2: string): boolean;
   removeRow(id: string): void;
   removeRows(ids: string[]): void;
   removeSelectedRows(reselect?: boolean): void;
@@ -184,21 +195,22 @@ export interface IGrid extends IRows, IDisposable {
 }
 
 export interface IGridOptions {
-  enabled?:               boolean;
-  readOnly?:              boolean;
-  verticalAlign?:         VerticalAlignment;
-  isDraggable?:           boolean;
-  multiSelect?:           boolean;
-  allowMergeColumns?:     boolean;
-  clearSelectionOnBlur?:  boolean;
-  groupBy?:               string[];
-  rowKeybindPermissions?: IGridRowKeybindPermissions;
-  variableKeybinds?:      {[keybind: string]: GridKeybindAction};
-  isRowCompleteFn?:       (row: IRowData) => boolean;
-  canSelectCellFn?:       (cell: ICell)   => boolean;
-  headerRowHeight?:       number;
-  rowHeight?:             number;
-  optionsMenuFn?:         () => IGridOptionsMenu;
+  enabled?:                 boolean;
+  readOnly?:                boolean;
+  verticalAlign?:           VerticalAlignment;
+  isReorderable?:           boolean;
+  reorderableCellRenderer?: (props: IReorderableGridRowsCellProps) => JSX.Element;
+  multiSelect?:             boolean;
+  allowMergeColumns?:       boolean;
+  clearSelectionOnBlur?:    boolean;
+  groupBy?:                 string[];
+  rowKeybindPermissions?:   IGridRowKeybindPermissions;
+  variableKeybinds?:        {[keybind: string]: GridKeybindAction};
+  isRowCompleteFn?:         (row: IRowData) => boolean;
+  canSelectCellFn?:         (cell: ICell)   => boolean;
+  headerRowHeight?:         number;
+  rowHeight?:               number;
+  optionsMenuFn?:           () => IGridOptionsMenu;
 }
 
 export interface IGroupRow {
@@ -207,6 +219,7 @@ export interface IGroupRow {
   rows:           (IRow | IGroupRow)[];
   readonly title: string;
   readonly level: number;
+  readonly id:    string;
   expand():       void;
   collapse():     void;
 }
@@ -258,6 +271,7 @@ export interface IRow extends IDisposable {
   grid:               IGrid;
   cells:              ICellMap;
   data:               any;
+  groupRow?:          IGroupRow;
   selected:           boolean;
   cls?:               string;
   allowMergeColumns?: boolean;
@@ -381,15 +395,15 @@ export interface ICell extends ICellProperties {
   keyForEdit?:           string;
   hasChanges:            boolean;
 
-  hasErrors():                  boolean;
-  getErrors():                  IErrorData[];
-  clone(row: IRow):             ICell;
-  clear():                      void;
-  setEditing(editing: boolean): void;
-  canFocus():                   boolean;
-  setFocus(focus?: boolean):    void;
-  validate():                   void;
-  unselect():                   void;
+  hasErrors():                                         boolean;
+  getErrors():                                         IErrorData[];
+  clone(row: IRow):                                    ICell;
+  clear():                                             void;
+  setEditing(editing: boolean):                        void;
+  canFocus():                                          boolean;
+  setFocus(focus?: boolean, preventScroll?: boolean):  void;
+  validate():                                          void;
+  unselect():                                          void;
   performKeybindAction(evt: React.KeyboardEvent<any>): void;
 }
 
@@ -441,6 +455,21 @@ export function find(rows: Iterable<IRow>, predicate: (row: IRow) => boolean): I
 
 export function findRowById(iterator: Iterable<IRow>, id: string): IRow | undefined {
   return find(iterator, (r) => r.id === id);
+}
+
+export function findGroupRowById(iterator: Iterable<IGroupRow>, id: string): IGroupRow | undefined {
+  for (const groupRow of iterator) {
+    if (groupRow.id === id) {
+      return groupRow;
+    }
+    if (groupRow.rows.length && isGroupRow(groupRow.rows[0])) {
+      let matchingInnerGroupRow = findGroupRowById(groupRow.rows as IGroupRow[], id);
+      if (matchingInnerGroupRow) {
+        return matchingInnerGroupRow;
+      }
+    }
+  }
+  return undefined;
 }
 
 export function findRowByPosition(iterator: Iterable<IRow>, position: number): IRow | undefined {
