@@ -2,10 +2,11 @@ import * as React                                from 'react';
 import { countries, employees }                  from './demo-data';
 import { sampleModel, SampleDialog }             from './SampleDialog';
 import { hotkeysModel, HotKeysDialog }           from './HotKeys';
+import classNames                                from 'classnames';
 import { YesNoModel, YesNoDialog }               from './YesNoDialog';
 import { ConfirmationModel, ConfirmationDialog } from './YesNoDialog';
 import { utc, UTC, isNullOrUndefined, guid }     from 'rewire-common';
-import { Observe, observable, watch, root }      from 'rewire-core';
+import { Observe, observable, watch, root, property }      from 'rewire-core';
 import {
   ActionFn,
   WithStyle,
@@ -245,7 +246,9 @@ function createTestGrid(nRows: number, nColumns: number) {
   cols[1].width = '65px';
   cols[1].align = 'right';
   // create the grid model and group by 'column2' and 'column3'
-  let grid = createGrid(rows, cols, { groupBy: ['column2', 'column3'], optionsMenuFn: () => ({ items: createColumnsToggleMenuItems(cols, ['column8', 'column9']) }), multiSelect: true, allowMergeColumns: true });
+  // let grid = createGrid(rows, cols, { groupBy: ['column2', 'column3'], optionsMenuFn: () => ({ items: createColumnsToggleMenuItems(cols, ['column8', 'column9']) }), multiSelect: true, allowMergeColumns: true, verticalAlign: 'top' });
+  let grid = createGrid(rows, cols, { groupBy: ['column2', 'column3'], optionsMenuFn: () => ({ items: createColumnsToggleMenuItems(cols, ['column8', 'column9']) }), clearSelectionOnBlur: false, multiSelect: true, allowMergeColumns: true, isReorderable: true, verticalAlign: 'top' });
+  // let grid = createGrid(rows, cols, { optionsMenuFn: () => ({ items: createColumnsToggleMenuItems(cols, ['column8', 'column9']) }), clearSelectionOnBlur: false, multiSelect: true, allowMergeColumns: true, isReorderable: true, verticalAlign: 'top' });
 
   grid.addFixedRow({ data: { column5: '2017', column6: '2018' } });
   // setTimeout(() => { grid.groupBy = [cols[5]]; }, 4000);
@@ -373,10 +376,10 @@ function createEmployeesGrid1() {
   // create the grid model
   const toggleItems: IToggleMenuItem[] = observable([
     {name: 'delete',    title: 'Delete', subheader: 'Grid Toggles', active: true, onClick: (item: IToggleMenuItem) => { item.active = !item.active; } },
-    {name: 'archive',   title: 'Archive',                           active: true, onClick: (item: IToggleMenuItem) => { item.active = !item.active; } },
+    {name: 'archive',   title: 'Archive',                           disabled: true, active: true, visible: () => true, onClick: (item: IToggleMenuItem) => { item.active = !item.active; } },
     {name: 'unarchive', title: 'Unarchive',                         active: true, onClick: (item: IToggleMenuItem) => { item.active = !item.active; } },
   ]);
-  let grid = createGrid(rows, cols, { multiSelect: true, allowMergeColumns: true, optionsMenuFn: () => ({ items: [...createColumnsToggleMenuItems(cols, ['timeColumn', 'email', 'isActive', 'autoCompleteColumn'], {onItemClick: toggleMenuHandleItemClick}), ...toggleItems] }) });
+  let grid = createGrid(rows, cols, { multiSelect: true, allowMergeColumns: true, isReorderable: true, optionsMenuFn: () => ({ items: [...createColumnsToggleMenuItems(cols, ['timeColumn', 'email', 'isActive', 'autoCompleteColumn'], {onItemClick: toggleMenuHandleItemClick}), ...toggleItems] }) });
   // sort by employee names
   grid.addSort(cols[0], 'ascending');
   grid.headerRowHeight = 32;
@@ -500,7 +503,7 @@ const HomeToggleMenu = (props: any) => {
   const anchorOrigin: PopoverOrigin = {vertical: 'top', horizontal: 'left'};
   const transformOrigin             = anchorOrigin;
   const items: IToggleMenuItem[]    = observable([
-    {name: 'toggle1', title: 'Toggle 1', active: true},
+    {name: 'toggle1', title: 'Toggle 1', active: true, visible: false},
     {name: 'toggle2', title: 'Toggle 2', active: true},
     {name: 'toggle3', title: 'Toggle 3', active: true},
   ]);
@@ -518,7 +521,7 @@ const HomeToggleMenu = (props: any) => {
   );
 };
 
-const styles = () => ({
+const styles = (theme: any) => ({
   dialogButtonsContainer: {
     display: 'flex',
     alignItems: 'center',
@@ -536,6 +539,13 @@ const styles = () => ({
     alignItems: 'center',
     justifyContent: 'center',
     marginTop: '10px',
+    transition: theme.transitions.create(['width'], {
+      easing: theme.transitions.easing.sharp,
+      duration: theme.transitions.duration.short,
+    }),
+  },
+  gridSectionCollapsed: {
+    width: '50%',
   },
   gridActionButtonsContainer: {
     display: 'flex',
@@ -572,6 +582,12 @@ const styles = () => ({
     height: '400px',
   },
 });
+
+let toggle = property(true);
+
+function toggleWidth() {
+  toggle(!toggle());
+}
 
 type HomeViewProps = WithStyle<ReturnType<typeof styles>>;
 function setValue(row: IRow, obj: any) {
@@ -621,7 +637,7 @@ export const HomeView = React.memo(withStyles(styles, (props: HomeViewProps) => 
           <Typography variant='h6'>Please think before you answer</Typography>
         </YesNoDialog>
 
-        <div className={classes.gridsSection}>
+        <div className={classNames(classes.gridsSection, toggle() ? undefined : classes.gridSectionCollapsed)}>
           <div className={classes.gridActionButtonsContainer}>
             <Button className={classes.gridActionButton} variant='contained' onClick={() => grid.selectCellByPos(0, 4)}>Select Cell</Button>
             <Button className={classes.gridActionButton} variant='contained' onClick={() => grid.selectCellsByRange(1, 4, 3, 5)}>Select Cells</Button>
@@ -643,6 +659,7 @@ export const HomeView = React.memo(withStyles(styles, (props: HomeViewProps) => 
             <Observe render={() => (<Button className={classes.gridActionButton} variant='contained' onClick={() => { grid.column('column1')!.visible = !grid.column('column1')!.visible; }}> Toggle Column</Button>)} />
             <Observe render={() => (<Button className={classes.gridActionButton} variant='contained' disabled={!grid.hasErrors()}>Enabled if has Errors</Button>)} />
             <Observe render={() => (<Button className={classes.gridActionButton} variant='contained' onClick={() => console.log(grid.get())}> Save All</Button>)} />
+            <Observe render={() => (<Button className={classes.gridActionButton} variant='contained' onClick={() => toggleWidth()}> ToggleWidth</Button>)} />
           </div>
 
           <Paper className={classes.gridContainer}>

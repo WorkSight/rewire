@@ -237,15 +237,19 @@ class Cell extends React.PureComponent<CellProps, {}> {
 
   handleFocus = (evt: React.FocusEvent<any>) => {
     evt.stopPropagation();
-    if (!this.grid.focusedCell && this.grid.selectedCells.length <= 0) {
+
+    if (this.grid.focusedCell) {
+      this.grid.previousFocusedCell = this.grid.focusedCell;
+    } else if (this.grid.selectedCells.length <= 0) {
       this.grid.selectCells([this.cell]);
-    } else {
-      this.grid.focusedCell = this.cell;
     }
+
+    this.grid.focusedCell = this.cell;
   }
 
   handleBlur = (evt: React.FocusEvent<any>) => {
-    this.grid.focusedCell = undefined;
+    this.grid.previousFocusedCell = this.grid.focusedCell;
+    this.grid.focusedCell         = undefined;
   }
 
   handleKeyDownToEnterEditMode = (evt: React.KeyboardEvent<any>) => {

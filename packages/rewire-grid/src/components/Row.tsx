@@ -1,31 +1,21 @@
-import {PureComponent} from 'react';
+import * as React              from 'react';
 import {
   IRow,
   IColumn,
   IGroupRow,
   isGroupRow
-}                              from '../models/GridTypes';
-import * as React              from 'react';
-import cc                      from 'classcat';
-import * as Color              from 'color';
-import {isNullOrUndefined}     from 'rewire-common';
-import {Observe}               from 'rewire-core';
-import {Theme}                 from '@material-ui/core/styles';
-import {WithStyle, withStyles} from 'rewire-ui';
-import Cell                    from './Cell';
-import * as fastdom            from 'fastdom';
-
-export interface IRowProps {
-  row               : IRow;
-  height?           : number;
-  columns           : () => IColumn[];
-  Cell              : React.ComponentType<any>;
-  isFixedColumnsRow?: boolean;
-  index             : number;
-  className?        : string;
-  classes?          : any;
-  cellClasses?      : any;
-}
+}                               from '../models/GridTypes';
+import cc                       from 'classcat';
+import * as Color               from 'color';
+import {isNullOrUndefined}      from 'rewire-common';
+import {Observe}                from 'rewire-core';
+import {Theme}                  from '@material-ui/core/styles';
+import {
+  WithStyle,
+  withStyles,
+}                               from 'rewire-ui';
+import Cell                     from './Cell';
+import * as fastdom             from 'fastdom';
 
 const styles = (theme: Theme) => {
   let color = theme.palette.groupRowBackground.main;
@@ -63,24 +53,22 @@ export const GroupRow = React.memo(withStyles(styles, (props: IGroupProps & {cla
   return (
     < >
       <Observe render={() => (
-        <tr onClick={() => props.group.expanded ? props.group.collapse() : props.group.expand()} className={(props.group.visible === false) ? props.classes.hidden : props.classes.visible} style={{height: 28}}>
-          <td colSpan={props.numVisibleColumns} className={cc([props.classes.group, props.classes[`groupLevel${props.group.level}`], 'group', {expanded: (props.group.expanded && props.fixed), collapsed: !props.group.expanded && props.fixed}, 'level-' + props.group.level, props.classes.collapsed])}>
-            <div><span>{props.fixed ? props.group.title : ''}</span></div>
-          </td>
-        </tr>
+          <tr onClick={() => props.group.expanded ? props.group.collapse() : props.group.expand()} className={(props.group.visible === false) ? props.classes.hidden : props.classes.visible} style={{height: 28}}>
+            <td colSpan={props.numVisibleColumns} className={cc([props.classes.group, props.classes[`groupLevel${props.group.level}`], 'group', {expanded: (props.group.expanded && props.fixed), collapsed: !props.group.expanded && props.fixed}, 'level-' + props.group.level, props.classes.collapsed])}>
+              <div><span>{props.fixed ? props.group.title : <>&nbsp;</>}</span></div>
+            </td>
+          </tr>
       )} />
       {props.group.rows.map((r, idx) => {
         if (isGroupRow(r)) {
           return <GroupRow key={r.title} classes={props.classes} cellClasses={props.cellClasses} fixed={props.fixed} group={r} columns={props.columns} numVisibleColumns={props.numVisibleColumns} />;
         } else {
-          return <Row key={r.id} classes={props.classes} cellClasses={props.cellClasses} height={r.grid.rowHeight} columns={props.columns} Cell={Cell} index={idx} className={((idx % 2) === 1) ? 'alt' : ''} row={r} />;
+          return <Row key={r.id} classes={props.classes} cellClasses={props.cellClasses} height={r.grid.rowHeight} columns={props.columns} Cell={Cell} index={idx} className={((idx % 2) === 1) ? 'alt' : ''} row={r} isFixedColumnsRow={props.fixed} groupId={props.group.id} />;
         }
       })}
     </>
   );
 }));
-
-type RowProps = WithStyle<ReturnType<typeof styles>, IRowProps>;
 
 const rowElementMap = new Map<IRow, InternalRow[]>();
 function addElement(row: IRow, component: InternalRow) {
@@ -101,7 +89,22 @@ function removeElement(row: IRow, component: InternalRow) {
   if (e.length === 0) rowElementMap.delete(row);
 }
 
-class InternalRow extends PureComponent<RowProps, {}> {
+export interface IRowProps {
+  row               : IRow;
+  height?           : number;
+  columns           : () => IColumn[];
+  Cell              : React.ComponentType<any>;
+  isFixedColumnsRow?: boolean;
+  index             : number;
+  className?        : string;
+  classes?          : any;
+  cellClasses?      : any;
+  groupId?          : string;
+}
+
+type RowProps = WithStyle<ReturnType<typeof styles>, IRowProps>;
+
+class InternalRow extends React.PureComponent<RowProps, {}> {
   element: React.RefObject<HTMLTableRowElement>;
   observer: MutationObserver;
   desiredHeight: number = 0;
@@ -143,11 +146,29 @@ class InternalRow extends PureComponent<RowProps, {}> {
 
   renderCells = React.memo((): JSX.Element | null => {
     return <Observe render={() => {
-      if (!this.props.row.cells) return null;
+      let hasReorderableCell = this.props.isFixedColumnsRow && this.props.row.grid.isReorderable;
+      if (!this.props.row.cells && !hasReorderableCell) return null;
       // this.props.grid.standardColumns      // console.log(this.props.isFixedColumnsRow);
       // const columns = this.props.isFixedColumnsRow ? this.props.row.grid.fixedColumns : this.props.row.grid.standardColumns;
 
       let cells: JSX.Element[] = [];
+
+      if (hasReorderableCell) {
+        if (!this.props.row.fixed) {
+          let ReorderableCellRenderer = this.props.row.grid.reorderableCellRenderer;
+          cells.push(<ReorderableCellRenderer key={`reorderable-gridRows-cell-${this.props.row.id}`} row={this.props.row} isGridMouseCellSelecting={this.props.row.grid.isMouseDown} groupId={this.props.groupId} />);
+        } else {
+          cells.push(
+            <th
+              key={`reorderable-headerRows-cell-${this.props.row.id}`}
+              colSpan={1}
+              rowSpan={this.props.row.grid.fixedRows.length}
+            >
+            </th>
+          );
+        }
+      }
+
       this.props.columns().forEach((column: IColumn) => {
         let cell = this.props.row.cells[column.name];
         let Cell = this.props.Cell;

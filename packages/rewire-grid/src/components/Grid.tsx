@@ -14,11 +14,11 @@ import {
   DataSignal,
   computed
 }                                            from 'rewire-core';
+import ReorderableGridRows                   from './ReorderableGridRows';
 import Column                                from './Column';
 import classNames                            from 'classnames';
 import Cell                                  from './Cell';
 import Row, {GroupRow}                       from './Row';
-import GroupRowModel                         from '../models/GroupRowModel';
 import * as React                            from 'react';
 import * as Color                            from 'color';
 import {debounce}                            from 'rewire-common';
@@ -460,11 +460,12 @@ const GridInternal = withStyles(styles, class extends React.PureComponent<GridPr
   }
 
   handleExternalMouseUp = (evt: MouseEvent) => {
-    if (this.grid.clearSelectionOnBlur && !this.grid.isMouseDown) {
+    if (this.grid.clearSelectionOnBlur && !this.grid.isMouseDown && !this.grid.isReorderingMouseDown) {
       this.grid.clearSelection();
     }
 
-    this.grid.isMouseDown = false;
+    this.grid.isReorderingMouseDown = false;
+    this.grid.isMouseDown           = false;
   }
 
   handleScroll = (evt: React.UIEvent<any>) => {
@@ -556,7 +557,6 @@ const GridInternal = withStyles(styles, class extends React.PureComponent<GridPr
   }
 
   UNSAFE_componentWillMount() {
-    disposeOnUnmount(this, () => this.buildGroups());
     disposeOnUnmount(this, () => this.buildColumnGroups());
   }
 
@@ -593,7 +593,7 @@ const GridInternal = withStyles(styles, class extends React.PureComponent<GridPr
   }
 
   renderFixedColumnHeaders(): JSX.Element | null {
-    if (this.props.grid.fixedColumns.length === 0) {
+    if (this.props.grid.fixedColumns.length === 0 && !this.props.grid.isReorderable) {
       return null;
     }
 
@@ -603,7 +603,7 @@ const GridInternal = withStyles(styles, class extends React.PureComponent<GridPr
           {this.renderColumnGroups(true)}
           <thead role='rowgroup'>
             <Observe render={() => (
-              this.props.grid.fixedRows.map((row, index) => <Row key={row.id} classes={this.props.rowClasses} cellClasses={this.props.cellClasses} height={this.props.grid.headerRowHeight} Cell={Column} columns={() => this.props.grid.fixedColumns} index={index} row={row} />)
+              this.props.grid.fixedRows.map((row, index) => <Row key={row.id} classes={this.props.rowClasses} cellClasses={this.props.cellClasses} height={this.props.grid.headerRowHeight} Cell={Column} columns={() => this.props.grid.fixedColumns} index={index} row={row} isFixedColumnsRow={true} />)
             )} />
           </thead>
         </table>
@@ -611,65 +611,30 @@ const GridInternal = withStyles(styles, class extends React.PureComponent<GridPr
     );
   }
 
-  getGroupValue(row: IRow, column: IColumn) {
-    const v = row && row.data && column && row.data[column.name];
-    return (v === null || v === undefined || Number.isNaN(v)) ? '(none)' : (column.map && column.map(v)) || String(v);
-  }
-
-  getGroupKey(row: IRow, groupBy: IColumn[], level: number): string {
-    const key: string[] = [];
-    for (let index = 0; index < level; index++) {
-      const column        = groupBy[index];
-      const valueAsString = this.getGroupValue(row, column);
-      key.push(valueAsString);
-    }
-    return key.join('->');
-  }
-
-  _groups: () => IGroupRow[] | undefined;
-  buildGroups() {
-    const computation = () => {
-      if (!this.grid.groupBy || (this.grid.groupBy.length === 0)) return undefined;
-      const groupMap = {};
-      const groups: IGroupRow[] = [];
-      for (const row of this.grid.rows) {
-        let parentGroup: IGroupRow | undefined;
-        for (let level = 0; level < this.grid.groupBy.length; level++) {
-          const key   = this.getGroupKey(row, this.grid.groupBy, level + 1);
-          let   group = groupMap[key];
-          if (!group) {
-            const value = this.getGroupValue(row, this.grid.groupBy[level]);
-            group = groupMap[key] = new GroupRowModel(value, level);
-            if (!parentGroup) groups.push(group);
-            else parentGroup.rows.push(group);
-          }
-
-          parentGroup = group;
-          if (level === this.grid.groupBy.length - 1) {
-            parentGroup!.rows.push(row);
-          }
-        }
-      }
-      return groups;
-    };
-
-    this._groups = computed<IGroupRow[] | undefined>(() => this.grid.rows.length && this.grid.groupBy.length, computation, undefined, true);
-  }
-
   renderGroups(columns: () => IColumn[], fixed: boolean) {
-    const groups = this._groups();
-    const grid   = this.grid as any;
-    return groups && groups.map((group) => <GroupRow classes={this.props.rowClasses} cellClasses={this.props.cellClasses} fixed={fixed} key={group.title} group={group} columns={columns} numVisibleColumns={fixed ? grid.visibleFixedColumns.length : grid.visibleStandardColumns.length} />);
+    const grid   = this.grid;
+    const groups = grid.groupRows;
+    let numVisibleColumns: number;
+    if (!fixed) {
+      numVisibleColumns = grid.visibleStandardColumns.length;
+    } else {
+      numVisibleColumns = grid.isReorderable ? grid.visibleFixedColumns.length + 1 : grid.visibleFixedColumns.length; 
+    }
+    return groups.map((group: IGroupRow) => <GroupRow classes={this.props.rowClasses} cellClasses={this.props.cellClasses} fixed={fixed} key={group.title} group={group} columns={columns} numVisibleColumns={numVisibleColumns} />);
   }
 
   _fixedColGroups: () => JSX.Element | undefined;
   _colGroups: () => JSX.Element | undefined;
   buildColumnGroups() {
     const fixedComputation = () => {
+      let fixedGroupsBase: JSX.Element[] = [];
+      if (this.grid.isReorderable) {
+        fixedGroupsBase.push(<ColumnWidth key={'cg_' + 'reorderable'} column={{visible: true, width: '40px'} as IColumn} />);
+      }
       let fixedGroups = this.props.grid.fixedColumns.reduce((prev: JSX.Element[], column) => {
         prev.push(<ColumnWidth key={'cg_' + column.id} column={column} />);
         return prev;
-      }, []);
+      }, fixedGroupsBase);
       return <colgroup>{fixedGroups}</colgroup>;
     };
     const standardComputation = () => {
@@ -679,7 +644,7 @@ const GridInternal = withStyles(styles, class extends React.PureComponent<GridPr
       }, []);
       return <colgroup>{standardGroups}</colgroup>;
     };
-    this._fixedColGroups = computed(() => this.props.grid.fixedColumns.length, fixedComputation, undefined, true);
+    this._fixedColGroups = computed(() => { this.props.grid.fixedColumns.length; this.grid.isReorderable; }, fixedComputation, undefined, true);
     this._colGroups      = computed(() => this.props.grid.standardColumns.length, standardComputation, undefined, true);
   }
 
@@ -694,14 +659,14 @@ const GridInternal = withStyles(styles, class extends React.PureComponent<GridPr
   renderRows = (rows: IRow[], columns: () => IColumn[], fixed: boolean) => {
     const grid = this.props.grid;
     if (!grid.groupBy || (grid.groupBy.length === 0)) {
-      return <Observe render={() => rows.map((row, index) => <Row key={row.id} classes={this.props.rowClasses} cellClasses={this.props.cellClasses} height={this.props.grid.rowHeight} columns={columns} Cell={Cell} index={index} className={((index % 2) === 1) ? 'alt' : ''} row={row} />)} />;
+      return <Observe render={() => rows.map((row, index) => <Row key={row.id} classes={this.props.rowClasses} cellClasses={this.props.cellClasses} height={this.props.grid.rowHeight} columns={columns} Cell={Cell} index={index} className={((index % 2) === 1) ? 'alt' : ''} row={row} isFixedColumnsRow={fixed} />)} />;
     }
 
     return <Observe render={() => this.renderGroups(columns, fixed)} />;
   }
 
   renderFixedColumnData(): JSX.Element | null {
-    if (this.props.grid.fixedColumns.length === 0) {
+    if (this.props.grid.fixedColumns.length === 0 && !this.grid.isReorderable) {
       return null;
     }
 
@@ -770,7 +735,7 @@ const GridInternal = withStyles(styles, class extends React.PureComponent<GridPr
             </table>
           </div>
         </div>
-      )} />
+    )} />
     );
   }
 
@@ -785,6 +750,16 @@ const GridInternal = withStyles(styles, class extends React.PureComponent<GridPr
   // }
 
   _body: HTMLTableSectionElement | null;
+
+  renderDataReorderable(): JSX.Element {
+    return (
+      <Observe render={() => (
+        <ReorderableGridRows>
+          {this.renderData()}  
+        </ReorderableGridRows>
+      )} />
+    );
+  }
 
   renderData(): JSX.Element {
     let BodyRenderer = (this.props.virtual) ? VirtualBody : Body;
@@ -809,7 +784,7 @@ const GridInternal = withStyles(styles, class extends React.PureComponent<GridPr
       <div className={classNames(classes.root, className)} style={{...style}}>
         <div className={classNames('ws-grid', classes.wsGrid)} onMouseDown={(this.grid.multiSelect || this.grid.clearSelectionOnBlur) ? this.handleMouseDown : undefined}>
           {this.renderHeaders()}
-          {this.renderData()}
+          {this.grid.isReorderable ? this.renderDataReorderable() : this.renderData()}
         </div>
       </div>
     )} />;

@@ -8,7 +8,8 @@ import {
   IErrorData,
   IDisposable,
   cloneValue,
-  IRowData
+  IRowData,
+  IGroupRow,
 }                                     from './GridTypes';
 import { isNullOrUndefined, guid }    from 'rewire-common';
 import createCell                     from './CellModel';
@@ -23,6 +24,7 @@ export class RowModel implements IRow, IDisposable, IValidationContext {
   id                    : string;
   grid                  : IGrid;
   cells                 : ICellMap;
+  groupRow?             : IGroupRow;
   selected              : boolean;
   cls?                  : string;
   data                  : any;
