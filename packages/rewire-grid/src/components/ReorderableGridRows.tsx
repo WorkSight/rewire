@@ -17,7 +17,7 @@ import {
   IGrid,
 }                            from '../models/GridTypes';
 import Icon                  from '@material-ui/core/Icon';
-import ReorderIcon           from '@material-ui/icons/reorder';
+import ReorderIcon           from '@material-ui/icons/Reorder';
 import ArrowDownwardIcon     from '@material-ui/icons/ArrowDownward';
 import ArrowUpwardIcon       from '@material-ui/icons/ArrowUpward';
 import {Theme}               from '@material-ui/core/styles';
