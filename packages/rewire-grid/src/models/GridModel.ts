@@ -198,7 +198,11 @@ class GridModel implements IGrid, IDisposable {
         parentGroup = group;
         if (level === this.groupBy.length - 1) {
           parentGroup!.rows.push(row);
-          row.groupRow = parentGroup!;
+          if (!row.groupRow) {
+            row.groupRow = parentGroup!;
+          } else {
+            Object.assign(row.groupRow, parentGroup!);
+          }
         }
       }
     }
@@ -528,8 +532,8 @@ class GridModel implements IGrid, IDisposable {
       if (newRowPosition === row.position) {
         return false;
       }
-  
-      if (row.groupRow && (row.groupRow.rows.findIndex((r: IRow) => r.id === this.rows[newRowPosition].id) ?? -1) < 0) {
+
+      if (row.groupRow?.id !== this.rows[newRowPosition].groupRow?.id) {
         return false;
       }
   
@@ -550,6 +554,10 @@ class GridModel implements IGrid, IDisposable {
       let row2 = findRowById(this.rows, rowId2);
       if (!row2) {
         return false;
+      }
+
+      if (row1.groupRow?.id !== row2.groupRow?.id) {
+        return;
       }
 
       let newRow1Position = row1.position > row2.position ? row2.position : row2.position - 1;
