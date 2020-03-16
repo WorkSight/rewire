@@ -522,23 +522,24 @@ class GridModel implements IGrid, IDisposable {
   }
 
   moveRow(rowId: string, byRows: number): boolean {
-    freeze(() => {
-      let row = findRowById(this.rows, rowId); 
-      if (!row) {
-        return false;
-      }
-  
-      let newRowPosition = Math.max(Math.min(row.position + byRows, this.rows.length - 1), 0);
-      if (newRowPosition === row.position) {
-        return false;
-      }
+    let row = findRowById(this.rows, rowId); 
+    if (!row) {
+      return false;
+    }
 
-      if (row.groupRow?.id !== this.rows[newRowPosition].groupRow?.id) {
-        return false;
-      }
-  
-      this.rows.splice(newRowPosition, 0, this.rows.splice(row.position, 1)[0]);
+    let newRowPosition = Math.max(Math.min(row.position + byRows, this.rows.length - 1), 0);
+    if (newRowPosition === row.position) {
+      return false;
+    }
+
+    if (row.groupRow?.id !== this.rows[newRowPosition].groupRow?.id) {
+      return false;
+    }
+
+    freeze(() => {
+      this.rows.splice(newRowPosition, 0, this.rows.splice(row!.position, 1)[0]);
     });
+
     this.setRowPositions();
     this.updateCellSelectionProperties(this.selectedCells);
 
@@ -546,25 +547,26 @@ class GridModel implements IGrid, IDisposable {
   }
 
   swapRows(rowId1: string, rowId2: string): boolean {
+    let row1 = findRowById(this.rows, rowId1);
+    if (!row1) {
+      return false;
+    }
+    let row2 = findRowById(this.rows, rowId2);
+    if (!row2) {
+      return false;
+    }
+
+    if (row1.groupRow?.id !== row2.groupRow?.id) {
+      return false;
+    }
+
     freeze(() => {
-      let row1 = findRowById(this.rows, rowId1);
-      if (!row1) {
-        return false;
-      }
-      let row2 = findRowById(this.rows, rowId2);
-      if (!row2) {
-        return false;
-      }
-
-      if (row1.groupRow?.id !== row2.groupRow?.id) {
-        return;
-      }
-
-      let newRow1Position = row1.position > row2.position ? row2.position : row2.position - 1;
-      this.rows.splice(newRow1Position, 0, this.rows.splice(row1.position, 1)[0]);
-      let currRow2Position = row1.position < row2.position ? row2.position : row2.position + 1;
-      this.rows.splice(row1.position, 0, this.rows.splice(currRow2Position, 1)[0]);
+      let newRow1Position = row1!.position > row2!.position ? row2!.position : row2!.position - 1;
+      this.rows.splice(newRow1Position, 0, this.rows.splice(row1!.position, 1)[0]);
+      let currRow2Position = row1!.position < row2!.position ? row2!.position : row2!.position + 1;
+      this.rows.splice(row1!.position, 0, this.rows.splice(currRow2Position, 1)[0]);
     });
+
     this.setRowPositions();
     this.updateCellSelectionProperties(this.selectedCells);
 
