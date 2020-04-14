@@ -1,8 +1,6 @@
 import * as React            from 'react';
 import classNames            from 'classnames';
-import HTML5Backend          from 'react-dnd-html5-backend';
 import {
-  DndProvider,
   DragSource,
   DropTarget,
 }                            from 'react-dnd';
@@ -16,6 +14,7 @@ import {
   IRow,
   IGrid,
 }                            from '../models/GridTypes';
+import DragAndDrop           from './DragAndDrop';
 import Icon                  from '@material-ui/core/Icon';
 import ReorderIcon           from '@material-ui/icons/Reorder';
 import ArrowDownwardIcon     from '@material-ui/icons/ArrowDownward';
@@ -274,9 +273,9 @@ export interface IReorderableGridRowsProps {
 class ReorderableGridRows extends React.PureComponent<IReorderableGridRowsProps> {
   render() {
     return (
-      <DndProvider backend={HTML5Backend}>
+      <DragAndDrop>
         {this.props.children}
-      </DndProvider>
+      </DragAndDrop>
     );
   }
 }
