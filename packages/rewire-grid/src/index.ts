@@ -11,6 +11,7 @@ export * from './components/Grid';
 export * from './components/Row';
 export * from './components/gridEditors';
 export * from './components/ReorderableGridRows';
+export * from './components/DragAndDrop';
 
 export {default as createCell}          from './models/CellModel';
 export {default as createColumn}        from './models/ColumnModel';
@@ -21,3 +22,4 @@ export {default as Column}              from './components/Column';
 export {default as Grid}                from './components/Grid';
 export {default as Row}                 from './components/Row';
 export {default as ReorderableGridRows} from './components/ReorderableGridRows';
+export {default as DragAndDrop}         from './components/DragAndDrop';

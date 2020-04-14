@@ -649,7 +649,7 @@ export const HomeView = React.memo(withStyles(styles, (props: HomeViewProps) => 
             </Button>
             <Button className={classes.gridActionButton} variant='contained' onClick={() => grid.removeRow(grid.rows[grid.rows.length - 1].id)}>Remove Row</Button>
             <Button className={classes.gridActionButton} variant='contained' onClick={() => grid.rows.forEach(row => row.cells['numberColumn'].value = 1337)}>Change Number Cell Value</Button>
-            <Button className={classes.gridActionButton} variant='contained' onClick={() => grid.rows.forEach(row => setValue(row, {'numberColumn': 2222, 'dateColumn': '1985-11-26'}))}>Change Number And Date Cells</Button>
+            <Button className={classes.gridActionButton} variant='contained' onClick={() => grid.rows.forEach(row => setValue(row, {'numberColumn': 2222, 'dateColumn': utc()}))}>Change Number And Date Cells</Button>
             <Button className={classes.gridActionButton} variant='contained' onClick={() => grid.rows.forEach(row => row.clear(['numberColumn', 'dateColumn']))}>Clear Number And Date</Button>
             <Button className={classes.gridActionButton} variant='contained' onClick={() => grid.rows.forEach(row => row.cells['complexColumn'].value = new ComplexCellData('smithers027', 'Smithers', 57))}>
               Change Complex Cell Value
