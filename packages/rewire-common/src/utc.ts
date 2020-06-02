@@ -9,8 +9,8 @@ const _maxValue = 218342563200000;
 const _minValue = -62135596800000;
 
 export class UTC {
-  public static readonly MaxValue: UTC = utc(_maxValue);
-  public static readonly MinValue: UTC = utc(_minValue);
+  public static get MaxValue(): UTC { return _MaxValue };
+  public static get MinValue(): UTC { return _MinValue };
 
   public utc: number;
   constructor(dt: DateType) {
@@ -202,6 +202,9 @@ export class UTC {
     [TimeSpan.milliseconds]: 1
   };
 }
+
+const _MaxValue = utc(_maxValue);
+const _MinValue = utc(_minValue);
 
 export default function utc(dt?: DateType) {
   return (dt && new UTC(dt)) || UTC.now();
