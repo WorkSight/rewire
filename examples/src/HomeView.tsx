@@ -375,9 +375,9 @@ function createEmployeesGrid1() {
 
   // create the grid model
   const toggleItems: IToggleMenuItem[] = observable([
-    {name: 'delete',    title: 'Delete', subheader: 'Grid Toggles', active: true, onClick: (item: IToggleMenuItem) => { item.active = !item.active; } },
-    {name: 'archive',   title: 'Archive',                           disabled: true, active: true, visible: () => true, onClick: (item: IToggleMenuItem) => { item.active = !item.active; } },
-    {name: 'unarchive', title: 'Unarchive',                         active: true, onClick: (item: IToggleMenuItem) => { item.active = !item.active; } },
+    {name: 'delete',    title: 'Delete', subheader: 'Grid Toggles', icon: ArchiveIcon, active: true, onClick: (item: IToggleMenuItem) => { item.active = !item.active; } },
+    {name: 'archive',   title: 'Archive',                           icon: ArchiveIcon, disabled: true, active: true, visible: () => true, onClick: (item: IToggleMenuItem) => { item.active = !item.active; } },
+    {name: 'unarchive', title: 'Unarchive',                         icon: ArchiveIcon, active: true, onClick: (item: IToggleMenuItem) => { item.active = !item.active; } },
   ]);
   let grid = createGrid(rows, cols, { multiSelect: true, allowMergeColumns: true, isReorderable: true, optionsMenuFn: () => ({ items: [...createColumnsToggleMenuItems(cols, ['timeColumn', 'email', 'isActive', 'autoCompleteColumn'], {onItemClick: toggleMenuHandleItemClick}), ...toggleItems] }) });
   // sort by employee names
@@ -503,9 +503,9 @@ const HomeToggleMenu = (props: any) => {
   const anchorOrigin: PopoverOrigin = {vertical: 'top', horizontal: 'left'};
   const transformOrigin             = anchorOrigin;
   const items: IToggleMenuItem[]    = observable([
-    {name: 'toggle1', title: 'Toggle 1', active: true, visible: false},
-    {name: 'toggle2', title: 'Toggle 2', active: true},
-    {name: 'toggle3', title: 'Toggle 3', active: true},
+    {name: 'toggle1', icon: ArchiveIcon, title: 'Toggle 1', active: true, visible: false},
+    {name: 'toggle2', icon: ArchiveIcon, title: 'Toggle 2', active: true},
+    {name: 'toggle3', icon: ArchiveIcon, title: 'Toggle 3', active: true},
   ]);
   return (
     <ToggleMenu

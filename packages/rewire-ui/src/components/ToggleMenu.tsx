@@ -5,6 +5,7 @@ import {Theme}                 from '@material-ui/core/styles';
 import MenuItem                from '@material-ui/core/MenuItem';
 import ListItemText            from '@material-ui/core/ListItemText';
 import ListItemIcon            from '@material-ui/core/ListItemIcon';
+import {SvgIconProps}          from '@material-ui/core/SvgIcon';
 import CheckIcon               from '@material-ui/icons/Check';
 import MenuBase, {
   IMenuBaseItem,
@@ -16,6 +17,7 @@ import {WithStyle, withStyles} from './styles';
 
 export interface IToggleMenuItem extends IMenuBaseItem {
   active: boolean | (() => boolean);
+  toggleIcon?: React.ComponentType<SvgIconProps>;
 
   onClick?(item: IToggleMenuItem): void;
 }
@@ -37,7 +39,12 @@ const toggleItemRendererStyles = (theme: Theme) => ({
   listItemTypography: {
   },
   listItemIcon: {
-    marginRight: '0px',
+    minWidth: '0px',
+    marginRight: '16px',
+  },
+  listItemToggleIcon: {
+    minWidth: '0px',
+    marginLeft: '16px',
     color: '#669639',
   },
   menuItem: {
@@ -61,11 +68,16 @@ export const ToggleItemRenderer = React.memo(withStyles(toggleItemRendererStyles
     return (
       visible &&
         <MenuItem key={item.name} divider={item.divider} classes={{root: rootClasses, selected: classes.menuItemSelected}} disableRipple={disabled} onClick={clickHandler}>
+          {item.icon &&
+            <ListItemIcon className={classes.listItemIcon}>
+              <item.icon />
+            </ListItemIcon>
+          }
           <ListItemText className={classes.listItemText} primary={item.title} primaryTypographyProps={{classes: {root: classes.listItemTypography}}} />
           <Observe render={() => (
             (is.function(item.active) ? item.active() : item.active) &&
-              <ListItemIcon className={classes.listItemIcon}>
-                {item.icon ? <item.icon /> : <CheckIcon />}
+              <ListItemIcon className={classes.listItemToggleIcon}>
+                {item.toggleIcon ? <item.toggleIcon /> : <CheckIcon />}
               </ListItemIcon>
             || null
           )} />
