@@ -101,8 +101,8 @@ class GridModel implements IGrid, IDisposable {
   clipboard                 : {value: any, columnPosition: number}[];
   multiSelect               : boolean;
   allowMergeColumns         : boolean;
-  isMouseDown               : boolean;
-  isReorderingMouseDown     : boolean;
+  __isMouseDown             : boolean;
+  __isReorderingMouseDown   : boolean;
   clearSelectionOnBlur      : boolean;
   rowKeybindPermissions     : IGridRowKeybindPermissions;
   staticKeybinds            : IGridStaticKeybinds;
@@ -149,8 +149,8 @@ class GridModel implements IGrid, IDisposable {
     this.headerRowHeight            = options && !isNullOrUndefined(options.headerRowHeight) ? options.headerRowHeight : undefined;
     this.rowHeight                  = options && !isNullOrUndefined(options.rowHeight) ? options.rowHeight : undefined;
     this.clipboard                  = [];
-    this.isMouseDown                = false;
-    this.isReorderingMouseDown      = false;
+    this.__isMouseDown              = false;
+    this.__isReorderingMouseDown    = false;
     this.startCell                  = undefined;
 
     this.rowKeybindPermissions = {
@@ -228,6 +228,20 @@ class GridModel implements IGrid, IDisposable {
     for (const row of this.rows) {
       row.dispose();
     }
+  }
+
+  get isMouseDown(): boolean {
+    return this.__isMouseDown;
+  }
+  set isMouseDown(value: boolean) {
+    this.__isMouseDown = value;
+  }
+
+  get isReorderingMouseDown(): boolean {
+    return this.__isReorderingMouseDown;
+  }
+  set isReorderingMouseDown(value: boolean) {
+    this.__isReorderingMouseDown = value;
   }
 
   dispose() {
@@ -522,7 +536,7 @@ class GridModel implements IGrid, IDisposable {
   }
 
   moveRow(rowId: string, byRows: number): boolean {
-    let row = findRowById(this.rows, rowId); 
+    let row = findRowById(this.rows, rowId);
     if (!row) {
       return false;
     }
@@ -572,7 +586,7 @@ class GridModel implements IGrid, IDisposable {
 
     return true;
   }
-    
+
   _removeRow(position: number): void {
     const row = this.rows[position];
     if (!row) return;

@@ -618,7 +618,7 @@ const GridInternal = withStyles(styles, class extends React.PureComponent<GridPr
     if (!fixed) {
       numVisibleColumns = grid.visibleStandardColumns.length;
     } else {
-      numVisibleColumns = grid.isReorderable ? grid.visibleFixedColumns.length + 1 : grid.visibleFixedColumns.length; 
+      numVisibleColumns = grid.isReorderable ? grid.visibleFixedColumns.length + 1 : grid.visibleFixedColumns.length;
     }
     return groups.map((group: IGroupRow) => <GroupRow classes={this.props.rowClasses} cellClasses={this.props.cellClasses} fixed={fixed} key={group.title} group={group} columns={columns} numVisibleColumns={numVisibleColumns} />);
   }
@@ -755,7 +755,7 @@ const GridInternal = withStyles(styles, class extends React.PureComponent<GridPr
     return (
       <Observe render={() => (
         <ReorderableGridRows>
-          {this.renderData()}  
+          {this.renderData()}
         </ReorderableGridRows>
       )} />
     );

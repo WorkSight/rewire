@@ -9,7 +9,7 @@ import * as is                    from 'is';
 import cc                         from 'classcat';
 import classNames                 from 'classnames';
 import {isNullOrUndefinedOrEmpty} from 'rewire-common';
-import {Observe}                  from 'rewire-core';
+import {Observe, defaultEquals}   from 'rewire-core';
 import {
   withStyles,
   WithStyle,
@@ -200,6 +200,13 @@ class Cell extends React.PureComponent<CellProps, {}> {
     }
   }
 
+  private isAlreadySelected = () => {
+    if (this.grid.selectedCells?.length === 1 && this.grid.selectedCells[0].id === this.cell.id) {
+      return true;
+    }
+    return false;
+  }
+
   handleClick = (evt: React.MouseEvent<any>) => {
     if (this.cell.editing) {
       return;
@@ -216,6 +223,7 @@ class Cell extends React.PureComponent<CellProps, {}> {
           if (!this.cell.canSelect) {
             return;
           }
+          if (this.isAlreadySelected()) return;
           this.grid.selectCells([this.cell], this.cell, true, true);
         }
       } else if (evt.shiftKey) {
@@ -225,6 +233,7 @@ class Cell extends React.PureComponent<CellProps, {}> {
         this.grid.selectCellsTo(this.cell);
       }
     } else {
+      if (this.isAlreadySelected()) return;
       this.grid.startCell = undefined;
       this.grid.selectCells([this.cell]);
       if (this.cell.canSelect) {
