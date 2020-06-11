@@ -132,12 +132,12 @@ export default class TimestampRange {
 
   toString() {
     if (this.isEmpty) return 'NULL';
-    return `[${this._start.toTimestampString()}, ${this._end.toTimestampString()}]`;
+    return `[${this._start.toTimestampString()}, ${this._end.toTimestampString()})`;
   }
 
   toTimeString() {
     if (this.isEmpty) return 'NULL';
-    return `[${this._start.toTimeString()}, ${this._end.toTimeString()}]`;
+    return `[${this._start.toTimeString()}, ${this._end.toTimeString()})`;
   }
 
   get isEmpty() {
