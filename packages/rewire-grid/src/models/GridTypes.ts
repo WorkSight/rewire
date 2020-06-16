@@ -330,7 +330,7 @@ export interface IColumnOptions {
   verticalAlign?:  VerticalAlignment;
   rowSpan?:        number;
   colSpan?:        number;
-  tooltip?:        string;
+  tooltip?:        string | (() => string);
   width?:          string;
   canSort?:        boolean;
   accessor?:       {getter: TGetter, setter: TSetter};
@@ -354,7 +354,7 @@ export interface IColumn extends ICellProperties {
   name:            string;
   title:           string;
   type:            EditorType;
-  tooltip?:        string;
+  tooltip?:        string | (() => string);
   width?:          string;
   fixed:           boolean;
   visible:         boolean;

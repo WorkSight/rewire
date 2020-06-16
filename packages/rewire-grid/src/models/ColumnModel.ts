@@ -55,7 +55,7 @@ export class ColumnModel implements IColumn {
   position       : number;
   sort?          : SortDirection;
   canSort        : boolean;
-  tooltip?       : string;
+  tooltip?       : string | (() => string);
   cls?           : any;
   typeOptions?   : any;
   type           : EditorType;

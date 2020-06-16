@@ -75,7 +75,7 @@ export const ToggleItemRenderer = React.memo(withStyles(toggleItemRendererStyles
           }
           <ListItemText className={classes.listItemText} primary={item.title} primaryTypographyProps={{classes: {root: classes.listItemTypography}}} />
           <Observe render={() => (
-            (is.function(item.active) ? item.active() : item.active) &&
+            (is.function(item.active) ? (item.active as CallableFunction)() : item.active) &&
               <ListItemIcon className={classes.listItemToggleIcon}>
                 {item.toggleIcon ? <item.toggleIcon /> : <CheckIcon />}
               </ListItemIcon>
