@@ -159,8 +159,8 @@ class MenuBase extends React.Component<MenuBaseProps, IMenuBaseState> {
       return (
         < >
         {items.map((item: IMenuBaseItem, idx: number) => {
-          let disabled     = !!(item.disabled && is.function(item.disabled) ? item.disabled() : item.disabled);
-          let visible      = !!(item.visible && is.function(item.visible) ? item.visible() : !isNullOrUndefined(item.visible) ? item.visible : true);
+          let disabled     = !!(item.disabled && is.function(item.disabled) ? (item.disabled as CallableFunction)() : item.disabled);
+          let visible      = !!(item.visible && is.function(item.visible) ? (item.visible as CallableFunction)() : !isNullOrUndefined(item.visible) ? item.visible : true);
           let rootClasses  = classNames(classes.menuItem, disabled ? classes.menuItemDisabled : undefined);
           let clickHandler = !disabled ? this.handleItemClick(item) : undefined;
           let subheader    = item.subheader;

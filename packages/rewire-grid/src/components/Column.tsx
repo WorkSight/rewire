@@ -1,5 +1,6 @@
-import {IColumn, ICell}           from '../models/GridTypes';
 import * as React                 from 'react';
+import * as is                    from 'is';
+import {IColumn, ICell}           from '../models/GridTypes';
 import {isNullOrUndefinedOrEmpty} from 'rewire-common';
 import {Observe}                  from 'rewire-core';
 
@@ -97,6 +98,7 @@ export default class Column extends React.PureComponent<IColumnCellProps> {
 
       const value          = !isNullOrUndefinedOrEmpty(this.value) ? this.value : <span>&nbsp;</span>;
       const ColumnRenderer = this.column.headerRenderer;
+      const tooltip        = !this.column.tooltip ? this.value : is.function(this.column.tooltip) ? (this.column.tooltip as CallableFunction)() : this.column.tooltip;
 
       return (
         <th
@@ -105,7 +107,7 @@ export default class Column extends React.PureComponent<IColumnCellProps> {
           ref={this.setColumnRef}
           rowSpan={this.props.cell.rowSpan}
           style={style}
-          title={this.column.tooltip || this.value}>
+          title={tooltip}>
           <div className={cls} style={{display: 'flex', justifyContent: 'center', alignItems: 'center'}}>
             {ColumnRenderer
               ? <ColumnRenderer cell={this.props.cell} />
