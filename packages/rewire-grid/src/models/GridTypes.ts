@@ -319,23 +319,24 @@ export interface ICellProperties {
 }
 
 export interface IColumnOptions {
-  type?:          IColumnEditor;
-  cls?:           any;
-  enabled?:       boolean;
-  readOnly?:      boolean;
-  editable?:      boolean;
-  fixed?:         boolean;
-  visible?:       boolean;
-  align?:         TextAlignment;
-  verticalAlign?: VerticalAlignment;
-  rowSpan?:       number;
-  colSpan?:       number;
-  tooltip?:       string;
-  width?:         string;
-  canSort?:       boolean;
-  accessor?:      {getter: TGetter, setter: TSetter};
-  renderer?:      React.SFC<any>;
-  validators?:    IFormValidator;
+  type?:           IColumnEditor;
+  cls?:            any;
+  enabled?:        boolean;
+  readOnly?:       boolean;
+  editable?:       boolean;
+  fixed?:          boolean;
+  visible?:        boolean;
+  align?:          TextAlignment;
+  verticalAlign?:  VerticalAlignment;
+  rowSpan?:        number;
+  colSpan?:        number;
+  tooltip?:        string;
+  width?:          string;
+  canSort?:        boolean;
+  accessor?:       {getter: TGetter, setter: TSetter};
+  headerRenderer?: React.SFC<any>;
+  renderer?:       React.SFC<any>;
+  validators?:     IFormValidator;
 
   onValueChange?(cell: ICell, v: any): void;
   map?(value: any):                             string;
@@ -365,6 +366,7 @@ export interface IColumn extends ICellProperties {
   canSort:         boolean;
   isGroupByColumn: boolean;
   typeOptions?:    any;
+  headerRenderer?: React.SFC<any>;
   editor?:         React.SFC<any>;
 
   map?(value: any): string;

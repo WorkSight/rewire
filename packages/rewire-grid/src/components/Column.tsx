@@ -1,6 +1,7 @@
-import {IColumn, ICell} from '../models/GridTypes';
-import * as React       from 'react';
-import {Observe}        from 'rewire-core';
+import {IColumn, ICell}           from '../models/GridTypes';
+import * as React                 from 'react';
+import {isNullOrUndefinedOrEmpty} from 'rewire-common';
+import {Observe}                  from 'rewire-core';
 
 export interface IColumnCellProps {
   cell: ICell;
@@ -94,6 +95,9 @@ export default class Column extends React.PureComponent<IColumnCellProps> {
         cls = 'sort ' + this.column.sort;
       }
 
+      const value          = !isNullOrUndefinedOrEmpty(this.value) ? this.value : <span>&nbsp;</span>;
+      const ColumnRenderer = this.column.headerRenderer;
+
       return (
         <th
           onMouseDown={this.column.canSort ? this.handleSort : undefined}
@@ -103,7 +107,10 @@ export default class Column extends React.PureComponent<IColumnCellProps> {
           style={style}
           title={this.column.tooltip || this.value}>
           <div className={cls} style={{display: 'flex', justifyContent: 'center', alignItems: 'center'}}>
-            {this.value}
+            {ColumnRenderer
+              ? <ColumnRenderer cell={this.props.cell} />
+              : value
+            }
             <div onMouseDown={this.handleMouseDown}
               style={{top: 0, right: 0, bottom: 0, width: '5px', position: 'absolute', cursor: 'col-resize'}}>
                 &nbsp;
