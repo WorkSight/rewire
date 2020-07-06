@@ -117,6 +117,7 @@ export interface ISelectRenderSuggestionFnProps<T> extends IRenderSuggestionFnPr
 
 interface ISelectProps<T> {
   renderSuggestion?: (props: ISelectRenderSuggestionFnProps<T>) => JSX.Element;
+  dynamic?: boolean;
 }
 
 export type ISelectInternalProps<T> = ICustomProps<T> & React.InputHTMLAttributes<any> & SelectProps & ISelectProps<T>;
@@ -159,7 +160,7 @@ class SelectInternal<T> extends React.Component<SelectInternalProps<T>, any> {
     }
   }
 
-  shouldComponentUpdate(nextProps: ICustomProps<T> & React.InputHTMLAttributes<any>, nextState: any, nextContext: any) {
+  shouldComponentUpdate(nextProps: ISelectInternalProps<T>, nextState: any, nextContext: any) {
     return (
         (nextProps.selectedItem        !== this.props.selectedItem)        ||
         (nextProps.error               !== this.props.error)               ||
@@ -172,6 +173,7 @@ class SelectInternal<T> extends React.Component<SelectInternalProps<T>, any> {
         (nextProps.align               !== this.props.align)               ||
         (nextProps.variant             !== this.props.variant)             ||
         (nextProps.multiple            !== this.props.multiple)            ||
+        (nextProps.dynamic             !== this.props.dynamic)            ||
         (nextProps.disableErrors       !== this.props.disableErrors)       ||
         (nextProps.useTooltipForErrors !== this.props.useTooltipForErrors) ||
         (nextProps.startAdornment      !== this.props.startAdornment)      ||
@@ -184,6 +186,13 @@ class SelectInternal<T> extends React.Component<SelectInternalProps<T>, any> {
   }
 
   handleOnOpen = (event: object) => {
+    this.openMenu();
+  }
+
+  openMenu = async () => {
+    if (this.props.dynamic) {
+      await this.performSearch();
+    }
     this.setState({isOpen: true});
   }
 
@@ -265,7 +274,7 @@ class SelectInternal<T> extends React.Component<SelectInternalProps<T>, any> {
       case 'ArrowDown':
       case ' ':
         evt.preventDefault();
-        this.setState({isOpen: true});
+        this.openMenu();
       case 'Enter':
         break;
       case 'Delete':
