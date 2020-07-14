@@ -6,6 +6,7 @@ import {
   createSetter,
   defaultGetter,
   defaultSetter,
+  utc,
 }                             from 'rewire-common';
 import {
   observable,
@@ -121,6 +122,12 @@ export interface IFormContext {
   avatar                  (editProps?: any): IFieldDefn;
   color                   (editProps?: any): IFieldDefn;
   mask                    (editProps?: any): IFieldDefn;
+}
+
+function utcEquals(date1: any, date2: any) {
+  if (date1 === date2)  return true;
+  if (!date1 || !date2) return false;
+  return utc(date1).equals(utc(date2));
 }
 
 class FormContext implements IFormContext {
@@ -413,6 +420,9 @@ export default class Form implements IValidationContext {
             if (!field.visible) continue;
             const value = this._getFieldValue(field, this._value);
             if (value === field.value) continue; // short circuit easy case!
+            if (field.type === 'date') {
+              return !utcEquals(field.value, value);
+            }
             if (!defaultEquals(field.value, field.type === 'boolean' || field.type === 'switch' ? value || false : value))
               return true;
           }
