@@ -1,12 +1,12 @@
-import * as React                                    from 'react';
-import classNames                                    from 'classnames';
-import {isNullOrUndefined, isNullOrUndefinedOrEmpty} from 'rewire-common';
-import {Theme}                                       from '@material-ui/core/styles';
-import TextField, { TextFieldProps }                 from '@material-ui/core/TextField';
-import InputAdornment                                from '@material-ui/core/InputAdornment';
-import ErrorTooltip                                  from './ErrorTooltip';
-import {TextAlignment, TextVariant}                  from './editors';
-import {withStyles, WithStyle}                       from './styles';
+import * as React                                         from 'react';
+import classNames                                         from 'classnames';
+import {isNullOrUndefined, isNullOrUndefinedOrEmpty, UTC, TimeSpan} from 'rewire-common';
+import {Theme}                                            from '@material-ui/core/styles';
+import TextField, { TextFieldProps }                      from '@material-ui/core/TextField';
+import InputAdornment                                     from '@material-ui/core/InputAdornment';
+import ErrorTooltip                                       from './ErrorTooltip';
+import {TextAlignment, TextVariant}                       from './editors';
+import {withStyles, WithStyle}                            from './styles';
 
 type MapFn<T> = (item?: T) => string;
 
@@ -203,10 +203,20 @@ export interface ITimeFieldProps {
   map?: MapFn<any>;
 }
 
+const ampmClock = {
+  hour:     'numeric', // 'numeric' => 3:15 PM '2-digit' => 03:15 PM
+  minute:   'numeric',
+  timeZone: 'GMT',
+  hourCycle: 'h11',
+  hour12:    true
+};
+const uppercaseFormatter = new Intl.DateTimeFormat('en-US', ampmClock);
+
 export interface ITimeState {
-  value?:  '-' | number;
-  isValid: boolean;
-  text:    string;
+  value?:   '-' | number;
+  isValid?: boolean;
+  text:     string;
+  title?:   string;
 }
 
 type TimeFieldProps = WithStyle<ReturnType<typeof styles>, TextFieldProps & ITimeFieldProps>;
@@ -224,6 +234,7 @@ class TimeInputField extends React.Component<TimeFieldProps, ITimeState> {
     this.inputRef  = React.createRef();
     const map      = props.map || defaultMap;
     this.state     = this._valueToSet(map(props.value));
+    this._setState(this.state);
   }
 
   UNSAFE_componentWillReceiveProps (nextProps: TimeFieldProps) {
@@ -249,8 +260,20 @@ class TimeInputField extends React.Component<TimeFieldProps, ITimeState> {
     );
   }
 
+  _setState(state: ITimeState) {
+    const time  = state.value;
+    if (typeof time === 'number' && state.text) {
+      const days   = (time < 0) ? Math.trunc(Math.abs(time) / 24) + 1 : Math.trunc(time / 24);
+      const prefix = (days > 0) ? `${days} day${days > 1 ? 's' : ''} ${(time < 0) ? 'preceding' : 'following'} at ` : '';
+      state.title  = `${prefix}${uppercaseFormatter.format(UTC.now().startOfDay().add(time as number, TimeSpan.hours).utc)}`;
+    } else {
+      state.title = '';
+    }
+    this.setState(state);
+  }
+
   setValue(value?: number | string) {
-    this.setState(this._valueToSet(value));
+    this._setState(this._valueToSet(value));
   }
 
   _valueToSet(value?: number | string): any {
@@ -260,14 +283,14 @@ class TimeInputField extends React.Component<TimeFieldProps, ITimeState> {
 
   handleChange = (evt: React.ChangeEvent<HTMLInputElement>) => {
     const state = this.validator.parse(evt.target.value);
-    this.setState({...state, text: evt.target.value});
+    this._setState({...state, text: evt.target.value});
   }
 
   handleBlur = (evt: React.FocusEvent<HTMLInputElement>) => {
     if (this.state.value === this.props.value) {
-      this.setState({text: !isNullOrUndefinedOrEmpty(this.state.value) ? `${this.state.value}` : ''});
+      this._setState({text: !isNullOrUndefinedOrEmpty(this.state.value) ? `${this.state.value}` : ''});
     }
-    this.props.onValueChange(this.state.value);
+    this.props.onValueChange(this.state.value as (number | undefined));
   }
 
   handleFocus = (evt: React.FocusEvent<HTMLInputElement>) => {
@@ -322,6 +345,7 @@ class TimeInputField extends React.Component<TimeFieldProps, ITimeState> {
         onFocus={this.handleFocus}
         autoFocus={autoFocus}
         placeholder={placeholder}
+        title={this.state.title}
         variant={variant as any}
         inputRef={this.inputRef}
         inputProps={{spellCheck: false, className: classes.nativeInput, style: {textAlign: align || 'left'}}}
