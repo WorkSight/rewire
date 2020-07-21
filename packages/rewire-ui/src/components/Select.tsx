@@ -1,7 +1,6 @@
 import * as React              from 'react';
 import classNames              from 'classnames';
 import { ChangeEvent }         from 'react';
-import {disposeOnUnmount}      from 'rewire-core';
 import RootRef                 from '@material-ui/core/RootRef';
 import {Theme}                 from '@material-ui/core/styles';
 import TextField               from '@material-ui/core/TextField';
@@ -140,8 +139,8 @@ class SelectInternal<T> extends React.Component<SelectInternalProps<T>, any> {
     this.inputRef      = React.createRef();
   }
 
-  componentDidMount() {
-    disposeOnUnmount(this, () => this.performSearch());
+  async componentDidMount() {
+    await this.performSearch();
     // this._isMounted = true;
   }
 
