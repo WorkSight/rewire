@@ -420,8 +420,8 @@ export default class Form implements IValidationContext {
             if (!field.visible) continue;
             const value = this._getFieldValue(field, this._value);
             if (value === field.value) continue; // short circuit easy case!
-            if (field.type === 'date') {
-              return !utcEquals(field.value, value);
+            if (field.type === 'date' && !utcEquals(field.value, value)) {
+              return true;
             }
             if (!defaultEquals(field.value, field.type === 'boolean' || field.type === 'switch' ? value || false : value))
               return true;
