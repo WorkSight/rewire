@@ -333,7 +333,7 @@ class Cell extends React.PureComponent<CellProps, {}> {
     let value = isNullOrUndefinedOrEmpty(v) ? undefined : v;
     this.cell.keyForEdit = undefined;
     this.cell.value      = value;
-    if (this.column.type === 'multiselect' || this.column.type === 'multiselectautocomplete') {
+    if (this.column.type === 'multiselect' || this.column.type === 'multiselectautocomplete' || this.column.type === 'date') {
       return;
     }
     this.grid.editCell(undefined);
@@ -382,9 +382,12 @@ class Cell extends React.PureComponent<CellProps, {}> {
             if (!Number.isNaN(num)) {
               value = num;
             }
-          }
-          else if (cellType === 'auto-complete' || cellType === 'multiselectautocomplete') {
+          } else if (cellType === 'auto-complete' || cellType === 'multiselectautocomplete') {
             value                                = undefined;
+            additionalProps['initialInputValue'] = cell.keyForEdit;
+          } else if (cellType === 'date') {
+            endOfTextOnFocus                     = false;
+            cursorPositionOnFocus                = 1;
             additionalProps['initialInputValue'] = cell.keyForEdit;
           }
         }

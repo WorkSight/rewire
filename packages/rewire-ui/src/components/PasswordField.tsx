@@ -42,11 +42,10 @@ const styles = (theme: Theme) => ({
   },
   iconButtonRoot: {
     color: 'inherit',
-    fontSize: 'unset',
+    fontSize: 'inherit',
     padding: '0px',
-    '&:hover, &:active': {
-      backgroundColor: 'transparent',
-      opacity: 1,
+    '&:hover': {
+      opacity: 0.7,
     },
   },
   inputAdornmentRoot: {

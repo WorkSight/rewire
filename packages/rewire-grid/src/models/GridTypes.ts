@@ -295,7 +295,8 @@ export interface IRow extends IDisposable {
 export type MaskType = (string | RegExp)[];
 
 export type IColumnEditor =
-  'text' | 'date' | 'checked' | 'none' |
+  'text'  | 'checked' | 'none' |
+  {type: 'date', options?: object} |
   {type: 'time', options?: {disableErrors?: boolean, rounding?: number, map?: MapFn<any>}} |
   {type: 'select', options: {search: SearchFn<any>, map: MapFn<any>}} |
   {type: 'multiselect', options: {search: SearchFn<any>, map: MapFn<any>}} |
