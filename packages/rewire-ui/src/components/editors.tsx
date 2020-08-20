@@ -16,6 +16,7 @@ import Select                  from './Select';
 import StaticField             from './StaticField';
 import SwitchField             from './SwitchField';
 import TextField               from './TextField';
+import DateField               from './DateField';
 import TimeInputField          from './TimeInputField';
 
 export interface IField {
@@ -39,6 +40,7 @@ export interface IField {
 export type EditorType    = 'text' | 'multitext' | 'static' | 'auto-complete' | 'select' | 'multiselect' | 'date' | 'time' | 'number' | 'checked' | 'switch' | 'password' | 'email' | 'phone' | 'avatar' | 'color' | 'mask' | 'none' | 'multiselectautocomplete' | 'custom';
 export type TextAlignment = 'left' | 'right' | 'center';
 export type TextVariant   = 'standard' | 'outlined';
+export type DateVariant   = 'dialog' | 'inline' | 'static';
 
 export function compare<T>(x?: T, y?: T) {
   if (x && !y) {
@@ -167,14 +169,15 @@ export default function editor(type: EditorType, propsForEdit?: any): React.SFC<
       );
 
     case 'date':
-      return ({field, className, classes, onValueChange, endOfTextOnFocus, selectOnFocus, cursorPositionOnFocus}: TextEditorProps) => (
+      return ({field, className, classes, onValueChange, endOfTextOnFocus, selectOnFocus, cursorPositionOnFocus, initialInputValue}: TextEditorProps) => (
         <Observe render={() => (
-          <TextField
+          <DateField
             onValueChange={onValueChange}
             placeholder={field.placeholder}
             endOfTextOnFocus={endOfTextOnFocus}
             selectOnFocus={selectOnFocus}
             cursorPositionOnFocus={cursorPositionOnFocus}
+            inputValue={initialInputValue}
             label={field.label}
             autoFocus={field.autoFocus}
             error={field.error}
@@ -184,8 +187,7 @@ export default function editor(type: EditorType, propsForEdit?: any): React.SFC<
             useTooltipForErrors={field.useTooltipForErrors}
             align={field.align || 'left'}
             variant={field.variant}
-            value={field.value && utc(field.value).toDateString()}
-            type='date'
+            value={field.value && utc(field.value).toLocalDate()}
             className={className}
             classes={classes}
             startAdornment={field.startAdornment && field.startAdornment()}

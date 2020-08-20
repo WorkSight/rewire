@@ -20,7 +20,7 @@ import {
 import MailOutlineIcon        from '@material-ui/icons/MailOutline';
 import PhoneIcon              from '@material-ui/icons/Phone';
 import AccessTimeIcon         from '@material-ui/icons/AccessTime';
-import DateRangeIcon          from '@material-ui/icons/DateRange';
+import CalendarIcon           from 'mdi-material-ui/Calendar';
 import Validator, {
   validator,
   IValidator,
@@ -553,7 +553,7 @@ export default class Form implements IValidationContext {
       // add default end adornment to field depending on field type if using defaults, and it wasn't explicitly set to something (including undefined)
       switch (field.type) {
         case 'date':
-          field.endAdornment = () => React.createElement(DateRangeIcon, undefined, undefined);
+          field.endAdornment = () => React.createElement(CalendarIcon, undefined, undefined);
           break;
         case 'time':
           field.endAdornment = () => React.createElement(AccessTimeIcon, undefined, undefined);

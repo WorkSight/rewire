@@ -205,8 +205,8 @@ class InternalRow extends React.PureComponent<RowProps, {}> {
     const components = getComponents(this.props.row);
     let   newHeight  = 0;
     fastdom.measure(() => {
-      this.element.current!.style.height = 'auto';
-      this.desiredHeight = this.element.current ? this.element.current!.getBoundingClientRect().height : 0;
+      if (this.element.current) this.element.current.style.height = 'auto';
+      this.desiredHeight = this.element.current ? this.element.current.getBoundingClientRect().height : 0;
       for (const component of components) {
         newHeight = Math.max(newHeight, component.desiredHeight);
       }
