@@ -122,7 +122,7 @@ class DateField extends React.PureComponent<DateFieldProps> {
   }
 
   onValueChange = (date?: Date | null, inputValue?: string | null) => {
-    const v = date && date instanceof Date && !isNaN(date.getTime()) ? utc(date).startOfDay() : undefined;
+    const v = date && date instanceof Date && !isNaN(date.getTime()) ? utc(date) : undefined;
     this.props.onValueChange(v);
   }
 

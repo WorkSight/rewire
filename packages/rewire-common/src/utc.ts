@@ -160,7 +160,7 @@ export class UTC {
     return new Date(this.utc);
   }
 
-  toLocalDate() {
+  toUTCDate() {
     let date = new Date(this.utc);
     return new Date(this.utc + getTimezoneOffset(date));
   }
