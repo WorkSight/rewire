@@ -3,7 +3,11 @@ import classNames                    from 'classnames';
 import {isNullOrUndefined, utc, UTC} from 'rewire-common';
 import DateBlurInputHOC              from './DateBlurInputHOC';
 import InputAdornment                from '@material-ui/core/InputAdornment';
-import {Theme}                       from '@material-ui/core/styles';
+import {
+  Theme,
+  createMuiTheme,
+  MuiThemeProvider,
+}                                    from '@material-ui/core/styles';
 import DateFnsUtils                  from '@date-io/date-fns';
 import {
   DatePicker,
@@ -18,6 +22,20 @@ import {
   DateVariant,
 }                                    from './editors';
 import {withStyles, WithStyle}       from './styles';
+
+const customTheme = createMuiTheme({
+  overrides: {
+    MuiPickersCalendarHeader: {
+      transitionContainer: {
+        height: '1.5rem',
+      },
+      iconButton: {
+        padding: '12px',
+      },
+    },
+  },
+});
+
 
 const styles = (theme: Theme) => ({
   inputRoot: {
@@ -166,9 +184,25 @@ class DateField extends React.PureComponent<DateFieldProps> {
     const clearable                          = !isNullOrUndefined(this.props.clearable) ? this.props.clearable : true;
     const onChange                           = (date: Date | null, inputValue: string | null) => { this.onValueChange(date, inputValue); this.props.onChange?.(date, inputValue); };
     const value                              = !isNullOrUndefined(this.props.value) ? this.props.value : null;
-
+    
+    const dateVariantSpecificProps =
+      dateVariant === 'inline'
+        ? { PopoverProps: this.props.PopoverProps }
+        : dateVariant === 'dialog'
+          ? { 
+              cancelLabel: this.props.cancelLabel,
+              clearable: clearable,
+              clearLabel: this.props.clearLabel,
+              DialogProps: this.props.DialogProps,
+              okLabel: this.props.okLabel,
+              showTodayButton: this.props.showTodayButton,
+              todayLabel: this.props.todayLabel,
+            }
+          : undefined;
+   
     if (!allowKeyboardInput) {
       return (
+      <MuiThemeProvider theme={customTheme}>
       <MuiPickersUtilsProvider utils={DateFnsUtils}>
       <DatePicker
         className={this.props.className}
@@ -220,7 +254,6 @@ class DateField extends React.PureComponent<DateFieldProps> {
         onYearChange={this.props.onYearChange}
         openTo={this.props.openTo}
         orientation={this.props.orientation}
-        PopoverProps={this.props.PopoverProps}
         readOnly={this.props.readOnly}
         renderDay={this.props.renderDay}
         shouldDisableDate={this.props.shouldDisableDate}
@@ -228,18 +261,12 @@ class DateField extends React.PureComponent<DateFieldProps> {
         TextFieldComponent={this.props.TextFieldComponent}
         ToolbarComponent={this.props.ToolbarComponent}
         views={this.props.views}
-        // Only available with dateVariant "dialog"
-        cancelLabel={this.props.cancelLabel}
-        clearable={clearable}
-        clearLabel={this.props.clearLabel}
-        DialogProps={this.props.DialogProps}
-        okLabel={this.props.okLabel}
-        showTodayButton={this.props.showTodayButton}
-        todayLabel={this.props.todayLabel}
-      /></MuiPickersUtilsProvider>);
+        {...dateVariantSpecificProps}
+      /></MuiPickersUtilsProvider></MuiThemeProvider>);
     }
 
     return (
+    <MuiThemeProvider theme={customTheme}>
     <MuiPickersUtilsProvider utils={DateFnsUtils}>
     <DateBlurInputHOC {...this.props} value={value} onValueChange={onChange}
       render={(props: DateFieldProps) =>
@@ -299,7 +326,6 @@ class DateField extends React.PureComponent<DateFieldProps> {
           onYearChange={props.onYearChange}
           openTo={props.openTo}
           orientation={props.orientation}
-          PopoverProps={props.PopoverProps}
           readOnly={props.readOnly}
           renderDay={props.renderDay}
           rifmFormatter={props.rifmFormatter}
@@ -308,17 +334,10 @@ class DateField extends React.PureComponent<DateFieldProps> {
           TextFieldComponent={props.TextFieldComponent}
           ToolbarComponent={props.ToolbarComponent}
           views={props.views}
-          // Only available with dateVariant "dialog"
-          cancelLabel={props.cancelLabel}
-          clearable={clearable}
-          clearLabel={props.clearLabel}
-          DialogProps={props.DialogProps}
-          okLabel={props.okLabel}
-          showTodayButton={props.showTodayButton}
-          todayLabel={props.todayLabel}
+          {...dateVariantSpecificProps}
         />
       }
-    /></MuiPickersUtilsProvider>);
+    /></MuiPickersUtilsProvider></MuiThemeProvider>);
   }
 }
 
