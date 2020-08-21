@@ -5,8 +5,6 @@ import DateBlurInputHOC              from './DateBlurInputHOC';
 import InputAdornment                from '@material-ui/core/InputAdornment';
 import {
   Theme,
-  createMuiTheme,
-  MuiThemeProvider,
 }                                    from '@material-ui/core/styles';
 import DateFnsUtils                  from '@date-io/date-fns';
 import {
@@ -22,20 +20,6 @@ import {
   DateVariant,
 }                                    from './editors';
 import {withStyles, WithStyle}       from './styles';
-
-const customTheme = createMuiTheme({
-  overrides: {
-    MuiPickersCalendarHeader: {
-      transitionContainer: {
-        height: '1.5rem',
-      },
-      iconButton: {
-        padding: '12px',
-      },
-    },
-  },
-});
-
 
 const styles = (theme: Theme) => ({
   inputRoot: {
@@ -138,7 +122,7 @@ class DateField extends React.PureComponent<DateFieldProps> {
   }
 
   onValueChange = (date?: Date | null, inputValue?: string | null) => {
-    const v = date && date instanceof Date && !isNaN(date.getTime()) ? utc(date).startOfDay() : undefined;
+    const v = date && date instanceof Date && !isNaN(date.getTime()) ? utc(date) : undefined;
     this.props.onValueChange(v);
   }
 
@@ -202,7 +186,6 @@ class DateField extends React.PureComponent<DateFieldProps> {
    
     if (!allowKeyboardInput) {
       return (
-      <MuiThemeProvider theme={customTheme}>
       <MuiPickersUtilsProvider utils={DateFnsUtils}>
       <DatePicker
         className={this.props.className}
@@ -262,11 +245,12 @@ class DateField extends React.PureComponent<DateFieldProps> {
         ToolbarComponent={this.props.ToolbarComponent}
         views={this.props.views}
         {...dateVariantSpecificProps}
-      /></MuiPickersUtilsProvider></MuiThemeProvider>);
+      />
+      </MuiPickersUtilsProvider>
+      );
     }
 
     return (
-    <MuiThemeProvider theme={customTheme}>
     <MuiPickersUtilsProvider utils={DateFnsUtils}>
     <DateBlurInputHOC {...this.props} value={value} onValueChange={onChange}
       render={(props: DateFieldProps) =>
@@ -337,7 +321,9 @@ class DateField extends React.PureComponent<DateFieldProps> {
           {...dateVariantSpecificProps}
         />
       }
-    /></MuiPickersUtilsProvider></MuiThemeProvider>);
+    />
+    </MuiPickersUtilsProvider>
+    );
   }
 }
 
