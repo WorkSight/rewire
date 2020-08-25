@@ -156,6 +156,17 @@ export class UTC {
     return new UTC(date.getTime());
   }
 
+  static nowtz(timeZone: string) {
+    const options = {
+      year: 'numeric', month: 'numeric', day: 'numeric',
+      hour: 'numeric', minute: 'numeric', second: 'numeric',
+      hour12: false,
+      timeZone: timeZone ?? 'Canada/Pacific'
+    };
+    const d = new Date(Date.parse(new Intl.DateTimeFormat('en-US', options).format(Date.now())));
+    return new UTC(d.getTime() - getTimezoneOffset(d));
+  }
+
   toDate() {
     return new Date(this.utc);
   }
