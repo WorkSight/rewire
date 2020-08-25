@@ -1,6 +1,11 @@
 import * as React                    from 'react';
 import classNames                    from 'classnames';
-import {isNullOrUndefined, utc, UTC} from 'rewire-common';
+import {
+  isNullOrUndefined,
+  utc,
+  UTC,
+  getTimezoneOffset,
+}                                    from 'rewire-common';
 import DateBlurInputHOC              from './DateBlurInputHOC';
 import InputAdornment                from '@material-ui/core/InputAdornment';
 import {
@@ -122,7 +127,10 @@ class DateField extends React.PureComponent<DateFieldProps> {
   }
 
   onValueChange = (date?: Date | null, inputValue?: string | null) => {
-    const v = date && date instanceof Date && !isNaN(date.getTime()) ? utc(date) : undefined;
+    const v = date && date instanceof Date && !isNaN(date.getTime()) 
+      ? utc(date.getTime() - getTimezoneOffset(date)).startOfDay()
+      : undefined;
+
     this.props.onValueChange(v);
   }
 

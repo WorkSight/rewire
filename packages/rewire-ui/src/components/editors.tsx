@@ -187,7 +187,7 @@ export default function editor(type: EditorType, propsForEdit?: any): React.SFC<
             useTooltipForErrors={field.useTooltipForErrors}
             align={field.align || 'left'}
             variant={field.variant}
-            value={field.value && utc(field.value).toDate()}
+            value={field.value && utc(field.value).toUTCDate()}
             className={className}
             classes={classes}
             startAdornment={field.startAdornment && field.startAdornment()}
