@@ -211,7 +211,9 @@ const styles = (theme: Theme) => ({
   },
 });
 
-interface IMultiSelectAutoCompleteProps<T> {
+export type MultiSelectAutoCompleteStyles = ReturnType<typeof styles>;
+
+export interface IMultiSelectAutoCompleteProps<T> {
   selectOnFocus?   :      boolean;
   endOfTextOnFocus?:      boolean;
   cursorPositionOnFocus?: number;
@@ -229,6 +231,8 @@ interface IMultiSelectAutoCompleteProps<T> {
   suggestionsContainerFooter?: ISuggestionsContainerComponent;
 }
 
+export type MultiSelectAutoCompleteProps<T> = WithStyle<MultiSelectAutoCompleteStyles, ICustomProps<T> & IMultiSelectAutoCompleteProps<T> & React.InputHTMLAttributes<any>>;
+
 interface IMultiSelectAutoCompleteState {
   suggestions: any[];
 }
@@ -237,8 +241,6 @@ interface IMultiSelectAutoCompleteObservableState {
   highlightedIndex: number | null;
   showMoreSelectedItemsPopupIsOpen: boolean;
 }
-
-export type MultiSelectAutoCompleteProps<T> = WithStyle<ReturnType<typeof styles>, ICustomProps<T> & IMultiSelectAutoCompleteProps<T> & React.InputHTMLAttributes<any>>;
 
 class MultiSelectAutoComplete<T> extends React.Component<MultiSelectAutoCompleteProps<T>, IMultiSelectAutoCompleteState> {
   state:                       IMultiSelectAutoCompleteState;

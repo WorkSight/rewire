@@ -55,6 +55,8 @@ const styles = (theme: Theme) => ({
   },
 });
 
+export type ColorFieldStyles = ReturnType<typeof styles>;
+
 export interface IColorFieldProps {
   className?       : string;
   autoFocus?       : boolean;
@@ -67,21 +69,21 @@ export interface IColorFieldProps {
   onValueChange: (value?: string) => void;
 }
 
+export type ColorFieldProps = WithStyle<ColorFieldStyles, IColorFieldProps>;
+
 export interface IColorFieldState {
   open: boolean;
   color?: string;
 }
 
-type ColorFieldPropsStyled = WithStyle<ReturnType<typeof styles>, IColorFieldProps>;
-
-class ColorField extends React.Component<ColorFieldPropsStyled, IColorFieldState> {
+class ColorField extends React.Component<ColorFieldProps, IColorFieldState> {
   state: IColorFieldState;
   inputLabelRef: React.RefObject<HTMLElement>;
   colorPickerTriggerRef: React.RefObject<HTMLElement>;
   colorPickerPanelContainerRef: React.RefObject<HTMLDivElement>;
   triggerElementActions: any;
 
-  constructor(props: ColorFieldPropsStyled) {
+  constructor(props: ColorFieldProps) {
     super(props);
 
     this.state = {
@@ -99,7 +101,7 @@ class ColorField extends React.Component<ColorFieldPropsStyled, IColorFieldState
     }
   }
 
-  shouldComponentUpdate(nextProps: ColorFieldPropsStyled, nextState: IColorFieldState) {
+  shouldComponentUpdate(nextProps: ColorFieldProps, nextState: IColorFieldState) {
     return (
       (nextProps.value    !== this.props.value)    ||
       (nextProps.disabled !== this.props.disabled) ||

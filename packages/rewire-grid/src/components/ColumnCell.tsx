@@ -1,20 +1,57 @@
 import * as React                 from 'react';
 import * as is                    from 'is';
+import classNames                 from 'classnames';
 import {IColumn, ICell}           from '../models/GridTypes';
+import { Theme }                  from '@material-ui/core/styles';
 import {isNullOrUndefinedOrEmpty} from 'rewire-common';
 import {Observe}                  from 'rewire-core';
+import {
+  withStyles,
+  WithStyle,
+}                                 from 'rewire-ui';
+
+const styles = (theme: Theme) => ({
+  root: {
+    position: 'relative',
+  },
+  hidden: {
+    display: 'none',
+    visibility: 'collapse',
+  },
+  disabled: {
+    color: '#bbb',
+    fontStyle: 'italic',
+  },
+  rendererContainer: {
+    display: 'flex',
+    justifyContent: 'center',
+    alignItems: 'center',
+  },
+  mouseDownContainer: {
+    top: 0,
+    right: 0,
+    bottom: 0,
+    width: '5px',
+    position: 'absolute',
+    cursor: 'col-resize',
+  },
+});
+
+export type ColumnCellStyles = ReturnType<typeof styles>;
 
 export interface IColumnCellProps {
   cell: ICell;
 }
 
-export default class Column extends React.PureComponent<IColumnCellProps> {
+export type ColumnCellProps = WithStyle<ColumnCellStyles, IColumnCellProps>;
+
+class ColumnCell extends React.PureComponent<ColumnCellProps> {
   startOffset : number;
   isResizing  : boolean;
   column      : IColumn;
   node        : HTMLTableHeaderCellElement;
 
-  constructor(props: IColumnCellProps) {
+  constructor(props: ColumnCellProps) {
     super(props);
     this.startOffset = 0;
     this.isResizing  = false;
@@ -79,17 +116,17 @@ export default class Column extends React.PureComponent<IColumnCellProps> {
   }
 
   render() {
+    const { classes } = this.props;
+
     return <Observe render={() => {
       let cls = '';
-      let style: React.CSSProperties = {position: 'relative'};
+      let columnCellClasses = classes.root;
       if (!this.column.visible) {
-        style.display    = 'none';
-        style.visibility = 'collapse';
+        columnCellClasses = classNames(columnCellClasses, classes.hidden);
       }
 
       if (!this.column.enabled) {
-        style.color     = '#bbb';
-        style.fontStyle = 'italic';
+        columnCellClasses = classNames(columnCellClasses, classes.disabled);
       }
 
       if (this.column.canSort && this.column.sort) {
@@ -106,16 +143,15 @@ export default class Column extends React.PureComponent<IColumnCellProps> {
           colSpan={this.props.cell.colSpan}
           ref={this.setColumnRef}
           rowSpan={this.props.cell.rowSpan}
-          style={style}
+          className={columnCellClasses}
           title={tooltip}>
-          <div className={cls} style={{display: 'flex', justifyContent: 'center', alignItems: 'center'}}>
+          <div className={classNames(classes.rendererContainer, cls)}>
             {ColumnRenderer
               ? <ColumnRenderer cell={this.props.cell} />
               : value
             }
-            <div onMouseDown={this.handleMouseDown}
-              style={{top: 0, right: 0, bottom: 0, width: '5px', position: 'absolute', cursor: 'col-resize'}}>
-                &nbsp;
+            <div className={classes.mouseDownContainer} onMouseDown={this.handleMouseDown}>
+              &nbsp;
             </div>
           </div>
         </th>
@@ -123,3 +159,5 @@ export default class Column extends React.PureComponent<IColumnCellProps> {
     }} />;
   }
 }
+
+export default withStyles(styles, ColumnCell);

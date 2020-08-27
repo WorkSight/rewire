@@ -31,7 +31,7 @@ import {omit}              from 'rewire-common';
 //   return '#' + (0x1000000 + (Math.round((t - R) * p) + R) * 0x10000 + (Math.round((t - G) * p) + G) * 0x100 + (Math.round((t - B) * p) + B)).toString(16).slice(1);
 // }
 
-const styles = {
+const sortableListStyles = {
   'item-container': {
     display:    'flex',
     flex:       '1',
@@ -77,11 +77,11 @@ const styles = {
   },
 };
 
+export type SortableListStyles = StyleProps<typeof sortableListStyles>;
+
 export interface IItem {
   id: string;
 }
-
-export type SortableStyles = StyleProps<typeof styles>;
 
 export type ListItemProps = {
   items          : IItem[];
@@ -90,7 +90,7 @@ export type ListItemProps = {
   itemRenderer?  : (item: IItem) => JSX.Element;
   autoFocusId?   : string;
   disableTabbing?: boolean;
-} & SortableStyles;
+} & SortableListStyles;
 
 export type ItemProps = {
   showDragHandle?: boolean;
@@ -100,7 +100,7 @@ export type ItemProps = {
   itemRenderer   : (item: IItem) => JSX.Element;
   item           : IItem;
   disableTabbing?: boolean;
-} & SortableStyles;
+} & SortableListStyles;
 
 export class Item extends React.Component<ItemProps> {
   node?: HTMLDivElement;
@@ -170,7 +170,7 @@ export class ListItems extends React.Component<ListItemProps> {
   }
 }
 
-export type SortableListProps = {
+export interface ISortableListProps {
   listId         : string;
   listType?      : string;
   autoFocusId?   : string;
@@ -187,7 +187,9 @@ export type SortableListProps = {
 
 const manager: Record<string, any> = {};
 
-class SortableListInternal extends React.Component<SortableListProps & SortableStyles> {
+export type SortableListProps = ISortableListProps & SortableListStyles;
+
+class SortableListInternal extends React.Component<SortableListProps> {
   UNSAFE_componentWillMount () {
     manager[(this.props.listType || 'DEFAULT') + this.props.listId] = this.props.items;
   }
@@ -205,7 +207,7 @@ class SortableListInternal extends React.Component<SortableListProps & SortableS
         {(dropProvided: DroppableProvided, dropSnapshot: DroppableStateSnapshot) => (
           <List {...listProps}>
           <div
-            className={cc({[classes['droppable-container']]: true, [classes['scroll-container']]: (scrollable || isNullOrUndefined(scrollable)), 'is-dragging-over': dropSnapshot.isDraggingOver, 'is-drop-disabled': isDropDisabled})}
+            className={cc({[classes['droppable-container']!]: true, [classes['scroll-container']!]: (scrollable || isNullOrUndefined(scrollable)), 'is-dragging-over': dropSnapshot.isDraggingOver, 'is-drop-disabled': isDropDisabled})}
             style={style}
             {...(dropProvided as any).droppableProps}
           >
@@ -229,16 +231,16 @@ class SortableListInternal extends React.Component<SortableListProps & SortableS
   }
 }
 
-export const SortableList = withStyles(styles, SortableListInternal);
+export const SortableList = withStyles(sortableListStyles, SortableListInternal);
 
-export interface Props {
+export interface ISortableProps {
   direction?: 'row' | 'column';
   classes?: React.CSSProperties;
   onDragStart?(initial: DragStart): void;
   onDragEnd?(result: DropResult): void;
 }
 
-const containerStyles = {
+const sortableStyles = {
   root: {
     display: 'flex',
     margin : 0,
@@ -252,7 +254,10 @@ const containerStyles = {
   },
 };
 
-class Sortable extends React.PureComponent<WithStyle<typeof containerStyles, Props>> {
+export type SortableStyles = typeof sortableStyles;
+export type SortableProps  = WithStyle<SortableStyles, ISortableProps>;
+
+class Sortable extends React.PureComponent<SortableProps> {
   onDragEnd = (result: DropResult) => {
     if (!result.destination || !this.props.children) {
       return;
@@ -277,7 +282,7 @@ class Sortable extends React.PureComponent<WithStyle<typeof containerStyles, Pro
         onDragStart={this.props.onDragStart}
         onDragEnd={this.onDragEnd}
       >
-        <div style={this.props.style} className={cc({[this.props.classes.root]: true, row: this.props.direction === 'row'})}>
+        <div style={this.props.style} className={cc({[this.props.classes.root!]: true, row: this.props.direction === 'row'})}>
           {this.props.children}
         </div>
       </DragDropContext>
@@ -285,4 +290,4 @@ class Sortable extends React.PureComponent<WithStyle<typeof containerStyles, Pro
   }
 }
 
-export default withStyles(containerStyles, Sortable);
+export default withStyles(sortableStyles, Sortable);

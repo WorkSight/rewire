@@ -9,7 +9,7 @@ import * as is                    from 'is';
 import cc                         from 'classcat';
 import classNames                 from 'classnames';
 import {isNullOrUndefinedOrEmpty} from 'rewire-common';
-import {Observe, defaultEquals}   from 'rewire-core';
+import {Observe}                  from 'rewire-core';
 import {
   withStyles,
   WithStyle,
@@ -118,11 +118,13 @@ const styles = (theme: Theme) => ({
   },
 });
 
+export type CellStyles = ReturnType<typeof styles>;
+
 export interface ICellProps {
   cell: ICell;
 }
 
-type CellProps = WithStyle<ReturnType<typeof styles>, ICellProps>;
+export type CellProps = WithStyle<CellStyles, ICellProps>;
 
 class Cell extends React.PureComponent<CellProps, {}> {
   cell: ICell;

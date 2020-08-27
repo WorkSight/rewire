@@ -11,7 +11,7 @@ import MenuBase, {
   IMenuBaseItem,
   MenuBaseProps,
   IMenuBaseItemRendererProps,
-  MenuBaseStylesType,
+  MenuBaseStyles,
 }                              from './MenuBase';
 import {WithStyle, withStyles} from './styles';
 
@@ -22,7 +22,7 @@ export interface IToggleMenuItem extends IMenuBaseItem {
   onClick?(item: IToggleMenuItem): void;
 }
 
-interface IToggleMenuItemRendererProps extends IMenuBaseItemRendererProps {
+export interface IToggleMenuItemRendererProps extends IMenuBaseItemRendererProps {
   item: IToggleMenuItem;
 }
 
@@ -55,7 +55,7 @@ const toggleItemRendererStyles = (theme: Theme) => ({
   },
 });
 
-export type ToggleMenuItemRendererProps = WithStyle<MenuBaseStylesType, IToggleMenuItemRendererProps>;
+export type ToggleMenuItemRendererProps = WithStyle<MenuBaseStyles, IToggleMenuItemRendererProps>;
 
 export const ToggleItemRenderer = React.memo(withStyles(toggleItemRendererStyles, React.forwardRef((props: ToggleMenuItemRendererProps, ref: any): JSX.Element => {
   return <Observe render={() => {

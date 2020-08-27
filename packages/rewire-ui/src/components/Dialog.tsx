@@ -70,6 +70,8 @@ let styles = (theme: Theme) => ({
   },
 });
 
+export type DialogStyles = ReturnType<typeof styles>;
+
 export interface IDefaultActionRendererStyles {
   root?:   string;
   icon?:   string;
@@ -116,7 +118,7 @@ export interface IDialogProps {
   ButtonRenderer?       : ActionRenderType;
 }
 
-type DialogProps = WithStyle<ReturnType<typeof styles>, IDialogProps>;
+export type DialogProps = WithStyle<DialogStyles, IDialogProps>;
 
 class DialogInternal extends React.Component<DialogProps> {
   prevActiveElement?: HTMLElement;

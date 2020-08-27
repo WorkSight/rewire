@@ -1,6 +1,8 @@
 import * as React                from 'react';
 import classNames                from 'classnames';
-import Checkbox, {CheckboxProps} from '@material-ui/core/Checkbox';
+import Checkbox, {
+  CheckboxProps,
+}                                from '@material-ui/core/Checkbox';
 import FormControlLabel          from '@material-ui/core/FormControlLabel';
 import {Theme}                   from '@material-ui/core/styles';
 import {isNullOrUndefined}       from 'rewire-common';
@@ -32,7 +34,9 @@ const styles = (theme: Theme) => ({
   }
 });
 
-export interface ICheckboxProps {
+export type CheckFieldStyles = ReturnType<typeof styles>;
+
+export interface ICheckFieldProps {
   visible? : boolean;
   disabled?: boolean;
   value?   : boolean;
@@ -41,14 +45,14 @@ export interface ICheckboxProps {
   onValueChange: (value?: boolean) => void;
 }
 
-type CheckboxPropsStyled = WithStyle<ReturnType<typeof styles>, CheckboxProps & ICheckboxProps>;
+export type CheckFieldProps = WithStyle<CheckFieldStyles, CheckboxProps & ICheckFieldProps>;
 
-class CheckboxInternal extends React.Component<CheckboxPropsStyled> {
-  constructor(props: CheckboxPropsStyled) {
+class CheckField extends React.Component<CheckFieldProps> {
+  constructor(props: CheckFieldProps) {
     super(props);
   }
 
-  shouldComponentUpdate(nextProps: CheckboxPropsStyled) {
+  shouldComponentUpdate(nextProps: CheckFieldProps) {
     return (
       (nextProps.value    !== this.props.value)    ||
       (nextProps.disabled !== this.props.disabled) ||
@@ -98,4 +102,4 @@ class CheckboxInternal extends React.Component<CheckboxPropsStyled> {
   }
 }
 
-export default withStyles(styles, CheckboxInternal);
+export default withStyles(styles, CheckField);

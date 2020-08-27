@@ -15,7 +15,7 @@ import {
   computed
 }                                            from 'rewire-core';
 import ReorderableGridRows                   from './ReorderableGridRows';
-import Column                                from './Column';
+import ColumnCell                            from './ColumnCell';
 import classNames                            from 'classnames';
 import Cell                                  from './Cell';
 import Row, {GroupRow}                       from './Row';
@@ -87,18 +87,6 @@ function verticalResizeWatcher(lifetime: React.Component<any>, element: HTMLElem
   const oldCWUM = lifetime.componentWillUnmount;
   lifetime.componentWillUnmount = () => { observer.disconnect(); oldCWUM && oldCWUM(); };
   return { watch(callback: ResizeCallback) { _callbacks.push(callback); } };
-}
-
-export interface IGridProps {
-  grid: IGrid;
-  virtual?: boolean;
-  className?: string;
-  style?: React.CSSProperties;
-  classes?: any;
-  rowClasses?: any;
-  cellClasses?: any;
-  gridColors?: IGridColors;
-  gridFontSizes?: IGridFontSizes;
 }
 
 type BodyType = {grid: IGrid, columns: () => IColumn[], renderRows: (rows: IRow[], columns: () => IColumn[], fixed: boolean) => any, scrollY: DataSignal<number>, rowClasses?: any, cellClasses?: any, loadMoreRows?: (args: {start: number, end: number}) => Promise<any[]> };
@@ -203,11 +191,58 @@ class VirtualBody extends React.PureComponent<BodyType, {offset: number, loading
   }
 }
 
-export default class Grid extends React.PureComponent<IGridProps> {
+const gridStyles = () => ({
+  root: {
+  },
+  leftLabels: {
+  },
+  cornerLabels: {
+  },
+  topLabels: {
+  },
+  wsGrid: {
+  },
+  gridContent: {
+  },
+  gridScroll: {
+  },
+  optionsMenuContainer: {
+  },
+  optionsMenuButton: {
+  },
+  optionsMenuIcon: {
+  },
+  optionsMenuMenuItem: {
+  },
+  optionsMenuTitleContainer: {
+  },
+  optionsMenuListItemTypography: {
+  },
+  optionsMenuListItemIcon: {
+  },
+});
+
+export type GridStyles = ReturnType<typeof gridStyles>;
+
+export interface IGridProps {
+  grid: IGrid;
+  virtual?: boolean;
+  className?: string;
+  style?: React.CSSProperties;
+  classes?: any;
+  rowClasses?: any;
+  cellClasses?: any;
+  gridColors?: IGridColors;
+  gridFontSizes?: IGridFontSizes;
+}
+
+export type GridProps = WithStyle<GridStyles, IGridProps>;
+
+class Grid extends React.PureComponent<GridProps> {
   private gridColors: IGridColors;
   private gridFontSizes: IGridFontSizes;
 
-  constructor(props: IGridProps) {
+  constructor(props: GridProps) {
     super(props);
 
     this.gridColors    = props.gridColors    || {};
@@ -246,7 +281,7 @@ export default class Grid extends React.PureComponent<IGridProps> {
   }
 }
 
-const styles = (theme: Theme) => {
+const internalGridStyles = (theme: Theme) => {
   // firefox consideration for fractional pixels issue
   let bodyFontSizeDigits = Number.parseFloat(theme.fontSizes.body.replace(/[^\d.-]/g, ''));
   let bodyFontSizeUnit   = theme.fontSizes.body.replace(/[\d.-]/g, '');
@@ -408,8 +443,6 @@ const styles = (theme: Theme) => {
   return styleObj;
 };
 
-type GridProps = WithStyle<ReturnType<typeof styles>, IGridProps>;
-
 function getScrollbarWidth() {
   // Creating invisible container
   const outer = document.createElement('div');
@@ -432,7 +465,7 @@ function getScrollbarWidth() {
 
 let _scrollbarWidth: number = getScrollbarWidth();
 
-const GridInternal = withStyles(styles, class extends React.PureComponent<GridProps> {
+const GridInternal = withStyles(internalGridStyles, class extends React.PureComponent<GridProps> {
   private scrollX            : DataSignal<number>;
   private scrollY            : DataSignal<number>;
   private _columnTableWrapper: HTMLDivElement;
@@ -603,7 +636,7 @@ const GridInternal = withStyles(styles, class extends React.PureComponent<GridPr
           {this.renderColumnGroups(true)}
           <thead role='rowgroup'>
             <Observe render={() => (
-              this.props.grid.fixedRows.map((row, index) => <Row key={row.id} classes={this.props.rowClasses} cellClasses={this.props.cellClasses} height={this.props.grid.headerRowHeight} Cell={Column} columns={() => this.props.grid.fixedColumns} index={index} row={row} isFixedColumnsRow={true} />)
+              this.props.grid.fixedRows.map((row, index) => <Row key={row.id} classes={this.props.rowClasses} cellClasses={this.props.cellClasses} height={this.props.grid.headerRowHeight} Cell={ColumnCell} columns={() => this.props.grid.fixedColumns} index={index} row={row} isFixedColumnsRow={true} />)
             )} />
           </thead>
         </table>
@@ -729,7 +762,7 @@ const GridInternal = withStyles(styles, class extends React.PureComponent<GridPr
               {this.renderColumnGroups(false)}
               <thead role='rowgroup'>
                 <Observe render={() => (
-                  this.props.grid.fixedRows.map((row, index) => <Row key={row.id} classes={this.props.rowClasses} cellClasses={this.props.cellClasses} height={this.props.grid.headerRowHeight} Cell={Column} columns={() => this.props.grid.standardColumns} index={index} row={row} />)
+                  this.props.grid.fixedRows.map((row, index) => <Row key={row.id} classes={this.props.rowClasses} cellClasses={this.props.cellClasses} height={this.props.grid.headerRowHeight} Cell={ColumnCell} columns={() => this.props.grid.standardColumns} index={index} row={row} />)
                 )} />
               </thead>
             </table>
@@ -790,3 +823,5 @@ const GridInternal = withStyles(styles, class extends React.PureComponent<GridPr
     )} />;
   }
 });
+
+export default withStyles(gridStyles, Grid);

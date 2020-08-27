@@ -1,9 +1,9 @@
-import * as React                                         from 'react';
-import classNames                                         from 'classnames';
-import {default as MuiAvatar}                             from '@material-ui/core/Avatar';
-import Button                                             from '@material-ui/core/Button';
-import {withStyles, WithStyle}                            from './styles';
-import AvatarCropper, {IAvatarCropperProps, generateHash} from './AvatarCropper';
+import * as React                                        from 'react';
+import classNames                                        from 'classnames';
+import {default as MuiAvatar}                            from '@material-ui/core/Avatar';
+import Button                                            from '@material-ui/core/Button';
+import {withStyles, WithStyle}                           from './styles';
+import AvatarCropper, {AvatarCropperProps, generateHash} from './AvatarCropper';
 
 /*************** AvatarField ***************/
 
@@ -15,26 +15,28 @@ const avatarFieldStyles = () => ({
   },
 });
 
+export type AvatarFieldStyles = ReturnType<typeof avatarFieldStyles>;
+
 export interface IAvatarFieldProps {
-  className?     : string;
-  visible?       : boolean;
-  classes?       : React.CSSProperties;
-  value?         : string;
-  avatarDiameter?: number;
-  mimeTypes?     : string;
-  label?         : string;
+  className?      : string;
+  visible?        : boolean;
+  classes?        : React.CSSProperties;
+  value?          : string;
+  avatarDiameter? : number;
+  mimeTypes?      : string;
+  label?          : string;
 
   onFileLoad?(data: any): void;
   onImageLoad?(data: any): void;
   onValueChange(v?: string): void;
 }
 
+export type AvatarFieldProps = WithStyle<AvatarFieldStyles, IAvatarFieldProps & AvatarCropperProps>;
+
 interface IAvatarFieldState {
   value?: string;
   loadedValue?: string;
 }
-
-type AvatarFieldProps = WithStyle<ReturnType<typeof avatarFieldStyles>, IAvatarFieldProps & IAvatarCropperProps>;
 
 class AvatarField extends React.Component<AvatarFieldProps, IAvatarFieldState> {
   state: IAvatarFieldState;
@@ -175,7 +177,9 @@ const innerAvatarStyles = () => ({
   },
 });
 
-export interface IInnerAvatarProps {
+export type InnerAvatarStyles = ReturnType<typeof innerAvatarStyles>;
+
+interface IInnerAvatarProps {
   classes?       : React.CSSProperties;
   buttonSize?    : 'small' | 'medium' | 'large';
   value?         : string;
@@ -188,7 +192,7 @@ export interface IInnerAvatarProps {
   onSave(v?: string): void;
 }
 
-type InnerAvatarProps = WithStyle<ReturnType<typeof innerAvatarStyles>, IInnerAvatarProps>;
+export type InnerAvatarProps = WithStyle<InnerAvatarStyles, IInnerAvatarProps>;
 
 const InnerAvatar = withStyles(innerAvatarStyles, class extends React.Component<InnerAvatarProps> {
   private fileInputRef: React.RefObject<HTMLInputElement>;

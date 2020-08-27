@@ -76,6 +76,8 @@ const styles = (theme: Theme) => ({
   },
 });
 
+export type PasswordFieldStyles = ReturnType<typeof styles>;
+
 export interface IPasswordFieldProps {
   visible?              : boolean;
   disabled?             : boolean;
@@ -96,25 +98,25 @@ export interface IPasswordFieldProps {
   onValueChange: (value?: string) => void;
 }
 
+export type PasswordFieldProps = WithStyle<PasswordFieldStyles, TextFieldProps & IPasswordFieldProps>;
+
 export interface IPasswordFieldState {
   showPassword: boolean;
 }
 
-type PasswordFieldPropsStyled = WithStyle<ReturnType<typeof styles>, TextFieldProps & IPasswordFieldProps>;
-
-class PasswordFieldInternal extends React.Component<PasswordFieldPropsStyled, IPasswordFieldState> {
+class PasswordField extends React.Component<PasswordFieldProps, IPasswordFieldState> {
   inputRef: React.RefObject<HTMLInputElement>;
   state: IPasswordFieldState = {
     showPassword: false,
   };
 
-  constructor(props: PasswordFieldPropsStyled) {
+  constructor(props: PasswordFieldProps) {
     super(props);
 
     this.inputRef = React.createRef();
   }
 
-  shouldComponentUpdate(nextProps: PasswordFieldPropsStyled, nextState: IPasswordFieldState) {
+  shouldComponentUpdate(nextProps: PasswordFieldProps, nextState: IPasswordFieldState) {
     return (
       (nextProps.value               !== this.props.value)         ||
       (nextProps.disabled            !== this.props.disabled)      ||
@@ -215,7 +217,7 @@ class PasswordFieldInternal extends React.Component<PasswordFieldPropsStyled, IP
 
     return (
       <BlurInputHOC {...this.props} type={type} value={value} onValueChange={this.props.onValueChange}
-        render={(props: PasswordFieldPropsStyled) =>
+        render={(props: PasswordFieldProps) =>
           <TextField
             className={props.className}
             classes={{root: props.classes.formControlRoot}}
@@ -244,4 +246,4 @@ class PasswordFieldInternal extends React.Component<PasswordFieldPropsStyled, IP
   }
 }
 
-export default withStyles(styles, PasswordFieldInternal);
+export default withStyles(styles, PasswordField);

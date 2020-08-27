@@ -1,6 +1,11 @@
 import * as React                                         from 'react';
 import classNames                                         from 'classnames';
-import {isNullOrUndefined, isNullOrUndefinedOrEmpty, UTC, TimeSpan} from 'rewire-common';
+import {
+  isNullOrUndefined,
+  isNullOrUndefinedOrEmpty,
+  UTC,
+  TimeSpan,
+}                                                         from 'rewire-common';
 import {Theme}                                            from '@material-ui/core/styles';
 import TextField, { TextFieldProps }                      from '@material-ui/core/TextField';
 import InputAdornment                                     from '@material-ui/core/InputAdornment';
@@ -181,6 +186,8 @@ const styles = (theme: Theme) => ({
   },
 });
 
+export type TimeInputFieldStyles = ReturnType<typeof styles>;
+
 export interface ITimeFieldProps {
   visible?              : boolean;
   disabled?             : boolean;
@@ -219,7 +226,7 @@ export interface ITimeState {
   title?:   string;
 }
 
-type TimeFieldProps = WithStyle<ReturnType<typeof styles>, TextFieldProps & ITimeFieldProps>;
+export type TimeFieldProps = WithStyle<TimeInputFieldStyles, TextFieldProps & ITimeFieldProps>;
 
 function defaultMap(v: any): any {
   return v;

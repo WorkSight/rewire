@@ -2,7 +2,14 @@ import * as React                    from 'react';
 import classNames                    from 'classnames';
 import {isNullOrUndefined, utc, UTC} from 'rewire-common';
 import BlurInputHOC                  from './BlurInputHOC';
-import TextField, { TextFieldProps } from '@material-ui/core/TextField';
+import {
+  TextField
+  as
+  MuiTextField, 
+  TextFieldProps
+  as
+  MuiTextFieldProps,
+}                                    from '@material-ui/core';
 import InputAdornment                from '@material-ui/core/InputAdornment';
 import {Theme}                       from '@material-ui/core/styles';
 import ErrorTooltip                  from './ErrorTooltip';
@@ -96,6 +103,8 @@ const styles = (theme: Theme) => ({
   },
 });
 
+export type TextFieldStyles = ReturnType<typeof styles>;
+
 export interface ITextFieldProps {
   visible?              : boolean;
   disabled?             : boolean;
@@ -120,18 +129,18 @@ export interface ITextFieldProps {
   onValueChange: (value?: string | UTC) => void;
 }
 
-type TextFieldPropsStyled = WithStyle<ReturnType<typeof styles>, TextFieldProps & ITextFieldProps>;
+export type TextFieldProps = WithStyle<TextFieldStyles, MuiTextFieldProps & ITextFieldProps>;
 
-class TextFieldInternal extends React.Component<TextFieldPropsStyled> {
+class TextField extends React.Component<TextFieldProps> {
   inputRef: React.RefObject<HTMLInputElement>;
 
-  constructor(props: TextFieldPropsStyled) {
+  constructor(props: TextFieldProps) {
     super(props);
 
     this.inputRef = React.createRef();
   }
 
-  shouldComponentUpdate(nextProps: TextFieldPropsStyled) {
+  shouldComponentUpdate(nextProps: TextFieldProps) {
     let equalValue: boolean;
 
     if (nextProps.multiline && nextProps.value && this.props.value) {
@@ -234,7 +243,7 @@ class TextFieldInternal extends React.Component<TextFieldPropsStyled> {
 
     if (this.props.updateOnChange) {
       return (
-      <TextField
+      <MuiTextField
         className={this.props.className}
         classes={{root: classes.formControlRoot}}
         type={type}
@@ -263,8 +272,8 @@ class TextFieldInternal extends React.Component<TextFieldPropsStyled> {
 
     return (
     <BlurInputHOC {...this.props} value={value} onValueChange={this.onValueChange}
-      render={(props: TextFieldPropsStyled) =>
-        <TextField
+      render={(props: TextFieldProps) =>
+        <MuiTextField
           className={props.className}
           classes={{root: props.classes.formControlRoot}}
           type={type}
@@ -294,4 +303,4 @@ class TextFieldInternal extends React.Component<TextFieldPropsStyled> {
   }
 }
 
-export default withStyles(styles, TextFieldInternal);
+export default withStyles(styles, TextField);

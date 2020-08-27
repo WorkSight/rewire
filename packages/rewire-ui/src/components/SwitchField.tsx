@@ -1,7 +1,9 @@
 import * as React              from 'react';
 import classNames              from 'classnames';
 import {isNullOrUndefined}     from 'rewire-common';
-import Switch, {SwitchProps}   from '@material-ui/core/Switch';
+import Switch, {
+  SwitchProps,
+}                              from '@material-ui/core/Switch';
 import FormControlLabel        from '@material-ui/core/FormControlLabel';
 import {Theme}                 from '@material-ui/core/styles';
 import {withStyles, WithStyle} from './styles';
@@ -42,7 +44,9 @@ const styles = (theme: Theme) => ({
   }
 });
 
-export interface ISwitchProps {
+export type SwitchFieldStyles = ReturnType<typeof styles>;
+
+export interface ISwitchFieldProps {
   visible? : boolean;
   disabled?: boolean;
   value?   : boolean;
@@ -51,14 +55,14 @@ export interface ISwitchProps {
   onValueChange: (value?: boolean) => void;
 }
 
-type SwitchPropsStyled = WithStyle<ReturnType<typeof styles>, SwitchProps & ISwitchProps>;
+export type SwitchFieldProps = WithStyle<SwitchFieldStyles, SwitchProps & ISwitchFieldProps>;
 
-class SwitchInternal extends React.Component<SwitchPropsStyled> {
-  constructor(props: SwitchPropsStyled) {
+class SwitchField extends React.Component<SwitchFieldProps> {
+  constructor(props: SwitchFieldProps) {
     super(props);
   }
 
-  shouldComponentUpdate(nextProps: SwitchPropsStyled) {
+  shouldComponentUpdate(nextProps: SwitchFieldProps) {
     return (
       (nextProps.value    !== this.props.value)    ||
       (nextProps.disabled !== this.props.disabled) ||
@@ -110,4 +114,4 @@ class SwitchInternal extends React.Component<SwitchPropsStyled> {
   }
 }
 
-export default withStyles(styles, SwitchInternal);
+export default withStyles(styles, SwitchField);
