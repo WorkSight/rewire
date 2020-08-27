@@ -24,6 +24,8 @@ const styles = (theme: Theme) => ({
   },
 });
 
+export type ErrorTooltipStyles = ReturnType<typeof styles>;
+
 const useTooltipStyles = makeStyles({
   tooltip: (props: any) => ({
     fontSize: isNullOrUndefined(props.fontSize) ? 'inherit' : `calc(${props.fontSize} * 0.8)`,
@@ -39,11 +41,11 @@ export interface IErrorTooltipProps {
   Icon?    : (props: SvgIconProps) => JSX.Element;
 }
 
+export type ErrorTooltipProps = WithStyle<ErrorTooltipStyles, IErrorTooltipProps>;
+
 interface IErrorTooltipObservableState {
   fontSize?: string | number; 
 }
-
-type ErrorTooltipProps = WithStyle<ReturnType<typeof styles>, IErrorTooltipProps>;
 
 class ErrorTooltip extends React.PureComponent<ErrorTooltipProps> {
   observableState: IErrorTooltipObservableState

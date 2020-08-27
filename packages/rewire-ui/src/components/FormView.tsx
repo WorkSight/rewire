@@ -10,6 +10,8 @@ const styles = () => ({
   },
 });
 
+export type FormViewStyles = ReturnType<typeof styles>;
+
 export interface IFormViewProps {
   form: Form;
   className?: string;
@@ -17,7 +19,7 @@ export interface IFormViewProps {
   onSubmit: (form: Form) => void;
 }
 
-type FormViewProps = WithStyle<ReturnType<typeof styles>, IFormViewProps>;
+export type FormViewProps = WithStyle<FormViewStyles, IFormViewProps>;
 
 class FormView extends React.Component<FormViewProps> {
   shouldComponentUpdate(nextProps: FormViewProps) {

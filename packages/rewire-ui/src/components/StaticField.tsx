@@ -23,6 +23,8 @@ const styles = (theme: Theme) => ({
   },
 });
 
+export type StaticFieldStyles = ReturnType<typeof styles>;
+
 export interface IStaticFieldProps {
   visible?: boolean;
   classes?: React.CSSProperties;
@@ -33,7 +35,7 @@ export interface IStaticFieldProps {
   onValueChange: (value?: string) => void;
 }
 
-type StaticFieldProps = WithStyle<ReturnType<typeof styles>, IStaticFieldProps & TextFieldProps>;
+export type StaticFieldProps = WithStyle<StaticFieldStyles, IStaticFieldProps & TextFieldProps>;
 
 class StaticFieldInternal extends React.Component<StaticFieldProps> {
   constructor(props: StaticFieldProps) {

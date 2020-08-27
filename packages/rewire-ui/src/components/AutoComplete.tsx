@@ -161,6 +161,8 @@ const styles = (theme: Theme) => ({
   },
 });
 
+export type AutoCompleteStyles = ReturnType<typeof styles>;
+
 export interface IAutoCompleteRenderSuggestionFnProps<T> extends IRenderSuggestionFnProps<T> {
   inputValue: any;
   parts: {highlight: boolean, text: string}[];
@@ -187,6 +189,8 @@ export interface IAutoCompleteProps<T> {
   suggestionsContainerFooter?: ISuggestionsContainerComponent;
 }
 
+export type AutoCompleteProps<T> = WithStyle<AutoCompleteStyles, ICustomProps<T> & IAutoCompleteProps<T> & React.InputHTMLAttributes<any>>;
+
 interface IAutoCompleteState {
   suggestions: any[];
 }
@@ -196,8 +200,6 @@ interface IAutoCompleteObservableState {
   isHovered: boolean;
   highlightedIndex: number | null;
 }
-
-export type AutoCompleteProps<T> = WithStyle<ReturnType<typeof styles>, ICustomProps<T> & IAutoCompleteProps<T> & React.InputHTMLAttributes<any>>;
 
 class AutoComplete<T> extends React.Component<AutoCompleteProps<T>, IAutoCompleteState> {
   state: IAutoCompleteState = {

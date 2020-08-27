@@ -81,6 +81,8 @@ const styles = (theme: Theme) => ({
   },
 });
 
+export type MaskFieldStyles = ReturnType<typeof styles>;
+
 const isDocument = typeof document !== 'undefined' && document !== null;
 
 interface IInputAdapterCustomProps {
@@ -184,7 +186,7 @@ export interface IMaskFieldProps {
   onValueChange: (value?: string) => void;
 }
 
-type MaskFieldProps = WithStyle<ReturnType<typeof styles>, TextFieldProps & IMaskFieldProps>;
+export type MaskFieldProps = WithStyle<MaskFieldStyles, TextFieldProps & IMaskFieldProps>;
 
 class MaskField extends React.Component<MaskFieldProps> {
   textFieldRef: React.RefObject<HTMLInputElement>;

@@ -69,6 +69,8 @@ const menuBaseStyles = (theme: Theme) => ({
   },
 });
 
+export type MenuBaseStyles = ReturnType<typeof menuBaseStyles>;
+
 interface IMenuBaseProps extends Without<Partial<MenuProps>, 'title'> {
   tooltip?:         string;
   title?:           string | JSX.Element | (() => JSX.Element);
@@ -83,12 +85,11 @@ interface IMenuBaseProps extends Without<Partial<MenuProps>, 'title'> {
   onItemClick?(item: IMenuBaseItem): void;
 }
 
+export type MenuBaseProps = WithStyle<MenuBaseStyles, IMenuBaseProps>;
+
 export interface IMenuBaseState {
   anchorEl?: HTMLElement;
 }
-
-export type MenuBaseStylesType = ReturnType<typeof menuBaseStyles>;
-export type MenuBaseProps      = WithStyle<MenuBaseStylesType, IMenuBaseProps>;
 
 class MenuBase extends React.Component<MenuBaseProps, IMenuBaseState> {
   state: IMenuBaseState = {

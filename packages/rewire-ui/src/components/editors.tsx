@@ -1,7 +1,11 @@
 import * as React              from 'react';
 import * as is                 from 'is';
+import {
+  utc,
+  UTC,
+  isNullOrUndefinedOrEmpty
+}                              from 'rewire-common';
 import {Observe}               from 'rewire-core';
-import {utc}                   from 'rewire-common';
 import { CSSProperties }       from '@material-ui/styles';
 import AutoComplete            from './AutoComplete';
 import AvatarField             from './AvatarField';
@@ -170,31 +174,35 @@ export default function editor(type: EditorType, propsForEdit?: any): React.SFC<
 
     case 'date':
       return ({field, className, classes, onValueChange, endOfTextOnFocus, selectOnFocus, cursorPositionOnFocus, initialInputValue}: TextEditorProps) => (
-        <Observe render={() => (
-          <DateField
-            onValueChange={onValueChange}
-            placeholder={field.placeholder}
-            endOfTextOnFocus={endOfTextOnFocus}
-            selectOnFocus={selectOnFocus}
-            cursorPositionOnFocus={cursorPositionOnFocus}
-            inputValue={initialInputValue}
-            label={field.label}
-            autoFocus={field.autoFocus}
-            error={field.error}
-            disabled={field.disabled && field.disabled(field)}
-            visible={field.visible}
-            disableErrors={field.disableErrors}
-            useTooltipForErrors={field.useTooltipForErrors}
-            align={field.align || 'left'}
-            variant={field.variant}
-            value={field.value && utc(field.value).toUTCDate()}
-            className={className}
-            classes={classes}
-            startAdornment={field.startAdornment && field.startAdornment()}
-            endAdornment={field.endAdornment && field.endAdornment()}
-            {...propsForEdit}
-          />
-        )} />
+        <Observe render={() => {
+          const value     = field.value && utc(field.value);
+          const dateValue = isNullOrUndefinedOrEmpty(value) || UTC.MaxValue.equals(value) || UTC.MinValue.equals(value) ? undefined : value.toUTCDate();
+          return (
+            <DateField
+              onValueChange={onValueChange}
+              placeholder={field.placeholder}
+              endOfTextOnFocus={endOfTextOnFocus}
+              selectOnFocus={selectOnFocus}
+              cursorPositionOnFocus={cursorPositionOnFocus}
+              inputValue={initialInputValue}
+              label={field.label}
+              autoFocus={field.autoFocus}
+              error={field.error}
+              disabled={field.disabled && field.disabled(field)}
+              visible={field.visible}
+              disableErrors={field.disableErrors}
+              useTooltipForErrors={field.useTooltipForErrors}
+              align={field.align || 'left'}
+              variant={field.variant}
+              value={dateValue}
+              className={className}
+              classes={classes}
+              startAdornment={field.startAdornment && field.startAdornment()}
+              endAdornment={field.endAdornment && field.endAdornment()}
+              {...propsForEdit}
+            />
+          );
+        }} />
       );
 
     case 'text':

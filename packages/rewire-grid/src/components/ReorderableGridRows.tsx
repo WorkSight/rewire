@@ -140,6 +140,8 @@ const reorderableGridRowsCellStyles = (theme: Theme) => ({
   },
 });
 
+export type ReorderableGridRowsCellStyles = ReturnType<typeof reorderableGridRowsCellStyles>;
+
 export interface IReorderableGridRowsCellProps {
   classes?                 : React.CSSProperties;
   row                      : IRow;
@@ -158,7 +160,7 @@ export interface IReorderableGridRowsCellProps {
   canDropRow?              : (sourceRow: IRow, targetRow: IRow) => boolean;
 }
 
-type ReorderableGridRowsCellProps = WithStyle<ReturnType<typeof reorderableGridRowsCellStyles>, IReorderableGridRowsCellProps>;
+export type ReorderableGridRowsCellProps = WithStyle<ReorderableGridRowsCellStyles, IReorderableGridRowsCellProps>;
 
 export const ReorderableGridRowsCell = lodash.flow([DragSource('reorderableGridRowsCell', cellSource, sourceCollect), DropTarget('reorderableGridRowsCell', cellTarget, targetCollect)])(withStyles(reorderableGridRowsCellStyles, class extends React.PureComponent<ReorderableGridRowsCellProps> {
   cellRef: React.RefObject<HTMLTableCellElement>;

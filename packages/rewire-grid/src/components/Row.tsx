@@ -47,9 +47,21 @@ const styles = (theme: Theme) => {
   return styleObj;
 };
 
-type IGroupProps = {group: IGroupRow, columns: () => IColumn[], numVisibleColumns: number, fixed: boolean} & React.Props<any>;
+export type RowStyles = ReturnType<typeof styles>;
 
-export const GroupRow = React.memo(withStyles(styles, (props: IGroupProps & {classes?: any, cellClasses?: any}) => {
+export interface IGroupProps extends React.Props<any> {
+  group: IGroupRow,
+  columns: () => IColumn[],
+  numVisibleColumns: number,
+  fixed: boolean,
+  classes?: any,
+  cellClasses?: any,
+}
+
+
+export type GroupProps = WithStyle<RowStyles, IGroupProps>;
+
+export const GroupRow = React.memo(withStyles(styles, (props: GroupProps) => {
   return (
     < >
       <Observe render={() => (
@@ -102,7 +114,7 @@ export interface IRowProps {
   groupId?          : string;
 }
 
-type RowProps = WithStyle<ReturnType<typeof styles>, IRowProps>;
+export type RowProps = WithStyle<RowStyles, IRowProps>;
 
 class InternalRow extends React.PureComponent<RowProps, {}> {
   element: React.RefObject<HTMLTableRowElement>;

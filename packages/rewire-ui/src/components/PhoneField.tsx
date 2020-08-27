@@ -14,11 +14,13 @@ const styles = (theme: Theme) => ({
   },
 });
 
-interface IPhoneFieldProps extends INumberFieldProps {
+export type PhoneFieldStyles = ReturnType<typeof styles>;
+
+export interface IPhoneFieldProps extends INumberFieldProps {
   mask: string;
 }
 
-type PhoneFieldProps = WithStyle<ReturnType<typeof styles>, TextFieldProps & IPhoneFieldProps>;
+export type PhoneFieldProps = WithStyle<PhoneFieldStyles, TextFieldProps & IPhoneFieldProps>;
 
 class PhoneField extends React.Component<PhoneFieldProps> {
   constructor(props: PhoneFieldProps) {

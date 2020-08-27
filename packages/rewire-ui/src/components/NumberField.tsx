@@ -67,6 +67,8 @@ const styles = (theme: Theme) => ({
   },
 });
 
+export type NumberFieldStyles = ReturnType<typeof styles>;
+
 export interface INumberFieldProps {
   visible?              : boolean;
   disabled?             : boolean;
@@ -95,7 +97,7 @@ export interface INumberFieldProps {
   onValueChange: (value?: number | string) => void;
 }
 
-type NumberFieldProps = WithStyle<ReturnType<typeof styles>, TextFieldProps & INumberFieldProps>;
+export type NumberFieldProps = WithStyle<NumberFieldStyles, TextFieldProps & INumberFieldProps>;
 
 class NumberTextField extends React.Component<NumberFieldProps> {
   inputRef: React.RefObject<HTMLInputElement>;

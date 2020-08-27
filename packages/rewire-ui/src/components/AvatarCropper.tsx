@@ -51,6 +51,8 @@ const styles = () => ({
   },
 });
 
+export type AvatarCropperStyles = ReturnType<typeof styles>;
+
 export interface IAvatarCropperProps {
   classes?: React.CSSProperties;
   buttonSize?: 'small' | 'medium' | 'large';
@@ -74,6 +76,8 @@ export interface IAvatarCropperProps {
   onCancel?: () => void;
 }
 
+export type AvatarCropperProps = WithStyle<AvatarCropperStyles, IAvatarCropperProps>;
+
 interface IAvatarCropperState {
   imgWidth: number;
   imgHeight: number;
@@ -85,8 +89,6 @@ interface IAvatarCropperState {
   crop: Konva.Circle;
   cropRadius: number;
 }
-
-type AvatarCropperProps = WithStyle<ReturnType<typeof styles>, IAvatarCropperProps>;
 
 class AvatarCropper extends React.Component<AvatarCropperProps, IAvatarCropperState> {
   state: IAvatarCropperState;

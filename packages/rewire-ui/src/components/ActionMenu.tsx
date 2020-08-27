@@ -8,7 +8,7 @@ import LabelIcon               from '@material-ui/icons/LabelOutlined';
 import MenuBase, {
   IMenuBaseItem,
   MenuBaseProps,
-  MenuBaseStylesType,
+  MenuBaseStyles,
   IMenuBaseItemRendererProps,
 }                              from './MenuBase';
 import {WithStyle, withStyles} from './styles';
@@ -20,7 +20,7 @@ export interface IActionMenuItem extends IMenuBaseItem {
   onClick?(item: IActionMenuItem): void;
 }
 
-interface IActionMenuItemRendererProps extends IMenuBaseItemRendererProps {
+export interface IActionMenuItemRendererProps extends IMenuBaseItemRendererProps {
   item: IActionMenuItem;
 }
 
@@ -47,7 +47,7 @@ const actionItemRendererStyles = (theme: Theme) => ({
   },
 });
 
-export type ActionMenuItemRendererProps = WithStyle<MenuBaseStylesType, IActionMenuItemRendererProps>;
+export type ActionMenuItemRendererProps = WithStyle<MenuBaseStyles, IActionMenuItemRendererProps>;
 
 export const ActionItemRenderer = React.memo(withStyles(actionItemRendererStyles, React.forwardRef((props: ActionMenuItemRendererProps, ref: any): JSX.Element => {
   return <Observe render={() => {

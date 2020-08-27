@@ -1,21 +1,21 @@
-import * as React              from 'react';
-import classNames              from 'classnames';
-import { ChangeEvent }         from 'react';
-import RootRef                 from '@material-ui/core/RootRef';
-import {Theme}                 from '@material-ui/core/styles';
-import TextField               from '@material-ui/core/TextField';
-import MenuItem                from '@material-ui/core/MenuItem';
-import {SelectProps}           from '@material-ui/core/Select';
-import InputAdornment          from '@material-ui/core/InputAdornment';
-import ErrorTooltip            from './ErrorTooltip';
+import * as React                      from 'react';
+import classNames                      from 'classnames';
+import { ChangeEvent }                 from 'react';
+import RootRef                         from '@material-ui/core/RootRef';
+import {Theme}                         from '@material-ui/core/styles';
+import TextField                       from '@material-ui/core/TextField';
+import MenuItem                        from '@material-ui/core/MenuItem';
+import {SelectProps as MuiSelectProps} from '@material-ui/core/Select';
+import InputAdornment                  from '@material-ui/core/InputAdornment';
+import ErrorTooltip                    from './ErrorTooltip';
 import {
   ICustomProps,
   SearchFn,
   MapFn,
   defaultMap,
   IRenderSuggestionFnProps,
-}                              from '../models/search';
-import {withStyles, WithStyle} from './styles';
+}                                      from '../models/search';
+import {withStyles, WithStyle}         from './styles';
 
 const styles = (theme: Theme) => ({
   inputRoot: {
@@ -110,19 +110,20 @@ const styles = (theme: Theme) => ({
   },
 });
 
+export type SelectStyles = ReturnType<typeof styles>;
+
 export interface ISelectRenderSuggestionFnProps<T> extends IRenderSuggestionFnProps<T> {
   displayName: string;
 }
 
-interface ISelectProps<T> {
+export interface ISelectProps<T> {
   renderSuggestion?: (props: ISelectRenderSuggestionFnProps<T>) => JSX.Element;
   dynamic?: boolean;
 }
 
-export type ISelectInternalProps<T> = ICustomProps<T> & React.InputHTMLAttributes<any> & SelectProps & ISelectProps<T>;
-type SelectInternalProps<T>         = WithStyle<ReturnType<typeof styles>, ISelectInternalProps<T>>;
+export type SelectProps<T> = WithStyle<SelectStyles, ISelectProps<T> & ICustomProps<T> & React.InputHTMLAttributes<any> & MuiSelectProps & ISelectProps<T>>;
 
-class SelectInternal<T> extends React.Component<SelectInternalProps<T>, any> {
+class Select<T> extends React.Component<SelectProps<T>, any> {
   // private _isMounted: boolean;
   inputRef  : React.RefObject<HTMLInputElement>;
   state     : any;
@@ -130,7 +131,7 @@ class SelectInternal<T> extends React.Component<SelectInternalProps<T>, any> {
   map       : MapFn<T>;
   _fontSize?: string;
 
-  constructor(props: SelectInternalProps<T>) {
+  constructor(props: SelectProps<T>) {
     super(props);
     // this._isMounted    = false;
     this.state         = {suggestions: [], isOpen: false, labelWidth: 0};
@@ -159,7 +160,7 @@ class SelectInternal<T> extends React.Component<SelectInternalProps<T>, any> {
     }
   }
 
-  shouldComponentUpdate(nextProps: ISelectInternalProps<T>, nextState: any, nextContext: any) {
+  shouldComponentUpdate(nextProps: SelectProps<T>, nextState: any, nextContext: any) {
     return (
         (nextProps.selectedItem        !== this.props.selectedItem)        ||
         (nextProps.error               !== this.props.error)               ||
@@ -444,4 +445,4 @@ class SelectInternal<T> extends React.Component<SelectInternalProps<T>, any> {
   }
 }
 
-export default withStyles(styles, SelectInternal);
+export default withStyles(styles, Select);

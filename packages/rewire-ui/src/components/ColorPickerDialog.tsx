@@ -8,6 +8,8 @@ import './colorPickerDialog.css';
 const styles = (theme: Theme) => ({
 });
 
+export type ColorPickerDialogStyles = ReturnType<typeof styles>;
+
 export interface IColor {
   hex: string;
   rgb: {
@@ -24,7 +26,7 @@ export interface IColor {
   };
 }
 
-interface IColorPickerDialogProps {
+export interface IColorPickerDialogProps {
   className?: string;
   isOpen: boolean;
   anchorEl?: HTMLElement | (() => HTMLElement);
@@ -38,7 +40,7 @@ interface IColorPickerDialogProps {
   onChangeComplete?(color: IColor, evt: React.ChangeEvent<any>): void;
 }
 
-type ColorPickerDialogProps = WithStyle<ReturnType<typeof styles>, IColorPickerDialogProps>;
+export type ColorPickerDialogProps = WithStyle<ColorPickerDialogStyles, IColorPickerDialogProps>;
 
 class ColorPickerDialog extends React.Component<ColorPickerDialogProps> {
   constructor(props: ColorPickerDialogProps) {

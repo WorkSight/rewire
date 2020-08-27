@@ -13,7 +13,7 @@ import {
 import MenuBase, {
   MenuBaseProps,
   IMenuBaseItemRendererProps,
-  MenuBaseStylesType,
+  MenuBaseStyles,
 }                              from './MenuBase';
 import {WithStyle}             from './styles';
 
@@ -21,16 +21,16 @@ export interface IMixedMenuItemRendererProps extends IMenuBaseItemRendererProps 
   item: IActionMenuItem | IToggleMenuItem;
 }
 
-export interface IMixedMenuProps extends MenuBaseProps {
+export interface MixedMenuProps extends MenuBaseProps {
   items: (IActionMenuItem | IToggleMenuItem)[];
 
   onItemClick?(item: IActionMenuItem | IToggleMenuItem): void;
 }
 
-export type MixedMenuItemRendererProps = WithStyle<MenuBaseStylesType, IMixedMenuItemRendererProps>;
+export type MixedMenuItemRendererProps = WithStyle<MenuBaseStyles, IMixedMenuItemRendererProps>;
 
-class MixedMenu extends React.Component<IMixedMenuProps> {
-  constructor(props: IMixedMenuProps) {
+class MixedMenu extends React.Component<MixedMenuProps> {
+  constructor(props: MixedMenuProps) {
     super(props);
   }
 
