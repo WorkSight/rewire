@@ -13,7 +13,7 @@
     "client"
   ],
   "scripts": {
-    "start": "parcel examples/src/index.html --port 3001"
+    "start": "yarn parcel examples/src/index.html --port 3001"
   },
   "author": "Sandy Place",
   "license": "MIT",
@@ -49,6 +49,7 @@
     "sass": "^1.17.3",
     "tslib": "^1.9.3",
     "tslint": "^5.18.0",
+    "parcel": "^1.12.4",
     "typescript": "^3.7.5",
     "uglify-es": "^3.3.9"
   },
