@@ -393,7 +393,6 @@ class AutoComplete<T> extends React.Component<AutoCompleteProps<T>, IAutoComplet
             this.downShift.selectItem(state.selectedItem, {
               type: '__autocomplete_keydown_enter__'
             });
-            return;
           }
           event.preventDefault();
           event.stopPropagation();

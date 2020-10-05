@@ -377,6 +377,7 @@ class MultiSelectAutoComplete<T> extends React.Component<MultiSelectAutoComplete
               const value = this.props.inputAdd(state.inputValue);
               if (value && (this.props.selectedItems.findIndex((item: any) => defaultEquals(item, value)) < 0)) {
                 this.props.onSelectItem && this.props.onSelectItem([...this.props.selectedItems, value]);
+                this.downShift.closeMenu();
                 event.preventDefault();
                 event.stopPropagation();
                 event.nativeEvent.stopImmediatePropagation();
@@ -387,7 +388,6 @@ class MultiSelectAutoComplete<T> extends React.Component<MultiSelectAutoComplete
             this.downShift.selectItem(state.selectedItem, {
               type: '__autocomplete_keydown_enter__'
             });
-            return;
           }
           event.preventDefault();
           event.stopPropagation();
