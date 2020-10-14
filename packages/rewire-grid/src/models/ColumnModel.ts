@@ -173,7 +173,7 @@ export class ColumnModel implements IColumn {
       let predicateFn = undefined;
 
       if (t === 'number') {
-        mapFn = getNumberString;
+        mapFn = (v: any) => getNumberString(v, typeOptions.decimals, typeOptions.thousandSeparator, typeOptions.fixed);
         align = 'right';
       } else if (t === 'checked') {
         mapFn = (value: boolean) => value ? 'True' : 'False';
@@ -186,7 +186,7 @@ export class ColumnModel implements IColumn {
         if (!typeOptions.mask) {
           typeOptions.mask = defaultPhoneMask;
         }
-        mapFn = getPhoneString;
+        mapFn = (v: any) => getPhoneString(v, typeOptions.format, typeOptions.mask);
       } else if (t === 'select' || t === 'auto-complete' || (t === 'time' && mapFn)) {
         predicateFn = (value: any, filter: any) => toLowerCase(mapFn(value)).includes(toLowerCase(filter.value));
         if (compareFn) {
@@ -236,14 +236,14 @@ const arrayCompare = (mapFn?: any, compareFn?: any) => (x: any, y: any): number 
   return (x.length < y.length ? -1 : x.length > y.length ? 1 : 0);
 };
 
-function getNumberString(value: any): string {
+export function getNumberString(value: any, decimals?: number, thousandSeparator?: boolean, fixed?: boolean): string {
   if (isNullOrUndefined(value)) return value;
 
-  let numberStr = this.typeOptions && this.typeOptions.decimals && is.number(value) ? value.toFixed(this.typeOptions.decimals) : value.toString();
-  if (this.typeOptions && !this.typeOptions.fixed) {
+  let numberStr = decimals && is.number(value) ? value.toFixed(decimals) : value.toString();
+  if (!fixed) {
     numberStr = parseFloat(numberStr).toString();
   }
-  numberStr = this.typeOptions && this.typeOptions.thousandSeparator ? getThousandSeparatedNumberString(numberStr) : numberStr;
+  numberStr = thousandSeparator ? getThousandSeparatedNumberString(numberStr) : numberStr;
 
   return numberStr;
 }
@@ -275,12 +275,12 @@ function getThousandSeparatedNumberString(numStr: string): string {
   return beforeDecimal + (hasDecimalSeparator ? '.' : '') + afterDecimal;
 }
 
-function getPhoneString(value: any): string {
+export function getPhoneString(value: any, format: string, mask: string): string {
   if (isNullOrUndefined(value)) return value;
 
   let phoneStr             = value.toString();
-  let phoneFormat          = this.typeOptions.format;
-  let phoneMask            = this.typeOptions.mask;
+  let phoneFormat          = format;
+  let phoneMask            = mask;
   let hashCount            = 0;
   const formattedNumberArr = phoneFormat.split('');
   for (let i = 0; i < phoneFormat.length; i++) {

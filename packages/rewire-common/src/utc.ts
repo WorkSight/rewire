@@ -160,7 +160,7 @@ export class UTC {
     const options = {
       year: 'numeric', month: 'numeric', day: 'numeric',
       hour: 'numeric', minute: 'numeric', second: 'numeric',
-      hour12: false,
+      hourCycle: 'h23',
       timeZone: timeZone ?? 'Canada/Pacific'
     };
     const d = new Date(Date.parse(new Intl.DateTimeFormat('en-US', options).format(Date.now())));
