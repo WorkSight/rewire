@@ -798,7 +798,7 @@ const GridInternal = withStyles(internalGridStyles, class extends React.PureComp
     let BodyRenderer = (this.props.virtual) ? VirtualBody : Body;
     return (
       <Observe render={() => (
-        <div className={classNames('grid-scroll', this.props.classes.gridScroll)} onScroll={this.handleScroll}>
+        <div className={classNames('grid-scroll', this.props.classes.gridScroll)} onScrollCapture={this.handleScroll}>
           {this.renderFixedColumnData()}
           <div className={classNames('grid-content', this.props.classes.gridContent)} ref={this.setGridContentRef}>
             <table role='grid'>
