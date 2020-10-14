@@ -1,5 +1,4 @@
 import {fetch, match}               from 'rewire-common';
-import {Theme}                      from '@material-ui/core/styles';
 import {TextAlignment, TextVariant} from '../components/editors';
 
 export interface ISearchOptions {
@@ -8,6 +7,7 @@ export interface ISearchOptions {
 
 export type MapFn<T>    = (item?: T) => string;
 export type SearchFn<T> = (searchText: string, options?: ISearchOptions) => Promise<T[]>;
+export type EqualsFn<T> = (item1: T, item2: T) => boolean;
 
 export function defaultMap<T extends string>(item?: T): string {
   return item || '(empty)';

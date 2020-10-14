@@ -1,7 +1,16 @@
 import * as React                       from 'react';
 import * as is                          from 'is';
 import classNames                       from 'classnames';
-import {observable, Observe}            from 'rewire-core';
+import {
+  debounce,
+  match,
+  isNullOrUndefined,
+}                                       from 'rewire-common';
+import {
+  observable,
+  Observe,
+  defaultEquals
+}                                       from 'rewire-core';
 import Downshift, {
   ControllerStateAndHelpers,
   StateChangeOptions
@@ -21,14 +30,7 @@ import {Theme}                          from '@material-ui/core/styles';
 import CloseIcon                        from '@material-ui/icons/Close';
 import CancelIcon                       from '@material-ui/icons/Cancel';
 import ArrowDropDownIcon                from '@material-ui/icons/ArrowDropDown';
-
-import {
-  debounce,
-  match,
-  isNullOrUndefined,
-}                                       from 'rewire-common';
-import { defaultEquals }                from 'rewire-core';
-import {withStyles, WithStyle}          from './styles';
+import { withStyles, WithStyle }        from './styles';
 import {
   ISuggestionsContainerComponent,
   ISuggestionsContainerComponentProps,
@@ -39,6 +41,7 @@ import {
   ICustomProps,
   SearchFn,
   MapFn,
+  EqualsFn,
   defaultMap
 }                                       from '../models/search';
 
@@ -221,14 +224,16 @@ export interface IMultiSelectAutoCompleteProps<T> {
   selectedItems:          any[];
   chipLimit?:             number;
   inputAdd?:              (value: string) => any;
-  openOnFocus?          : boolean;
-  showEmptySuggestions? : boolean;
-  hasTransition?        : boolean;
-  transitionTimeout?    : number;
-  renderSuggestion?     : (props: IAutoCompleteRenderSuggestionFnProps<T>) => JSX.Element;
+  equals?:                EqualsFn<T>
+  openOnFocus?:           boolean;
+  showEmptySuggestions?:  boolean;
+  hasTransition?:         boolean;
+  transitionTimeout?:     number;
+  renderSuggestion?:      (props: IAutoCompleteRenderSuggestionFnProps<T>) => JSX.Element;
 
   suggestionsContainerHeader?: ISuggestionsContainerComponent;
   suggestionsContainerFooter?: ISuggestionsContainerComponent;
+
 }
 
 export type MultiSelectAutoCompleteProps<T> = WithStyle<MultiSelectAutoCompleteStyles, ICustomProps<T> & IMultiSelectAutoCompleteProps<T> & React.InputHTMLAttributes<any>>;
@@ -252,6 +257,7 @@ class MultiSelectAutoComplete<T> extends React.Component<MultiSelectAutoComplete
   downShift:                   any;
   search:                      SearchFn<T>;
   map:                         MapFn<T>;
+  equals:                      EqualsFn<T>;
   inputRef:                    React.RefObject<HTMLInputElement>;
   textFieldRef:                React.RefObject<HTMLElement>;
   showMoreSelectedItemsRef:    React.RefObject<HTMLElement>;
@@ -269,8 +275,9 @@ class MultiSelectAutoComplete<T> extends React.Component<MultiSelectAutoComplete
       const wait = is.number(props.debounce) ? props.debounce as number : 150;
       this.search = debounce(this.search, wait);
     }
-    this.map   = props.map || defaultMap;
-    this.state = {suggestions: []};
+    this.map    = props.map || defaultMap;
+    this.equals = props.equals || defaultEquals;
+    this.state  = {suggestions: []};
     if (!isNullOrUndefined(props.initialInputValue)) {
       this.performSearch(props.initialInputValue);
     }
@@ -338,7 +345,7 @@ class MultiSelectAutoComplete<T> extends React.Component<MultiSelectAutoComplete
         return;
       }
 
-      if (!this.props.selectedItems.map(item => this.map(item)).includes(this.map(options.selectedItem))) {
+      if (!this.props.selectedItems.some(item => this.equals(item, options.selectedItem))) {
         const newItems = [...this.props.selectedItems, options.selectedItem];
         this.props.onSelectItem && this.props.onSelectItem(newItems);
       }
@@ -375,8 +382,9 @@ class MultiSelectAutoComplete<T> extends React.Component<MultiSelectAutoComplete
           } else {
             if (this.props.inputAdd && state.inputValue && state.inputValue.length > 0) {
               const value = this.props.inputAdd(state.inputValue);
-              if (value && (this.props.selectedItems.findIndex((item: any) => defaultEquals(item, value)) < 0)) {
+              if (value && (!this.props.selectedItems.some((item: any) => this.equals(item, value)))) {
                 this.props.onSelectItem && this.props.onSelectItem([...this.props.selectedItems, value]);
+                this.downShift.closeMenu();
                 event.preventDefault();
                 event.stopPropagation();
                 event.nativeEvent.stopImmediatePropagation();
@@ -387,7 +395,6 @@ class MultiSelectAutoComplete<T> extends React.Component<MultiSelectAutoComplete
             this.downShift.selectItem(state.selectedItem, {
               type: '__autocomplete_keydown_enter__'
             });
-            return;
           }
           event.preventDefault();
           event.stopPropagation();
@@ -417,8 +424,7 @@ class MultiSelectAutoComplete<T> extends React.Component<MultiSelectAutoComplete
 
   deleteItem = (item: any) => {
     const selectedItems = [...this.props.selectedItems];
-    const selectedItem  = this.map(item);
-    selectedItems.splice(selectedItems.findIndex(i => this.map(i) === selectedItem), 1);
+    selectedItems.splice(selectedItems.findIndex(i => this.equals(i, item)), 1);
     this.props.onSelectItem && this.props.onSelectItem(selectedItems);
   }
 
@@ -696,7 +702,7 @@ class MultiSelectAutoComplete<T> extends React.Component<MultiSelectAutoComplete
           <div className={classNames(...suggestionsClasses)}>
             {(!suggestions || suggestions.length <= 0)
               ? <Typography variant='body2' className={classNames(classes.menuItem, classes.noResults)}>No Results</Typography>
-              : <Observe render={() => suggestions.filter((suggestion: any) => !selectedItems.map((item: any) => this.map(item)).includes(this.map(suggestion))).map((suggestion: any, index: number) =>
+              : <Observe render={() => suggestions.filter((suggestion: any) => !selectedItems.some((item: any) => this.equals(item, suggestion))).map((suggestion: any, index: number) =>
                   <this.renderSuggestion
                     key={index}
                     suggestion={suggestion}
