@@ -37,10 +37,11 @@ export class TimeValidator {
       };
     }
 
-    const v = this._parse(value);
-    if (isNullOrUndefined(v) || this.rounding === 0) {
+    const v      = this._parse(value);
+    const isNull = isNullOrUndefined(v);
+    if (isNull || this.rounding === 0) {
       return {
-        value   : v,
+        value   : isNull ? v : this._round(v!),
         isValid : v !== undefined,
       };
     }
@@ -108,7 +109,7 @@ export class TimeValidator {
   private round(value: number): number {
     switch (this.rounding) {
       case 0:
-        return value;
+        return this._round(value);
       case 0.25:
         return this._round(value - (7 / 60.0));
       default:
@@ -118,7 +119,8 @@ export class TimeValidator {
 
   private _round(value: number): number {
     if (this.rounding === 0) {
-      return value;
+      const n = 10000;
+      return Math.round( value * n + Number.EPSILON ) / n;
     }
 
     let remainder = this.remainder(value);
