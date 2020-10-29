@@ -31,7 +31,7 @@
     "sourceMap": true,
     "strictNullChecks": true,
     "suppressImplicitAnyIndexErrors": true,
-    "target": "es2019",
+    "target": "es2020",
     "traceResolution": false
   },
   "files": ["src/index.ts", "src/externals.d.ts"],
