@@ -32,7 +32,7 @@
     "sourceMap": true,
     "strictNullChecks": true,
     "suppressImplicitAnyIndexErrors": true,
-    "target": "es2020",
+    "target": "es2019",
     "traceResolution": false,
     "plugins": [
       { "name": "tslint-language-service" }
