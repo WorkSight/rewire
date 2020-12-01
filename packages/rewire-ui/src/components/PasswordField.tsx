@@ -85,6 +85,7 @@ export interface IPasswordFieldProps {
   useTooltipForErrors?  : boolean;
   error?                : string;
   value?                : string;
+  tooltip?              : string | ((value: any) => string)
   label?                : string;
   placeholder?          : string;
   align?                : TextAlignment;
@@ -118,19 +119,34 @@ class PasswordField extends React.Component<PasswordFieldProps, IPasswordFieldSt
 
   shouldComponentUpdate(nextProps: PasswordFieldProps, nextState: IPasswordFieldState) {
     return (
-      (nextProps.value               !== this.props.value)         ||
-      (nextProps.disabled            !== this.props.disabled)      ||
-      (nextProps.visible             !== this.props.visible)       ||
-      (nextProps.error               !== this.props.error)         ||
-      (nextState.showPassword        !== this.state.showPassword)  ||
-      (nextProps.hasAdornment        !== this.props.hasAdornment)  ||
-      (nextProps.label               !== this.props.label)         ||
-      (nextProps.placeholder         !== this.props.placeholder)   ||
-      (nextProps.align               !== this.props.align)         ||
-      (nextProps.variant             !== this.props.variant)       ||
-      (nextProps.disableErrors       !== this.props.disableErrors) || 
-      (nextProps.useTooltipForErrors !== this.props.useTooltipForErrors)
+      (nextProps.value               !== this.props.value)               ||
+      (nextProps.disabled            !== this.props.disabled)            ||
+      (nextProps.visible             !== this.props.visible)             ||
+      (nextProps.error               !== this.props.error)               ||
+      (nextState.showPassword        !== this.state.showPassword)        ||
+      (nextProps.hasAdornment        !== this.props.hasAdornment)        ||
+      (nextProps.label               !== this.props.label)               ||
+      (nextProps.placeholder         !== this.props.placeholder)         ||
+      (nextProps.align               !== this.props.align)               ||
+      (nextProps.variant             !== this.props.variant)             ||
+      (nextProps.disableErrors       !== this.props.disableErrors)       || 
+      (nextProps.useTooltipForErrors !== this.props.useTooltipForErrors) ||
+      (nextProps.tooltip             !== this.props.tooltip)
     );
+  }
+
+  getTooltip(value: any): string | undefined {
+    if (!this.state.showPassword) {
+      return undefined;
+    }
+    let tooltip = this.props.tooltip;
+    if (isNullOrUndefined(tooltip)) {
+      return !isNullOrUndefined(value) ? String(value) : undefined;
+    }
+    if (is.function(tooltip))  {
+      tooltip = (tooltip as CallableFunction)(value);
+    }
+    return tooltip as string;
   }
 
   handleFocus = (evt: React.FocusEvent<HTMLInputElement>) => {
@@ -201,6 +217,7 @@ class PasswordField extends React.Component<PasswordFieldProps, IPasswordFieldSt
           error={!this.props.disableErrors && !this.props.disabled && !!this.props.error}
           helperText={!this.props.disableErrors && <span>{(!this.props.disabled && this.props.error ? <this.renderError classes={this.props.classes} error={this.props.error} useTooltipForErrors={this.props.useTooltipForErrors} /> : '')}</span>}
           value={value}
+          title={this.getTooltip(value)}
           inputRef={this.inputRef}
           autoFocus={this.props.autoFocus}
           onFocus={this.handleFocus}
@@ -229,6 +246,7 @@ class PasswordField extends React.Component<PasswordFieldProps, IPasswordFieldSt
             error={!props.disableErrors && !props.disabled && !!props.error}
             helperText={!props.disableErrors && <span>{(!props.disabled && props.error ? <this.renderError classes={props.classes} error={props.error} useTooltipForErrors={props.useTooltipForErrors} /> : '')}</span>}
             value={props.value}
+            title={this.getTooltip(props.value)}
             inputRef={this.inputRef}
             autoFocus={props.autoFocus}
             onFocus={this.handleFocus}

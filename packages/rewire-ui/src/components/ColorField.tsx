@@ -63,8 +63,9 @@ export interface IColorFieldProps {
   visible?         : boolean;
   disabled?        : boolean;
   value?           : string;
-  variant?         : TextVariant;
+  tooltip?         : string | ((value: any) => string);
   label?           : string;
+  variant?         : TextVariant;
 
   onValueChange: (value?: string) => void;
 }
@@ -107,9 +108,21 @@ class ColorField extends React.Component<ColorFieldProps, IColorFieldState> {
       (nextProps.disabled !== this.props.disabled) ||
       (nextProps.visible  !== this.props.visible)  ||
       (nextProps.label    !== this.props.label)    ||
+      (nextProps.tooltip  !== this.props.tooltip)  ||
       (nextProps.variant  !== this.props.variant)  ||
       (nextState.open     !== this.state.open)
     );
+  }
+
+  getTooltip(value: any): string | undefined {
+    let tooltip = this.props.tooltip;
+    if (isNullOrUndefined(tooltip)) {
+      return value;
+    }
+    if (is.function(tooltip))  {
+      tooltip = (tooltip as CallableFunction)(value);
+    }
+    return tooltip as string;
   }
 
   handleChangeComplete = (color: IColor, evt: React.ChangeEvent<any>) => {
@@ -192,6 +205,7 @@ class ColorField extends React.Component<ColorFieldProps, IColorFieldState> {
           className={classNames('rc-color-picker-trigger', variant === 'outlined' ? classes.colorPickerTriggerOutlined : '')}
           classes={{root: classes.colorPickerTrigger}}
           disabled={disabled}
+          title={this.getTooltip(value)}
           style={{backgroundColor: value, borderColor: disabled ? 'rgba(0, 0, 0, 0.26)' : ''}}
           action={(actions: any) => {
             this.triggerElementActions = actions;

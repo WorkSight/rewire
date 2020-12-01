@@ -38,7 +38,7 @@ const CustomEditor = (props: any) => {
 
 function createForm() {
   return Form.create((_) => ({
-    email:                   _.email().label('Email').validators('email').placeholder('enter a valid email').autoFocus(),
+    email:                   _.email().label('Email').validators('email').placeholder('enter a valid email').autoFocus().tooltip((value) => `Email: ${value}`),
     custom2:                 _.custom(CustomEditor).label('OOGA').placeholder('enter a valid email'),
     password:                _.password().label('Password').validators('required', validator('==', field('password_confirmation'), error('passwords must be the same'))).placeholder('enter a password'),
     password_confirmation:   _.password().label('Confirm Password').validators('required').placeholder('confirm your password'),

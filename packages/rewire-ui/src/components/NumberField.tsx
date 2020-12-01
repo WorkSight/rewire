@@ -76,6 +76,7 @@ export interface INumberFieldProps {
   useTooltipForErrors?  : boolean;
   error?                : string;
   value?                : number;
+  tooltip?              : string | ((value: any) => string);
   label?                : string;
   placeholder?          : string;
   format?               : string;
@@ -133,8 +134,59 @@ class NumberTextField extends React.Component<NumberFieldProps> {
       (nextProps.disableErrors       !== this.props.disableErrors)       ||
       (nextProps.useTooltipForErrors !== this.props.useTooltipForErrors) ||
       (nextProps.startAdornment      !== this.props.startAdornment)      ||
-      (nextProps.endAdornment        !== this.props.endAdornment)
+      (nextProps.endAdornment        !== this.props.endAdornment)        ||
+      (nextProps.tooltip             !== this.props.tooltip)
     );
+  }
+
+  getTooltip(value: any): string | undefined {
+    let tooltip = this.props.tooltip;
+    if (isNullOrUndefined(tooltip)) {
+      return !isNullOrUndefined(value) ? this.getNumberString(value, this.props.decimals, this.props.thousandSeparator, this.props.fixed) : undefined;
+    }
+    if (is.function(tooltip))  {
+      tooltip = (tooltip as CallableFunction)(value);
+    }
+    return tooltip as string;
+  }
+
+  getNumberString(value: any, decimals?: number, thousandSeparator?: boolean, fixed?: boolean): string | undefined {
+    if (isNullOrUndefined(value)) return value ?? undefined;
+  
+    let numberStr = decimals && is.number(value) ? value.toFixed(decimals) : value.toString();
+    if (!fixed) {
+      numberStr = parseFloat(numberStr).toString();
+    }
+    numberStr = thousandSeparator ? this.getThousandSeparatedNumberString(numberStr) : numberStr;
+  
+    return numberStr;
+  }
+
+  splitDecimal(numStr: string): any {
+    const hasNagation = numStr[0] === '-';
+    const addNegation = hasNagation;
+    numStr            = numStr.replace('-', '');
+  
+    const parts         = numStr.split('.');
+    const beforeDecimal = parts[0];
+    const afterDecimal  = parts[1] || '';
+  
+    return {
+      beforeDecimal,
+      afterDecimal,
+      addNegation,
+    };
+  }
+  
+  getThousandSeparatedNumberString(numStr: string): string {
+    let {beforeDecimal, afterDecimal, addNegation} = this.splitDecimal(numStr);
+    let hasDecimalSeparator = !!afterDecimal && afterDecimal.length > 0;
+  
+    beforeDecimal = beforeDecimal.replace(/(\d)(?=(\d{3})+(?!\d))/g, '$1' + ',');
+  
+    if (addNegation) beforeDecimal = '-' + beforeDecimal;
+  
+    return beforeDecimal + (hasDecimalSeparator ? '.' : '') + afterDecimal;
   }
 
   handleFocus = (evt: React.FocusEvent<HTMLInputElement>) => {
@@ -197,6 +249,7 @@ class NumberTextField extends React.Component<NumberFieldProps> {
           error={!this.props.disableErrors && !this.props.disabled && !!this.props.error}
           helperText={!this.props.disableErrors && <span>{(!this.props.disabled && this.props.error ? <this.renderError classes={this.props.classes} error={this.props.error} useTooltipForErrors={this.props.useTooltipForErrors} /> : '')}</span>}
           value={value}
+          title={this.getTooltip(value)}
           label={this.props.label}
           onValueChange={this.handleValueChanged}
           onBlur={this.props.onBlur}
@@ -234,6 +287,7 @@ class NumberTextField extends React.Component<NumberFieldProps> {
             error={!props.disableErrors && !props.disabled && !!props.error}
             helperText={!props.disableErrors && <span>{(!props.disabled && props.error ? <this.renderError classes={props.classes} error={props.error} useTooltipForErrors={props.useTooltipForErrors} /> : '')}</span>}
             value={props.value}
+            title={this.getTooltip(value)}
             label={props.label}
             onValueChange={(values: any) => props.onChange && props.onChange({target: {value: values.floatValue}} as any)}
             onBlur={props.onBlur}

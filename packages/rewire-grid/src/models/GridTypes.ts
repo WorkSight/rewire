@@ -339,6 +339,7 @@ export interface IColumnOptions {
   headerRenderer?: React.SFC<any>;
   renderer?:       React.SFC<any>;
   validators?:     IFormValidator;
+  editorTooltip?:  string | ((value: any) => string);
 
   onValueChange?(cell: ICell, v: any): void;
   map?(value: any):                             string;
@@ -370,6 +371,7 @@ export interface IColumn extends ICellProperties {
   typeOptions?:    any;
   headerRenderer?: React.SFC<any>;
   editor?:         React.SFC<any>;
+  editorTooltip?:  string | ((value: any) => string);
 
   map?(value: any): string;
   predicate?(value: any, filter: {value: any}): boolean;

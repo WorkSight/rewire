@@ -46,6 +46,7 @@ export type TSetter        = (obj: any, value: any) => void;
 
 export interface IFieldDefn {
   label               (text: string):                                    IFieldDefn;
+  tooltip             (tooltip: string | ((value: any) => string)):      IFieldDefn;
   accessor            (getter: TGetter, setter: TSetter):                IFieldDefn;
   accessor            (path: string[]):                                  IFieldDefn;
   placeholder         (text: string):                                    IFieldDefn;
@@ -84,6 +85,7 @@ interface IBaseFieldDefn {
   autoFocus?          : boolean;
   editProps?          : any;
   label?              : string;
+  tooltip?            : string | ((value: any) => string);
   placeholder?        : string;
   align?              : TextAlignment;
   variant?            : TextVariant;
@@ -236,6 +238,11 @@ class BaseField implements IFieldDefn {
 
   label(text: string): IFieldDefn {
     this.typeDefn.label = text;
+    return this;
+  }
+
+  tooltip(tooltip: string | ((value: any) => string)): IFieldDefn {
+    this.typeDefn.tooltip = tooltip;
     return this;
   }
 
@@ -533,6 +540,7 @@ export default class Form implements IValidationContext {
       placeholder:         fieldDefn.typeDefn.placeholder,
       align:               fieldDefn.typeDefn.align,
       label:               fieldDefn.typeDefn.label,
+      tooltip:             fieldDefn.typeDefn.tooltip,
       disabled:            fieldDefn.typeDefn.disabled,
       disableErrors:       !isNullOrUndefined(fieldDefn.typeDefn.disableErrors) ? fieldDefn.typeDefn.disableErrors : this.disableErrors,
       useTooltipForErrors: !isNullOrUndefined(fieldDefn.typeDefn.useTooltipForErrors) ? fieldDefn.typeDefn.useTooltipForErrors : this.useTooltipForErrors,

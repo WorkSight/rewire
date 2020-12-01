@@ -32,6 +32,7 @@ export interface IField {
   autoFocus?          : boolean;
   error?              : string;
   value?              : any;
+  tooltip?            : string | ((value: any) => string);
   disabled?           : (field: IField) => boolean;
   visible?            : boolean;
   disableErrors?      : boolean;
@@ -104,6 +105,7 @@ export default function editor(type: EditorType, propsForEdit?: any): React.SFC<
             align={field.align || 'left'}
             variant={field.variant}
             selectedItem={field.value}
+            tooltip={field.tooltip}
             onSelectItem={onValueChange}
             className={className}
             classes={classes}
@@ -134,6 +136,7 @@ export default function editor(type: EditorType, propsForEdit?: any): React.SFC<
             align={field.align || 'left'}
             variant={field.variant}
             selectedItems={field.value || []}
+            tooltip={field.tooltip}
             onSelectItem={onValueChange}
             className={className}
             classes={classes}
@@ -162,6 +165,7 @@ export default function editor(type: EditorType, propsForEdit?: any): React.SFC<
             align={field.align || 'left'}
             variant={field.variant}
             selectedItem={field.value || []}
+            tooltip={field.tooltip}
             onSelectItem={onValueChange}
             className={className}
             classes={classes}
@@ -195,6 +199,7 @@ export default function editor(type: EditorType, propsForEdit?: any): React.SFC<
               align={field.align || 'left'}
               variant={field.variant}
               value={dateValue}
+              tooltip={field.tooltip}
               className={className}
               classes={classes}
               startAdornment={field.startAdornment && field.startAdornment()}
@@ -213,6 +218,7 @@ export default function editor(type: EditorType, propsForEdit?: any): React.SFC<
             placeholder={field.placeholder}
             label={field.label}
             value={field.value}
+            tooltip={field.tooltip}
             autoFocus={field.autoFocus}
             endOfTextOnFocus={endOfTextOnFocus}
             selectOnFocus={selectOnFocus}
@@ -241,6 +247,7 @@ export default function editor(type: EditorType, propsForEdit?: any): React.SFC<
             placeholder={field.placeholder}
             label={field.label}
             value={field.value}
+            tooltip={field.tooltip}
             autoFocus={field.autoFocus}
             endOfTextOnFocus={endOfTextOnFocus}
             selectOnFocus={selectOnFocus}
@@ -269,6 +276,7 @@ export default function editor(type: EditorType, propsForEdit?: any): React.SFC<
             placeholder={field.placeholder}
             label={field.label}
             value={field.value}
+            tooltip={field.tooltip}
             autoFocus={field.autoFocus}
             endOfTextOnFocus={endOfTextOnFocus}
             selectOnFocus={selectOnFocus}
@@ -297,6 +305,7 @@ export default function editor(type: EditorType, propsForEdit?: any): React.SFC<
           <PhoneField
             label={field.label}
             value={field.value}
+            tooltip={field.tooltip}
             autoFocus={field.autoFocus}
             endOfTextOnFocus={endOfTextOnFocus}
             selectOnFocus={selectOnFocus}
@@ -324,6 +333,7 @@ export default function editor(type: EditorType, propsForEdit?: any): React.SFC<
           <StaticField
             label={field.label}
             value={field.value}
+            tooltip={field.tooltip}
             onValueChange={onValueChange}
             visible={field.visible}
             align={field.align || 'left'}
@@ -341,6 +351,7 @@ export default function editor(type: EditorType, propsForEdit?: any): React.SFC<
             placeholder={field.placeholder}
             label={field.label}
             value={field.value}
+            tooltip={field.tooltip}
             autoFocus={field.autoFocus}
             endOfTextOnFocus={endOfTextOnFocus}
             selectOnFocus={selectOnFocus}
@@ -368,6 +379,7 @@ export default function editor(type: EditorType, propsForEdit?: any): React.SFC<
             placeholder={field.placeholder}
             label={field.label}
             value={field.value}
+            tooltip={field.tooltip}
             onValueChange={onValueChange}
             endOfTextOnFocus={endOfTextOnFocus}
             selectOnFocus={selectOnFocus}
@@ -396,6 +408,7 @@ export default function editor(type: EditorType, propsForEdit?: any): React.SFC<
             placeholder={field.placeholder}
             label={field.label}
             value={field.value}
+            tooltip={field.tooltip}
             endOfTextOnFocus={endOfTextOnFocus}
             selectOnFocus={selectOnFocus}
             cursorPositionOnFocus={cursorPositionOnFocus}
@@ -423,6 +436,7 @@ export default function editor(type: EditorType, propsForEdit?: any): React.SFC<
           <CheckField
             label={field.label}
             value={field.value}
+            tooltip={field.tooltip}
             onValueChange={onValueChange}
             autoFocus={field.autoFocus}
             disabled={field.disabled && field.disabled(field)}
@@ -440,6 +454,7 @@ export default function editor(type: EditorType, propsForEdit?: any): React.SFC<
           <SwitchField
             label={field.label}
             value={field.value}
+            tooltip={field.tooltip}
             onValueChange={onValueChange}
             autoFocus={field.autoFocus}
             disabled={field.disabled && field.disabled(field)}
@@ -471,6 +486,7 @@ export default function editor(type: EditorType, propsForEdit?: any): React.SFC<
             align={field.align || 'left'}
             variant={field.variant}
             selectedItem={field.value}
+            tooltip={field.tooltip}
             onSelectItem={onValueChange}
             className={className}
             classes={classes}
@@ -488,6 +504,7 @@ export default function editor(type: EditorType, propsForEdit?: any): React.SFC<
             label={field.label}
             onValueChange={onValueChange}
             value={field.value}
+            tooltip={field.tooltip}
             visible={field.visible}
             className={className}
             classes={classes}
@@ -502,6 +519,7 @@ export default function editor(type: EditorType, propsForEdit?: any): React.SFC<
           <ColorField
             label={field.label}
             value={field.value}
+            tooltip={field.tooltip}
             onValueChange={onValueChange}
             autoFocus={field.autoFocus}
             disabled={field.disabled && field.disabled(field)}
@@ -520,6 +538,7 @@ export default function editor(type: EditorType, propsForEdit?: any): React.SFC<
           <MaskField
             label={field.label}
             value={field.value}
+            tooltip={field.tooltip}
             autoFocus={field.autoFocus}
             endOfTextOnFocus={endOfTextOnFocus}
             selectOnFocus={selectOnFocus}

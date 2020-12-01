@@ -367,6 +367,7 @@ class Cell extends React.PureComponent<CellProps, {}> {
       if (cell.editing) {
         if (!this.column.editor) return null;
         let Editor                                    = this.column.editor;
+        let tooltip                                   = this.column.editorTooltip;
         let cellType                                  = this.column.type;
         let additionalProps                           = {};
         let endOfTextOnFocus                          = false;
@@ -409,7 +410,7 @@ class Cell extends React.PureComponent<CellProps, {}> {
         const height = (this.cell as CellModel).element!.getBoundingClientRect().height - 2;
         return <Observe render={() => (
           <div className={this.props.classes.editorContainer} style={{height}}>
-            <Editor field={{...cell, value: value, autoFocus: true, align: cell.align, error: undefined, disableErrors: true}} endOfTextOnFocus={endOfTextOnFocus} selectOnFocus={selectOnFocus} cursorPositionOnFocus={cursorPositionOnFocus} className={cell.cls} onValueChange={this.onValueChange} classes={editorClasses} {...additionalProps}/>
+            <Editor field={{...cell, value: value, autoFocus: true, align: cell.align, error: undefined, disableErrors: true, tooltip: tooltip}} endOfTextOnFocus={endOfTextOnFocus} selectOnFocus={selectOnFocus} cursorPositionOnFocus={cursorPositionOnFocus} className={cell.cls} onValueChange={this.onValueChange} classes={editorClasses} {...additionalProps}/>
           </div>
         )} />;
       }

@@ -168,6 +168,7 @@ export interface IMaskFieldProps {
   useTooltipForErrors?  : boolean;
   error?                : string;
   value?                : string;
+  tooltip?              : string | ((value: any) => string);
   label?                : string;
   placeholder?          : string;
   align?                : TextAlignment;
@@ -213,8 +214,20 @@ class MaskField extends React.Component<MaskFieldProps> {
       (nextProps.disableErrors       !== this.props.disableErrors)       ||
       (nextProps.useTooltipForErrors !== this.props.useTooltipForErrors) ||
       (nextProps.startAdornment      !== this.props.startAdornment)      ||
-      (nextProps.endAdornment        !== this.props.endAdornment)
+      (nextProps.endAdornment        !== this.props.endAdornment)        ||
+      (nextProps.tooltip             !== this.props.tooltip)
     );
+  }
+
+  getTooltip(value: any): string | undefined {
+    let tooltip = this.props.tooltip;
+    if (isNullOrUndefined(tooltip)) {
+      return value;
+    }
+    if (is.function(tooltip))  {
+      tooltip = (tooltip as CallableFunction)(value);
+    }
+    return tooltip as string;
   }
 
   handleFocus = (evt: React.FocusEvent<HTMLInputElement>) => {
@@ -295,6 +308,7 @@ class MaskField extends React.Component<MaskFieldProps> {
         error={!this.props.disableErrors && !this.props.disabled && !!this.props.error}
         helperText={!this.props.disableErrors && <span>{(!this.props.disabled && this.props.error ? <this.renderError classes={this.props.classes} error={this.props.error} useTooltipForErrors={this.props.useTooltipForErrors} /> : '')}</span>}
         value={value}
+        title={this.getTooltip(value)}
         autoFocus={this.props.autoFocus}
         onFocus={this.handleFocus}
         onBlur={this.props.onBlur}
@@ -322,6 +336,7 @@ class MaskField extends React.Component<MaskFieldProps> {
           error={!props.disableErrors && !props.disabled && !!props.error}
           helperText={!props.disableErrors && <span>{(!props.disabled && props.error ? <this.renderError classes={props.classes} error={props.error} useTooltipForErrors={props.useTooltipForErrors} /> : '')}</span>}
           value={props.value}
+          title={this.getTooltip(props.value)}
           autoFocus={props.autoFocus}
           onFocus={this.handleFocus}
           onBlur={props.onBlur}

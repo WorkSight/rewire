@@ -297,7 +297,8 @@ class MultiSelectAutoComplete<T> extends React.Component<MultiSelectAutoComplete
       (nextProps.disableErrors !== this.props.disableErrors) ||
       (nextProps.useTooltipForErrors !== this.props.useTooltipForErrors) ||
       (nextProps.startAdornment !== this.props.startAdornment) ||
-      (nextProps.endAdornment !== this.props.endAdornment)
+      (nextProps.endAdornment !== this.props.endAdornment) ||
+      (nextProps.tooltip !== this.props.tooltip)
     );
   }
 
@@ -521,6 +522,20 @@ class MultiSelectAutoComplete<T> extends React.Component<MultiSelectAutoComplete
     return results;
   }
 
+  getTooltip(value: any): string | undefined {
+    let tooltip = this.props.tooltip;
+    if (isNullOrUndefined(tooltip)) {
+      if (isNullOrUndefined(value) || !value.length) {
+        return undefined;
+      }
+      return value.map(v => this.map(v)).join(', ');
+    }
+    if (is.function(tooltip))  {
+      tooltip = (tooltip as CallableFunction)(value);
+    }
+    return tooltip as string;
+  }
+
   suggestionComparisonFn = (prevProps: any, nextProps: any): boolean => {
     let prevAriaSelected = prevProps.itemProps && prevProps.itemProps['aria-selected'];
     let nextAriaSelected = nextProps.itemProps && nextProps.itemProps['aria-selected'];
@@ -599,7 +614,7 @@ class MultiSelectAutoComplete<T> extends React.Component<MultiSelectAutoComplete
   }
 
   renderInput = React.memo((props: any) => {
-    const {classes, error, getInputProps, startAdornment, isOpen, align, variant, disableErrors, useTooltipForErrors, label, disabled, autoFocus, placeholder} = props;
+    const {classes, error, getInputProps, startAdornment, isOpen, align, variant, disableErrors, useTooltipForErrors, label, disabled, autoFocus, placeholder, tooltip} = props;
     let inputProps = getInputProps({
       disabled: disabled,
       onKeyDown: this.handleKeyDown,
@@ -620,6 +635,7 @@ class MultiSelectAutoComplete<T> extends React.Component<MultiSelectAutoComplete
           className={classes.textField}
           classes={{root: classes.formControlRoot}}
           variant={variant}
+          title={tooltip}
           error={!disableErrors && !disabled && !!error}
           helperText={!disableErrors && <span>{(!disabled && error ? <this.renderError classes={classes} error={error} useTooltipForErrors={useTooltipForErrors} /> : '')}</span>}
           inputRef={this.inputRef}
@@ -872,6 +888,7 @@ class MultiSelectAutoComplete<T> extends React.Component<MultiSelectAutoComplete
                 disabled={disabled}
                 autoFocus={autoFocus}
                 label={label}
+                tooltip={this.getTooltip(selectedItem)}
                 placeholder={placeholder}
                 align={align}
                 variant={variant}

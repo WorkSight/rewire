@@ -1,5 +1,6 @@
 import * as React                                        from 'react';
 import classNames                                        from 'classnames';
+import { isNullOrUndefined }                             from 'rewire-common';
 import {default as MuiAvatar}                            from '@material-ui/core/Avatar';
 import Button                                            from '@material-ui/core/Button';
 import {withStyles, WithStyle}                           from './styles';
@@ -22,6 +23,7 @@ export interface IAvatarFieldProps {
   visible?        : boolean;
   classes?        : React.CSSProperties;
   value?          : string;
+  tooltip?        : string | ((value: any) => string);
   avatarDiameter? : number;
   mimeTypes?      : string;
   label?          : string;
@@ -61,9 +63,21 @@ class AvatarField extends React.Component<AvatarFieldProps, IAvatarFieldState> {
       (nextProps.value       !== this.props.value)       ||
       (nextProps.visible     !== this.props.visible)     ||
       (nextProps.label       !== this.props.label)       ||
+      (nextProps.tooltip     !== this.props.tooltip)     ||
       (nextState.value       !== this.state.value)       ||
       (nextState.loadedValue !== this.state.loadedValue)
     );
+  }
+
+  getTooltip(value: any): string | undefined {
+    let tooltip = this.props.tooltip;
+    if (isNullOrUndefined(tooltip)) {
+      return undefined;
+    }
+    if (is.function(tooltip))  {
+      tooltip = (tooltip as CallableFunction)(value);
+    }
+    return tooltip as string;
   }
 
   onImageLoad = (imageSrc: string) => {
@@ -117,7 +131,7 @@ class AvatarField extends React.Component<AvatarFieldProps, IAvatarFieldState> {
 
     return (
       <div className={classNames(this.props.className, classes.avatarContainer)}>
-        <InnerAvatar classes={otherClasses} buttonSize={bSize} avatarDiameter={avatarDiameter} mimeTypes={mimeTypes} label={label} onFileLoad={onFileLoad} onImageLoad={this.onImageLoad} onSave={this.onSave} value={this.state.value} />
+        <InnerAvatar classes={otherClasses} tooltip={this.getTooltip(this.state.value)} buttonSize={bSize} avatarDiameter={avatarDiameter} mimeTypes={mimeTypes} label={label} onFileLoad={onFileLoad} onImageLoad={this.onImageLoad} onSave={this.onSave} value={this.state.value} />
         {avatarCropperElement}
       </div>
     );
@@ -183,6 +197,7 @@ interface IInnerAvatarProps {
   classes?       : React.CSSProperties;
   buttonSize?    : 'small' | 'medium' | 'large';
   value?         : string;
+  tooltip?       : string;
   avatarDiameter?: number;
   mimeTypes?     : string;
   label?         : string;
@@ -269,7 +284,7 @@ const InnerAvatar = withStyles(innerAvatarStyles, class extends React.Component<
     return (
       this.props.value
         ? < >
-            <MuiAvatar src={this.props.value} className={classes.muiAvatar} style={{width: diameterStr, height: diameterStr}} />
+            <MuiAvatar title={this.props.tooltip} src={this.props.value} className={classes.muiAvatar} style={{width: diameterStr, height: diameterStr}} />
             <div className={classes.buttonsContainer}>
               <Button variant='contained' component='label' size={bSize} tabIndex={-1} className={classNames(classes.button, classes.changeImageButton)}>
                 <span>Change</span>

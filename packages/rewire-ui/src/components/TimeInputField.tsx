@@ -198,6 +198,7 @@ export interface ITimeFieldProps {
   error?                : string;
   value?                : number | string;
   label?                : string;
+  tooltip?              : string | ((value: any) => string);
   align?                : TextAlignment;
   variant?              : TextVariant;
   placeholder?          : string;
@@ -225,7 +226,6 @@ export interface ITimeState {
   value?:   '-' | number;
   isValid?: boolean;
   text:     string;
-  title?:   string;
 }
 
 export type TimeFieldProps = WithStyle<TimeInputFieldStyles, TextFieldProps & ITimeFieldProps>;
@@ -243,7 +243,7 @@ class TimeInputField extends React.Component<TimeFieldProps, ITimeState> {
     this.inputRef  = React.createRef();
     const map      = props.map || defaultMap;
     this.state     = this._valueToSet(map(props.value));
-    this._setState(this.state);
+    this.setState(this.state);
   }
 
   UNSAFE_componentWillReceiveProps (nextProps: TimeFieldProps) {
@@ -265,24 +265,13 @@ class TimeInputField extends React.Component<TimeFieldProps, ITimeState> {
       (nextProps.disableErrors       !== this.props.disableErrors)       ||
       (nextProps.useTooltipForErrors !== this.props.useTooltipForErrors) ||
       (nextProps.startAdornment      !== this.props.startAdornment)      ||
-      (nextProps.endAdornment        !== this.props.endAdornment)
+      (nextProps.endAdornment        !== this.props.endAdornment)        ||
+      (nextProps.tooltip             !== this.props.tooltip)
     );
   }
 
-  _setState(state: ITimeState) {
-    const time  = state.value;
-    if (typeof time === 'number' && state.text) {
-      const days   = (time < 0) ? Math.trunc(Math.abs(time) / 24) + 1 : Math.trunc(time / 24);
-      const prefix = (days > 0) ? `${days} day${days > 1 ? 's' : ''} ${(time < 0) ? 'preceding' : 'following'} at ` : '';
-      state.title  = `${prefix}${uppercaseFormatter.format(UTC.now().startOfDay().add(time as number, TimeSpan.hours).utc)}`;
-    } else {
-      state.title = '';
-    }
-    this.setState(state);
-  }
-
   setValue(value?: number | string) {
-    this._setState(this._valueToSet(value));
+    this.setState(this._valueToSet(value));
   }
 
   _valueToSet(value?: number | string): any {
@@ -292,12 +281,12 @@ class TimeInputField extends React.Component<TimeFieldProps, ITimeState> {
 
   handleChange = (evt: React.ChangeEvent<HTMLInputElement>) => {
     const state = this.validator.parse(evt.target.value);
-    this._setState({...state, text: evt.target.value});
+    this.setState({...state, text: evt.target.value});
   }
 
   handleBlur = (evt: React.FocusEvent<HTMLInputElement>) => {
     if (this.state.value === this.props.value) {
-      this._setState({text: !isNullOrUndefinedOrEmpty(this.state.value) ? `${this.state.value}` : ''});
+      this.setState({text: !isNullOrUndefinedOrEmpty(this.state.value) ? `${this.state.value}` : ''});
     }
     this.props.onValueChange(this.state.value as (number | undefined));
   }
@@ -311,6 +300,24 @@ class TimeInputField extends React.Component<TimeFieldProps, ITimeState> {
       let cursorPosition = Math.max(0, Math.min(this.props.cursorPositionOnFocus!, evt.target.value.length));
       evt.target.setSelectionRange(cursorPosition, cursorPosition);
     }
+  }
+
+  getTooltip(value: ITimeState): string | undefined {
+    let tooltip = this.props.tooltip;
+    if (isNullOrUndefined(tooltip)) {
+      const time  = value.value;
+      if (typeof time === 'number' && value.text) {
+        const days   = (time < 0) ? Math.trunc(Math.abs(time) / 24) + 1 : Math.trunc(time / 24);
+        const prefix = (days > 0) ? `${days} day${days > 1 ? 's' : ''} ${(time < 0) ? 'preceding' : 'following'} at ` : '';
+        return `${prefix}${uppercaseFormatter.format(UTC.now().startOfDay().add(time as number, TimeSpan.hours).utc)}`;
+      } else {
+        return undefined;
+      }
+    }
+    if (is.function(tooltip))  {
+      tooltip = (tooltip as CallableFunction)(value);
+    }
+    return tooltip as string;
   }
 
   renderError = React.memo((props: any) => {
@@ -354,7 +361,7 @@ class TimeInputField extends React.Component<TimeFieldProps, ITimeState> {
         onFocus={this.handleFocus}
         autoFocus={autoFocus}
         placeholder={placeholder}
-        title={this.state.title}
+        title={this.getTooltip(this.state)}
         variant={variant as any}
         inputRef={this.inputRef}
         inputProps={{spellCheck: false, className: classes.nativeInput, style: {textAlign: align || 'left'}}}
