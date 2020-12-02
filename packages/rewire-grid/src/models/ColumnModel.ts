@@ -62,6 +62,7 @@ export class ColumnModel implements IColumn {
   headerRenderer?: React.SFC<any>;
   renderer?      : React.SFC<any>;
   editor?        : React.SFC<any>;
+  editorTooltip? : string | ((value: any) => string);
 
   onValueChange?(cell: ICell, v: any): void;
   map?(value: any): string;
@@ -102,6 +103,7 @@ export class ColumnModel implements IColumn {
     this.map            = options && !isNullOrUndefined(options.map)            ? options.map!            : undefined;
     this.predicate      = options && !isNullOrUndefined(options.predicate)      ? options.predicate!      : undefined;
     this.compare        = options && !isNullOrUndefined(options.compare)        ? options.compare!        : undefined;
+    this.editorTooltip  = options && !isNullOrUndefined(options.editorTooltip)  ? options.editorTooltip   : undefined;
     if (options && options.validators) {
       this.__validators = validators(options.validators);
     }

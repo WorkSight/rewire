@@ -81,6 +81,7 @@ export interface ICustomProps<T> {
   align?                : TextAlignment;
   variant?              : TextVariant;
   label?                : string;
+  tooltip?              : string | ((value: any) => string);
   placeholder?          : string;
   autoFocus?            : boolean;
   disableErrors?        : boolean;

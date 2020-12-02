@@ -29,6 +29,7 @@ export interface IStaticFieldProps {
   visible?: boolean;
   classes?: React.CSSProperties;
   value?  : string;
+  tooltip?: string | ((value: any) => string);
   label?  : string;
   align?  : TextAlignment;
 
@@ -47,8 +48,20 @@ class StaticFieldInternal extends React.Component<StaticFieldProps> {
       (nextProps.value   !== this.props.value)   ||
       (nextProps.visible !== this.props.visible) ||
       (nextProps.label   !== this.props.label)   ||
-      (nextProps.align   !== this.props.align)
+      (nextProps.align   !== this.props.align)   ||
+      (nextProps.tooltip !== this.props.tooltip)
     );
+  }
+
+  getTooltip(value: any): string | undefined {
+    let tooltip = this.props.tooltip;
+    if (isNullOrUndefined(tooltip)) {
+      return value;
+    }
+    if (is.function(tooltip))  {
+      tooltip = (tooltip as CallableFunction)(value);
+    }
+    return tooltip as string;
   }
 
   render() {
@@ -65,6 +78,7 @@ class StaticFieldInternal extends React.Component<StaticFieldProps> {
         disabled={true}
         label={this.props.label}
         value={value}
+        title={this.getTooltip(value)}
         type={this.props.type}
         onChange={(evt: React.ChangeEvent<HTMLInputElement>) => this.props.onValueChange(evt.target.value)}
         InputLabelProps={{shrink: true, classes: {root: classes.inputLabelRoot, disabled: classes.inputLabelDisabled}}}

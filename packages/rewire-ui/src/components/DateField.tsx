@@ -102,6 +102,7 @@ export interface IDateFieldProps {
   useTooltipForErrors?  : boolean;
   error?                : string;
   label?                : string;
+  tooltip?              : string | ((value: any) => string);
   placeholder?          : string;
   variant?              : TextVariant;
   dateVariant?          : DateVariant;
@@ -126,6 +127,17 @@ class DateField extends React.PureComponent<DateFieldProps> {
     super(props);
 
     this.inputRef = React.createRef();
+  }
+
+  getTooltip(value: any): string | undefined {
+    let tooltip = this.props.tooltip;
+    if (isNullOrUndefined(tooltip)) {
+      return !isNullOrUndefined(value) ? value.toDateString() : undefined;
+    }
+    if (is.function(tooltip))  {
+      tooltip = (tooltip as CallableFunction)(value);
+    }
+    return tooltip as string;
   }
 
   onValueChange = (date?: Date | null, inputValue?: string | null) => {
@@ -228,6 +240,7 @@ class DateField extends React.PureComponent<DateFieldProps> {
         error={!this.props.disableErrors && !this.props.disabled && !!this.props.error}
         helperText={!this.props.disableErrors && <span>{(!this.props.disabled && this.props.error ? <this.renderError classes={classes} error={this.props.error} useTooltipForErrors={this.props.useTooltipForErrors} /> : '')}</span>}
         value={value}
+        title={this.getTooltip(value)}
         autoFocus={this.props.autoFocus}
         onFocus={this.handleFocus}
         onBlur={this.props.onBlur}
@@ -296,6 +309,7 @@ class DateField extends React.PureComponent<DateFieldProps> {
           error={!props.disableErrors && !props.disabled && !!props.error}
           helperText={!props.disableErrors && <span>{(!props.disabled && props.error ? <this.renderError classes={props.classes} error={props.error} useTooltipForErrors={props.useTooltipForErrors} /> : '')}</span>}
           value={props.value}
+          title={this.getTooltip(props.value)}
           autoFocus={props.autoFocus}
           onFocus={this.handleFocus}
           onBlur={props.onBlur}

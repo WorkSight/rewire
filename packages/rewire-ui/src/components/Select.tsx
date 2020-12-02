@@ -1,6 +1,7 @@
 import * as React                      from 'react';
 import classNames                      from 'classnames';
 import { ChangeEvent }                 from 'react';
+import { isNullOrUndefined }           from 'rewire-common';
 import RootRef                         from '@material-ui/core/RootRef';
 import {Theme}                         from '@material-ui/core/styles';
 import TextField                       from '@material-ui/core/TextField';
@@ -173,12 +174,31 @@ class Select<T> extends React.Component<SelectProps<T>, any> {
         (nextProps.align               !== this.props.align)               ||
         (nextProps.variant             !== this.props.variant)             ||
         (nextProps.multiple            !== this.props.multiple)            ||
-        (nextProps.dynamic             !== this.props.dynamic)            ||
+        (nextProps.dynamic             !== this.props.dynamic)             ||
         (nextProps.disableErrors       !== this.props.disableErrors)       ||
         (nextProps.useTooltipForErrors !== this.props.useTooltipForErrors) ||
         (nextProps.startAdornment      !== this.props.startAdornment)      ||
-        (nextProps.endAdornment        !== this.props.endAdornment)
+        (nextProps.endAdornment        !== this.props.endAdornment)        ||
+        (nextProps.tooltip             !== this.props.tooltip)
       );
+  }
+
+  getTooltip(value: any): string | undefined {
+    let tooltip = this.props.tooltip;
+    if (isNullOrUndefined(tooltip)) {
+      if (isNullOrUndefined(value) || (this.props.multiple && value.length <= 0)) {
+        return undefined;
+      } 
+      if (this.props.multiple) {
+        return value.join(', ');
+      } else {
+        return String(value);
+      }
+    }
+    if (is.function(tooltip))  {
+      tooltip = (tooltip as CallableFunction)(value);
+    }
+    return tooltip as string;
   }
 
   handleOnClose = (event: object) => {
@@ -415,6 +435,7 @@ class Select<T> extends React.Component<SelectProps<T>, any> {
           error={!this.props.disableErrors && !this.props.disabled && !!this.props.error}
           helperText={!this.props.disableErrors && <span>{(!this.props.disabled && this.props.error ? <this.renderError classes={this.props.classes} error={this.props.error} useTooltipForErrors={this.props.useTooltipForErrors} /> : '')}</span>}
           value={v}
+          title={this.getTooltip(v)}
           onChange={this.handleChanged}
           autoFocus={this.props.autoFocus}
           inputProps={{spellCheck: false, className: classes.nativeInput, style: {textAlign: this.props.align || 'left'}}}

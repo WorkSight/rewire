@@ -255,7 +255,8 @@ class AutoComplete<T> extends React.Component<AutoCompleteProps<T>, IAutoComplet
         (nextProps.openOnFocus !== this.props.openOnFocus) ||
         (nextProps.showEmptySuggestions !== this.props.showEmptySuggestions) ||
         (nextProps.hasTransition !== this.props.hasTransition) ||
-        (nextProps.transitionTimeout !== this.props.transitionTimeout)
+        (nextProps.transitionTimeout !== this.props.transitionTimeout) || 
+        (nextProps.tooltip !== this.props.tooltip)
       );
   }
 
@@ -311,6 +312,17 @@ class AutoComplete<T> extends React.Component<AutoCompleteProps<T>, IAutoComplet
     }
     results.push({highlight: false, text: this.html(value)});
     return results;
+  }
+
+  getTooltip(value: any): string | undefined {
+    let tooltip = this.props.tooltip;
+    if (isNullOrUndefined(tooltip)) {
+      return value;
+    }
+    if (is.function(tooltip))  {
+      tooltip = (tooltip as CallableFunction)(value);
+    }
+    return tooltip as string;
   }
 
   suggestionComparisonFn = (prevProps: any, nextProps: any): boolean => {
@@ -528,7 +540,7 @@ class AutoComplete<T> extends React.Component<AutoCompleteProps<T>, IAutoComplet
   });
 
   renderInput = React.memo((props: any) => {
-    const {classes, error, getInputProps, startAdornment, isOpen, align, variant, disableErrors, useTooltipForErrors, hasSelectedItem, label, disabled, autoFocus, placeholder} = props;
+    const {classes, error, getInputProps, startAdornment, isOpen, align, variant, disableErrors, useTooltipForErrors, hasSelectedItem, label, disabled, autoFocus, placeholder, tooltip} = props;
     let inputProps = getInputProps({
       disabled: disabled,
       onKeyDown: this.handleKeyDown,
@@ -549,6 +561,7 @@ class AutoComplete<T> extends React.Component<AutoCompleteProps<T>, IAutoComplet
           className={classes.textField}
           classes={{root: classes.formControlRoot}}
           variant={variant}
+          title={tooltip}
           error={!disableErrors && !disabled && !!error}
           helperText={!disableErrors && <span>{(!disabled && error ? <this.renderError classes={classes} error={error} useTooltipForErrors={useTooltipForErrors} /> : '')}</span>}
           inputRef={this.inputRef}
@@ -727,6 +740,7 @@ class AutoComplete<T> extends React.Component<AutoCompleteProps<T>, IAutoComplet
                  disabled={disabled}
                  autoFocus={autoFocus}
                  label={label}
+                 tooltip={this.getTooltip(inputValue)}
                  placeholder={placeholder}
                  align={align}
                  variant={variant}

@@ -50,6 +50,7 @@ export interface ISwitchFieldProps {
   visible? : boolean;
   disabled?: boolean;
   value?   : boolean;
+  tooltip? : string | ((value: any) => string);
   label?   : string;
 
   onValueChange: (value?: boolean) => void;
@@ -67,8 +68,20 @@ class SwitchField extends React.Component<SwitchFieldProps> {
       (nextProps.value    !== this.props.value)    ||
       (nextProps.disabled !== this.props.disabled) ||
       (nextProps.visible  !== this.props.visible)  ||
-      (nextProps.label    !== this.props.label)
+      (nextProps.label    !== this.props.label)    ||
+      (nextProps.tooltip  !== this.props.tooltip)
     );
+  }
+
+  getTooltip(value: any): string | undefined {
+    let tooltip = this.props.tooltip;
+    if (isNullOrUndefined(tooltip)) {
+      return undefined;
+    }
+    if (is.function(tooltip))  {
+      tooltip = (tooltip as CallableFunction)(value);
+    }
+    return tooltip as string;
   }
 
   render() {
@@ -88,6 +101,7 @@ class SwitchField extends React.Component<SwitchFieldProps> {
               disabled={this.props.disabled}
               inputProps={{}}
               checked={this.props.value}
+              title={this.getTooltip(this.props.value)}
               onChange={(evt: React.ChangeEvent<HTMLInputElement>) => this.props.onValueChange(evt.target.checked)}
               classes={{root: classes.switchRoot, switchBase: classes.switchBase, track: classes.switchTrack, thumb: classes.switchThumb, checked: classes.switchChecked}}
             />
@@ -106,6 +120,7 @@ class SwitchField extends React.Component<SwitchFieldProps> {
           disabled={this.props.disabled}
           inputProps={{}}
           checked={this.props.value}
+          title={this.getTooltip(this.props.value)}
           onChange={(evt: React.ChangeEvent<HTMLInputElement>) => this.props.onValueChange(evt.target.checked)}
           classes={{root: classes.switchRoot, switchBase: classes.switchBase, track: classes.switchTrack, thumb: classes.switchThumb, checked: classes.switchChecked}}
         />
