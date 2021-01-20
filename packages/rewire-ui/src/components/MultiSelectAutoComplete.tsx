@@ -233,7 +233,6 @@ export interface IMultiSelectAutoCompleteProps<T> {
 
   suggestionsContainerHeader?: ISuggestionsContainerComponent;
   suggestionsContainerFooter?: ISuggestionsContainerComponent;
-
 }
 
 export type MultiSelectAutoCompleteProps<T> = WithStyle<MultiSelectAutoCompleteStyles, ICustomProps<T> & IMultiSelectAutoCompleteProps<T> & React.InputHTMLAttributes<any>>;
@@ -369,7 +368,11 @@ class MultiSelectAutoComplete<T> extends React.Component<MultiSelectAutoComplete
         const {inputValue, isOpen} = this.downShift.getState();
         const {selectedItems}      = this.props;
         if (!isOpen && selectedItems.length && (!inputValue || !inputValue.length) && event.key === 'Backspace') {
-          this.props.onSelectItem && this.props.onSelectItem(selectedItems.slice(0, selectedItems.length - 1));
+          let newItems: any[] | undefined = selectedItems.slice(0, selectedItems.length - 1);
+          if (!newItems.length) {
+            newItems = undefined;
+          }
+          this.props.onSelectItem && this.props.onSelectItem(newItems);
         }
         break;
       case 9:
@@ -424,8 +427,11 @@ class MultiSelectAutoComplete<T> extends React.Component<MultiSelectAutoComplete
   }
 
   deleteItem = (item: any) => {
-    const selectedItems = [...this.props.selectedItems];
+    let selectedItems: any[] | undefined = [...this.props.selectedItems];
     selectedItems.splice(selectedItems.findIndex(i => this.equals(i, item)), 1);
+    if (!selectedItems.length) {
+      selectedItems = undefined;
+    }
     this.props.onSelectItem && this.props.onSelectItem(selectedItems);
   }
 
