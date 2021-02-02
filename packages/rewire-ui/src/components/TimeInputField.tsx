@@ -21,7 +21,7 @@ export class TimeValidator {
     this.rounding = !isNullOrUndefined(rounding) ? rounding! : 0.25;
   }
 
-  parse(value?: string | number): {value?: '-' | number, isValid: boolean} {
+  parse(value?: string | number): {value?: '-' | '.' | '-.' | number, isValid: boolean} {
     if (typeof value === 'number') {
       const rounded = this.round(value);
       return {
@@ -30,7 +30,7 @@ export class TimeValidator {
       };
     }
 
-    if (value === '-') {
+    if (value === '-' || value === '.' || value === '-.') {
       return {
         value:   value,
         isValid: false
@@ -223,7 +223,7 @@ const ampmClock = {
 const uppercaseFormatter = new Intl.DateTimeFormat('en-US', ampmClock);
 
 export interface ITimeState {
-  value?:   '-' | number;
+  value?:   '-' | '.' | '-.' | number;
   isValid?: boolean;
   text:     string;
 }
