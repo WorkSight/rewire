@@ -1,3 +1,5 @@
+import isNullOrUndefined from './isNullOrUndefined';
+
 export type DateType = UTC | Date | string | number;
 export enum TimeSpan { years, months, days, weeks, hours, minutes, seconds, milliseconds }
 
@@ -136,19 +138,42 @@ export class UTC {
     return +amount.toFixed(decimals);
   }
 
-  add(amount: number, ts: TimeSpan = TimeSpan.days) {
+  add(amount: number, ts: TimeSpan = TimeSpan.days, roundTo?: number) {
+    let newAmount: number;
     switch (ts) {
       case TimeSpan.years:
-        const d = new Date(this.utc);
-        return new UTC(d.setUTCFullYear(d.getUTCFullYear() + amount));
+        const d   = new Date(this.utc);
+        newAmount = d.setUTCFullYear(d.getUTCFullYear() + amount);
+        break;
 
       case TimeSpan.months:
-        const d2 = new Date(this.utc);
-        return new UTC(d2.setUTCFullYear(d2.getUTCFullYear(), (d2.getUTCMonth() + amount)));
+        const d2  = new Date(this.utc);
+        newAmount = d2.setUTCFullYear(d2.getUTCFullYear(), (d2.getUTCMonth() + amount));
+        break;
 
       default:
-        return new UTC(this.utc + (amount * UTC.TimeSpanToMillis[ts]));
+        newAmount = this.utc + (amount * UTC.TimeSpanToMillis[ts]);
     }
+
+    if (!isNullOrUndefined(roundTo)) {
+      newAmount = this.round(newAmount / UTC.TimeSpanToMillis[ts], roundTo) * UTC.TimeSpanToMillis[ts];
+    }
+
+    return new UTC(newAmount);
+  }
+
+  subtract(dt: DateType, ts: TimeSpan = TimeSpan.days, roundTo?: number) {
+    let right  = UTC.toNumber(dt);
+    let left   = this.utc;
+    let result = (left - right) / UTC.TimeSpanToMillis[ts];
+    if (!isNullOrUndefined(roundTo)) {
+      result = this.round(result, roundTo);
+    }
+    return result;
+  }
+
+  subtractDate(dt: DateType, ts: TimeSpan = TimeSpan.days) {
+    return Math.trunc(this.subtract(dt, ts));
   }
 
   static now() {
@@ -182,16 +207,6 @@ export class UTC {
 
   toJSON(): any {
     return this.toString();
-  }
-
-  subtract(dt: DateType, ts: TimeSpan = TimeSpan.days, roundTo: number = 0) {
-    let right  = UTC.toNumber(dt);
-    let left   = this.utc;
-    let result = (left - right) / UTC.TimeSpanToMillis[ts];
-    if (roundTo > 0) {
-      return this.round(result, roundTo);
-    }
-    return Math.trunc(result);
   }
 
   private static MillisecondsPerYear   = 365 * 24 * 60 * 60 * 1000;
