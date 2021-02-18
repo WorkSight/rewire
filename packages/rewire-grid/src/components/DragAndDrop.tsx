@@ -1,5 +1,5 @@
 import { DndProvider, createDndContext } from 'react-dnd';
-import HTML5Backend                      from 'react-dnd-html5-backend';
+import { HTML5Backend }                  from 'react-dnd-html5-backend';
 import * as React                        from 'react';
 
 const dndContext = createDndContext(HTML5Backend);
@@ -9,7 +9,7 @@ function useDndProviderElement(props: any) {
 
   if (!props.children) return null;
 
-  return <DndProvider manager={manager.current.dragDropManager}>{props.children}</DndProvider>;
+  return <DndProvider manager={manager.current.dragDropManager!}>{props.children}</DndProvider>;
 }
 
 export default function DragAndDrop(props: any) {
