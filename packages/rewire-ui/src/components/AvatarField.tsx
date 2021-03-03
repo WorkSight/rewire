@@ -22,6 +22,7 @@ export interface IAvatarFieldProps {
   className?      : string;
   visible?        : boolean;
   classes?        : React.CSSProperties;
+  disabled?       : boolean;
   value?          : string;
   tooltip?        : string | ((value: any) => string);
   avatarDiameter? : number;
@@ -64,6 +65,7 @@ class AvatarField extends React.Component<AvatarFieldProps, IAvatarFieldState> {
       (nextProps.visible     !== this.props.visible)     ||
       (nextProps.label       !== this.props.label)       ||
       (nextProps.tooltip     !== this.props.tooltip)     ||
+      (nextProps.disabled    !== this.props.disabled)    ||
       (nextState.value       !== this.state.value)       ||
       (nextState.loadedValue !== this.state.loadedValue)
     );
@@ -98,7 +100,7 @@ class AvatarField extends React.Component<AvatarFieldProps, IAvatarFieldState> {
       return null;
     }
 
-    const {classes, buttonSize, width, height, imageWidth, imageHeight, avatarDiameter, label, lineWidth, cropColor, backgroundColor, shadingColor, shadingOpacity, cropRadius, minCropRadius, onCrop, onLoad, onFileLoad, mimeTypes} = this.props;
+    const {classes, buttonSize, width, height, imageWidth, imageHeight, avatarDiameter, label, disabled, lineWidth, cropColor, backgroundColor, shadingColor, shadingOpacity, cropRadius, minCropRadius, onCrop, onLoad, onFileLoad, mimeTypes} = this.props;
     const bSize                              = buttonSize || this.defaultAvatarFieldProps.buttonSize;
     const {avatarContainer, ...otherClasses} = classes;
     let avatarCropperElement                 = undefined;
@@ -131,7 +133,7 @@ class AvatarField extends React.Component<AvatarFieldProps, IAvatarFieldState> {
 
     return (
       <div className={classNames(this.props.className, classes.avatarContainer)}>
-        <InnerAvatar classes={otherClasses} tooltip={this.getTooltip(this.state.value)} buttonSize={bSize} avatarDiameter={avatarDiameter} mimeTypes={mimeTypes} label={label} onFileLoad={onFileLoad} onImageLoad={this.onImageLoad} onSave={this.onSave} value={this.state.value} />
+        <InnerAvatar classes={otherClasses} tooltip={this.getTooltip(this.state.value)} buttonSize={bSize} avatarDiameter={avatarDiameter} mimeTypes={mimeTypes} label={label} onFileLoad={onFileLoad} onImageLoad={this.onImageLoad} onSave={this.onSave} disabled={disabled} value={this.state.value} />
         {avatarCropperElement}
       </div>
     );
@@ -189,6 +191,10 @@ const innerAvatarStyles = () => ({
     cursor: 'pointer',
     width: '100%',
   },
+  disabled: {
+    opacity: '0.38',
+    cursor: 'default',
+  },
 });
 
 export type InnerAvatarStyles = ReturnType<typeof innerAvatarStyles>;
@@ -196,6 +202,7 @@ export type InnerAvatarStyles = ReturnType<typeof innerAvatarStyles>;
 interface IInnerAvatarProps {
   classes?       : React.CSSProperties;
   buttonSize?    : 'small' | 'medium' | 'large';
+  disabled?      : boolean;
   value?         : string;
   tooltip?       : string;
   avatarDiameter?: number;
@@ -225,7 +232,10 @@ const InnerAvatar = withStyles(innerAvatarStyles, class extends React.Component<
   }
 
   shouldComponentUpdate(nextProps: IInnerAvatarProps) {
-    return nextProps.value !== this.props.value;
+    return (
+      nextProps.value !== this.props.value ||
+      nextProps.disabled !== this.props.disabled
+    );
   }
 
   onFileLoad = (file: any) => {
@@ -256,7 +266,7 @@ const InnerAvatar = withStyles(innerAvatarStyles, class extends React.Component<
   }
 
   render() {
-    const {classes, buttonSize, avatarDiameter, label, mimeTypes} = this.props;
+    const {classes, buttonSize, avatarDiameter, label, disabled, mimeTypes} = this.props;
     const bSize                = buttonSize || this.defaultInnerAvatarProps.buttonSize;
     const mTypes               = mimeTypes || this.defaultInnerAvatarProps.mimeTypes;
     const diameter             = (avatarDiameter || this.defaultInnerAvatarProps.avatarDiameter);
@@ -279,26 +289,29 @@ const InnerAvatar = withStyles(innerAvatarStyles, class extends React.Component<
       className: classes.changeImageButtonInnerInput,
       accept: mTypes,
       ref: this.fileInputRef,
+      disabled: disabled,
     };
 
     return (
       this.props.value
         ? < >
             <MuiAvatar title={this.props.tooltip} src={this.props.value} className={classes.muiAvatar} style={{width: diameterStr, height: diameterStr}} />
-            <div className={classes.buttonsContainer}>
-              <Button variant='contained' component='label' size={bSize} tabIndex={-1} className={classNames(classes.button, classes.changeImageButton)}>
-                <span>Change</span>
-                <label className={classes.changeImageButtonInnerLabel} htmlFor={fileInputId} />
-                <input {...fileInputProps} />
-              </Button>
-              <Button variant='contained' component='label' size={bSize} tabIndex={-1} className={classNames(classes.button, classes.deleteImageButton)} onClick={this.deleteImage}>
-                <span>Delete</span>
-              </Button>
-            </div>
+            {!disabled &&
+              <div className={classes.buttonsContainer}>
+                <Button variant='contained' component='label' size={bSize} tabIndex={-1} disabled={disabled} className={classNames(classes.button, classes.changeImageButton)}>
+                  <span>Change</span>
+                  <label className={classes.changeImageButtonInnerLabel} htmlFor={fileInputId} />
+                  <input {...fileInputProps} />
+                </Button>
+                <Button variant='contained' component='label' size={bSize} tabIndex={-1} disabled={disabled} className={classNames(classes.button, classes.deleteImageButton)} onClick={this.deleteImage}>
+                  <span>Delete</span>
+                </Button>
+              </div>
+            }
           </>
         : <div className={classes.loaderContainer} style={loaderContainerStyle}>
             <input {...fileInputProps} />
-            <label htmlFor={fileInputId} className={classes.label} style={labelStyle}>{loaderLabel}</label>
+            <label htmlFor={fileInputId} className={classNames(classes.label, disabled ? classes.disabled : undefined)} style={labelStyle}>{loaderLabel}</label>
           </div>
     );
   }
