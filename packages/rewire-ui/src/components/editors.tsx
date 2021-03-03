@@ -504,6 +504,7 @@ export default function editor(type: EditorType, propsForEdit?: any): React.SFC<
             label={field.label}
             onValueChange={onValueChange}
             value={field.value}
+            disabled={field.disabled && field.disabled(field)}
             tooltip={field.tooltip}
             visible={field.visible}
             className={className}
