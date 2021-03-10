@@ -127,16 +127,17 @@ const styles = (theme: Theme) => ({
 export function createMultiSelectAutoCompleteEditor(options: any) {
   const E      = editor('multiselectautocomplete', options);
   const Editor = withStyles(styles, (props: TextEditorProps) => {
-    const {classes, ...restProps} = props;
-    const {...editorClasses}      = classes;
-    const {field}                 = restProps;
+    const {classes, ...restProps}   = props;
+    const {paper, ...editorClasses} = classes;
+    const {field}                   = restProps;
 
     return (
       <Observe render={() => (
         <Popover
-          classes={{paper: classes.paper}}
+          classes={{paper: paper}}
           open={true}
           anchorEl={field.__element}
+          transitionDuration={0}
           marginThreshold={5}
           onKeyDown={() => {}}
           onBackdropClick={() => { field.grid.editCell(undefined); field.__element.focus(); }}
