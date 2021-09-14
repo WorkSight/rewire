@@ -1,6 +1,6 @@
 {
   "name": "rewire",
-  "version": "1.0.252",
+  "version": "1.0.254",
   "description": "WorkSight .NEXT core",
   "main": "src/index.js",
   "private": true,
@@ -52,6 +52,9 @@
     "tslint": "^6.1.3",
     "typescript": "^4.1.5",
     "uglify-es": "^3.3.9"
+  },
+  "resolutions": {
+    "@babel/preset-env": "7.13.8"
   },
   "alias": {
     "rewire-core": "./packages/rewire-core",

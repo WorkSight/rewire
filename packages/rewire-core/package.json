@@ -1,6 +1,6 @@
 {
   "name": "rewire-core",
-  "version": "1.0.252",
+  "version": "1.0.254",
   "description": "A simple library for developing react applications using reactive state and proxies",
   "main": "./src/index.ts",
   "typings": "./src/index.ts",
@@ -23,8 +23,12 @@
     "url": "https://github.com/worksight/rewire/issues"
   },
   "homepage": "https://github.com/worksight/rewire",
+  "alias": {
+    "rewire-common": "../rewire-common"
+  },
   "dependencies": {
     "react": "^17.0.1",
+    "rewire-common": "^1.0.254",
     "s-js": "^0.4.9"
   },
   "devDependencies": {
