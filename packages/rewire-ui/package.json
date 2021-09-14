@@ -1,6 +1,6 @@
 {
   "name": "rewire-ui",
-  "version": "1.0.252",
+  "version": "1.0.254",
   "description": "A lightweight set of material-ui-next components built using the reactive library rewire-core.",
   "repository": {
     "type": "git",
@@ -56,8 +56,8 @@
     "react-dom": "^17.0.1",
     "react-number-format": "^4.4.4",
     "react-text-mask-hoc": "^0.11.0",
-    "rewire-common": "^1.0.249",
-    "rewire-core": "^1.0.249"
+    "rewire-common": "^1.0.254",
+    "rewire-core": "^1.0.254"
   },
   "devDependencies": {
     "@babel/core": "^7.12.16",
