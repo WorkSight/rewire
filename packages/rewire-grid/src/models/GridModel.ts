@@ -1322,6 +1322,9 @@ class GridModel implements IGrid, IDisposable {
   }
 
   spliceColumns(start: number, deleteCount: number, ...columns: IColumn[]): void {
+    if (deleteCount <= 0 && !columns?.length) {
+      return;
+    }
     const columnsToAdd: any[] = [];
     for (let colIdx = 0; colIdx < this.columns.length; colIdx++) {
       const column = this.columns[colIdx];
@@ -1337,6 +1340,8 @@ class GridModel implements IGrid, IDisposable {
       columnsToAdd.push(newColumn);
     }
     this.columns.splice(start, deleteCount, ...columnsToAdd);
+    this.mergeColumns();
+    this.mergeFixedRows();
   }
 
   static create(rows: any[], columns: IColumn[], options?: IGridOptions): IGrid {
