@@ -25,20 +25,36 @@ import { extractFiles }       from 'extract-files';
 import { ExecutionResult }    from 'graphql';
 
 
+function tryEvent (t: number, data: any, sink: Sink<any>) {
+  try {
+    sink.event(t, data)
+  } catch (e) {
+    sink.error(t, e)
+  }
+}
+
 class QueryObservable {
   constructor(private client: SubscriptionClient, private query: SubscribePayload) {}
+  _dispose: any;
 
   run(sink: Sink<any>, scheduler: Scheduler) {
-    return scheduler.asap(new PropagateTask(
+    const self = this;
+    scheduler.asap(new PropagateTask(
       (t, query, sink: Sink<any>) => {
-        this.client.subscribe(query, {
-          next: (data: any) => sink.event(t, data),
+        self ._dispose = this.client.subscribe(query, {
+          next: (data: any) => tryEvent(t, data, sink),
           error: (err: Error) => sink.error(t, err),
           complete: () => sink.end(t),
-        })
+        });
       },
-      this.query,
-      sink));
+      self .query,
+    sink));
+
+    return {
+      dispose() {
+        return self?._dispose();
+      }
+    };
   }
 }
 
@@ -129,7 +145,7 @@ class Client implements IClient {
       const url = new URL(this.url);
       const protocol = (url.protocol == 'https:') ? 'wss:' : 'ws:';
       this.subscriptionClient = createClient({
-        url: `${protocol}//${url.host}${url.pathname}`,
+        url: `${protocol}//${url.host}${url.pathname}ws`,
         lazy: true,
         retryAttempts: 100,
         connectionParams: () => ({token: this.bearer})
