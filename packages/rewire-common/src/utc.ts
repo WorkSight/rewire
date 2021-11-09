@@ -187,7 +187,7 @@ export class UTC {
       hour: 'numeric', minute: 'numeric', second: 'numeric',
       hourCycle: 'h23',
       timeZone: timeZone ?? 'Canada/Pacific'
-    };
+    } as Intl.DateTimeFormatOptions;
     const d = new Date(Date.parse(new Intl.DateTimeFormat('en-US', options).format(Date.now())));
     return new UTC(d.getTime() - getTimezoneOffset(d));
   }
