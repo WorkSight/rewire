@@ -123,7 +123,7 @@ class GridModel implements IGrid, IDisposable {
     this.__validator                = new Validator();
     this._dispose                   = dispose;
     this._sort                      = [];
-    this._groupColumns              = [];
+    this._groupColumns              = observable([]);
     this.id                         = id++;
     this.rows                       = [];
     this.fixedRows                  = [];

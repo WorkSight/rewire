@@ -173,7 +173,7 @@ function createHandler(eq: EQType, parent?: () => void) {
 
     set(target: ObjectType, property: string, value: any, receiver: Object) {
       if (!target.hasOwnProperty(property)) {
-        // for getters
+        // for setters
         let proto = Object.getPrototypeOf(target);
         while (proto !== _objectProto) {
           let propDesc = Object.getOwnPropertyDescriptor(proto, property);
