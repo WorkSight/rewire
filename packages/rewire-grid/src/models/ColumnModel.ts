@@ -24,6 +24,8 @@ import {
   createWatcherFn,
   WatcherTypeFn,
   observable,
+  DataSignal,
+  property
 } from 'rewire-core';
 import {createMultiSelectAutoCompleteEditor} from '../components/gridEditors';
 import * as is             from 'is';
@@ -32,9 +34,9 @@ let id            = 0;
 const toLowerCase = (value: string) => String(value).toLowerCase();
 
 export class ColumnModel implements IColumn {
-  _enabled?            : boolean;
-  _readOnly?           : boolean;
-  _verticalAlign?      : VerticalAlignment;
+  _enabled             : DataSignal<boolean | undefined>;
+  _readOnly            : DataSignal<boolean | undefined>;
+  _verticalAlign       : DataSignal<VerticalAlignment | undefined>;
   __validators         : IValidator[];
   __watchColumnVisible : WatcherTypeFn;
   __watchColumnFixed   : WatcherTypeFn;
@@ -73,7 +75,12 @@ export class ColumnModel implements IColumn {
     return a.position < b.position ? -1 : a.position > b.position ? 1 : 0;
   }
 
-  private constructor() { }
+  private constructor() {
+    // setup properties
+    this._enabled       = property(undefined);
+    this._readOnly      = property(undefined);
+    this._verticalAlign = property(undefined);
+  }
 
   private initialize(name: string | string[], title: string, options?: IColumnOptions) {
     this.id             = id++;
@@ -84,9 +91,9 @@ export class ColumnModel implements IColumn {
     this.position       = 0;
     this.sort           = undefined;
     this.typeOptions    = undefined;
-    this._enabled       = options && !isNullOrUndefined(options.enabled)       ? options.enabled!       : undefined;
-    this._readOnly      = options && !isNullOrUndefined(options.readOnly)      ? options.readOnly!      : undefined;
-    this._verticalAlign = options && !isNullOrUndefined(options.verticalAlign)  ? options.verticalAlign!  : undefined;
+    this.enabled        = options && !isNullOrUndefined(options.enabled)        ? options.enabled!        : undefined;
+    this.readOnly       = options && !isNullOrUndefined(options.readOnly)       ? options.readOnly!       : undefined;
+    this.verticalAlign  = options && !isNullOrUndefined(options.verticalAlign)  ? options.verticalAlign!  : undefined;
     this.editable       = options && !isNullOrUndefined(options.editable)       ? options.editable!       : true;
     this.fixed          = options && !isNullOrUndefined(options.fixed)          ? options.fixed!          : false;
     this.width          = options && !isNullOrUndefined(options.width)          ? options.width!          : undefined;
@@ -115,25 +122,27 @@ export class ColumnModel implements IColumn {
     return this;
   }
 
-  set readOnly(value: boolean) {
-    this._readOnly = value;
+  set readOnly(value: boolean | undefined) {
+    this._readOnly(value);
   }
   get readOnly(): boolean {
-    return (!isNullOrUndefined(this._readOnly) ? this._readOnly : this.grid.readOnly) as boolean;
+    const readOnly = this._readOnly();
+    return (!isNullOrUndefined(readOnly) ? readOnly : this.grid.readOnly) as boolean;
   }
 
-  set enabled(value: boolean) {
-    this._enabled = value;
+  set enabled(value: boolean | undefined) {
+    this._enabled(value);
   }
   get enabled(): boolean {
-    return (!isNullOrUndefined(this._enabled) ? this._enabled : this.grid.enabled) as boolean;
+    const enabled = this._enabled();
+    return (!isNullOrUndefined(enabled) ? enabled : this.grid.enabled) as boolean;
   }
 
-  set verticalAlign(value: VerticalAlignment) {
-    this._verticalAlign = value;
+  set verticalAlign(value: VerticalAlignment | undefined) {
+    this._verticalAlign(value);
   }
   get verticalAlign(): VerticalAlignment {
-    return this._verticalAlign || this.grid.verticalAlign;
+    return this._verticalAlign() || this.grid.verticalAlign;
   }
 
   get isGroupByColumn(): boolean {

@@ -14,44 +14,51 @@ import {
 import { isNullOrUndefined, guid }    from 'rewire-common';
 import createCell                     from './CellModel';
 import * as deepEqual                 from 'fast-deep-equal';
-import { observable }                 from 'rewire-core';
+import {
+  observable,
+  DataSignal,
+  property
+}                                     from 'rewire-core';
 import { IValidationContext, IError } from 'rewire-ui';
 
 const EmptyFn = () => {};
 
 export class RowModel implements IRow, IDisposable, IValidationContext {
-  private _allowMergeColumns?: boolean;
-  id                    : string;
-  grid                  : IGrid;
-  cells                 : ICellMap;
-  groupRow?             : IGroupRow;
-  selected              : boolean;
-  cls?                  : string;
-  data                  : any;
-  visible               : boolean;
-  fixed                 : boolean;
-  position              : number;
-  dispose               : () => void = EmptyFn;
+  private _allowMergeColumns: DataSignal<boolean | undefined>;
+  id                        : string;
+  grid                      : IGrid;
+  cells                     : ICellMap;
+  groupRow?                 : IGroupRow;
+  selected                  : boolean;
+  cls?                      : string;
+  data                      : any;
+  visible                   : boolean;
+  fixed                     : boolean;
+  position                  : number;
+  dispose                   : () => void = EmptyFn;
   onClick?(row: IRow): void;
 
   static positionCompare(a: IRow, b: IRow): number {
     return a.position < b.position ? -1 : a.position > b.position ? 1 : 0;
   }
 
-  protected constructor() { }
-  protected initialize(grid: IGrid, data?: IRowData, position: number = 0) {
-    this.grid               = grid;
-    this.cells              = {};
-    this.selected           = false;
-    this.position           = position;
-    this.data               = data && data.data;
+  protected constructor() {
+    // setup properties
+    this._allowMergeColumns = property(undefined);
+  }
 
-    let options             = data && data.options;
-    this._allowMergeColumns = options && options.allowMergeColumns;
-    this.cls                = options && options.cls;
-    this.visible            = options && !isNullOrUndefined(options.visible) ? options.visible! : true;
-    this.fixed              = options && !isNullOrUndefined(options.fixed) ? options.fixed! : false;
-    this.onClick            = options && options.onClick;
+  protected initialize(grid: IGrid, data?: IRowData, position: number = 0) {
+    this.grid              = grid;
+    this.cells             = {};
+    this.selected          = false;
+    this.position          = position;
+    this.data              = data && data.data;
+    let options            = data && data.options;
+    this.allowMergeColumns = options && options.allowMergeColumns;
+    this.cls               = options && options.cls;
+    this.visible           = options && !isNullOrUndefined(options.visible) ? options.visible! : true;
+    this.fixed             = options && !isNullOrUndefined(options.fixed) ? options.fixed! : false;
+    this.onClick           = options && options.onClick;
 
     if (data && data.id) {
       this.id = String(data.id);
@@ -78,11 +85,12 @@ export class RowModel implements IRow, IDisposable, IValidationContext {
     if (!this.fixed && this.grid.isRowCompleteFn(this)) this.grid.validator.validate(this);
   }
 
-  set allowMergeColumns(value: boolean) {
-    this._allowMergeColumns = value;
+  set allowMergeColumns(value: boolean | undefined) {
+    this._allowMergeColumns(value);
   }
   get allowMergeColumns(): boolean {
-    return !isNullOrUndefined(this._allowMergeColumns) ? this._allowMergeColumns! : this.grid.allowMergeColumns;
+    const allowMergeColumns = this._allowMergeColumns();
+    return !isNullOrUndefined(allowMergeColumns) ? allowMergeColumns : this.grid.allowMergeColumns;
   }
 
   get options(): IRowOptions {
@@ -236,7 +244,7 @@ export class RowModel implements IRow, IDisposable, IValidationContext {
       cls: this.cls,
       visible: this.visible,
       fixed: this.fixed,
-      allowMergeColumns: this._allowMergeColumns,
+      allowMergeColumns: this._allowMergeColumns(),
     };
     let newRow = RowModel.create(this.grid, {data: newCellValues, options: options}, this.position);
     return newRow;
