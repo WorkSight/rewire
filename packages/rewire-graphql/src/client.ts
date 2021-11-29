@@ -10,10 +10,53 @@ import {
 }                             from './types';
 import { BSON }               from './bson';
 import { hashString }         from './hash';
-import { SubscriptionClient } from 'subscriptions-transport-ws';
-import { from, Stream }       from 'most';
+import {
+  createClient,
+  Client as SubscriptionClient,
+  SubscribePayload
+}                             from 'graphql-ws';
+import {
+  Stream,
+  Sink,
+  Scheduler,
+  PropagateTask
+}                             from 'most';
 import { extractFiles }       from 'extract-files';
 import { ExecutionResult }    from 'graphql';
+
+
+function tryEvent (t: number, data: any, sink: Sink<any>) {
+  try {
+    sink.event(t, data)
+  } catch (e) {
+    sink.error(t, e)
+  }
+}
+
+class QueryObservable {
+  constructor(private client: SubscriptionClient, private query: SubscribePayload) {}
+  _dispose: any;
+
+  run(sink: Sink<any>, scheduler: Scheduler) {
+    const self = this;
+    scheduler.asap(new PropagateTask(
+      (t, query, sink: Sink<any>) => {
+        self ._dispose = this.client.subscribe(query, {
+          next: (data: any) => tryEvent(t, data, sink),
+          error: (err: Error) => sink.error(t, err),
+          complete: () => sink.end(t),
+        });
+      },
+      self .query,
+    sink));
+
+    return {
+      dispose() {
+        return self?._dispose();
+      }
+    };
+  }
+}
 
 class Client implements IClient {
   url                : string; // Graphql API URL
@@ -101,10 +144,15 @@ class Client implements IClient {
     if (!this.subscriptionClient) {
       const url = new URL(this.url);
       const protocol = (url.protocol == 'https:') ? 'wss:' : 'ws:';
-      this.subscriptionClient = new SubscriptionClient(`${protocol}//${url.host}${url.pathname}`, {reconnect: true, lazy: true, connectionParams: () => ({token: this.bearer})});
+      this.subscriptionClient = createClient({
+        url: `${protocol}//${url.host}${url.pathname}ws`,
+        lazy: true,
+        retryAttempts: 100,
+        connectionParams: () => ({token: this.bearer})
+      });
     }
 
-    return from(this.subscriptionClient!.request({query: (isGQL(query)) ? query.loc.source.body : query, variables})) as Stream<ExecutionResult<T>>;
+    return new Stream(new QueryObservable(this.subscriptionClient!, {query: (isGQL(query)) ? query.loc.source.body : query, variables: variables as Record<string, unknown>})) as Stream<ExecutionResult<T>>;
   }
 
   query(query: GQL, variables?: object, headers?: object, mutate: boolean = false): Promise<IQueryResponse> {
