@@ -31,6 +31,11 @@ export default class TimestampRange {
     }
 
     if (typeof start === 'string') {
+      if (start === 'empty' || start === 'NULL') {
+        this._start = TimestampRange.Empty._start;
+        this._end   = TimestampRange.Empty._end;
+        return;
+      }
       const partsInput = start.replace(/"/g, '').split(',');
       if (partsInput.length === 2) {
         this._start = (new UTC(partsInput[0].substr(1).trim() + 'Z'));
