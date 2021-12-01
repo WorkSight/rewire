@@ -2,17 +2,18 @@ import isNullOrUndefined from './isNullOrUndefined';
 
 export type DateType = UTC | Date | string | number;
 export enum TimeSpan { years, months, days, weeks, hours, minutes, seconds, milliseconds }
+export enum eDayOfWeek { Sunday, Monday, Tuesday, Wednesday, Thursday, Friday, Saturday }
 
 export function getTimezoneOffset(date: Date) {
   return (date.getTimezoneOffset() * 60000);
 }
 
-const _maxValue = 218342563200000;
-const _minValue = -62135596800000;
+const _maxValue = Date.UTC(8888, 12 - 1, 31, 0, 0, 0, 0);
+const _minValue = Date.UTC(1, 1 - 1, 1, 0, 0, 0, 0);
 
 export class UTC {
-  public static get MaxValue(): UTC { return _MaxValue };
-  public static get MinValue(): UTC { return _MinValue };
+  public static readonly MaxValue: UTC = utc(_maxValue);
+  public static readonly MinValue: UTC = utc(_minValue);
 
   public utc: number;
   constructor(dt: DateType) {
@@ -131,11 +132,16 @@ export class UTC {
     let d       = new Date(this.utc);
     let hours   = d.getUTCHours();
     let minutes = d.getUTCMinutes();
-    return `${this.pad(hours)}:${this.pad(minutes)}`;
+    const seconds = d.getUTCSeconds();
+    return `${this.pad(hours)}:${this.pad(minutes)}:${this.pad(seconds)}`;
   }
 
   round(amount: number, decimals: number) {
     return +amount.toFixed(decimals);
+  }
+
+  get dayOfWeek() {
+    return (this.toUTCDate().getDay()) as eDayOfWeek;
   }
 
   add(amount: number, ts: TimeSpan = TimeSpan.days, roundTo?: number) {
@@ -174,6 +180,10 @@ export class UTC {
 
   subtractDate(dt: DateType, ts: TimeSpan = TimeSpan.days) {
     return Math.trunc(this.subtract(dt, ts));
+  }
+
+  static today() {
+    return UTC.now().startOfDay();
   }
 
   static now() {
@@ -227,10 +237,9 @@ export class UTC {
     [TimeSpan.seconds]:      UTC.MillisecondsPerSecond,
     [TimeSpan.milliseconds]: 1
   };
-}
 
-const _MaxValue = utc(_maxValue);
-const _MinValue = utc(_minValue);
+  static get ZoneOffset() { return new Date().getTimezoneOffset() * 60000; }
+}
 
 export default function utc(dt?: DateType) {
   return (dt && new UTC(dt)) || UTC.now();
