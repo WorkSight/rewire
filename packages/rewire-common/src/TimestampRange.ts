@@ -1,4 +1,4 @@
-import utc, { DateType, UTC }            from './utc';
+import utc, { DateType, UTC, TimeSpan }  from './utc';
 import { mergeMap, combine as _combine } from './LQ';
 import { isJSONRange, IJSONRange }       from './DateRange';
 
@@ -94,6 +94,10 @@ export default class TimestampRange {
     return {start: this._start, end: this._end};
   }
 
+  toUnits() {
+    return this._end.subtract(this._start, TimeSpan.hours, 4);
+  }
+
   static subtract(r1: Iterable<TimestampRange>, r2: TimestampRange | Iterable<TimestampRange>): Iterable<TimestampRange> {
     if (r2 instanceof TimestampRange) {
       r2 = [r2];
@@ -167,12 +171,12 @@ export default class TimestampRange {
   }
 
   intersection(range: TimestampRange) {
-    if (this.isEmpty) return TimestampRange.Empty;
+    if (!range || this.isEmpty) return TimestampRange.Empty;
     let r = new TimestampRange(this);
 
-    r._start = r._start >= range._start ? r._start : range._start;
-    r._end   = r._end <= range._end ? r._end : range._end;
-    return r.isValid && r._start !== r._end ? r : TimestampRange.Empty;
+    if (range._start > r._start) r._start = range._start;
+    if (range._end < r._end) r._end = range._end;
+    return r.isValid && (r._start.utc !== r._end.utc) ? r : TimestampRange.Empty;
   }
 
   contains(range: TimestampRange) {

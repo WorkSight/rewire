@@ -34,12 +34,21 @@ export default class DateRange implements Iterable<UTC> {
     }
 
     if (typeof start === 'string') {
+      if (start === 'empty' || start === 'NULL') {
+        this._start = DateRange.Empty._start;
+        this._end   = DateRange.Empty._end;
+        return;
+      }
       const parts = start.replace(/"/g, '').split(',');
       if (parts.length === 2) {
         const s     = parts[0].substr(1).trim();
-        this._start = s ? new UTC(s + 'T00:00Z') : UTC.MinValue;
+        this._start = s ? new UTC(s + 'T00:00:00.000Z') : UTC.MinValue;
         const e     = parts[1].substr(0, parts[1].length - 1).trim();
-        this._end   = e ? new UTC(e + 'T00:00Z') : UTC.MaxValue;
+        this._end   = e ? new UTC(e + 'T00:00:00.000Z') : UTC.MaxValue;
+
+        if (this._end.isValid && !this._end.equals(UTC.MaxValue) && parts[1].substr(parts[1].length - 1) === ')') {
+          this._end = this._end.add(-1, TimeSpan.days); // Adjust end date if it is exclusive
+        }
         if (!this._start.isValid) this._start = UTC.MinValue;
         if (!this._end.isValid)   this._end   = UTC.MaxValue;
         return;
@@ -154,7 +163,7 @@ export default class DateRange implements Iterable<UTC> {
   }
 
   intersects(range: DateRange) {
-    return Math.max(this._start.date, range._start.date) <= Math.min(this._end.date, range._end.date);
+    return (!((this._start >= range._end) || (this._end <= range._start)));
   }
 
   inRange(effective: DateType) {
@@ -167,7 +176,7 @@ export default class DateRange implements Iterable<UTC> {
   }
 
   intersection(range: DateRange) {
-    if (this.isEmpty) return DateRange.Empty;
+    if (!range || this.isEmpty) return DateRange.Empty;
     let r = new DateRange(this);
 
     r._start = r._start >= range._start ? r._start : range._start;
