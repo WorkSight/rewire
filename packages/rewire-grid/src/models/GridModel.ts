@@ -664,14 +664,24 @@ class GridModel implements IGrid, IDisposable {
     return this;
   }
 
+  clearSort() {
+    for (const c of this._sort) {
+      (c as any).sort = undefined;
+    }
+    this._sort.length = 0;
+  }
+
   sort() {
     if ( (!this.groupBy || !this.groupBy.length) && (!this._sort || this._sort.length === 0) ) return;
     let rowCompareFn = (r1: IRow, r2: IRow): number => {
       if (this.groupBy && this.groupBy.length) {
         for (const column of this.groupBy) {
+          const c1      = r1.cells[column.name];
+          const c2      = r2.cells[column.name];
+          if (!c1 || !c2) continue;
           let compareFn = column.compare;
-          let v1        = r1.cells[column.name].value;
-          let v2        = r2.cells[column.name].value;
+          let v1        = c1.value;
+          let v2        = c2.value;
           let r         = compareFn ? compareFn(v1, v2) : compare(v1, v2);
           if (r !== 0) {
             if (!column.sort || column.sort === 'ascending') return r;
@@ -681,9 +691,12 @@ class GridModel implements IGrid, IDisposable {
       }
 
       for (const column of this._sort) {
+        const c1      = r1.cells[column.name];
+        const c2      = r2.cells[column.name];
+        if (!c1 || !c2) continue;
         let compareFn = column.compare;
-        let v1        = r1.cells[column.name].value;
-        let v2        = r2.cells[column.name].value;
+        let v1        = c1.value;
+        let v2        = c2.value;
         let r         = compareFn ? compareFn(v1, v2) : compare(v1, v2);
         if (r !== 0) {
           if (!column.sort || column.sort === 'ascending') return r;
