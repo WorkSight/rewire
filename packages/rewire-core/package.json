@@ -1,6 +1,6 @@
 {
   "name": "rewire-core",
-  "version": "1.0.265",
+  "version": "1.0.266",
   "description": "A simple library for developing react applications using reactive state and proxies",
   "main": "./src/index.ts",
   "typings": "./src/index.ts",
@@ -28,7 +28,7 @@
   },
   "dependencies": {
     "react": "^17.0.1",
-    "rewire-common": "^1.0.265",
+    "rewire-common": "^1.0.266",
     "s-js": "^0.4.9"
   },
   "devDependencies": {

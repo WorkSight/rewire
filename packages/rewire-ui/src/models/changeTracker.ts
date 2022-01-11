@@ -1,5 +1,5 @@
 import { observable, DataSignal, property, sample, freeze, root } from 'rewire-core';
-import * as deepEqual                                 from 'fast-deep-equal';
+import * as deepEqual                                             from 'fast-deep-equal';
 
 export interface IRowData {
   id: string;
@@ -218,6 +218,28 @@ export class ChangeTracker {
     return !deepEqual(this.workingData(row)[field], original.data[field]);
   }
 
+  public getChangedRows() {
+    if (!this._original || !this._working) return [];
+    const changedRows = [];
+    for (let widx = 0; widx < this._working.length; widx++) {
+      const working = this._context.getRow(widx);
+      if (!working) {
+        if (this._context.isComplete(this._working[widx])) {
+          changedRows.push(clone(this.workingData(this._working[widx]), this._context.depth));
+        }
+      } else {
+        if (!this._context.isComplete(working)) continue;
+        if (!this.rowIsEqual(working)) {
+          changedRows.push(clone(this.workingData(working), this._context.depth));
+        }
+      }
+    }
+
+    const deletedRows = Object.keys(this._original.data).filter(id => !this._working!.some(r => r.id === id)).map(key => clone(this._original!.data[key].data, this._context.depth));
+    changedRows.push(...deletedRows);
+    return changedRows;
+  }
+
   public async recalculate() {
     if (!this._original || !this._working) return Promise.resolve(this._hasChanges());
     if (this._recalculating) return this._recalculating;
@@ -237,7 +259,7 @@ testing comment this out after every change to the tracker to make sure tests pa
 */
 /*
 function sample2() {
-  let rows: any[] = observable([]);
+  let rows: any[] = [];
   for (let index = 0; index < 1; index++) {
     const row = {id: String(index)};
     for (let c = 4; c < 5; c++) {
@@ -262,7 +284,7 @@ async function run() {
   ct.recalculate();
   ct.recalculate();
   test('after set should be false', false, await ct.recalculate());
-
+  
   rows.push({ooga: 'ooga'});
   test('after row change show be true', true, await ct.recalculate());
 
