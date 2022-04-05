@@ -13,7 +13,8 @@ import { Observe }   from 'rewire-core';
 import { delay }     from 'rewire-common';
 import Typography    from '@material-ui/core/Typography';
 import Button        from '@material-ui/core/Button';
-import { countries, searcher } from './demo-data';
+import { countries, searcher }      from './demo-data';
+import { DraggableResizableDialog } from 'rewire-ui';
 
 const clickHandler = (props: ISuggestionsContainerComponentProps) => () => {
   console.log('Add Item!');
@@ -154,7 +155,7 @@ const SampleFormView = React.memo(({ form }: { form: typeof sampleModel.form }) 
 const getTitle = (dialog: Modal): JSX.Element => <span>Dialog Title</span>;
 
 export const SampleDialog = () => (
-  <Dialog dialog={sampleModel} title={getTitle} maxWidth='lg'>
+  <DraggableResizableDialog defaultWidth='lg' DialogProps={{dialog: sampleModel, title: getTitle}}>
     <SampleFormView form={sampleModel.form} />
-  </Dialog>
+  </DraggableResizableDialog>
 );

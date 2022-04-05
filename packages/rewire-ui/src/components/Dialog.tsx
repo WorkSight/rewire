@@ -12,6 +12,7 @@ import Button, { ButtonProps }   from '@material-ui/core/Button';
 import Divider                   from '@material-ui/core/Divider';
 import Icon                      from '@material-ui/core/Icon';
 import Grow                      from '@material-ui/core/Grow';
+import { PaperProps }            from '@material-ui/core/Paper';
 import { Theme }                 from '@material-ui/core/styles';
 import { WithStyle, withStyles } from './styles';
 import './Dialog.css';
@@ -21,8 +22,12 @@ let styles = (theme: Theme) => ({
     width: '100%',
     overflowY: 'hidden',
   },
+  container: {
+  },
   scrollPaper: {
     maxHeight: 'calc(100% - 72px)',
+  },
+  paperWidthFalse: {
   },
   buttons: {
     alignSelf: 'flex-end',
@@ -38,7 +43,8 @@ let styles = (theme: Theme) => ({
     flexShrink: '0',
     alignItems: 'center',
     flexDirection: 'column',
-    margin: '15px 15px 0px 15px',
+    padding: '15px 15px 0px 15px',
+    margin: '0px',
     '& > hr': {
       marginTop: '15px',
       marginBottom: '0px',
@@ -54,6 +60,8 @@ let styles = (theme: Theme) => ({
     paddingTop: '15px',
     paddingBottom: '15px',
     position: 'relative',
+    width: '100%',
+    height: '100%',
   },
   childrenContainerActionsNoDivider: {
     paddingBottom: '0px',
@@ -99,9 +107,15 @@ export const DefaultActionRenderer: ActionRenderType = ({label, action, isDisabl
 const TRANSITION_TIMEOUT = 220;
 const Transition = React.forwardRef((props: any, ref: any) => <Grow {...props} ref={ref} timeout={TRANSITION_TIMEOUT} onEntered={(node => node.style.transform = 'none')} />);
 
+export interface HeaderComponentProps {
+  dialog: Modal;
+  classes?: any;
+  title?: (dialog: Modal) => JSX.Element;
+}
+
 export interface IDialogProps {
   dialog                : Modal;
-  classes?              : React.CSSProperties;
+  classes?              : any;
   fullWidth?            : boolean;
   fullScreen?           : boolean;
   disableEscapeKeyDown? : boolean;
@@ -116,6 +130,8 @@ export interface IDialogProps {
   buttonVariant?        : ButtonProps['variant'];
   actions?              : string[];
   ButtonRenderer?       : ActionRenderType;
+  PaperComponent?       : React.ElementType<PaperProps>;
+  HeaderComponent?      : (props: any) => JSX.Element;
 }
 
 export type DialogProps = WithStyle<DialogStyles, IDialogProps>;
@@ -135,24 +151,34 @@ class DialogInternal extends React.Component<DialogProps> {
     });
   }
 
-  RenderDialogContent = React.memo(React.forwardRef((): JSX.Element => {
-    const {classes, children, dialog, ButtonRenderer, title, buttonVariant} = this.props;
-    const {buttonRoot, buttonIcon, buttonLabel} = classes;
-    const buttonClasses                         = {root: buttonRoot, icon: buttonIcon, label: buttonLabel};
-    const hasTitle                              = dialog.title || title;
-    const actions                               = this.props.actions || (dialog.actions && Object.keys(dialog.actions));
-    const hasActions                            = actions && (actions.length > 0);
-    const hasDivider                            = hasActions && !isNullOrUndefined(this.props.hasDivider) ? this.props.hasDivider : true;
+  RenderHeader(props: HeaderComponentProps): JSX.Element {
+    const {dialog, classes, title} = props;
+    const hasTitle                 = dialog.title || title;
 
     return (
       <Observe render={() => (
-        < >
-        {hasTitle &&
+        hasTitle &&
           <div className={classes.heading}>
             <Typography variant='h6'>{(title && title(dialog)) || dialog.title}</Typography>
             <hr/>
           </div>
-        }
+      )} />
+    );
+  }
+
+  RenderDialogContent = React.memo(React.forwardRef((): JSX.Element => {
+    const {classes, children, dialog, ButtonRenderer, buttonVariant, title, HeaderComponent} = this.props;
+    const {buttonRoot, buttonIcon, buttonLabel} = classes;
+    const buttonClasses                         = {root: buttonRoot, icon: buttonIcon, label: buttonLabel};
+    const actions                               = this.props.actions || (dialog.actions && Object.keys(dialog.actions));
+    const hasActions                            = actions && (actions.length > 0);
+    const hasDivider                            = hasActions && !isNullOrUndefined(this.props.hasDivider) ? this.props.hasDivider : true;
+    const HeaderRenderer                        = React.memo(HeaderComponent ?? this.RenderHeader);
+
+    return (
+      <Observe render={() => (
+        < >
+        <HeaderRenderer dialog={dialog} classes={classes} title={title} />
         <div className={classNames(classes.childrenContainer, hasActions && !hasDivider ? classes.childrenContainerActionsNoDivider : '')}>
           {children}
         </div>
@@ -170,7 +196,7 @@ class DialogInternal extends React.Component<DialogProps> {
   }));
 
   render() {
-    const {classes, dialog, fullWidth, fullScreen, maxWidth, disableEscapeKeyDown, hideBackdrop, transition, transitionDuration, disableTransition, disableEnforceFocus} = this.props;
+    const {classes, dialog, fullWidth, fullScreen, maxWidth, disableEscapeKeyDown, hideBackdrop, transition, transitionDuration, disableTransition, disableEnforceFocus, PaperComponent} = this.props;
     const escapeAction            = disableEscapeKeyDown ? undefined : () => dialog.close();
     const transitionToUse         = transition ? transition : Transition;
     const transitionDurationToUse = !isNullOrUndefined(transitionDuration) ? transitionDuration : TRANSITION_TIMEOUT;
@@ -179,7 +205,7 @@ class DialogInternal extends React.Component<DialogProps> {
 
     return (
       <Observe render={() => (
-        <Dialog classes={{paper: classes.root, paperScrollPaper: classes.scrollPaper}} open={dialog.isOpen} disableEnforceFocus={disableEnforceFocus} maxWidth={maxWidth} hideBackdrop={hideBackdrop} transitionDuration={transitionTime} TransitionComponent={transitionAction} fullWidth={fullWidth} fullScreen={fullScreen} disableEscapeKeyDown={disableEscapeKeyDown} onEscapeKeyDown={escapeAction}>
+        <Dialog classes={{container: classes.container, paper: classes.root, paperScrollPaper: classes.scrollPaper, paperWidthFalse: classes.paperWidthFalse}} open={dialog.isOpen} disableEnforceFocus={disableEnforceFocus} maxWidth={maxWidth} hideBackdrop={hideBackdrop} transitionDuration={transitionTime} TransitionComponent={transitionAction} PaperComponent={PaperComponent} fullWidth={fullWidth} fullScreen={fullScreen} disableEscapeKeyDown={disableEscapeKeyDown} onEscapeKeyDown={escapeAction}>
           <this.RenderDialogContent />
         </Dialog>
       )} />
