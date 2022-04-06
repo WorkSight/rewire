@@ -21,6 +21,9 @@ let dialogStyles = (theme: Theme) => ({
   },
   heading: {
     cursor: 'move',
+    '& img': {
+      pointerEvents: 'none',
+    }
   },
   scrollPaper: {
     maxHeight: 'none',
@@ -46,7 +49,8 @@ export interface IDraggableResizableDialogProps {
   classes?: any;
   DialogProps: Omit<DialogProps, 'PaperComponent' | 'classes' | 'maxWidth' | 'fullWidth' | 'fullScreen'>;
   DraggableResizableBoxProps?: Omit<DraggableResizableBoxProps, 'bounds' | 'dragHandleClassName' | 'default' | 'classes' | 'className'>;
-  defaultWidth?: 'xs' | 'sm' | 'md' | 'lg';
+  defaultWidth: 'xs' | 'sm' | 'md' | 'lg' | number | string;
+  defaultHeight: number | string;
 }
 
 export type DraggableResizableDialogProps = WithStyle<ReturnType<typeof dialogStyles>, IDraggableResizableDialogProps>;
@@ -54,38 +58,36 @@ export type DraggableResizableDialogProps = WithStyle<ReturnType<typeof dialogSt
 class DraggableResizableDialog extends React.Component<DraggableResizableDialogProps> {
   draggableResizableBoxRef: React.RefObject<Rnd>;
 
+  static defaultProps = {
+    defaultWidth: 'auto',
+    defaultHeight: 'auto',
+  }
+
   constructor(props: DraggableResizableDialogProps) {
     super(props);
 
     this.draggableResizableBoxRef = React.createRef();
   }
 
-  getDefaultWidth(width?: string): number | string {
-    let defaultWidth: number | string;
+  getDefaultWidth(width: 'xs' | 'sm' | 'md' | 'lg' | number | string): number | string {
     switch(width) {
       case 'xs':
-        defaultWidth = 400;
-        break;
+        return 400;
       case 'sm':
-        defaultWidth = 600;
-        break;
+        return 600;
       case 'md':
-        defaultWidth = 960;
-        break;
+        return 960;
       case 'lg':
-        defaultWidth = 1280;
-        break;
+        return 1280;
       default:
-        defaultWidth = 'auto';
-        break;
+        return width;
     }
-
-    return defaultWidth;
   }
 
   PaperComponent = (props: PaperProps) => {
-    const ref          = this.draggableResizableBoxRef;
-    const defaultWidth = this.getDefaultWidth(this.props.defaultWidth)
+    const ref           = this.draggableResizableBoxRef;
+    const defaultWidth  = this.getDefaultWidth(this.props.defaultWidth)
+    const defaultHeight = this.props.defaultHeight;
     React.useEffect(() => {
       const currRef    = ref?.current;
       const dialogSize = currRef?.resizable?.size;
@@ -104,7 +106,7 @@ class DraggableResizableDialog extends React.Component<DraggableResizableDialogP
           innerRef={ref}
           className={this.props.classes.draggableResizableDialogRoot}
           dragHandleClassName='draggable-resizable-dialog-title'
-          default={{x: 0, y: 0, width: defaultWidth, height: 'auto'}}
+          default={{x: 0, y: 0, width: defaultWidth, height: defaultHeight}}
           bounds='parent'
         >
           <Paper {...props} />
