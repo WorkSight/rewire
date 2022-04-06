@@ -1,5 +1,4 @@
 import * as React                from 'react';
-import { isNullOrUndefined  }    from 'rewire-common';
 import { Observe }               from 'rewire-core';
 import classNames                from 'classnames';
 import Paper, { PaperProps }     from '@material-ui/core/Paper';
@@ -22,6 +21,9 @@ let dialogStyles = (theme: Theme) => ({
   },
   heading: {
     cursor: 'move',
+    '& img': {
+      pointerEvents: 'none',
+    }
   },
   scrollPaper: {
     maxHeight: 'none',

@@ -1,6 +1,6 @@
 {
   "name": "rewire-graphql",
-  "version": "1.0.272",
+  "version": "1.0.273",
   "description": "A reactive observable cache for graphql built using rewire-core.",
   "main": "./src/index.ts",
   "typings": "./src/index.ts",
@@ -29,7 +29,7 @@
     "graphql-ws": "^5.5.5",
     "is": "^3.3.0",
     "most": "^1.9.0",
-    "rewire-common": "^1.0.272"
+    "rewire-common": "^1.0.273"
   },
   "devDependencies": {
     "@babel/core": "^7.12.16"
