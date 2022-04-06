@@ -45,7 +45,7 @@ let dialogStyles = (theme: Theme) => ({
 export interface IDraggableResizableDialogProps {
   classes?: any;
   DialogProps: Omit<DialogProps, 'PaperComponent' | 'classes' | 'maxWidth' | 'fullWidth' | 'fullScreen'>;
-  DraggableResizableBoxProps: Omit<DraggableResizableBoxProps, 'bounds' | 'dragHandleClassName' | 'default' | 'classes' | 'className'>;
+  DraggableResizableBoxProps?: Omit<DraggableResizableBoxProps, 'bounds' | 'dragHandleClassName' | 'default' | 'classes' | 'className'>;
   defaultWidth?: 'xs' | 'sm' | 'md' | 'lg';
 }
 
