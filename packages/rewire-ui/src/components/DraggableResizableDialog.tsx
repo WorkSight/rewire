@@ -93,8 +93,26 @@ class DraggableResizableDialog extends React.Component<DraggableResizableDialogP
       const dialogSize = currRef?.resizable?.size;
       const parentSize = currRef?.resizable?.getParentSize();
       if (currRef && dialogSize && parentSize) {
-        const startX = (parentSize.width - dialogSize.width) / 2;
-        const startY = (parentSize.height - dialogSize.height) / 2;
+        let dialogWidth    = dialogSize.width;
+        let dialogHeight   = dialogSize.height;
+        const parentWidth  = parentSize.width;
+        const parentHeight = parentSize.height;
+        let updateSize     = false;
+
+        if (dialogWidth > parentWidth) {
+          dialogWidth = parentWidth;
+          updateSize  = true;
+        }
+        if (dialogHeight > parentHeight) {
+          dialogHeight = parentHeight;
+          updateSize   = true;
+        }
+        if (updateSize) {
+          currRef.updateSize({ width: dialogWidth, height: dialogHeight });
+        }
+
+        const startX = (parentWidth - dialogWidth) / 2;
+        const startY = (parentHeight - dialogHeight) / 2;
         currRef.updatePosition({ x: startX, y: startY });
       }
     }, [])
