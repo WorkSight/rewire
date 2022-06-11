@@ -59,7 +59,7 @@ do
   cd dist
   tsc
   rm tsconfig.json
-  cp -rf ./src ~/dev/client/node_modules/$module/
+  cp -rf ./src ~/dev/flow-client/node_modules/$module/
 
   if [ ! -z $PUBLISH ];
   then

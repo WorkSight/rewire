@@ -145,7 +145,7 @@ class Client implements IClient {
       const url = new URL(this.url);
       const protocol = (url.protocol == 'https:') ? 'wss:' : 'ws:';
       this.subscriptionClient = createClient({
-        url: `${protocol}//${url.host}${url.pathname}ws`,
+        url: `${protocol}//${url.host}${url.pathname}`,
         lazy: true,
         retryAttempts: 100,
         connectionParams: () => ({token: this.bearer})
