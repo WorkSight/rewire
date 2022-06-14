@@ -62,9 +62,15 @@ export const isEmail    = (value: any): boolean  => {
   const re = /(^$|^(([^<>()\[\]\\.,;:\s@"]+(\.[^<>()\[\]\\.,;:\s@"]+)*)|(".+"))@((\[[0-9]{1,3}\.[0-9]{1,3}\.[0-9]{1,3}\.[0-9]{1,3}\])|(([a-zA-Z\-0-9]+\.)+[a-zA-Z]{2,}))$)/;
   return re.test(String(!isNullOrUndefined(value) ? value : ''));
 };
+
 export const requiredWhenOthersAreNotNull = (value: any, ...otherValues: any[]): boolean => {
   if (otherValues.some((v: any) => isNull(v))) return true;
   return isRequired(value);
+};
+
+export const requiredWhenAnyOthersAreNotNull = (value: any, ...otherValues: any[]): boolean => {
+  if (otherValues.some((v: any) => !isNull(v))) return isRequired(value);
+  return true;
 };
 
 export const requiredWhenOtherIsValue = (value: any, otherValue: any, requiredValue: any): boolean => {
@@ -101,7 +107,7 @@ export interface IValidator {
 }
 
 export type SingleParameterBuiltInValidator = 'required' | 'email' | 'empty';
-export type BuiltInValidators = SingleParameterBuiltInValidator |  '<' | '>' | '<=' | '>=' | '==' | '!=' | 'regex' | 'sumOf' | 'differenceOf' | 'requiredWhenOthersAreNotNull' | 'requiredWhenOtherIsValue';
+export type BuiltInValidators = SingleParameterBuiltInValidator |  '<' | '>' | '<=' | '>=' | '==' | '!=' | 'regex' | 'sumOf' | 'differenceOf' | 'requiredWhenOthersAreNotNull' | 'requiredWhenAnyOthersAreNotNull' | 'requiredWhenOtherIsValue';
 export type IFormValidator = (IValidator | SingleParameterBuiltInValidator | IValidationFn) | (IValidator | SingleParameterBuiltInValidator | IValidationFn)[];
 
 export function validators(v: IFormValidator) {
@@ -148,6 +154,7 @@ const __builtInValidators: {[type: string]: IValidator} = {
   ...createBuiltIn('empty', isNull, 'must be empty'),
   ...createBuiltIn('required', isRequired, 'is required'),
   ...createBuiltIn('requiredWhenOthersAreNotNull', requiredWhenOthersAreNotNull, 'is required'),
+  ...createBuiltIn('requiredWhenAnyOthersAreNotNull', requiredWhenAnyOthersAreNotNull, 'is required'),
   ...createBuiltIn('requiredWhenOtherIsValue', requiredWhenOtherIsValue, 'is required'),
   ...createBuiltIn('sumOf', isSumOfOthers, template`must be the sum of ${'all'}`),
   ...createBuiltIn('differenceOf', isDifferenceOfOthers, template`must be the difference of ${'all'}`),
