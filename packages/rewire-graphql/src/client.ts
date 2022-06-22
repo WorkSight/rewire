@@ -43,7 +43,10 @@ class QueryObservable {
       (t, query, sink: Sink<any>) => {
         self ._dispose = this.client.subscribe(query, {
           next: (data: any) => tryEvent(t, data, sink),
-          error: (err: Error) => sink.error(t, err),
+          error: (err: Error) => {
+            console.error(err);
+            // sink.error(t, err);
+          },
           complete: () => sink.end(t),
         });
       },
@@ -147,7 +150,8 @@ class Client implements IClient {
       this.subscriptionClient = createClient({
         url: `${protocol}//${url.host}${url.pathname}`,
         lazy: true,
-        retryAttempts: 100,
+        retryAttempts: 200,
+        shouldRetry: () => true,
         connectionParams: () => ({token: this.bearer})
       });
     }
