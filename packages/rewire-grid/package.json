@@ -1,6 +1,6 @@
 {
   "name": "rewire-grid",
-  "version": "1.0.279",
+  "version": "1.0.280",
   "description": "A lightweight reactive grid implementation built using rewire-core.",
   "repository": {
     "type": "git",
@@ -49,7 +49,7 @@
   },
   "devDependencies": {
     "@babel/core": "^7.12.16",
-    "@types/lodash.flow": "^3.5.7",
-    "@babel/preset-env": "^7.12.16"
+    "@babel/preset-env": "^7.12.16",
+    "@types/lodash.flow": "^3.5.7"
   }
 }
