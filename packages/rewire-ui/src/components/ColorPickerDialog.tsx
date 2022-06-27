@@ -2,7 +2,7 @@ import * as React              from 'react';
 import {SketchPicker}          from 'react-color';
 import Popover                 from '@material-ui/core/Popover';
 import {Theme}                 from '@material-ui/core/styles';
-import {WithStyle, withStyles} from './styles';
+import {withStyles}            from './styles';
 import './colorPickerDialog.css';
 
 const styles = (theme: Theme) => ({
@@ -40,7 +40,7 @@ export interface IColorPickerDialogProps {
   onChangeComplete?(color: IColor, evt: React.ChangeEvent<any>): void;
 }
 
-export type ColorPickerDialogProps = WithStyle<ColorPickerDialogStyles, IColorPickerDialogProps>;
+export type ColorPickerDialogProps = IColorPickerDialogProps;
 
 class ColorPickerDialog extends React.Component<ColorPickerDialogProps> {
   constructor(props: ColorPickerDialogProps) {
@@ -79,10 +79,10 @@ class ColorPickerDialog extends React.Component<ColorPickerDialogProps> {
       >
         <SketchPicker
           color={color}
-          onChange={onChange}
-          onChangeComplete={onChangeComplete}
+          onChange={onChange as any}
+          onChangeComplete={onChangeComplete as any}
           disableAlpha={disableAlpha}
-          width={width || 225}
+          width={String(width) || "225px"}
           styles={{default: defaultStyles, disableAlpha: disableAlphaStyles}}
         />
       </Popover>

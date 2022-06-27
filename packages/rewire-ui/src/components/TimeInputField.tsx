@@ -219,7 +219,7 @@ const ampmClock = {
   timeZone: 'GMT',
   hourCycle: 'h11',
   hour12:    true
-};
+} as Intl.DateTimeFormatOptions;
 const uppercaseFormatter = new Intl.DateTimeFormat('en-US', ampmClock);
 
 export interface ITimeState {

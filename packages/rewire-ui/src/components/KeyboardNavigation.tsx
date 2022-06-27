@@ -54,12 +54,8 @@ export default class KeyboardNavigation {
 
   canMove(ctrl: HTMLElement | HTMLInputElement, direction: number) {
     let input = (ctrl as HTMLInputElement);
-    if (input.setSelectionRange) {
-      let caretPosition = input.selectionStart! + direction;
-      return (caretPosition < 0) || (caretPosition > input.value.length);
-    }
-
-    return true;
+    let caretPosition = input.selectionStart! + direction;
+    return (caretPosition < 0) || (caretPosition > input.value.length);
   }
 
   moveToNextControl(ctl: HTMLElement, direction: number) {

@@ -2,7 +2,6 @@ import * as React                      from 'react';
 import classNames                      from 'classnames';
 import { ChangeEvent }                 from 'react';
 import { isNullOrUndefined }           from 'rewire-common';
-import RootRef                         from '@material-ui/core/RootRef';
 import {Theme}                         from '@material-ui/core/styles';
 import TextField                       from '@material-ui/core/TextField';
 import MenuItem                        from '@material-ui/core/MenuItem';
@@ -26,6 +25,8 @@ const styles = (theme: Theme) => ({
   inputInput: {
     paddingTop: '0.375em',
     paddingBottom: '0.4375em',
+  },
+  nativeInput: {
   },
   inputOutlinedInput: {
     paddingTop: '0.75em',
@@ -188,7 +189,7 @@ class Select<T> extends React.Component<SelectProps<T>, any> {
     if (isNullOrUndefined(tooltip)) {
       if (isNullOrUndefined(value) || (this.props.multiple && value.length <= 0)) {
         return undefined;
-      } 
+      }
       if (this.props.multiple) {
         return value.join(', ');
       } else {
@@ -219,9 +220,9 @@ class Select<T> extends React.Component<SelectProps<T>, any> {
   handleMenuKeyDown = (event: React.KeyboardEvent<any>) => {
     switch (event.keyCode) {
       case 9:
-        let valueToSelect = this.state.suggestions.find((v: any) => event.target.dataset.value === this.map(v));
+        let valueToSelect = this.state.suggestions.find((v: any) => (event.target as any).dataset.value === this.map(v));
         if (this.props.multiple) {
-          let values = this.props.selectedItem;
+          let values = this.props.selectedItem as unknown as (T[] | undefined);
           if (values) {
             let valueToSelectMapped = this.map(valueToSelect);
             if (values.findIndex((v: any) => this.map(v) === valueToSelectMapped) >= 0) {
@@ -231,7 +232,7 @@ class Select<T> extends React.Component<SelectProps<T>, any> {
               values.push(valueToSelect);
             }
           }
-          this.props.onSelectItem && this.props.onSelectItem(values);
+          this.props.onSelectItem && this.props.onSelectItem(values as any);
         } else {
           this.props.onSelectItem && this.props.onSelectItem(valueToSelect);
         }
@@ -354,7 +355,7 @@ class Select<T> extends React.Component<SelectProps<T>, any> {
       s.fontWeight = '500';
     }
     return (
-      <MenuItem key={index} component='div' selected={isHighlighted} value={displayName} style={s} classes={{root: this.props.classes.selectMenuItem}}><span>{displayName}</span></MenuItem>
+      <MenuItem key={index} component={'div' as any} selected={isHighlighted} value={displayName} style={s} classes={{root: this.props.classes.selectMenuItem}}><span>{displayName}</span></MenuItem>
     );
   }
 
@@ -394,7 +395,7 @@ class Select<T> extends React.Component<SelectProps<T>, any> {
       return null;
     }
 
-    const v              = this.props.multiple ? this.props.selectedItem && this.props.selectedItem.map((val: any) => this.map(val)) || [] : this.map(this.props.selectedItem);
+    const v              = this.props.multiple ? this.props.selectedItem && (this.props.selectedItem as unknown as T[]).map((val: any) => this.map(val)) || [] : this.map(this.props.selectedItem);
     const startAdornment = this.props.startAdornment ? <InputAdornment position='start' classes={{root: this.props.classes.inputAdornmentRoot}}>{this.props.startAdornment}</InputAdornment> : undefined;
     const endAdornment   = this.props.endAdornment ? <InputAdornment position='end' classes={{root: this.props.classes.inputAdornmentRoot}}>{this.props.endAdornment}</InputAdornment> : undefined;
     const menuListProps  = {
@@ -422,46 +423,45 @@ class Select<T> extends React.Component<SelectProps<T>, any> {
     let cls = (this.props.className || '') + ' select';
 
     return (
-      <RootRef rootRef={this.inputRef}>
-        <TextField
-          className={cls}
-          classes={{root: classes.formControlRoot}}
-          style={this.props.style}
-          select={true}
-          disabled={!!this.props.disabled}
-          label={this.props.label}
-          placeholder={this.props.placeholder}
-          variant={variant}
-          error={!this.props.disableErrors && !this.props.disabled && !!this.props.error}
-          helperText={!this.props.disableErrors && <span>{(!this.props.disabled && this.props.error ? <this.renderError classes={this.props.classes} error={this.props.error} useTooltipForErrors={this.props.useTooltipForErrors} /> : '')}</span>}
-          value={v}
-          title={this.getTooltip(v)}
-          onChange={this.handleChanged}
-          autoFocus={this.props.autoFocus}
-          inputProps={{spellCheck: false, className: classes.nativeInput, style: {textAlign: this.props.align || 'left'}}}
-          InputProps={{startAdornment: startAdornment, endAdornment: endAdornment, classes: {root: classes.inputRoot, input: inputClassName, formControl: inputFormControlClassName}}}
-          InputLabelProps={{shrink: true, classes: {root: classes.inputLabelRoot, outlined: classes.inputLabelOutlined, shrink: classes.inputLabelShrink}}}
-          FormHelperTextProps={{classes: {root: classNames(classes.helperTextRoot, this.props.useTooltipForErrors ? classes.helperTextRootErrorIcon : undefined), contained: classes.helperTextContained}}}
-          SelectProps={{
-            multiple: this.props.multiple,
-            open: this.state.isOpen,
-            onOpen: this.handleOnOpen,
-            onClose: this.handleOnClose,
-            value: v,
-            displayEmpty: true,
-            classes: {root: selectRootClasses, select: classes.select, selectMenu: classes.selectMenu, icon: classes.icon},
-            SelectDisplayProps: {onKeyDown: this.handleKeyDown},
-            MenuProps: {classes: {paper: classes.selectMenuPaper}, MenuListProps: menuListProps},
-            renderValue: (() => (
-              <span className={classes.valueRendererContainer} style={{textAlign: this.props.align || 'left'}}>
-                {this.renderValue(v, this.props.multiple, this.props.placeholder)}
-              </span>
-            ))
-          }}
-        >
-          {this.renderSuggestions(v, this.props.multiple)}
-        </TextField>
-      </RootRef>
+      <TextField
+        className={cls}
+        inputRef={this.inputRef}
+        classes={{root: classes.formControlRoot}}
+        style={this.props.style}
+        select={true}
+        disabled={!!this.props.disabled}
+        label={this.props.label}
+        placeholder={this.props.placeholder}
+        variant={variant as any}
+        error={!this.props.disableErrors && !this.props.disabled && !!this.props.error}
+        helperText={!this.props.disableErrors && <span>{(!this.props.disabled && this.props.error ? <this.renderError classes={this.props.classes} error={this.props.error} useTooltipForErrors={this.props.useTooltipForErrors} /> : '')}</span>}
+        value={v}
+        title={this.getTooltip(v)}
+        onChange={this.handleChanged}
+        autoFocus={this.props.autoFocus}
+        inputProps={{spellCheck: false, className: classes.nativeInput, style: {textAlign: this.props.align || 'left'}}}
+        InputProps={{startAdornment: startAdornment, endAdornment: endAdornment, classes: {root: classes.inputRoot, input: inputClassName, formControl: inputFormControlClassName}}}
+        InputLabelProps={{shrink: true, classes: {root: classes.inputLabelRoot, outlined: classes.inputLabelOutlined, shrink: classes.inputLabelShrink}}}
+        FormHelperTextProps={{classes: {root: classNames(classes.helperTextRoot, this.props.useTooltipForErrors ? classes.helperTextRootErrorIcon : undefined), contained: classes.helperTextContained}}}
+        SelectProps={{
+          multiple: this.props.multiple,
+          open: this.state.isOpen,
+          onOpen: this.handleOnOpen,
+          onClose: this.handleOnClose,
+          value: v,
+          displayEmpty: true,
+          classes: {root: selectRootClasses, select: classes.select, selectMenu: classes.selectMenu, icon: classes.icon},
+          SelectDisplayProps: {onKeyDown: this.handleKeyDown},
+          MenuProps: {classes: {paper: classes.selectMenuPaper}, MenuListProps: menuListProps},
+          renderValue: (() => (
+            <span className={classes.valueRendererContainer} style={{textAlign: this.props.align || 'left'}}>
+              {this.renderValue(v, this.props.multiple, this.props.placeholder)}
+            </span>
+          ))
+        }}
+      >
+        {this.renderSuggestions(v, this.props.multiple)}
+      </TextField>
     );
   }
 }

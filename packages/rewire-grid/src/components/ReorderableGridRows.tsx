@@ -4,7 +4,7 @@ import {
   DragSource,
   DropTarget,
 }                            from 'react-dnd';
-import * as lodash           from 'lodash';
+import flow                  from 'lodash.flow';
 import {Observe}             from 'rewire-core';
 import {
   WithStyle,
@@ -162,7 +162,7 @@ export interface IReorderableGridRowsCellProps {
 
 export type ReorderableGridRowsCellProps = WithStyle<ReorderableGridRowsCellStyles, IReorderableGridRowsCellProps>;
 
-export const ReorderableGridRowsCell = lodash.flow([DragSource('reorderableGridRowsCell', cellSource, sourceCollect), DropTarget('reorderableGridRowsCell', cellTarget, targetCollect)])(withStyles(reorderableGridRowsCellStyles, class extends React.PureComponent<ReorderableGridRowsCellProps> {
+export const ReorderableGridRowsCell = flow([DragSource('reorderableGridRowsCell', cellSource, sourceCollect), DropTarget('reorderableGridRowsCell', cellTarget, targetCollect)])(withStyles(reorderableGridRowsCellStyles, class extends React.PureComponent<ReorderableGridRowsCellProps> {
   cellRef: React.RefObject<HTMLTableCellElement>;
   cellScrollAnchorRef: React.RefObject<HTMLDivElement>;
 
@@ -222,7 +222,7 @@ export const ReorderableGridRowsCell = lodash.flow([DragSource('reorderableGridR
   }
 
   render() {
-    const {classes, isGridMouseCellSelecting, isDragging, highlighted, hoveredWhileDragging, draggedItem, connectDragSource, connectDragPreview, connectDropTarget} = this.props;
+    const {classes, isGridMouseCellSelecting, isDragging, highlighted, hoveredWhileDragging, draggedItem, connectDragSource, connectDropTarget} = this.props;
     let cellClasses = [classes.cell];
 
     if (isDragging) {

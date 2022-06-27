@@ -25,6 +25,7 @@ import {
   DateVariant,
 }                                    from './editors';
 import {withStyles, WithStyle}       from './styles';
+import { MaterialUiPickersDate } from '@material-ui/pickers/typings/date';
 
 const styles = (theme: Theme) => ({
   inputRoot: {
@@ -141,7 +142,7 @@ class DateField extends React.PureComponent<DateFieldProps> {
   }
 
   onValueChange = (date?: Date | null, inputValue?: string | null) => {
-    const v = date && date instanceof Date && !isNaN(date.getTime()) 
+    const v = date && date instanceof Date && !isNaN(date.getTime())
       ? utc(date.getTime() - getTimezoneOffset(date)).startOfDay()
       : undefined;
 
@@ -170,7 +171,7 @@ class DateField extends React.PureComponent<DateFieldProps> {
       case 46:
         if (!this.props.allowKeyboardInput) {
           this.onValueChange(null);
-        } 
+        }
         break;
     }
   }
@@ -207,15 +208,15 @@ class DateField extends React.PureComponent<DateFieldProps> {
     const dateVariant                        = this.props.dateVariant || 'inline';
     const autoOk                             = !isNullOrUndefined(this.props.autoOk) ? this.props.autoOk : dateVariant === 'inline' || dateVariant === 'static';
     const clearable                          = !isNullOrUndefined(this.props.clearable) ? this.props.clearable : true;
-    const onChange                           = (date: Date | null, inputValue: string | null) => { this.onValueChange(date, inputValue); this.props.onChange?.(date, inputValue); };
-    const onClose                            = () => { this.onClose(); this.props.onClose?.(); };
+    const onChange                           = (date: MaterialUiPickersDate) => { this.onValueChange(date, null); this.props.onChange?.(date, null); };
+    const onClose                            = () => { this.onClose(); this.props.onClose?.(); }
     const value                              = !isNullOrUndefined(this.props.value) ? this.props.value : null;
-    
+
     const dateVariantSpecificProps =
       dateVariant === 'inline'
         ? { PopoverProps: this.props.PopoverProps }
         : dateVariant === 'dialog'
-          ? { 
+          ? {
               cancelLabel: this.props.cancelLabel,
               clearable: clearable,
               clearLabel: this.props.clearLabel,
@@ -225,13 +226,13 @@ class DateField extends React.PureComponent<DateFieldProps> {
               todayLabel: this.props.todayLabel,
             }
           : undefined;
-   
+
     if (!allowKeyboardInput) {
       return (
       <MuiPickersUtilsProvider utils={DateFnsUtils}>
       <DatePicker
         className={this.props.className}
-        classes={{root: classes.formControlRoot}}
+        // classes={{root: classes.formControlRoot}}
         disabled={this.props.disabled}
         label={this.props.label}
         placeholder={this.props.placeholder}
@@ -259,7 +260,7 @@ class DateField extends React.PureComponent<DateFieldProps> {
         emptyLabel={emptyLabel}
         format={format}
         initialFocusedDate={this.props.initialFocusedDate}
-        InputAdornmentProps={{classes: {root: classes.inputAdornmentRoot}, ...this.props.InputAdornmentProps}}
+        // InputAdornmentProps={{classes: {root: classes.inputAdornmentRoot}, ...this.props.InputAdornmentProps}}
         invalidDateMessage={this.props.invalidDateMessage}
         invalidLabel={this.props.invalidLabel}
         labelFunc={this.props.labelFunc}
@@ -295,11 +296,11 @@ class DateField extends React.PureComponent<DateFieldProps> {
 
     return (
     <MuiPickersUtilsProvider utils={DateFnsUtils}>
-    <DateBlurInputHOC {...this.props} value={value} onValueChange={onChange}
+    <DateBlurInputHOC {...(this.props as any)} value={value} onValueChange={(date?: (Date | null | undefined) | (UTC | undefined)) => onChange(date as MaterialUiPickersDate)}
       render={(props: DateFieldProps) =>
         <KeyboardDatePicker
           className={props.className}
-          classes={{root: props.classes.formControlRoot}}
+          // classes={{root: props.classes.formControlRoot}}
           disabled={props.disabled}
           label={props.label}
           placeholder={props.placeholder}
@@ -328,7 +329,7 @@ class DateField extends React.PureComponent<DateFieldProps> {
           emptyLabel={emptyLabel}
           format={format}
           initialFocusedDate={props.initialFocusedDate}
-          InputAdornmentProps={{classes: {root: classes.inputAdornmentRoot}, ...props.InputAdornmentProps}}
+          // InputAdornmentProps={{classes: {root: classes.inputAdornmentRoot}, ...props.InputAdornmentProps}}
           invalidDateMessage={props.invalidDateMessage}
           invalidLabel={props.invalidLabel}
           KeyboardButtonProps={{className: classes.inputAdornmentButton, tabIndex: -1, ...props.KeyboardButtonProps}}

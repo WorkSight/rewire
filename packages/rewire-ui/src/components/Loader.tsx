@@ -1,12 +1,9 @@
-import * as React              from 'react';
-import * as is                 from 'is';
-import CircularProgress        from '@material-ui/core/CircularProgress';
-import Fade, {FadeProps}       from '@material-ui/core/Fade';
-import {makeStyles, Theme}     from '@material-ui/core/styles';    
-import {WithStyle, CSSTheme}   from './styles';
-
-// patch fade to get rid of the error for passing the style.
-const F = Fade as React.ComponentType<FadeProps & {style?: React.CSSProperties}>;
+import * as React            from 'react';
+import * as is               from 'is';
+import CircularProgress      from '@material-ui/core/CircularProgress';
+import Fade                  from '@material-ui/core/Fade';
+import {makeStyles, Theme}   from '@material-ui/core/styles';
+import {WithStyle, CSSTheme} from './styles';
 
 const styles = (theme: Theme) => ({
   root: {
@@ -45,11 +42,11 @@ export default (props: LoaderProps) => {
     return (
       <div className={classes.root}>
         {props.children}
-        <F in={props.loading} style={{transitionDelay: delay + 'ms'}} unmountOnExit>
+        <Fade in={props.loading} style={{transitionDelay: delay + 'ms'}} unmountOnExit>
           <div className={classes.progressContainer}>
             <CircularProgress />
           </div>
-        </F>
+        </Fade>
       </div>
     );
   }

@@ -5,7 +5,6 @@ import BlurInputHOC                    from './BlurInputHOC';
 import {TextMask}                      from 'react-text-mask-hoc';
 import TextField, {TextFieldProps}     from '@material-ui/core/TextField';
 import InputAdornment                  from '@material-ui/core/InputAdornment';
-import RootRef                         from '@material-ui/core/RootRef';
 import {Theme}                         from '@material-ui/core/styles';
 import {isNullOrUndefined}             from 'rewire-common';
 import ErrorTooltip                    from './ErrorTooltip';
@@ -87,7 +86,7 @@ const isDocument = typeof document !== 'undefined' && document !== null;
 
 interface IInputAdapterCustomProps {
   caretPosition: number;
-  onChange(evt: React.ChangeEvent): void;
+  onChange(evt: React.ChangeEvent<HTMLInputElement>): void;
 }
 
 class InputAdapterCustom extends React.PureComponent<IInputAdapterCustomProps> {
@@ -106,7 +105,7 @@ class InputAdapterCustom extends React.PureComponent<IInputAdapterCustomProps> {
   getRef = (element: HTMLInputElement) => {
     this.input = element;
   }
-  handleChange = (evt: React.ChangeEvent) => {
+  handleChange = (evt: React.ChangeEvent<HTMLInputElement>) => {
     evt.persist();
     this.props.onChange(evt);
   }
@@ -127,10 +126,10 @@ interface ITextMaskInputData {
 }
 
 interface ITextMaskCustomProps {
-  inputRef: any;
+  inputRef?: any;
   mask?: MaskType | (() => MaskType);
   guide?: boolean;
-  onChange(evt: React.ChangeEvent): void;
+  onChange(evt: React.ChangeEvent<HTMLInputElement>): void;
 }
 
 class TextMaskCustom extends React.PureComponent<ITextMaskCustomProps> {
@@ -138,7 +137,7 @@ class TextMaskCustom extends React.PureComponent<ITextMaskCustomProps> {
     super(props);
   }
 
-  handleChange = (evt: React.ChangeEvent, inputData: ITextMaskInputData) => {
+  handleChange = (evt: React.ChangeEvent<HTMLInputElement>, inputData: ITextMaskInputData) => {
     (evt.target as HTMLInputElement).value = inputData.value || '';
     this.props.onChange(evt);
   }
@@ -245,7 +244,7 @@ class MaskField extends React.Component<MaskFieldProps> {
     const {placeholderChar, placeholder, mask, showMask} = this.props;
 
     let maskPlaceholderChar = placeholderChar || '_';
-    let maskMask            = is.function(mask) ? mask() : mask;
+    let maskMask            = is.function(mask) ? (mask as any)() : mask;
     let maskPlaceholder     = placeholder;
     if (maskMask && (isNullOrUndefined(showMask) || showMask)) {
       let ph = '';
@@ -297,14 +296,14 @@ class MaskField extends React.Component<MaskFieldProps> {
 
     if (this.props.updateOnChange) {
       return (
-      <RootRef rootRef={this.textFieldRef}>
       <TextField
         className={this.props.className}
         classes={{root: classes.formControlRoot}}
         disabled={this.props.disabled}
         label={this.props.label}
+        inputRef={this.textFieldRef}
         placeholder={maskPlaceholder}
-        variant={variant}
+        variant={variant as any}
         error={!this.props.disableErrors && !this.props.disabled && !!this.props.error}
         helperText={!this.props.disableErrors && <span>{(!this.props.disabled && this.props.error ? <this.renderError classes={this.props.classes} error={this.props.error} useTooltipForErrors={this.props.useTooltipForErrors} /> : '')}</span>}
         value={value}
@@ -318,21 +317,19 @@ class MaskField extends React.Component<MaskFieldProps> {
         InputLabelProps={{shrink: true, classes: {root: classes.inputLabelRoot, outlined: classes.inputLabelOutlined, shrink: classes.inputLabelShrink}}}
         FormHelperTextProps={{classes: {root: classNames(classes.helperTextRoot, this.props.useTooltipForErrors ? classes.helperTextRootErrorIcon : undefined), contained: classes.helperTextContained}}}
       />
-      </RootRef>
       );
     }
-
     return (
-    <BlurInputHOC {...this.props} value={value} onValueChange={this.props.onValueChange}
+    <BlurInputHOC {...(this.props as any)} value={value} onValueChange={this.props.onValueChange}
       render={(props: MaskFieldProps) =>
-        <RootRef rootRef={this.textFieldRef}>
         <TextField
+          inputRef={this.textFieldRef}
           className={props.className}
           classes={{root: classes.formControlRoot}}
           disabled={props.disabled}
           label={props.label}
           placeholder={maskPlaceholder}
-          variant={variant}
+          variant={variant as any}
           error={!props.disableErrors && !props.disabled && !!props.error}
           helperText={!props.disableErrors && <span>{(!props.disabled && props.error ? <this.renderError classes={props.classes} error={props.error} useTooltipForErrors={props.useTooltipForErrors} /> : '')}</span>}
           value={props.value}
@@ -346,7 +343,6 @@ class MaskField extends React.Component<MaskFieldProps> {
           InputLabelProps={{shrink: true, classes: {root: classes.inputLabelRoot, outlined: classes.inputLabelOutlined, shrink: classes.inputLabelShrink}}}
           FormHelperTextProps={{classes: {root: classNames(props.classes.helperTextRoot, props.useTooltipForErrors ? props.classes.helperTextRootErrorIcon : undefined), contained: props.classes.helperTextContained}}}
         />
-        </RootRef>
       }
     />
     );

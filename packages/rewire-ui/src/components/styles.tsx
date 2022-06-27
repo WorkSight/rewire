@@ -5,7 +5,7 @@ import {
 }                        from '@material-ui/core/styles';
 import { CSSProperties } from '@material-ui/styles';
 
-export {Theme as Theme};
+export type {Theme as Theme};
 
 export type StylesOf<T> = {
   [P in keyof T]?: string;
@@ -18,9 +18,9 @@ export type StyleProps<T> = {
 
 export type CSSTheme = { [field: string]: CSSProperties };
 
-export interface Func<T> {
-  ([...args]: any, args2?: any): T;
-}
+// export interface Func<T> {
+//   ([...args]: any, args2?: any): T;
+// }
 
 export type WithStyle<T, P = {}>     = {style?: React.CSSProperties, children?: React.ReactNode} & StyleProps<T> & P;
 export type ComponentProps<T>        = <P>(component: React.ComponentType<WithStyle<T, P>>) => React.ComponentType<P>;
@@ -35,6 +35,6 @@ export default function decorate<T>(styles: T | ThemeFn<T>): ComponentProps<T> {
   return withStylesMUI(styles as any, {withTheme: true}) as ComponentProps<T>;
 }
 
-export function withStyles<P, T>(styles: T | ThemeFn<T>, component: React.ComponentType<WithStyle<T, P>>) {
-  return decorate(styles)<P>(component);
+export function withStyles<P, T>(styles: T | ThemeFn<T>, component: React.ComponentClass<P, {}> | React.FunctionComponent<P>) {
+  return decorate(styles)<P>(component as any) as (p: (WithStyle<T, P> & P) | P) => JSX.Element | React.ComponentElement<(WithStyle<T, P> & P) | P, any>;
 }

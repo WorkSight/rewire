@@ -49,6 +49,7 @@
   },
   "devDependencies": {
     "@babel/core": "^7.12.16",
+    "@types/lodash.flow": "^3.5.7",
     "@babel/preset-env": "^7.12.16"
   }
 }

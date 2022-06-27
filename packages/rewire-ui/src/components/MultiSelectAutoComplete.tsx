@@ -11,8 +11,9 @@ import {
   Observe,
   defaultEquals
 }                                       from 'rewire-core';
-import Downshift, {
+import _Downshift, {
   ControllerStateAndHelpers,
+  DownshiftProps,
   StateChangeOptions
 }                                       from 'downshift';
 import TextField                        from '@material-ui/core/TextField';
@@ -24,7 +25,6 @@ import IconButton                       from '@material-ui/core/IconButton';
 import MenuItem                         from '@material-ui/core/MenuItem';
 import InputAdornment                   from '@material-ui/core/InputAdornment';
 import Typography                       from '@material-ui/core/Typography';
-import RootRef                          from '@material-ui/core/RootRef';
 import Fade                             from '@material-ui/core/Fade';
 import {Theme}                          from '@material-ui/core/styles';
 import CloseIcon                        from '@material-ui/icons/Close';
@@ -44,6 +44,9 @@ import {
   EqualsFn,
   defaultMap
 }                                       from '../models/search';
+
+type DownshiftType = (props: (DownshiftProps<any> & {ref: any})) => JSX.Element;
+const Downshift: DownshiftType = _Downshift as unknown as DownshiftType;
 
 const styles = (theme: Theme) => ({
   container: {
@@ -235,7 +238,9 @@ export interface IMultiSelectAutoCompleteProps<T> {
   suggestionsContainerFooter?: ISuggestionsContainerComponent;
 }
 
-export type MultiSelectAutoCompleteProps<T> = WithStyle<MultiSelectAutoCompleteStyles, ICustomProps<T> & IMultiSelectAutoCompleteProps<T> & React.InputHTMLAttributes<any>>;
+
+
+export type MultiSelectAutoCompleteProps<T> = WithStyle<MultiSelectAutoCompleteStyles, {onSelectItem: (value?: T[]) => void} & Omit<ICustomProps<T>, 'onSelectItem'> & IMultiSelectAutoCompleteProps<T> & React.InputHTMLAttributes<any>>;
 
 interface IMultiSelectAutoCompleteState {
   suggestions: any[];
@@ -259,7 +264,7 @@ class MultiSelectAutoComplete<T> extends React.Component<MultiSelectAutoComplete
   equals:                      EqualsFn<T>;
   inputRef:                    React.RefObject<HTMLInputElement>;
   textFieldRef:                React.RefObject<HTMLElement>;
-  showMoreSelectedItemsRef:    React.RefObject<HTMLElement>;
+  showMoreSelectedItemsRef:    React.RefObject<HTMLDivElement>;
 
   constructor(props: MultiSelectAutoCompleteProps<T>) {
     super(props);
@@ -534,7 +539,7 @@ class MultiSelectAutoComplete<T> extends React.Component<MultiSelectAutoComplete
       if (isNullOrUndefined(value) || !value.length) {
         return undefined;
       }
-      return value.map(v => this.map(v)).join(', ');
+      return value.map((v: T) => this.map(v)).join(', ');
     }
     if (is.function(tooltip))  {
       tooltip = (tooltip as CallableFunction)(value);
@@ -636,22 +641,21 @@ class MultiSelectAutoComplete<T> extends React.Component<MultiSelectAutoComplete
     const eAdornment                = <this.renderOpenButton disabled={disabled} isOpen={isOpen} />;
 
     return (
-      <RootRef rootRef={this.textFieldRef}>
-        <TextField
-          className={classes.textField}
-          classes={{root: classes.formControlRoot}}
-          variant={variant}
-          title={tooltip}
-          error={!disableErrors && !disabled && !!error}
-          helperText={!disableErrors && <span>{(!disabled && error ? <this.renderError classes={classes} error={error} useTooltipForErrors={useTooltipForErrors} /> : '')}</span>}
-          inputRef={this.inputRef}
-          inputProps={{spellCheck: false, className: classes.nativeInput, style: {textAlign: align || 'left'}}}
-          InputProps={{inputComponent: this.renderCustomInnerInputComponent, startAdornment: sAdornment, endAdornment: eAdornment, classes: {root: classes.inputRoot, input: inputClassName, formControl: inputFormControlClassName, adornedEnd: adornedEndClassName}}}
-          InputLabelProps={{shrink: true, classes: {root: classes.inputLabelRoot, outlined: classes.inputLabelOutlined, shrink: classes.inputLabelShrink}}}
-          FormHelperTextProps={{classes: {root: classNames(classes.helperTextRoot, useTooltipForErrors ? classes.helperTextRootErrorIcon : undefined), contained: classes.helperTextContained}}}
-          {...inputProps}
-        />
-      </RootRef>
+      <TextField
+        ref={this.textFieldRef}
+        className={classes.textField}
+        classes={{root: classes.formControlRoot}}
+        variant={variant}
+        title={tooltip}
+        error={!disableErrors && !disabled && !!error}
+        helperText={!disableErrors && <span>{(!disabled && error ? <this.renderError classes={classes} error={error} useTooltipForErrors={useTooltipForErrors} /> : '')}</span>}
+        inputRef={this.inputRef}
+        inputProps={{spellCheck: false, className: classes.nativeInput, style: {textAlign: align || 'left'}}}
+        InputProps={{inputComponent: this.renderCustomInnerInputComponent, startAdornment: sAdornment, endAdornment: eAdornment, classes: {root: classes.inputRoot, input: inputClassName, formControl: inputFormControlClassName, adornedEnd: adornedEndClassName}}}
+        InputLabelProps={{shrink: true, classes: {root: classes.inputLabelRoot, outlined: classes.inputLabelOutlined, shrink: classes.inputLabelShrink}}}
+        FormHelperTextProps={{classes: {root: classNames(classes.helperTextRoot, useTooltipForErrors ? classes.helperTextRootErrorIcon : undefined), contained: classes.helperTextContained}}}
+        {...inputProps}
+      />
     );
   });
 
@@ -840,15 +844,14 @@ class MultiSelectAutoComplete<T> extends React.Component<MultiSelectAutoComplete
     if (showMore) {
       const showMoreItems = selectedItems.slice(chipLimit);
       returnValue.push(
-        <RootRef key='....' rootRef={this.showMoreSelectedItemsRef}>
-          <Chip
-            key='...'
-            label='...'
-            disabled={this.props.disabled}
-            className={classNames(baseChipClass, classes.showMoreChip)}
-            onClick={!this.props.disabled ? this.openShowMoreSelectedItemsPopup : undefined}
-          />
-        </RootRef>
+        <Chip
+          ref={this.showMoreSelectedItemsRef}
+          key='...'
+          label='...'
+          disabled={this.props.disabled}
+          className={classNames(baseChipClass, classes.showMoreChip)}
+          onClick={!this.props.disabled ? this.openShowMoreSelectedItemsPopup : undefined}
+        />
       );
       returnValue.push(<Observe render={() => <this.renderShowMoreSelectedItemsPopup key='showMoreSelectedItemsPopup' classes={classes} open={this.showMoreSelectedItemsPopupIsOpen} items={showMoreItems} /> } />);
     }
@@ -870,7 +873,7 @@ class MultiSelectAutoComplete<T> extends React.Component<MultiSelectAutoComplete
         itemToString={this.map}
         onInputValueChange={this.handleInputChanged}
         onUserAction={this.handleItemChanged}
-        ref={(v) => this.downShift = v}
+        ref={(v: any) => this.downShift = v}
         >
           {({
             getInputProps,

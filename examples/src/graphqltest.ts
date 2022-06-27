@@ -1,78 +1,78 @@
-import gql                                  from 'graphql-tag';
-import {client as create, uploadMiddleware} from 'rewire-graphql';
+import gql                from 'graphql-tag';
+import {client as create} from 'rewire-graphql';
 
 const client = create('http://localhost:3010/graphql', {mode: 'cors'});
 // const client = create('http://api.worksight.services:3010/graphql');
 
-const query = gql`
-  query($type: EntityType!, $search: String, $filter: FieldFilter, $count: Int) {
-    search(type: $type, search: $search, filter: $filter, count: $count) {
-      id
-      name
-      code
-      display
-    }
-  }
-`;
+// const query = gql`
+//   query($type: EntityType!, $search: String, $filter: FieldFilter, $count: Int) {
+//     search(type: $type, search: $search, filter: $filter, count: $count) {
+//       id
+//       name
+//       code
+//       display
+//     }
+//   }
+// `;
 
-const query2 = gql`
-  query($ids: [ID!]!) {
-    employeesByIds(ids: $ids) {
-      id
-      name
-      code
-      phone {
-        home
-        mobile
-        work
-        fax
-        workFax
-      }
-      email
-    }
-  }
-`;
+// const query2 = gql`
+//   query($ids: [ID!]!) {
+//     employeesByIds(ids: $ids) {
+//       id
+//       name
+//       code
+//       phone {
+//         home
+//         mobile
+//         work
+//         fax
+//         workFax
+//       }
+//       email
+//     }
+//   }
+// `;
 
-const query3 = gql`
-  query($filter: EntityFilter, $sort: EntitySort, $first: Int, $after: Cursor) {
-    generators(filter: $filter, sort: $sort, first: $first, after: $after) {
-      took
-      totalCount
-      cursor
-      data {
-        id
-        name
-        cycle {
-          id
-          name
-        }
-      }
-    }
-  }
-`;
+// const query3 = gql`
+//   query($filter: EntityFilter, $sort: EntitySort, $first: Int, $after: Cursor) {
+//     generators(filter: $filter, sort: $sort, first: $first, after: $after) {
+//       took
+//       totalCount
+//       cursor
+//       data {
+//         id
+//         name
+//         cycle {
+//           id
+//           name
+//         }
+//       }
+//     }
+//   }
+// `;
 
-const query4 = gql`
-  query($filter: EmployeeFilter, $sort: EmployeeSort, $first: Int, $after: Cursor) {
-    employees(filter: $filter, sort: $sort, first: $first, after: $after) {
-      took
-      totalCount
-      cursor
-      data {
-        id
-        name
-        code
-        phone {
-          home
-          mobile
-          work
-          fax
-          workFax
-        }
-        email
-      }
-    }
-  }
-`;
+// const query4 = gql`
+//   query($filter: EmployeeFilter, $sort: EmployeeSort, $first: Int, $after: Cursor) {
+//     employees(filter: $filter, sort: $sort, first: $first, after: $after) {
+//       took
+//       totalCount
+//       cursor
+//       data {
+//         id
+//         name
+//         code
+//         phone {
+//           home
+//           mobile
+//           work
+//           fax
+//           workFax
+//         }
+//         email
+//       }
+//     }
+//   }
+// `;
 
 export const subscriptionQuery = gql`
 subscription s {
@@ -82,63 +82,63 @@ subscription s {
   }
 }`;
 
-const mutation = gql`
-  mutation($text: String!) {
-    addTodo(text: $text) {
-      id
-      text
-    }
-  }`;
+// const mutation = gql`
+//   mutation($text: String!) {
+//     addTodo(text: $text) {
+//       id
+//       text
+//     }
+//   }`;
 
-const employees = gql`
-  query q {
-    employees {
-      data {
-        name
-        code
-      }
-    }
-  }
-`;
+// const employees = gql`
+//   query q {
+//     employees {
+//       data {
+//         name
+//         code
+//       }
+//     }
+//   }
+// `;
 
-const ping = gql`
-  mutation ping {
-    ping
-  }
-`;
+// const ping = gql`
+//   mutation ping {
+//     ping
+//   }
+// `;
 
-const te = gql`
-  query es {
-    employeeSchedule(effective: "[2017-01-01,2017-01-30]", filter: {employeeIds: ["79bc245e-d007-4755-b617-5047cd7c06de", "32fd0806-1c83-4809-a320-429c2eb92ec5", "3bf11682-3afe-40cc-a1d4-370d9b460c10", "9f43b0e2-02c0-4a95-ac56-020c423d5657", "ce758be6-873b-48c9-85b0-9225f9273d89", "7bc36573-8841-4066-8753-306cfbf2e9a2", "e2a209f4-ae0d-405a-a157-b4fa887d67b9", "a2a8aa3a-bc18-49d4-a83d-5e7cf37606c5", "7a05f099-c4af-4e5e-ba75-5564fea3804f", "043e5ddb-b263-4616-bbce-860448ce7e99", "b3ec75a4-690d-4726-894b-ec613c3a5587", "43478dc0-0a95-44a8-b632-d36803173eb5", "e33d18d8-83bc-4cc5-ab95-9c72741fec37"]}, first: 20) {
-      data {
-        id
-        assignedEmployee: employee {
-          id
-          name
-        }
-        assignedOccupation: occupation {
-          name
-        }
-        schedule {
-          shiftType: template {
-            name
-          }
-          earnedDate
-          details {
-            accountCode
-            scheduledOccupation: occupation {
-              name
-            }
-            effective
-            reason {
-              name
-            }
-          }
-        }
-      }
-    }
-  }
-`;
+// const te = gql`
+//   query es {
+//     employeeSchedule(effective: "[2017-01-01,2017-01-30]", filter: {employeeIds: ["79bc245e-d007-4755-b617-5047cd7c06de", "32fd0806-1c83-4809-a320-429c2eb92ec5", "3bf11682-3afe-40cc-a1d4-370d9b460c10", "9f43b0e2-02c0-4a95-ac56-020c423d5657", "ce758be6-873b-48c9-85b0-9225f9273d89", "7bc36573-8841-4066-8753-306cfbf2e9a2", "e2a209f4-ae0d-405a-a157-b4fa887d67b9", "a2a8aa3a-bc18-49d4-a83d-5e7cf37606c5", "7a05f099-c4af-4e5e-ba75-5564fea3804f", "043e5ddb-b263-4616-bbce-860448ce7e99", "b3ec75a4-690d-4726-894b-ec613c3a5587", "43478dc0-0a95-44a8-b632-d36803173eb5", "e33d18d8-83bc-4cc5-ab95-9c72741fec37"]}, first: 20) {
+//       data {
+//         id
+//         assignedEmployee: employee {
+//           id
+//           name
+//         }
+//         assignedOccupation: occupation {
+//           name
+//         }
+//         schedule {
+//           shiftType: template {
+//             name
+//           }
+//           earnedDate
+//           details {
+//             accountCode
+//             scheduledOccupation: occupation {
+//               name
+//             }
+//             effective
+//             reason {
+//               name
+//             }
+//           }
+//         }
+//       }
+//     }
+//   }
+// `;
 
 const upload = gql`
   mutation($file: Upload!) {
@@ -149,26 +149,26 @@ const upload = gql`
 `;
 
 export async function uploadFile(file: File) {
-  console.log(await client.mutation(upload, {file}));
+  console.log(await client.mutation(upload as any, {file}));
 }
 
-async function run() {
-  // client.bearer = '0ab38f1096494eb96aa206a7053370b9e171743058f8ce70';
-  client.bearer = '421029e4df937eaa4047fdcd81d1583d77a449d526c341cd';
-  // client.use(uploadMiddleware);
-  // client.use((q, req, next) => {
-  //   next();
-  // });
-  // console.log(await client.query(employees));
-  const r = client.subscribe(subscriptionQuery);
-  const s = r.subscribe({
-    next(data: any) {
-      console.log(data);
-    },
-    error(err: Error) {},
-    // complete value parameter is deprecated
-    complete(value?: any) {}
-  });
+// async function run() {
+//   // client.bearer = '0ab38f1096494eb96aa206a7053370b9e171743058f8ce70';
+//   client.bearer = '421029e4df937eaa4047fdcd81d1583d77a449d526c341cd';
+//   // client.use(uploadMiddleware);
+//   // client.use((q, req, next) => {
+//   //   next();
+//   // });
+//   // console.log(await client.query(employees));
+//   const r = client.subscribe(subscriptionQuery);
+//   const s = r.subscribe({
+//     next(data: any) {
+//       console.log(data);
+//     },
+//     error(err: Error) {},
+//     // complete value parameter is deprecated
+//     complete(value?: any) {}
+//   });
 
   // setTimeout(() => s.unsubscribe(), 15000);
   // s.unsubscribe();
@@ -206,6 +206,6 @@ async function run() {
   //   r3.data.search.results[1].employee.name = 'booger nose';
   // }, 5000);
   // // console.log(result);
-}
+// }
 
 // run();

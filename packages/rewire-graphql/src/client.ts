@@ -193,13 +193,13 @@ export function uploadMiddleware(query: IQuery, request: RequestInit, next: () =
 
   const map = {};
   let i     = 0;
-  files.forEach((paths: string) => {
+  files.forEach((paths: string[]) => {
     map[++i] = paths;
   });
   form.append('map', JSON.stringify(map));
 
   i = 0;
-  files.forEach((paths: string, file: File) => {
+  files.forEach((paths: string[], file: File) => {
     form.append(String(++i), file, file.name);
   });
 

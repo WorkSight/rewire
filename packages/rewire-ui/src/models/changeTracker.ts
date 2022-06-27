@@ -1,5 +1,5 @@
-import { observable, DataSignal, property, sample, freeze, root } from 'rewire-core';
-import * as deepEqual                                             from 'fast-deep-equal';
+import { DataSignal, property, sample, freeze, root } from 'rewire-core';
+import * as deepEqual                                 from 'fast-deep-equal';
 
 export interface IRowData {
   id: string;
@@ -87,8 +87,8 @@ export class ChangeTracker {
   private _original?      : IOriginalData;
   private _working?       : IRowData[];
   private _recalculating? : Promise<boolean>;
-  private _dispose        : () => void;
-  private _interval       : NodeJS.Timeout;
+  private _dispose?       : () => void;
+  private _interval?      : NodeJS.Timeout;
   constructor(private _context: IChangeTrackerContext) {
     root((dispose) => {
       this._dispose = dispose;
@@ -284,7 +284,7 @@ async function run() {
   ct.recalculate();
   ct.recalculate();
   test('after set should be false', false, await ct.recalculate());
-  
+
   rows.push({ooga: 'ooga'});
   test('after row change show be true', true, await ct.recalculate());
 

@@ -1,5 +1,5 @@
 import * as React                    from 'react';
-import NumberFormat                  from 'react-number-format';
+import _NumberFormat, { NumberFormatProps } from 'react-number-format';
 import * as is                       from 'is';
 import classNames                    from 'classnames';
 import TextField, { TextFieldProps } from '@material-ui/core/TextField';
@@ -100,6 +100,8 @@ export interface INumberFieldProps {
 
 export type NumberFieldProps = WithStyle<NumberFieldStyles, TextFieldProps & INumberFieldProps>;
 
+const NumberFormat = _NumberFormat as unknown as (props: (NumberFormatProps<TextFieldProps> & NumberFieldProps)) => JSX.Element;
+
 class NumberTextField extends React.Component<NumberFieldProps> {
   inputRef: React.RefObject<HTMLInputElement>;
 
@@ -115,7 +117,7 @@ class NumberTextField extends React.Component<NumberFieldProps> {
   }
 
   shouldComponentUpdate(nextProps: NumberFieldProps) {
-    return (  
+    return (
       (nextProps.value               !== this.props.value)               ||
       (nextProps.disabled            !== this.props.disabled)            ||
       (nextProps.visible             !== this.props.visible)             ||
@@ -152,13 +154,13 @@ class NumberTextField extends React.Component<NumberFieldProps> {
 
   getNumberString(value: any, decimals?: number, thousandSeparator?: boolean, fixed?: boolean): string | undefined {
     if (isNullOrUndefined(value)) return value ?? undefined;
-  
+
     let numberStr = decimals && is.number(value) ? value.toFixed(decimals) : value.toString();
     if (!fixed) {
       numberStr = parseFloat(numberStr).toString();
     }
     numberStr = thousandSeparator ? this.getThousandSeparatedNumberString(numberStr) : numberStr;
-  
+
     return numberStr;
   }
 
@@ -166,26 +168,26 @@ class NumberTextField extends React.Component<NumberFieldProps> {
     const hasNagation = numStr[0] === '-';
     const addNegation = hasNagation;
     numStr            = numStr.replace('-', '');
-  
+
     const parts         = numStr.split('.');
     const beforeDecimal = parts[0];
     const afterDecimal  = parts[1] || '';
-  
+
     return {
       beforeDecimal,
       afterDecimal,
       addNegation,
     };
   }
-  
+
   getThousandSeparatedNumberString(numStr: string): string {
     let {beforeDecimal, afterDecimal, addNegation} = this.splitDecimal(numStr);
     let hasDecimalSeparator = !!afterDecimal && afterDecimal.length > 0;
-  
+
     beforeDecimal = beforeDecimal.replace(/(\d)(?=(\d{3})+(?!\d))/g, '$1' + ',');
-  
+
     if (addNegation) beforeDecimal = '-' + beforeDecimal;
-  
+
     return beforeDecimal + (hasDecimalSeparator ? '.' : '') + afterDecimal;
   }
 
@@ -246,7 +248,7 @@ class NumberTextField extends React.Component<NumberFieldProps> {
           className={this.props.className}
           classes={{root: this.props.classes.formControlRoot}}
           disabled={this.props.disabled}
-          error={!this.props.disableErrors && !this.props.disabled && !!this.props.error}
+          // error={!this.props.disableErrors && !this.props.disabled && !!this.props.error}
           helperText={!this.props.disableErrors && <span>{(!this.props.disabled && this.props.error ? <this.renderError classes={this.props.classes} error={this.props.error} useTooltipForErrors={this.props.useTooltipForErrors} /> : '')}</span>}
           value={value}
           title={this.getTooltip(value)}
@@ -270,13 +272,13 @@ class NumberTextField extends React.Component<NumberFieldProps> {
           FormHelperTextProps={{classes: {root: classNames(this.props.classes.helperTextRoot, this.props.useTooltipForErrors ? this.props.classes.helperTextRootErrorIcon : undefined), contained: this.props.classes.helperTextContained}}}
           customInput={TextField}
           placeholder={this.props.placeholder}
-          variant={this.props.variant}
+          variant={this.props.variant as any}
         />);
     }
 
     return (
       <BlurInputHOC
-        {...this.props}
+        {...(this.props as any)}
         value={value}
         onValueChange={(v?: number | string) => this.props.onValueChange(v)}
         render={(props: NumberFieldProps) => (
@@ -284,7 +286,7 @@ class NumberTextField extends React.Component<NumberFieldProps> {
             className={props.className}
             classes={{root: props.classes.formControlRoot}}
             disabled={props.disabled}
-            error={!props.disableErrors && !props.disabled && !!props.error}
+            // error={!props.disableErrors && !props.disabled && !!props.error}
             helperText={!props.disableErrors && <span>{(!props.disabled && props.error ? <this.renderError classes={props.classes} error={props.error} useTooltipForErrors={props.useTooltipForErrors} /> : '')}</span>}
             value={props.value}
             title={this.getTooltip(value)}
@@ -308,7 +310,7 @@ class NumberTextField extends React.Component<NumberFieldProps> {
             FormHelperTextProps={{classes: {root: classNames(props.classes.helperTextRoot, props.useTooltipForErrors ? props.classes.helperTextRootErrorIcon : undefined), contained: props.classes.helperTextContained}}}
             customInput={TextField}
             placeholder={props.placeholder}
-            variant={props.variant}
+            variant={props.variant as any}
           />)
         }
       />);

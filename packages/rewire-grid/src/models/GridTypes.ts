@@ -18,7 +18,7 @@ import * as merge                        from 'deepmerge';
 import { ButtonProps }                   from '@material-ui/core/Button';
 import { PopoverOrigin }                 from '@material-ui/core/Popover';
 import { IReorderableGridRowsCellProps } from '../components/ReorderableGridRows';
-export { EditorType };
+export type { EditorType };
 
 export interface IRows {
   rows: IRow[];

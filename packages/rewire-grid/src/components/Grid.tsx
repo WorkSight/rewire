@@ -30,7 +30,7 @@ import SettingsIcon                          from '@material-ui/icons/Settings';
 import createGridTheme                       from './GridTheme';
 import {scrollBySmooth}                      from '../models/SmoothScroll';
 import ResizeObserver                        from 'resize-observer-polyfill';
-import * as fastdom                          from 'fastdom';
+import fastdom                               from 'fastdom';
 import './data-grid.scss';
 
 interface IColumnProps {
@@ -238,11 +238,11 @@ export interface IGridProps {
 
 export type GridProps = WithStyle<GridStyles, IGridProps>;
 
-class Grid extends React.PureComponent<GridProps> {
+class Grid extends React.PureComponent<IGridProps> {
   private gridColors: IGridColors;
   private gridFontSizes: IGridFontSizes;
 
-  constructor(props: GridProps) {
+  constructor(props: IGridProps) {
     super(props);
 
     this.gridColors    = props.gridColors    || {};
@@ -448,7 +448,7 @@ function getScrollbarWidth() {
   const outer = document.createElement('div');
   outer.style.visibility = 'hidden';
   outer.style.overflow = 'scroll'; // forcing scrollbar to appear
-  outer.style.msOverflowStyle = 'scrollbar'; // needed for WinJS apps
+  // outer.style.msOverflowStyle = 'scrollbar'; // needed for WinJS apps
   document.body.appendChild(outer);
 
   // Creating inner element and placing it in the container
@@ -465,7 +465,7 @@ function getScrollbarWidth() {
 
 let _scrollbarWidth: number = getScrollbarWidth();
 
-const GridInternal = withStyles(internalGridStyles, class extends React.PureComponent<GridProps> {
+const GridInternal = withStyles(internalGridStyles, class extends React.PureComponent<IGridProps> {
   private scrollX            : DataSignal<number>;
   private scrollY            : DataSignal<number>;
   private _columnTableWrapper: HTMLDivElement;

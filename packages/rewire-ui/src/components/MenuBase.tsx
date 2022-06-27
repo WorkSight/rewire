@@ -9,7 +9,6 @@ import MenuItem                     from '@material-ui/core/MenuItem';
 import ListItemText                 from '@material-ui/core/ListItemText';
 import ListItemIcon                 from '@material-ui/core/ListItemIcon';
 import ListSubheader                from '@material-ui/core/ListSubheader';
-import {SvgIconProps}               from '@material-ui/core/SvgIcon';
 import {Theme}                      from '@material-ui/core/styles';
 import {PopoverOrigin}              from '@material-ui/core/Popover';
 import LabelIcon                    from '@material-ui/icons/LabelOutlined';
@@ -18,7 +17,7 @@ import {WithStyle, withStyles}      from './styles';
 export interface IMenuBaseItem {
   name: string;
   title: string;
-  icon?: React.ComponentType<SvgIconProps>;
+  icon?: React.ReactNode;
   divider?: boolean;
   subheader?: string | JSX.Element | (() => JSX.Element);
   closeOnClick?: boolean;
@@ -146,7 +145,7 @@ class MenuBase extends React.Component<MenuBaseProps, IMenuBaseState> {
         visible &&
           <MenuItem key={item.name} divider={item.divider} disableRipple={disabled} classes={{root: rootClasses, selected: classes.menuItemSelected}} onClick={clickHandler}>
             <ListItemIcon className={classes.listItemIcon}>
-              {item.icon ? <item.icon /> : <LabelIcon />}
+              {item.icon ? item.icon : <LabelIcon />}
             </ListItemIcon>
             <ListItemText className={classes.listItemText} primary={item.title} primaryTypographyProps={{classes: {root: classes.listItemTypography}}} />
           </MenuItem>

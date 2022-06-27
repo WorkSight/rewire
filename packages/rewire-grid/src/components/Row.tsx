@@ -15,7 +15,7 @@ import {
   withStyles,
 }                               from 'rewire-ui';
 import Cell                     from './Cell';
-import * as fastdom             from 'fastdom';
+import fastdom                  from 'fastdom';
 
 const styles = (theme: Theme) => {
   let color = theme.palette.groupRowBackground.main;
@@ -105,7 +105,7 @@ export interface IRowProps {
   row               : IRow;
   height?           : number;
   columns           : () => IColumn[];
-  Cell              : React.ComponentType<any>;
+  Cell              : (props: any) => JSX.Element;
   isFixedColumnsRow?: boolean;
   index             : number;
   className?        : string;
@@ -118,7 +118,7 @@ export type RowProps = WithStyle<RowStyles, IRowProps>;
 
 class InternalRow extends React.PureComponent<RowProps, {}> {
   element: React.RefObject<HTMLTableRowElement>;
-  observer: MutationObserver;
+  observer?: MutationObserver;
   desiredHeight: number = 0;
 
   constructor(props: RowProps) {

@@ -247,7 +247,7 @@ const arrayCompare = (mapFn?: any, compareFn?: any) => (x: any, y: any): number 
   return (x.length < y.length ? -1 : x.length > y.length ? 1 : 0);
 };
 
-export function getNumberString(value: any, decimals?: number, thousandSeparator?: boolean, fixed?: boolean): string {
+export function getNumberString(value: any, decimals?: number, thousandSeparator?: boolean, fixed?: boolean): string | null | undefined {
   if (isNullOrUndefined(value)) return value;
 
   let numberStr = decimals && is.number(value) ? value.toFixed(decimals) : value.toString();
@@ -286,7 +286,7 @@ function getThousandSeparatedNumberString(numStr: string): string {
   return beforeDecimal + (hasDecimalSeparator ? '.' : '') + afterDecimal;
 }
 
-export function getPhoneString(value: any, format: string, mask: string): string {
+export function getPhoneString(value: any, format: string, mask: string): string | null | undefined {
   if (isNullOrUndefined(value)) return value;
 
   let phoneStr             = value.toString();

@@ -15,7 +15,6 @@
     "inlineSources": false,
     "isolatedModules": true,
     "jsx": "react",
-    "listFiles": true,
     "locale": "en-us",
     "module": "commonjs",
     "moduleResolution": "node",
@@ -38,7 +37,10 @@
       { "name": "tslint-language-service" }
     ]
   },
-  "exclude": [
+"include": [
+  "src/main.ts", "src/externals.d.ts"
+],
+"exclude": [
     "node_modules", "test", "tests", "dist", "lib", "build"
   ]
 }

@@ -1,6 +1,6 @@
 
 import * as React from 'react';
-import * as Konva from 'konva';
+import Konva from 'konva';
 // import 'konva/src/shapes/Image';
 // import 'konva/src/shapes/Circle';
 // import 'konva/src/shapes/Rect';
@@ -111,7 +111,7 @@ class AvatarCropper extends React.Component<AvatarCropperProps, IAvatarCropperSt
     },
     onLoad: () => {
     },
-  };
+  } as unknown as AvatarCropperProps;
 
   constructor(props: AvatarCropperProps) {
     super(props);
@@ -124,7 +124,7 @@ class AvatarCropper extends React.Component<AvatarCropperProps, IAvatarCropperSt
       containerId,
       loaderId,
       lastMouseY: 0,
-      crop: undefined,
+      crop: undefined as any,
       cropRadius: 0,
       image: undefined,
     };
@@ -386,7 +386,7 @@ class AvatarCropper extends React.Component<AvatarCropperProps, IAvatarCropperSt
       const x = isLeftCorner() ? calcLeft() : (isRightCorner() ? calcRight() : crop.x());
       const y = isTopCorner() ? calcTop() : (isBottomCorner() ? calcBottom() : crop.y());
       moveResizer(x, y);
-      crop.setFillPatternOffset({ x: x / this.scale, y: y / this.scale });
+      crop.fillPatternOffset({ x: x / this.scale, y: y / this.scale });
       crop.x(x);
       cropStroke.x(x);
       crop.y(y);

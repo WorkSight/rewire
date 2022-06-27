@@ -37,7 +37,6 @@
     "@types/classnames": "^2.2.11",
     "@types/color": "^3.0.1",
     "@types/deepmerge": "^2.2.0",
-    "@types/material-ui": "^0.21.8",
     "@types/node": "^14.14.28",
     "@types/react": "^17.0.2",
     "classcat": "^3.2.5",
@@ -64,6 +63,7 @@
   "devDependencies": {
     "@babel/core": "^7.12.16",
     "@babel/preset-env": "^7.12.16",
+    "@types/react-color": "2.17.6",
     "cssnano": "^4.1.10"
   }
 }

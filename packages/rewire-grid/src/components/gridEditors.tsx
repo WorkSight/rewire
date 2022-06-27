@@ -128,8 +128,8 @@ export function createMultiSelectAutoCompleteEditor(options: any) {
   const E      = editor('multiselectautocomplete', options);
   const Editor = withStyles(styles, (props: TextEditorProps) => {
     const {classes, ...restProps}   = props;
-    const {paper, ...editorClasses} = classes;
-    const {field}                   = restProps;
+    const {paper, ...editorClasses} = (classes as any);
+    const {field}: {field: any}     = restProps;
 
     return (
       <Observe render={() => (

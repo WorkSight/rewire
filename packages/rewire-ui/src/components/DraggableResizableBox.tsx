@@ -3,7 +3,7 @@ import {
   Rnd,
   Props as RndProps,
 }                                                                     from 'react-rnd';
-export {
+export type {
   Rnd,
   ResizeEnable as DraggableResizableBoxResizeEnable,
   HandleStyles as DraggableResizableBoxResizeHandleStyles,
@@ -14,7 +14,7 @@ export {
   RndResizeCallback as DraggableResizableBoxResizeCallback,
   RndDragCallback as DraggableResizableBoxDragCallback,
 }                                                                     from 'react-rnd';
-export { 
+export type {
   ResizableBoxSize as DraggableResizableBoxSize,
 }                                                                     from './ResizableBox';
 
