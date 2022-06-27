@@ -1,4 +1,4 @@
-import * as React   from 'react';
+import React   from 'react';
 import { Observe }  from 'rewire-core';
 import {
   editor,

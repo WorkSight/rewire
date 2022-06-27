@@ -1,4 +1,4 @@
-import * as React              from 'react';
+import React              from 'react';
 import {
   IRow,
   IColumn,
@@ -6,7 +6,7 @@ import {
   isGroupRow
 }                               from '../models/GridTypes';
 import cc                       from 'classcat';
-import * as Color               from 'color';
+import Color               from 'color';
 import {isNullOrUndefined}      from 'rewire-common';
 import {Observe}                from 'rewire-core';
 import {Theme}                  from '@material-ui/core/styles';

@@ -1,4 +1,4 @@
-import * as React         from 'react';
+import React         from 'react';
 import { TextFieldProps } from '@material-ui/core/TextField';
 import { InputProps }     from '@material-ui/core/Input';
 import { TextAlignment }  from './editors';

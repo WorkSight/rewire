@@ -1,4 +1,4 @@
-import * as React        from 'react';
+import React        from 'react';
 import { Modal, Dialog } from 'rewire-ui';
 import Typography        from '@material-ui/core/Typography';
 

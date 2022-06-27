@@ -1,4 +1,4 @@
-import * as React from 'react';
+import React from 'react';
 import './flexgrid.css';
 
 export type TAlign = 'start' | 'center' | 'end' | 'around' | 'between';

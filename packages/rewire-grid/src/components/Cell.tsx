@@ -4,8 +4,8 @@ import {
   IColumn,
   ICell
 }                                 from '../models/GridTypes';
-import * as React                 from 'react';
-import * as is                    from 'is';
+import React                 from 'react';
+import is                    from 'is';
 import cc                         from 'classcat';
 import classNames                 from 'classnames';
 import {isNullOrUndefinedOrEmpty} from 'rewire-common';

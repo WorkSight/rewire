@@ -1,4 +1,4 @@
-import * as is                           from 'is';
+import is                           from 'is';
 import {isNullOrUndefined}               from 'rewire-common';
 import {
   EditorType,
@@ -14,7 +14,7 @@ import {
   TGetter,
   TSetter
 } from 'rewire-ui';
-import * as merge                        from 'deepmerge';
+import merge                        from 'deepmerge';
 import { ButtonProps }                   from '@material-ui/core/Button';
 import { PopoverOrigin }                 from '@material-ui/core/Popover';
 import { IReorderableGridRowsCellProps } from '../components/ReorderableGridRows';

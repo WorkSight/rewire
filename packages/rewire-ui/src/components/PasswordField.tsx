@@ -1,4 +1,4 @@
-import * as React                    from 'react';
+import React                    from 'react';
 import classNames                    from 'classnames';
 import TextField, { TextFieldProps } from '@material-ui/core/TextField';
 import InputAdornment                from '@material-ui/core/InputAdornment';

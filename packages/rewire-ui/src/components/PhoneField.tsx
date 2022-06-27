@@ -1,4 +1,4 @@
-import * as React                       from 'react';
+import React                       from 'react';
 import {Theme}                          from '@material-ui/core/styles';
 import {TextFieldProps}                 from '@material-ui/core/TextField';
 import {withStyles, WithStyle}          from './styles';

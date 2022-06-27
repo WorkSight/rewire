@@ -1,4 +1,4 @@
-import * as React                      from 'react';
+import React                      from 'react';
 import ColorPickerDialog, {IColor}     from './ColorPickerDialog';
 import classNames                      from 'classnames';
 import {TextVariant}                   from './editors';

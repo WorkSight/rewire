@@ -1,4 +1,4 @@
-import * as React from 'react';
+import React from 'react';
 const focusedElementSelector = '[tabindex="0"]:not([style*="display: none"]),input:not([type="hidden"]):not([disabled]):not([style*="display: none"])';
 const rowsSelector           = '.tabrow:not([type="hidden"]):not([disabled])';
 

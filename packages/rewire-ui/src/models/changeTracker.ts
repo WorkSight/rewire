@@ -1,5 +1,5 @@
 import { DataSignal, property, sample, freeze, root } from 'rewire-core';
-import * as deepEqual                                 from 'fast-deep-equal';
+import deepEqual                                      from 'fast-deep-equal';
 
 export interface IRowData {
   id: string;

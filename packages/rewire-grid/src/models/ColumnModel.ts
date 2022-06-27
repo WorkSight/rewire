@@ -1,4 +1,4 @@
-import * as React from 'react';
+import React from 'react';
 import {
   IColumn,
   ICell,
@@ -28,7 +28,7 @@ import {
   property
 } from 'rewire-core';
 import {createMultiSelectAutoCompleteEditor} from '../components/gridEditors';
-import * as is             from 'is';
+import is             from 'is';
 
 let id            = 0;
 const toLowerCase = (value: string) => String(value).toLowerCase();

@@ -1,4 +1,4 @@
-import * as React                                from 'react';
+import React                                from 'react';
 import { countries, employees }                  from './demo-data';
 import { sampleModel, SampleDialog }             from './SampleDialog';
 import { hotkeysModel, HotKeysDialog }           from './HotKeys';
@@ -39,7 +39,6 @@ import Typography            from '@material-ui/core/Typography';
 import DeleteIcon            from '@material-ui/icons/DeleteOutlined';
 import ArchiveIcon           from '@material-ui/icons/ArchiveOutlined';
 import UnarchiveIcon         from '@material-ui/icons/UnarchiveOutlined';
-import { uploadFile }        from './graphqltest';
 
 interface IDocument {
   id:    string;
@@ -618,7 +617,7 @@ export const HomeView = React.memo(withStyles(styles, (props: HomeViewProps) => 
           id='contained-button-file'
           type='file'
           onChange={({ target: { validity, files } }) => {
-            validity.valid && uploadFile(files![0]);
+            validity.valid
           }}
         />
         <label htmlFor='contained-button-file'>

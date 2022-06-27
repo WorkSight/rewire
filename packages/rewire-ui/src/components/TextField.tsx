@@ -1,5 +1,5 @@
-import * as React                    from 'react';
-import * as is                       from 'is';
+import React                    from 'react';
+import is                       from 'is';
 import classNames                    from 'classnames';
 import {isNullOrUndefined, utc, UTC} from 'rewire-common';
 import BlurInputHOC                  from './BlurInputHOC';

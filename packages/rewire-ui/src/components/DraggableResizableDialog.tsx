@@ -1,4 +1,4 @@
-import * as React                from 'react';
+import React                from 'react';
 import { Observe }               from 'rewire-core';
 import classNames                from 'classnames';
 import Paper, { PaperProps }     from '@material-ui/core/Paper';

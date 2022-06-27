@@ -1,5 +1,5 @@
 
-import * as React from 'react';
+import React from 'react';
 import Konva from 'konva';
 // import 'konva/src/shapes/Image';
 // import 'konva/src/shapes/Circle';

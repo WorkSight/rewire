@@ -1,5 +1,5 @@
-import * as React            from 'react';
-import * as is               from 'is';
+import React            from 'react';
+import is               from 'is';
 import CircularProgress      from '@material-ui/core/CircularProgress';
 import Fade                  from '@material-ui/core/Fade';
 import {makeStyles, Theme}   from '@material-ui/core/styles';

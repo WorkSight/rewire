@@ -1,4 +1,4 @@
-import * as React                    from 'react';
+import React                    from 'react';
 import {isNullOrUndefined}           from 'rewire-common';
 import {Theme}                       from '@material-ui/core/styles';
 import TextField, { TextFieldProps } from '@material-ui/core/TextField';

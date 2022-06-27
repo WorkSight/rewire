@@ -3,7 +3,7 @@ import { DndProvider as _DndProvider,
   DndProviderProps
 } from 'react-dnd';
 import { HTML5Backend }                  from 'react-dnd-html5-backend';
-import * as React                        from 'react';
+import React                        from 'react';
 
 const dndContext  = createDndContext(HTML5Backend);
 const DndProvider = _DndProvider as React.FC<DndProviderProps<any, any> & {children: React.ReactNode}>;

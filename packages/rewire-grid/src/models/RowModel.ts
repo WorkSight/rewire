@@ -13,7 +13,7 @@ import {
 }                                     from './GridTypes';
 import { isNullOrUndefined, guid }    from 'rewire-common';
 import createCell                     from './CellModel';
-import * as deepEqual                 from 'fast-deep-equal';
+import deepEqual                      from 'fast-deep-equal';
 import {
   observable,
   DataSignal,

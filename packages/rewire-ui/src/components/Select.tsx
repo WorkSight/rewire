@@ -1,4 +1,4 @@
-import * as React                      from 'react';
+import React                      from 'react';
 import classNames                      from 'classnames';
 import { ChangeEvent }                 from 'react';
 import { isNullOrUndefined }           from 'rewire-common';
@@ -16,7 +16,6 @@ import {
   IRenderSuggestionFnProps,
 }                                      from '../models/search';
 import {withStyles, WithStyle}         from './styles';
-import { RootRef } from '@material-ui/core';
 
 const styles = (theme: Theme) => ({
   inputRoot: {

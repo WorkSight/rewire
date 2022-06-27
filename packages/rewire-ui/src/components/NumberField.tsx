@@ -1,6 +1,6 @@
-import * as React                    from 'react';
+import React                    from 'react';
 import _NumberFormat, { NumberFormatProps } from 'react-number-format';
-import * as is                       from 'is';
+import is                       from 'is';
 import classNames                    from 'classnames';
 import TextField, { TextFieldProps } from '@material-ui/core/TextField';
 import InputAdornment                from '@material-ui/core/InputAdornment';
