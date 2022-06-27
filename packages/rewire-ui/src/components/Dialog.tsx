@@ -133,6 +133,7 @@ export interface IDialogProps {
   buttonVariant?        : ButtonProps['variant'];
   actions?              : string[];
   ButtonRenderer?       : ActionRenderType;
+  children?             : React.ReactNode;
   PaperComponent?       : React.ElementType<PaperProps>;
   HeaderComponent?      : (props: any) => JSX.Element;
 }

@@ -37,7 +37,7 @@ export class CellModel implements ICell {
   _cls                 : DataSignal<string | undefined>;
   _align               : DataSignal<TextAlignment | undefined>;
   _verticalAlign       : DataSignal<VerticalAlignment | undefined>;
-  _renderer            : DataSignal<React.SFC<any> | undefined>;
+  _renderer            : DataSignal<React.FunctionComponent<any> | undefined>;
   _onValueChange?      : ((cell: ICell, v: any) => void);
   private __element?   : HTMLTableDataCellElement; // non-observable
 
@@ -140,10 +140,10 @@ export class CellModel implements ICell {
     return this._verticalAlign() || this.column.verticalAlign;
   }
 
-  set renderer(value: React.SFC<any> | undefined) {
+  set renderer(value: React.FunctionComponent<any> | undefined) {
     this._renderer(value);
   }
-  get renderer(): React.SFC<any> | undefined {
+  get renderer(): React.FunctionComponent<any> | undefined {
     return this._renderer() || this.column.renderer;
   }
 

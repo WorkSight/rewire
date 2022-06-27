@@ -61,9 +61,9 @@ export class ColumnModel implements IColumn {
   cls?           : any;
   typeOptions?   : any;
   type           : EditorType;
-  headerRenderer?: React.SFC<any>;
-  renderer?      : React.SFC<any>;
-  editor?        : React.SFC<any>;
+  headerRenderer?: React.FunctionComponent<any>;
+  renderer?      : React.FunctionComponent<any>;
+  editor?        : React.FunctionComponent<any>;
   editorTooltip? : string | ((value: any) => string);
 
   onValueChange?(cell: ICell, v: any): void;

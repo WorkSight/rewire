@@ -16,6 +16,7 @@ import {
   IRenderSuggestionFnProps,
 }                                      from '../models/search';
 import {withStyles, WithStyle}         from './styles';
+import { RootRef } from '@material-ui/core';
 
 const styles = (theme: Theme) => ({
   inputRoot: {
@@ -425,7 +426,7 @@ class Select<T> extends React.Component<SelectProps<T>, any> {
     return (
       <TextField
         className={cls}
-        inputRef={this.inputRef}
+        ref={this.inputRef}
         classes={{root: classes.formControlRoot}}
         style={this.props.style}
         select={true}

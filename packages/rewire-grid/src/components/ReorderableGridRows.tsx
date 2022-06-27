@@ -270,6 +270,7 @@ export const ReorderableGridRowsCell = flow([DragSource('reorderableGridRowsCell
 }));
 
 export interface IReorderableGridRowsProps {
+  children?: React.ReactNode | null;
 }
 
 class ReorderableGridRows extends React.PureComponent<IReorderableGridRowsProps> {

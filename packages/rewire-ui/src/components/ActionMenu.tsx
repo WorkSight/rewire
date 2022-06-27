@@ -67,7 +67,7 @@ export const ActionItemRenderer = React.memo(withStyles(actionItemRendererStyles
       visible &&
         <MenuItem key={item.name} {...externalLinkProps} divider={item.divider} disableRipple={disabled} classes={{root: rootClasses, selected: classes.menuItemSelected}} onClick={clickHandler}>
           <ListItemIcon className={classes.listItemIcon}>
-            {item.icon ? item.icon : <LabelIcon />}
+            {item.icon ? <item.icon /> : <LabelIcon />}
           </ListItemIcon>
           <ListItemText className={classes.listItemText} primary={item.title} primaryTypographyProps={{classes: {root: classes.listItemTypography}}} />
         </MenuItem>

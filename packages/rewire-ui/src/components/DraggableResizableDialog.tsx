@@ -51,6 +51,7 @@ export interface IDraggableResizableDialogProps {
   defaultWidth: 'xs' | 'sm' | 'md' | 'lg' | number | string;
   defaultHeight?: number | string;
   classes?: any;
+  children?: React.ReactNode;
 }
 
 export type DraggableResizableDialogProps = WithStyle<ReturnType<typeof dialogStyles>, IDraggableResizableDialogProps>;

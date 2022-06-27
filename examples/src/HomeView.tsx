@@ -104,7 +104,7 @@ class ComplexCellData {
   }
 }
 
-const ComplexCell: React.SFC<{cell: ICell}> = (props) => {
+const ComplexCell: React.FunctionComponent<{cell: ICell}> = (props: any) => {
   const {cell} = props;
   return (
     <div style={{width: '100%', textAlign: cell.align}}>

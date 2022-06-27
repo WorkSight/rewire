@@ -49,7 +49,7 @@ const styles = (theme: Theme) => {
 
 export type RowStyles = ReturnType<typeof styles>;
 
-export interface IGroupProps extends React.Props<any> {
+export interface IGroupProps  {
   group: IGroupRow,
   columns: () => IColumn[],
   numVisibleColumns: number,
@@ -57,7 +57,6 @@ export interface IGroupProps extends React.Props<any> {
   classes?: any,
   cellClasses?: any,
 }
-
 
 export type GroupProps = WithStyle<RowStyles, IGroupProps>;
 

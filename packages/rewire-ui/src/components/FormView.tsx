@@ -17,6 +17,7 @@ export interface IFormViewProps {
   className?: string;
   style?: React.CSSProperties;
   onSubmit: (form: Form) => void;
+  children?: React.ReactNode;
 }
 
 export type FormViewProps = WithStyle<FormViewStyles, IFormViewProps>;

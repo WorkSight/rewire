@@ -176,12 +176,13 @@ export interface ISortableListProps {
   autoFocusId?   : string;
   scrollable?    : boolean;
   isDropDisabled?: boolean;
-  listRenderer?  : React.SFC<any>;
+  listRenderer?  : (props: any) => JSX.Element | React.ComponentElement<any, any> | null;
   itemRenderer?  : (item: IItem) => JSX.Element;
   style?         : Object;
   classes?       : React.CSSProperties;
   showDragHandle?: boolean;
   disableTabbing?: boolean;
+  children?      : React.ReactNode;
   items          : IItem[];
 };
 
@@ -235,7 +236,8 @@ export const SortableList = withStyles(sortableListStyles, SortableListInternal)
 
 export interface ISortableProps {
   direction?: 'row' | 'column';
-  classes?: any;
+  classes?:   any;
+  children?:  React.ReactNode;
   onDragStart?(initial: DragStart): void;
   onDragEnd?(result: DropResult): void;
 }

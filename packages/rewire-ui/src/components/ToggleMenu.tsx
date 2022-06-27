@@ -17,7 +17,7 @@ import {WithStyle, withStyles} from './styles';
 
 export interface IToggleMenuItem extends IMenuBaseItem {
   active: boolean | (() => boolean);
-  toggleIcon?: React.ComponentType<SvgIconProps>;
+  toggleIcon?: (props: SvgIconProps) => JSX.Element | React.ComponentElement<SvgIconProps, any> | null;
 
   onClick?(item: IToggleMenuItem): void;
 }
@@ -70,14 +70,14 @@ export const ToggleItemRenderer = React.memo(withStyles(toggleItemRendererStyles
         <MenuItem key={item.name} divider={item.divider} classes={{root: rootClasses, selected: classes.menuItemSelected}} disableRipple={disabled} onClick={clickHandler}>
           {item.icon &&
             <ListItemIcon className={classes.listItemIcon}>
-              {item.icon}
+              {<item.icon />}
             </ListItemIcon>
           }
           <ListItemText className={classes.listItemText} primary={item.title} primaryTypographyProps={{classes: {root: classes.listItemTypography}}} />
           <Observe render={() => (
             (is.function(item.active) ? (item.active as CallableFunction)() : item.active) &&
               <ListItemIcon className={classes.listItemToggleIcon}>
-                {item.toggleIcon ? item.toggleIcon : <CheckIcon />}
+                {item.toggleIcon ? <item.toggleIcon /> : <CheckIcon />}
               </ListItemIcon>
             || null
           )} />

@@ -13,11 +13,12 @@ import {Theme}                      from '@material-ui/core/styles';
 import {PopoverOrigin}              from '@material-ui/core/Popover';
 import LabelIcon                    from '@material-ui/icons/LabelOutlined';
 import {WithStyle, withStyles}      from './styles';
+import { SvgIconProps }             from '@material-ui/core/SvgIcon';
 
 export interface IMenuBaseItem {
   name: string;
   title: string;
-  icon?: React.ReactNode;
+  icon?: (props: SvgIconProps) => JSX.Element | React.ComponentElement<SvgIconProps, any> | null;
   divider?: boolean;
   subheader?: string | JSX.Element | (() => JSX.Element);
   closeOnClick?: boolean;
@@ -79,7 +80,7 @@ interface IMenuBaseProps extends Without<Partial<MenuProps>, 'title'> {
   anchorOrigin?:    PopoverOrigin;
   transformOrigin?: PopoverOrigin;
   items:            IMenuBaseItem[];
-  itemRenderer?:    React.SFC<any>;
+  itemRenderer?:    (props: any) => JSX.Element | React.ComponentElement<any, any> | null;
 
   onItemClick?(item: IMenuBaseItem): void;
 }
@@ -145,7 +146,7 @@ class MenuBase extends React.Component<MenuBaseProps, IMenuBaseState> {
         visible &&
           <MenuItem key={item.name} divider={item.divider} disableRipple={disabled} classes={{root: rootClasses, selected: classes.menuItemSelected}} onClick={clickHandler}>
             <ListItemIcon className={classes.listItemIcon}>
-              {item.icon ? item.icon : <LabelIcon />}
+              {item.icon ? <item.icon /> : <LabelIcon />}
             </ListItemIcon>
             <ListItemText className={classes.listItemText} primary={item.title} primaryTypographyProps={{classes: {root: classes.listItemTypography}}} />
           </MenuItem>

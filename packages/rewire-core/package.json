@@ -27,7 +27,7 @@
     "rewire-common": "../rewire-common"
   },
   "dependencies": {
-    "react": "^17.0.1",
+    "react": "18.0.0",
     "rewire-common": "^1.0.277",
     "s-js": "^0.4.9"
   },
