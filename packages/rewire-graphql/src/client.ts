@@ -6,7 +6,10 @@ import {
   IClient,
   isGQL,
   GraphQLMiddleware,
-  GQL
+  GQL,
+  IObservable,
+  ISubscription,
+  IObserver
 }                             from './types';
 import { BSON }               from './bson';
 import { hashString }         from './hash';
@@ -15,49 +18,47 @@ import {
   Client as SubscriptionClient,
   SubscribePayload
 }                             from 'graphql-ws';
-import {
-  Stream,
-  Sink,
-  Scheduler,
-  PropagateTask
-}                             from 'most';
 import { extractFiles }       from 'extract-files';
 import { ExecutionResult }    from 'graphql';
 
+class QueryObservable<T> implements IObservable<T> {
+  _subscription: ISubscription | undefined;
+  _observers: IObserver<T>[] = [];
+  _disposeFn?: () => void;
 
-function tryEvent (t: number, data: any, sink: Sink<any>) {
-  try {
-    sink.event(t, data)
-  } catch (e) {
-    sink.error(t, e)
-  }
-}
-
-class QueryObservable {
   constructor(private client: SubscriptionClient, private query: SubscribePayload) {}
-  _dispose: any;
 
-  run(sink: Sink<any>, scheduler: Scheduler) {
+  subscribe(observer: IObserver<T>): ISubscription {
     const self = this;
-    scheduler.asap(new PropagateTask(
-      (t, query, sink: Sink<any>) => {
-        self ._dispose = this.client.subscribe(query, {
-          next: (data: any) => tryEvent(t, data, sink),
-          error: (err: Error) => {
-            console.error(err);
-            // sink.error(t, err);
-          },
-          complete: () => sink.end(t),
-        });
-      },
-      self .query,
-    sink));
-
-    return {
-      dispose() {
-        return self?._dispose();
+    self._observers.push(observer);
+    const _subscription = {
+      unsubscribe() {
+        self._observers.splice(self._observers.indexOf(observer), 1);
+        if ((self._observers.length === 0) && self._disposeFn) {
+          self._disposeFn();
+          self._disposeFn = undefined;
+        }
       }
     };
+    if (self._disposeFn) return _subscription;
+    (async () => {
+        try {
+          self._disposeFn = self.client.subscribe(self.query, {
+            next: (data: any) => self._observers.forEach(o => o.next(data)),
+            error: (err: Error) => {
+              console.error(err);
+            },
+            complete: () => self._observers.forEach(o => o.complete()),
+          });
+        }
+        catch(err) {
+          console.error(err);
+          self._observers.forEach(o => o.error(err));
+          return;
+      }
+    })();
+
+    return _subscription;
   }
 }
 
@@ -143,7 +144,7 @@ class Client implements IClient {
     return promise;
   }
 
-  subscribe<T>(query: GQL, variables?: object): Stream<ExecutionResult<T>> {
+  subscribe<T>(query: GQL, variables?: object): IObservable<ExecutionResult<T>> {
     if (!this.subscriptionClient) {
       const url = new URL(this.url);
       const protocol = (url.protocol == 'https:') ? 'wss:' : 'ws:';
@@ -156,7 +157,7 @@ class Client implements IClient {
       });
     }
 
-    return new Stream(new QueryObservable(this.subscriptionClient!, {query: (isGQL(query)) ? query.loc.source.body : query, variables: variables as Record<string, unknown>})) as Stream<ExecutionResult<T>>;
+    return new QueryObservable<ExecutionResult<T>>(this.subscriptionClient!, {query: (isGQL(query)) ? query.loc.source.body : query, variables: variables as Record<string, unknown>});
   }
 
   query(query: GQL, variables?: object, headers?: object, mutate: boolean = false): Promise<IQueryResponse> {

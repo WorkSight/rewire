@@ -19,13 +19,13 @@ import ColumnCell                            from './ColumnCell';
 import classNames                            from 'classnames';
 import Cell                                  from './Cell';
 import Row, {GroupRow}                       from './Row';
-import React                            from 'react';
-import Color                            from 'color';
+import React                                 from 'react';
+import Color                                 from 'color';
 import {debounce}                            from 'rewire-common';
 import {WithStyle, withStyles, MixedMenu}    from 'rewire-ui';
 import {PopoverOrigin}                       from '@material-ui/core/Popover';
 import {ButtonProps}                         from '@material-ui/core/Button';
-import {MuiThemeProvider, Theme}             from '@material-ui/core/styles';
+import {ThemeProvider, Theme}                from '@material-ui/core/styles';
 import SettingsIcon                          from '@material-ui/icons/Settings';
 import createGridTheme                       from './GridTheme';
 import {scrollBySmooth}                      from '../models/SmoothScroll';
@@ -72,8 +72,7 @@ function verticalResizeWatcher(lifetime: React.Component<any>, element: HTMLElem
   });
 
   const observer = new ResizeObserver(function() {
-    fastdom.measure(() => {
-      const current = {scrollHeight: element.scrollHeight, clientHeight: element.clientHeight};
+    fastdom.measure(() => {      const current = {scrollHeight: element.scrollHeight, clientHeight: element.clientHeight};
       if (current && _previous && (current.scrollHeight === _previous.scrollHeight) === (current.clientHeight === _previous.clientHeight)) return;
       for (const callback of _callbacks) {
         callback(current);
@@ -274,9 +273,9 @@ class Grid extends React.PureComponent<IGridProps> {
     });
 
     return (
-      <MuiThemeProvider theme={(outerTheme?: Theme) => createGridTheme({palette: paletteObj, fontSizes: gridFontSizes}, outerTheme)}>
+      <ThemeProvider theme={(outerTheme?: Theme) => createGridTheme({palette: paletteObj, fontSizes: gridFontSizes}, outerTheme)}>
         <GridInternal {...this.props} />
-      </MuiThemeProvider>
+      </ThemeProvider>
     );
   }
 }

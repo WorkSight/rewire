@@ -1,4 +1,3 @@
-import { Stream }          from 'most';
 import { ExecutionResult } from 'graphql';
 
 export type GQL = {loc: {source: {body: string}}};
@@ -28,6 +27,20 @@ export interface IQueryResponse {
 
 export type GraphQLMiddleware = (query: IQuery, request: RequestInit, next: () => void) => void;
 
+export interface IObserver<T> {
+  next(value: T): void
+  error(errorValue: Error): void
+  complete(completionValue?: T): void
+};
+
+export interface ISubscription {
+  unsubscribe(): void;
+};
+
+export interface IObservable<T> {
+  subscribe(observer: IObserver<T>): ISubscription;
+};
+
 export interface IClient {
   bearer?: string;
 
@@ -36,5 +49,5 @@ export interface IClient {
   use            (middleware: GraphQLMiddleware): void;
   executeMutation(mutationObject: IMutation, headers?: object): Promise<IQueryResponse>;
   mutation       (query: GQL, variables: object, headers?: object): Promise<IQueryResponse>;
-  subscribe<T>   (query: GQL, variables?: object): Stream<ExecutionResult<T>>;
+  subscribe<T>   (query: GQL, variables?: object): IObservable<ExecutionResult<T>>;
 }

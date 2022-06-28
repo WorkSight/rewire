@@ -1,6 +1,6 @@
 {
   "name": "rewire-grid",
-  "version": "1.0.280",
+  "version": "1.0.284",
   "description": "A lightweight reactive grid implementation built using rewire-core.",
   "repository": {
     "type": "git",
@@ -25,9 +25,9 @@
   },
   "homepage": "https://github.com/worksight/rewire",
   "dependencies": {
-    "@material-ui/core": "^4.11.3",
-    "@material-ui/icons": "^4.11.2",
-    "@material-ui/styles": "^4.11.3",
+    "@material-ui/core": "^4.12.4",
+    "@material-ui/icons": "^4.11.3",
+    "@material-ui/styles": "^4.11.5",
     "@types/material-ui": "^0.21.8",
     "@types/react": "^18.0.0",
     "classcat": "^3.2.5",
@@ -48,8 +48,6 @@
     "sass": "^1.32.7"
   },
   "devDependencies": {
-    "@babel/core": "^7.12.16",
-    "@babel/preset-env": "^7.12.16",
     "@types/lodash.flow": "^3.5.7"
   }
 }
