@@ -15,7 +15,7 @@ import {
   withStyles,
 }                               from 'rewire-ui';
 import Cell                     from './Cell';
-import fastdom                  from 'fastdom';
+import { loop }                 from 'dom-loop';
 
 const styles = (theme: Theme) => {
   let color = theme.palette.groupRowBackground.main;
@@ -194,14 +194,14 @@ class InternalRow extends React.PureComponent<RowProps, {}> {
     const components = getComponents(this.props.row);
 
     let newHeight = 0;
-    fastdom.measure(() => {
+    loop.read(() => {
       this.desiredHeight = this.element.current ? this.element.current.getBoundingClientRect().height : 0;
       for (const component of components) {
         newHeight = Math.max(newHeight, component.desiredHeight);
       }
     });
 
-    fastdom.mutate(() => {
+    loop.write(() => {
       for (const component of components) {
         if (component.element.current) component.element.current.style.height = `${newHeight}px`;
       }
@@ -215,7 +215,7 @@ class InternalRow extends React.PureComponent<RowProps, {}> {
 
     const components = getComponents(this.props.row);
     let   newHeight  = 0;
-    fastdom.measure(() => {
+    loop.read(() => {
       if (this.element.current) this.element.current.style.height = 'auto';
       this.desiredHeight = this.element.current ? this.element.current.getBoundingClientRect().height : 0;
       for (const component of components) {
@@ -223,7 +223,7 @@ class InternalRow extends React.PureComponent<RowProps, {}> {
       }
     });
 
-    fastdom.mutate(() => {
+    loop.write(() => {
       for (const component of components) {
         if (component.element.current) component.element.current.style.height = `${newHeight}px`;
       }
