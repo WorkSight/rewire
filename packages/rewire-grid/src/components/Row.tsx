@@ -1,4 +1,4 @@
-import * as React              from 'react';
+import React              from 'react';
 import {
   IRow,
   IColumn,
@@ -6,7 +6,7 @@ import {
   isGroupRow
 }                               from '../models/GridTypes';
 import cc                       from 'classcat';
-import * as Color               from 'color';
+import Color               from 'color';
 import {isNullOrUndefined}      from 'rewire-common';
 import {Observe}                from 'rewire-core';
 import {Theme}                  from '@material-ui/core/styles';
@@ -15,7 +15,7 @@ import {
   withStyles,
 }                               from 'rewire-ui';
 import Cell                     from './Cell';
-import * as fastdom             from 'fastdom';
+import fastdom                  from 'fastdom';
 
 const styles = (theme: Theme) => {
   let color = theme.palette.groupRowBackground.main;
@@ -49,7 +49,7 @@ const styles = (theme: Theme) => {
 
 export type RowStyles = ReturnType<typeof styles>;
 
-export interface IGroupProps extends React.Props<any> {
+export interface IGroupProps  {
   group: IGroupRow,
   columns: () => IColumn[],
   numVisibleColumns: number,
@@ -57,7 +57,6 @@ export interface IGroupProps extends React.Props<any> {
   classes?: any,
   cellClasses?: any,
 }
-
 
 export type GroupProps = WithStyle<RowStyles, IGroupProps>;
 
@@ -105,7 +104,7 @@ export interface IRowProps {
   row               : IRow;
   height?           : number;
   columns           : () => IColumn[];
-  Cell              : React.ComponentType<any>;
+  Cell              : (props: any) => JSX.Element;
   isFixedColumnsRow?: boolean;
   index             : number;
   className?        : string;
@@ -118,7 +117,7 @@ export type RowProps = WithStyle<RowStyles, IRowProps>;
 
 class InternalRow extends React.PureComponent<RowProps, {}> {
   element: React.RefObject<HTMLTableRowElement>;
-  observer: MutationObserver;
+  observer?: MutationObserver;
   desiredHeight: number = 0;
 
   constructor(props: RowProps) {

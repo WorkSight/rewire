@@ -1,4 +1,4 @@
-import * as React              from 'react';
+import React              from 'react';
 import { delay }               from 'rewire-common';
 import { countries, searcher } from './demo-data';
 import { Observe }             from 'rewire-core';
@@ -15,8 +15,6 @@ import AccessibilityIcon from '@material-ui/icons/Accessibility';
 import AddIcon           from '@material-ui/icons/Add';
 import Button            from '@material-ui/core/Button';
 // import Slide             from '@material-ui/core/Slide';
-
-import './graphqltest';
 
 const confirmation = new Modal('Please confirm your request')
   .action('yes', () => (console.log('I beg to differ, but its your choice'), true), { color: 'primary' })

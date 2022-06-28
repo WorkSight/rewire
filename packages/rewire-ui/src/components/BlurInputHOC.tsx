@@ -1,11 +1,11 @@
-import * as React         from 'react';
+import React         from 'react';
 import { TextFieldProps } from '@material-ui/core/TextField';
 import { InputProps }     from '@material-ui/core/Input';
 import { TextAlignment }  from './editors';
 
 export interface IBlurState {
-  readonly value?: string | number | React.ReactText[];
-  currentExternalValue?: string | number | React.ReactText[];
+  readonly value?: string | number | React.ReactText[] | unknown;
+  currentExternalValue?: string | number | React.ReactText[] | unknown;
 }
 
 export type IBlurProps = {
@@ -58,13 +58,13 @@ export default class BlurInputHOC extends React.Component<IBlurProps, IBlurState
 
   handleOnKeyDown = (evt: React.KeyboardEvent<HTMLInputElement>) => {
     if (evt.keyCode === 13) {
-      this.props.onValueChange(this.state.value);
+      this.props.onValueChange(this.state.value as any);
     }
   }
 
   handleOnBlur = (evt: any) => {
     if (this.props.onValueChange) {
-      this.props.onValueChange(this.state.value);
+      this.props.onValueChange(this.state.value as any);
     }
   }
 

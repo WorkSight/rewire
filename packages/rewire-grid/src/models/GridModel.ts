@@ -13,7 +13,7 @@ import {
   ChangeTracker,
   IChangeTrackerContext
 }                                     from 'rewire-ui';
-import * as merge                     from 'deepmerge';
+import merge                     from 'deepmerge';
 import { CellModel }                  from './CellModel';
 import { ColumnModel }                from './ColumnModel';
 import {

@@ -1,9 +1,9 @@
-import * as React                                         from 'react';
+import React                                         from 'react';
 import {
   Resizable,
   ResizableProps,
 }                                                         from 're-resizable';
-export {
+export type {
   Enable as ResizableBoxEnable,
   HandleStyles as ResizableBoxHandleStyles,
   HandleClassName as ResizableBoxHandleClassName,

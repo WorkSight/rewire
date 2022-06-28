@@ -1,4 +1,4 @@
-import * as React           from 'react';
+import React           from 'react';
 import { TransitionWrapper} from 'rewire-ui';
 import Typography           from '@material-ui/core/Typography';
 

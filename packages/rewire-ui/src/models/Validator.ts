@@ -1,6 +1,6 @@
 import {isNullOrUndefined} from 'rewire-common';
 import {defaultEquals} from 'rewire-core';
-import * as is from 'is';
+import is from 'is';
 
 export function isGreaterThan(v1: any, v2: any): boolean {
   if (isNullOrUndefined(v1) || isNullOrUndefined(v2)) {

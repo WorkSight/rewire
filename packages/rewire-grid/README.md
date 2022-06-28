@@ -31,11 +31,11 @@ Then, using a module bundler that supports either CommonJS or ES2015 modules, su
 
 Getting Started
 ---------------
-The grid like most of rewire components consists of a model and associated view components. They generally map one to one. So there will be a GridModel -> Grid, ColumnModel -> Column, etc...When working and building react-core components it is desirable to keep this model -> View separation. The philosophy of which the View is just reacting to model changes and are generally very lightweight. When you want to add capabilities to your application think model first and generally your models should not have any react or view dependencies. Enough sermonizing let's have a look. 
+The grid like most of rewire components consists of a model and associated view components. They generally map one to one. So there will be a GridModel -> Grid, ColumnModel -> Column, etc...When working and building react-core components it is desirable to keep this model -> View separation. The philosophy of which the View is just reacting to model changes and are generally very lightweight. When you want to add capabilities to your application think model first and generally your models should not have any react or view dependencies. Enough sermonizing let's have a look.
 
 ```js
-import * as React    from 'react';
-import * as ReactDOM from 'react-dom';
+import React    from 'react';
+import ReactDOM from 'react-dom';
 import {createGrid, createColumn, Grid} from 'rewire-grid';
 
 function createTestGrid(nRows: number, nColumns: number) {
@@ -99,7 +99,7 @@ ReactDOM.render(<div>
 </div>, document.getElementById('root'));
 
 ```
-The rendered grid view: 
+The rendered grid view:
 
 ![grid sample](https://github.com/WorkSight/rewire/raw/master/resources/grid-sample.png)
 

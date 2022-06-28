@@ -1,4 +1,4 @@
-import * as qs from 'query-string';
+import qs from 'query-string';
 
 const _timeout: number = 30 * 1000;
 export interface IServerInfo {

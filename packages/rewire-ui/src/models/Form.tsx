@@ -1,4 +1,4 @@
-import * as React             from 'react';
+import React             from 'react';
 import {
   isNullOrUndefined,
   isNullOrUndefinedOrEmpty,
@@ -514,7 +514,7 @@ export default class Form implements IValidationContext {
     'multiselectautocomplete' : 'multiselectautocomplete'
   };
 
-  private createEditor(editorType: EditorType | undefined, field: IEditorField, editProps?: any): React.SFC<any> {
+  private createEditor(editorType: EditorType | undefined, field: IEditorField, editProps?: any): React.FunctionComponent<any> {
     if (!editorType) editorType = Form.editorDefaults[field.type];
 
     if (!editProps) {
@@ -528,7 +528,7 @@ export default class Form implements IValidationContext {
       this.setFieldValue(field.name, value);
     };
 
-    return (props) => React.createElement(editor(editorType!, editProps), {...props, field: field, onValueChange});
+    return (props: any) => React.createElement(editor(editorType!, editProps), {...props, field: field, onValueChange});
   }
 
   private createField(name: string, fieldDefn: BaseField): IEditorField {

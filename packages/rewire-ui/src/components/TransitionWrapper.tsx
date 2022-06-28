@@ -1,4 +1,4 @@
-import * as React from 'react';
+import React from 'react';
 import Fade       from '@material-ui/core/Fade';
 import Grow       from '@material-ui/core/Grow';
 

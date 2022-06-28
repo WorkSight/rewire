@@ -1,4 +1,4 @@
-import * as React from 'react';
+import React from 'react';
 
 export type TPercentage = '8.33%' | '16.67%' | '25%' | '33.33%' | '41.67%' | '50%' | '58.33%' | '66.67%' | '75%' | '83.33%' | '91.67%' | '100%';
 export type TColumns = '1' | '2' | '3' | '4' | '5' | '6' | '7' | '8' | '9' | '10' | '11' | '12';

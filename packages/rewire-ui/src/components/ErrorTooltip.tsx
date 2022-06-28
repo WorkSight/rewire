@@ -1,8 +1,8 @@
-import * as React              from 'react';
+import React                   from 'react';
 import classNames              from 'classnames';
 import {Observe, observable}   from 'rewire-core';
 import {isNullOrUndefined}     from 'rewire-common';
-import Tooltip, {TooltipProps} from '@material-ui/core/Tooltip';
+import Tooltip                 from '@material-ui/core/Tooltip';
 import Fade                    from '@material-ui/core/Fade';
 import {SvgIconProps}          from '@material-ui/core/SvgIcon';
 import {Theme, makeStyles}     from '@material-ui/core/styles';
@@ -44,7 +44,7 @@ export interface IErrorTooltipProps {
 export type ErrorTooltipProps = WithStyle<ErrorTooltipStyles, IErrorTooltipProps>;
 
 interface IErrorTooltipObservableState {
-  fontSize?: string | number; 
+  fontSize?: string | number;
 }
 
 class ErrorTooltip extends React.PureComponent<ErrorTooltipProps> {

@@ -1,5 +1,5 @@
-import * as React              from 'react';
-import * as is                 from 'is';
+import React              from 'react';
+import is                 from 'is';
 import {
   utc,
   UTC,
@@ -86,7 +86,7 @@ export type TextEditorProps = {
   onValueChange         : (v: any) => void,
 };
 
-export default function editor(type: EditorType, propsForEdit?: any): React.SFC<TextEditorProps> {
+export default function editor(type: EditorType, propsForEdit?: any): React.FunctionComponent<TextEditorProps> {
   switch (type) {
     case 'select':
       return ({field, className, classes, onValueChange}: TextEditorProps) => (

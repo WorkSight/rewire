@@ -13,9 +13,8 @@
     "forceConsistentCasingInFileNames": false,
     "inlineSourceMap": false,
     "inlineSources": false,
-    "isolatedModules": true,
+    "isolatedModules": false,
     "jsx": "react",
-    "listFiles": true,
     "locale": "en-us",
     "module": "commonjs",
     "moduleResolution": "node",
@@ -38,7 +37,11 @@
       { "name": "tslint-language-service" }
     ]
   },
-  "exclude": [
+  "include": [
+    "src/index.ts",
+    "src/externals.d.ts"
+  ],
+"exclude": [
     "node_modules", "test", "tests", "dist", "lib", "build"
   ]
 }

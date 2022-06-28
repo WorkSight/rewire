@@ -1,4 +1,4 @@
-import * as React                from 'react';
+import React                from 'react';
 import Modal, { ActionType }     from '../models/Modal';
 import classNames                from 'classnames';
 import {isNullOrUndefined}       from 'rewire-common';
@@ -15,7 +15,10 @@ import Grow                      from '@material-ui/core/Grow';
 import { PaperProps }            from '@material-ui/core/Paper';
 import { Theme }                 from '@material-ui/core/styles';
 import { WithStyle, withStyles } from './styles';
+import { TransitionProps }       from '@material-ui/core/transitions';
 import './Dialog.css';
+
+type TransitionPropsType = React.ComponentType<TransitionProps & { children?: React.ReactElement<any, any> }> | undefined;
 
 let styles = (theme: Theme) => ({
   root: {
@@ -130,13 +133,14 @@ export interface IDialogProps {
   buttonVariant?        : ButtonProps['variant'];
   actions?              : string[];
   ButtonRenderer?       : ActionRenderType;
+  children?             : React.ReactNode;
   PaperComponent?       : React.ElementType<PaperProps>;
   HeaderComponent?      : (props: any) => JSX.Element;
 }
 
 export type DialogProps = WithStyle<DialogStyles, IDialogProps>;
 
-class DialogInternal extends React.Component<DialogProps> {
+class DialogInternal extends React.Component<IDialogProps> {
   prevActiveElement?: HTMLElement;
 
   componentDidMount() {
@@ -200,7 +204,7 @@ class DialogInternal extends React.Component<DialogProps> {
     const escapeAction            = disableEscapeKeyDown ? undefined : () => dialog.close();
     const transitionToUse         = transition ? transition : Transition;
     const transitionDurationToUse = !isNullOrUndefined(transitionDuration) ? transitionDuration : TRANSITION_TIMEOUT;
-    const transitionAction        = disableTransition ? undefined : transitionToUse;
+    const transitionAction        = (disableTransition ? undefined : transitionToUse) as TransitionPropsType;
     const transitionTime          = disableTransition ? 0 : transitionDurationToUse;
 
     return (

@@ -1,10 +1,10 @@
-import {createMuiTheme, Theme}       from '@material-ui/core/styles';
-import {ThemeOptions}                from '@material-ui/core/styles/createMuiTheme';
-import * as Color                    from 'color';
-import * as merge                    from 'deepmerge';
+import {createTheme, Theme}       from '@material-ui/core/styles';
+import {ThemeOptions}                from '@material-ui/core/styles';
+import Color                    from 'color';
+import merge                    from 'deepmerge';
 import {IGridColors, IGridFontSizes} from '../models/GridTypes';
 
-declare module '@material-ui/core/styles/createMuiTheme' {
+declare module '@material-ui/core/styles' {
   interface Theme {
     fontSizes: {
       header: string,
@@ -282,7 +282,7 @@ export default function createGridTheme(options: ThemeOptions = {}, outerTheme?:
 
   let defaultThemeOptions: ThemeOptions = {...outerTheme, palette: palette, fontSizes: fontSizes, typography: typography};
   let gridThemeOptions: ThemeOptions    = merge(defaultThemeOptions, options);
-  let gridTheme = createMuiTheme(gridThemeOptions);
+  let gridTheme = createTheme(gridThemeOptions);
 
   return gridTheme;
 }

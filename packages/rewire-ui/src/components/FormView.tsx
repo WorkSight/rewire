@@ -1,4 +1,4 @@
-import * as React              from 'react';
+import React              from 'react';
 import Form                    from '../models/Form';
 import classNames              from 'classnames';
 import {withStyles, WithStyle} from './styles';
@@ -17,11 +17,12 @@ export interface IFormViewProps {
   className?: string;
   style?: React.CSSProperties;
   onSubmit: (form: Form) => void;
+  children?: React.ReactNode;
 }
 
 export type FormViewProps = WithStyle<FormViewStyles, IFormViewProps>;
 
-class FormView extends React.Component<FormViewProps> {
+class FormView extends React.Component<IFormViewProps> {
   shouldComponentUpdate(nextProps: FormViewProps) {
     return (
       nextProps.form !== this.props.form ||
@@ -55,7 +56,7 @@ class FormView extends React.Component<FormViewProps> {
   }
 
   render() {
-    const {style, className, classes, children} = this.props;
+    const {style, className, classes, children} = (this.props as FormViewProps);
     return (
       <form autoComplete='off' className={classNames(classes.form, className)} style={style} onKeyDown={this.handleKeyDown} onSubmit={this.handleSubmit}>
         {children}

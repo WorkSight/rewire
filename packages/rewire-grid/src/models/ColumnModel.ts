@@ -1,4 +1,4 @@
-import * as React from 'react';
+import React from 'react';
 import {
   IColumn,
   ICell,
@@ -28,7 +28,7 @@ import {
   property
 } from 'rewire-core';
 import {createMultiSelectAutoCompleteEditor} from '../components/gridEditors';
-import * as is             from 'is';
+import is             from 'is';
 
 let id            = 0;
 const toLowerCase = (value: string) => String(value).toLowerCase();
@@ -61,9 +61,9 @@ export class ColumnModel implements IColumn {
   cls?           : any;
   typeOptions?   : any;
   type           : EditorType;
-  headerRenderer?: React.SFC<any>;
-  renderer?      : React.SFC<any>;
-  editor?        : React.SFC<any>;
+  headerRenderer?: React.FunctionComponent<any>;
+  renderer?      : React.FunctionComponent<any>;
+  editor?        : React.FunctionComponent<any>;
   editorTooltip? : string | ((value: any) => string);
 
   onValueChange?(cell: ICell, v: any): void;
@@ -247,7 +247,7 @@ const arrayCompare = (mapFn?: any, compareFn?: any) => (x: any, y: any): number 
   return (x.length < y.length ? -1 : x.length > y.length ? 1 : 0);
 };
 
-export function getNumberString(value: any, decimals?: number, thousandSeparator?: boolean, fixed?: boolean): string {
+export function getNumberString(value: any, decimals?: number, thousandSeparator?: boolean, fixed?: boolean): string | null | undefined {
   if (isNullOrUndefined(value)) return value;
 
   let numberStr = decimals && is.number(value) ? value.toFixed(decimals) : value.toString();
@@ -286,7 +286,7 @@ function getThousandSeparatedNumberString(numStr: string): string {
   return beforeDecimal + (hasDecimalSeparator ? '.' : '') + afterDecimal;
 }
 
-export function getPhoneString(value: any, format: string, mask: string): string {
+export function getPhoneString(value: any, format: string, mask: string): string | null | undefined {
   if (isNullOrUndefined(value)) return value;
 
   let phoneStr             = value.toString();

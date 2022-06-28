@@ -1,4 +1,4 @@
-import * as React                    from 'react';
+import React                    from 'react';
 import classNames                    from 'classnames';
 import TextField, { TextFieldProps } from '@material-ui/core/TextField';
 import InputAdornment                from '@material-ui/core/InputAdornment';
@@ -129,7 +129,7 @@ class PasswordField extends React.Component<PasswordFieldProps, IPasswordFieldSt
       (nextProps.placeholder         !== this.props.placeholder)         ||
       (nextProps.align               !== this.props.align)               ||
       (nextProps.variant             !== this.props.variant)             ||
-      (nextProps.disableErrors       !== this.props.disableErrors)       || 
+      (nextProps.disableErrors       !== this.props.disableErrors)       ||
       (nextProps.useTooltipForErrors !== this.props.useTooltipForErrors) ||
       (nextProps.tooltip             !== this.props.tooltip)
     );
@@ -171,7 +171,7 @@ class PasswordField extends React.Component<PasswordFieldProps, IPasswordFieldSt
     if (!useTooltipForErrors) {
       return error;
     }
-      
+
     return (
       <ErrorTooltip
         inputRef={this.inputRef}
@@ -213,7 +213,7 @@ class PasswordField extends React.Component<PasswordFieldProps, IPasswordFieldSt
           disabled={this.props.disabled}
           label={this.props.label}
           placeholder={this.props.placeholder}
-          variant={this.props.variant}
+          variant={this.props.variant as any}
           error={!this.props.disableErrors && !this.props.disabled && !!this.props.error}
           helperText={!this.props.disableErrors && <span>{(!this.props.disabled && this.props.error ? <this.renderError classes={this.props.classes} error={this.props.error} useTooltipForErrors={this.props.useTooltipForErrors} /> : '')}</span>}
           value={value}
@@ -233,7 +233,7 @@ class PasswordField extends React.Component<PasswordFieldProps, IPasswordFieldSt
     }
 
     return (
-      <BlurInputHOC {...this.props} type={type} value={value} onValueChange={this.props.onValueChange}
+      <BlurInputHOC {...(this.props as any)} type={type} value={value} onValueChange={this.props.onValueChange}
         render={(props: PasswordFieldProps) =>
           <TextField
             className={props.className}
@@ -242,7 +242,7 @@ class PasswordField extends React.Component<PasswordFieldProps, IPasswordFieldSt
             disabled={props.disabled}
             label={props.label}
             placeholder={props.placeholder}
-            variant={props.variant}
+            variant={props.variant as any}
             error={!props.disableErrors && !props.disabled && !!props.error}
             helperText={!props.disableErrors && <span>{(!props.disabled && props.error ? <this.renderError classes={props.classes} error={props.error} useTooltipForErrors={props.useTooltipForErrors} /> : '')}</span>}
             value={props.value}

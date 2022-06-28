@@ -1,5 +1,5 @@
-import * as React         from 'react';
-import * as ReactDOM      from 'react-dom';
+import React              from 'react';
+import ReactDOM           from 'react-dom/client';
 import CssBaseline        from '@material-ui/core/CssBaseline';
 import Divider            from '@material-ui/core/Divider';
 import { HomeView }       from './HomeView';
@@ -11,7 +11,7 @@ import {
   Route,
   Link,
 } from 'react-router-dom';
-import { MuiThemeProvider, createMuiTheme }         from '@material-ui/core/styles';
+import { MuiThemeProvider, createTheme }         from '@material-ui/core/styles';
 
 const listStyle = ({
   listStyleType: 'none',
@@ -56,8 +56,8 @@ const BasicExample = (props: any) => {
 
 // async function login() {
   // await fetch.post('accounts/login', { username: 'Administrator', password: '324#$as(lkf)' });
-  let theme = createMuiTheme();
-  ReactDOM.render(<MuiThemeProvider theme={theme}><BasicExample /></MuiThemeProvider>, document.getElementById('root'));
+let theme = createTheme();
+ReactDOM.createRoot(document.getElementById('root')!).render(<MuiThemeProvider theme={theme}><BasicExample /></MuiThemeProvider>);
 // }
 
 // login();

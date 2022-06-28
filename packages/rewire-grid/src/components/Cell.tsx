@@ -4,8 +4,8 @@ import {
   IColumn,
   ICell
 }                                 from '../models/GridTypes';
-import * as React                 from 'react';
-import * as is                    from 'is';
+import React                 from 'react';
+import is                    from 'is';
 import cc                         from 'classcat';
 import classNames                 from 'classnames';
 import {isNullOrUndefinedOrEmpty} from 'rewire-common';
@@ -14,7 +14,7 @@ import {
   withStyles,
   WithStyle,
   ErrorSeverity,
-  ErrorTooltip,
+  ErrorTooltip
 }                                 from 'rewire-ui';
 import {SvgIconProps}             from '@material-ui/core/SvgIcon';
 import {Theme}                    from '@material-ui/core/styles';
@@ -394,7 +394,7 @@ class Cell extends React.PureComponent<CellProps, {}> {
             additionalProps['initialInputValue'] = cell.keyForEdit;
           }
         }
-        let editorClasses: Object | undefined = undefined;
+        let editorClasses: Object = {};
         if (cellType === 'checked') {
           editorClasses = {checkboxRoot: this.props.classes.editorCheckboxRoot};
         } else if (cellType === 'text' || cellType === 'date' || cellType === 'email' || cellType === 'password' || cellType === 'time' || cellType === 'number' || cellType === 'phone' || cellType === 'auto-complete' || 'select' || 'multiSelect' || 'mask') {

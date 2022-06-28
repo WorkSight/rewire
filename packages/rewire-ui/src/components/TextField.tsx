@@ -1,12 +1,12 @@
-import * as React                    from 'react';
-import * as is                       from 'is';
+import React                    from 'react';
+import is                       from 'is';
 import classNames                    from 'classnames';
 import {isNullOrUndefined, utc, UTC} from 'rewire-common';
 import BlurInputHOC                  from './BlurInputHOC';
 import {
   TextField
   as
-  MuiTextField, 
+  MuiTextField,
   TextFieldProps
   as
   MuiTextFieldProps,
@@ -286,7 +286,7 @@ class TextField extends React.Component<TextFieldProps> {
     }
 
     return (
-    <BlurInputHOC {...this.props} value={value} onValueChange={this.onValueChange}
+    <BlurInputHOC {...(this.props as any)} value={value} onValueChange={(value?: string | number | React.ReactText[]) => this.onValueChange(value as string)}
       render={(props: TextFieldProps) =>
         <MuiTextField
           className={props.className}

@@ -19,18 +19,18 @@ import ColumnCell                            from './ColumnCell';
 import classNames                            from 'classnames';
 import Cell                                  from './Cell';
 import Row, {GroupRow}                       from './Row';
-import * as React                            from 'react';
-import * as Color                            from 'color';
+import React                                 from 'react';
+import Color                                 from 'color';
 import {debounce}                            from 'rewire-common';
 import {WithStyle, withStyles, MixedMenu}    from 'rewire-ui';
 import {PopoverOrigin}                       from '@material-ui/core/Popover';
 import {ButtonProps}                         from '@material-ui/core/Button';
-import {MuiThemeProvider, Theme}             from '@material-ui/core/styles';
+import {ThemeProvider, Theme}                from '@material-ui/core/styles';
 import SettingsIcon                          from '@material-ui/icons/Settings';
 import createGridTheme                       from './GridTheme';
 import {scrollBySmooth}                      from '../models/SmoothScroll';
 import ResizeObserver                        from 'resize-observer-polyfill';
-import * as fastdom                          from 'fastdom';
+import fastdom                               from 'fastdom';
 import './data-grid.scss';
 
 interface IColumnProps {
@@ -72,8 +72,7 @@ function verticalResizeWatcher(lifetime: React.Component<any>, element: HTMLElem
   });
 
   const observer = new ResizeObserver(function() {
-    fastdom.measure(() => {
-      const current = {scrollHeight: element.scrollHeight, clientHeight: element.clientHeight};
+    fastdom.measure(() => {      const current = {scrollHeight: element.scrollHeight, clientHeight: element.clientHeight};
       if (current && _previous && (current.scrollHeight === _previous.scrollHeight) === (current.clientHeight === _previous.clientHeight)) return;
       for (const callback of _callbacks) {
         callback(current);
@@ -238,11 +237,11 @@ export interface IGridProps {
 
 export type GridProps = WithStyle<GridStyles, IGridProps>;
 
-class Grid extends React.PureComponent<GridProps> {
+class Grid extends React.PureComponent<IGridProps> {
   private gridColors: IGridColors;
   private gridFontSizes: IGridFontSizes;
 
-  constructor(props: GridProps) {
+  constructor(props: IGridProps) {
     super(props);
 
     this.gridColors    = props.gridColors    || {};
@@ -274,9 +273,9 @@ class Grid extends React.PureComponent<GridProps> {
     });
 
     return (
-      <MuiThemeProvider theme={(outerTheme?: Theme) => createGridTheme({palette: paletteObj, fontSizes: gridFontSizes}, outerTheme)}>
+      <ThemeProvider theme={(outerTheme?: Theme) => createGridTheme({palette: paletteObj, fontSizes: gridFontSizes}, outerTheme)}>
         <GridInternal {...this.props} />
-      </MuiThemeProvider>
+      </ThemeProvider>
     );
   }
 }
@@ -448,7 +447,7 @@ function getScrollbarWidth() {
   const outer = document.createElement('div');
   outer.style.visibility = 'hidden';
   outer.style.overflow = 'scroll'; // forcing scrollbar to appear
-  outer.style.msOverflowStyle = 'scrollbar'; // needed for WinJS apps
+  // outer.style.msOverflowStyle = 'scrollbar'; // needed for WinJS apps
   document.body.appendChild(outer);
 
   // Creating inner element and placing it in the container
@@ -465,7 +464,7 @@ function getScrollbarWidth() {
 
 let _scrollbarWidth: number = getScrollbarWidth();
 
-const GridInternal = withStyles(internalGridStyles, class extends React.PureComponent<GridProps> {
+const GridInternal = withStyles(internalGridStyles, class extends React.PureComponent<IGridProps> {
   private scrollX            : DataSignal<number>;
   private scrollY            : DataSignal<number>;
   private _columnTableWrapper: HTMLDivElement;

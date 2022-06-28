@@ -1,6 +1,6 @@
 {
   "name": "rewire-common",
-  "version": "1.0.279",
+  "version": "1.0.284",
   "description": "Common utilities used by the rewire suite of reactive components",
   "main": "./src/index.ts",
   "typings": "./src/index.ts",
@@ -23,10 +23,5 @@
     "@types/nanoid": "^2.1.0",
     "nanoid": "^3.1.20",
     "query-string": "^6.14.0"
-  },
-  "devDependencies": {
-    "@babel/core": "^7.12.16",
-    "@babel/preset-env": "^7.12.16",
-    "babel-preset-env": "^1.7.0"
   }
 }

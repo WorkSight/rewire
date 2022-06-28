@@ -1,4 +1,4 @@
-import * as is                           from 'is';
+import is                           from 'is';
 import {isNullOrUndefined}               from 'rewire-common';
 import {
   EditorType,
@@ -14,11 +14,11 @@ import {
   TGetter,
   TSetter
 } from 'rewire-ui';
-import * as merge                        from 'deepmerge';
+import merge                        from 'deepmerge';
 import { ButtonProps }                   from '@material-ui/core/Button';
 import { PopoverOrigin }                 from '@material-ui/core/Popover';
 import { IReorderableGridRowsCellProps } from '../components/ReorderableGridRows';
-export { EditorType };
+export type { EditorType };
 
 export interface IRows {
   rows: IRow[];
@@ -313,7 +313,7 @@ export interface ICellProperties {
   cls?:      any;
   editable:  boolean;
   align?:    TextAlignment;
-  renderer?: React.SFC<any>;
+  renderer?: React.FunctionComponent<any>;
   colSpan:   number;
   rowSpan:   number;
 
@@ -336,8 +336,8 @@ export interface IColumnOptions {
   width?:          string;
   canSort?:        boolean;
   accessor?:       {getter: TGetter, setter: TSetter};
-  headerRenderer?: React.SFC<any>;
-  renderer?:       React.SFC<any>;
+  headerRenderer?: React.FunctionComponent<any>;
+  renderer?:       React.FunctionComponent<any>;
   validators?:     IFormValidator;
   editorTooltip?:  string | ((value: any) => string);
 
@@ -369,8 +369,8 @@ export interface IColumn extends ICellProperties {
   canSort:         boolean;
   isGroupByColumn: boolean;
   typeOptions?:    any;
-  headerRenderer?: React.SFC<any>;
-  editor?:         React.SFC<any>;
+  headerRenderer?: React.FunctionComponent<any>;
+  editor?:         React.FunctionComponent<any>;
   editorTooltip?:  string | ((value: any) => string);
 
   map?(value: any): string;

@@ -1,11 +1,12 @@
-import * as React              from 'react';
-import * as is                 from 'is';
+import React              from 'react';
+import is                 from 'is';
 import classNames              from 'classnames';
 import {
   Observe,
   observable,
 }                              from 'rewire-core';
-import Downshift,  {
+import _Downshift,  {
+  DownshiftProps,
   ControllerStateAndHelpers,
   StateChangeOptions }         from 'downshift';
 import TextField               from '@material-ui/core/TextField';
@@ -16,7 +17,6 @@ import IconButton              from '@material-ui/core/IconButton';
 import MenuItem                from '@material-ui/core/MenuItem';
 import InputAdornment          from '@material-ui/core/InputAdornment';
 import Typography              from '@material-ui/core/Typography';
-import RootRef                 from '@material-ui/core/RootRef';
 import {Theme}                 from '@material-ui/core/styles';
 import CloseIcon               from '@material-ui/icons/Close';
 import ArrowDropDownIcon       from '@material-ui/icons/ArrowDropDown';
@@ -34,6 +34,9 @@ import {
   defaultMap,
   IRenderSuggestionFnProps,
 } from '../models/search';
+
+type DownshiftType = (props: (DownshiftProps<any> & {ref: any})) => JSX.Element;
+const Downshift: DownshiftType = _Downshift as unknown as DownshiftType;
 
 const styles = (theme: Theme) => ({
   container: {
@@ -255,7 +258,7 @@ class AutoComplete<T> extends React.Component<AutoCompleteProps<T>, IAutoComplet
         (nextProps.openOnFocus !== this.props.openOnFocus) ||
         (nextProps.showEmptySuggestions !== this.props.showEmptySuggestions) ||
         (nextProps.hasTransition !== this.props.hasTransition) ||
-        (nextProps.transitionTimeout !== this.props.transitionTimeout) || 
+        (nextProps.transitionTimeout !== this.props.transitionTimeout) ||
         (nextProps.tooltip !== this.props.tooltip)
       );
   }
@@ -556,22 +559,21 @@ class AutoComplete<T> extends React.Component<AutoCompleteProps<T>, IAutoComplet
     const sAdornment                = startAdornment ? <InputAdornment position='start' classes={{root: classes.inputAdornmentRoot}}>{startAdornment}</InputAdornment> : undefined;
     const eAdornment                = (< ><this.renderDeleteButton disabled={disabled} hasSelectedItem={hasSelectedItem} /><this.renderOpenButton disabled={disabled} isOpen={isOpen} /></>);
     return (
-      <RootRef rootRef={this.textFieldRef}>
-        <TextField
-          className={classes.textField}
-          classes={{root: classes.formControlRoot}}
-          variant={variant}
-          title={tooltip}
-          error={!disableErrors && !disabled && !!error}
-          helperText={!disableErrors && <span>{(!disabled && error ? <this.renderError classes={classes} error={error} useTooltipForErrors={useTooltipForErrors} /> : '')}</span>}
-          inputRef={this.inputRef}
-          inputProps={{spellCheck: false, className: classes.nativeInput, style: {textAlign: align || 'left'}}}
-          InputProps={{onMouseEnter: this.handleMouseEnter, onMouseLeave: this.handleMouseLeave, startAdornment: sAdornment, endAdornment: eAdornment, classes: {root: classes.inputRoot, input: inputClassName, formControl: inputFormControlClassName, adornedEnd: adornedEndClassName}}}
-          InputLabelProps={{shrink: true, classes: {root: classes.inputLabelRoot, outlined: classes.inputLabelOutlined, shrink: classes.inputLabelShrink}}}
-          FormHelperTextProps={{classes: {root: classNames(classes.helperTextRoot, useTooltipForErrors ? classes.helperTextRootErrorIcon : undefined), contained: classes.helperTextContained}}}
-          {...inputProps}
-        />
-      </RootRef>
+      <TextField
+        className={classes.textField}
+        classes={{root: classes.formControlRoot}}
+        ref={this.textFieldRef}
+        variant={variant}
+        title={tooltip}
+        error={!disableErrors && !disabled && !!error}
+        helperText={!disableErrors && <span>{(!disabled && error ? <this.renderError classes={classes} error={error} useTooltipForErrors={useTooltipForErrors} /> : '')}</span>}
+        inputRef={this.inputRef}
+        inputProps={{spellCheck: false, className: classes.nativeInput, style: {textAlign: align || 'left'}}}
+        InputProps={{onMouseEnter: this.handleMouseEnter, onMouseLeave: this.handleMouseLeave, startAdornment: sAdornment, endAdornment: eAdornment, classes: {root: classes.inputRoot, input: inputClassName, formControl: inputFormControlClassName, adornedEnd: adornedEndClassName}}}
+        InputLabelProps={{shrink: true, classes: {root: classes.inputLabelRoot, outlined: classes.inputLabelOutlined, shrink: classes.inputLabelShrink}}}
+        FormHelperTextProps={{classes: {root: classNames(classes.helperTextRoot, useTooltipForErrors ? classes.helperTextRootErrorIcon : undefined), contained: classes.helperTextContained}}}
+        {...inputProps}
+      />
     );
   });
 
@@ -716,7 +718,7 @@ class AutoComplete<T> extends React.Component<AutoCompleteProps<T>, IAutoComplet
         itemToString={this.map}
         onInputValueChange={this.handleInputChanged}
         onUserAction={this.handleItemChanged}
-        ref={(v) => this.downShift = v}
+        ref={(v: any) => this.downShift = v}
         >
           {({
             getInputProps,

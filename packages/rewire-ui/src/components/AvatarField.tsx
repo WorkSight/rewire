@@ -1,4 +1,4 @@
-import * as React                                        from 'react';
+import React                                        from 'react';
 import classNames                                        from 'classnames';
 import { isNullOrUndefined }                             from 'rewire-common';
 import {default as MuiAvatar}                            from '@material-ui/core/Avatar';
@@ -285,7 +285,7 @@ const InnerAvatar = withStyles(innerAvatarStyles, class extends React.Component<
       name: fileInputId,
       type: 'file',
       id: fileInputId,
-      tabIndex: '-1',
+      tabIndex: -1,
       className: classes.changeImageButtonInnerInput,
       accept: mTypes,
       ref: this.fileInputRef,

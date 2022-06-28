@@ -1,4 +1,4 @@
-import * as React                                         from 'react';
+import React                                         from 'react';
 import classNames                                         from 'classnames';
 import {
   isNullOrUndefined,
@@ -219,7 +219,7 @@ const ampmClock = {
   timeZone: 'GMT',
   hourCycle: 'h11',
   hour12:    true
-};
+} as Intl.DateTimeFormatOptions;
 const uppercaseFormatter = new Intl.DateTimeFormat('en-US', ampmClock);
 
 export interface ITimeState {

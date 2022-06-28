@@ -1,5 +1,5 @@
-import * as React                   from 'react';
-import * as is                      from 'is';
+import React                   from 'react';
+import is                      from 'is';
 import {isNullOrUndefined, Without} from 'rewire-common';
 import {Observe}                    from 'rewire-core';
 import classNames                   from 'classnames';
@@ -9,16 +9,16 @@ import MenuItem                     from '@material-ui/core/MenuItem';
 import ListItemText                 from '@material-ui/core/ListItemText';
 import ListItemIcon                 from '@material-ui/core/ListItemIcon';
 import ListSubheader                from '@material-ui/core/ListSubheader';
-import {SvgIconProps}               from '@material-ui/core/SvgIcon';
 import {Theme}                      from '@material-ui/core/styles';
 import {PopoverOrigin}              from '@material-ui/core/Popover';
 import LabelIcon                    from '@material-ui/icons/LabelOutlined';
 import {WithStyle, withStyles}      from './styles';
+import { SvgIconProps }             from '@material-ui/core/SvgIcon';
 
 export interface IMenuBaseItem {
   name: string;
   title: string;
-  icon?: React.ComponentType<SvgIconProps>;
+  icon?: (props: SvgIconProps) => JSX.Element | React.ComponentElement<SvgIconProps, any> | null;
   divider?: boolean;
   subheader?: string | JSX.Element | (() => JSX.Element);
   closeOnClick?: boolean;
@@ -80,7 +80,7 @@ interface IMenuBaseProps extends Without<Partial<MenuProps>, 'title'> {
   anchorOrigin?:    PopoverOrigin;
   transformOrigin?: PopoverOrigin;
   items:            IMenuBaseItem[];
-  itemRenderer?:    React.SFC<any>;
+  itemRenderer?:    (props: any) => JSX.Element | React.ComponentElement<any, any> | null;
 
   onItemClick?(item: IMenuBaseItem): void;
 }

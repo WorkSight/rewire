@@ -6,7 +6,7 @@ export type EQType = (v1: any, v2: any) => boolean;
 const proxyProperty   = '___isProxy___';
 const versionProperty = '___version___';
 
-export {DataSignal};
+export type {DataSignal};
 
 export const observe: O = S;
 export const root       = S.root;

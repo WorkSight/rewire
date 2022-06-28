@@ -1,4 +1,4 @@
-import * as React              from 'react';
+import React              from 'react';
 import {Observe}               from 'rewire-core';
 import MenuItem                from '@material-ui/core/MenuItem';
 import ListItemText            from '@material-ui/core/ListItemText';

@@ -1,9 +1,7 @@
-import * as React            from 'react';
+import React            from 'react';
 import {
   Modal,
   Dialog,
-  WithStyle,
-  withStyles,
   CSSTheme
 }                            from 'rewire-ui';
 import { Theme, makeStyles } from '@material-ui/core/styles';
