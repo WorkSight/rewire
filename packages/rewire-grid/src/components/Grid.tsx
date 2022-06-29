@@ -30,7 +30,7 @@ import SettingsIcon                          from '@material-ui/icons/Settings';
 import createGridTheme                       from './GridTheme';
 import {scrollBySmooth}                      from '../models/SmoothScroll';
 import ResizeObserver                        from 'resize-observer-polyfill';
-import fastdom                               from 'fastdom';
+import { loop }                              from 'dom-loop';
 import './data-grid.scss';
 
 interface IColumnProps {
@@ -63,7 +63,7 @@ interface IResizeWatcherResult {
 function verticalResizeWatcher(lifetime: React.Component<any>, element: HTMLElement): IResizeWatcherResult {
   const _previous                    = {scrollHeight: -1, clientHeight: -1};
   const _callbacks: ResizeCallback[] = [];
-  fastdom.measure(() => {
+  loop.read(() => {
     _previous.clientHeight = element.clientHeight;
     _previous.scrollHeight = element.scrollHeight;
     for (const callback of _callbacks) {
@@ -72,7 +72,7 @@ function verticalResizeWatcher(lifetime: React.Component<any>, element: HTMLElem
   });
 
   const observer = new ResizeObserver(function() {
-    fastdom.measure(() => {      const current = {scrollHeight: element.scrollHeight, clientHeight: element.clientHeight};
+    loop.read(() => {      const current = {scrollHeight: element.scrollHeight, clientHeight: element.clientHeight};
       if (current && _previous && (current.scrollHeight === _previous.scrollHeight) === (current.clientHeight === _previous.clientHeight)) return;
       for (const callback of _callbacks) {
         callback(current);
