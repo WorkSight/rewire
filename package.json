@@ -1,6 +1,6 @@
 {
   "name": "rewire",
-  "version": "1.0.285",
+  "version": "1.0.286",
   "description": "WorkSight .NEXT core",
   "main": "examples/src/main.ts",
   "private": true,
@@ -16,7 +16,8 @@
   "scripts": {
     "build": "yarn vite build ./examples/ ",
     "preview": "yarn vite preview ./examples/ --port 3002",
-    "start": "yarn vite ./examples/ --port 3001"
+    "start": "yarn vite ./examples/ --port 3001",
+    "lint": " yarn eslint packages/*/src"
   },
   "author": "Sandy Place",
   "license": "MIT",

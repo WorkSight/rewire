@@ -1,4 +1,4 @@
-import React                    from 'react';
+import React                         from 'react';
 import classNames                    from 'classnames';
 import {
   isNullOrUndefined,
@@ -13,8 +13,9 @@ import {
 }                                    from '@material-ui/core/styles';
 import DateFnsUtils                  from '@date-io/date-fns';
 import {
-  DatePicker,
-  KeyboardDatePicker,
+  DatePicker as _DatePicker,
+  KeyboardDatePicker as _KeyboardDatePicker,
+  DatePickerProps,
   KeyboardDatePickerProps,
   MuiPickersUtilsProvider,
 }                                    from '@material-ui/pickers';
@@ -25,7 +26,7 @@ import {
   DateVariant,
 }                                    from './editors';
 import {withStyles, WithStyle}       from './styles';
-import { MaterialUiPickersDate } from '@material-ui/pickers/typings/date';
+import { MaterialUiPickersDate }     from '@material-ui/pickers/typings/date';
 
 const styles = (_theme: Theme) => ({
   inputRoot: {
@@ -120,6 +121,9 @@ export interface IDateFieldProps {
 }
 
 export type DateFieldProps = WithStyle<DateFieldStyles, IDateFieldProps & KeyboardDatePickerProps>;
+
+const DatePicker         = (props: DatePickerProps & {classes: any}) => <_DatePicker {...props} />;
+const KeyboardDatePicker = (props: KeyboardDatePickerProps & {classes: any}) => <_KeyboardDatePicker {...props} />;
 
 class DateField extends React.PureComponent<DateFieldProps> {
   inputRef: React.RefObject<HTMLInputElement>;
@@ -232,7 +236,7 @@ class DateField extends React.PureComponent<DateFieldProps> {
       <MuiPickersUtilsProvider utils={DateFnsUtils}>
       <DatePicker
         className={this.props.className}
-        // classes={{root: classes.formControlRoot}}
+        classes={{root: classes.formControlRoot}}
         disabled={this.props.disabled}
         label={this.props.label}
         placeholder={this.props.placeholder}
@@ -260,7 +264,6 @@ class DateField extends React.PureComponent<DateFieldProps> {
         emptyLabel={emptyLabel}
         format={format}
         initialFocusedDate={this.props.initialFocusedDate}
-        // InputAdornmentProps={{classes: {root: classes.inputAdornmentRoot}, ...this.props.InputAdornmentProps}}
         invalidDateMessage={this.props.invalidDateMessage}
         invalidLabel={this.props.invalidLabel}
         labelFunc={this.props.labelFunc}
@@ -300,7 +303,7 @@ class DateField extends React.PureComponent<DateFieldProps> {
       render={(props: DateFieldProps) =>
         <KeyboardDatePicker
           className={props.className}
-          // classes={{root: props.classes.formControlRoot}}
+          classes={{root: props.classes.formControlRoot}}
           disabled={props.disabled}
           label={props.label}
           placeholder={props.placeholder}
@@ -329,7 +332,7 @@ class DateField extends React.PureComponent<DateFieldProps> {
           emptyLabel={emptyLabel}
           format={format}
           initialFocusedDate={props.initialFocusedDate}
-          // InputAdornmentProps={{classes: {root: classes.inputAdornmentRoot}, ...props.InputAdornmentProps}}
+          InputAdornmentProps={{classes: {root: classes.inputAdornmentRoot}, ...props.InputAdornmentProps}}
           invalidDateMessage={props.invalidDateMessage}
           invalidLabel={props.invalidLabel}
           KeyboardButtonProps={{className: classes.inputAdornmentButton, tabIndex: -1, ...props.KeyboardButtonProps}}
