@@ -1,17 +1,17 @@
-import React                    from 'react';
+import React                                from 'react';
 import _NumberFormat, { NumberFormatProps } from 'react-number-format';
-import is                       from 'is';
-import classNames                    from 'classnames';
-import TextField, { TextFieldProps } from '@material-ui/core/TextField';
-import InputAdornment                from '@material-ui/core/InputAdornment';
-import { Theme }                     from '@material-ui/core/styles';
-import { isNullOrUndefined }         from 'rewire-common';
-import ErrorTooltip                  from './ErrorTooltip';
-import BlurInputHOC                  from './BlurInputHOC';
-import { TextAlignment }             from './editors';
-import { withStyles, WithStyle }     from './styles';
+import is                                   from 'is';
+import classNames                           from 'classnames';
+import TextField, { TextFieldProps }        from '@material-ui/core/TextField';
+import InputAdornment                       from '@material-ui/core/InputAdornment';
+import { Theme }                            from '@material-ui/core/styles';
+import { isNullOrUndefined }                from 'rewire-common';
+import ErrorTooltip                         from './ErrorTooltip';
+import BlurInputHOC                         from './BlurInputHOC';
+import { TextAlignment }                    from './editors';
+import { withStyles, WithStyle }            from './styles';
 
-const styles = (theme: Theme) => ({
+const styles = (_theme: Theme) => ({
   inputRoot: {
     lineHeight: 'inherit',
     fontSize: 'inherit',
@@ -112,9 +112,9 @@ class NumberTextField extends React.Component<NumberFieldProps> {
   }
 
   handleValueChanged = (values: any) => {
-    let value = values.floatValue;
+    const value = values.floatValue;
     this.props.onValueChange(value);
-  }
+  };
 
   shouldComponentUpdate(nextProps: NumberFieldProps) {
     return (
@@ -181,8 +181,9 @@ class NumberTextField extends React.Component<NumberFieldProps> {
   }
 
   getThousandSeparatedNumberString(numStr: string): string {
+    // eslint-disable-next-line prefer-const
     let {beforeDecimal, afterDecimal, addNegation} = this.splitDecimal(numStr);
-    let hasDecimalSeparator = !!afterDecimal && afterDecimal.length > 0;
+    const hasDecimalSeparator = !!afterDecimal && afterDecimal.length > 0;
 
     beforeDecimal = beforeDecimal.replace(/(\d)(?=(\d{3})+(?!\d))/g, '$1' + ',');
 
@@ -201,10 +202,10 @@ class NumberTextField extends React.Component<NumberFieldProps> {
     } else if (this.props.endOfTextOnFocus) {
       evt.target.setSelectionRange(evt.target.value.length, evt.target.value.length);
     } else if (!isNullOrUndefined(this.props.cursorPositionOnFocus)) {
-      let cursorPosition = Math.max(0, Math.min(this.props.cursorPositionOnFocus!, evt.target.value.length));
+      const cursorPosition = Math.max(0, Math.min(this.props.cursorPositionOnFocus!, evt.target.value.length));
       evt.target.setSelectionRange(cursorPosition, cursorPosition);
     }
-  }
+  };
 
   parse(v: any) {
     if (is.string(v) && (v.length > 0)) {

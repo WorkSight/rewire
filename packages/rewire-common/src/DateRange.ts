@@ -167,7 +167,7 @@ export default class DateRange implements Iterable<UTC> {
   }
 
   inRange(effective: DateType) {
-    let x = utc(effective).startOfDay();
+    const x = utc(effective).startOfDay();
     return ((x >= this._start) && (x <= this._end));
   }
 
@@ -177,7 +177,7 @@ export default class DateRange implements Iterable<UTC> {
 
   intersection(range: DateRange) {
     if (!range || this.isEmpty) return DateRange.Empty;
-    let r = new DateRange(this);
+    const r = new DateRange(this);
 
     r._start = r._start >= range._start ? r._start : range._start;
     r._end   = r._end <= range._end ? r._end : range._end;

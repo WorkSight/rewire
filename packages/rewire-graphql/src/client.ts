@@ -1,3 +1,4 @@
+/* eslint-disable no-async-promise-executor */
 import {
   IClientOptions,
   IMutation,
@@ -29,6 +30,7 @@ class QueryObservable<T> implements IObservable<T> {
   constructor(private client: SubscriptionClient, private query: SubscribePayload) {}
 
   subscribe(observer: IObserver<T>): ISubscription {
+    // eslint-disable-next-line @typescript-eslint/no-this-alias
     const self = this;
     self._observers.push(observer);
     const _subscription = {
@@ -94,7 +96,7 @@ class Client implements IClient {
     const queryId = hashString(body);
 
     if (!mutate) {
-      let running = this.running[queryId];
+      const running = this.running[queryId];
       if (running) {
         return running;
       }
@@ -107,7 +109,7 @@ class Client implements IClient {
         : this.fetchOptions;
 
       try {
-        let reqInit = {
+        const reqInit = {
           body: body,
           headers: {
             'content-type': 'application/json',
@@ -128,8 +130,8 @@ class Client implements IClient {
         }
 
         if (this.bearer) reqInit.headers.Authorization = 'Bearer ' + this.bearer;
-        let res      = await fetch(this.url, reqInit);
-        let response = BSON.parse(await res.text());
+        const res      = await fetch(this.url, reqInit);
+        const response = BSON.parse(await res.text());
         if (res.ok && !response.errors) {
           resolve({data: response.data});
         } else {

@@ -39,7 +39,7 @@
         evt.stopPropagation();
         cell.grid.startCell = undefined;
         let nextStartCell   = cell;
-        let upCell          = cell.grid.adjacentTopCell(cell, true);
+        const upCell          = cell.grid.adjacentTopCell(cell, true);
         if (upCell) {
           cell.grid.selectCells([upCell]);
           nextStartCell = upCell;
@@ -53,7 +53,7 @@
         evt.stopPropagation();
         cell.grid.startCell = undefined;
         let nextStartCell   = cell;
-        let downCell        = cell.grid.adjacentBottomCell(cell, true);
+        const downCell        = cell.grid.adjacentBottomCell(cell, true);
         if (downCell) {
           cell.grid.selectCells([downCell]);
           nextStartCell = downCell;
@@ -74,8 +74,7 @@
         evt.stopPropagation();
         cell.grid.startCell = undefined;
         let nextStartCell   = cell;
-        let prevCell: ICell | undefined;
-        prevCell = cell.grid.previousCell(cell, true);
+        const prevCell: ICell | undefined = cell.grid.previousCell(cell, true);
         if (prevCell) {
           cell.grid.selectCells([prevCell]);
           nextStartCell = prevCell;
@@ -96,8 +95,7 @@
         evt.stopPropagation();
         cell.grid.startCell = undefined;
         let nextStartCell   = cell;
-        let nextCell: ICell | undefined;
-        nextCell = cell.grid.nextCell(cell, true);
+        const nextCell: ICell | undefined = cell.grid.nextCell(cell, true);
         if (nextCell) {
           cell.grid.selectCells([nextCell]);
           nextStartCell = nextCell;
@@ -113,7 +111,7 @@
         }
         evt.preventDefault();
         evt.stopPropagation();
-        let upCell = cell.grid.adjacentTopCell(cell, true);
+        const upCell = cell.grid.adjacentTopCell(cell, true);
         if (!upCell) {
           return;
         }
@@ -131,7 +129,7 @@
         }
         evt.preventDefault();
         evt.stopPropagation();
-        let downCell = cell.grid.adjacentBottomCell(cell, true);
+        const downCell = cell.grid.adjacentBottomCell(cell, true);
         if (!downCell) {
           return;
         }
@@ -156,8 +154,7 @@
         }
         evt.preventDefault();
         evt.stopPropagation();
-        let leftCell: ICell | undefined;
-        leftCell = cell.grid.adjacentLeftCell(cell, true);
+        const leftCell: ICell | undefined = cell.grid.adjacentLeftCell(cell, true);
         if (!leftCell) {
           return;
         }
@@ -182,8 +179,7 @@
         }
         evt.preventDefault();
         evt.stopPropagation();
-        let rightCell: ICell | undefined;
-        rightCell = cell.grid.adjacentRightCell(cell, true);
+        const rightCell: ICell | undefined  = cell.grid.adjacentRightCell(cell, true);
         if (!rightCell) {
           return;
         }
@@ -199,7 +195,7 @@
         evt.stopPropagation();
         cell.grid.startCell = undefined;
         let newStartCell    = cell;
-        let nextCell        = cell.grid.nextCell(cell, true);
+        const nextCell        = cell.grid.nextCell(cell, true);
         if (nextCell) {
           cell.grid.selectCells([nextCell]);
           newStartCell = nextCell;
@@ -213,7 +209,7 @@
         evt.stopPropagation();
         cell.grid.startCell = undefined;
         let newStartCell    = cell;
-        let prevCell        = cell.grid.previousCell(cell, true);
+        const prevCell        = cell.grid.previousCell(cell, true);
         if (prevCell) {
           cell.grid.selectCells([prevCell]);
           newStartCell = prevCell;
@@ -230,7 +226,7 @@
         evt.stopPropagation();
         cell.grid.startCell = undefined;
         let newStartCell    = cell;
-        let firstCellInRow  = cell.grid.firstCellInRow(cell.row, true);
+        const firstCellInRow  = cell.grid.firstCellInRow(cell.row, true);
         if (firstCellInRow) {
           cell.grid.selectCells([firstCellInRow]);
           newStartCell = firstCellInRow;
@@ -247,7 +243,7 @@
         evt.stopPropagation();
         cell.grid.startCell = undefined;
         let newStartCell    = cell;
-        let lastCellInRow   = cell.grid.lastCellInRow(cell.row, true);
+        const lastCellInRow   = cell.grid.lastCellInRow(cell.row, true);
         if (lastCellInRow) {
           cell.grid.selectCells([lastCellInRow]);
           newStartCell = lastCellInRow;
@@ -264,7 +260,7 @@
         evt.stopPropagation();
         cell.grid.startCell = undefined;
         let newStartCell    = cell;
-        let firstCell       = cell.grid.firstCell(true);
+        const firstCell       = cell.grid.firstCell(true);
         if (firstCell) {
           cell.grid.selectCells([firstCell]);
           newStartCell = firstCell;
@@ -281,7 +277,7 @@
         evt.stopPropagation();
         cell.grid.startCell = undefined;
         let newStartCell    = cell;
-        let lastCell        = cell.grid.lastCell(true);
+        const lastCell        = cell.grid.lastCell(true);
         if (lastCell) {
           cell.grid.selectCells([lastCell]);
           newStartCell = lastCell;
@@ -374,7 +370,7 @@
        Ctrl+D:      Duplicate selected row(s) below them
        Ctrl+Delete: Delete selected row(s)
       ---------------------------------------------------*/
-      'Ctrl+Insert': (evt: React.KeyboardEvent<any>, cell: ICell): IRow | undefined   => { if (cell.editing) { return; } let newRow = cell.grid.rowKeybindPermissions.insertRow && cell.grid.insertRowAtSelection() || undefined;     evt.stopPropagation(); evt.preventDefault(); return newRow; },
-      'Ctrl+D'     : (evt: React.KeyboardEvent<any>, cell: ICell): IRow[] | undefined => { if (cell.editing) { return; } let newRow = cell.grid.rowKeybindPermissions.duplicateRow && cell.grid.duplicateSelectedRows() || undefined; evt.stopPropagation(); evt.preventDefault(); return newRow; },
+      'Ctrl+Insert': (evt: React.KeyboardEvent<any>, cell: ICell): IRow | undefined   => { if (cell.editing) { return; } const newRow = cell.grid.rowKeybindPermissions.insertRow && cell.grid.insertRowAtSelection() || undefined;     evt.stopPropagation(); evt.preventDefault(); return newRow; },
+      'Ctrl+D'     : (evt: React.KeyboardEvent<any>, cell: ICell): IRow[] | undefined => { if (cell.editing) { return; } const newRow = cell.grid.rowKeybindPermissions.duplicateRow && cell.grid.duplicateSelectedRows() || undefined; evt.stopPropagation(); evt.preventDefault(); return newRow; },
       'Ctrl+Delete': (evt: React.KeyboardEvent<any>, cell: ICell)                     => { if (cell.editing) { return; } cell.grid.rowKeybindPermissions.deleteRow && cell.grid.removeSelectedRows();                                 evt.stopPropagation(); evt.preventDefault(); },
     };

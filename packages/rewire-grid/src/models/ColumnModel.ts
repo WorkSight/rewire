@@ -226,7 +226,7 @@ export class ColumnModel implements IColumn {
 const getArrayString = (map?: (v: any) => string) => (value: any): string => {
   if (!value) return '';
 
-  let values = map ? value.map((v: any) => map(v)) : value;
+  const values = map ? value.map((v: any) => map(v)) : value;
   return values.join(', ');
 };
 
@@ -236,9 +236,9 @@ const arrayCompare = (mapFn?: any, compareFn?: any) => (x: any, y: any): number 
   if (!y) return 1;
 
   for (let i = 0; i < x.length && i < y.length; i++) {
-    let xVal = mapFn ? mapFn(x[i]) : x[i];
-    let yVal = mapFn ? mapFn(y[i]) : y[i];
-    let c    = compareFn ? compareFn(xVal, yVal) : compare(xVal, yVal);
+    const xVal = mapFn ? mapFn(x[i]) : x[i];
+    const yVal = mapFn ? mapFn(y[i]) : y[i];
+    const c    = compareFn ? compareFn(xVal, yVal) : compare(xVal, yVal);
     if (c !== 0) {
       return c;
     }
@@ -276,8 +276,9 @@ function splitDecimal(numStr: string): any {
 }
 
 function getThousandSeparatedNumberString(numStr: string): string {
+  // eslint-disable-next-line prefer-const
   let {beforeDecimal, afterDecimal, addNegation} = splitDecimal(numStr);
-  let hasDecimalSeparator = !!afterDecimal && afterDecimal.length > 0;
+  const hasDecimalSeparator = !!afterDecimal && afterDecimal.length > 0;
 
   beforeDecimal = beforeDecimal.replace(/(\d)(?=(\d{3})+(?!\d))/g, '$1' + ',');
 
@@ -289,9 +290,9 @@ function getThousandSeparatedNumberString(numStr: string): string {
 export function getPhoneString(value: any, format: string, mask: string): string | null | undefined {
   if (isNullOrUndefined(value)) return value;
 
-  let phoneStr             = value.toString();
-  let phoneFormat          = format;
-  let phoneMask            = mask;
+  const phoneStr             = value.toString();
+  const phoneFormat          = format;
+  const phoneMask            = mask;
   let hashCount            = 0;
   const formattedNumberArr = phoneFormat.split('');
   for (let i = 0; i < phoneFormat.length; i++) {

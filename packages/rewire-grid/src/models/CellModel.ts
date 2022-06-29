@@ -216,9 +216,9 @@ export class CellModel implements ICell {
   }
 
   getErrors(): IErrorData[] {
-    let errors: IErrorData[] = [];
+    const errors: IErrorData[] = [];
     if (this.error) {
-      let newErrorData: IErrorData = {
+      const newErrorData: IErrorData = {
         name: this.column.title || this.column.name,
         error: this.error,
       };
@@ -253,9 +253,9 @@ export class CellModel implements ICell {
   }
 
   clone(newRow: IRow): ICell {
-    let newValue          = cloneValue(this.value);
-    let row               = newRow || this.row;
-    let newCell           = CellModel.create(row, this.column, newValue) as CellModel;
+    const newValue          = cloneValue(this.value);
+    const row               = newRow || this.row;
+    const newCell           = CellModel.create(row, this.column, newValue) as CellModel;
     newCell.enabled       = this._enabled();
     newCell.readOnly      = this._readOnly();
     newCell.editable      = this._editable();

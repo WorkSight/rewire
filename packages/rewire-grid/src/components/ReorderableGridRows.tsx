@@ -22,11 +22,11 @@ import ArrowUpwardIcon       from '@material-ui/icons/ArrowUpward';
 import {Theme}               from '@material-ui/core/styles';
 
 const cellSource = {
-  beginDrag(props: any, monitor: any, component: any) {
+  beginDrag(props: any, _monitor: any, _component: any) {
     const item = {row: props.row as IRow, groupId: props.groupId};
     return item;
   },
-  endDrag(props: any, monitor: any, component: any) {
+  endDrag(props: any, monitor: any, _component: any) {
     if (!monitor.didDrop()) {
       return;
     }
@@ -43,7 +43,7 @@ const cellSource = {
       if (props.canMoveRow && !props.canMoveRow(sourceRow)) {
         return;
       }
-      let byRows = targetRow.position - sourceRow.position;
+      const byRows = targetRow.position - sourceRow.position;
       grid.moveRow(sourceRow.id, byRows);
       props.onMoveRow && props.onMoveRow(sourceRow, byRows);
     } else {
@@ -62,7 +62,7 @@ function sourceCollect(connect: any, monitor: any) {
 }
 
 const cellTarget = {
-  drop(props: any, monitor: any, component: any) {
+  drop(props: any, monitor: any, _component: any) {
     const sourceItem = monitor.getItem();
     const sourceRow  = sourceItem.row as IRow;
     const targetRow  = props.row as IRow;
@@ -177,19 +177,19 @@ export const ReorderableGridRowsCell = flow([DragSource('reorderableGridRowsCell
     evt.stopPropagation();
     this.props.row.grid.clearSelection();
     this.props.row.grid.selectRows([this.props.row]);
-  }
+  };
 
   handleBlur = (evt: React.FocusEvent<any>) => {
     evt.stopPropagation();
     if (!this.props.row.grid.selectedCells.length) {
       this.props.row.grid.selectRows([]);
     }
-  }
+  };
 
   handleMouseDown = (evt: React.MouseEvent<any>) => {
     evt.stopPropagation();
     this.props.row.grid.isReorderingMouseDown = true;
-  }
+  };
 
   handleKeyDown = (evt: React.KeyboardEvent<any>) => {
     evt.stopPropagation();
@@ -219,11 +219,11 @@ export const ReorderableGridRowsCell = flow([DragSource('reorderableGridRowsCell
         this.props.row.grid.clearSelection();
         break;
     }
-  }
+  };
 
   render() {
     const {classes, isGridMouseCellSelecting, isDragging, highlighted, hoveredWhileDragging, draggedItem, connectDragSource, connectDropTarget} = this.props;
-    let cellClasses = [classes.cell];
+    const cellClasses = [classes.cell];
 
     if (isDragging) {
       cellClasses.push(classes.isDragging);

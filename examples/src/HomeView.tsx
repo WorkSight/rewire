@@ -131,14 +131,14 @@ function createTestGrid(nRows: number, nColumns: number) {
   if (nColumns < 10) throw new Error('add some more columns!');
 
   // create some random sized columns!
-  let cols: IColumn[] = observable([]);
+  const cols: IColumn[] = observable([]);
   for (let col = 0; col < nColumns; col++) {
     cols.push(createColumn('column' + col, 'Header# ' + col, { type: 'text', width: Math.trunc(Math.random() * 250 + 50) + 'px' }));
   }
   cols[5].title = 'Sales';
   cols[6].title = 'Sales';
 
-  let timeOnValueChange = (cell: ICell, value: any) => {
+  const timeOnValueChange = (cell: ICell, value: any) => {
     if (!value) {
       cell.value = undefined;
       cell.row.cells.differenceColumn.value = undefined;
@@ -158,7 +158,6 @@ function createTestGrid(nRows: number, nColumns: number) {
       return undefined;
     }
 
-    let error: IError | undefined;
     let errorMsg: string = '';
     let errorSeverity: ErrorSeverity = ErrorSeverity.Error;
     if (value < 2000) {
@@ -174,7 +173,7 @@ function createTestGrid(nRows: number, nColumns: number) {
       errorMsg = 'Between 2000 and 4000';
       errorSeverity = ErrorSeverity.Info;
     }
-    error = errorMsg ? { text: errorMsg, severity: errorSeverity } : undefined;
+    const error = errorMsg ? { text: errorMsg, severity: errorSeverity } : undefined;
     return error;
   };
 
@@ -193,7 +192,7 @@ function createTestGrid(nRows: number, nColumns: number) {
   cols.push(createColumn('multiselectColumn',       'MultiSelect',         { type: { type: 'multiselect', options: countries }, width: Math.trunc(Math.random() * 250 + 50) + 'px' }));
   cols.push(createColumn('checkedColumn',           'Checked',             { type: 'checked', width: Math.trunc(Math.random() * 250 + 50) + 'px' }));
 
-  let complexColumnValidator = (value: any): IError | undefined => {
+  const complexColumnValidator = (value: any): IError | undefined => {
     if (isNullOrUndefined(value)) {
       return undefined;
     }
@@ -210,12 +209,12 @@ function createTestGrid(nRows: number, nColumns: number) {
   // const timeOut: UTC = utc().startOfDay().add(11,  TimeSpan.hours);
 
   // add some cell data!
-  let rows: IRowData[] = [];
+  const rows: IRowData[] = [];
   for (let row = 0; row < nRows; row++) {
-    let r: IRowData = { id: `${row}`, data: {}, options: {onClick: handleRowClick}};
+    const r: IRowData = { id: `${row}`, data: {}, options: {onClick: handleRowClick}};
     for (let column = 0; column < cols.length; column++) {
       let v: any = `RC ${column}-${row % 5}`;
-      let colName = cols[column].name;
+      const colName = cols[column].name;
       if ((column <= 1 || column >= 4) && row === 1) v = undefined;
       else if (colName === 'autoCompleteColumn' || colName === 'selectColumn') v = { id: '14', name: 'Austria' };
       else if (colName === 'multiAutoCompleteColumn' || colName === 'multiselectColumn') v = [{id: '18', name: 'Bangladesh'}, {id: '19', name: 'Barbados'}];
@@ -246,7 +245,7 @@ function createTestGrid(nRows: number, nColumns: number) {
   cols[1].align = 'right';
   // create the grid model and group by 'column2' and 'column3'
   // let grid = createGrid(rows, cols, { groupBy: ['column2', 'column3'], optionsMenuFn: () => ({ items: createColumnsToggleMenuItems(cols, ['column8', 'column9']) }), multiSelect: true, allowMergeColumns: true, verticalAlign: 'top' });
-  let grid = createGrid(rows, cols, { groupBy: ['column2', 'column3'], optionsMenuFn: () => ({ items: createColumnsToggleMenuItems(cols, ['column8', 'column9']) }), clearSelectionOnBlur: false, multiSelect: true, allowMergeColumns: true, isReorderable: true, verticalAlign: 'top' });
+  const grid = createGrid(rows, cols, { groupBy: ['column2', 'column3'], optionsMenuFn: () => ({ items: createColumnsToggleMenuItems(cols, ['column8', 'column9']) }), clearSelectionOnBlur: false, multiSelect: true, allowMergeColumns: true, isReorderable: true, verticalAlign: 'top' });
   // let grid = createGrid(rows, cols, { optionsMenuFn: () => ({ items: createColumnsToggleMenuItems(cols, ['column8', 'column9']) }), clearSelectionOnBlur: false, multiSelect: true, allowMergeColumns: true, isReorderable: true, verticalAlign: 'top' });
 
   grid.addFixedRow({ data: { column5: '2017', column6: '2018' } });
@@ -286,7 +285,7 @@ function createTestGrid(nRows: number, nColumns: number) {
   return grid;
 }
 
-let grid                     = createTestGrid(40, 14);
+const grid                     = createTestGrid(40, 14);
 // let newRow                = {id: 'newRowxycdij', data: {}, options: {allowMergeColumns: false}};
 // newRow.data['column0']    = 'AHHH';
 // newRow.data['column2']    = 'RC 2-3';
@@ -310,10 +309,10 @@ function toggleMenuHandleItemClick(item: IToggleMenuItem, column: IColumn) {
   column.visible = !column.visible;
 
   if (column.name === 'email') {
-    let isActiveColumn      = column.grid.column('isActive');
+    const isActiveColumn      = column.grid.column('isActive');
     isActiveColumn!.visible = !isActiveColumn!.visible;
   } else if (column.name === 'isActive') {
-    let emailColumn      = column.grid.column('email');
+    const emailColumn      = column.grid.column('email');
     emailColumn!.visible = !emailColumn!.visible;
   }
 }
@@ -323,7 +322,7 @@ const clickHandler = (props: ISuggestionsContainerComponentProps) => () => {
   props.downShift.closeMenu();
 };
 
-const suggestionsContainerHeader = (props: ISuggestionsContainerComponentProps) => (
+const suggestionsContainerHeader = (_props: ISuggestionsContainerComponentProps) => (
   <div>
     <Typography variant='subtitle1' style={{fontSize: 'inherit'}}><strong>Items Title</strong></Typography>
   </div>
@@ -336,7 +335,7 @@ const suggestionsContainerFooter = (props: ISuggestionsContainerComponentProps) 
 );
 
 function createEmployeesGrid1() {
-  let cols: IColumn[] = observable([]);
+  const cols: IColumn[] = observable([]);
 
   // add header columns
   cols.push(createColumn('name',                       'Employee',               {type: 'text', width: '120px'}));
@@ -350,11 +349,11 @@ function createEmployeesGrid1() {
   cols.push(createColumn('multiAutoCompleteColumn',    'Multi Auto Complete',    {type: {type: 'multiselectautocomplete', options: countries}, width: '250px'}));
 
   // add employee rows
-  let rows: IRowData[] = [];
+  const rows: IRowData[] = [];
   for (let row = 0; row < employees.length; row++) {
-    let r: IRowData = { id: `${row}`, data: {}, options: { onClick: handleRowClick }};
+    const r: IRowData = { id: `${row}`, data: {}, options: { onClick: handleRowClick }};
     for (let column = 0; column < cols.length; column++) {
-      let fieldName: string = cols[column].name;
+      const fieldName: string = cols[column].name;
       let v: any;
       if (fieldName === 'name') {
         v = employees[row][fieldName]; // somehow make into a button that opens a dialog on click???
@@ -378,7 +377,7 @@ function createEmployeesGrid1() {
     {name: 'archive',   title: 'Archive',                           icon: ArchiveIcon, disabled: true, active: true, visible: () => true, onClick: (item: IToggleMenuItem) => { item.active = !item.active; } },
     {name: 'unarchive', title: 'Unarchive',                         icon: ArchiveIcon, active: true, onClick: (item: IToggleMenuItem) => { item.active = !item.active; } },
   ]);
-  let grid = createGrid(rows, cols, { multiSelect: true, allowMergeColumns: true, isReorderable: true, optionsMenuFn: () => ({ items: [...createColumnsToggleMenuItems(cols, ['timeColumn', 'email', 'isActive', 'autoCompleteColumn'], {onItemClick: toggleMenuHandleItemClick}), ...toggleItems] }) });
+  const grid = createGrid(rows, cols, { multiSelect: true, allowMergeColumns: true, isReorderable: true, optionsMenuFn: () => ({ items: [...createColumnsToggleMenuItems(cols, ['timeColumn', 'email', 'isActive', 'autoCompleteColumn'], {onItemClick: toggleMenuHandleItemClick}), ...toggleItems] }) });
   // sort by employee names
   grid.addSort(cols[0], 'ascending');
   grid.headerRowHeight = 32;
@@ -388,7 +387,7 @@ function createEmployeesGrid1() {
 }
 
 function createEmployeesGrid2() {
-  let cols: IColumn[] = observable([]);
+  const cols: IColumn[] = observable([]);
 
   // add header columns
   cols.push(createColumn('name',                    'Employee',            {type: 'text', width: '120px'}));
@@ -404,11 +403,11 @@ function createEmployeesGrid2() {
   cols.push(createColumn('numberColumn3',           'Number Column 3',     {type: {type: 'number', options: {}}, width: '120px'}));
 
   // add employee rows
-  let rows: IRowData[] = [];
+  const rows: IRowData[] = [];
   for (let row = 0; row < employees.length; row++) {
-    let r: IRowData = {id: `${row}`, data: {}};
+    const r: IRowData = {id: `${row}`, data: {}};
     for (let column = 0; column < cols.length; column++) {
-      let fieldName: string = cols[column].name;
+      const fieldName: string = cols[column].name;
       let v: any;
       if (fieldName === 'name') {
         v = employees[row][fieldName]; // somehow make into a button that opens a dialog on click???
@@ -425,7 +424,7 @@ function createEmployeesGrid2() {
   }
 
   // create the grid model
-  let grid = createGrid(rows, cols, {multiSelect: true, allowMergeColumns: true});
+  const grid = createGrid(rows, cols, {multiSelect: true, allowMergeColumns: true});
   // sort by employee names
   grid.addSort(cols[0], 'ascending');
   grid.headerRowHeight = 56;
@@ -434,14 +433,14 @@ function createEmployeesGrid2() {
   return grid;
 }
 
-let employeesGrid1 = createEmployeesGrid1();
-let employeesGrid2 = createEmployeesGrid2();
+const employeesGrid1 = createEmployeesGrid1();
+const employeesGrid2 = createEmployeesGrid2();
 employeesGrid1.setChangeTracking(true);
 employeesGrid2.setChangeTracking(true);
 
 // observable dates don't work, but not sure if they ever need to.
 // let testDate = observable(new Date());
-let mode = observable({
+const mode = observable({
   gridMode: 'employees1',
 });
 
@@ -582,7 +581,7 @@ const styles = (theme: any) => ({
   },
 });
 
-let toggle = property(true);
+const toggle = property(true);
 
 function toggleWidth() {
   toggle(!toggle());
@@ -616,8 +615,8 @@ export const HomeView = React.memo(withStyles(styles, (props: HomeViewProps) => 
           accept='image/*'
           id='contained-button-file'
           type='file'
-          onChange={({ target: { validity, files } }) => {
-            validity.valid
+          onChange={({ target: { validity } }) => {
+            validity.valid;
           }}
         />
         <label htmlFor='contained-button-file'>

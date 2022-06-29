@@ -280,9 +280,9 @@ export default function createGridTheme(options: ThemeOptions = {}, outerTheme?:
     typography = merge(outerTheme.typography, typography);
   }
 
-  let defaultThemeOptions: ThemeOptions = {...outerTheme, palette: palette, fontSizes: fontSizes, typography: typography};
-  let gridThemeOptions: ThemeOptions    = merge(defaultThemeOptions, options);
-  let gridTheme = createTheme(gridThemeOptions);
+  const defaultThemeOptions: ThemeOptions = {...outerTheme, palette: palette, fontSizes: fontSizes, typography: typography};
+  const gridThemeOptions: ThemeOptions    = merge(defaultThemeOptions, options);
+  const gridTheme = createTheme(gridThemeOptions);
 
   return gridTheme;
 }

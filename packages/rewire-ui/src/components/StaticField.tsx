@@ -70,7 +70,7 @@ class StaticFieldInternal extends React.Component<StaticFieldProps> {
     }
 
     const {classes} = this.props;
-    let value       = !isNullOrUndefined(this.props.value) ? this.props.value : '';
+    const value       = !isNullOrUndefined(this.props.value) ? this.props.value : '';
 
     return (
       <TextField

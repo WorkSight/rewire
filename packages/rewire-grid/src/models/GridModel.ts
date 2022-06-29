@@ -207,7 +207,7 @@ class GridModel implements IGrid, IDisposable {
       }
     }
     return groups;
-  }
+  };
 
   private getGroupValue(row: IRow, column: IColumn) {
     const v = row && row.data && column && row.data[column.name];
@@ -309,12 +309,12 @@ class GridModel implements IGrid, IDisposable {
   }
 
   copy() {
-    let selectedCells = this.selectedCells;
+    const selectedCells = this.selectedCells;
     if (selectedCells.length <= 0) {
       return;
     }
 
-    let copiedCells: any[] = [];
+    const copiedCells: any[] = [];
     selectedCells.forEach(cell => {
       copiedCells.push({value: cell.value, columnPosition: cell.columnPosition});
     });
@@ -347,11 +347,11 @@ class GridModel implements IGrid, IDisposable {
   }
 
   getCellsByRange(colStart: number, rowStart: number, colEnd: number, rowEnd: number, allowCollapsed: boolean): ICell[] {
-    let cells: ICell[] = [];
-    let rows = this.getRowsByRange(rowStart, rowEnd, allowCollapsed);
+    const cells: ICell[] = [];
+    const rows = this.getRowsByRange(rowStart, rowEnd, allowCollapsed);
     rows.forEach(row => {
       for (let j = colStart; j <= colEnd; j++) {
-        let cellToAdd = row.cells[this.columns[colStart].name];
+        const cellToAdd = row.cells[this.columns[colStart].name];
         if (cellToAdd.rowSpan <= 0) {
           continue;
         }
@@ -364,13 +364,13 @@ class GridModel implements IGrid, IDisposable {
   }
 
   getRowsByRange(rowStart: number, rowEnd: number, allowCollapsed: boolean): IRow[] {
-    let rows: IRow[] = [];
-    let rowCount     = this.rows.length;
-    let start        = Math.max(0, Math.min(rowStart, rowEnd));
-    let end          = Math.min(rowCount - 1, Math.max(rowStart, rowEnd));
+    const rows: IRow[] = [];
+    const rowCount     = this.rows.length;
+    const start        = Math.max(0, Math.min(rowStart, rowEnd));
+    const end          = Math.min(rowCount - 1, Math.max(rowStart, rowEnd));
 
     for (let i = start; i <= end; i++) {
-      let row = this.rowByPos(i);
+      const row = this.rowByPos(i);
       if (row && (allowCollapsed || row.visible)) {
         rows.push(row);
       }
@@ -398,7 +398,7 @@ class GridModel implements IGrid, IDisposable {
     return sample(() =>  {
       let currentRowPosition    = cell.rowPosition;
       let row: IRow | undefined = cell.row;
-      let rowDirection          = (byRows) > 0 ? 1 : -1;
+      const rowDirection          = (byRows) > 0 ? 1 : -1;
       while (byRows !== 0 && (currentRowPosition >= 0) && (currentRowPosition < this.rows.length))  {
         currentRowPosition += rowDirection;
         const r             = this.rows[currentRowPosition];
@@ -413,7 +413,7 @@ class GridModel implements IGrid, IDisposable {
 
       let   currentColumnPosition       = cell.columnPosition;
       let   column: IColumn | undefined = cell.column;
-      let   columnDirection             = (byColumns) > 0 ? 1 : -1;
+      const   columnDirection             = (byColumns) > 0 ? 1 : -1;
       const c2                          = row.cells[column.name];
       if (c2.colSpan === 0 && (byColumns === 0)) byColumns = -1;
       while (byColumns !== 0 && (currentColumnPosition >= 0) && (currentColumnPosition < this.columns.length))  {
@@ -536,12 +536,12 @@ class GridModel implements IGrid, IDisposable {
   }
 
   moveRow(rowId: string, byRows: number): boolean {
-    let row = findRowById(this.rows, rowId);
+    const row = findRowById(this.rows, rowId);
     if (!row) {
       return false;
     }
 
-    let newRowPosition = Math.max(Math.min(row.position + byRows, this.rows.length - 1), 0);
+    const newRowPosition = Math.max(Math.min(row.position + byRows, this.rows.length - 1), 0);
     if (newRowPosition === row.position) {
       return false;
     }
@@ -561,11 +561,11 @@ class GridModel implements IGrid, IDisposable {
   }
 
   swapRows(rowId1: string, rowId2: string): boolean {
-    let row1 = findRowById(this.rows, rowId1);
+    const row1 = findRowById(this.rows, rowId1);
     if (!row1) {
       return false;
     }
-    let row2 = findRowById(this.rows, rowId2);
+    const row2 = findRowById(this.rows, rowId2);
     if (!row2) {
       return false;
     }
@@ -575,9 +575,9 @@ class GridModel implements IGrid, IDisposable {
     }
 
     freeze(() => {
-      let newRow1Position = row1!.position > row2!.position ? row2!.position : row2!.position - 1;
+      const newRow1Position = row1!.position > row2!.position ? row2!.position : row2!.position - 1;
       this.rows.splice(newRow1Position, 0, this.rows.splice(row1!.position, 1)[0]);
-      let currRow2Position = row1!.position < row2!.position ? row2!.position : row2!.position + 1;
+      const currRow2Position = row1!.position < row2!.position ? row2!.position : row2!.position + 1;
       this.rows.splice(row1!.position, 0, this.rows.splice(currRow2Position, 1)[0]);
     });
 
@@ -593,12 +593,12 @@ class GridModel implements IGrid, IDisposable {
     this.rows.splice(position, 1);
     if (row.fixed) return;
     if (row.selected) {
-      let selectedRowIdx = this.selectedRows.findIndex((selectedRow: IRow) => selectedRow.id === row.id);
+      const selectedRowIdx = this.selectedRows.findIndex((selectedRow: IRow) => selectedRow.id === row.id);
       this.selectedRows.splice(selectedRowIdx, 1);
       row.selected = false;
       this.columns.forEach((column: IColumn) => {
         const cell: ICell = row.cells[column.name];
-        let cellIdx = this.selectedCells.findIndex((selectedCell: ICell) => selectedCell.id === cell.id);
+        const cellIdx = this.selectedCells.findIndex((selectedCell: ICell) => selectedCell.id === cell.id);
         if (cellIdx >= 0) {
           this.selectedCells.splice(cellIdx, 1);
           cell.unselect();
@@ -629,7 +629,7 @@ class GridModel implements IGrid, IDisposable {
 
     let newCellToSelect: ICell | undefined;
     if (reselect) {
-      let currCell    = this.focusedCell || (this.selectedCells.length > 0 && this.selectedCells[this.selectedCells.length - 1]) || undefined;
+      const currCell    = this.focusedCell || (this.selectedCells.length > 0 && this.selectedCells[this.selectedCells.length - 1]) || undefined;
       newCellToSelect = currCell ? this.findVerticallyNearestCellWithUnselectedRow(currCell) : undefined;
     }
     this.removeRows(this.selectedRows.map(row => row.id));
@@ -640,7 +640,7 @@ class GridModel implements IGrid, IDisposable {
   }
 
   addSort(column: IColumn, sort?: SortDirection, insert?: boolean): IGrid {
-    let sortColumn = this._sort.indexOf(column);
+    const sortColumn = this._sort.indexOf(column);
     if (sortColumn >= 0) {
       this._sort.splice(sortColumn, 1);
     }
@@ -673,16 +673,16 @@ class GridModel implements IGrid, IDisposable {
 
   sort() {
     if ( (!this.groupBy || !this.groupBy.length) && (!this._sort || this._sort.length === 0) ) return;
-    let rowCompareFn = (r1: IRow, r2: IRow): number => {
+    const rowCompareFn = (r1: IRow, r2: IRow): number => {
       if (this.groupBy && this.groupBy.length) {
         for (const column of this.groupBy) {
           const c1      = r1.cells[column.name];
           const c2      = r2.cells[column.name];
           if (!c1 || !c2) continue;
-          let compareFn = column.compare;
-          let v1        = c1.value;
-          let v2        = c2.value;
-          let r         = compareFn ? compareFn(v1, v2) : compare(v1, v2);
+          const compareFn = column.compare;
+          const v1        = c1.value;
+          const v2        = c2.value;
+          const r         = compareFn ? compareFn(v1, v2) : compare(v1, v2);
           if (r !== 0) {
             if (!column.sort || column.sort === 'ascending') return r;
             return -1 * r;
@@ -694,10 +694,10 @@ class GridModel implements IGrid, IDisposable {
         const c1      = r1.cells[column.name];
         const c2      = r2.cells[column.name];
         if (!c1 || !c2) continue;
-        let compareFn = column.compare;
-        let v1        = c1.value;
-        let v2        = c2.value;
-        let r         = compareFn ? compareFn(v1, v2) : compare(v1, v2);
+        const compareFn = column.compare;
+        const v1        = c1.value;
+        const v2        = c2.value;
+        const r         = compareFn ? compareFn(v1, v2) : compare(v1, v2);
         if (r !== 0) {
           if (!column.sort || column.sort === 'ascending') return r;
           return -1 * r;
@@ -730,16 +730,16 @@ class GridModel implements IGrid, IDisposable {
       return;
     }
 
-    let selectedCells = this.selectedCells.filter(selectedCell => !selectedCell.readOnly);
+    const selectedCells = this.selectedCells.filter(selectedCell => !selectedCell.readOnly);
     if (selectedCells.length <= 0) {
       return;
     }
 
-    let clipboardCellsByColumnPosition         = {};
-    let clipboardCellsByColumnPositionOriginal = {};
-    let clipboardValues                        = this.clipboard;
+    const clipboardCellsByColumnPosition         = {};
+    const clipboardCellsByColumnPositionOriginal = {};
+    const clipboardValues                        = this.clipboard;
     clipboardValues.forEach(value => {
-      let cellColPos = value.columnPosition;
+      const cellColPos = value.columnPosition;
       if (!clipboardCellsByColumnPosition[cellColPos]) {
         clipboardCellsByColumnPosition[cellColPos]         = [value];
         clipboardCellsByColumnPositionOriginal[cellColPos] = [value];
@@ -752,12 +752,12 @@ class GridModel implements IGrid, IDisposable {
     const rows = new Set<IRow>();
 
     selectedCells.forEach((selectedCell) => {
-      let clipboardCellsForColumn = clipboardCellsByColumnPosition[selectedCell.columnPosition];
+      const clipboardCellsForColumn = clipboardCellsByColumnPosition[selectedCell.columnPosition];
       if (!clipboardCellsForColumn || clipboardCellsForColumn.length <= 0) {
         return;
       }
 
-      let clipboardValue = clipboardCellsForColumn.shift();
+      const clipboardValue = clipboardCellsForColumn.shift();
       selectedCell.value = clipboardValue.value;
       rows.add(selectedCell.row);
 
@@ -792,7 +792,7 @@ class GridModel implements IGrid, IDisposable {
     return this._groupColumns;
   }
   set groupBy(value: IColumn[]) {
-    let groupsToMakeVisible = this._groupColumns.filter((g: IColumn) => value.findIndex((g2: IColumn) => g2.id === g.id) < 0);
+    const groupsToMakeVisible = this._groupColumns.filter((g: IColumn) => value.findIndex((g2: IColumn) => g2.id === g.id) < 0);
     freeze(() => {
       this._groupColumns.length = 0;
       for (const column of groupsToMakeVisible) {
@@ -836,7 +836,7 @@ class GridModel implements IGrid, IDisposable {
   }
 
   addFixedRow(data?: IRowData, position?: number): IRow {
-    let d = data || {};
+    const d = data || {};
     if (d.options) {
       d.options.fixed = true;
     } else {
@@ -872,12 +872,12 @@ class GridModel implements IGrid, IDisposable {
   }
 
   _addRows(data: (IRowData | undefined)[], position?: number): IRow[] {
-    let addedRows: IRow[] = [];
-    let pos               = position;
+    const addedRows: IRow[] = [];
+    let pos                 = position;
     for (const rowData of data) {
       addedRows.push(this._addRow(rowData, pos));
       if (!isNullOrUndefined(pos)) {
-        pos!++;
+        pos++;
       }
     }
 
@@ -908,15 +908,15 @@ class GridModel implements IGrid, IDisposable {
   }
 
   duplicateRows(ids: string[], position?: number): IRow[] {
-    let duplicatedRows: IRow[] = [];
-    let pos = position;
+    const duplicatedRows: IRow[] = [];
+    let   pos = position;
     ids.forEach(id => {
-      let duplicatedRow = this._duplicateRow(id, pos);
+      const duplicatedRow = this._duplicateRow(id, pos);
       if (duplicatedRow) {
         duplicatedRows.push(duplicatedRow);
       }
       if (!isNullOrUndefined(pos)) {
-        pos!++;
+        pos++;
       }
     });
 
@@ -950,9 +950,9 @@ class GridModel implements IGrid, IDisposable {
   }
 
   insertRowAtSelection(data?: IRowData): IRow {
-    let rowToInsertId      = data && data.id;
-    let rowToInsertData    = data && data.data || {};
-    let rowToInsertOptions = data && data.options;
+    const rowToInsertId      = data && data.id;
+    const rowToInsertData    = data && data.data || {};
+    const rowToInsertOptions = data && data.options;
     let insertPosition     = this.rows.length;
     if (this.selectedRows.length > 0) {
       this.groupBy.forEach((column: IColumn) => {
@@ -962,8 +962,8 @@ class GridModel implements IGrid, IDisposable {
       });
       insertPosition = Math.max(...this.selectedRows.map(row => row.position)) + 1;
     }
-    let insertData: IRowData = {id: rowToInsertId, data: rowToInsertData, options: rowToInsertOptions};
-    let insertedRow = this._addRow(insertData, insertPosition);
+    const insertData: IRowData = {id: rowToInsertId, data: rowToInsertData, options: rowToInsertOptions};
+    const insertedRow = this._addRow(insertData, insertPosition);
     this.setRowPositions();
     return insertedRow;
   }
@@ -1001,7 +1001,7 @@ class GridModel implements IGrid, IDisposable {
   }
 
   getErrors(): IErrorData[] {
-    let errors: IErrorData[] = [];
+    const errors: IErrorData[] = [];
 
     for (const row of this.rows) {
       if (!row) continue;
@@ -1018,7 +1018,7 @@ class GridModel implements IGrid, IDisposable {
   }
 
   selectCellByPos(rowPosition: number, columnPosition: number) {
-    let cell = this.cellByPos(rowPosition, columnPosition);
+    const cell = this.cellByPos(rowPosition, columnPosition);
     if (cell) {
       this.startCell = cell;
       this.selectCells([cell]);
@@ -1031,10 +1031,10 @@ class GridModel implements IGrid, IDisposable {
     const colStart = columnPosition1 < columnPosition2 ? columnPosition1 : columnPosition2;
     const colEnd   = columnPosition2 > columnPosition1 ? columnPosition2 : columnPosition1;
 
-    let cellsToSelect: ICell[] = [];
+    const cellsToSelect: ICell[] = [];
     for (let i = rowStart; i <= rowEnd; i++) {
       for (let j = colStart; j <= colEnd; j++) {
-        let cell = this.cellByPos(i, j);
+        const cell = this.cellByPos(i, j);
         if (cell) {
           cellsToSelect.push(cell);
         }
@@ -1048,15 +1048,15 @@ class GridModel implements IGrid, IDisposable {
   }
 
   selectRows(rows: IRow[]): void {
-    let currentRows = this.selectedRows;
+    const currentRows = this.selectedRows;
 
     if (currentRows.length <= 0 && rows.length <= 0) {
       return;
     }
-    let currentRowsSet  = new Set(currentRows);
-    let rowsSet         = new Set(rows);
-    let currentRowsDiff = currentRows.filter(currRow => !rowsSet.has(currRow));
-    let rowsDiff        = rows.filter(row => !currentRowsSet.has(row));
+    const currentRowsSet  = new Set(currentRows);
+    const rowsSet         = new Set(rows);
+    const currentRowsDiff = currentRows.filter(currRow => !rowsSet.has(currRow));
+    const rowsDiff        = rows.filter(row => !currentRowsSet.has(row));
 
     currentRowsDiff.forEach(currRow => {
       currRow.selected = false;
@@ -1073,7 +1073,7 @@ class GridModel implements IGrid, IDisposable {
   }
 
   editCell(cell?: ICell): void {
-    let currentCell = this.editingCell;
+    const currentCell = this.editingCell;
     if (!cell) {
       if (!currentCell) {
         return;
@@ -1098,14 +1098,14 @@ class GridModel implements IGrid, IDisposable {
   }
 
   unselectCells(cells: ICell[], cellToFocus?: ICell): void {
-    let newSelectCells = this.selectedCells.slice();
+    const newSelectCells = this.selectedCells.slice();
     cells.forEach(cell => {
       for (let i = 0; i < cell.colSpan; i++) {
-        let cellToRemove = i === 0 ? cell : this.cellByPos(cell.rowPosition, cell.columnPosition + i);
+        const cellToRemove = i === 0 ? cell : this.cellByPos(cell.rowPosition, cell.columnPosition + i);
         if (!cellToRemove) {
           continue;
         }
-        let cellIdx = newSelectCells.findIndex(selectCell => selectCell.id === cellToRemove!.id);
+        const cellIdx = newSelectCells.findIndex(selectCell => selectCell.id === cellToRemove!.id);
         if (cellIdx >= 0) {
           newSelectCells.splice(cellIdx, 1);
         }
@@ -1115,7 +1115,7 @@ class GridModel implements IGrid, IDisposable {
   }
 
   selectCells(cells: ICell[], cellToFocus?: ICell, handleMergedCells: boolean = true, append: boolean = false): void {
-    let currentCells = this.selectedCells;
+    const currentCells = this.selectedCells;
 
     if (currentCells.length <= 0 && cells.length <= 0) {
       this.selectedRows.length && this.selectRows([]);
@@ -1141,7 +1141,7 @@ class GridModel implements IGrid, IDisposable {
 
         if (handleMergedCells) {
           for (let i = 1; i < cell.colSpan; i++) {
-            let additionalCell = this.cellByPos(cell.rowPosition, cell.columnPosition + i);
+            const additionalCell = this.cellByPos(cell.rowPosition, cell.columnPosition + i);
             if (!additionalCell) {
               continue;
             }
@@ -1152,7 +1152,7 @@ class GridModel implements IGrid, IDisposable {
       }
     });
 
-    let currentCellsDiff = currentCells.filter(currCell => !cellsToSelect.includes(currCell));
+    const currentCellsDiff = currentCells.filter(currCell => !cellsToSelect.includes(currCell));
 
     if (append) {
       rowsToSelect  = rowsToSelect.concat(this.selectedRows);
@@ -1186,30 +1186,30 @@ class GridModel implements IGrid, IDisposable {
   updateCellSelectionProperties(cellsToSelect: ICell[]) {
     cellsToSelect.forEach(cell => {
       freeze(() => {
-        let adjacentTopCell = this.adjacentTopCell(cell);
-        let sameGroupTop    = !!adjacentTopCell && true; // (adjacentTopCell.row.parentRow && adjacentTopCell.row.parentRow.id) === (cell.row.parentRow && cell.row.parentRow.id);
+        const adjacentTopCell = this.adjacentTopCell(cell);
+        const sameGroupTop    = !!adjacentTopCell && true; // (adjacentTopCell.row.parentRow && adjacentTopCell.row.parentRow.id) === (cell.row.parentRow && cell.row.parentRow.id);
         if (!adjacentTopCell || !sameGroupTop || !adjacentTopCell.selected) {
           cell.isTopMostSelection = true;
         } else {
           cell.isTopMostSelection = false;
         }
 
-        let adjacentRightCell = this.adjacentRightCell(cell);
+        const adjacentRightCell = this.adjacentRightCell(cell);
         if (!adjacentRightCell || !adjacentRightCell.selected) {
           cell.isRightMostSelection = true;
         } else {
           cell.isRightMostSelection = false;
         }
 
-        let adjacentBottomCell = this.adjacentBottomCell(cell);
-        let sameGroupBottom    = !!adjacentBottomCell && true; // (adjacentBottomCell.row.parentRow && adjacentBottomCell.row.parentRow.id) === (cell.row.parentRow && cell.row.parentRow.id);
+        const adjacentBottomCell = this.adjacentBottomCell(cell);
+        const sameGroupBottom    = !!adjacentBottomCell && true; // (adjacentBottomCell.row.parentRow && adjacentBottomCell.row.parentRow.id) === (cell.row.parentRow && cell.row.parentRow.id);
         if (!adjacentBottomCell || !sameGroupBottom || !adjacentBottomCell.selected) {
           cell.isBottomMostSelection = true;
         } else {
           cell.isBottomMostSelection = false;
         }
 
-        let adjacentLeftCell = this.adjacentLeftCell(cell);
+        const adjacentLeftCell = this.adjacentLeftCell(cell);
         if (!adjacentLeftCell || !adjacentLeftCell.selected) {
           cell.isLeftMostSelection = true;
         } else {
@@ -1220,10 +1220,10 @@ class GridModel implements IGrid, IDisposable {
   }
 
   selectCellsTo(cell: ICell, append: boolean = false) {
-    let rowPos      = cell.rowPosition;
-    let colPos      = cell.columnPosition;
-    let startRowPos = this.startCell!.rowPosition;
-    let startColPos = this.startCell!.columnPosition;
+    const rowPos      = cell.rowPosition;
+    const colPos      = cell.columnPosition;
+    const startRowPos = this.startCell!.rowPosition;
+    const startColPos = this.startCell!.columnPosition;
     let rowStart: number;
     let rowEnd: number;
     let colStart: number;
@@ -1247,7 +1247,7 @@ class GridModel implements IGrid, IDisposable {
 
     let columnsToSelect: IColumn[] = [];
     for (let i = colStart; i <= colEnd; i++) {
-      let column = this.columnByPos(i);
+      const column = this.columnByPos(i);
       if (column && column.visible) {
         columnsToSelect.push(column);
       }
@@ -1266,10 +1266,10 @@ class GridModel implements IGrid, IDisposable {
     // handle merged cells case
     columnsToSelect = this.selectCellsToMergeHelper(rowsToSelect.filter(row => row.allowMergeColumns), columnsToSelect);
 
-    let cellsToSelect: ICell[] = [];
+    const cellsToSelect: ICell[] = [];
     rowsToSelect.forEach(row => {
       columnsToSelect.forEach(column => {
-        let cell = row.cells[column.name];
+        const cell = row.cells[column.name];
         if (cell) {
           cellsToSelect.push(cell);
         }
@@ -1288,8 +1288,8 @@ class GridModel implements IGrid, IDisposable {
   private selectCellsToMergeHelper(rows: IRow[], columnsToSelect: IColumn[]): IColumn[] {
     rows.forEach((row, idx) => {
       if (!row.allowMergeColumns) return;
-      let colToSelectCount = columnsToSelect.length;
-      let rowCells         = columnsToSelect.map(column => row.cells[column.name]);
+      const colToSelectCount = columnsToSelect.length;
+      const rowCells         = columnsToSelect.map(column => row.cells[column.name]);
       rowCells.forEach(rowCell => {
         if (rowCell.colSpan === 1 || !columnsToSelect.some(col => col.id === rowCell.column.id)) {
           return;
@@ -1320,7 +1320,7 @@ class GridModel implements IGrid, IDisposable {
       });
       if (columnsToSelect.length > colToSelectCount) {
         // columns added, need to check previous rows to see if the cells of these new columns are themselves merged cells
-        let prevRowsNewColumnsToSelect = this.selectCellsToMergeHelper(rows.slice(0, idx), columnsToSelect.slice(colToSelectCount, columnsToSelect.length));
+        const prevRowsNewColumnsToSelect = this.selectCellsToMergeHelper(rows.slice(0, idx), columnsToSelect.slice(colToSelectCount, columnsToSelect.length));
         columnsToSelect                = [...new Set(columnsToSelect.concat(prevRowsNewColumnsToSelect))];
       }
     });
@@ -1359,11 +1359,11 @@ class GridModel implements IGrid, IDisposable {
 
   static create(rows: any[], columns: IColumn[], options?: IGridOptions): IGrid {
     return root((dispose: any) => {
-      let grid     = observable(new GridModel());
+      const grid     = observable(new GridModel());
       grid.initialize(dispose, options);
       grid.loading = true;
       freeze(() => {
-        let groupBy  = options && options.groupBy;
+        const groupBy  = options && options.groupBy;
         if (groupBy) {
           grid.groupBy = groupBy.map((name: string) => findColumnByName(columns, name)).filter((column: IColumn | undefined) => !isNullOrUndefined(column)) as IColumn[];
         }
@@ -1390,7 +1390,7 @@ export function mergeRows(rows: IRow[], columns: IColumn[], mergeEmpty: boolean 
     let previousCell: ICell | undefined;
     let rowSpan = 1;
     for (const r of rows) {
-      let cell = r.cells[column.name];
+      const cell = r.cells[column.name];
       if (previousCell && cell && (previousValue === cell.value || (!cell.value && mergeEmpty))) {
         previousCell.rowSpan = ++rowSpan;
         cell.rowSpan = 0;

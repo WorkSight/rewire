@@ -13,12 +13,12 @@ export function defaultMap<T extends string>(item?: T): string {
   return item || '(empty)';
 }
 
-export function arraySearch<T>(suggestions: T[], map?: (item?: T) => string, value?: T) {
-  let _map = map || defaultMap;
+export function arraySearch<T>(suggestions: T[], map?: (item?: T) => string, _value?: T) {
+  const _map = map || defaultMap;
 
   function getSuggestions(value: string): T[] {
     let   count       = 0;
-    let   regex       = match(value, 'i');
+    const   regex       = match(value, 'i');
 
     return value.length === 0
       ? suggestions
@@ -33,7 +33,7 @@ export function arraySearch<T>(suggestions: T[], map?: (item?: T) => string, val
         });
   }
 
-  function search(searchText: string, options?: ISearchOptions): Promise<T[]> {
+  function search(searchText: string, _options?: ISearchOptions): Promise<T[]> {
     return Promise.resolve(getSuggestions(searchText));
   }
 
@@ -43,7 +43,7 @@ export function arraySearch<T>(suggestions: T[], map?: (item?: T) => string, val
 export function documentSearch(documentType: string) {
   return {
     async search(text: string, options: ISearchOptions) {
-      let searchParams: any = {search: text};
+      const searchParams: any = {search: text};
 
       if (options && options.parentId) {
         searchParams.parentOrganizationKey = options.parentId;

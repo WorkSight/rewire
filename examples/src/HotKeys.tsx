@@ -16,11 +16,11 @@ class HotkeysModel extends Modal {
 
 export const hotkeysModel = new HotkeysModel();
 
-const getGridDialogTitle = (dialog: Modal): JSX.Element => {
+const getGridDialogTitle = (_dialog: Modal): JSX.Element => {
   return <div>Grid Hotkeys List</div>;
 };
 
-const styles = (theme: Theme) => ({
+const styles = (_theme: Theme) => ({
   dialogContentsContainer: {
     padding: '16px',
     maxHeight: '600px',
@@ -42,7 +42,7 @@ const styles = (theme: Theme) => ({
 
 const useHotKeyStyles = makeStyles(styles);
 
-export const HotKeysDialog = (props: any) => {
+export const HotKeysDialog = (_props: any) => {
     const classes = useHotKeyStyles();
 
     return (

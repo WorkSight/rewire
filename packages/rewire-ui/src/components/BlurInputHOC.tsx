@@ -54,21 +54,22 @@ export default class BlurInputHOC extends React.Component<IBlurProps, IBlurState
 
   handleOnChange = (evt: React.ChangeEvent<HTMLInputElement>) => {
     this.setState({value: evt.target.value});
-  }
+  };
 
   handleOnKeyDown = (evt: React.KeyboardEvent<HTMLInputElement>) => {
     if (evt.keyCode === 13) {
       this.props.onValueChange(this.state.value as any);
     }
-  }
+  };
 
-  handleOnBlur = (evt: any) => {
+  handleOnBlur = (_evt: any) => {
     if (this.props.onValueChange) {
       this.props.onValueChange(this.state.value as any);
     }
-  }
+  };
 
   render() {
+    // eslint-disable-next-line @typescript-eslint/no-unused-vars
     const { render, onValueChange, ...rest } = {...this.props, onKeyDown: this.handleOnKeyDown, onBlur: this.handleOnBlur, onChange: this.handleOnChange, value: this.state.value};
     return this.props.render(rest as any);
   }

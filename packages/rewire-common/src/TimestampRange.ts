@@ -162,7 +162,7 @@ export default class TimestampRange {
   }
 
   inRange(effective: DateType) {
-    let x = utc(effective);
+    const x = utc(effective);
     return ((x >= this._start) && (x < this._end));
   }
 
@@ -172,7 +172,7 @@ export default class TimestampRange {
 
   intersection(range: TimestampRange) {
     if (!range || this.isEmpty) return TimestampRange.Empty;
-    let r = new TimestampRange(this);
+    const r = new TimestampRange(this);
 
     if (range._start > r._start) r._start = range._start;
     if (range._end < r._end) r._end = range._end;

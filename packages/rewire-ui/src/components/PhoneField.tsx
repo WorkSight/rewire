@@ -7,7 +7,7 @@ import NumberField, {INumberFieldProps} from './NumberField';
 export const defaultPhoneFormat = '+# (###) ###-####';
 export const defaultPhoneMask   = 'x';
 
-const styles = (theme: Theme) => ({
+const styles = (_theme: Theme) => ({
   inputRoot: {
   },
   formControlRoot: {
@@ -29,9 +29,9 @@ class PhoneField extends React.Component<PhoneFieldProps> {
 
   render() {
     const {format, mask, placeholder, ...otherProps} = this.props;
-    let phoneFormat      = format || defaultPhoneFormat;
-    let phoneMask        = mask || defaultPhoneMask;
-    let phonePlaceholder = phoneFormat && phoneMask && phoneFormat.slice().replace(new RegExp(/#/, 'g'), phoneMask) || placeholder;
+    const phoneFormat      = format || defaultPhoneFormat;
+    const phoneMask        = mask || defaultPhoneMask;
+    const phonePlaceholder = phoneFormat && phoneMask && phoneFormat.slice().replace(new RegExp(/#/, 'g'), phoneMask) || placeholder;
 
     return (
       <NumberField format={phoneFormat} mask={phoneMask} placeholder={phonePlaceholder} isNumericString={true} {...otherProps} />

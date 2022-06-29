@@ -2,6 +2,7 @@ import React              from 'react';
 import Form                    from '../models/Form';
 import classNames              from 'classnames';
 import {withStyles, WithStyle} from './styles';
+import './flexgrid.css';
 
 const styles = () => ({
   form: {
@@ -41,19 +42,19 @@ class FormView extends React.Component<IFormViewProps> {
   handleKeyDown = (evt: React.KeyboardEvent<any>) => {
     if (evt.keyCode === 13) {
       evt.preventDefault();
-      let activeElement = document.activeElement as HTMLElement;
+      const activeElement = document.activeElement as HTMLElement;
       if (activeElement) {
         activeElement.blur();
         activeElement.focus();
       }
       this.submitForm();
     }
-  }
+  };
 
   handleSubmit = (evt: any) => {
     evt.preventDefault();
     this.submitForm();
-  }
+  };
 
   render() {
     const {style, className, classes, children} = (this.props as FormViewProps);

@@ -112,13 +112,13 @@ export class Item extends React.Component<ItemProps> {
   }
 
   setFocus = (evt: React.MouseEvent<any>) => {
-    let element = evt.target as any;
+    const element = evt.target as any;
     if (this.props.showDragHandle) {
       element.focus();
     } else {
       element.parentNode.focus();
     }
-  }
+  };
 
   render() {
     const {item, dragProvided, classes, showDragHandle, itemRenderer, disableTabbing} = this.props;
@@ -155,7 +155,7 @@ export class ListItems extends React.Component<ListItemProps> {
         < >
         {this.props.items.map((item: any, index: number) => (
             <Draggable key={item.id} draggableId={item.id} index={index}>
-              {(dragProvided: DraggableProvided & {placeholder?: any}, dragSnapshot: DraggableStateSnapshot) => (
+              {(dragProvided: DraggableProvided & {placeholder?: any}, _dragSnapshot: DraggableStateSnapshot) => (
                 <div>
                   <Item dragProvided={dragProvided} showDragHandle={this.props.showDragHandle} disableTabbing={this.props.disableTabbing} itemRenderer={itemRenderer} classes={this.props.classes} theme={this.props.theme} autoFocus={item.id === this.props.autoFocusId} item={item} />
                   {dragProvided.placeholder}
@@ -178,13 +178,13 @@ export interface ISortableListProps {
   isDropDisabled?: boolean;
   listRenderer?  : (props: any) => JSX.Element | React.ComponentElement<any, any> | null;
   itemRenderer?  : (item: IItem) => JSX.Element;
-  style?         : Object;
+  style?         : Record<string, unknown>;
   classes?       : React.CSSProperties;
   showDragHandle?: boolean;
   disableTabbing?: boolean;
   children?      : React.ReactNode;
   items          : IItem[];
-};
+}
 
 const manager: Record<string, any> = {};
 
@@ -265,8 +265,8 @@ class Sortable extends React.PureComponent<ISortableProps> {
       return;
     }
 
-    let source      = manager[result.type + result.source.droppableId];
-    let destination = manager[result.type + result.destination.droppableId];
+    const source      = manager[result.type + result.source.droppableId];
+    const destination = manager[result.type + result.destination.droppableId];
 
     if (!source || !destination) {
       return;
@@ -276,7 +276,7 @@ class Sortable extends React.PureComponent<ISortableProps> {
     if (this.props.onDragEnd) {
       this.props.onDragEnd.call(this, result);
     }
-  }
+  };
 
   render() {
     const props = this.props as SortableProps;

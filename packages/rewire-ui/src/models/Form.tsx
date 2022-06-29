@@ -190,30 +190,30 @@ class FormContext implements IFormContext {
   }
 
   phone(editProps?: any): IFieldDefn {
-    let field       = new BaseField('phone', editProps);
-    let phoneLength = ((editProps && editProps.format) || defaultPhoneFormat).replace(new RegExp('[^#]', 'g'), '').length;
-    let phoneRegEx  = new RegExp('^$|^[0-9]{' + phoneLength + '}$');
+    const field       = new BaseField('phone', editProps);
+    const phoneLength = ((editProps && editProps.format) || defaultPhoneFormat).replace(new RegExp('[^#]', 'g'), '').length;
+    const phoneRegEx  = new RegExp('^$|^[0-9]{' + phoneLength + '}$');
     field.validators(validator('regex', phoneRegEx));
     return field;
   }
 
   select(searcher: any, editProps?: any): IFieldDefn {
-    let eProps = Object.assign({}, searcher, editProps);
+    const eProps = Object.assign({}, searcher, editProps);
     return new BaseField('select', eProps);
   }
 
   multiselect(searcher: any, editProps?: any): IFieldDefn {
-    let eProps = Object.assign({}, searcher, editProps);
+    const eProps = Object.assign({}, searcher, editProps);
     return new BaseField('multiselect', eProps);
   }
 
   multiselectautocomplete(searcher: any, editProps?: any): IFieldDefn {
-    let eProps = Object.assign({}, searcher, editProps);
+    const eProps = Object.assign({}, searcher, editProps);
     return new BaseField('multiselectautocomplete', eProps);
   }
 
   reference(searcher: any, editProps?: any): IFieldDefn {
-    let eProps = Object.assign({}, searcher, editProps);
+    const eProps = Object.assign({}, searcher, editProps);
     return new BaseField('reference', eProps);
   }
 
@@ -400,6 +400,10 @@ export default class Form implements IValidationContext {
     });
   }
 
+  get value() {
+    return this._value;
+  }
+
   set value(value: ObjectType)  {
     freeze(() => {
       replace(this._value, value);
@@ -413,7 +417,7 @@ export default class Form implements IValidationContext {
     if (this.initialValuesValidationMode === 'all') {
       validationResult = this.validateForm();
     } else if (this.initialValuesValidationMode === 'withValues') {
-      let fieldsToValidate = this.fields.filter(field => !isNullOrUndefined(field.value));
+      const fieldsToValidate = this.fields.filter(field => !isNullOrUndefined(field.value));
       validationResult     = this.validateFields(fieldsToValidate);
     }
 
@@ -456,10 +460,6 @@ export default class Form implements IValidationContext {
     return this._initial;
   }
 
-  get value() {
-    return this._value;
-  }
-
   private _getFieldValue(field: IEditorField, obj: any) {
     if (!field) return undefined;
     return (field as any).__getter(obj);
@@ -471,7 +471,7 @@ export default class Form implements IValidationContext {
   }
 
   getChanges(): {[s: string]: any} {
-    let changesObj = {};
+    const changesObj = {};
     for (const field of this.fields) {
       const v = this._getFieldValue(field, this._value);
       if (!defaultEquals(field.value, v)) {
@@ -483,7 +483,7 @@ export default class Form implements IValidationContext {
 
   private initializeFields(fields: IFieldDefns) {
     const flds: any[] = [];
-    for (let fieldName in fields) {
+    for (const fieldName in fields) {
       if (!this.field[fieldName]) {
         const field = fields[fieldName];
         flds.push(this.createField(fieldName, field as BaseField));
@@ -524,7 +524,7 @@ export default class Form implements IValidationContext {
     }
 
     const onValueChange = (v: any) => {
-      let value = isNullOrUndefinedOrEmpty(v) ? undefined : v;
+      const value = isNullOrUndefinedOrEmpty(v) ? undefined : v;
       this.setFieldValue(field.name, value);
     };
 
@@ -587,7 +587,7 @@ export default class Form implements IValidationContext {
   }
 
   public setFieldValue(fieldName: string, value: any): boolean {
-    let field = this.field[fieldName];
+    const field = this.field[fieldName];
     if (!field || defaultEquals(field.value, value)) return false;
     field.value = value;
     field.onValueChange && field.onValueChange(this, value);
@@ -601,7 +601,7 @@ export default class Form implements IValidationContext {
     if (!fieldKVPairs) return false;
 
     let success     = false;
-    let fieldsToSet = Object.keys(fieldKVPairs).map((fieldName: string) => this.field[fieldName]).filter((field: IEditorField) => field && !defaultEquals(field.value, fieldKVPairs[field.name]));
+    const fieldsToSet = Object.keys(fieldKVPairs).map((fieldName: string) => this.field[fieldName]).filter((field: IEditorField) => field && !defaultEquals(field.value, fieldKVPairs[field.name]));
     fieldsToSet.forEach((field: IEditorField) => {
       field.value = fieldKVPairs[field.name];
       success     = true;
@@ -617,13 +617,13 @@ export default class Form implements IValidationContext {
   }
 
   public getField(fieldName: string): any {
-    let field = this.field[fieldName];
+    const field = this.field[fieldName];
     if (!field) return;
     return {label: field.label, value: field.value};
   }
 
   public shouldValidate(fieldName: string): boolean {
-    let field = this.field[fieldName];
+    const field = this.field[fieldName];
     if (!field) return false;
     return !field.disableErrors && !(field.disabled?.(field));
   }
@@ -647,6 +647,7 @@ export default class Form implements IValidationContext {
   }
 
   public revert() {
+    // eslint-disable-next-line no-self-assign
     this.value = this.value;
   }
 
@@ -667,15 +668,15 @@ export default class Form implements IValidationContext {
 
   public submit = (): boolean => {
     if (!this._value) return false;
-    let result = this.validateForm();
+    const result = this.validateForm();
     if (result === eValidationResult.Error) return false;
     replace(this._value, this.toObjectValues());
     return true;
-  }
+  };
 
   public submitAsync = async (cb?: () => Promise<boolean | undefined>): Promise<boolean> => {
     if (!this._value) return false;
-    let result = this.validateForm();
+    const result = this.validateForm();
     if (result === eValidationResult.Error) return false;
     try {
       const r = cb && (await cb());
@@ -685,7 +686,7 @@ export default class Form implements IValidationContext {
     }
     replace(this._value, this.toObjectValues());
     return true;
-  }
+  };
 
   public validateField(field: IEditorField): eValidationResult {
     return this.validator.validateField(this, field.name);

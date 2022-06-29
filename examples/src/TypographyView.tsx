@@ -2,7 +2,7 @@ import React           from 'react';
 import { TransitionWrapper} from 'rewire-ui';
 import Typography           from '@material-ui/core/Typography';
 
-export const TypographyView = React.memo((props: any) => (
+export const TypographyView = React.memo((_props: any) => (
   <TransitionWrapper>
     <div>
       <Typography variant='body1'>body1</Typography>

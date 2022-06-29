@@ -20,7 +20,7 @@ import './Dialog.css';
 
 type TransitionPropsType = React.ComponentType<TransitionProps & { children?: React.ReactElement<any, any> }> | undefined;
 
-let styles = (theme: Theme) => ({
+const styles = (_theme: Theme) => ({
   root: {
     width: '100%',
     overflowY: 'hidden',

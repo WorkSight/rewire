@@ -84,7 +84,7 @@ export class UTC {
   }
 
   get daysInMonth(): number {
-    let date = new Date(this.utc);
+    const date = new Date(this.utc);
     return new Date(Date.UTC(date.getUTCFullYear(), date.getUTCMonth() + 1, 0)).getUTCDate();
   }
 
@@ -94,7 +94,7 @@ export class UTC {
   }
 
   startOfMonth() {
-    let date = new Date(this.utc);
+    const date = new Date(this.utc);
     date.setUTCDate(1);
     this.utc = date.setUTCHours(0, 0, 0, 0);
     return this;
@@ -106,7 +106,7 @@ export class UTC {
   }
 
   endOfMonth() {
-    let date = new Date(this.utc);
+    const date = new Date(this.utc);
     this.utc = new Date(Date.UTC(date.getUTCFullYear(), date.getUTCMonth() + 1, 0)).setUTCHours(23, 59, 59, 999);
     return this;
   }
@@ -117,10 +117,10 @@ export class UTC {
 
   toDateString() {
     if ((this.utc === UTC.MaxValue.utc) || (this.utc === UTC.MinValue.utc)) return '';
-    let d     = new Date(this.utc);
-    let year  = d.getUTCFullYear();
-    let month = d.getUTCMonth() + 1;
-    let day   = d.getUTCDate();
+    const d     = new Date(this.utc);
+    const year  = d.getUTCFullYear();
+    const month = d.getUTCMonth() + 1;
+    const day   = d.getUTCDate();
     return `${year}-${this.pad(month)}-${this.pad(day)}`;
   }
 
@@ -129,9 +129,9 @@ export class UTC {
   }
 
   toTimeString() {
-    let d       = new Date(this.utc);
-    let hours   = d.getUTCHours();
-    let minutes = d.getUTCMinutes();
+    const d       = new Date(this.utc);
+    const hours   = d.getUTCHours();
+    const minutes = d.getUTCMinutes();
     const seconds = d.getUTCSeconds();
     return `${this.pad(hours)}:${this.pad(minutes)}:${this.pad(seconds)}`;
   }
@@ -147,15 +147,17 @@ export class UTC {
   add(amount: number, ts: TimeSpan = TimeSpan.days, roundTo?: number) {
     let newAmount: number;
     switch (ts) {
-      case TimeSpan.years:
+      case TimeSpan.years: {
         const d   = new Date(this.utc);
         newAmount = d.setUTCFullYear(d.getUTCFullYear() + amount);
         break;
+      }
 
-      case TimeSpan.months:
+      case TimeSpan.months: {
         const d2  = new Date(this.utc);
         newAmount = d2.setUTCFullYear(d2.getUTCFullYear(), (d2.getUTCMonth() + amount));
         break;
+      }
 
       default:
         newAmount = this.utc + (amount * UTC.TimeSpanToMillis[ts]);
@@ -169,8 +171,8 @@ export class UTC {
   }
 
   subtract(dt: DateType, ts: TimeSpan = TimeSpan.days, roundTo?: number) {
-    let right  = UTC.toNumber(dt);
-    let left   = this.utc;
+    const right  = UTC.toNumber(dt);
+    const left   = this.utc;
     let result = (left - right) / UTC.TimeSpanToMillis[ts];
     if (!isNullOrUndefined(roundTo)) {
       result = this.round(result, roundTo);
@@ -187,7 +189,7 @@ export class UTC {
   }
 
   static now() {
-    let date = new Date();
+    const date = new Date();
     return new UTC(date.getTime());
   }
 
@@ -207,7 +209,7 @@ export class UTC {
   }
 
   toUTCDate() {
-    let date = new Date(this.utc);
+    const date = new Date(this.utc);
     return new Date(this.utc + getTimezoneOffset(date));
   }
 

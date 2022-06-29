@@ -20,7 +20,7 @@ const clickHandler = (props: ISuggestionsContainerComponentProps) => () => {
   props.downShift.closeMenu();
 };
 
-const suggestionsContainerHeader = (props: ISuggestionsContainerComponentProps) => (
+const suggestionsContainerHeader = (_props: ISuggestionsContainerComponentProps) => (
   <div>
     <Typography variant='subtitle1'><strong>Items Title</strong></Typography>
   </div>
@@ -34,7 +34,7 @@ const suggestionsContainerFooter = (props: ISuggestionsContainerComponentProps) 
 
 const CustomEditor = (props: any) => {
   return <span>{props.value}</span>;
-}
+};
 
 function createForm() {
   return Form.create((_) => ({
@@ -43,7 +43,7 @@ function createForm() {
     password:                _.password().label('Password').validators('required', validator('==', field('password_confirmation'), error('passwords must be the same'))).placeholder('enter a password'),
     password_confirmation:   _.password().label('Confirm Password').validators('required').placeholder('confirm your password'),
     country:                 _.reference(countries).label('Country').validators('required').placeholder('type to lookup'),
-    time:                    _.time().label('Time').validators('required').onValueChange((form: Form, v: any) => form.setFieldValue('email', 'hi@hi.com')),
+    time:                    _.time().label('Time').validators('required').onValueChange((form: Form, _v: any) => form.setFieldValue('email', 'hi@hi.com')),
     multiselectAutoComplete: _.multiselectautocomplete(countries, { chipLimit: 2, inputAdd: (v: string) => ({id: v, name: v}) }).label('Multiselect AutoComplete Country').validators('required').placeholder('select all that apply'),
     searchers:               _.multiselectautocomplete(searcher, { chipLimit: 2, inputAdd: (v: string) => v}).label('Multiselect AutoComplete Searcher').validators('required').placeholder('select all that apply'),
     multiselectCountry:      _.multiselect(countries).label('Multiselect Country').validators('required').placeholder('select countries'),
@@ -57,7 +57,7 @@ function createForm() {
     color:                   _.color().label('Color'),
     phone:                   _.phone().label('Phone').accessor(['phone', 'home']),
     mask:                    _.mask({mask: ['(', /[1-9]/, /\d/, /\d/, ')', ' ', /\d/, /\d/, /\d/, '-', /\d/, /\d/, /\d/, /\d/]}).label('MyMask').validators('required'),
-    trigger:                 _.string().label('Trigger').placeholder('Change me to trigger handler').onValueChange((form: Form, v: any) => {form.setFieldValue('email', 'Triggered!@hotmail.com'); form.setFieldValue('money', 1337); }),
+    trigger:                 _.string().label('Trigger').placeholder('Change me to trigger handler').onValueChange((form: Form, _v: any) => {form.setFieldValue('email', 'Triggered!@hotmail.com'); form.setFieldValue('money', 1337); }),
     advancedAutoComplete:    _.reference(countries, { suggestionsContainerHeader: suggestionsContainerHeader, suggestionsContainerFooter: suggestionsContainerFooter, openOnFocus: true }).label('Advanced AutoComplete').validators('required').placeholder('select a country'),
   }), {
     email:                 'my_email@gmail.com',
@@ -92,7 +92,7 @@ export class SampleModel extends Modal {
     console.log(this.form.value);
     await delay(2000);
     return true;
-  }
+  };
 }
 
 export const sampleModel = new SampleModel();
@@ -151,7 +151,7 @@ const SampleFormView = React.memo(({ form }: { form: typeof sampleModel.form }) 
 ));
 
 // override title
-const getTitle = (dialog: Modal): JSX.Element => <span>Dialog Title</span>;
+const getTitle = (_dialog: Modal): JSX.Element => <span>Dialog Title</span>;
 
 export const SampleDialog = () => (
   <DraggableResizableDialog defaultWidth='lg' DialogProps={{dialog: sampleModel, title: getTitle}}>

@@ -8,7 +8,7 @@ import {Theme}                   from '@material-ui/core/styles';
 import {isNullOrUndefined}       from 'rewire-common';
 import {withStyles, WithStyle}   from './styles';
 
-const styles = (theme: Theme) => ({
+const styles = (_theme: Theme) => ({
   inputRoot: {
   },
   checkboxRoot: {

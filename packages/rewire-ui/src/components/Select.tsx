@@ -17,7 +17,7 @@ import {
 }                                      from '../models/search';
 import {withStyles, WithStyle}         from './styles';
 
-const styles = (theme: Theme) => ({
+const styles = (_theme: Theme) => ({
   inputRoot: {
     lineHeight: 'inherit',
     fontSize: 'inherit',
@@ -152,7 +152,7 @@ class Select<T> extends React.Component<SelectProps<T>, any> {
 
     const suggestions = await this.search('', this.props.options);
     this.setState({suggestions: suggestions});
-  }
+  };
 
   UNSAFE_componentWillReceiveProps (nextProps: ICustomProps<T>) {
     if (nextProps.options) {
@@ -162,7 +162,7 @@ class Select<T> extends React.Component<SelectProps<T>, any> {
     }
   }
 
-  shouldComponentUpdate(nextProps: SelectProps<T>, nextState: any, nextContext: any) {
+  shouldComponentUpdate(nextProps: SelectProps<T>, nextState: any, _nextContext: any) {
     return (
         (nextProps.selectedItem        !== this.props.selectedItem)        ||
         (nextProps.error               !== this.props.error)               ||
@@ -202,29 +202,29 @@ class Select<T> extends React.Component<SelectProps<T>, any> {
     return tooltip as string;
   }
 
-  handleOnClose = (event: object) => {
+  handleOnClose = (_event: object) => {
     this.setState({isOpen: false});
-  }
+  };
 
-  handleOnOpen = (event: object) => {
+  handleOnOpen = (_event: object) => {
     this.openMenu();
-  }
+  };
 
   openMenu = async () => {
     if (this.props.dynamic) {
       await this.performSearch();
     }
     this.setState({isOpen: true});
-  }
+  };
 
   handleMenuKeyDown = (event: React.KeyboardEvent<any>) => {
     switch (event.keyCode) {
-      case 9:
-        let valueToSelect = this.state.suggestions.find((v: any) => (event.target as any).dataset.value === this.map(v));
+      case 9: {
+        const valueToSelect = this.state.suggestions.find((v: any) => (event.target as any).dataset.value === this.map(v));
         if (this.props.multiple) {
           let values = this.props.selectedItem as unknown as (T[] | undefined);
           if (values) {
-            let valueToSelectMapped = this.map(valueToSelect);
+            const valueToSelectMapped = this.map(valueToSelect);
             if (values.findIndex((v: any) => this.map(v) === valueToSelectMapped) >= 0) {
               values = values.filter((v: any) => this.map(v) !== valueToSelectMapped);
               values = values.length <= 0 ? undefined : values;
@@ -240,6 +240,8 @@ class Select<T> extends React.Component<SelectProps<T>, any> {
         event.preventDefault();
         event.stopPropagation();
         event.nativeEvent.stopImmediatePropagation();
+        break;
+      }
       case 13:
       case 37:
       case 38:
@@ -249,43 +251,43 @@ class Select<T> extends React.Component<SelectProps<T>, any> {
         event.nativeEvent.stopImmediatePropagation();
         break;
     }
-  }
+  };
 
   handleMenuKeyPress = (event: React.KeyboardEvent<any>) => {
     event.preventDefault();
     event.stopPropagation();
     event.nativeEvent.stopImmediatePropagation();
-  }
+  };
 
   handleMenuMouseEnter = (event: React.MouseEvent<any>) => {
     event.preventDefault();
     event.stopPropagation();
     event.nativeEvent.stopImmediatePropagation();
-  }
+  };
 
   handleMenuMouseDown = (event: React.MouseEvent<any>) => {
     event.preventDefault();
     event.stopPropagation();
     event.nativeEvent.stopImmediatePropagation();
-  }
+  };
 
   handleMenuMouseUp = (event: React.MouseEvent<any>) => {
     event.preventDefault();
     event.stopPropagation();
     event.nativeEvent.stopImmediatePropagation();
-  }
+  };
 
   handleMenuClick = (event: React.MouseEvent<any>) => {
     event.preventDefault();
     event.stopPropagation();
     event.nativeEvent.stopImmediatePropagation();
-  }
+  };
 
   handleMenuDoubleClick = (event: React.MouseEvent<any>) => {
     event.preventDefault();
     event.stopPropagation();
     event.nativeEvent.stopImmediatePropagation();
-  }
+  };
 
   handleKeyDown = (evt: React.KeyboardEvent<any>) => {
     this.props.onKeyDown && this.props.onKeyDown(evt);
@@ -296,6 +298,7 @@ class Select<T> extends React.Component<SelectProps<T>, any> {
       case ' ':
         evt.preventDefault();
         this.openMenu();
+        break;
       case 'Enter':
         break;
       case 'Delete':
@@ -305,7 +308,7 @@ class Select<T> extends React.Component<SelectProps<T>, any> {
       default:
         break;
     }
-  }
+  };
 
   handleChanged = (event: ChangeEvent<any>) => {
     if (this.props.onSelectItem) {
@@ -317,7 +320,7 @@ class Select<T> extends React.Component<SelectProps<T>, any> {
         this.props.onSelectItem(this.state.suggestions.find((v: any) => event.target.value === this.map(v)));
       }
     }
-  }
+  };
 
   setFontSize() {
     if (!this._fontSize) {
@@ -350,14 +353,14 @@ class Select<T> extends React.Component<SelectProps<T>, any> {
         </MenuItem>
       );
     }
-    let s: any = {fontSize: fontSize};
+    const s: any = {fontSize: fontSize};
     if (isHighlighted) {
       s.fontWeight = '500';
     }
     return (
       <MenuItem key={index} component={'div' as any} selected={isHighlighted} value={displayName} style={s} classes={{root: this.props.classes.selectMenuItem}}><span>{displayName}</span></MenuItem>
     );
-  }
+  };
 
   renderError = React.memo((props: any) => {
     const {classes, error, useTooltipForErrors} = props;
@@ -420,7 +423,7 @@ class Select<T> extends React.Component<SelectProps<T>, any> {
       inputFormControlClassName = classes.inputFormControlWithLabel;
     }
 
-    let cls = (this.props.className || '') + ' select';
+    const cls = (this.props.className || '') + ' select';
 
     return (
       <TextField

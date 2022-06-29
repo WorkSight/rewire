@@ -1,47 +1,13 @@
 {
-  "compileOnSave": false,
+  "extends": "../../tsconfig.json",
   "compilerOptions": {
-    "allowJs": false,
-    "allowSyntheticDefaultImports": true,
-    "allowUnreachableCode": false,
-    "allowUnusedLabels": false,
-    "declaration": true,
-    "diagnostics": false,
-    "emitDecoratorMetadata": true,
-    "esModuleInterop": false,
-    "experimentalDecorators": true,
-    "forceConsistentCasingInFileNames": false,
-    "inlineSourceMap": false,
-    "inlineSources": false,
-    "isolatedModules": true,
-    "jsx": "react",
-    "listFiles": false,
-    "locale": "en-us",
-    "module": "commonjs",
-    "moduleResolution": "node",
-    "noEmitHelpers": false,
-    "noImplicitAny": true,
-    "noImplicitUseStrict": false,
-    "noLib": false,
-    "noStrictGenericChecks": true,
-    "noUnusedLocals": true,
     "outDir": "dist",
-    "preserveConstEnums": true,
-    "removeComments": true,
-    "skipLibCheck": true,
-    "sourceMap": true,
-    "strictNullChecks": true,
-    "suppressImplicitAnyIndexErrors": true,
-    "target": "ES2020",
-    "traceResolution": false,
-    "plugins": [
-      { "name": "tslint-language-service" }
-    ]
+    "rootDir": "src",
   },
-  "include": [
-    "src/index.ts", "src/externals.d.ts"
-  ],
-"exclude": [
+  "exclude": [
     "node_modules", "test", "tests", "dist", "lib", "build"
+  ],
+  "include": [
+    "src/**/*",
   ]
 }

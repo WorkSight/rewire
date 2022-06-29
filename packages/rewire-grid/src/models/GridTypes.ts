@@ -469,7 +469,7 @@ export function findGroupRowById(iterator: Iterable<IGroupRow>, id: string): IGr
       return groupRow;
     }
     if (groupRow.rows.length && isGroupRow(groupRow.rows[0])) {
-      let matchingInnerGroupRow = findGroupRowById(groupRow.rows as IGroupRow[], id);
+      const matchingInnerGroupRow = findGroupRowById(groupRow.rows as IGroupRow[], id);
       if (matchingInnerGroupRow) {
         return matchingInnerGroupRow;
       }

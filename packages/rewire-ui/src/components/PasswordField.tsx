@@ -12,7 +12,7 @@ import BlurInputHOC                  from './BlurInputHOC';
 import {TextAlignment, TextVariant}  from './editors';
 import {withStyles, WithStyle}       from './styles';
 
-const styles = (theme: Theme) => ({
+const styles = (_theme: Theme) => ({
   inputRoot: {
     lineHeight: 'inherit',
     fontSize: 'inherit',
@@ -155,15 +155,15 @@ class PasswordField extends React.Component<PasswordFieldProps, IPasswordFieldSt
     } else if (this.props.endOfTextOnFocus) {
       evt.target.setSelectionRange(evt.target.value.length, evt.target.value.length);
     } else if (!isNullOrUndefined(this.props.cursorPositionOnFocus)) {
-      let cursorPosition = Math.max(0, Math.min(this.props.cursorPositionOnFocus!, evt.target.value.length));
+      const cursorPosition = Math.max(0, Math.min(this.props.cursorPositionOnFocus!, evt.target.value.length));
       evt.target.setSelectionRange(cursorPosition, cursorPosition);
     }
-  }
+  };
 
   handleClickShowPassword = () => {
     this.setState(state => ({showPassword: !state.showPassword}));
     setTimeout(() => this.inputRef.current && this.inputRef.current.focus(), 0);
-  }
+  };
 
   renderError = React.memo((props: any) => {
     const {classes, error, useTooltipForErrors} = props;
@@ -186,7 +186,7 @@ class PasswordField extends React.Component<PasswordFieldProps, IPasswordFieldSt
       return null;
     }
 
-    let adornment = this.props.hasAdornment
+    const adornment = this.props.hasAdornment
       ? (
         <InputAdornment position='end' classes={{root: this.props.classes.inputAdornmentRoot}}>
           <IconButton tabIndex={-1} classes={{root: this.props.classes.iconButtonRoot}} disableRipple={true} onClick={this.handleClickShowPassword}>
@@ -202,7 +202,7 @@ class PasswordField extends React.Component<PasswordFieldProps, IPasswordFieldSt
     const type                      = this.state.showPassword ? 'text' : 'password';
     const inputClassName            = this.props.variant === 'outlined' ? this.props.classes.inputOutlinedInput : this.props.classes.inputInput;
     const inputFormControlClassName = this.props.variant === 'standard' && this.props.label ? this.props.classes.inputFormControlWithLabel : undefined;
-    let value                       = !isNullOrUndefined(this.props.value) ? this.props.value : '';
+    const value                       = !isNullOrUndefined(this.props.value) ? this.props.value : '';
 
     if (this.props.updateOnChange) {
       return (

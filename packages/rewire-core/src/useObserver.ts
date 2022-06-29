@@ -50,7 +50,7 @@ export function useObserver<T>(
   return s.current!.track(renderFn, update);
 }
 
-export function disposeOnUnmount(context: any, fn: Function) {
+export function disposeOnUnmount(context: any, fn: () => void) {
   S.root((dispose) => {
     const oldCWM = context.componentWillUnmount;
     context.componentWillUnmount = () => {

@@ -44,7 +44,7 @@ interface IAvatarFieldState {
 class AvatarField extends React.Component<AvatarFieldProps, IAvatarFieldState> {
   state: IAvatarFieldState;
   defaultAvatarFieldProps = {
-    buttonSize: 'small' as 'small',
+    buttonSize: 'small' as const,
     cropRadius: 75,
     minCropRadius: 40,
     lineWidth: 3,
@@ -84,16 +84,16 @@ class AvatarField extends React.Component<AvatarFieldProps, IAvatarFieldState> {
 
   onImageLoad = (imageSrc: string) => {
     this.setState({loadedValue: imageSrc}, () => this.props.onImageLoad && this.props.onImageLoad(imageSrc));
-  }
+  };
 
   onSave = (imageSrc?: string) => {
     this.props.onValueChange(imageSrc);
     this.setState({value: imageSrc, loadedValue: undefined}, () => this.props.onSave && this.props.onSave(imageSrc));
-  }
+  };
 
   onCancel = () => {
     this.setState({loadedValue: undefined}, () => this.props.onCancel && this.props.onCancel());
-  }
+  };
 
   render() {
     if (this.props.visible === false) {
@@ -102,11 +102,12 @@ class AvatarField extends React.Component<AvatarFieldProps, IAvatarFieldState> {
 
     const {classes, buttonSize, width, height, imageWidth, imageHeight, avatarDiameter, label, disabled, lineWidth, cropColor, backgroundColor, shadingColor, shadingOpacity, cropRadius, minCropRadius, onCrop, onLoad, onFileLoad, mimeTypes} = this.props;
     const bSize                              = buttonSize || this.defaultAvatarFieldProps.buttonSize;
+    // eslint-disable-next-line @typescript-eslint/no-unused-vars
     const {avatarContainer, ...otherClasses} = classes;
     let avatarCropperElement                 = undefined;
 
     if (this.state.loadedValue) {
-      let containerWidth = width || this.defaultAvatarFieldProps.width;
+      const containerWidth = width || this.defaultAvatarFieldProps.width;
 
       avatarCropperElement =
         <AvatarCropper
@@ -221,7 +222,7 @@ const InnerAvatar = withStyles(innerAvatarStyles, class extends React.Component<
   defaultInnerAvatarProps = {
     label: 'Upload Image',
     avatarDiameter: 150,
-    buttonSize: 'small' as 'small',
+    buttonSize: 'small' as const,
     mimeTypes: 'image/jpeg,image/png',
   };
 
@@ -240,13 +241,13 @@ const InnerAvatar = withStyles(innerAvatarStyles, class extends React.Component<
 
   onFileLoad = (file: any) => {
     this.props.onFileLoad && this.props.onFileLoad(file);
-  }
+  };
 
   handleFileLoad = (e: any) => {
     e.preventDefault();
 
-    let reader = new FileReader();
-    let file   = e.target && e.target.files[0];
+    const reader = new FileReader();
+    const file   = e.target && e.target.files[0];
     this.onFileLoad(file);
 
     let imageSrc: string;
@@ -255,15 +256,15 @@ const InnerAvatar = withStyles(innerAvatarStyles, class extends React.Component<
       this.props.onImageLoad(imageSrc);
     };
     reader.readAsDataURL(file);
-    let fileInput = this.fileInputRef.current;
+    const fileInput = this.fileInputRef.current;
     if (fileInput) {
       fileInput.value = '';
     }
-  }
+  };
 
-  deleteImage = (e: React.MouseEvent<any>) => {
+  deleteImage = (_e: React.MouseEvent<any>) => {
     this.props.onSave();
-  }
+  };
 
   render() {
     const {classes, buttonSize, avatarDiameter, label, disabled, mimeTypes} = this.props;

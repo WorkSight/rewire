@@ -14,7 +14,7 @@ import Dialog, {
 }                                from './Dialog';
 import { WithStyle, withStyles } from './styles';
 
-let dialogStyles = (theme: Theme) => ({
+const dialogStyles = (_theme: Theme) => ({
   root: {
     margin: '0px',
     height: '100%',
@@ -62,7 +62,7 @@ class DraggableResizableDialog extends React.Component<IDraggableResizableDialog
   static defaultProps = {
     defaultWidth: 'auto',
     defaultHeight: 'auto',
-  }
+  };
 
   constructor(props: DraggableResizableDialogProps) {
     super(props);
@@ -87,7 +87,7 @@ class DraggableResizableDialog extends React.Component<IDraggableResizableDialog
 
   PaperComponent = (props: PaperProps) => {
     const ref           = this.draggableResizableBoxRef;
-    const defaultWidth  = this.getDefaultWidth(this.props.defaultWidth)
+    const defaultWidth  = this.getDefaultWidth(this.props.defaultWidth);
     const defaultHeight = this.props.defaultHeight;
     React.useEffect(() => {
       const currRef    = ref?.current;
@@ -116,7 +116,7 @@ class DraggableResizableDialog extends React.Component<IDraggableResizableDialog
         const startY = (parentHeight - dialogHeight) / 2;
         currRef.updatePosition({ x: startX, y: startY });
       }
-    }, [])
+    }, []);
 
     const draggableProps = this.props as DraggableResizableDialogProps;
     return (
@@ -133,7 +133,7 @@ class DraggableResizableDialog extends React.Component<IDraggableResizableDialog
         </DraggableResizableBox>
       </div>
     );
-  }
+  };
 
   RenderDialogHeader(props: HeaderComponentProps): JSX.Element {
     const {dialog, classes, title} = props;

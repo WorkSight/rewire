@@ -28,7 +28,7 @@
     "graphql": "^16.5.0",
     "graphql-ws": "^5.9.0",
     "is": "^3.3.0",
-    "rewire-common": "^1.0.279"
+    "rewire-common": "^1.0.285"
   },
   "devDependencies": {
     "@types/extract-files": "^8.1.1"

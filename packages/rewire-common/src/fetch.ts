@@ -36,15 +36,15 @@ export class Fetch {
 
     if ((response.status >= 200) && (response.status < 300)) {
       if (response.status === 200) {
-        let v = await response.text();
+        const v = await response.text();
         return v ? JSON.parse(v) : v;
       }
       return undefined;
     }
 
     try {
-      let v = await response.text();
-      let m: any = (v && JSON.parse(v)) || {msg: v};
+      const v = await response.text();
+      const m: any = (v && JSON.parse(v)) || {msg: v};
       m.msg = m.ExceptionMessage || m.Message || m.msg;
       // messages.channel('ui-messages').action('error').post(m);
     } catch (ex)  {
@@ -61,7 +61,7 @@ export class Fetch {
 
     if ((response.status >= 200) && (response.status < 300)) {
       if (response.status === 200) {
-        let v = await response.blob();
+        const v = await response.blob();
         return v;
       }
       return undefined;
@@ -88,7 +88,7 @@ export class Fetch {
   }
 
   get(api: string, params: any, ms: number = _timeout): Promise<any> {
-    let queryString = qs.stringify(params);
+    const queryString = qs.stringify(params);
     return this._fetch(this.url + api + (queryString ? ('?' + queryString) : ''), undefined, ms);
   }
 
@@ -97,7 +97,7 @@ export class Fetch {
   }
 
   postQuery(api: string, params: any, data: any = {}, ms: number = _timeout) {
-    let queryString = qs.stringify(params);
+    const queryString = qs.stringify(params);
     return this._fetch(this.url + api + (queryString ? ('?' + queryString) : ''), {method: 'post', body: JSON.stringify(data)}, ms);
   }
 
@@ -114,7 +114,7 @@ export class Fetch {
   }
 
   async del(api: string, params: any, ms: number = _timeout) {
-    let queryString = qs.stringify(params);
+    const queryString = qs.stringify(params);
     return this._fetch(this.url + api + (queryString ? ('?' + queryString) : ''), {method: 'delete'}, ms);
   }
 }

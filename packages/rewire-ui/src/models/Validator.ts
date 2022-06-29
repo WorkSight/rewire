@@ -1,3 +1,4 @@
+/* eslint-disable no-prototype-builtins */
 import {isNullOrUndefined} from 'rewire-common';
 import {defaultEquals} from 'rewire-core';
 import is from 'is';
@@ -59,6 +60,7 @@ export function isNull(value?: any): boolean {
 export const isRequired = (value: any): boolean => !(isNull(value) || (is.array(value) && value.length <= 0));
 export const isRegEx    = (value: string, re: RegExp): boolean => re.test(String(!isNullOrUndefined(value) ? value : ''));
 export const isEmail    = (value: any): boolean  => {
+  // eslint-disable-next-line no-useless-escape
   const re = /(^$|^(([^<>()\[\]\\.,;:\s@"]+(\.[^<>()\[\]\\.,;:\s@"]+)*)|(".+"))@((\[[0-9]{1,3}\.[0-9]{1,3}\.[0-9]{1,3}\.[0-9]{1,3}\])|(([a-zA-Z\-0-9]+\.)+[a-zA-Z]{2,}))$)/;
   return re.test(String(!isNullOrUndefined(value) ? value : ''));
 };
@@ -80,13 +82,13 @@ export const requiredWhenOtherIsValue = (value: any, otherValue: any, requiredVa
 
 export const isDifferenceOfOthers = (value: number, ...otherValues: number[]): boolean => {
   if (otherValues.some((v: number | undefined) => isNullOrUndefined(v))) return true;
-  let difference = otherValues.reduce((totalValue: number, currValue: number) => totalValue - currValue);
+  const difference = otherValues.reduce((totalValue: number, currValue: number) => totalValue - currValue);
   return value === difference;
 };
 
 export const isSumOfOthers = (value: number, ...otherValues: number[]): boolean => {
   if (otherValues.some((v: number | undefined) => isNullOrUndefined(v))) return true;
-  let sum = otherValues.reduce((totalValue: number, currValue: number) => totalValue + currValue);
+  const sum = otherValues.reduce((totalValue: number, currValue: number) => totalValue + currValue);
   return value === sum;
 };
 
@@ -213,7 +215,7 @@ export default class Validator {
 
   private _get(context: IValidationContext, field: string, validator: IValidator, property: string) {
     const f    = context.getField(field);
-    let   args = [f && f[property]];
+    const   args = [f && f[property]];
     for (const f of validator.args!) {
       if (f.hasOwnProperty('field')) {
         const field = context.getField(f.field);
@@ -243,6 +245,7 @@ export default class Validator {
     }
     if (errorResult !== undefined) {
       if (setErrors) {
+        // eslint-disable-next-line prefer-const
         let {text, severity} = errorResult as IErrorDefn;
         text                 = (typeof text === 'function') ? text(...this.extractLabels(context, field, validator)) : text;
         context.setError(field, {text, severity});

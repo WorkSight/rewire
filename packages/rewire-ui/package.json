@@ -57,13 +57,10 @@
     "react-number-format": "^4.4.4",
     "react-rnd": "^10.3.5",
     "react-text-mask-hoc": "^0.11.0",
-    "rewire-common": "^1.0.279",
-    "rewire-core": "^1.0.279"
+    "rewire-common": "^1.0.285",
+    "rewire-core": "^1.0.285"
   },
   "devDependencies": {
-    "@babel/core": "^7.12.16",
-    "@babel/preset-env": "^7.12.16",
-    "@types/react-color": "2.17.6",
-    "cssnano": "^4.1.10"
+    "@types/react-color": "2.17.6"
   }
 }

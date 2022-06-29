@@ -10,7 +10,7 @@ import {
   WithStyle,
 }                                 from 'rewire-ui';
 
-const styles = (theme: Theme) => ({
+const styles = (_theme: Theme) => ({
   root: {
     position: 'relative',
   },
@@ -65,7 +65,7 @@ class ColumnCell extends React.PureComponent<ColumnCellProps> {
     document.removeEventListener('mousemove', this.handleMouseMove, true);
     evt.stopPropagation();
     evt.preventDefault();
-  }
+  };
 
   handleMouseDown = (evt: React.MouseEvent<any>) => {
     if (!this.node) return;
@@ -75,7 +75,7 @@ class ColumnCell extends React.PureComponent<ColumnCellProps> {
     document.addEventListener('mousemove', this.handleMouseMove, true);
     evt.stopPropagation();
     evt.preventDefault();
-  }
+  };
 
   handleMouseMove = (evt: MouseEvent) => {
     // Known bug with resizing columns when the set widths of the columns is less than the width of the grid (due to it stretching to fill the screen) i.e. no horizontal scrollbar.
@@ -83,7 +83,7 @@ class ColumnCell extends React.PureComponent<ColumnCellProps> {
     if (this.isResizing) {
       if (this.node.colSpan > 1) {
         let currColumn = this.column;
-        let widthToSet = Math.max((this.startOffset + evt.pageX) / this.node.colSpan, 5);
+        const widthToSet = Math.max((this.startOffset + evt.pageX) / this.node.colSpan, 5);
         for (let i = 1; i <= this.node.colSpan; i++) {
           // let cellWidth    = currColumn.grid.dataRowsByPosition[0].cells[currColumn.name].element.offsetWidth;
           // widthToSet       = currColumn.width ? widthToSet - (cellWidth - currColumn.width.slice().replace(new RegExp(/px/, 'g'), '')) : widthToSet;
@@ -96,7 +96,7 @@ class ColumnCell extends React.PureComponent<ColumnCellProps> {
       }
     }
     evt.preventDefault();
-  }
+  };
 
   handleSort = (evt: React.MouseEvent<any>) => {
     if (evt.ctrlKey) {
@@ -105,7 +105,7 @@ class ColumnCell extends React.PureComponent<ColumnCellProps> {
       this.column.grid.setSort(this.column, (!this.column.sort || (this.column.sort === 'descending')) ? 'ascending' : 'descending');
     }
     evt.preventDefault();
-  }
+  };
 
   get value(): string {
     return this.props.cell.value;
@@ -113,7 +113,7 @@ class ColumnCell extends React.PureComponent<ColumnCellProps> {
 
   setColumnRef = (element: HTMLTableHeaderCellElement) => {
     this.node = element as HTMLTableHeaderCellElement;
-  }
+  };
 
   render() {
     const { classes } = this.props;

@@ -228,11 +228,11 @@ class AvatarCropper extends React.Component<AvatarCropperProps, IAvatarCropperSt
 
   onCancelClick = () => {
     this.onCancelCallback();
-  }
+  };
 
   onSaveClick = () => {
     this.onSaveCallback(this.getPreview());
-  }
+  };
 
   onKeyDown = (evt: React.KeyboardEvent<any>) => {
     if (evt.altKey || evt.ctrlKey) {
@@ -251,7 +251,7 @@ class AvatarCropper extends React.Component<AvatarCropperProps, IAvatarCropperSt
         evt.preventDefault();
         break;
     }
-  }
+  };
 
   getPreview() {
     const crop = this.state.crop;
@@ -296,7 +296,7 @@ class AvatarCropper extends React.Component<AvatarCropperProps, IAvatarCropperSt
 
     const scale = imgHeight / originalHeight;
 
-    let cRadius      = this.props.cropRadius ? Math.min(Math.abs(this.props.cropRadius), Math.min((imgWidth / 2), (imgHeight / 2))) : 0;
+    const cRadius      = this.props.cropRadius ? Math.min(Math.abs(this.props.cropRadius), Math.min((imgWidth / 2), (imgHeight / 2))) : 0;
     const cropRadius = cRadius || (imgWidth / 4);
 
     this.setState({
@@ -308,7 +308,7 @@ class AvatarCropper extends React.Component<AvatarCropperProps, IAvatarCropperSt
   }
 
   initCrop() {
-    let crop = new Konva.Circle({
+    const crop = new Konva.Circle({
       x: this.halfWidth,
       y: this.halfHeight,
       radius: this.cropRadius,
@@ -508,7 +508,7 @@ class AvatarCropper extends React.Component<AvatarCropperProps, IAvatarCropperSt
 
     let cropperContainerWidth;
     let cropperContainerHeight;
-    let ratio = this.state.imgHeight / this.state.imgWidth;
+    const ratio = this.state.imgHeight / this.state.imgWidth;
     if (ratio > 1) {
       cropperContainerHeight = Math.min(height, this.state.imgHeight);
       cropperContainerWidth  = Math.min(width, this.state.imgWidth);

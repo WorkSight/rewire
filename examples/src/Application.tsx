@@ -29,7 +29,7 @@ const contentContainerStyle = {
   padding: '0px 20px',
 };
 
-const BasicExample = (props: any) => {
+const BasicExample = (_props: any) => {
   return (
     < >
     <CssBaseline />
@@ -56,7 +56,7 @@ const BasicExample = (props: any) => {
 
 // async function login() {
   // await fetch.post('accounts/login', { username: 'Administrator', password: '324#$as(lkf)' });
-let theme = createTheme();
+const theme = createTheme();
 ReactDOM.createRoot(document.getElementById('root')!).render(<MuiThemeProvider theme={theme}><BasicExample /></MuiThemeProvider>);
 // }
 

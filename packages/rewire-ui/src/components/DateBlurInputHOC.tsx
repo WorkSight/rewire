@@ -40,21 +40,22 @@ export default class DateBlurInputHOC extends React.PureComponent<IDateBlurProps
 
   handleOnChange = (date?: Date | null, inputValue?: string | null) => {
     this.setState({value: date, inputValue: inputValue});
-  }
+  };
 
   handleOnKeyDown = (evt: React.KeyboardEvent<HTMLInputElement>) => {
     if (evt.keyCode === 13) {
       this.props.onValueChange(this.state.value);
     }
-  }
+  };
 
-  handleOnBlur = (evt: any) => {
+  handleOnBlur = (_evt: any) => {
     if (this.props.onValueChange) {
       this.props.onValueChange(this.state.value);
     }
-  }
+  };
 
   render() {
+    // eslint-disable-next-line @typescript-eslint/no-unused-vars
     const { render, onValueChange, ...rest } = {...this.props, onKeyDown: this.handleOnKeyDown, onBlur: this.handleOnBlur, onChange: this.handleOnChange, value: this.state.value, inputValue: this.state.inputValue};
     return this.props.render(rest as any);
   }

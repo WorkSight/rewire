@@ -8,7 +8,7 @@ import FormControlLabel        from '@material-ui/core/FormControlLabel';
 import {Theme}                 from '@material-ui/core/styles';
 import {withStyles, WithStyle} from './styles';
 
-const styles = (theme: Theme) => ({
+const styles = (_theme: Theme) => ({
   inputRoot: {
   },
   switchRoot: {

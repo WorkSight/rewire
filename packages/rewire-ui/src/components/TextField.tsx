@@ -17,7 +17,7 @@ import ErrorTooltip                  from './ErrorTooltip';
 import {TextAlignment, TextVariant}  from './editors';
 import {withStyles, WithStyle}       from './styles';
 
-const styles = (theme: Theme) => ({
+const styles = (_theme: Theme) => ({
   inputRoot: {
     lineHeight: 'inherit',
     fontSize: 'inherit',
@@ -188,7 +188,7 @@ class TextField extends React.Component<TextFieldProps> {
       v = v ? utc(v).startOfDay() : undefined;
     }
     this.props.onValueChange(v);
-  }
+  };
 
   handleFocus = (evt: React.FocusEvent<HTMLInputElement>) => {
     if (this.props.type === 'date' && (this.props.selectOnFocus || this.props.endOfTextOnFocus)) {
@@ -198,10 +198,10 @@ class TextField extends React.Component<TextFieldProps> {
     } else if (this.props.endOfTextOnFocus) {
       evt.target.setSelectionRange(evt.target.value.length, evt.target.value.length);
     } else if (!isNullOrUndefined(this.props.cursorPositionOnFocus)) {
-      let cursorPosition = Math.max(0, Math.min(this.props.cursorPositionOnFocus!, evt.target.value.length));
+      const cursorPosition = Math.max(0, Math.min(this.props.cursorPositionOnFocus!, evt.target.value.length));
       evt.target.setSelectionRange(cursorPosition, cursorPosition);
     }
-  }
+  };
 
   handleKeyDown = (evt: React.KeyboardEvent<any>) => {
     this.props.onKeyDown && this.props.onKeyDown(evt);
@@ -217,7 +217,7 @@ class TextField extends React.Component<TextFieldProps> {
       default:
         break;
     }
-  }
+  };
 
   renderError = React.memo((props: any) => {
     const {classes, error, useTooltipForErrors} = props;
@@ -253,7 +253,7 @@ class TextField extends React.Component<TextFieldProps> {
         inputClassName = classes.inputInput;
       }
     }
-    let value = !isNullOrUndefined(this.props.value) ? this.props.value : '';
+    const value = !isNullOrUndefined(this.props.value) ? this.props.value : '';
 
     if (this.props.updateOnChange) {
       return (

@@ -34,7 +34,7 @@ class TestDialog extends Modal {
     await delay(2000);
     setTimeout(() => confirmation.open(), 0);
     return true;
-  }
+  };
 
   form = Form.create((_) => ({
     date                 : _.date().label('Date').validators('required').autoFocus(),
@@ -116,7 +116,7 @@ const TestFormView = ({form}: {form: typeof testDialog.form}) => (
   )} />
 );
 
-export const AboutView = React.memo((props: any) => (
+export const AboutView = React.memo((_props: any) => (
   <TransitionWrapper>
     <div>
       <h2>About</h2>

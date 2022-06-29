@@ -26,7 +26,7 @@ export class ArrayChangeTrackerContext implements IChangeTrackerContext {
     this._rows.length = value;
   }
 
-  onHasChanges(value: boolean) {}
+  onHasChanges(_value: boolean) {}
 
   getRow(index: number) {
     if ((index < 0) || (index >= this._rows.length)) return undefined;
@@ -243,7 +243,7 @@ export class ChangeTracker {
   public async recalculate() {
     if (!this._original || !this._working) return Promise.resolve(this._hasChanges());
     if (this._recalculating) return this._recalculating;
-    return this._recalculating = new Promise<boolean>((resolve, reject) => {
+    return this._recalculating = new Promise<boolean>((resolve, _reject) => {
       requestAnimationFrame(() => {
         const hasChanges = !this._equals();
         this.setHasChanges(hasChanges);

@@ -5,7 +5,7 @@ import {Theme}                 from '@material-ui/core/styles';
 import {withStyles}            from './styles';
 import './colorPickerDialog.css';
 
-const styles = (theme: Theme) => ({
+const styles = (_theme: Theme) => ({
 });
 
 export type ColorPickerDialogStyles = ReturnType<typeof styles>;

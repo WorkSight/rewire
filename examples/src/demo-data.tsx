@@ -38,7 +38,7 @@ export const suggestions = [
   {id: '34', name: 'Brunei Darussalam'},
 ];
 
-export let employees = [
+export const employees = [
   {id: '1e',  name: 'Schrute, Dwight',         email: 'testEmail11@test.com',       isActive: true, timeColumn: '7:30', autoCompleteColumn: undefined                ,   selectColumn: {id: '14', name: 'Austria'}, numberColumn1: 1, numberColumn2: 2, numberColumn3: 3},
   {id: '2e',  name: 'Scott, Michael',          email: 'testEmail22@test.com',       isActive: true, timeColumn: '7:30', autoCompleteColumn: {id: '14', name: 'Austria'}, selectColumn: {id: '14', name: 'Austria'}, numberColumn1: 1, numberColumn2: 2, numberColumn3: 3},
   {id: '3e',  name: 'Lannister, Jaime',        email: 'testEmail33@test.com',       isActive: true, timeColumn: '7:30', autoCompleteColumn: {id: '14', name: 'Austria'}, selectColumn: {id: '14', name: 'Austria'}, numberColumn1: 1, numberColumn2: 2, numberColumn3: 3},

@@ -28,11 +28,7 @@
   },
   "dependencies": {
     "react": "18.0.0",
-    "rewire-common": "^1.0.279",
+    "rewire-common": "^1.0.285",
     "s-js": "^0.4.9"
-  },
-  "devDependencies": {
-    "@babel/core": "^7.12.16",
-    "@babel/preset-env": "^7.12.16"
   }
 }

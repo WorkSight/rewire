@@ -19,7 +19,7 @@ export interface IModalState {
   enable: boolean;
 }
 
-export default class Modal<TState = {}> {
+export default class Modal<TState = unknown> {
   protected state:  IModalState & TState;
   readonly actions: {[index: string]: ActionType};
 
@@ -52,7 +52,7 @@ export default class Modal<TState = {}> {
   action(label: string, options?: ActionOptions):                                    Modal; // the first two are the overloads the implementation does now show in intellisense!!
   action(label: string, action: ActionFn, options?: ActionOptions):                  Modal;
   action(label: string, action?: ActionFn | ActionOptions, options?: ActionOptions): Modal {
-    let disabledFn = options && options.disabled || disabled;
+    const disabledFn = options && options.disabled || disabled;
 
     if (action && typeof(action) === 'function') {
       this.actions[label] = {action: () => this.dispatch(disabledFn, action), disabled: disabledFn, ...options};
@@ -79,5 +79,5 @@ export default class Modal<TState = {}> {
 
   close = () => {
     this.state.open = false;
-  }
+  };
 }

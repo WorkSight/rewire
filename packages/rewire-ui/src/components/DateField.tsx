@@ -27,7 +27,7 @@ import {
 import {withStyles, WithStyle}       from './styles';
 import { MaterialUiPickersDate } from '@material-ui/pickers/typings/date';
 
-const styles = (theme: Theme) => ({
+const styles = (_theme: Theme) => ({
   inputRoot: {
     lineHeight: 'inherit',
     fontSize: 'inherit',
@@ -141,26 +141,26 @@ class DateField extends React.PureComponent<DateFieldProps> {
     return tooltip as string;
   }
 
-  onValueChange = (date?: Date | null, inputValue?: string | null) => {
+  onValueChange = (date?: Date | null, _inputValue?: string | null) => {
     const v = date && date instanceof Date && !isNaN(date.getTime())
       ? utc(date.getTime() - getTimezoneOffset(date)).startOfDay()
       : undefined;
 
     this.props.onValueChange(v);
-  }
+  };
 
   onClose = () => {
     this.inputRef.current?.focus();
-  }
+  };
 
   handleFocus = (evt: React.FocusEvent<HTMLInputElement>) => {
     if (this.props.selectOnFocus || this.props.endOfTextOnFocus) {
       evt.target.select();
     } else if (!isNullOrUndefined(this.props.cursorPositionOnFocus)) {
-      let cursorPosition = Math.max(0, Math.min(this.props.cursorPositionOnFocus!, evt.target.value.length));
+      const cursorPosition = Math.max(0, Math.min(this.props.cursorPositionOnFocus!, evt.target.value.length));
       evt.target.setSelectionRange(cursorPosition, cursorPosition);
     }
-  }
+  };
 
   handleInputKeyDown = (event: any) => {
     if (event.altKey || event.ctrlKey || event.shiftKey) {
@@ -174,7 +174,7 @@ class DateField extends React.PureComponent<DateFieldProps> {
         }
         break;
     }
-  }
+  };
 
   renderError = React.memo((props: any) => {
     const {classes, error, useTooltipForErrors} = props;
@@ -204,12 +204,12 @@ class DateField extends React.PureComponent<DateFieldProps> {
     const inputClassName: string | undefined = this.props.variant === 'standard' ? classes.inputInput : classes.inputOutlinedInput;
     const allowKeyboardInput                 = !isNullOrUndefined(this.props.allowKeyboardInput) ? this.props.allowKeyboardInput : true;
     const format                             = this.props.format || 'yyyy-MM-dd';
-    const emptyLabel                         = this.props.emptyLabel || 'yyyy-mm-dd'
+    const emptyLabel                         = this.props.emptyLabel || 'yyyy-mm-dd';
     const dateVariant                        = this.props.dateVariant || 'inline';
     const autoOk                             = !isNullOrUndefined(this.props.autoOk) ? this.props.autoOk : dateVariant === 'inline' || dateVariant === 'static';
     const clearable                          = !isNullOrUndefined(this.props.clearable) ? this.props.clearable : true;
     const onChange                           = (date: MaterialUiPickersDate) => { this.onValueChange(date, null); this.props.onChange?.(date, null); };
-    const onClose                            = () => { this.onClose(); this.props.onClose?.(); }
+    const onClose                            = () => { this.onClose(); this.props.onClose?.(); };
     const value                              = !isNullOrUndefined(this.props.value) ? this.props.value : null;
 
     const dateVariantSpecificProps =

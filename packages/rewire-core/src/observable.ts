@@ -1,3 +1,5 @@
+/* eslint-disable no-prototype-builtins */
+/* eslint-disable prefer-rest-params */
 import S, {DataSignal}                               from 's-js';
 import {isNullOrUndefined, isNullOrUndefinedOrEmpty} from 'rewire-common';
 
@@ -28,9 +30,8 @@ export function version(value: ObjectType) {
 }
 
 function wrap(fn: any) {
-  let f: any = function(this: any) {
+  const f: any = function(this: any, ...args: any[]) {
     let result: any = undefined;
-    let args = arguments;
     freeze(() => {
       result = fn.apply(this, args);
     });
@@ -63,13 +64,13 @@ const arrayPrototype = Object.create(Array.prototype);
 
 function observable_array(value: ObjectType, eq: EQType, parent?: () => void) {
   Object.setPrototypeOf(value, arrayPrototype);
-  let version = S.data(0);
+  const version = S.data(0);
   function incrementVersion() {
     if (parent) parent();
   }
 
   const arrayHandler = {
-    get(target: ObjectType, property: string, receiver: Object) {
+    get(target: ObjectType, property: string, _receiver: unknown) {
       if (property === proxyProperty) {
         return true; // add a isProxy flag dynamically
       }
@@ -87,8 +88,8 @@ function observable_array(value: ObjectType, eq: EQType, parent?: () => void) {
       return v;
     },
 
-    set(target: ObjectType, property: string, v: any, receiver: Object) {
-      let val = target[property];
+    set(target: ObjectType, property: string, v: any, _receiver: unknown) {
+      const val = target[property];
       if (eq(val, v)) {
         return true;
       }
@@ -99,7 +100,7 @@ function observable_array(value: ObjectType, eq: EQType, parent?: () => void) {
     }
   };
 
-  return new Proxy(value as Object, arrayHandler);
+  return new Proxy(value as Record<string, unknown>, arrayHandler);
 }
 
 const _invalidProperties = {
@@ -109,8 +110,8 @@ const _invalidProperties = {
 const _objectProto = Object.getPrototypeOf(new Object());
 
 function createHandler(eq: EQType, parent?: () => void) {
-  let dependencyCache: ObjectType = {};
-  let version = S.data(0);
+  const dependencyCache: ObjectType = {};
+  const version = S.data(0);
 
   function incrementVersion() {
     version(S.sample(version) + 1);
@@ -123,7 +124,7 @@ function createHandler(eq: EQType, parent?: () => void) {
     deleteProperty(target: ObjectType, property: string) {
       if (property in target) {
         delete target[property];
-        let v = dependencyCache[property];
+        const v = dependencyCache[property];
         if (v) {
           v(undefined);
         }
@@ -135,7 +136,7 @@ function createHandler(eq: EQType, parent?: () => void) {
       return Object.getPrototypeOf(target);
     },
 
-    get(target: ObjectType, property: string, receiver: Object) {
+    get(target: ObjectType, property: string, _receiver: unknown) {
       if (property === proxyProperty) { // dynamically add a is_proxy property
         return true;
       }
@@ -155,7 +156,7 @@ function createHandler(eq: EQType, parent?: () => void) {
         // for getters
         let proto = Object.getPrototypeOf(target);
         while (proto !== _objectProto) {
-          let propDesc = Object.getOwnPropertyDescriptor(proto, property);
+          const propDesc = Object.getOwnPropertyDescriptor(proto, property);
           if (propDesc && propDesc.get && typeof propDesc.get === 'function') {
             return value;
           }
@@ -171,12 +172,12 @@ function createHandler(eq: EQType, parent?: () => void) {
       return v();
     },
 
-    set(target: ObjectType, property: string, value: any, receiver: Object) {
+    set(target: ObjectType, property: string, value: any, receiver: Record<string, unknown>) {
       if (!target.hasOwnProperty(property)) {
         // for setters
         let proto = Object.getPrototypeOf(target);
         while (proto !== _objectProto) {
-          let propDesc = Object.getOwnPropertyDescriptor(proto, property);
+          const propDesc = Object.getOwnPropertyDescriptor(proto, property);
           if (propDesc && propDesc.set && typeof propDesc.set === 'function') {
             propDesc.set.call(receiver, value);
             return true;
@@ -226,8 +227,8 @@ export function defaultEquals(v1: any, v2: any) {
       return true;
     } else {
       if (v1.equals && v2.equals) {
-        let p1 = Object.getPrototypeOf(v1);
-        let p2 = Object.getPrototypeOf(v2);
+        const p1 = Object.getPrototypeOf(v1);
+        const p2 = Object.getPrototypeOf(v2);
         if (p1 && p2 && p1.constructor === p2.constructor) return v1.equals(v2);
       } else if (v1.valueOf && v2.valueOf) {
         return v1.valueOf() === v2.valueOf();

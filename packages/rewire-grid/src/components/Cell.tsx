@@ -126,7 +126,7 @@ export interface ICellProps {
 
 export type CellProps = WithStyle<CellStyles, ICellProps>;
 
-class Cell extends React.PureComponent<CellProps, {}> {
+class Cell extends React.PureComponent<CellProps, unknown> {
   cell: ICell;
   row: IRow;
   column: IColumn;
@@ -147,7 +147,7 @@ class Cell extends React.PureComponent<CellProps, {}> {
 
     this.cell.keyForEdit = undefined;
     this.grid.editCell(this.cell);
-  }
+  };
 
   handleKeyDown = (evt: React.KeyboardEvent<any>) => {
     if (evt.key === 'Shift' || evt.key === 'Control' || evt.key === 'Alt') return;
@@ -160,7 +160,7 @@ class Cell extends React.PureComponent<CellProps, {}> {
     if (evt.altKey)   { evt.key = 'Alt+' + evt.key; }
 
     this.cell.performKeybindAction(evt);
-  }
+  };
 
   handleMouseDown = (evt: React.MouseEvent<any>) => {
     evt.preventDefault();
@@ -177,7 +177,7 @@ class Cell extends React.PureComponent<CellProps, {}> {
     if (this.cell.canSelect) {
       this.grid.startCell = this.cell;
     }
-  }
+  };
 
   handleMouseEnter = (evt: React.MouseEvent<any>) => {
     if (this.cell.editing || !this.grid.isMouseDown) {
@@ -200,25 +200,25 @@ class Cell extends React.PureComponent<CellProps, {}> {
     if (this.cell.canSelect) {
       this.grid.selectCellsTo(this.cell, evt.ctrlKey);
     }
-  }
+  };
 
   private isAlreadySelected = () => {
     if (this.grid.selectedCells?.length === 1 && this.grid.selectedCells[0].id === this.cell.id) {
       return true;
     }
     return false;
-  }
+  };
 
   handleClick = (evt: React.MouseEvent<any>) => {
     if (this.cell.editing) {
       return;
     }
 
-    let selectedCells = this.grid.selectedCells;
+    const selectedCells = this.grid.selectedCells;
 
     if (this.grid.multiSelect && selectedCells.length > 0 && (evt.ctrlKey || evt.shiftKey)) {
       if (evt.ctrlKey) {
-        let cellToUnselect = selectedCells.find(cell => cell.id === this.cell.id);
+        const cellToUnselect = selectedCells.find(cell => cell.id === this.cell.id);
         if (cellToUnselect) {
           this.grid.unselectCells([cellToUnselect], cellToUnselect);
         } else {
@@ -244,7 +244,7 @@ class Cell extends React.PureComponent<CellProps, {}> {
     }
     // commented out to allow row click handling
     // evt.stopPropagation();
-  }
+  };
 
   handleFocus = (evt: React.FocusEvent<any>) => {
     evt.stopPropagation();
@@ -256,12 +256,12 @@ class Cell extends React.PureComponent<CellProps, {}> {
     }
 
     this.grid.focusedCell = this.cell;
-  }
+  };
 
-  handleBlur = (evt: React.FocusEvent<any>) => {
+  handleBlur = (_evt: React.FocusEvent<any>) => {
     this.grid.previousFocusedCell = this.grid.focusedCell;
     this.grid.focusedCell         = undefined;
-  }
+  };
 
   handleKeyDownToEnterEditMode = (evt: React.KeyboardEvent<any>) => {
     if (this.cell.editing || this.cell.readOnly || !this.cell.editable || !this.column.editor || !this.cell.canSelect) {
@@ -285,7 +285,7 @@ class Cell extends React.PureComponent<CellProps, {}> {
 
     evt.preventDefault();
     evt.stopPropagation();
-  }
+  };
 
   renderErrorIcon(): JSX.Element {
     let ErrorIconToUse: (props: SvgIconProps) => JSX.Element;
@@ -322,8 +322,8 @@ class Cell extends React.PureComponent<CellProps, {}> {
   get value(): string {
     let value: string;
     if (is.array(this.cell.value)) {
-      let valueToUse = this.cell.value.slice(0, 3);
-      let values     = this.column.map ? this.column.map(valueToUse) : valueToUse;
+      const valueToUse = this.cell.value.slice(0, 3);
+      const values     = this.column.map ? this.column.map(valueToUse) : valueToUse;
       value          = this.cell.value.length > 3 ? `${values}, ....` : values;
     } else {
       value = this.column.map ? this.column.map(this.cell.value) : this.cell.value;
@@ -332,7 +332,7 @@ class Cell extends React.PureComponent<CellProps, {}> {
   }
 
   onValueChange = (v: any) => {
-    let value = isNullOrUndefinedOrEmpty(v) ? undefined : v;
+    const value = isNullOrUndefinedOrEmpty(v) ? undefined : v;
     this.cell.keyForEdit = undefined;
     this.cell.value      = value;
     if (this.column.type === 'multiselect' || this.column.type === 'multiselectautocomplete' || this.column.type === 'date') {
@@ -340,36 +340,36 @@ class Cell extends React.PureComponent<CellProps, {}> {
     }
     this.grid.editCell(undefined);
     if ((this.column.type === 'auto-complete' || this.column.type === 'select' || this.column.type === 'checked')) setTimeout(() => this.cell.setFocus(), 0);
-  }
+  };
 
   handleTooltip = (node: HTMLElement) => {
     node.setAttribute('title', (node.offsetWidth < node.scrollWidth) ? this.value : '');
-  }
+  };
 
   handleTooltipForSpan = (evt: React.MouseEvent<HTMLSpanElement>) => {
     this.handleTooltip(evt.currentTarget as HTMLElement);
-  }
+  };
 
   handleTooltipForDiv = (evt: React.MouseEvent<HTMLDivElement>) => {
     this.handleTooltip(evt.currentTarget as HTMLElement);
-  }
+  };
 
   setCellRef = (element: HTMLTableDataCellElement) => {
     if (element && element !== (this.cell as CellModel).element) {
       // this.cell.element = (element as HTMLTableDataCellElement);
       (this.cell as CellModel).setElement(element as HTMLTableDataCellElement);
     }
-  }
+  };
 
   renderCell = React.memo((): JSX.Element | null => {
     return <Observe render={() => {
-      let cell = this.cell;
+      const cell = this.cell;
       if (cell.editing) {
         if (!this.column.editor) return null;
-        let Editor                                    = this.column.editor;
-        let tooltip                                   = this.column.editorTooltip;
-        let cellType                                  = this.column.type;
-        let additionalProps                           = {};
+        const Editor                                    = this.column.editor;
+        const tooltip                                   = this.column.editorTooltip;
+        const cellType                                  = this.column.type;
+        const additionalProps                           = {};
         let endOfTextOnFocus                          = false;
         let selectOnFocus                             = true;
         let cursorPositionOnFocus: number | undefined = undefined;
@@ -381,7 +381,7 @@ class Cell extends React.PureComponent<CellProps, {}> {
           if (cellType === 'number') {
             endOfTextOnFocus      = false;
             cursorPositionOnFocus = 1;
-            let num               = parseFloat(value);
+            const num               = parseFloat(value);
             if (!Number.isNaN(num)) {
               value = num;
             }
@@ -394,10 +394,10 @@ class Cell extends React.PureComponent<CellProps, {}> {
             additionalProps['initialInputValue'] = cell.keyForEdit;
           }
         }
-        let editorClasses: Object = {};
+        let editorClasses: Record<string, unknown> = {};
         if (cellType === 'checked') {
           editorClasses = {checkboxRoot: this.props.classes.editorCheckboxRoot};
-        } else if (cellType === 'text' || cellType === 'date' || cellType === 'email' || cellType === 'password' || cellType === 'time' || cellType === 'number' || cellType === 'phone' || cellType === 'auto-complete' || 'select' || 'multiSelect' || 'mask') {
+        } else if (cellType === 'text' || cellType === 'date' || cellType === 'email' || cellType === 'password' || cellType === 'time' || cellType === 'number' || cellType === 'phone' || cellType === 'auto-complete' ||  cellType === 'mask') {
           editorClasses = {formControlRoot: this.props.classes.editorFormControlRoot, inputRoot: this.props.classes.editorInputRoot};
         }
 
@@ -416,8 +416,8 @@ class Cell extends React.PureComponent<CellProps, {}> {
       }
 
       return <Observe render={() => {
-        let value        = !isNullOrUndefinedOrEmpty(this.value) ? this.value : <span>&nbsp;</span>;
-        let CellRenderer = cell.renderer;
+        const value        = !isNullOrUndefinedOrEmpty(this.value) ? this.value : <span>&nbsp;</span>;
+        const CellRenderer = cell.renderer;
         return (
           < >
             {CellRenderer
@@ -438,12 +438,12 @@ class Cell extends React.PureComponent<CellProps, {}> {
     const {classes} = this.props;
 
     return <Observe render={() => {
-      let cell = this.cell;
+      const cell = this.cell;
       if (!cell) {
         return <div></div>;
       }
 
-      let clazz = cc([{
+      const clazz = cc([{
         selected           : this.cell.selected,
         selectedTopMost    : this.cell.isTopMostSelection,
         selectedRightMost  : this.cell.isRightMostSelection,
@@ -474,9 +474,9 @@ class Cell extends React.PureComponent<CellProps, {}> {
         tdClasses                 = classNames(tdClasses, classes.tableCellEditing);
       }
 
-      let colSpan   = cell.colSpan;
-      let rowSpan   = cell.rowSpan;
-      let innerCell =
+      const colSpan   = cell.colSpan;
+      const rowSpan   = cell.rowSpan;
+      const innerCell =
         <div className={classNames(classes.cellContainer, 'cellContainer')}>
           <div className={cellInnerContainerClasses}>
             <this.renderCell />
@@ -487,7 +487,7 @@ class Cell extends React.PureComponent<CellProps, {}> {
             {}
           </div>
         </div>;
-      let cellContent = innerCell;
+      const cellContent = innerCell;
 
       return (
         <td tabIndex={0}

@@ -1,3 +1,4 @@
+/* eslint-disable no-prototype-builtins */
 import React                       from 'react';
 import is                          from 'is';
 import classNames                       from 'classnames';
@@ -287,7 +288,7 @@ class MultiSelectAutoComplete<T> extends React.Component<MultiSelectAutoComplete
     }
   }
 
-  shouldComponentUpdate(nextProps: MultiSelectAutoCompleteProps<T>, nextState: any, nextContext: any) {
+  shouldComponentUpdate(nextProps: MultiSelectAutoCompleteProps<T>, nextState: any, _nextContext: any) {
     return (
       (nextProps.selectedItems !== this.props.selectedItems) ||
       (nextProps.error !== this.props.error) ||
@@ -320,27 +321,27 @@ class MultiSelectAutoComplete<T> extends React.Component<MultiSelectAutoComplete
     } else if (this.props.endOfTextOnFocus) {
       evt.target.setSelectionRange(evt.target.value.length, evt.target.value.length);
     } else if (!isNullOrUndefined(this.props.cursorPositionOnFocus)) {
-      let cursorPosition = Math.max(0, Math.min(this.props.cursorPositionOnFocus!, evt.target.value.length));
+      const cursorPosition = Math.max(0, Math.min(this.props.cursorPositionOnFocus!, evt.target.value.length));
       evt.target.setSelectionRange(cursorPosition, cursorPosition);
     }
 
     if (this.props.openOnFocus && !this._manualFocusing) {
       this.handleOpenOnFocus();
     }
-  }
+  };
 
   handleOpenOnFocus = async () => {
     await this.performSearch('');
     this.downShift.openMenu();
-  }
+  };
 
   handleInputChanged = (inputValue: string, helpers: ControllerStateAndHelpers<any>) => {
     if (helpers.isOpen) {
       this.performSearch(inputValue);
     }
-  }
+  };
 
-  handleItemChanged = (options: StateChangeOptions<any>, helpers: ControllerStateAndHelpers<any>) => {
+  handleItemChanged = (options: StateChangeOptions<any>, _helpers: ControllerStateAndHelpers<any>) => {
     if (!options) {
       return;
     }
@@ -361,7 +362,7 @@ class MultiSelectAutoComplete<T> extends React.Component<MultiSelectAutoComplete
         selectedItem: null
       });
     }
-  }
+  };
 
   handleKeyDown = (event: any) => {
     if (event.altKey || event.ctrlKey) {
@@ -369,7 +370,7 @@ class MultiSelectAutoComplete<T> extends React.Component<MultiSelectAutoComplete
     }
 
     switch (event.keyCode) {
-      case 8:
+      case 8: {
         const {inputValue, isOpen} = this.downShift.getState();
         const {selectedItems}      = this.props;
         if (!isOpen && selectedItems.length && (!inputValue || !inputValue.length) && event.key === 'Backspace') {
@@ -380,8 +381,9 @@ class MultiSelectAutoComplete<T> extends React.Component<MultiSelectAutoComplete
           this.props.onSelectItem && this.props.onSelectItem(newItems);
         }
         break;
+      }
       case 9:
-      case 13:
+      case 13: {
         const state = this.downShift.getState();
         if (state.isOpen) {
           if (this.state.suggestions.length > 0) {
@@ -410,7 +412,8 @@ class MultiSelectAutoComplete<T> extends React.Component<MultiSelectAutoComplete
           event.nativeEvent.stopImmediatePropagation();
         }
         break;
-      case 27:
+      }
+      case 27: {
         const st = this.downShift.getState();
         if (st.isOpen) {
           event.nativeEvent.preventDownshiftDefault = false;
@@ -419,6 +422,7 @@ class MultiSelectAutoComplete<T> extends React.Component<MultiSelectAutoComplete
           event.nativeEvent.preventDownshiftDefault = true;
         }
         break;
+      }
       case 37:
       case 38:
       case 39:
@@ -429,7 +433,7 @@ class MultiSelectAutoComplete<T> extends React.Component<MultiSelectAutoComplete
         }
         break;
     }
-  }
+  };
 
   deleteItem = (item: any) => {
     let selectedItems: any[] | undefined = [...this.props.selectedItems];
@@ -438,7 +442,7 @@ class MultiSelectAutoComplete<T> extends React.Component<MultiSelectAutoComplete
       selectedItems = undefined;
     }
     this.props.onSelectItem && this.props.onSelectItem(selectedItems);
-  }
+  };
 
   handleDelete = (item: any) => () => {
     this.deleteItem(item);
@@ -446,38 +450,38 @@ class MultiSelectAutoComplete<T> extends React.Component<MultiSelectAutoComplete
     this._manualFocusing = true;
     this.inputRef.current && this.inputRef.current.focus();
     this._manualFocusing = false;
-  }
+  };
 
   handlePopupDelete = (item: any, isLastItem: boolean) => () => {
     this.deleteItem(item);
     if (isLastItem) {
       this.closeShowMoreSelectedItemsPopup();
     }
-  }
+  };
 
   handleMenuMouseDown = (event: React.MouseEvent<any>) => {
     event.preventDefault();
     event.stopPropagation();
     event.nativeEvent.stopImmediatePropagation();
-  }
+  };
 
   handleMenuMouseUp = (event: React.MouseEvent<any>) => {
     event.preventDefault();
     event.stopPropagation();
     event.nativeEvent.stopImmediatePropagation();
-  }
+  };
 
   handleMenuClick = (event: React.MouseEvent<any>) => {
     event.preventDefault();
     event.stopPropagation();
     event.nativeEvent.stopImmediatePropagation();
-  }
+  };
 
   handleMenuDoubleClick = (event: React.MouseEvent<any>) => {
     event.preventDefault();
     event.stopPropagation();
     event.nativeEvent.stopImmediatePropagation();
-  }
+  };
 
   UNSAFE_componentWillReceiveProps (nextProps: any) {
     if (isNullOrUndefined(nextProps.selectedItems) && (nextProps.selectedItems !== this.props.selectedItems) && this.downShift) {
@@ -496,7 +500,7 @@ class MultiSelectAutoComplete<T> extends React.Component<MultiSelectAutoComplete
     this.setState({
       suggestions
     });
-  }
+  };
 
   html(str: string) {
     if (str && (str.length > 0)) {
@@ -506,17 +510,17 @@ class MultiSelectAutoComplete<T> extends React.Component<MultiSelectAutoComplete
   }
 
   parse(searchText: string, value: string): {highlight: boolean, text: string}[] {
-    let results: {highlight: boolean, text: string}[] = [];
+    const results: {highlight: boolean, text: string}[] = [];
     if (searchText && searchText.length > 0) {
-      let regex = match(searchText);
+      const regex = match(searchText);
       let prevIndex = 0;
       for (let i = 0; i < 10; i++) {
-        let matches = regex.exec(value);
+        const matches = regex.exec(value);
         if (!matches) {
           break;
         }
-        let match: string = matches[0];
-        let index = matches.index;
+        const match: string = matches[0];
+        const index = matches.index;
         if (prevIndex < index) {
           results.push({highlight: false, text: this.html(value.substring(prevIndex, index))});
         }
@@ -548,8 +552,8 @@ class MultiSelectAutoComplete<T> extends React.Component<MultiSelectAutoComplete
   }
 
   suggestionComparisonFn = (prevProps: any, nextProps: any): boolean => {
-    let prevAriaSelected = prevProps.itemProps && prevProps.itemProps['aria-selected'];
-    let nextAriaSelected = nextProps.itemProps && nextProps.itemProps['aria-selected'];
+    const prevAriaSelected = prevProps.itemProps && prevProps.itemProps['aria-selected'];
+    const nextAriaSelected = nextProps.itemProps && nextProps.itemProps['aria-selected'];
     return (
       (prevProps.suggestion === nextProps.suggestion) &&
       (prevProps.index === nextProps.index) &&
@@ -558,17 +562,17 @@ class MultiSelectAutoComplete<T> extends React.Component<MultiSelectAutoComplete
       (prevProps.inputValue === nextProps.inputValue) &&
       (prevProps.classes === nextProps.classes)
     );
-  }
+  };
 
   openShowMoreSelectedItemsPopup = () => {
     this.observableState.showMoreSelectedItemsPopupIsOpen = true;
-  }
+  };
 
   closeShowMoreSelectedItemsPopup = () => {
     this._manualFocusing                                  = true;
     this.observableState.showMoreSelectedItemsPopupIsOpen = false;
     setTimeout(() => { this.inputRef.current && this.inputRef.current.focus(); this._manualFocusing = false; });
-  }
+  };
 
   handleOpenButtonClick = (isOpen: boolean) => () => {
     if (isOpen) {
@@ -580,7 +584,7 @@ class MultiSelectAutoComplete<T> extends React.Component<MultiSelectAutoComplete
 
     this._manualFocusing = true;
     setTimeout(() => { this.inputRef.current && this.inputRef.current.focus(); this._manualFocusing = false; }, 0);
-  }
+  };
 
   setFontSize() {
     if (!this._fontSize) {
@@ -622,11 +626,11 @@ class MultiSelectAutoComplete<T> extends React.Component<MultiSelectAutoComplete
     return (
       <div className={this.props.classes.textFieldInputContainer}><this.renderChips selectedItems={this.props.selectedItems} /><input ref={inputRef} {...inputProps}></input></div>
     );
-  }
+  };
 
   renderInput = React.memo((props: any) => {
     const {classes, error, getInputProps, startAdornment, isOpen, align, variant, disableErrors, useTooltipForErrors, label, disabled, autoFocus, placeholder, tooltip} = props;
-    let inputProps = getInputProps({
+    const inputProps = getInputProps({
       disabled: disabled,
       onKeyDown: this.handleKeyDown,
       onFocus: this.handleFocus,
@@ -698,8 +702,8 @@ class MultiSelectAutoComplete<T> extends React.Component<MultiSelectAutoComplete
       onDoubleClick: this.handleMenuDoubleClick,
     };
 
-    let suggestionsPaperClasses: string[] = [classes.suggestionsPaper];
-    let suggestionsClasses: string[]      = [classes.suggestions];
+    const suggestionsPaperClasses: string[] = [classes.suggestionsPaper];
+    const suggestionsClasses: string[]      = [classes.suggestions];
     if (suggestionsContainerHeader || suggestionsContainerFooter) {
       suggestionsPaperClasses.push(classes.suggestionsPaperContained);
       suggestionsClasses.push(classes.suggestionsContained);
@@ -714,7 +718,7 @@ class MultiSelectAutoComplete<T> extends React.Component<MultiSelectAutoComplete
     }
 
     this.setFontSize();
-    let suggestionsContainerComponentProps: ISuggestionsContainerComponentProps = {
+    const suggestionsContainerComponentProps: ISuggestionsContainerComponentProps = {
       downShift: this.downShift,
     };
 
@@ -750,9 +754,9 @@ class MultiSelectAutoComplete<T> extends React.Component<MultiSelectAutoComplete
   renderSuggestionsContainer = React.memo((props: any) => {
     const { openOnFocus, showEmptySuggestions, suggestionsContainerHeader, suggestionsContainerFooter, hasTransition, transitionTimeout, label, isOpen, classes, getMenuProps, getItemProps, inputValue, selectedItems, suggestions } = props;
 
-    let transition = !isNullOrUndefined(hasTransition) ? hasTransition : true;
-    let timeout    = !isNullOrUndefined(transitionTimeout) && transitionTimeout! >= 0 ? transitionTimeout : 350;
-    let showEmpty  = !isNullOrUndefined(showEmptySuggestions) ? showEmptySuggestions : openOnFocus ? true : false;
+    const transition = !isNullOrUndefined(hasTransition) ? hasTransition : true;
+    const timeout    = !isNullOrUndefined(transitionTimeout) && transitionTimeout! >= 0 ? transitionTimeout : 350;
+    const showEmpty  = !isNullOrUndefined(showEmptySuggestions) ? showEmptySuggestions : openOnFocus ? true : false;
 
     if ((!suggestions || suggestions.length <= 0) && !showEmpty) {
       return null;
@@ -829,7 +833,7 @@ class MultiSelectAutoComplete<T> extends React.Component<MultiSelectAutoComplete
     const baseChipClass   = this.props.variant === 'outlined' ? classNames(classes.chip, classes.inputOutlinedChip) : classes.chip;
     const chipLimit       = this.props.chipLimit || 3;
     const itemsToRender   = selectedItems.slice(0, chipLimit);
-    const returnValue     = itemsToRender.map((item: any, index: number) => (
+    const returnValue     = itemsToRender.map((item: any, _index: number) => (
       <Chip
         key={this.map(item)}
         tabIndex={-1}

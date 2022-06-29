@@ -18,9 +18,9 @@ import Cell                     from './Cell';
 import { loop }                 from 'dom-loop';
 
 const styles = (theme: Theme) => {
-  let color = theme.palette.groupRowBackground.main;
+  const color = theme.palette.groupRowBackground.main;
 
-  let styleObj = {
+  const styleObj = {
     group: {
       fontSize: theme.fontSizes.groupRow,
       lineHeight: `calc(1.3 * ${theme.fontSizes.groupRow})`,
@@ -115,7 +115,7 @@ export interface IRowProps {
 
 export type RowProps = WithStyle<RowStyles, IRowProps>;
 
-class InternalRow extends React.PureComponent<RowProps, {}> {
+class InternalRow extends React.PureComponent<RowProps, unknown> {
   element: React.RefObject<HTMLTableRowElement>;
   observer?: MutationObserver;
   desiredHeight: number = 0;
@@ -132,7 +132,7 @@ class InternalRow extends React.PureComponent<RowProps, {}> {
     if (this.props.row.onClick) {
       this.props.row.onClick(this.props.row);
     }
-  }
+  };
 
   componentDidMount() {
     if (!isNullOrUndefined(this.props.height)) {
@@ -157,16 +157,16 @@ class InternalRow extends React.PureComponent<RowProps, {}> {
 
   renderCells = React.memo((): JSX.Element | null => {
     return <Observe render={() => {
-      let hasReorderableCell = this.props.isFixedColumnsRow && this.props.row.grid.isReorderable;
+      const hasReorderableCell = this.props.isFixedColumnsRow && this.props.row.grid.isReorderable;
       if (!this.props.row.cells && !hasReorderableCell) return null;
       // this.props.grid.standardColumns      // console.log(this.props.isFixedColumnsRow);
       // const columns = this.props.isFixedColumnsRow ? this.props.row.grid.fixedColumns : this.props.row.grid.standardColumns;
 
-      let cells: JSX.Element[] = [];
+      const cells: JSX.Element[] = [];
 
       if (hasReorderableCell) {
         if (!this.props.row.fixed) {
-          let ReorderableCellRenderer = this.props.row.grid.reorderableCellRenderer;
+          const ReorderableCellRenderer = this.props.row.grid.reorderableCellRenderer;
           cells.push(<ReorderableCellRenderer key={`reorderable-gridRows-cell-${this.props.row.id}`} row={this.props.row} isGridMouseCellSelecting={this.props.row.grid.isMouseDown} groupId={this.props.groupId} />);
         } else {
           cells.push(
@@ -181,8 +181,8 @@ class InternalRow extends React.PureComponent<RowProps, {}> {
       }
 
       this.props.columns().forEach((column: IColumn) => {
-        let cell = this.props.row.cells[column.name];
-        let Cell = this.props.Cell;
+        const cell = this.props.row.cells[column.name];
+        const Cell = this.props.Cell;
         if ((cell.colSpan ===  0) || (cell.rowSpan === 0)) return;
           cells.push(<Cell key={cell.id} classes={this.props.cellClasses} cell={cell} onClick={this.handleRowClick} />);
       });

@@ -1,5 +1,5 @@
 import React from 'react';
-import './flexgrid.css';
+import './Row.css';
 
 export type TAlign = 'start' | 'center' | 'end' | 'around' | 'between';
 

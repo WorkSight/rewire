@@ -1,3 +1,4 @@
+/* eslint-disable @typescript-eslint/no-unused-vars */
 import React                   from 'react';
 import is                      from 'is';
 import {isNullOrUndefined, Without} from 'rewire-common';
@@ -38,7 +39,7 @@ export interface IMenuBaseItemRendererProps {
   clickHandler?(): void;
 }
 
-const menuBaseStyles = (theme: Theme) => ({
+const menuBaseStyles = (_theme: Theme) => ({
   menuButton: {
     minWidth: '0px',
   },
@@ -109,15 +110,15 @@ class MenuBase extends React.Component<MenuBaseProps, IMenuBaseState> {
     if (item.closeOnClick) {
       this.handleMenuClose();
     }
-  }
+  };
 
   handleMenuClick = (evt: React.MouseEvent<HTMLElement>) => {
     this.setState({anchorEl: evt.currentTarget});
-  }
+  };
 
   handleMenuClose = () => {
     this.setState({anchorEl: undefined});
-  }
+  };
 
   renderTitle = React.memo((props: any): JSX.Element | null => {
     return <Observe render={() => {
@@ -134,7 +135,7 @@ class MenuBase extends React.Component<MenuBaseProps, IMenuBaseState> {
     }} />;
   });
 
-  renderItem = React.memo(React.forwardRef((props: IMenuBaseItemRendererProps, ref: any): JSX.Element => {
+  renderItem = React.memo(React.forwardRef((props: IMenuBaseItemRendererProps, _ref: any): JSX.Element => {
     return <Observe render={() => {
       const item         = props.item;
       const visible      = props.visible;
@@ -160,12 +161,12 @@ class MenuBase extends React.Component<MenuBaseProps, IMenuBaseState> {
       return (
         < >
         {items.map((item: IMenuBaseItem, idx: number) => {
-          let disabled     = !!(item.disabled && is.function(item.disabled) ? (item.disabled as CallableFunction)() : item.disabled);
-          let visible      = !!(item.visible && is.function(item.visible) ? (item.visible as CallableFunction)() : !isNullOrUndefined(item.visible) ? item.visible : true);
-          let rootClasses  = classNames(classes.menuItem, disabled ? classes.menuItemDisabled : undefined);
-          let clickHandler = !disabled ? this.handleItemClick(item) : undefined;
-          let subheader    = item.subheader;
-          let ItemRenderer = itemRenderer ? itemRenderer : this.renderItem;
+          const disabled     = !!(item.disabled && is.function(item.disabled) ? (item.disabled as CallableFunction)() : item.disabled);
+          const visible      = !!(item.visible && is.function(item.visible) ? (item.visible as CallableFunction)() : !isNullOrUndefined(item.visible) ? item.visible : true);
+          const rootClasses  = classNames(classes.menuItem, disabled ? classes.menuItemDisabled : undefined);
+          const clickHandler = !disabled ? this.handleItemClick(item) : undefined;
+          const subheader    = item.subheader;
+          const ItemRenderer = itemRenderer ? itemRenderer : this.renderItem;
 
           return (
             <React.Fragment key={idx}>

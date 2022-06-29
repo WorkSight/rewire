@@ -24,7 +24,7 @@ export interface IActionMenuItemRendererProps extends IMenuBaseItemRendererProps
   item: IActionMenuItem;
 }
 
-const actionItemRendererStyles = (theme: Theme) => ({
+const actionItemRendererStyles = (_theme: Theme) => ({
   menuButton: {
   },
   menu: {
@@ -49,7 +49,7 @@ const actionItemRendererStyles = (theme: Theme) => ({
 
 export type ActionMenuItemRendererProps = WithStyle<MenuBaseStyles, IActionMenuItemRendererProps>;
 
-export const ActionItemRenderer = React.memo(withStyles(actionItemRendererStyles, React.forwardRef((props: ActionMenuItemRendererProps, ref: any): JSX.Element => {
+export const ActionItemRenderer = React.memo(withStyles(actionItemRendererStyles, React.forwardRef((props: ActionMenuItemRendererProps, _ref: any): JSX.Element => {
   return <Observe render={() => {
     const item         = props.item;
     const visible      = props.visible;
@@ -57,7 +57,7 @@ export const ActionItemRenderer = React.memo(withStyles(actionItemRendererStyles
     const classes      = props.classes;
     const rootClasses  = props.rootClasses;
     const clickHandler = props.clickHandler;
-    let externalLinkProps: any = {};
+    const externalLinkProps: any = {};
     if (item.isExternalLink) {
         externalLinkProps.component = 'a';
         externalLinkProps.target    = '_blank';

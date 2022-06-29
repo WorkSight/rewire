@@ -108,7 +108,7 @@ import {Theme}      from '@material-ui/core/styles';
 //   };
 // }
 
-const styles = (theme: Theme) => ({
+const styles = (_theme: Theme) => ({
   paper: {
     padding: '16px',
     minWidth: '300px',

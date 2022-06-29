@@ -52,7 +52,7 @@ function _fixed(style: React.CSSProperties, fixed?: string, ) {
   return '';
 }
 
-const Col: React.SFC<IColProps> = ({children, pct, grow, fixed, contentAlignment, align, style}) => {
+const Col: React.FunctionComponent<IColProps> = ({children, pct, grow, fixed, contentAlignment, align, style}) => {
   style = style || {};
   const cls = `col${_percentage(pct)}${_grow(grow)}${_contentAlignment(contentAlignment)}${_align(align)}${_fixed(style, fixed)}`;
 

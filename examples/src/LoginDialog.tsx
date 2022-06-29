@@ -31,7 +31,7 @@ class LoginDialog extends Modal {
     color                : _.color().label('Color'),
     phone                : _.phone().label('Phone'),
     mask                 : _.mask({mask: ['(', /[1-9]/, /\d/, /\d/, ')', ' ', /\d/, /\d/, /\d/, '-', /\d/, /\d/, /\d/, /\d/]}).label('MyMask').validators('required').autoFocus(),
-    trigger              : _.string().label('Trigger').placeholder('Change me to trigger handler').onValueChange((form: Form, v: any) => {form.setFieldValue('email', 'Triggered!@hotmail.com'); form.setFieldValue('money', 1337); }),
+    trigger              : _.string().label('Trigger').placeholder('Change me to trigger handler').onValueChange((form: Form, _v: any) => {form.setFieldValue('email', 'Triggered!@hotmail.com'); form.setFieldValue('money', 1337); }),
   }), {}, {initialValuesValidationMode: 'all'});
 
   constructor() {
@@ -47,7 +47,7 @@ class LoginDialog extends Modal {
     setTimeout(() => confirmation.open(), 0);
     // await perform login from server
     return true;
-  }
+  };
 }
 
 const loginDialog = new LoginDialog();
@@ -80,7 +80,7 @@ const LoginFormView = React.memo(React.forwardRef(({form}: {form: typeof loginDi
   )} />
 )));
 
-const getLoginTitle = (dialog: Modal): JSX.Element => {
+const getLoginTitle = (_dialog: Modal): JSX.Element => {
   return <div>Login</div>;
 };
 

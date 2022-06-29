@@ -24,7 +24,7 @@ export function createGetter(path: string | string[]) {
   if (fn) return fn;
 
   const [lets, exp] = generateBody(path, false);
-  let body = `{ if (!obj) return undefined;
+  const body = `{ if (!obj) return undefined;
   ${(lets.length > 0) ? `let ${lets};` : ''}
   return ${exp};
 }`;
@@ -39,7 +39,7 @@ export function createSetter(path: string | string[]) {
   if (fn) return fn;
 
   const [lets, exp] = generateBody(path, true);
-  let body = `{ if (!obj) return;
+  const body = `{ if (!obj) return;
   ${(lets.length > 0) ? `let ${lets};` : ''}
   ${exp};
 }`;

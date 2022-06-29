@@ -31,15 +31,15 @@ export interface IObserver<T> {
   next(value: T): void
   error(errorValue: Error): void
   complete(completionValue?: T): void
-};
+}
 
 export interface ISubscription {
   unsubscribe(): void;
-};
+}
 
 export interface IObservable<T> {
   subscribe(observer: IObserver<T>): ISubscription;
-};
+}
 
 export interface IClient {
   bearer?: string;

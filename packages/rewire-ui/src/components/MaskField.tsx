@@ -1,3 +1,4 @@
+/* eslint-disable @typescript-eslint/no-unused-vars */
 import React                      from 'react';
 import is                         from 'is';
 import classNames                      from 'classnames';
@@ -11,7 +12,7 @@ import ErrorTooltip                    from './ErrorTooltip';
 import {TextAlignment, TextVariant}    from './editors';
 import {withStyles, WithStyle}         from './styles';
 
-const styles = (theme: Theme) => ({
+const styles = (_theme: Theme) => ({
   inputRoot: {
     lineHeight: 'inherit',
     fontSize: 'inherit',
@@ -96,7 +97,7 @@ class InputAdapterCustom extends React.PureComponent<IInputAdapterCustomProps> {
     super(props);
   }
 
-  componentDidUpdate(prevProps: IInputAdapterCustomProps) {
+  componentDidUpdate(_prevProps: IInputAdapterCustomProps) {
     this.setCaretPosition();
   }
   get caretPosition(): number | null {
@@ -104,11 +105,11 @@ class InputAdapterCustom extends React.PureComponent<IInputAdapterCustomProps> {
   }
   getRef = (element: HTMLInputElement) => {
     this.input = element;
-  }
+  };
   handleChange = (evt: React.ChangeEvent<HTMLInputElement>) => {
     evt.persist();
     this.props.onChange(evt);
-  }
+  };
   setCaretPosition() {
     if (isDocument && this.input === document.activeElement) {
       this.input.setSelectionRange(this.props.caretPosition, this.props.caretPosition);
@@ -140,7 +141,7 @@ class TextMaskCustom extends React.PureComponent<ITextMaskCustomProps> {
   handleChange = (evt: React.ChangeEvent<HTMLInputElement>, inputData: ITextMaskInputData) => {
     (evt.target as HTMLInputElement).value = inputData.value || '';
     this.props.onChange(evt);
-  }
+  };
 
   render() {
     const {inputRef, mask, onChange, guide, ...otherProps} = this.props;
@@ -235,16 +236,16 @@ class MaskField extends React.Component<MaskFieldProps> {
     } else if (this.props.endOfTextOnFocus) {
       evt.target.setSelectionRange(evt.target.value.length, evt.target.value.length);
     } else if (!isNullOrUndefined(this.props.cursorPositionOnFocus)) {
-      let cursorPosition = Math.max(0, Math.min(this.props.cursorPositionOnFocus!, evt.target.value.length));
+      const cursorPosition = Math.max(0, Math.min(this.props.cursorPositionOnFocus!, evt.target.value.length));
       evt.target.setSelectionRange(cursorPosition, cursorPosition);
     }
-  }
+  };
 
   getPlaceholder(): string {
     const {placeholderChar, placeholder, mask, showMask} = this.props;
 
-    let maskPlaceholderChar = placeholderChar || '_';
-    let maskMask            = is.function(mask) ? (mask as any)() : mask;
+    const maskPlaceholderChar = placeholderChar || '_';
+    const maskMask            = is.function(mask) ? (mask as any)() : mask;
     let maskPlaceholder     = placeholder;
     if (maskMask && (isNullOrUndefined(showMask) || showMask)) {
       let ph = '';
@@ -290,9 +291,9 @@ class MaskField extends React.Component<MaskFieldProps> {
       inputClassName = classes.inputInput;
     }
 
-    let maskPlaceholder = this.getPlaceholder();
+    const maskPlaceholder = this.getPlaceholder();
 
-    let value = !isNullOrUndefined(this.props.value) ? this.props.value : '';
+    const value = !isNullOrUndefined(this.props.value) ? this.props.value : '';
 
     if (this.props.updateOnChange) {
       return (

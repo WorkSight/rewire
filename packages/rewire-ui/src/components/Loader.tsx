@@ -5,7 +5,7 @@ import Fade                  from '@material-ui/core/Fade';
 import {makeStyles, Theme}   from '@material-ui/core/styles';
 import {WithStyle, CSSTheme} from './styles';
 
-const styles = (theme: Theme) => ({
+const styles = (_theme: Theme) => ({
   root: {
     position: 'relative',
   },

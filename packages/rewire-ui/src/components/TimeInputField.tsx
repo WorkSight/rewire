@@ -1,3 +1,4 @@
+/* eslint-disable no-useless-escape */
 import React                                         from 'react';
 import classNames                                         from 'classnames';
 import {
@@ -95,7 +96,7 @@ export class TimeValidator {
     }
 
     let hours   = parseInt(value[1], 10);
-    let minutes = value[3] ? parseInt(value[3], 10) / 60.0 : 0;
+    const minutes = value[3] ? parseInt(value[3], 10) / 60.0 : 0;
     if (value[4] && (value[4].toLowerCase() === 'pm')) {
       hours += 12;
     }
@@ -123,8 +124,8 @@ export class TimeValidator {
       return Math.round( value * n + Number.EPSILON ) / n;
     }
 
-    let remainder = this.remainder(value);
-    let d = (remainder * 10) % (this.rounding * 10);
+    const remainder = this.remainder(value);
+    const d = (remainder * 10) % (this.rounding * 10);
     if (Math.abs(d) < 0.00001) {
       return value;
     }
@@ -132,7 +133,7 @@ export class TimeValidator {
   }
 }
 
-const styles = (theme: Theme) => ({
+const styles = (_theme: Theme) => ({
   inputRoot: {
     lineHeight: 'inherit',
     fontSize: 'inherit',
@@ -282,14 +283,14 @@ class TimeInputField extends React.Component<TimeFieldProps, ITimeState> {
   handleChange = (evt: React.ChangeEvent<HTMLInputElement>) => {
     const state = this.validator.parse(evt.target.value);
     this.setState({...state, text: evt.target.value});
-  }
+  };
 
-  handleBlur = (evt: React.FocusEvent<HTMLInputElement>) => {
+  handleBlur = (_evt: React.FocusEvent<HTMLInputElement>) => {
     if (this.state.value === this.props.value) {
       this.setState({text: !isNullOrUndefinedOrEmpty(this.state.value) ? `${this.state.value}` : ''});
     }
     this.props.onValueChange(this.state.value as (number | undefined));
-  }
+  };
 
   handleFocus = (evt: React.FocusEvent<HTMLInputElement>) => {
     if (this.props.selectOnFocus) {
@@ -297,10 +298,10 @@ class TimeInputField extends React.Component<TimeFieldProps, ITimeState> {
     } else if (this.props.endOfTextOnFocus) {
       evt.target.setSelectionRange(evt.target.value.length, evt.target.value.length);
     } else if (!isNullOrUndefined(this.props.cursorPositionOnFocus)) {
-      let cursorPosition = Math.max(0, Math.min(this.props.cursorPositionOnFocus!, evt.target.value.length));
+      const cursorPosition = Math.max(0, Math.min(this.props.cursorPositionOnFocus!, evt.target.value.length));
       evt.target.setSelectionRange(cursorPosition, cursorPosition);
     }
-  }
+  };
 
   getTooltip(value: ITimeState): string | undefined {
     let tooltip = this.props.tooltip;

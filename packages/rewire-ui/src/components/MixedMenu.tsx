@@ -1,3 +1,4 @@
+/* eslint-disable no-prototype-builtins */
 import React              from 'react';
 import {Observe}               from 'rewire-core';
 import {
@@ -34,7 +35,7 @@ class MixedMenu extends React.Component<MixedMenuProps> {
     super(props);
   }
 
-  itemRenderer = React.memo(React.forwardRef((props: MixedMenuItemRendererProps, ref: any): JSX.Element => {
+  itemRenderer = React.memo(React.forwardRef((props: MixedMenuItemRendererProps, _ref: any): JSX.Element => {
     return <Observe render={() => {
       return (
         props.item.hasOwnProperty('active')

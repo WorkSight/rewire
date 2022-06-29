@@ -26,7 +26,7 @@ export interface IToggleMenuItemRendererProps extends IMenuBaseItemRendererProps
   item: IToggleMenuItem;
 }
 
-const toggleItemRendererStyles = (theme: Theme) => ({
+const toggleItemRendererStyles = (_theme: Theme) => ({
   menuButton: {
   },
   menu: {
@@ -57,7 +57,7 @@ const toggleItemRendererStyles = (theme: Theme) => ({
 
 export type ToggleMenuItemRendererProps = WithStyle<MenuBaseStyles, IToggleMenuItemRendererProps>;
 
-export const ToggleItemRenderer = React.memo(withStyles(toggleItemRendererStyles, React.forwardRef((props: ToggleMenuItemRendererProps, ref: any): JSX.Element => {
+export const ToggleItemRenderer = React.memo(withStyles(toggleItemRendererStyles, React.forwardRef((props: ToggleMenuItemRendererProps, _ref: any): JSX.Element => {
   return <Observe render={() => {
     const item         = props.item;
     const visible      = props.visible;
@@ -101,7 +101,7 @@ class ToggleMenu extends React.Component<IToggleMenuProps> {
     if (!is.function(item.active)) {
       item.active = !item.active;
     }
-  }
+  };
 
   render() {
     const {onItemClick, ...restProps} = this.props;

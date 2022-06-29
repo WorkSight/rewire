@@ -1,3 +1,4 @@
+/* eslint-disable @typescript-eslint/no-unused-vars */
 import React                   from 'react';
 import classNames              from 'classnames';
 import {Observe, observable}   from 'rewire-core';
@@ -9,7 +10,7 @@ import {Theme, makeStyles}     from '@material-ui/core/styles';
 import ErrorIcon               from '@material-ui/icons/Error';
 import {withStyles, WithStyle} from './styles';
 
-const styles = (theme: Theme) => ({
+const styles = (_theme: Theme) => ({
   root: {
   },
   errorIcon: {
@@ -48,7 +49,7 @@ interface IErrorTooltipObservableState {
 }
 
 class ErrorTooltip extends React.PureComponent<ErrorTooltipProps> {
-  observableState: IErrorTooltipObservableState
+  observableState: IErrorTooltipObservableState;
 
   constructor(props: ErrorTooltipProps){
     super(props);
@@ -70,7 +71,7 @@ class ErrorTooltip extends React.PureComponent<ErrorTooltipProps> {
 
   onOpen = () => {
     this.setFontSize();
-  }
+  };
 
   renderTooltip = React.memo((props: any) => {
     return <Observe render={() => {
