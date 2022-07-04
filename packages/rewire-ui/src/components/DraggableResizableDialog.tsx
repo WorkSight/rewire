@@ -1,4 +1,4 @@
-import React                from 'react';
+import React                     from 'react';
 import { Observe }               from 'rewire-core';
 import classNames                from 'classnames';
 import Paper, { PaperProps }     from '@material-ui/core/Paper';
@@ -154,8 +154,10 @@ class DraggableResizableDialog extends React.Component<IDraggableResizableDialog
   }
 
   render() {
+    const {draggableResizableDialogContainer, draggableResizableDialogRoot, ...dialogClasses} = this.props.classes;
+
     return (
-      <Dialog {...this.props.DialogProps} classes={(this.props as DraggableResizableDialogProps).classes} HeaderComponent={this.RenderDialogHeader} PaperComponent={this.PaperComponent} maxWidth={false} fullWidth={false} fullScreen={false}>
+      <Dialog {...this.props.DialogProps} classes={dialogClasses} HeaderComponent={this.RenderDialogHeader} PaperComponent={this.PaperComponent} maxWidth={false} fullWidth={false} fullScreen={false}>
         {this.props.children}
       </Dialog>
     );
