@@ -119,8 +119,8 @@ export interface ITextFieldProps {
   align?                : TextAlignment;
   variant?              : TextVariant;
   multiline?            : boolean;
-  rows?                 : string | number; // only used if multiline is true
-  rowsMax?              : string | number; // only used if multiline is true
+  minRows?              : string | number; // only used if multiline is true
+  maxRows?              : string | number; // only used if multiline is true
   selectOnFocus?        : boolean;
   endOfTextOnFocus?     : boolean;
   cursorPositionOnFocus?: number;
@@ -160,8 +160,8 @@ class TextField extends React.Component<TextFieldProps> {
       (nextProps.placeholder         !== this.props.placeholder)         ||
       (nextProps.align               !== this.props.align)               ||
       (nextProps.multiline           !== this.props.multiline)           ||
-      (nextProps.rows                !== this.props.rows)                ||
-      (nextProps.rowsMax             !== this.props.rowsMax)             ||
+      (nextProps.minRows             !== this.props.minRows)             ||
+      (nextProps.maxRows             !== this.props.maxRows)             ||
       (nextProps.variant             !== this.props.variant)             ||
       (nextProps.disableErrors       !== this.props.disableErrors)       ||
       (nextProps.useTooltipForErrors !== this.props.useTooltipForErrors) ||
@@ -262,8 +262,8 @@ class TextField extends React.Component<TextFieldProps> {
         classes={{root: classes.formControlRoot}}
         type={type}
         multiline={multiline}
-        rows={this.props.rows || 2}
-        rowsMax={this.props.rowsMax || 4}
+        minRows={this.props.minRows || 2}
+        maxRows={this.props.maxRows || 4}
         disabled={this.props.disabled}
         label={this.props.label}
         placeholder={this.props.placeholder}
@@ -293,8 +293,8 @@ class TextField extends React.Component<TextFieldProps> {
           classes={{root: props.classes.formControlRoot}}
           type={type}
           multiline={multiline}
-          rows={props.rows || 2}
-          rowsMax={props.rowsMax || 4}
+          minRows={props.minRows || 2}
+          maxRows={props.maxRows || 4}
           disabled={props.disabled}
           label={props.label}
           placeholder={props.placeholder}

@@ -161,11 +161,12 @@ class DialogInternal extends React.Component<IDialogProps> {
 
     return (
       <Observe render={() => (
-        hasTitle &&
-          <div className={classes.heading}>
-            <Typography variant='h6'>{(title && title(dialog)) || dialog.title}</Typography>
-            <hr/>
-          </div>
+        hasTitle
+          ? <div className={classes.heading}>
+              <Typography variant='h6'>{(title && title(dialog)) || dialog.title}</Typography>
+              <hr/>
+            </div>
+          : null
       )} />
     );
   }
@@ -201,7 +202,7 @@ class DialogInternal extends React.Component<IDialogProps> {
 
   render() {
     const {classes, dialog, fullWidth, fullScreen, maxWidth, disableEscapeKeyDown, hideBackdrop, transition, transitionDuration, disableTransition, disableEnforceFocus, PaperComponent} = this.props;
-    const escapeAction            = disableEscapeKeyDown ? undefined : () => dialog.close();
+    const onCloseAction           = (_evt: any, reason: string) => {if (reason === 'escapeKeyDown') { dialog.close(); }};
     const transitionToUse         = transition ? transition : Transition;
     const transitionDurationToUse = !isNullOrUndefined(transitionDuration) ? transitionDuration : TRANSITION_TIMEOUT;
     const transitionAction        = (disableTransition ? undefined : transitionToUse) as TransitionPropsType;
@@ -209,7 +210,7 @@ class DialogInternal extends React.Component<IDialogProps> {
 
     return (
       <Observe render={() => (
-        <Dialog classes={{container: classes.container, paper: classes.root, paperScrollPaper: classes.scrollPaper, paperWidthFalse: classes.paperWidthFalse}} open={dialog.isOpen} disableEnforceFocus={disableEnforceFocus} maxWidth={maxWidth} hideBackdrop={hideBackdrop} transitionDuration={transitionTime} TransitionComponent={transitionAction} PaperComponent={PaperComponent} fullWidth={fullWidth} fullScreen={fullScreen} disableEscapeKeyDown={disableEscapeKeyDown} onEscapeKeyDown={escapeAction}>
+        <Dialog classes={{container: classes.container, paper: classes.root, paperScrollPaper: classes.scrollPaper, paperWidthFalse: classes.paperWidthFalse}} open={dialog.isOpen} disableEnforceFocus={disableEnforceFocus} maxWidth={maxWidth} hideBackdrop={hideBackdrop} transitionDuration={transitionTime} TransitionComponent={transitionAction} PaperComponent={PaperComponent} fullWidth={fullWidth} fullScreen={fullScreen} disableEscapeKeyDown={disableEscapeKeyDown} onClose={onCloseAction}>
           <this.RenderDialogContent />
         </Dialog>
       )} />
