@@ -857,7 +857,7 @@ class MultiSelectAutoComplete<T> extends React.Component<MultiSelectAutoComplete
           onClick={!this.props.disabled ? this.openShowMoreSelectedItemsPopup : undefined}
         />
       );
-      returnValue.push(<Observe render={() => <this.renderShowMoreSelectedItemsPopup key='showMoreSelectedItemsPopup' classes={classes} open={this.showMoreSelectedItemsPopupIsOpen} items={showMoreItems} /> } />);
+      returnValue.push(<div key='showMoreSelectedItemsPopup'><Observe render={() => <this.renderShowMoreSelectedItemsPopup classes={classes} open={this.showMoreSelectedItemsPopupIsOpen} items={showMoreItems} /> } /></div>);
     }
     return < >{returnValue}</>;
   });
