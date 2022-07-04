@@ -43,6 +43,20 @@ const dialogStyles = (_theme: Theme) => ({
     position: 'static !important',
     flexShrink: '1 !important',
   },
+  buttons: {   
+  },
+  childrenContainer: {
+  },
+  childrenContainerActionsNoDivider: {
+  },
+  divider: {
+  },
+  buttonRoot: {
+  },
+  buttonIcon: {
+  },
+  buttonLabel: {
+  },
 });
 
 export interface IDraggableResizableDialogProps {
