@@ -101,7 +101,6 @@ export default function editor(type: EditorType, propsForEdit?: any): React.Func
             visible={field.visible}
             disableErrors={field.disableErrors}
             useTooltipForErrors={field.useTooltipForErrors}
-            style={{width: '100%', minWidth: '120px', textAlign: field.align || 'left'}}
             align={field.align || 'left'}
             variant={field.variant}
             selectedItem={field.value}
@@ -161,7 +160,6 @@ export default function editor(type: EditorType, propsForEdit?: any): React.Func
             visible={field.visible}
             disableErrors={field.disableErrors}
             useTooltipForErrors={field.useTooltipForErrors}
-            style={{width: '100%', minWidth: '120px', textAlign: field.align || 'left'}}
             align={field.align || 'left'}
             variant={field.variant}
             selectedItem={field.value || []}

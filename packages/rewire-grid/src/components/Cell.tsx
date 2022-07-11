@@ -109,6 +109,9 @@ const styles = (theme: Theme) => ({
     flex: '1',
     flexDirection: 'row',
   },
+  selectEditorFormControlRoot: {
+    flex: '1',
+  },
   editorMultiSelectAutoCompleteTextFieldInputContainer: {
     overflow: 'hidden',
   },
@@ -402,7 +405,7 @@ class Cell extends React.PureComponent<CellProps, unknown> {
         }
 
         if (cellType === 'select' || cellType === 'multiselect') {
-          editorClasses = Object.assign(editorClasses, {select: this.props.classes.editorSelectSelect, selectMenu: this.props.classes.editorSelectSelectMenu});
+          editorClasses = Object.assign(editorClasses, {formControlRoot: this.props.classes.selectEditorFormControlRoot, inputRoot: this.props.classes.editorInputRoot, select: this.props.classes.editorSelectSelect, selectMenu: this.props.classes.editorSelectSelectMenu});
         } else if (cellType === 'multiselectautocomplete') {
           Object.assign(editorClasses, {textFieldInputContainer: this.props.classes.editorMultiSelectAutoCompleteTextFieldInputContainer});
         }
