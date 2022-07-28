@@ -635,7 +635,7 @@ const GridInternal = withStyles(internalGridStyles, class extends React.PureComp
           {this.renderColumnGroups(true)}
           <thead role='rowgroup'>
             <Observe render={() => (
-              this.props.grid.fixedRows.map((row, index) => <Row key={row.id} classes={this.props.rowClasses} cellClasses={this.props.cellClasses} height={this.props.grid.headerRowHeight} Cell={ColumnCell} columns={() => this.props.grid.fixedColumns} index={index} row={row} isFixedColumnsRow={true} />)
+              this.props.grid.fixedRows.map((row, index) => <Row key={row.keyId} classes={this.props.rowClasses} cellClasses={this.props.cellClasses} height={this.props.grid.headerRowHeight} Cell={ColumnCell} columns={() => this.props.grid.fixedColumns} index={index} row={row} isFixedColumnsRow={true} />)
             )} />
           </thead>
         </table>
@@ -652,7 +652,7 @@ const GridInternal = withStyles(internalGridStyles, class extends React.PureComp
     } else {
       numVisibleColumns = grid.isReorderable ? grid.visibleFixedColumns.length + 1 : grid.visibleFixedColumns.length;
     }
-    return groups.map((group: IGroupRow) => <GroupRow classes={this.props.rowClasses} cellClasses={this.props.cellClasses} fixed={fixed} key={group.title} group={group} columns={columns} numVisibleColumns={numVisibleColumns} />);
+    return groups.map((group: IGroupRow) => <GroupRow key={group.keyId} classes={this.props.rowClasses} cellClasses={this.props.cellClasses} fixed={fixed} group={group} columns={columns} numVisibleColumns={numVisibleColumns} />);
   }
 
   _fixedColGroups: () => JSX.Element | undefined;
@@ -664,14 +664,14 @@ const GridInternal = withStyles(internalGridStyles, class extends React.PureComp
         fixedGroupsBase.push(<ColumnWidth key={'cg_' + 'reorderable'} column={{visible: true, width: '40px'} as IColumn} />);
       }
       const fixedGroups = this.props.grid.fixedColumns.reduce((prev: JSX.Element[], column) => {
-        prev.push(<ColumnWidth key={'cg_' + column.id} column={column} />);
+        prev.push(<ColumnWidth key={'cg_' + column.keyId} column={column} />);
         return prev;
       }, fixedGroupsBase);
       return <colgroup>{fixedGroups}</colgroup>;
     };
     const standardComputation = () => {
       const standardGroups = this.props.grid.standardColumns.reduce((prev: JSX.Element[], column) => {
-        prev.push(<ColumnWidth key={'cg_' + column.id} column={column} />);
+        prev.push(<ColumnWidth key={'cg_' + column.keyId} column={column} />);
         return prev;
       }, []);
       return <colgroup>{standardGroups}</colgroup>;
@@ -691,7 +691,7 @@ const GridInternal = withStyles(internalGridStyles, class extends React.PureComp
   renderRows = (rows: IRow[], columns: () => IColumn[], fixed: boolean) => {
     const grid = this.props.grid;
     if (!grid.groupBy || (grid.groupBy.length === 0)) {
-      return <Observe render={() => rows.map((row, index) => <Row key={row.id} classes={this.props.rowClasses} cellClasses={this.props.cellClasses} height={this.props.grid.rowHeight} columns={columns} Cell={Cell} index={index} className={((index % 2) === 1) ? 'alt' : ''} row={row} isFixedColumnsRow={fixed} />)} />;
+      return <Observe render={() => rows.map((row, index) => <Row key={row.keyId} classes={this.props.rowClasses} cellClasses={this.props.cellClasses} height={this.props.grid.rowHeight} columns={columns} Cell={Cell} index={index} className={((index % 2) === 1) ? 'alt' : ''} row={row} isFixedColumnsRow={fixed} />)} />;
     }
 
     return <Observe render={() => this.renderGroups(columns, fixed)} />;
@@ -761,7 +761,7 @@ const GridInternal = withStyles(internalGridStyles, class extends React.PureComp
               {this.renderColumnGroups(false)}
               <thead role='rowgroup'>
                 <Observe render={() => (
-                  this.props.grid.fixedRows.map((row, index) => <Row key={row.id} classes={this.props.rowClasses} cellClasses={this.props.cellClasses} height={this.props.grid.headerRowHeight} Cell={ColumnCell} columns={() => this.props.grid.standardColumns} index={index} row={row} />)
+                  this.props.grid.fixedRows.map((row, index) => <Row key={row.keyId} classes={this.props.rowClasses} cellClasses={this.props.cellClasses} height={this.props.grid.headerRowHeight} Cell={ColumnCell} columns={() => this.props.grid.standardColumns} index={index} row={row} />)
                 )} />
               </thead>
             </table>
