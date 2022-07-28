@@ -84,6 +84,8 @@ export interface IGridOptionsMenu {
 
 export interface IGrid extends IRows, IDisposable {
   id                              : number;
+  readonly keyId                  : string;
+  readonly version                : number;
   enabled                         : boolean;
   readOnly                        : boolean;
   verticalAlign                   : VerticalAlignment;
@@ -215,12 +217,13 @@ export interface IGridOptions {
 }
 
 export interface IGroupRow {
-  expanded:       boolean;
-  visible:        boolean;
-  rows:           (IRow | IGroupRow)[];
   readonly title: string;
   readonly level: number;
   readonly id:    string;
+  readonly keyId: string;
+  expanded:       boolean;
+  visible:        boolean;
+  rows:           (IRow | IGroupRow)[];
   expand():       void;
   collapse():     void;
 }
@@ -269,6 +272,7 @@ export interface IRowData {
 
 export interface IRow extends IDisposable {
   id:                 string;
+  keyId:              string;
   grid:               IGrid;
   cells:              ICellMap;
   data:               any;
@@ -308,14 +312,15 @@ export type IColumnEditor =
   {type: 'multiselectautocomplete', options: {search: SearchFn<any>, map: MapFn<any>, equals?: EqualsFn<any>, openOnFocus?: boolean, showEmptySuggestions?: boolean, suggestionsContainerHeader?: ISuggestionsContainerComponent, suggestionsContainerFooter?: ISuggestionsContainerComponent, chipLimit?: number}};
 
 export interface ICellProperties {
-  id:        number;
-  grid:      IGrid;
-  cls?:      any;
-  editable:  boolean;
-  align?:    TextAlignment;
-  renderer?: React.FunctionComponent<any>;
-  colSpan:   number;
-  rowSpan:   number;
+  id:             number;
+  readonly keyId: string;
+  grid:           IGrid;
+  cls?:           any;
+  editable:       boolean;
+  align?:         TextAlignment;
+  renderer?:      React.FunctionComponent<any>;
+  colSpan:        number;
+  rowSpan:        number;
 
   onValueChange?(cell: ICell, v: any): void;
 }

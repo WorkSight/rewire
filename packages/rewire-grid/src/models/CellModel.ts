@@ -39,7 +39,7 @@ export class CellModel implements ICell {
   _verticalAlign       : DataSignal<VerticalAlignment | undefined>;
   _renderer            : DataSignal<React.FunctionComponent<any> | undefined>;
   _onValueChange?      : ((cell: ICell, v: any) => void);
-  private __element?   : HTMLTableDataCellElement; // non-observable
+  private __element?   : HTMLTableCellElement; // non-observable
 
   id                   : number;
   row                  : IRow;
@@ -93,6 +93,10 @@ export class CellModel implements ICell {
     this.hasChanges            = false;
     this.__element             = undefined;
     return this;
+  }
+
+  get keyId(): string {
+    return String(this.id);
   }
 
   set enabled(value: boolean | undefined) {

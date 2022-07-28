@@ -80,6 +80,7 @@ class GridModel implements IGrid, IDisposable {
   _groupRows                : () => IGroupRow[];
   _groupColumns             : IColumn[];
   _sort                     : IColumn[];
+  _version                  : number;
   id                        : number;
   enabled                   : boolean;
   readOnly                  : boolean;
@@ -124,6 +125,7 @@ class GridModel implements IGrid, IDisposable {
     this._dispose                   = dispose;
     this._sort                      = [];
     this._groupColumns              = observable([]);
+    this._version                   = 0;
     this.id                         = id++;
     this.rows                       = [];
     this.fixedRows                  = [];
@@ -228,6 +230,14 @@ class GridModel implements IGrid, IDisposable {
     for (const row of this.rows) {
       row.dispose();
     }
+  }
+
+  get version(): number {
+    return this._version;
+  }
+
+  get keyId(): string {
+    return String(this.id);
   }
 
   get isMouseDown(): boolean {
@@ -337,6 +347,7 @@ class GridModel implements IGrid, IDisposable {
       this.rows.length          = 0;
       this.selectedRows.length  = 0;
       this.selectedCells.length = 0;
+      this._version++;
     });
     freeze(() => {
       this._addRows(data);

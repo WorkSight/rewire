@@ -122,6 +122,10 @@ export class ColumnModel implements IColumn {
     return this;
   }
 
+  get keyId(): string {
+    return String(this.id);
+  }
+
   set readOnly(value: boolean | undefined) {
     this._readOnly(value);
   }

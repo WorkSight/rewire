@@ -72,9 +72,9 @@ export const GroupRow = React.memo(withStyles(styles, (props: GroupProps) => {
       )} />
       {props.group.rows.map((r, idx) => {
         if (isGroupRow(r)) {
-          return <GroupRow key={r.title} classes={props.classes} cellClasses={props.cellClasses} fixed={props.fixed} group={r} columns={props.columns} numVisibleColumns={props.numVisibleColumns} />;
+          return <GroupRow key={r.keyId} classes={props.classes} cellClasses={props.cellClasses} fixed={props.fixed} group={r} columns={props.columns} numVisibleColumns={props.numVisibleColumns} />;
         } else {
-          return <Row key={r.id} classes={props.classes} cellClasses={props.cellClasses} height={r.grid.rowHeight} columns={props.columns} Cell={Cell} index={idx} className={((idx % 2) === 1) ? 'alt' : ''} row={r} isFixedColumnsRow={props.fixed} groupId={props.group.id} />;
+          return <Row key={r.keyId} classes={props.classes} cellClasses={props.cellClasses} height={r.grid.rowHeight} columns={props.columns} Cell={Cell} index={idx} className={((idx % 2) === 1) ? 'alt' : ''} row={r} isFixedColumnsRow={props.fixed} groupId={props.group.id} />;
         }
       })}
     </>
@@ -167,11 +167,11 @@ class InternalRow extends React.PureComponent<RowProps, unknown> {
       if (hasReorderableCell) {
         if (!this.props.row.fixed) {
           const ReorderableCellRenderer = this.props.row.grid.reorderableCellRenderer;
-          cells.push(<ReorderableCellRenderer key={`reorderable-gridRows-cell-${this.props.row.id}`} row={this.props.row} isGridMouseCellSelecting={this.props.row.grid.isMouseDown} groupId={this.props.groupId} />);
+          cells.push(<ReorderableCellRenderer key={`reorderable-gridRows-cell-${this.props.row.keyId}`} row={this.props.row} isGridMouseCellSelecting={this.props.row.grid.isMouseDown} groupId={this.props.groupId} />);
         } else {
           cells.push(
             <th
-              key={`reorderable-headerRows-cell-${this.props.row.id}`}
+              key={`reorderable-headerRows-cell-${this.props.row.keyId}`}
               colSpan={1}
               rowSpan={this.props.row.grid.fixedRows.length}
             >
@@ -184,7 +184,7 @@ class InternalRow extends React.PureComponent<RowProps, unknown> {
         const cell = this.props.row.cells[column.name];
         const Cell = this.props.Cell;
         if ((cell.colSpan ===  0) || (cell.rowSpan === 0)) return;
-          cells.push(<Cell key={cell.id} classes={this.props.cellClasses} cell={cell} onClick={this.handleRowClick} />);
+          cells.push(<Cell key={cell.keyId} classes={this.props.cellClasses} cell={cell} onClick={this.handleRowClick} />);
       });
       return cells;
     }} />;

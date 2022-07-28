@@ -26,6 +26,7 @@ const EmptyFn = () => {};
 export class RowModel implements IRow, IDisposable, IValidationContext {
   private _allowMergeColumns: DataSignal<boolean | undefined>;
   id                        : string;
+  keyId                     : string;
   grid                      : IGrid;
   cells                     : ICellMap;
   groupRow?                 : IGroupRow;
@@ -53,7 +54,7 @@ export class RowModel implements IRow, IDisposable, IValidationContext {
     this.selected          = false;
     this.position          = position;
     this.data              = data && data.data;
-    const options            = data && data.options;
+    const options          = data && data.options;
     this.allowMergeColumns = options && options.allowMergeColumns;
     this.cls               = options && options.cls;
     this.visible           = options && !isNullOrUndefined(options.visible) ? options.visible! : true;
@@ -65,6 +66,8 @@ export class RowModel implements IRow, IDisposable, IValidationContext {
     } else {
       this.id = guid();
     }
+
+    this.keyId = `${this.id}-${this.grid.version}`; 
 
     for (const column of this.grid.columns) {
       this.createCell(column, (column as any).__getter(data && data.data));

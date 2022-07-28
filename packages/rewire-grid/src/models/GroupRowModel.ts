@@ -4,7 +4,7 @@ import { value }            from 'rewire-core';
 export default class GroupRowModel implements IGroupRow {
   rows: (IRow | IGroupRow)[];
   private _expanded: any;
-  private _visible: any;
+  private _visible:  any;
 
   constructor(public title: string, public level: number, public id: string) {
     this._expanded = value(true);
@@ -26,6 +26,10 @@ export default class GroupRowModel implements IGroupRow {
       row.visible = false;
     }
     this.expanded = false;
+  }
+
+  get keyId(): string {
+    return this.id;
   }
 
   get expanded() {
