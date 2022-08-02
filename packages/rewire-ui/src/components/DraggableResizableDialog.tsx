@@ -17,7 +17,6 @@ import { WithStyle, withStyles } from './styles';
 const dialogStyles = (_theme: Theme) => ({
   root: {
     margin: '0px',
-    height: '100%',
   },
   heading: {
     cursor: 'move',
@@ -40,6 +39,7 @@ const dialogStyles = (_theme: Theme) => ({
     height: 'calc(100% - 64px)',
   },
   draggableResizableDialogRoot: {
+    display: 'flex !important',
     position: 'static !important',
     flexShrink: '1 !important',
   },
