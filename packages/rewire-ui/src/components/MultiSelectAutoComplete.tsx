@@ -898,8 +898,8 @@ class MultiSelectAutoComplete<T> extends React.Component<MultiSelectAutoComplete
                 classes={classes}
                 error={error}
                 getInputProps={getInputProps}
-                disabled={disabled}
-                autoFocus={autoFocus}
+                disabled={!!disabled}
+                autoFocus={!!autoFocus}
                 label={label}
                 tooltip={this.getTooltip(selectedItem)}
                 placeholder={placeholder}

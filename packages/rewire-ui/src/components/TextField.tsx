@@ -264,7 +264,7 @@ class TextField extends React.Component<TextFieldProps> {
         multiline={multiline}
         minRows={this.props.minRows || 2}
         maxRows={this.props.maxRows || 4}
-        disabled={this.props.disabled}
+        disabled={!!this.props.disabled}
         label={this.props.label}
         placeholder={this.props.placeholder}
         variant={variant as any}
@@ -272,7 +272,7 @@ class TextField extends React.Component<TextFieldProps> {
         helperText={!this.props.disableErrors && <span>{(!this.props.disabled && this.props.error ? <this.renderError classes={classes} error={this.props.error} useTooltipForErrors={this.props.useTooltipForErrors} /> : '')}</span>}
         value={value}
         title={this.getTooltip(value)}
-        autoFocus={this.props.autoFocus}
+        autoFocus={!!this.props.autoFocus}
         onFocus={this.handleFocus}
         onBlur={this.props.onBlur}
         onKeyDown={this.handleKeyDown}
@@ -295,7 +295,7 @@ class TextField extends React.Component<TextFieldProps> {
           multiline={multiline}
           minRows={props.minRows || 2}
           maxRows={props.maxRows || 4}
-          disabled={props.disabled}
+          disabled={!!props.disabled}
           label={props.label}
           placeholder={props.placeholder}
           variant={variant as any}
@@ -303,7 +303,7 @@ class TextField extends React.Component<TextFieldProps> {
           helperText={!props.disableErrors && <span>{(!props.disabled && props.error ? <this.renderError classes={props.classes} error={props.error} useTooltipForErrors={props.useTooltipForErrors} /> : '')}</span>}
           value={props.value}
           title={this.getTooltip(props.value)}
-          autoFocus={props.autoFocus}
+          autoFocus={!!props.autoFocus}
           onFocus={this.handleFocus}
           onBlur={props.onBlur}
           onKeyDown={this.handleKeyDown}

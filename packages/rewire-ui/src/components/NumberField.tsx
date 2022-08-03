@@ -249,14 +249,14 @@ class NumberTextField extends React.Component<NumberFieldProps> {
         <NumberFormat
           className={this.props.className}
           classes={{root: this.props.classes.formControlRoot}}
-          disabled={this.props.disabled}
+          disabled={!!this.props.disabled}
           helperText={!this.props.disableErrors && <span>{(!this.props.disabled && this.props.error ? <this.renderError classes={this.props.classes} error={this.props.error} useTooltipForErrors={this.props.useTooltipForErrors} /> : '')}</span>}
           value={value}
           title={this.getTooltip(value)}
           label={this.props.label}
           onValueChange={this.handleValueChanged}
           onBlur={this.props.onBlur}
-          autoFocus={this.props.autoFocus}
+          autoFocus={!!this.props.autoFocus}
           onFocus={this.handleFocus}
           thousandSeparator={this.props.thousandSeparator || undefined}
           allowNegative={this.props.allowNegative}
@@ -286,14 +286,14 @@ class NumberTextField extends React.Component<NumberFieldProps> {
           <NumberFormat
             className={props.className}
             classes={{root: props.classes.formControlRoot}}
-            disabled={props.disabled}
+            disabled={!!props.disabled}
             helperText={!props.disableErrors && <span>{(!props.disabled && props.error ? <this.renderError classes={props.classes} error={props.error} useTooltipForErrors={props.useTooltipForErrors} /> : '')}</span>}
             value={props.value}
             title={this.getTooltip(value)}
             label={props.label}
             onValueChange={(values: any) => props.onChange && props.onChange({target: {value: values.floatValue}} as any)}
             onBlur={props.onBlur}
-            autoFocus={props.autoFocus}
+            autoFocus={!!props.autoFocus}
             onFocus={this.handleFocus}
             thousandSeparator={props.thousandSeparator || undefined}
             allowNegative={this.props.allowNegative}

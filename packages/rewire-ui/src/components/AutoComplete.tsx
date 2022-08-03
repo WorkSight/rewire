@@ -743,8 +743,8 @@ class AutoComplete<T> extends React.Component<AutoCompleteProps<T>, IAutoComplet
                  classes={classes}
                  error={error}
                  getInputProps={getInputProps}
-                 disabled={disabled}
-                 autoFocus={autoFocus}
+                 disabled={!!disabled}
+                 autoFocus={!!autoFocus}
                  label={label}
                  tooltip={this.getTooltip(inputValue)}
                  placeholder={placeholder}

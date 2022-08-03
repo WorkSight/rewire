@@ -1,5 +1,5 @@
 import React              from 'react';
-import ReactDOM           from 'react-dom/client';
+import ReactDOM           from 'react-dom';
 import CssBaseline        from '@material-ui/core/CssBaseline';
 import Divider            from '@material-ui/core/Divider';
 import { HomeView }       from './HomeView';
@@ -57,9 +57,8 @@ const BasicExample = (_props: any) => {
 // async function login() {
   // await fetch.post('accounts/login', { username: 'Administrator', password: '324#$as(lkf)' });
 const theme = createTheme();
-ReactDOM.createRoot(document.getElementById('root')!).render(<MuiThemeProvider theme={theme}><BasicExample /></MuiThemeProvider>);
+ReactDOM.render(<MuiThemeProvider theme={theme}><BasicExample /></MuiThemeProvider>, document.getElementById('root'));
 // }
-
 // login();
 
 export default BasicExample;

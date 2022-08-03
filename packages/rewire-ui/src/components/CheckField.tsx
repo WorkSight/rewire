@@ -85,8 +85,8 @@ class CheckField extends React.Component<CheckFieldProps> {
           className={this.props.className}
           control={
             <Checkbox
-              autoFocus={this.props.autoFocus}
-              disabled={this.props.disabled}
+              autoFocus={!!this.props.autoFocus}
+              disabled={!!this.props.disabled}
               inputProps={{}}
               checked={!!this.props.value}
               title={this.getTooltip(!!this.props.value)}
@@ -104,8 +104,8 @@ class CheckField extends React.Component<CheckFieldProps> {
     return (
       <div className={classNames(this.props.className, this.props.classes.checkboxContainerNoLabel)}>
         <Checkbox
-          autoFocus={this.props.autoFocus}
-          disabled={this.props.disabled}
+          autoFocus={!!this.props.autoFocus}
+          disabled={!!this.props.disabled}
           inputProps={{}}
           checked={!!this.props.value}
           title={this.getTooltip(!!this.props.value)}
