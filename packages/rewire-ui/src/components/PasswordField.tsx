@@ -210,7 +210,7 @@ class PasswordField extends React.Component<PasswordFieldProps, IPasswordFieldSt
           className={this.props.className}
           classes={{root: this.props.classes.formControlRoot}}
           type={type}
-          disabled={this.props.disabled}
+          disabled={!!this.props.disabled}
           label={this.props.label}
           placeholder={this.props.placeholder}
           variant={this.props.variant as any}
@@ -219,7 +219,7 @@ class PasswordField extends React.Component<PasswordFieldProps, IPasswordFieldSt
           value={value}
           title={this.getTooltip(value)}
           inputRef={this.inputRef}
-          autoFocus={this.props.autoFocus}
+          autoFocus={!!this.props.autoFocus}
           onFocus={this.handleFocus}
           onBlur={this.props.onBlur}
           onKeyDown={this.props.onKeyDown}
@@ -239,7 +239,7 @@ class PasswordField extends React.Component<PasswordFieldProps, IPasswordFieldSt
             className={props.className}
             classes={{root: props.classes.formControlRoot}}
             type={type}
-            disabled={props.disabled}
+            disabled={!!props.disabled}
             label={props.label}
             placeholder={props.placeholder}
             variant={props.variant as any}
@@ -248,7 +248,7 @@ class PasswordField extends React.Component<PasswordFieldProps, IPasswordFieldSt
             value={props.value}
             title={this.getTooltip(props.value)}
             inputRef={this.inputRef}
-            autoFocus={props.autoFocus}
+            autoFocus={!!props.autoFocus}
             onFocus={this.handleFocus}
             onBlur={props.onBlur}
             onKeyDown={props.onKeyDown}

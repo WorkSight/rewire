@@ -441,7 +441,7 @@ class Select<T> extends React.Component<SelectProps<T>, any> {
         value={v}
         title={this.getTooltip(v)}
         onChange={this.handleChanged}
-        autoFocus={this.props.autoFocus}
+        autoFocus={!!this.props.autoFocus}
         inputProps={{spellCheck: false, className: classes.nativeInput, style: {textAlign: this.props.align || 'left'}}}
         InputProps={{startAdornment: startAdornment, endAdornment: endAdornment, classes: {root: classes.inputRoot, input: inputClassName, formControl: inputFormControlClassName}}}
         InputLabelProps={{shrink: true, classes: {root: classes.inputLabelRoot, outlined: classes.inputLabelOutlined, shrink: classes.inputLabelShrink}}}

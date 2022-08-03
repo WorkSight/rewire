@@ -352,7 +352,7 @@ class TimeInputField extends React.Component<TimeFieldProps, ITimeState> {
       <TextField
         className={className}
         classes={{root: classes.formControlRoot}}
-        disabled={disabled}
+        disabled={!!disabled}
         error={!disableErrors && !disabled && (!!error || (!!this.state.text && !this.state.isValid))}
         value={this.state.text}
         label={label}
@@ -360,7 +360,7 @@ class TimeInputField extends React.Component<TimeFieldProps, ITimeState> {
         onChange={this.handleChange}
         onBlur={this.handleBlur}
         onFocus={this.handleFocus}
-        autoFocus={autoFocus}
+        autoFocus={!!autoFocus}
         placeholder={placeholder}
         title={this.getTooltip(this.state)}
         variant={variant as any}

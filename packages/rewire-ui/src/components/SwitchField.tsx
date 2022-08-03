@@ -97,16 +97,16 @@ class SwitchField extends React.Component<SwitchFieldProps> {
           className={this.props.className}
           control={
             <Switch
-              autoFocus={this.props.autoFocus}
-              disabled={this.props.disabled}
+              autoFocus={!!this.props.autoFocus}
+              disabled={!!this.props.disabled}
               inputProps={{}}
-              checked={this.props.value}
+              checked={!!this.props.value}
               title={this.getTooltip(this.props.value)}
               onChange={(evt: React.ChangeEvent<HTMLInputElement>) => this.props.onValueChange(evt.target.checked)}
               classes={{root: classes.switchRoot, switchBase: classes.switchBase, track: classes.switchTrack, thumb: classes.switchThumb, checked: classes.switchChecked}}
             />
           }
-          disabled={this.props.disabled}
+          disabled={!!this.props.disabled}
           label={this.props.label}
           classes={{root: classes.formControlLabelRoot, label: classes.formControlLabelLabel}}
         />
@@ -116,10 +116,10 @@ class SwitchField extends React.Component<SwitchFieldProps> {
     return (
       <div className={classNames(this.props.className, classes.switchContainerNoLabel)}>
         <Switch
-          autoFocus={this.props.autoFocus}
-          disabled={this.props.disabled}
+          autoFocus={!!this.props.autoFocus}
+          disabled={!!this.props.disabled}
           inputProps={{}}
-          checked={this.props.value}
+          checked={!!this.props.value}
           title={this.getTooltip(this.props.value)}
           onChange={(evt: React.ChangeEvent<HTMLInputElement>) => this.props.onValueChange(evt.target.checked)}
           classes={{root: classes.switchRoot, switchBase: classes.switchBase, track: classes.switchTrack, thumb: classes.switchThumb, checked: classes.switchChecked}}

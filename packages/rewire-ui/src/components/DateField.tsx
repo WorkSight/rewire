@@ -237,7 +237,7 @@ class DateField extends React.PureComponent<DateFieldProps> {
       <DatePicker
         className={this.props.className}
         classes={{root: classes.formControlRoot}}
-        disabled={this.props.disabled}
+        disabled={!!this.props.disabled}
         label={this.props.label}
         placeholder={this.props.placeholder}
         variant={dateVariant}
@@ -246,7 +246,7 @@ class DateField extends React.PureComponent<DateFieldProps> {
         helperText={!this.props.disableErrors && <span>{(!this.props.disabled && this.props.error ? <this.renderError classes={classes} error={this.props.error} useTooltipForErrors={this.props.useTooltipForErrors} /> : '')}</span>}
         value={value}
         title={this.getTooltip(value)}
-        autoFocus={this.props.autoFocus}
+        autoFocus={!!this.props.autoFocus}
         onFocus={this.handleFocus}
         onBlur={this.props.onBlur}
         onChange={onChange}
@@ -304,7 +304,7 @@ class DateField extends React.PureComponent<DateFieldProps> {
         <KeyboardDatePicker
           className={props.className}
           classes={{root: props.classes.formControlRoot}}
-          disabled={props.disabled}
+          disabled={!!props.disabled}
           label={props.label}
           placeholder={props.placeholder}
           variant={dateVariant}
@@ -314,7 +314,7 @@ class DateField extends React.PureComponent<DateFieldProps> {
           helperText={!props.disableErrors && <span>{(!props.disabled && props.error ? <this.renderError classes={props.classes} error={props.error} useTooltipForErrors={props.useTooltipForErrors} /> : '')}</span>}
           value={props.value}
           title={this.getTooltip(props.value)}
-          autoFocus={props.autoFocus}
+          autoFocus={!!props.autoFocus}
           onFocus={this.handleFocus}
           onBlur={props.onBlur}
           onChange={props.onChange}
