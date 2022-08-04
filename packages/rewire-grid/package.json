@@ -29,7 +29,7 @@
     "@material-ui/icons": "^4.11.3",
     "@material-ui/styles": "^4.11.5",
     "@types/material-ui": "^0.21.8",
-    "@types/react": "^18.0.0",
+    "@types/react": "^17.0.2",
     "classcat": "^3.2.5",
     "classnames": "^2.2.6",
     "color": "^3.1.3",
