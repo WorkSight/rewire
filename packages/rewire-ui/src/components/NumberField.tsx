@@ -230,6 +230,8 @@ class NumberTextField extends React.Component<NumberFieldProps> {
     );
   });
 
+  TextFieldWithErrorProp = (props: TextFieldProps) => <TextField error={!this.props.disableErrors && !this.props.disabled && !!this.props.error} {...props} />;
+
   render(): any {
     const {visible, updateOnChange} = this.props;
     if (visible === false) {
@@ -242,7 +244,6 @@ class NumberTextField extends React.Component<NumberFieldProps> {
     const inputClassName            = this.props.variant === 'outlined' ? this.props.classes.inputOutlinedInput : this.props.classes.inputInput;
     const inputFormControlClassName = this.props.variant === 'standard' && this.props.label ? this.props.classes.inputFormControlWithLabel : undefined;
     value                           = !isNullOrUndefined(value) ? value : null;
-    const TextFieldWithErrorProp    = (props: TextFieldProps) => <TextField error={!this.props.disableErrors && !this.props.disabled && !!this.props.error} {...props} />;
 
     if (updateOnChange) {
       return (
@@ -271,7 +272,7 @@ class NumberTextField extends React.Component<NumberFieldProps> {
           InputProps={{startAdornment: startAdornment, endAdornment: endAdornment, classes: {root: this.props.classes.inputRoot, input: inputClassName, formControl: inputFormControlClassName}}}
           InputLabelProps={{shrink: true, classes: {root: this.props.classes.inputLabelRoot, outlined: this.props.classes.inputLabelOutlined, shrink: this.props.classes.inputLabelShrink}}}
           FormHelperTextProps={{classes: {root: classNames(this.props.classes.helperTextRoot, this.props.useTooltipForErrors ? this.props.classes.helperTextRootErrorIcon : undefined), contained: this.props.classes.helperTextContained}}}
-          customInput={TextFieldWithErrorProp}
+          customInput={this.TextFieldWithErrorProp}
           placeholder={this.props.placeholder}
           variant={this.props.variant as any}
         />);
@@ -308,7 +309,7 @@ class NumberTextField extends React.Component<NumberFieldProps> {
             InputProps={{startAdornment: startAdornment, endAdornment: endAdornment, classes: {root: props.classes.inputRoot, input: inputClassName, formControl: inputFormControlClassName}}}
             InputLabelProps={{shrink: true, classes: {root: props.classes.inputLabelRoot, outlined: props.classes.inputLabelOutlined, shrink: props.classes.inputLabelShrink}}}
             FormHelperTextProps={{classes: {root: classNames(props.classes.helperTextRoot, props.useTooltipForErrors ? props.classes.helperTextRootErrorIcon : undefined), contained: props.classes.helperTextContained}}}
-            customInput={TextFieldWithErrorProp}
+            customInput={this.TextFieldWithErrorProp}
             placeholder={props.placeholder}
             variant={props.variant as any}
           />)
