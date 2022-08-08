@@ -21,7 +21,7 @@ import Cell                                  from './Cell';
 import Row, {GroupRow}                       from './Row';
 import React                                 from 'react';
 import Color                                 from 'color';
-import {debounce}                            from 'rewire-common';
+import {debounce, delay}                            from 'rewire-common';
 import {WithStyle, withStyles, MixedMenu}    from 'rewire-ui';
 import {PopoverOrigin}                       from '@material-ui/core/Popover';
 import {ButtonProps}                         from '@material-ui/core/Button';
@@ -89,7 +89,7 @@ function verticalResizeWatcher(lifetime: React.Component<any>, element: HTMLElem
 }
 
 type BodyType = {grid: IGrid, columns: () => IColumn[], renderRows: (rows: IRow[], columns: () => IColumn[], fixed: boolean) => any, scrollY: DataSignal<number>, rowClasses?: any, cellClasses?: any, loadMoreRows?: (args: {start: number, end: number}) => Promise<any[]> };
-class Body extends React.PureComponent<BodyType, {offset: number}> {
+class Body extends React.PureComponent<BodyType, {indexOffset: number}> {
   constructor(props: BodyType) {
     super(props);
   }
@@ -103,51 +103,75 @@ class Body extends React.PureComponent<BodyType, {offset: number}> {
   }
 }
 
-class VirtualBody extends React.PureComponent<BodyType, {offset: number, loading: boolean}> {
+class VirtualBody extends React.PureComponent<BodyType, {indexOffset: number, loading: boolean, scrollOffset: number, height: number}> {
   viewportCount = 0;
 
   constructor(props: BodyType) {
     super(props);
-    this.state    = {offset: 0, loading: false};
+    this.state    = {indexOffset: 0, loading: false, scrollOffset: 0, height: 0};
     this.onScroll = debounce(this.onScroll, 25, {leading: false});
   }
 
-  async loadMoreRows(offset: number) {
-    if (!this.props.loadMoreRows || this.rowCache[offset + this.viewportCount]) return;
+  async loadMoreRows(indexOffset: number) {
+    if (!this.props.loadMoreRows || this.rowCache[indexOffset + this.viewportCount]) return;
     this.setState({loading: true});
-    const rows    = await this.props.loadMoreRows({start: offset, end: offset + this.viewportCount});
+    await delay(500);
+    const rows    = await this.props.loadMoreRows({start: indexOffset, end: indexOffset + this.viewportCount});
     const i       = 0;
     for (const r of rows) {
-      const rowIdx = i + offset;
+      const rowIdx = i + indexOffset;
       const rr     = this.props.grid.addRow(r);
-      this.rowCache[offset + i] = <Row key={rowIdx} classes={this.props.rowClasses} cellClasses={this.props.cellClasses} columns={this.props.columns} height={this.props.grid.rowHeight} Cell={Cell} index={rowIdx} className={((rowIdx % 2) === 1) ? 'alt' : ''} row={rr} />;
+      this.rowCache[indexOffset + i] = <Row key={rowIdx} classes={this.props.rowClasses} cellClasses={this.props.cellClasses} columns={this.props.columns} height={this.props.grid.rowHeight} Cell={Cell} index={rowIdx} className={((rowIdx % 2) === 1) ? 'alt' : ''} row={rr} />;
     }
   }
 
   onScroll = async () => {
-    const offset = Math.trunc(this.props.scrollY() / 30);
-    if (offset < 0 || this.state.offset === offset) {
-      return;
+    const rows: HTMLTableRowElement[] | undefined = this._body?.childNodes?.values() as HTMLTableRowElement[] | undefined;
+    if (!rows) return;
+    let idx       = 0;
+    let height    = 0;
+    const scrollY = this.props.scrollY();
+    for (const row of rows) {
+      const h = height + parseInt(row?.style?.height);
+      if (h > scrollY) {
+        return;
+      }
+      height = h;
+      idx++;
+      if (idx == 2) {
+        this.props.contentElement()!.scrollBy(0, -scrollY);
+        this.setState({loading: false, indexOffset: this.state.indexOffset + idx, height: this.state.height + height});
+        return;
+      }
     }
-    await this.loadMoreRows(offset);
-    this._body!.style.transform = 'translateY(' + (offset * 30) + 'px)';
-    this.setState({loading: false, offset});
+
+    // const row = this.props.grid.rows[this.state.indexOffset];
+    // if ( row. + (this.props.scrollY() - this.state.scrollOffset))
+    // const indexOffset = Math.trunc(this.props.scrollY() / 30);
+    // if (indexOffset < 0 || this.state.indexOffset === indexOffset) {
+    //   return;
+    // }
+    // await this.loadMoreRows(indexOffset);
+    // this._body!.style.transform = 'translateY(' + (indexOffset * 30) + 'px)';
+    // this.setState({loading: false, indexOffset});
   };
 
   componentDidMount() {
-    // disposeOnUnmount(this, () => {
-    //   watch(() => this.contentElement, () => {
-    //     let gridContent = this.contentElement;
-    //     if (!gridContent) return;
-    //     let rows                 = this.props.grid.rows;
-    //     let totalSize            = Math.trunc(rows.length * 30);
-    //     gridContent.style.height = totalSize + 'px';
-    //     this.viewportCount       = Math.trunc(gridContent.parentElement!.clientHeight / 30) + 2;
-    //     this.forceUpdate();
-    //   });
+    setTimeout(() => {
+      disposeOnUnmount(this, () => {
+        watch(() => this.props.contentElement(), () => {
+          const gridContent = this.props.contentElement();
+          if (!gridContent) return;
+          // const rows               = this.props.grid.rows;
+          // const totalSize          = Math.trunc(rows.length * 30);
+          // gridContent.style.height = totalSize + 'px';
+          this.viewportCount       = Math.trunc(gridContent.parentElement!.clientHeight / 56) + 4;
+          this.forceUpdate();
+        }, undefined, true);
 
-    //   watch(this.props.scrollY, this.onScroll);
-    // });
+        watch(this.props.scrollY, this.onScroll);
+      });
+    }, 0);
   }
 
   setBodyRef = (element: HTMLTableSectionElement) => {
@@ -161,10 +185,10 @@ class VirtualBody extends React.PureComponent<BodyType, {offset: number, loading
     if (!this._body) return null;
     const result: JSX.Element[] = [];
     const rows    = this.props.grid.rows;
-    const offset  = this.state.offset;
+    const indexOffset  = this.state.indexOffset;
 
     for (let index = 0; index < this.viewportCount; index++) {
-      const rowIdx = offset + index;
+      const rowIdx = indexOffset + index;
       if ((rowIdx < 0) || (rowIdx >= rows.length)) continue;
 
       let cachedRow = this.rowCache[rowIdx];
@@ -802,7 +826,7 @@ const GridInternal = withStyles(internalGridStyles, class extends React.PureComp
           <div className={classNames('grid-content', this.props.classes.gridContent)} ref={this.setGridContentRef}>
             <table role='grid'>
               {this.renderColumnGroups(false)}
-              <BodyRenderer grid={this.props.grid} renderRows={this.renderRows} scrollY={this.scrollY} columns={() => this.props.grid.standardColumns} />
+              <BodyRenderer grid={this.props.grid} contentElement={() => this.contentElement} renderRows={this.renderRows} scrollY={this.scrollY} columns={() => this.props.grid.standardColumns} />
             </table>
           </div>
         </div>
