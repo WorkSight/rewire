@@ -243,7 +243,7 @@ class NumberTextField extends React.Component<NumberFieldProps> {
     const endAdornment              = this.props.endAdornment ? <InputAdornment position='end' classes={{root: this.props.classes.inputAdornmentRoot}}>{this.props.endAdornment}</InputAdornment> : undefined;
     const inputClassName            = this.props.variant === 'outlined' ? this.props.classes.inputOutlinedInput : this.props.classes.inputInput;
     const inputFormControlClassName = this.props.variant === 'standard' && this.props.label ? this.props.classes.inputFormControlWithLabel : undefined;
-    value                           = !isNullOrUndefined(value) ? value : null;
+    value                           = !isNullOrUndefined(value) ? value : '';
 
     if (updateOnChange) {
       return (
