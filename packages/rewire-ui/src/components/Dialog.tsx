@@ -1,4 +1,5 @@
-import React                from 'react';
+import React                     from 'react';
+import is                        from 'is';
 import Modal, { ActionType }     from '../models/Modal';
 import classNames                from 'classnames';
 import {isNullOrUndefined}       from 'rewire-common';
@@ -100,7 +101,7 @@ export interface IActionRenderTypeProps {
 export type ActionRenderType = (props: IActionRenderTypeProps) => JSX.Element;
 export const DefaultActionRenderer: ActionRenderType = ({label, action, isDisabled, variant, classes}: IActionRenderTypeProps) => (
   <Observe render={() => (
-    <span title={action.tooltip}>
+    <span title={action.tooltip && is.function(action.tooltip) ? (action.tooltip as CallableFunction)() : action.tooltip}>
       <Button className={classes && classes.root} type={action.type} color={action.type ? 'primary' : action.color} variant={action.variant || variant} disabled={isDisabled || action.disabled()} onClick={action.action}>
         {action.icon && <Icon className={classes && classes.icon} style={{marginRight: '8px'}}>{action.icon}</Icon>}
         <span className={classes && classes.label}>{label}</span>

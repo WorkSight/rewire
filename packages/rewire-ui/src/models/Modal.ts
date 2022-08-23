@@ -6,13 +6,13 @@ export interface ActionOptions {
   color?   : 'primary' | 'secondary';
   icon?    : string;
   variant? : ButtonProps['variant'];
-  tooltip? : string;
+  tooltip? : string | (() => string);
   disabled?: () => boolean;
 }
 
 const disabled         = () => false;
 export type ActionFn   = () => (Promise<boolean> | boolean);
-export type ActionType = {action: () => (Promise<void> | void), type?: 'submit', icon?: string, color?: 'primary' | 'secondary', variant?: ButtonProps['variant'], tooltip?: string, disabled: () => boolean};
+export type ActionType = {action: () => (Promise<void> | void), type?: 'submit', icon?: string, color?: 'primary' | 'secondary', variant?: ButtonProps['variant'], tooltip?: string | (() => string), disabled: () => boolean};
 
 export interface IModalState {
   open: boolean;
