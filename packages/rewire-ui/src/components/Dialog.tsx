@@ -76,6 +76,8 @@ const styles = (_theme: Theme) => ({
   },
   buttonRoot: {
   },
+  buttonButton: {
+  },
   buttonIcon: {
   },
   buttonLabel: {
@@ -86,6 +88,7 @@ export type DialogStyles = ReturnType<typeof styles>;
 
 export interface IDefaultActionRendererStyles {
   root?:   string;
+  button?: string;
   icon?:   string;
   label?:  string;
 }
@@ -101,8 +104,8 @@ export interface IActionRenderTypeProps {
 export type ActionRenderType = (props: IActionRenderTypeProps) => JSX.Element;
 export const DefaultActionRenderer: ActionRenderType = ({label, action, isDisabled, variant, classes}: IActionRenderTypeProps) => (
   <Observe render={() => (
-    <span title={action.tooltip && is.function(action.tooltip) ? (action.tooltip as CallableFunction)() : action.tooltip}>
-      <Button className={classes && classes.root} type={action.type} color={action.type ? 'primary' : action.color} variant={action.variant || variant} disabled={isDisabled || action.disabled()} onClick={action.action}>
+    <span className={classes && classes.root} title={action.tooltip && is.function(action.tooltip) ? (action.tooltip as CallableFunction)() : action.tooltip}>
+      <Button className={classes && classes.button} type={action.type} color={action.type ? 'primary' : action.color} variant={action.variant || variant} disabled={isDisabled || action.disabled()} onClick={action.action}>
         {action.icon && <Icon className={classes && classes.icon} style={{marginRight: '8px'}}>{action.icon}</Icon>}
         <span className={classes && classes.label}>{label}</span>
       </Button>
@@ -176,8 +179,8 @@ class DialogInternal extends React.Component<IDialogProps> {
 
   RenderDialogContent = React.memo(React.forwardRef((): JSX.Element => {
     const {classes, children, dialog, ButtonRenderer, buttonVariant, title, HeaderComponent} = this.props;
-    const {buttonRoot, buttonIcon, buttonLabel} = classes;
-    const buttonClasses                         = {root: buttonRoot, icon: buttonIcon, label: buttonLabel};
+    const {buttonRoot, buttonButton, buttonIcon, buttonLabel} = classes;
+    const buttonClasses                         = {root: buttonRoot, button: buttonButton, icon: buttonIcon, label: buttonLabel};
     const actions                               = this.props.actions || (dialog.actions && Object.keys(dialog.actions));
     const hasActions                            = actions && (actions.length > 0);
     const hasDivider                            = hasActions && !isNullOrUndefined(this.props.hasDivider) ? this.props.hasDivider : true;
