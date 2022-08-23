@@ -94,6 +94,14 @@ const styles = (theme: Theme) => ({
     flexWrap: 'wrap',
     overflow: 'visible',
   },
+  textFieldInputContainerOutlined: {
+    width: '100%',
+    display: 'flex',
+    alignItems: 'center',
+    flexWrap: 'wrap',
+    overflow: 'visible',
+    padding: '4px',
+  },
   // make chips size responsive.
   chip: {
     fontSize: '0.9em',
@@ -624,7 +632,10 @@ class MultiSelectAutoComplete<T> extends React.Component<MultiSelectAutoComplete
   renderCustomInnerInputComponent = (props: any) => {
     const {inputRef, ...inputProps} = props;
     return (
-      <div className={this.props.classes.textFieldInputContainer}><this.renderChips selectedItems={this.props.selectedItems} /><input ref={inputRef} {...inputProps}></input></div>
+      <div className={this.props.variant === 'outlined' ? this.props.classes.textFieldInputContainerOutlined : this.props.classes.textFieldInputContainer}>
+        <this.renderChips selectedItems={this.props.selectedItems} />
+        <input ref={inputRef} {...inputProps}></input>
+      </div>
     );
   };
 
