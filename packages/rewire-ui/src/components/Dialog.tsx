@@ -37,7 +37,7 @@ const styles = (_theme: Theme) => ({
     display: 'flex',
     flexShrink: '0',
     margin: '15px',
-    '& > button': {
+    '& > *': {
       marginLeft: '15px',
     },
   },
@@ -100,10 +100,12 @@ export interface IActionRenderTypeProps {
 export type ActionRenderType = (props: IActionRenderTypeProps) => JSX.Element;
 export const DefaultActionRenderer: ActionRenderType = ({label, action, isDisabled, variant, classes}: IActionRenderTypeProps) => (
   <Observe render={() => (
-    <Button className={classes && classes.root} type={action.type} color={action.type ? 'primary' : action.color} variant={action.variant || variant} disabled={isDisabled || action.disabled()} onClick={action.action}>
-      {action.icon && <Icon className={classes && classes.icon} style={{marginRight: '8px'}}>{action.icon}</Icon>}
-      <span className={classes && classes.label}>{label}</span>
-    </Button>
+    <span title={action.tooltip}>
+      <Button className={classes && classes.root} type={action.type} color={action.type ? 'primary' : action.color} variant={action.variant || variant} disabled={isDisabled || action.disabled()} onClick={action.action}>
+        {action.icon && <Icon className={classes && classes.icon} style={{marginRight: '8px'}}>{action.icon}</Icon>}
+        <span className={classes && classes.label}>{label}</span>
+      </Button>
+    </span>
   )} />
 );
 
