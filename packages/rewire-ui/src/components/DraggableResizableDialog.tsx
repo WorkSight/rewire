@@ -43,7 +43,7 @@ const dialogStyles = (_theme: Theme) => ({
     position: 'static !important',
     flexShrink: '1 !important',
   },
-  buttons: {   
+  buttons: {
   },
   childrenContainer: {
   },
