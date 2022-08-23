@@ -77,6 +77,7 @@ const styles = (_theme: Theme) => ({
   buttonRoot: {
   },
   buttonButton: {
+    height: '100%',
   },
   buttonIcon: {
   },
