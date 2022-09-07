@@ -130,8 +130,8 @@ const styles = (theme: Theme) => ({
     flexGrow: 1,
   },
   inputOutlinedInput: {
-    paddingTop: '0.75em',
-    paddingBottom: '0.75em',
+    paddingTop: 'calc(0.75em - 4px)',
+    paddingBottom: 'calc(0.75em - 4px)',
     width: 'auto',
     flexGrow: 1,
   },
