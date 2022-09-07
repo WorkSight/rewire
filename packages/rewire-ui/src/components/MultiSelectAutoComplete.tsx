@@ -126,13 +126,13 @@ const styles = (theme: Theme) => ({
   inputInput: {
     paddingTop: '0.375em',
     paddingBottom: '0.4375em',
-    width: 'auto',
+    width: '100%',
     flexGrow: 1,
   },
   inputOutlinedInput: {
     paddingTop: 'calc(0.75em - 4px)',
     paddingBottom: 'calc(0.75em - 4px)',
-    width: 'auto',
+    width: '100%',
     flexGrow: 1,
   },
   inputLabelRoot: {
