@@ -1,6 +1,6 @@
 /* eslint-disable @typescript-eslint/no-unused-vars */
-import React                   from 'react';
-import is                      from 'is';
+import React                        from 'react';
+import is                           from 'is';
 import {isNullOrUndefined, Without} from 'rewire-common';
 import {Observe}                    from 'rewire-core';
 import classNames                   from 'classnames';
