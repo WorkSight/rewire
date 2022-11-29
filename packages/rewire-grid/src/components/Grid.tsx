@@ -88,7 +88,7 @@ function verticalResizeWatcher(lifetime: React.Component<any>, element: HTMLElem
   return { watch(callback: ResizeCallback) { _callbacks.push(callback); } };
 }
 
-type BodyType = {grid: IGrid, columns: () => IColumn[], renderRows: (rows: IRow[], columns: () => IColumn[], fixed: boolean) => any, scrollY: DataSignal<number>, rowClasses?: any, cellClasses?: any, loadMoreRows?: (args: {start: number, end: number}) => Promise<any[]> };
+type BodyType = {grid: IGrid, columns: () => IColumn[], contentElement: any, renderRows: (rows: IRow[], columns: () => IColumn[], fixed: boolean) => any, scrollY: DataSignal<number>, rowClasses?: any, cellClasses?: any, loadMoreRows?: (args: {start: number, end: number}) => Promise<any[]> };
 class Body extends React.PureComponent<BodyType, {indexOffset: number}> {
   constructor(props: BodyType) {
     super(props);

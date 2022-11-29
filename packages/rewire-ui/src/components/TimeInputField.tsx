@@ -1,18 +1,18 @@
 /* eslint-disable no-useless-escape */
-import React                                         from 'react';
-import classNames                                         from 'classnames';
+import React                         from 'react';
+import classNames                    from 'classnames';
 import {
   isNullOrUndefined,
   isNullOrUndefinedOrEmpty,
   UTC,
-  TimeSpan,
-}                                                         from 'rewire-common';
-import {Theme}                                            from '@material-ui/core/styles';
-import TextField, { TextFieldProps }                      from '@material-ui/core/TextField';
-import InputAdornment                                     from '@material-ui/core/InputAdornment';
-import ErrorTooltip                                       from './ErrorTooltip';
-import {TextAlignment, TextVariant}                       from './editors';
-import {withStyles, WithStyle}                            from './styles';
+  TimeSpan
+}                                    from 'rewire-common';
+import {Theme}                       from '@material-ui/core/styles';
+import TextField, { TextFieldProps } from '@material-ui/core/TextField';
+import InputAdornment                from '@material-ui/core/InputAdornment';
+import ErrorTooltip                  from './ErrorTooltip';
+import {TextAlignment, TextVariant}  from './editors';
+import {withStyles, WithStyle}       from './styles';
 
 type MapFn<T> = (item?: T) => string;
 
@@ -310,7 +310,7 @@ class TimeInputField extends React.Component<TimeFieldProps, ITimeState> {
       if (typeof time === 'number' && value.text) {
         const days   = (time < 0) ? Math.trunc(Math.abs(time) / 24) + 1 : Math.trunc(time / 24);
         const prefix = (days > 0) ? `${days} day${days > 1 ? 's' : ''} ${(time < 0) ? 'preceding' : 'following'} at ` : '';
-        return `${prefix}${uppercaseFormatter.format(UTC.now().startOfDay().add(time as number, TimeSpan.hours).utc)}`;
+        return `${prefix}${uppercaseFormatter.format(UTC.now().startOfDay().add(time as number, TimeSpan.hours).roundToMinutes().utc)}`;
       } else {
         return undefined;
       }

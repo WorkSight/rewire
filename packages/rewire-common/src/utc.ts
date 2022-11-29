@@ -29,6 +29,10 @@ export class UTC {
     return new UTC(Date.UTC(year, month - 1, day, hours, minutes, seconds, ms));
   }
 
+  roundToMinutes(): UTC {
+    return new UTC(Math.trunc(Math.trunc(this.utc + 0.5 * UTC.MillisecondsPerMinute) / UTC.MillisecondsPerMinute) * UTC.MillisecondsPerMinute);
+  }
+
   get isValid() {
     return !Number.isNaN(this.utc);
   }
