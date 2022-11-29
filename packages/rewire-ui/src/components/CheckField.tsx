@@ -37,11 +37,12 @@ const styles = (_theme: Theme) => ({
 export type CheckFieldStyles = ReturnType<typeof styles>;
 
 export interface ICheckFieldProps {
-  visible? : boolean;
-  disabled?: boolean;
-  value?   : boolean;
-  tooltip? : string |((value: any) => string);
-  label?   : string;
+  visible?  : boolean;
+  disabled? : boolean;
+  value?    : boolean;
+  tooltip?  : string |((value: any) => string);
+  label?    : string;
+  classes?  : Record<string, string>;
 
   onValueChange: (value?: boolean) => void;
 }
@@ -117,4 +118,4 @@ class CheckField extends React.Component<CheckFieldProps> {
   }
 }
 
-export default withStyles(styles, CheckField);
+export default withStyles<CheckboxProps & ICheckFieldProps, unknown>(styles, CheckField);

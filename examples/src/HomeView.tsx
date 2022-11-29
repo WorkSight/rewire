@@ -127,7 +127,7 @@ function handleRowClick(row: IRow) {
 
 function createTestGrid(rows: any, cols: any) {
   console.time('start tester');
- 
+
   // create the grid model and group by 'column2' and 'column3'
   // let grid = createGrid(rows, cols, { groupBy: ['column2', 'column3'], optionsMenuFn: () => ({ items: createColumnsToggleMenuItems(cols, ['column8', 'column9']) }), multiSelect: true, allowMergeColumns: true, verticalAlign: 'top' });
   const grid = createGrid(rows, cols, { groupBy: ['column2', 'column3'], optionsMenuFn: () => ({ items: createColumnsToggleMenuItems(cols, ['column8', 'column9']) }), clearSelectionOnBlur: false, multiSelect: true, allowMergeColumns: true, isReorderable: true, verticalAlign: 'top' });
@@ -173,7 +173,7 @@ function createTestGrid(rows: any, cols: any) {
 function createTestGridCols(nCols: number) {
   // make sure we have enough columns passed.
   if (nCols < 10) throw new Error('add some more columns!');
- 
+
   // create some random sized columns!
   const cols: IColumn[] = observable([]);
   for (let col = 0; col < nCols; col++) {
@@ -181,7 +181,7 @@ function createTestGridCols(nCols: number) {
   }
   cols[5].title = 'Sales';
   cols[6].title = 'Sales';
- 
+
   const timeOnValueChange = (cell: ICell, value: any) => {
     if (!value) {
       cell.value = undefined;
@@ -196,12 +196,12 @@ function createTestGridCols(nCols: number) {
     const diff = cell.row.cells.timeInColumn.value - cell.row.cells.timeOutColumn.value;
     cell.row.cells.differenceColumn.value = diff;
   };
- 
+
   const customNumberValidator = function(value: any): IError | undefined {
     if (isNullOrUndefined(value)) {
       return undefined;
     }
- 
+
     let errorMsg: string = '';
     let errorSeverity: ErrorSeverity = ErrorSeverity.Error;
     if (value < 2000) {
@@ -220,7 +220,7 @@ function createTestGridCols(nCols: number) {
     const error = errorMsg ? { text: errorMsg, severity: errorSeverity } : undefined;
     return error;
   };
- 
+
   cols.push(createColumn(['nestedColumn', 'value'], 'Nested Column',       { type: 'text', width: Math.trunc(Math.random() * 250 + 50) + 'px' }));
   cols.push(createColumn('maskColumn',              'Mask',                { type: { type: 'mask', options: { mask: ['(', /[1-9]/, /\d/, /\d/, ')', ' ', /\d/, /\d/, /\d/, '-', /\d/, /\d/, /\d/, /\d/] } }, width: Math.trunc(Math.random() * 250 + 50) + 'px' }));
   cols.push(createColumn('phoneColumn',             'Phone',               { type: { type: 'phone' }, width: Math.trunc(Math.random() * 250 + 50) + 'px' }));
@@ -235,25 +235,25 @@ function createTestGridCols(nCols: number) {
   cols.push(createColumn('selectColumn',            'Select',              { type: { type: 'select', options: countries }, width: Math.trunc(Math.random() * 250 + 50) + 'px' }));
   cols.push(createColumn('multiselectColumn',       'MultiSelect',         { type: { type: 'multiselect', options: countries }, width: Math.trunc(Math.random() * 250 + 50) + 'px' }));
   cols.push(createColumn('checkedColumn',           'Checked',             { type: 'checked', width: Math.trunc(Math.random() * 250 + 50) + 'px' }));
- 
+
   const complexColumnValidator = (value: any): IError | undefined => {
     if (isNullOrUndefined(value)) {
       return undefined;
     }
     return (value.name === 'Homer') ? error('no homers allowed', ErrorSeverity.Critical) : undefined;
   };
- 
+
   cols.push(createColumn('complexColumn', 'Complex', { type: 'none', renderer: ComplexCell, compare: ComplexCellData.compare, validators: complexColumnValidator, width: Math.trunc(Math.random() * 250 + 50) + 'px' }));
   cols.push(createColumn('complexColumn2', 'Complex2', { type: 'none', renderer: ComplexCell, compare: ComplexCellData.compare, validators: complexColumnValidator, width: Math.trunc(Math.random() * 250 + 50) + 'px' }));
   // Override and set some columns to be number!
   cols[5].setEditor({ type: 'number', options: { decimals: 2, thousandSeparator: true } });
   cols[6].setEditor({ type: 'number', options: { decimals: 3, thousandSeparator: true } });
- 
+
   // const timeIn:  UTC = utc().startOfDay().add(7.5, TimeSpan.hours);
   // const timeOut: UTC = utc().startOfDay().add(11,  TimeSpan.hours);
- 
+
   // add some cell data!
-  
+
   // Some fixed columns to the left
   cols[0].fixed = true;
   cols[0].width = '128px';
@@ -397,7 +397,7 @@ function createEmployeesGrid1() {
     {name: 'archive',   title: 'Archive',                           icon: ArchiveIcon, disabled: true, active: true, visible: () => true, onClick: (item: IToggleMenuItem) => { item.active = !item.active; } },
     {name: 'unarchive', title: 'Unarchive',                         icon: ArchiveIcon, active: true, onClick: (item: IToggleMenuItem) => { item.active = !item.active; } },
   ]);
-  const grid = createGrid(rows, cols, { multiSelect: true, allowMergeColumns: true, isReorderable: true, optionsMenuFn: () => ({ items: [...createColumnsToggleMenuItems(cols, ['timeColumn', 'email', 'isActive', 'autoCompleteColumn'], {onItemClick: toggleMenuHandleItemClick}), ...toggleItems] }) });
+  const grid = createGrid(rows, cols, { multiSelect: true, allowMergeColumns: true, isReorderable: false, optionsMenuFn: () => ({ items: [...createColumnsToggleMenuItems(cols, ['timeColumn', 'email', 'isActive', 'autoCompleteColumn'], {onItemClick: toggleMenuHandleItemClick}), ...toggleItems] }) });
   // sort by employee names
   grid.headerRowHeight = 32;
   grid.rowHeight = 56;
@@ -700,7 +700,7 @@ export const HomeView = React.memo(withStyles(styles, (props: HomeViewProps) => 
                 <Button className={classes.employeesGridButton} onClick={() => mode.gridMode = 'employees1'} variant='outlined'>Grid 1</Button>
                 <Button className={classes.employeesGridButton} onClick={() => mode.gridMode = 'employees2'} variant='outlined'>Grid 2</Button>
               </div>
-              <Grid key={mode.gridMode} grid={mode.gridMode === 'employees1' ? employeesGrid1 : employeesGrid2} gridFontSizes={{header: '0.95rem', body: '0.95rem', groupRow: '0.95rem', toggleMenu: '0.95rem'}} className={classes.employeeGrid} />
+              <Grid key={mode.gridMode} virtual={true} grid={mode.gridMode === 'employees1' ? employeesGrid1 : employeesGrid2} gridFontSizes={{header: '0.95rem', body: '0.95rem', groupRow: '0.95rem', toggleMenu: '0.95rem'}} className={classes.employeeGrid} />
             </Paper>
           )} />
         </div>

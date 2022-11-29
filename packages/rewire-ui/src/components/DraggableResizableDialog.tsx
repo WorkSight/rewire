@@ -168,6 +168,7 @@ class DraggableResizableDialog extends React.Component<IDraggableResizableDialog
   }
 
   render() {
+    // eslint-disable-next-line @typescript-eslint/no-unused-vars
     const {draggableResizableDialogContainer, draggableResizableDialogRoot, ...dialogClasses} = this.props.classes;
 
     return (

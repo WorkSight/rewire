@@ -1,5 +1,5 @@
 /* eslint-disable no-prototype-builtins */
-import React              from 'react';
+import React                   from 'react';
 import {Observe}               from 'rewire-core';
 import {
   IActionMenuItem,
@@ -30,7 +30,7 @@ export interface MixedMenuProps extends MenuBaseProps {
 
 export type MixedMenuItemRendererProps = WithStyle<MenuBaseStyles, IMixedMenuItemRendererProps>;
 
-class MixedMenu extends React.Component<MixedMenuProps> {
+class MixedMenu extends React.PureComponent<MixedMenuProps> {
   constructor(props: MixedMenuProps) {
     super(props);
   }
