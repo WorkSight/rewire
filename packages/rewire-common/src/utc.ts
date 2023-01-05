@@ -50,7 +50,7 @@ export class UTC {
   }
 
   static toNumber(dt: DateType) {
-    if (dt && (dt as any).utc) {
+    if (typeof ((dt as any)?.utc) === 'number') {
       return (dt as any).utc;
     }
 
