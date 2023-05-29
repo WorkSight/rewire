@@ -194,6 +194,7 @@ export type TimeInputFieldStyles = ReturnType<typeof styles>;
 export interface ITimeFieldProps {
   visible?              : boolean;
   disabled?             : boolean;
+  readOnly?             : boolean;
   disableErrors?        : boolean;
   useTooltipForErrors?  : boolean;
   error?                : string;
@@ -256,6 +257,7 @@ class TimeInputField extends React.Component<TimeFieldProps, ITimeState> {
     return (
       (nextState.text                !== this.state.text)                ||
       (nextProps.disabled            !== this.props.disabled)            ||
+      (nextProps.readOnly            !== this.props.readOnly)            ||
       (nextProps.visible             !== this.props.visible)             ||
       (nextProps.error               !== this.props.error)               ||
       (nextProps.rounding            !== this.props.rounding)            ||
@@ -338,7 +340,7 @@ class TimeInputField extends React.Component<TimeFieldProps, ITimeState> {
   });
 
   render() {
-    const {classes, className, visible, disabled, error, label, placeholder, align, disableErrors, autoFocus, variant, useTooltipForErrors} = this.props;
+    const {classes, className, visible, disabled, readOnly, error, label, placeholder, align, disableErrors, autoFocus, variant, useTooltipForErrors} = this.props;
     if (visible === false) {
       return null;
     }
@@ -366,7 +368,7 @@ class TimeInputField extends React.Component<TimeFieldProps, ITimeState> {
         variant={variant as any}
         inputRef={this.inputRef}
         inputProps={{spellCheck: false, className: classes.nativeInput, style: {textAlign: align || 'left'}}}
-        InputProps={{startAdornment: startAdornment, endAdornment: endAdornment, classes: {root: classes.inputRoot, input: inputClassName, formControl: inputFormControlClassName}}}
+        InputProps={{readOnly: !!readOnly, startAdornment: startAdornment, endAdornment: endAdornment, classes: {root: classes.inputRoot, input: inputClassName, formControl: inputFormControlClassName}}}
         InputLabelProps={{shrink: true, classes: {root: classes.inputLabelRoot, outlined: classes.inputLabelOutlined, shrink: classes.inputLabelShrink}}}
         FormHelperTextProps={{classes: {root: classNames(classes.helperTextRoot, this.props.useTooltipForErrors ? classes.helperTextRootErrorIcon : undefined), contained: classes.helperTextContained}}}
       />);

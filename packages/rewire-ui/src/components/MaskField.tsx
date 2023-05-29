@@ -164,6 +164,7 @@ export type MaskType = (string | RegExp)[];
 export interface IMaskFieldProps {
   visible?              : boolean;
   disabled?             : boolean;
+  readOnly?             : boolean;
   disableErrors?        : boolean;
   useTooltipForErrors?  : boolean;
   error?                : string;
@@ -201,6 +202,7 @@ class MaskField extends React.Component<MaskFieldProps> {
     return (
       (nextProps.value               !== this.props.value)               ||
       (nextProps.disabled            !== this.props.disabled)            ||
+      (nextProps.readOnly            !== this.props.readOnly)            ||
       (nextProps.visible             !== this.props.visible)             ||
       (nextProps.error               !== this.props.error)               ||
       (nextProps.label               !== this.props.label)               ||
@@ -314,7 +316,7 @@ class MaskField extends React.Component<MaskFieldProps> {
         onBlur={this.props.onBlur}
         onChange={(evt: React.ChangeEvent<HTMLInputElement>) => this.props.onValueChange(evt.target.value)}
         inputProps={{spellCheck: false, className: classes.nativeInput, style: {textAlign: this.props.align || 'left'}, ...maskProps}}
-        InputProps={{inputComponent: TextMaskCustom, startAdornment: startAdornment, endAdornment: endAdornment, classes: {root: classes.inputRoot, input: inputClassName, formControl: inputFormControlClassName}}}
+        InputProps={{inputComponent: TextMaskCustom, readOnly: !!this.props.readOnly, startAdornment: startAdornment, endAdornment: endAdornment, classes: {root: classes.inputRoot, input: inputClassName, formControl: inputFormControlClassName}}}
         InputLabelProps={{shrink: true, classes: {root: classes.inputLabelRoot, outlined: classes.inputLabelOutlined, shrink: classes.inputLabelShrink}}}
         FormHelperTextProps={{classes: {root: classNames(classes.helperTextRoot, this.props.useTooltipForErrors ? classes.helperTextRootErrorIcon : undefined), contained: classes.helperTextContained}}}
       />
@@ -340,7 +342,7 @@ class MaskField extends React.Component<MaskFieldProps> {
           onBlur={props.onBlur}
           onChange={props.onChange}
           inputProps={{spellCheck: false, className: classes.nativeInput, style: {textAlign: props.align || 'left'}, ...maskProps}}
-          InputProps={{inputComponent: TextMaskCustom, startAdornment: startAdornment, endAdornment: endAdornment, classes: {root: classes.inputRoot, input: inputClassName, formControl: inputFormControlClassName}}}
+          InputProps={{inputComponent: TextMaskCustom, readOnly: !!props.readOnly, startAdornment: startAdornment, endAdornment: endAdornment, classes: {root: classes.inputRoot, input: inputClassName, formControl: inputFormControlClassName}}}
           InputLabelProps={{shrink: true, classes: {root: classes.inputLabelRoot, outlined: classes.inputLabelOutlined, shrink: classes.inputLabelShrink}}}
           FormHelperTextProps={{classes: {root: classNames(props.classes.helperTextRoot, props.useTooltipForErrors ? props.classes.helperTextRootErrorIcon : undefined), contained: props.classes.helperTextContained}}}
         />

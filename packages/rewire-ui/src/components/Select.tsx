@@ -123,7 +123,7 @@ export interface ISelectProps<T> {
   dynamic?: boolean;
 }
 
-export type SelectProps<T> = WithStyle<SelectStyles, ISelectProps<T> & ICustomProps<T> & React.InputHTMLAttributes<any> & MuiSelectProps & ISelectProps<T>>;
+export type SelectProps<T> = WithStyle<SelectStyles, ISelectProps<T> & ICustomProps<T> & React.InputHTMLAttributes<any> & MuiSelectProps>;
 
 class Select<T> extends React.Component<SelectProps<T>, any> {
   // private _isMounted: boolean;
@@ -167,6 +167,7 @@ class Select<T> extends React.Component<SelectProps<T>, any> {
         (nextProps.selectedItem        !== this.props.selectedItem)        ||
         (nextProps.error               !== this.props.error)               ||
         (nextProps.disabled            !== this.props.disabled)            ||
+        (nextProps.readOnly            !== this.props.readOnly)            ||
         (nextProps.visible             !== this.props.visible)             ||
         (nextState.suggestions         !== this.state.suggestions)         ||
         (nextState.isOpen              !== this.state.isOpen)              ||
@@ -291,6 +292,9 @@ class Select<T> extends React.Component<SelectProps<T>, any> {
 
   handleKeyDown = (evt: React.KeyboardEvent<any>) => {
     this.props.onKeyDown && this.props.onKeyDown(evt);
+    if (this.props.disabled || this.props.readOnly) {
+      return;
+    }
 
     switch (evt.key) {
       case 'ArrowUp':
@@ -443,7 +447,7 @@ class Select<T> extends React.Component<SelectProps<T>, any> {
         onChange={this.handleChanged}
         autoFocus={!!this.props.autoFocus}
         inputProps={{spellCheck: false, className: classes.nativeInput, style: {textAlign: this.props.align || 'left'}}}
-        InputProps={{startAdornment: startAdornment, endAdornment: endAdornment, classes: {root: classes.inputRoot, input: inputClassName, formControl: inputFormControlClassName}}}
+        InputProps={{readOnly: !!this.props.readOnly, startAdornment: startAdornment, endAdornment: endAdornment, classes: {root: classes.inputRoot, input: inputClassName, formControl: inputFormControlClassName}}}
         InputLabelProps={{shrink: true, classes: {root: classes.inputLabelRoot, outlined: classes.inputLabelOutlined, shrink: classes.inputLabelShrink}}}
         FormHelperTextProps={{classes: {root: classNames(classes.helperTextRoot, this.props.useTooltipForErrors ? classes.helperTextRootErrorIcon : undefined), contained: classes.helperTextContained}}}
         SelectProps={{

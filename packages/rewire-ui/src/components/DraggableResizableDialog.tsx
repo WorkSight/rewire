@@ -62,7 +62,7 @@ const dialogStyles = (_theme: Theme) => ({
 export interface IDraggableResizableDialogProps {
   DialogProps: Omit<DialogProps, 'PaperComponent' | 'classes' | 'maxWidth' | 'fullWidth' | 'fullScreen'>;
   DraggableResizableBoxProps?: Omit<DraggableResizableBoxProps, 'bounds' | 'dragHandleClassName' | 'default' | 'classes' | 'className'>;
-  defaultWidth: 'xs' | 'sm' | 'md' | 'lg' | number | string;
+  defaultWidth: 'xs' | 'sm' | 'md' | 'lg' | 'xl' | number | string;
   defaultHeight?: number | string;
   classes?: any;
   children?: React.ReactNode;
@@ -84,7 +84,7 @@ class DraggableResizableDialog extends React.Component<IDraggableResizableDialog
     this.draggableResizableBoxRef = React.createRef();
   }
 
-  getDefaultWidth(width: 'xs' | 'sm' | 'md' | 'lg' | number | string): number | string {
+  getDefaultWidth(width: 'xs' | 'sm' | 'md' | 'lg' | 'xl' | number | string): number | string {
     switch(width) {
       case 'xs':
         return 400;
@@ -94,6 +94,8 @@ class DraggableResizableDialog extends React.Component<IDraggableResizableDialog
         return 960;
       case 'lg':
         return 1280;
+      case 'xl':
+        return 1500;
       default:
         return width;
     }

@@ -81,6 +81,7 @@ export type PasswordFieldStyles = ReturnType<typeof styles>;
 export interface IPasswordFieldProps {
   visible?              : boolean;
   disabled?             : boolean;
+  readOnly?             : boolean;
   disableErrors?        : boolean;
   useTooltipForErrors?  : boolean;
   error?                : string;
@@ -121,6 +122,7 @@ class PasswordField extends React.Component<PasswordFieldProps, IPasswordFieldSt
     return (
       (nextProps.value               !== this.props.value)               ||
       (nextProps.disabled            !== this.props.disabled)            ||
+      (nextProps.readOnly            !== this.props.readOnly)            ||
       (nextProps.visible             !== this.props.visible)             ||
       (nextProps.error               !== this.props.error)               ||
       (nextState.showPassword        !== this.state.showPassword)        ||
@@ -225,7 +227,7 @@ class PasswordField extends React.Component<PasswordFieldProps, IPasswordFieldSt
           onKeyDown={this.props.onKeyDown}
           onChange={(evt: React.ChangeEvent<HTMLInputElement>) => this.props.onValueChange(evt.target.value)}
           inputProps={{spellCheck: false, className: this.props.classes.nativeInput, style: {textAlign: this.props.align || 'left'}}}
-          InputProps={{endAdornment: adornment, classes: {root: this.props.classes.inputRoot, input: inputClassName, formControl: inputFormControlClassName}}}
+          InputProps={{readOnly: !!this.props.readOnly, endAdornment: adornment, classes: {root: this.props.classes.inputRoot, input: inputClassName, formControl: inputFormControlClassName}}}
           InputLabelProps={{shrink: true, classes: {root: this.props.classes.inputLabelRoot, outlined: this.props.classes.inputLabelOutlined, shrink: this.props.classes.inputLabelShrink}}}
           FormHelperTextProps={{classes: {root: classNames(this.props.classes.helperTextRoot, this.props.useTooltipForErrors ? this.props.classes.helperTextRootErrorIcon : undefined), contained: this.props.classes.helperTextContained}}}
         />
@@ -254,7 +256,7 @@ class PasswordField extends React.Component<PasswordFieldProps, IPasswordFieldSt
             onKeyDown={props.onKeyDown}
             onChange={props.onChange}
             inputProps={{spellCheck: false, className: props.classes.nativeInput, style: {textAlign: props.align || 'left'}}}
-            InputProps={{endAdornment: adornment, classes: {root: props.classes.inputRoot, input: inputClassName, formControl: inputFormControlClassName}}}
+            InputProps={{readOnly: !!props.readOnly, endAdornment: adornment, classes: {root: props.classes.inputRoot, input: inputClassName, formControl: inputFormControlClassName}}}
             InputLabelProps={{shrink: true, classes: {root: props.classes.inputLabelRoot, outlined: props.classes.inputLabelOutlined, shrink: props.classes.inputLabelShrink}}}
             FormHelperTextProps={{classes: {root: classNames(props.classes.helperTextRoot, props.useTooltipForErrors ? props.classes.helperTextRootErrorIcon : undefined), contained: props.classes.helperTextContained}}}
           />

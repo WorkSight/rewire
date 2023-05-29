@@ -109,6 +109,7 @@ export type TextFieldStyles = ReturnType<typeof styles>;
 export interface ITextFieldProps {
   visible?              : boolean;
   disabled?             : boolean;
+  readOnly?             : boolean;
   disableErrors?        : boolean;
   useTooltipForErrors?  : boolean;
   error?                : string;
@@ -154,6 +155,7 @@ class TextField extends React.Component<TextFieldProps> {
     return (
       !equalValue ||
       (nextProps.disabled            !== this.props.disabled)            ||
+      (nextProps.readOnly            !== this.props.readOnly)            ||
       (nextProps.visible             !== this.props.visible)             ||
       (nextProps.error               !== this.props.error)               ||
       (nextProps.label               !== this.props.label)               ||
@@ -279,7 +281,7 @@ class TextField extends React.Component<TextFieldProps> {
         onChange={(evt: React.ChangeEvent<HTMLInputElement>) => this.onValueChange(evt.target.value)}
         inputRef={this.inputRef}
         inputProps={{spellCheck: !!multiline, className: classes.nativeInput, style: {textAlign: this.props.align || 'left'}}}
-        InputProps={{startAdornment: startAdornment, endAdornment: endAdornment, classes: {root: classes.inputRoot, multiline: multilineClassName, input: inputClassName, formControl: inputFormControlClassName}}}
+        InputProps={{readOnly: !!this.props.readOnly, startAdornment: startAdornment, endAdornment: endAdornment, classes: {root: classes.inputRoot, multiline: multilineClassName, input: inputClassName, formControl: inputFormControlClassName}}}
         InputLabelProps={{shrink: true, classes: {root: classes.inputLabelRoot, outlined: classes.inputLabelOutlined, shrink: classes.inputLabelShrink}}}
         FormHelperTextProps={{classes: {root: classNames(classes.helperTextRoot, this.props.useTooltipForErrors ? classes.helperTextRootErrorIcon : undefined), contained: classes.helperTextContained}}}
       />);
@@ -310,7 +312,7 @@ class TextField extends React.Component<TextFieldProps> {
           onChange={props.onChange}
           inputRef={this.inputRef}
           inputProps={{spellCheck: !!multiline, className: props.classes.nativeInput, style: {textAlign: props.align || 'left'}}}
-          InputProps={{startAdornment: startAdornment, endAdornment: endAdornment, classes: {root: props.classes.inputRoot, multiline: multilineClassName, input: inputClassName, formControl: inputFormControlClassName}}}
+          InputProps={{readOnly: !!props.readOnly, startAdornment: startAdornment, endAdornment: endAdornment, classes: {root: props.classes.inputRoot, multiline: multilineClassName, input: inputClassName, formControl: inputFormControlClassName}}}
           InputLabelProps={{shrink: true, classes: {root: props.classes.inputLabelRoot, outlined: props.classes.inputLabelOutlined, shrink: props.classes.inputLabelShrink}}}
           FormHelperTextProps={{classes: {root: classNames(props.classes.helperTextRoot, props.useTooltipForErrors ? props.classes.helperTextRootErrorIcon : undefined), contained: props.classes.helperTextContained}}}
         />

@@ -99,6 +99,8 @@ const styles = (_theme: Theme) => ({
 export type DateFieldStyles = ReturnType<typeof styles>;
 
 export interface IDateFieldProps {
+  disabled?             : boolean;
+  readOnly?             : boolean;
   visible?              : boolean;
   disableErrors?        : boolean;
   useTooltipForErrors?  : boolean;
@@ -252,7 +254,7 @@ class DateField extends React.PureComponent<DateFieldProps> {
         onChange={onChange}
         inputRef={this.inputRef}
         inputProps={{className: classes.nativeInput, style: {textAlign: this.props.align || 'left'}, onKeyDown: this.handleInputKeyDown}}
-        InputProps={{startAdornment: startAdornment, endAdornment: endAdornment, classes: {root: classes.inputRoot, input: inputClassName, formControl: inputFormControlClassName}}}
+        InputProps={{readOnly: !!this.props.readOnly, startAdornment: startAdornment, endAdornment: endAdornment, classes: {root: classes.inputRoot, input: inputClassName, formControl: inputFormControlClassName}}}
         InputLabelProps={{shrink: true, classes: {root: classes.inputLabelRoot, outlined: classes.inputLabelOutlined, shrink: classes.inputLabelShrink}}}
         FormHelperTextProps={{classes: {root: classNames(classes.helperTextRoot, this.props.useTooltipForErrors ? classes.helperTextRootErrorIcon : undefined), contained: classes.helperTextContained}}}
         allowKeyboardControl={this.props.allowKeyboardControl}
@@ -320,7 +322,7 @@ class DateField extends React.PureComponent<DateFieldProps> {
           onChange={props.onChange}
           inputRef={this.inputRef}
           inputProps={{className: props.classes.nativeInput, style: {textAlign: props.align || 'left'}, onKeyDown: this.handleInputKeyDown}}
-          InputProps={{startAdornment: startAdornment, endAdornment: endAdornment, classes: {root: props.classes.inputRoot, input: inputClassName, formControl: inputFormControlClassName}}}
+          InputProps={{readOnly: !!props.readOnly, startAdornment: startAdornment, endAdornment: endAdornment, classes: {root: props.classes.inputRoot, input: inputClassName, formControl: inputFormControlClassName}}}
           InputLabelProps={{shrink: true, classes: {root: props.classes.inputLabelRoot, outlined: props.classes.inputLabelOutlined, shrink: props.classes.inputLabelShrink}}}
           FormHelperTextProps={{classes: {root: classNames(props.classes.helperTextRoot, props.useTooltipForErrors ? props.classes.helperTextRootErrorIcon : undefined), contained: props.classes.helperTextContained}}}
           allowKeyboardControl={props.allowKeyboardControl}

@@ -136,7 +136,7 @@ export interface IDialogProps {
   transition?           : (props: any) => JSX.Element;
   transitionDuration?   : number;
   title?                : (dialog: Modal) => JSX.Element;
-  maxWidth?             : 'xs' | 'sm' | 'md' | 'lg' | false;
+  maxWidth?             : 'xs' | 'sm' | 'md' | 'lg' | 'xl' | false;
   buttonVariant?        : ButtonProps['variant'];
   actions?              : string[];
   ButtonRenderer?       : ActionRenderType;
