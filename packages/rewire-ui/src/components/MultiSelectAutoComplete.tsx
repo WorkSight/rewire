@@ -301,6 +301,7 @@ class MultiSelectAutoComplete<T> extends React.Component<MultiSelectAutoComplete
       (nextProps.selectedItems !== this.props.selectedItems) ||
       (nextProps.error !== this.props.error) ||
       (nextProps.disabled !== this.props.disabled) ||
+      (nextProps.readOnly !== this.props.readOnly) ||
       (nextProps.visible !== this.props.visible) ||
       (nextState.suggestions !== this.state.suggestions) ||
       (nextProps.label !== this.props.label) ||
@@ -339,6 +340,9 @@ class MultiSelectAutoComplete<T> extends React.Component<MultiSelectAutoComplete
   };
 
   handleOpenOnFocus = async () => {
+    if (this.props.disabled || this.props.readOnly) {
+      return;
+    }
     await this.performSearch('');
     this.downShift.openMenu();
   };
@@ -373,7 +377,7 @@ class MultiSelectAutoComplete<T> extends React.Component<MultiSelectAutoComplete
   };
 
   handleKeyDown = (event: any) => {
-    if (event.altKey || event.ctrlKey) {
+    if (event.altKey || event.ctrlKey || this.props.disabled || this.props.readOnly) {
       return;
     }
 
@@ -453,14 +457,20 @@ class MultiSelectAutoComplete<T> extends React.Component<MultiSelectAutoComplete
   };
 
   handleDelete = (item: any) => () => {
-    this.deleteItem(item);
+    if (this.props.disabled || this.props.readOnly) {
+      return;
+    }
 
+    this.deleteItem(item);
     this._manualFocusing = true;
     this.inputRef.current && this.inputRef.current.focus();
     this._manualFocusing = false;
   };
 
   handlePopupDelete = (item: any, isLastItem: boolean) => () => {
+    if (this.props.disabled || this.props.readOnly) {
+      return;
+    }
     this.deleteItem(item);
     if (isLastItem) {
       this.closeShowMoreSelectedItemsPopup();
@@ -583,6 +593,9 @@ class MultiSelectAutoComplete<T> extends React.Component<MultiSelectAutoComplete
   };
 
   handleOpenButtonClick = (isOpen: boolean) => () => {
+    if (this.props.disabled || this.props.readOnly) {
+      return;
+    }
     if (isOpen) {
       this.downShift.closeMenu();
     } else {
@@ -640,7 +653,7 @@ class MultiSelectAutoComplete<T> extends React.Component<MultiSelectAutoComplete
   };
 
   renderInput = React.memo((props: any) => {
-    const {classes, error, getInputProps, startAdornment, isOpen, align, variant, disableErrors, useTooltipForErrors, label, disabled, autoFocus, placeholder, tooltip} = props;
+    const {classes, error, getInputProps, startAdornment, isOpen, align, variant, disableErrors, useTooltipForErrors, label, disabled, readOnly, autoFocus, placeholder, tooltip} = props;
     const inputProps = getInputProps({
       disabled: disabled,
       onKeyDown: this.handleKeyDown,
@@ -666,7 +679,7 @@ class MultiSelectAutoComplete<T> extends React.Component<MultiSelectAutoComplete
         helperText={!disableErrors && <span>{(!disabled && error ? <this.renderError classes={classes} error={error} useTooltipForErrors={useTooltipForErrors} /> : '')}</span>}
         inputRef={this.inputRef}
         inputProps={{spellCheck: false, className: classes.nativeInput, style: {textAlign: align || 'left'}}}
-        InputProps={{inputComponent: this.renderCustomInnerInputComponent, startAdornment: sAdornment, endAdornment: eAdornment, classes: {root: classes.inputRoot, input: inputClassName, formControl: inputFormControlClassName, adornedEnd: adornedEndClassName}}}
+        InputProps={{inputComponent: this.renderCustomInnerInputComponent, readOnly: !!readOnly, startAdornment: sAdornment, endAdornment: eAdornment, classes: {root: classes.inputRoot, input: inputClassName, formControl: inputFormControlClassName, adornedEnd: adornedEndClassName}}}
         InputLabelProps={{shrink: true, classes: {root: classes.inputLabelRoot, outlined: classes.inputLabelOutlined, shrink: classes.inputLabelShrink}}}
         FormHelperTextProps={{classes: {root: classNames(classes.helperTextRoot, useTooltipForErrors ? classes.helperTextRootErrorIcon : undefined), contained: classes.helperTextContained}}}
         {...inputProps}
@@ -825,7 +838,7 @@ class MultiSelectAutoComplete<T> extends React.Component<MultiSelectAutoComplete
             <div key={idx} className={idx > 0 ? classes.showMoreSelectedItemsPopupItemSpacing : undefined}>
               <div className={classes.showMoreSelectedItemsPopupItemContainer}>
                 <span>{this.map(item)}</span>
-                {!this.props.disabled &&
+                {!this.props.disabled && !this.props.readOnly &&
                   <IconButton className={classes.showMoreSelectedItemsPopupIconButton} style={{fontSize: this._fontSize}} onClick={this.handlePopupDelete(item, items.length <= 1)}>
                     <CancelIcon className={classes.showMoreSelectedItemsPopupIcon} />
                   </IconButton>
@@ -839,12 +852,12 @@ class MultiSelectAutoComplete<T> extends React.Component<MultiSelectAutoComplete
   });
 
   renderChips = React.memo((props: {selectedItems: any[]}) => {
-    const {classes}       = this.props;
-    const {selectedItems} = props;
-    const baseChipClass   = this.props.variant === 'outlined' ? classNames(classes.chip, classes.inputOutlinedChip) : classes.chip;
-    const chipLimit       = this.props.chipLimit || 3;
-    const itemsToRender   = selectedItems.slice(0, chipLimit);
-    const returnValue     = itemsToRender.map((item: any, _index: number) => (
+    const {classes, disabled, readOnly} = this.props;
+    const {selectedItems}               = props;
+    const baseChipClass                 = this.props.variant === 'outlined' ? classNames(classes.chip, classes.inputOutlinedChip) : classes.chip;
+    const chipLimit                     = this.props.chipLimit || 3;
+    const itemsToRender                 = selectedItems.slice(0, chipLimit);
+    const returnValue                   = itemsToRender.map((item: any, _index: number) => (
       <Chip
         key={this.map(item)}
         tabIndex={-1}
@@ -852,7 +865,7 @@ class MultiSelectAutoComplete<T> extends React.Component<MultiSelectAutoComplete
         disabled={this.props.disabled}
         className={baseChipClass}
         classes={{deleteIcon: classes.chipDeleteIcon}}
-        onDelete={this.handleDelete(item)}
+        onDelete={!disabled && !readOnly ? this.handleDelete(item) : undefined}
       />
     ));
     const showMore = selectedItems.length > itemsToRender.length;
@@ -874,7 +887,7 @@ class MultiSelectAutoComplete<T> extends React.Component<MultiSelectAutoComplete
   });
 
   render() {
-    const {classes, disabled, visible, error, label, placeholder, autoFocus, align, disableErrors, useTooltipForErrors, variant, startAdornment, initialInputValue, selectedItems, showEmptySuggestions, openOnFocus, suggestionsContainerHeader, suggestionsContainerFooter, hasTransition, transitionTimeout} = this.props;
+    const {classes, disabled, readOnly, visible, error, label, placeholder, autoFocus, align, disableErrors, useTooltipForErrors, variant, startAdornment, initialInputValue, selectedItems, showEmptySuggestions, openOnFocus, suggestionsContainerHeader, suggestionsContainerFooter, hasTransition, transitionTimeout} = this.props;
     if (visible === false) {
       return null;
     }
@@ -899,7 +912,8 @@ class MultiSelectAutoComplete<T> extends React.Component<MultiSelectAutoComplete
             selectedItem,
             highlightedIndex,
           }) => {
-            if (!isOpen) {
+            const open = isOpen && !disabled && !readOnly;
+            if (!open) {
               this._suggestionsContainerWidth = undefined;
             }
             this.observableState.highlightedIndex = highlightedIndex;
@@ -910,6 +924,7 @@ class MultiSelectAutoComplete<T> extends React.Component<MultiSelectAutoComplete
                 error={error}
                 getInputProps={getInputProps}
                 disabled={!!disabled}
+                readOnly={!!readOnly}
                 autoFocus={!!autoFocus}
                 label={label}
                 tooltip={this.getTooltip(selectedItem)}
@@ -919,14 +934,14 @@ class MultiSelectAutoComplete<T> extends React.Component<MultiSelectAutoComplete
                 disableErrors={disableErrors}
                 useTooltipForErrors={useTooltipForErrors}
                 startAdornment={startAdornment}
-                isOpen={isOpen}
+                isOpen={open}
                 inputValue={inputValue}
                 selectedItem={selectedItem}
               />}
               {isOpen
               ? <this.renderSuggestionsContainer
                   getMenuProps={getMenuProps}
-                  isOpen={isOpen}
+                  isOpen={open}
                   classes={classes}
                   openOnFocus={openOnFocus}
                   showEmptySuggestions={showEmptySuggestions}

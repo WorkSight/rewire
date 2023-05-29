@@ -76,6 +76,8 @@ export type RenderSuggestionFn<T> = (props: IRenderSuggestionFnProps<T>) => JSX.
 
 export interface ICustomProps<T> {
   readonly selectedItem?: T;
+  disabled?             : boolean;
+  readOnly?             : boolean;
   visible?              : boolean;
   error?                : string;
   align?                : TextAlignment;

@@ -245,6 +245,7 @@ class AutoComplete<T> extends React.Component<AutoCompleteProps<T>, IAutoComplet
         (nextProps.selectedItem !== this.props.selectedItem) ||
         (nextProps.error !== this.props.error) ||
         (nextProps.disabled !== this.props.disabled) ||
+        (nextProps.readOnly !== this.props.readOnly) ||
         (nextProps.visible !== this.props.visible) ||
         (nextState.suggestions !== this.state.suggestions) ||
         (nextProps.label !== this.props.label) ||
@@ -392,7 +393,7 @@ class AutoComplete<T> extends React.Component<AutoCompleteProps<T>, IAutoComplet
   };
 
   handleKeyDown = (event: any) => {
-    if (event.altKey || event.ctrlKey) {
+    if (event.altKey || event.ctrlKey || this.props.disabled || this.props.readOnly) {
       return;
     }
 
@@ -476,12 +477,18 @@ class AutoComplete<T> extends React.Component<AutoCompleteProps<T>, IAutoComplet
   }
 
   handleDeleteButtonClick = () => {
+    if (this.props.disabled || this.props.readOnly) {
+      return;
+    }
     this.props.onSelectItem(undefined);
     this._manualFocusing = true;
     setTimeout(() => { this.inputRef.current && this.inputRef.current.focus(); this._manualFocusing = false; }, 0);
   };
 
   handleOpenButtonClick = (isOpen: boolean) => () => {
+    if (this.props.disabled || this.props.readOnly) {
+      return;
+    }
     if (isOpen) {
       this.downShift.closeMenu();
     } else {
@@ -521,7 +528,7 @@ class AutoComplete<T> extends React.Component<AutoCompleteProps<T>, IAutoComplet
 
     return <Observe render={() => {
       let deleteButtonClasses: string;
-      if (props.disabled || !props.hasSelectedItem || (!this.isHovered && !this.isFocused)) {
+      if (props.disabled || props.readOnly || !props.hasSelectedItem || (!this.isHovered && !this.isFocused)) {
         deleteButtonClasses = classNames(classes.deleteButton, classes.deleteButtonHidden);
       } else {
         deleteButtonClasses = classes.deleteButton!;
@@ -547,7 +554,7 @@ class AutoComplete<T> extends React.Component<AutoCompleteProps<T>, IAutoComplet
   });
 
   renderInput = React.memo((props: any) => {
-    const {classes, error, getInputProps, startAdornment, isOpen, align, variant, disableErrors, useTooltipForErrors, hasSelectedItem, label, disabled, autoFocus, placeholder, tooltip} = props;
+    const {classes, error, getInputProps, startAdornment, isOpen, align, variant, disableErrors, useTooltipForErrors, hasSelectedItem, label, disabled, readOnly, autoFocus, placeholder, tooltip} = props;
     const inputProps = getInputProps({
       disabled: disabled,
       onKeyDown: this.handleKeyDown,
@@ -557,11 +564,12 @@ class AutoComplete<T> extends React.Component<AutoCompleteProps<T>, IAutoComplet
       label: label,
       placeholder: placeholder,
     });
+
     const inputClassName            = variant === 'outlined' ? classes.inputOutlinedInput : classes.inputInput;
     const adornedEndClassName       = variant === 'outlined' ? classes.adornedEndOutlined : undefined;
     const inputFormControlClassName = variant === 'standard' && label ? classes.inputFormControlWithLabel : undefined;
     const sAdornment                = startAdornment ? <InputAdornment position='start' classes={{root: classes.inputAdornmentRoot}}>{startAdornment}</InputAdornment> : undefined;
-    const eAdornment                = (< ><this.renderDeleteButton disabled={disabled} hasSelectedItem={hasSelectedItem} /><this.renderOpenButton disabled={disabled} isOpen={isOpen} /></>);
+    const eAdornment                = (< ><this.renderDeleteButton disabled={disabled} readOnly={readOnly} hasSelectedItem={hasSelectedItem} /><this.renderOpenButton disabled={disabled} isOpen={isOpen} /></>);
     return (
       <TextField
         className={classes.textField}
@@ -573,7 +581,7 @@ class AutoComplete<T> extends React.Component<AutoCompleteProps<T>, IAutoComplet
         helperText={!disableErrors && <span>{(!disabled && error ? <this.renderError classes={classes} error={error} useTooltipForErrors={useTooltipForErrors} /> : '')}</span>}
         inputRef={this.inputRef}
         inputProps={{spellCheck: false, className: classes.nativeInput, style: {textAlign: align || 'left'}}}
-        InputProps={{onMouseEnter: this.handleMouseEnter, onMouseLeave: this.handleMouseLeave, startAdornment: sAdornment, endAdornment: eAdornment, classes: {root: classes.inputRoot, input: inputClassName, formControl: inputFormControlClassName, adornedEnd: adornedEndClassName}}}
+        InputProps={{onMouseEnter: this.handleMouseEnter, onMouseLeave: this.handleMouseLeave, readOnly: !!readOnly, startAdornment: sAdornment, endAdornment: eAdornment, classes: {root: classes.inputRoot, input: inputClassName, formControl: inputFormControlClassName, adornedEnd: adornedEndClassName}}}
         InputLabelProps={{shrink: true, classes: {root: classes.inputLabelRoot, outlined: classes.inputLabelOutlined, shrink: classes.inputLabelShrink}}}
         FormHelperTextProps={{classes: {root: classNames(classes.helperTextRoot, useTooltipForErrors ? classes.helperTextRootErrorIcon : undefined), contained: classes.helperTextContained}}}
         {...inputProps}
@@ -708,7 +716,7 @@ class AutoComplete<T> extends React.Component<AutoCompleteProps<T>, IAutoComplet
   });
 
   render() {
-    const {classes, disabled, visible, error, label, placeholder, autoFocus, align, disableErrors, useTooltipForErrors, variant, startAdornment, initialInputValue, showEmptySuggestions, openOnFocus, suggestionsContainerHeader, suggestionsContainerFooter, hasTransition, transitionTimeout} = this.props;
+    const {classes, disabled, readOnly, visible, error, label, placeholder, autoFocus, align, disableErrors, useTooltipForErrors, variant, startAdornment, initialInputValue, showEmptySuggestions, openOnFocus, suggestionsContainerHeader, suggestionsContainerFooter, hasTransition, transitionTimeout} = this.props;
     if (visible === false) {
       return null;
     }
@@ -733,7 +741,8 @@ class AutoComplete<T> extends React.Component<AutoCompleteProps<T>, IAutoComplet
             selectedItem,
             highlightedIndex,
           }) => {
-            if (!isOpen) {
+            const open = isOpen && !disabled && !readOnly;
+            if (!open) {
               this._suggestionsContainerWidth = undefined;
             }
             this.observableState.highlightedIndex = highlightedIndex;
@@ -744,6 +753,7 @@ class AutoComplete<T> extends React.Component<AutoCompleteProps<T>, IAutoComplet
                  error={error}
                  getInputProps={getInputProps}
                  disabled={!!disabled}
+                 readOnly={!!readOnly}
                  autoFocus={!!autoFocus}
                  label={label}
                  tooltip={this.getTooltip(inputValue)}
@@ -753,14 +763,14 @@ class AutoComplete<T> extends React.Component<AutoCompleteProps<T>, IAutoComplet
                  disableErrors={disableErrors}
                  useTooltipForErrors={useTooltipForErrors}
                  startAdornment={startAdornment}
-                 isOpen={isOpen}
+                 isOpen={open}
                  inputValue={inputValue}
                  hasSelectedItem={!!selectedItem}
               />}
               {isOpen
               ? <this.renderSuggestionsContainer
                   getMenuProps={getMenuProps}
-                  isOpen={isOpen}
+                  isOpen={open}
                   classes={classes}
                   openOnFocus={openOnFocus}
                   showEmptySuggestions={showEmptySuggestions}

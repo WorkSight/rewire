@@ -72,6 +72,7 @@ export type NumberFieldStyles = ReturnType<typeof styles>;
 export interface INumberFieldProps {
   visible?              : boolean;
   disabled?             : boolean;
+  readOnly?             : boolean;
   disableErrors?        : boolean;
   useTooltipForErrors?  : boolean;
   error?                : string;
@@ -120,6 +121,7 @@ class NumberTextField extends React.Component<NumberFieldProps> {
     return (
       (nextProps.value               !== this.props.value)               ||
       (nextProps.disabled            !== this.props.disabled)            ||
+      (nextProps.readOnly            !== this.props.readOnly)            ||
       (nextProps.visible             !== this.props.visible)             ||
       (nextProps.format              !== this.props.format)              ||
       (nextProps.mask                !== this.props.mask)                ||
@@ -269,7 +271,7 @@ class NumberTextField extends React.Component<NumberFieldProps> {
           isNumericString={isNumericString}
           inputRef={this.inputRef}
           inputProps={{spellCheck: false, className: this.props.classes.nativeInput, style: {textAlign: this.props.align || 'left'}}}
-          InputProps={{startAdornment: startAdornment, endAdornment: endAdornment, classes: {root: this.props.classes.inputRoot, input: inputClassName, formControl: inputFormControlClassName}}}
+          InputProps={{readOnly: !!this.props.readOnly, startAdornment: startAdornment, endAdornment: endAdornment, classes: {root: this.props.classes.inputRoot, input: inputClassName, formControl: inputFormControlClassName}}}
           InputLabelProps={{shrink: true, classes: {root: this.props.classes.inputLabelRoot, outlined: this.props.classes.inputLabelOutlined, shrink: this.props.classes.inputLabelShrink}}}
           FormHelperTextProps={{classes: {root: classNames(this.props.classes.helperTextRoot, this.props.useTooltipForErrors ? this.props.classes.helperTextRootErrorIcon : undefined), contained: this.props.classes.helperTextContained}}}
           customInput={this.TextFieldWithErrorProp}
@@ -306,7 +308,7 @@ class NumberTextField extends React.Component<NumberFieldProps> {
             isNumericString={isNumericString}
             inputRef={this.inputRef}
             inputProps={{spellCheck: false, className: props.classes.nativeInput, style: {textAlign: props.align || 'left'}}}
-            InputProps={{startAdornment: startAdornment, endAdornment: endAdornment, classes: {root: props.classes.inputRoot, input: inputClassName, formControl: inputFormControlClassName}}}
+            InputProps={{readOnly: !!props.readOnly, startAdornment: startAdornment, endAdornment: endAdornment, classes: {root: props.classes.inputRoot, input: inputClassName, formControl: inputFormControlClassName}}}
             InputLabelProps={{shrink: true, classes: {root: props.classes.inputLabelRoot, outlined: props.classes.inputLabelOutlined, shrink: props.classes.inputLabelShrink}}}
             FormHelperTextProps={{classes: {root: classNames(props.classes.helperTextRoot, props.useTooltipForErrors ? props.classes.helperTextRootErrorIcon : undefined), contained: props.classes.helperTextContained}}}
             customInput={this.TextFieldWithErrorProp}
