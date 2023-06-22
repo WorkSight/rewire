@@ -86,10 +86,10 @@ export type TextEditorProps = {
   onValueChange         : (v: any) => void,
 };
 
-export default function editor(type: EditorType, propsForEdit?: any): React.FunctionComponent<TextEditorProps> {
+export default function editor(type: EditorType, propsForEdit?: any): React.FunctionComponent<TextEditorProps & any> {
   switch (type) {
     case 'select':
-      return ({field, className, classes, onValueChange}: TextEditorProps) => (
+      return ({field, className, classes, onValueChange, ...otherProps}: TextEditorProps & any) => (
         <Observe render={() => (
           <Select
             label={field.label}
@@ -111,12 +111,13 @@ export default function editor(type: EditorType, propsForEdit?: any): React.Func
             startAdornment={field.startAdornment && field.startAdornment()}
             endAdornment={field.endAdornment && field.endAdornment()}
             {...propsForEdit}
+            {...otherProps}
           />
         )} />
       );
 
     case 'multiselectautocomplete':
-      return ({ field, className, classes, onValueChange, endOfTextOnFocus, selectOnFocus, cursorPositionOnFocus, initialInputValue}: TextEditorProps) => (
+      return ({ field, className, classes, onValueChange, endOfTextOnFocus, selectOnFocus, cursorPositionOnFocus, initialInputValue, ...otherProps}: TextEditorProps & any) => (
         <Observe render={() => (
           <MultiSelectAutoComplete
             placeholder={field.placeholder}
@@ -142,12 +143,13 @@ export default function editor(type: EditorType, propsForEdit?: any): React.Func
             startAdornment={field.startAdornment && field.startAdornment()}
             endAdornment={field.endAdornment && field.endAdornment()}
             {...propsForEdit}
+            {...otherProps}
           />
         )} />
       );
 
     case 'multiselect':
-      return ({field, className, classes, onValueChange}: TextEditorProps) => (
+      return ({field, className, classes, onValueChange, ...otherProps}: TextEditorProps & any) => (
         <Observe render={() => (
           <Select
             multiple={true}
@@ -170,12 +172,13 @@ export default function editor(type: EditorType, propsForEdit?: any): React.Func
             startAdornment={field.startAdornment && field.startAdornment()}
             endAdornment={field.endAdornment && field.endAdornment()}
             {...propsForEdit}
+            {...otherProps}
           />
         )} />
       );
 
     case 'date':
-      return ({field, className, classes, onValueChange, endOfTextOnFocus, selectOnFocus, cursorPositionOnFocus, initialInputValue}: TextEditorProps) => (
+      return ({field, className, classes, onValueChange, endOfTextOnFocus, selectOnFocus, cursorPositionOnFocus, initialInputValue, ...otherProps}: TextEditorProps & any) => (
         <Observe render={() => {
           const value     = field.value && utc(field.value);
           const dateValue = isNullOrUndefinedOrEmpty(value) || UTC.MaxValue.equals(value) || UTC.MinValue.equals(value) ? undefined : value.toUTCDate();
@@ -203,6 +206,7 @@ export default function editor(type: EditorType, propsForEdit?: any): React.Func
               startAdornment={field.startAdornment && field.startAdornment()}
               endAdornment={field.endAdornment && field.endAdornment()}
               {...propsForEdit}
+              {...otherProps}
             />
           );
         }} />
@@ -210,7 +214,7 @@ export default function editor(type: EditorType, propsForEdit?: any): React.Func
 
     case 'text':
     case 'email':
-      return ({field, className, classes, onValueChange, endOfTextOnFocus, selectOnFocus, cursorPositionOnFocus}: TextEditorProps) => (
+      return ({field, className, classes, onValueChange, endOfTextOnFocus, selectOnFocus, cursorPositionOnFocus, ...otherProps}: TextEditorProps & any) => (
         <Observe render={() => (
           <TextField
             placeholder={field.placeholder}
@@ -234,12 +238,13 @@ export default function editor(type: EditorType, propsForEdit?: any): React.Func
             startAdornment={field.startAdornment && field.startAdornment()}
             endAdornment={field.endAdornment && field.endAdornment()}
             {...propsForEdit}
+            {...otherProps}
           />
         )} />
       );
 
     case 'custom':
-      return ({field, className, classes, onValueChange, endOfTextOnFocus, selectOnFocus, cursorPositionOnFocus}: TextEditorProps) => (
+      return ({field, className, classes, onValueChange, endOfTextOnFocus, selectOnFocus, cursorPositionOnFocus, ...otherProps}: TextEditorProps & any) => (
         <Observe render={() => (
           <propsForEdit.__Editor
             placeholder={field.placeholder}
@@ -263,12 +268,13 @@ export default function editor(type: EditorType, propsForEdit?: any): React.Func
             startAdornment={field.startAdornment && field.startAdornment()}
             endAdornment={field.endAdornment && field.endAdornment()}
             {...propsForEdit}
+            {...otherProps}
           />
         )} />
       );
 
     case 'multitext':
-      return ({field, className, classes, onValueChange, endOfTextOnFocus, selectOnFocus, cursorPositionOnFocus}: TextEditorProps) => (
+      return ({field, className, classes, onValueChange, endOfTextOnFocus, selectOnFocus, cursorPositionOnFocus, ...otherProps}: TextEditorProps & any) => (
         <Observe render={() => (
           <TextField
             placeholder={field.placeholder}
@@ -293,12 +299,13 @@ export default function editor(type: EditorType, propsForEdit?: any): React.Func
             startAdornment={field.startAdornment && field.startAdornment()}
             endAdornment={field.endAdornment && field.endAdornment()}
             {...propsForEdit}
+            {...otherProps}
           />
         )} />
       );
 
     case 'phone':
-      return ({field, className, classes, onValueChange, endOfTextOnFocus, selectOnFocus, cursorPositionOnFocus}: TextEditorProps) => (
+      return ({field, className, classes, onValueChange, endOfTextOnFocus, selectOnFocus, cursorPositionOnFocus, ...otherProps}: TextEditorProps & any) => (
         <Observe render={() => (
           <PhoneField
             label={field.label}
@@ -321,12 +328,13 @@ export default function editor(type: EditorType, propsForEdit?: any): React.Func
             startAdornment={field.startAdornment && field.startAdornment()}
             endAdornment={field.endAdornment && field.endAdornment()}
             {...propsForEdit}
+            {...otherProps}
           />
         )} />
       );
 
     case 'static':
-      return ({field, className, classes, onValueChange}: TextEditorProps) => (
+      return ({field, className, classes, onValueChange, ...otherProps}: TextEditorProps & any) => (
         <Observe render={() => (
           <StaticField
             label={field.label}
@@ -338,12 +346,13 @@ export default function editor(type: EditorType, propsForEdit?: any): React.Func
             className={className}
             classes={classes}
             {...propsForEdit}
+            {...otherProps}
           />
         )} />
       );
 
     case 'password':
-      return ({field, className, classes, onValueChange, endOfTextOnFocus, selectOnFocus, cursorPositionOnFocus}: TextEditorProps) => (
+      return ({field, className, classes, onValueChange, endOfTextOnFocus, selectOnFocus, cursorPositionOnFocus, ...otherProps}: TextEditorProps & any) => (
         <Observe render={() => (
           <PasswordField
             placeholder={field.placeholder}
@@ -366,12 +375,13 @@ export default function editor(type: EditorType, propsForEdit?: any): React.Func
             classes={classes}
             hasAdornment={field.endAdornment}
             {...propsForEdit}
+            {...otherProps}
           />
         )} />
       );
 
     case 'number':
-      return ({field, className, classes, onValueChange, endOfTextOnFocus, selectOnFocus, cursorPositionOnFocus}: TextEditorProps) => (
+      return ({field, className, classes, onValueChange, endOfTextOnFocus, selectOnFocus, cursorPositionOnFocus, ...otherProps}: TextEditorProps & any) => (
         <Observe render={() => (
           <NumberField
             placeholder={field.placeholder}
@@ -395,12 +405,13 @@ export default function editor(type: EditorType, propsForEdit?: any): React.Func
             startAdornment={field.startAdornment && field.startAdornment()}
             endAdornment={field.endAdornment && field.endAdornment()}
             {...propsForEdit}
+            {...otherProps}
           />
         )} />
       );
 
     case 'time':
-      return ({field, className, classes, onValueChange, endOfTextOnFocus, selectOnFocus, cursorPositionOnFocus}: TextEditorProps) => (
+      return ({field, className, classes, onValueChange, endOfTextOnFocus, selectOnFocus, cursorPositionOnFocus, ...otherProps}: TextEditorProps & any) => (
         <Observe render={() => (
           <TimeInputField
             placeholder={field.placeholder}
@@ -424,12 +435,13 @@ export default function editor(type: EditorType, propsForEdit?: any): React.Func
             startAdornment={field.startAdornment && field.startAdornment()}
             endAdornment={field.endAdornment && field.endAdornment()}
             {...propsForEdit}
+            {...otherProps}
           />
         )} />
       );
 
     case 'checked':
-      return ({field, className, classes, onValueChange}: TextEditorProps) => (
+      return ({field, className, classes, onValueChange, ...otherProps}: TextEditorProps & any) => (
         <Observe render={() => (
           <CheckField
             label={field.label}
@@ -442,12 +454,13 @@ export default function editor(type: EditorType, propsForEdit?: any): React.Func
             className={className}
             classes={classes}
             {...propsForEdit}
+            {...otherProps}
           />
         )} />
       );
 
     case 'switch':
-      return ({field, className, classes, onValueChange}: TextEditorProps) => (
+      return ({field, className, classes, onValueChange, ...otherProps}: TextEditorProps & any) => (
         <Observe render={() => (
           <SwitchField
             label={field.label}
@@ -460,12 +473,13 @@ export default function editor(type: EditorType, propsForEdit?: any): React.Func
             className={className}
             classes={classes}
             {...propsForEdit}
+            {...otherProps}
           />
         )} />
       );
 
     case 'auto-complete':
-      return ({field, className, classes, onValueChange, endOfTextOnFocus, selectOnFocus, cursorPositionOnFocus, initialInputValue}: TextEditorProps) => (
+      return ({field, className, classes, onValueChange, endOfTextOnFocus, selectOnFocus, cursorPositionOnFocus, initialInputValue, ...otherProps}: TextEditorProps & any) => (
         <Observe render={() => (
           <AutoComplete
             placeholder={field.placeholder}
@@ -491,12 +505,13 @@ export default function editor(type: EditorType, propsForEdit?: any): React.Func
             startAdornment={field.startAdornment && field.startAdornment()}
             endAdornment={field.endAdornment && field.endAdornment()}
             {...propsForEdit}
+            {...otherProps}
           />
         )} />
       );
 
     case 'avatar':
-      return ({field, className, classes, onValueChange}: TextEditorProps) => (
+      return ({field, className, classes, onValueChange, ...otherProps}: TextEditorProps & any) => (
         <Observe render={() => (
           <AvatarField
             label={field.label}
@@ -508,12 +523,13 @@ export default function editor(type: EditorType, propsForEdit?: any): React.Func
             className={className}
             classes={classes}
             {...propsForEdit}
+            {...otherProps}
           />
         )} />
       );
 
     case 'color':
-      return ({field, className, classes, onValueChange}: TextEditorProps) => (
+      return ({field, className, classes, onValueChange, ...otherProps}: TextEditorProps & any) => (
         <Observe render={() => (
           <ColorField
             label={field.label}
@@ -527,12 +543,13 @@ export default function editor(type: EditorType, propsForEdit?: any): React.Func
             className={className}
             classes={classes}
             {...propsForEdit}
+            {...otherProps}
           />
         )} />
       );
 
     case 'mask':
-      return ({field, className, classes, onValueChange, endOfTextOnFocus, selectOnFocus, cursorPositionOnFocus}: TextEditorProps) => (
+      return ({field, className, classes, onValueChange, endOfTextOnFocus, selectOnFocus, cursorPositionOnFocus, ...otherProps}: TextEditorProps & any) => (
         <Observe render={() => (
           <MaskField
             label={field.label}
@@ -555,6 +572,7 @@ export default function editor(type: EditorType, propsForEdit?: any): React.Func
             startAdornment={field.startAdornment && field.startAdornment()}
             endAdornment={field.endAdornment && field.endAdornment()}
             {...propsForEdit}
+            {...otherProps}
           />
         )} />
       );
