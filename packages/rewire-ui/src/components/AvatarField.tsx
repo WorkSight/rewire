@@ -157,7 +157,7 @@ const innerAvatarStyles = () => ({
     textAlign: 'center',
   },
   changeImageButton: {
-    margin: '0px 10px 0px 0px',
+    margin: '0px',
     position: 'relative',
   },
   deleteImageButton: {
@@ -170,6 +170,7 @@ const innerAvatarStyles = () => ({
   buttonsContainer: {
     display: 'flex',
     justifyContent: 'center',
+    gap: '10px',
   },
   button: {
     minWidth: '70px',
