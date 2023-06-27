@@ -326,7 +326,7 @@ class GridModel implements IGrid, IDisposable {
 
     const copiedCells: any[] = [];
     selectedCells.forEach(cell => {
-      copiedCells.push({value: cell.value, columnPosition: cell.columnPosition});
+      copiedCells.push({value: cell.value, rowPosition: cell.rowPosition, columnPosition: cell.columnPosition});
     });
     this.clipboard = copiedCells;
   }
