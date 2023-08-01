@@ -1,4 +1,4 @@
-import React                from 'react';
+import React                     from 'react';
 import classNames                from 'classnames';
 import Checkbox, {
   CheckboxProps,
@@ -6,6 +6,7 @@ import Checkbox, {
 import FormControlLabel          from '@material-ui/core/FormControlLabel';
 import {Theme}                   from '@material-ui/core/styles';
 import {isNullOrUndefined}       from 'rewire-common';
+import is                        from 'is';
 import {withStyles, WithStyle}   from './styles';
 
 const styles = (_theme: Theme) => ({
