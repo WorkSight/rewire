@@ -285,16 +285,16 @@ export interface IRow extends IDisposable {
   fixed:              boolean;
   options:            IRowOptions;
 
-  onClick?(row: IRow):                                    void;
-  hasErrors():                                            boolean;
-  getErrors():                                            IErrorData[];
-  createCell(column: IColumn, value: any, type?: string): ICell;
-  clear(columnNames?: string[]):                          void;
-  mergeAllColumns():                                      void;
-  mergeFixedColumns():                                    void;
-  mergeStandardColumns():                                 void;
-  clone():                                                IRow;
-  validate():                                             void;
+  onClick?(row: IRow):                                        void;
+  hasErrors():                                                boolean;
+  getErrors():                                                IErrorData[];
+  createCell(column: IColumn, value: any, isTitle?: boolean): ICell;
+  clear(columnNames?: string[]):                              void;
+  mergeAllColumns():                                          void;
+  mergeFixedColumns():                                        void;
+  mergeStandardColumns():                                     void;
+  clone():                                                    IRow;
+  validate():                                                 void;
 }
 
 export type MaskType = (string | RegExp)[];
@@ -404,6 +404,7 @@ export interface ICell extends ICellProperties {
   isBottomMostSelection: boolean;
   isLeftMostSelection:   boolean;
   keyForEdit?:           string;
+  isTitle:               boolean;
   hasChanges:            boolean;
 
   hasErrors():                                         boolean;
