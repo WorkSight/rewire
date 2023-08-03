@@ -344,6 +344,7 @@ export interface IColumnOptions {
   headerRenderer?: React.FunctionComponent<any>;
   renderer?:       React.FunctionComponent<any>;
   validators?:     IFormValidator;
+  cellTooltip?:    string | ((value: any) => string);
   editorTooltip?:  string | ((value: any) => string);
 
   onValueChange?(cell: ICell, v: any): void;
@@ -376,6 +377,7 @@ export interface IColumn extends ICellProperties {
   typeOptions?:    any;
   headerRenderer?: React.FunctionComponent<any>;
   editor?:         React.FunctionComponent<any>;
+  cellTooltip?:    string | ((value: any) => string);
   editorTooltip?:  string | ((value: any) => string);
 
   map?(value: any): string;

@@ -4,11 +4,14 @@ import {
   IColumn,
   ICell
 }                                 from '../models/GridTypes';
-import React                 from 'react';
-import is                    from 'is';
+import React                      from 'react';
+import is                         from 'is';
 import cc                         from 'classcat';
 import classNames                 from 'classnames';
-import {isNullOrUndefinedOrEmpty} from 'rewire-common';
+import {
+  isNullOrUndefined,
+  isNullOrUndefinedOrEmpty
+}                                 from 'rewire-common';
 import {Observe}                  from 'rewire-core';
 import {
   withStyles,
@@ -327,7 +330,7 @@ class Cell extends React.PureComponent<CellProps, unknown> {
     if (is.array(this.cell.value)) {
       const valueToUse = this.cell.value.slice(0, 3);
       const values     = this.column.map ? this.column.map(valueToUse) : valueToUse;
-      value          = this.cell.value.length > 3 ? `${values}, ....` : values;
+      value            = this.cell.value.length > 3 ? `${values}, ....` : values;
     } else {
       value = this.column.map ? this.column.map(this.cell.value) : this.cell.value;
     }
@@ -345,8 +348,22 @@ class Cell extends React.PureComponent<CellProps, unknown> {
     if ((this.column.type === 'auto-complete' || this.column.type === 'select' || this.column.type === 'checked')) setTimeout(() => this.cell.setFocus(), 0);
   };
 
+  getCellTooltip() {
+    const tooltip = this.column.cellTooltip;
+    let title     = this.value;
+    if (!isNullOrUndefined(tooltip)) {
+      if (is.function(tooltip))  {
+        title = (tooltip as CallableFunction)(this.value);
+      } else {
+        title = tooltip as string;
+      }
+    }
+
+    return title;
+  }
+
   handleTooltip = (node: HTMLElement) => {
-    node.setAttribute('title', (node.offsetWidth < node.scrollWidth) ? this.value : '');
+    node.setAttribute('title', (node.offsetWidth < node.scrollWidth) ? this.getCellTooltip() : '');
   };
 
   handleTooltipForSpan = (evt: React.MouseEvent<HTMLSpanElement>) => {
@@ -369,10 +386,10 @@ class Cell extends React.PureComponent<CellProps, unknown> {
       const cell = this.cell;
       if (cell.editing) {
         if (!this.column.editor) return null;
-        const Editor                                    = this.column.editor;
-        const tooltip                                   = this.column.editorTooltip;
-        const cellType                                  = this.column.type;
-        const additionalProps                           = {};
+        const Editor                                  = this.column.editor;
+        const tooltip                                 = this.column.editorTooltip;
+        const cellType                                = this.column.type;
+        const additionalProps                         = {};
         let endOfTextOnFocus                          = false;
         let selectOnFocus                             = true;
         let cursorPositionOnFocus: number | undefined = undefined;

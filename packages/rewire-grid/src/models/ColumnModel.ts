@@ -63,6 +63,7 @@ export class ColumnModel implements IColumn {
   type           : EditorType;
   headerRenderer?: React.FunctionComponent<any>;
   renderer?      : React.FunctionComponent<any>;
+  cellTooltip?   : string | ((value: any) => string);
   editor?        : React.FunctionComponent<any>;
   editorTooltip? : string | ((value: any) => string);
 
@@ -110,6 +111,7 @@ export class ColumnModel implements IColumn {
     this.map            = options && !isNullOrUndefined(options.map)            ? options.map!            : undefined;
     this.predicate      = options && !isNullOrUndefined(options.predicate)      ? options.predicate!      : undefined;
     this.compare        = options && !isNullOrUndefined(options.compare)        ? options.compare!        : undefined;
+    this.cellTooltip    = options && !isNullOrUndefined(options.cellTooltip)    ? options.cellTooltip     : undefined;
     this.editorTooltip  = options && !isNullOrUndefined(options.editorTooltip)  ? options.editorTooltip   : undefined;
     if (options && options.validators) {
       this.__validators = validators(options.validators);
