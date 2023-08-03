@@ -57,6 +57,7 @@ export class CellModel implements ICell {
   isBottomMostSelection: boolean;
   isLeftMostSelection  : boolean;
   keyForEdit?          : string;
+  isTitle              : boolean;
 
   static positionCompare(a: ICell, b: ICell): number {
     return a.rowPosition < b.rowPosition ? -1 : a.rowPosition > b.rowPosition ? 1 : a.columnPosition < b.columnPosition ? -1 : a.columnPosition > b.columnPosition ? 1 : 0;
@@ -73,7 +74,7 @@ export class CellModel implements ICell {
     this._renderer      = property(undefined);
   }
 
-  initialize(row: IRow, column: IColumn, value: any) {
+  initialize(row: IRow, column: IColumn, value: any, isTitle: boolean = false) {
     this.id                    = id++;
     this.row                   = row;
     this.column                = column;
@@ -90,6 +91,7 @@ export class CellModel implements ICell {
     this.isBottomMostSelection = false;
     this.isLeftMostSelection   = false;
     this.keyForEdit            = undefined;
+    this.isTitle               = isTitle;
     this.hasChanges            = false;
     this.__element             = undefined;
     return this;
@@ -195,15 +197,25 @@ export class CellModel implements ICell {
     this.validate();
   }
 
+  private _getValue() {
+    return this.isTitle ? this.row.data[this.column.name] : (this.column as any).__getter(this.row.data);
+  }
+
+  private _setValue(value: any) {
+    if (this.isTitle) {
+      this.row.data[this.column.name] = value;
+    } else {
+      (this.column as any).__setter(this.row.data, value);
+    }
+  }
+
   get value() {
-    return (this.column as any).__getter(this.row.data);
-    // return this.row.data[this.column.name];
+    return this._getValue();
   }
   set value(value: any) {
-    const oldValue = (this.column as any).__getter(this.row.data);
+    const oldValue = this._getValue();
     if (defaultEquals(value, oldValue)) return;
-    (this.column as any).__setter(this.row.data, value);
-    // this.row.data[this.column.name] = value;
+    this._setValue(value);
     if (this.row.fixed) return;
     if (!this.grid.loading) {
       if (this.column.fixed) {
@@ -299,8 +311,8 @@ export class CellModel implements ICell {
     }
   }
 
-  static create(row: IRow, column: IColumn, value: any): ICell {
-    return observable(new CellModel()).initialize(row, column, value);
+  static create(row: IRow, column: IColumn, value: any, isTitle: boolean = false): ICell {
+    return observable(new CellModel()).initialize(row, column, value, isTitle);
   }
 }
 

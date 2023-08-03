@@ -122,8 +122,8 @@ export class RowModel implements IRow, IDisposable, IValidationContext {
     if (this.grid.onError) this.grid.onError(this, field, error);
   }
 
-  createCell(column: IColumn, value: any): ICell {
-    return this.cells[column.name] = createCell(this, column, value);
+  createCell(column: IColumn, value: any, isTitle: boolean = false): ICell {
+    return this.cells[column.name] = createCell(this, column, value, isTitle);
   }
 
   mergeAllColumns() {
