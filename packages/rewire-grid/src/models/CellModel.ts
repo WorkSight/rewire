@@ -79,6 +79,7 @@ export class CellModel implements ICell {
     this.row                   = row;
     this.column                = column;
     this.grid                  = row.grid;
+    this.isTitle               = isTitle;
     this.rowSpan               = 1;
     this.colSpan               = 1;
     this.selected              = false;
@@ -91,7 +92,6 @@ export class CellModel implements ICell {
     this.isBottomMostSelection = false;
     this.isLeftMostSelection   = false;
     this.keyForEdit            = undefined;
-    this.isTitle               = isTitle;
     this.hasChanges            = false;
     this.__element             = undefined;
     return this;
