@@ -62,13 +62,17 @@ export class UTC {
       return dt;
     }
 
-    let s = dt as string;
-    if (!s || (s.length === 0)) return UTC.now().utc;
-    if (s[s.length - 1].toLowerCase() !== 'z') {
-      if (s.length <= 10) s += 'T00:00Z';
-      else s += 'Z';
+    if (typeof(dt) === 'string') {
+      let s = dt as string;
+      if (!s || (s.length === 0)) return UTC.now().utc;
+      if (s[s.length - 1].toLowerCase() !== 'z') {
+        if (s.length <= 10) s += 'T00:00Z';
+        else s += 'Z';
+      }
+      return Date.parse(s);
     }
-    return Date.parse(s);
+
+    return UTC.now().utc;
   }
 
   get date(): number {

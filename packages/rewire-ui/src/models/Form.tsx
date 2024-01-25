@@ -127,8 +127,7 @@ export interface IFormContext {
 }
 
 function utcEquals(date1: any, date2: any) {
-  if (date1 === date2)  return true;
-  if (!date1 || !date2) return false;
+  if ((date1 === date2)|| (!date1 && !date2)) return true;
   return utc(date1).equals(utc(date2));
 }
 
