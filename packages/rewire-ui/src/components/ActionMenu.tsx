@@ -65,7 +65,7 @@ export const ActionItemRenderer = React.memo(withStyles(actionItemRendererStyles
     }
     return (
       visible &&
-        <MenuItem key={item.name} {...externalLinkProps} divider={item.divider} disableRipple={disabled} classes={{root: rootClasses, selected: classes.menuItemSelected}} onClick={clickHandler}>
+        <MenuItem key={item.name} className={item.className} {...externalLinkProps} divider={item.divider} disableRipple={disabled} classes={{root: rootClasses, selected: classes.menuItemSelected}} onClick={clickHandler}>
           <ListItemIcon className={classes.listItemIcon}>
             {item.icon ? <item.icon /> : <LabelIcon />}
           </ListItemIcon>

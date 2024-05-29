@@ -67,7 +67,7 @@ export const ToggleItemRenderer = React.memo(withStyles(toggleItemRendererStyles
     const clickHandler = props.clickHandler;
     return (
       visible &&
-        <MenuItem key={item.name} divider={item.divider} classes={{root: rootClasses, selected: classes.menuItemSelected}} disableRipple={disabled} onClick={clickHandler}>
+        <MenuItem key={item.name} className={item.className} divider={item.divider} classes={{root: rootClasses, selected: classes.menuItemSelected}} disableRipple={disabled} onClick={clickHandler}>
           {item.icon &&
             <ListItemIcon className={classes.listItemIcon}>
               {<item.icon />}

@@ -25,6 +25,7 @@ export interface IMenuBaseItem {
   closeOnClick?: boolean;
   visible?: boolean | (() => boolean);
   disabled?: boolean | (() => boolean);
+  className?: string;
 
   onClick?(item: IMenuBaseItem): void;
 }
@@ -145,7 +146,7 @@ class MenuBase extends React.Component<MenuBaseProps, IMenuBaseState> {
       const clickHandler = props.clickHandler;
       return (
         visible &&
-          <MenuItem key={item.name} divider={item.divider} disableRipple={disabled} classes={{root: rootClasses, selected: classes.menuItemSelected}} onClick={clickHandler}>
+          <MenuItem key={item.name} className={item.className} divider={item.divider} disableRipple={disabled} classes={{root: rootClasses, selected: classes.menuItemSelected}} onClick={clickHandler}>
             <ListItemIcon className={classes.listItemIcon}>
               {item.icon ? <item.icon /> : <LabelIcon />}
             </ListItemIcon>
