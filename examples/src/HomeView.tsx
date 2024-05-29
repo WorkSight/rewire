@@ -495,9 +495,9 @@ const HomeActionMenu = (props: any) => {
   const anchorOrigin: PopoverOrigin = {vertical: 'top', horizontal: 'left'};
   const transformOrigin             = anchorOrigin;
   const items: IActionMenuItem[]    = [
-    {name: 'delete',    title: 'Delete',    icon: DeleteIcon,    onClick: () => { console.log('Performing Delete Action...'); },    closeOnClick: true},
-    {name: 'archive',   title: 'Archive',   icon: ArchiveIcon,   onClick: () => { console.log('Performing Archive Action...'); },   closeOnClick: true},
-    {name: 'unarchive', title: 'Unarchive', icon: UnarchiveIcon, onClick: () => { console.log('Performing Unarchive Action...'); }, closeOnClick: true},
+    {className: 'item-1', name: 'delete',    title: 'Delete',    icon: DeleteIcon,    onClick: () => { console.log('Performing Delete Action...'); },    closeOnClick: true},
+    {className: 'item-2', name: 'archive',   title: 'Archive',   icon: ArchiveIcon,   onClick: () => { console.log('Performing Archive Action...'); },   closeOnClick: true},
+    {className: 'item-3', name: 'unarchive', title: 'Unarchive', icon: UnarchiveIcon, onClick: () => { console.log('Performing Unarchive Action...'); }, closeOnClick: true},
   ];
 
   return (
