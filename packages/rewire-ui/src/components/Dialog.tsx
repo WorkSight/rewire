@@ -99,13 +99,14 @@ export interface IActionRenderTypeProps {
   action:     ActionType;
   isDisabled: boolean;
   variant?:   ButtonProps['variant'];
+  id?:        string;
   classes?:   IDefaultActionRendererStyles;
 }
 
 export type ActionRenderType = (props: IActionRenderTypeProps) => JSX.Element;
-export const DefaultActionRenderer: ActionRenderType = ({label, action, isDisabled, variant, classes}: IActionRenderTypeProps) => (
+export const DefaultActionRenderer: ActionRenderType = ({label, action, isDisabled, variant, id, classes}: IActionRenderTypeProps) => (
   <Observe render={() => (
-    <span className={classes && classes.root} title={action.tooltip && is.function(action.tooltip) ? (action.tooltip as CallableFunction)() : action.tooltip}>
+    <span id={id} className={classes && classes.root} title={action.tooltip && is.function(action.tooltip) ? (action.tooltip as CallableFunction)() : action.tooltip}>
       <Button className={classes && classes.button} type={action.type} color={action.type ? 'primary' : action.color} variant={action.variant || variant} disabled={isDisabled || action.disabled()} onClick={action.action}>
         {action.icon && <Icon className={classes && classes.icon} style={{marginRight: '8px'}}>{action.icon}</Icon>}
         <span className={classes && classes.label}>{label}</span>
@@ -125,6 +126,7 @@ export interface HeaderComponentProps {
 
 export interface IDialogProps {
   dialog                : Modal;
+  id?                   : string;
   classes?              : any;
   fullWidth?            : boolean;
   fullScreen?           : boolean;
@@ -179,7 +181,7 @@ class DialogInternal extends React.Component<IDialogProps> {
   }
 
   RenderDialogContent = React.memo(React.forwardRef((): JSX.Element => {
-    const {classes, children, dialog, ButtonRenderer, buttonVariant, title, HeaderComponent} = this.props;
+    const {id, classes, children, dialog, ButtonRenderer, buttonVariant, title, HeaderComponent} = this.props;
     const {buttonRoot, buttonButton, buttonIcon, buttonLabel} = classes;
     const buttonClasses                         = {root: buttonRoot, button: buttonButton, icon: buttonIcon, label: buttonLabel};
     const actions                               = this.props.actions || (dialog.actions && Object.keys(dialog.actions));
@@ -198,7 +200,7 @@ class DialogInternal extends React.Component<IDialogProps> {
         {hasActions &&
           <div className={classes.buttons}>
             <Observe render={() => (
-              actions.map(label => ((ButtonRenderer && <ButtonRenderer key={label} classes={buttonClasses} label={label} action={dialog.actions[label]} isDisabled={dialog.isDisabled} variant={buttonVariant} />) || <DefaultActionRenderer key={label} classes={buttonClasses} label={label} action={dialog.actions[label]} isDisabled={dialog.isDisabled} variant={buttonVariant} />))
+              actions.map(label => ((ButtonRenderer && <ButtonRenderer key={label} id={`${id}-${label}`} classes={buttonClasses} label={label} action={dialog.actions[label]} isDisabled={dialog.isDisabled} variant={buttonVariant} />) || <DefaultActionRenderer key={label} id={`${id}-${label}`} classes={buttonClasses} label={label} action={dialog.actions[label]} isDisabled={dialog.isDisabled} variant={buttonVariant} />))
             )} />
           </div>
         }
@@ -208,7 +210,7 @@ class DialogInternal extends React.Component<IDialogProps> {
   }));
 
   render() {
-    const {classes, dialog, fullWidth, fullScreen, maxWidth, disableEscapeKeyDown, hideBackdrop, transition, transitionDuration, disableTransition, disableEnforceFocus, PaperComponent} = this.props;
+    const {id, classes, dialog, fullWidth, fullScreen, maxWidth, disableEscapeKeyDown, hideBackdrop, transition, transitionDuration, disableTransition, disableEnforceFocus, PaperComponent} = this.props;
     const onCloseAction           = (_evt: any, reason: string) => {if (reason === 'escapeKeyDown') { dialog.close(); }};
     const transitionToUse         = transition ? transition : Transition;
     const transitionDurationToUse = !isNullOrUndefined(transitionDuration) ? transitionDuration : TRANSITION_TIMEOUT;
@@ -217,7 +219,7 @@ class DialogInternal extends React.Component<IDialogProps> {
 
     return (
       <Observe render={() => (
-        <Dialog classes={{container: classes.container, paper: classes.root, paperScrollPaper: classes.scrollPaper, paperWidthFalse: classes.paperWidthFalse}} open={dialog.isOpen} disableEnforceFocus={disableEnforceFocus} maxWidth={maxWidth} hideBackdrop={hideBackdrop} transitionDuration={transitionTime} TransitionComponent={transitionAction} PaperComponent={PaperComponent} fullWidth={fullWidth} fullScreen={fullScreen} disableEscapeKeyDown={disableEscapeKeyDown} onClose={onCloseAction}>
+        <Dialog id={id} classes={{container: classes.container, paper: classes.root, paperScrollPaper: classes.scrollPaper, paperWidthFalse: classes.paperWidthFalse}} open={dialog.isOpen} disableEnforceFocus={disableEnforceFocus} maxWidth={maxWidth} hideBackdrop={hideBackdrop} transitionDuration={transitionTime} TransitionComponent={transitionAction} PaperComponent={PaperComponent} fullWidth={fullWidth} fullScreen={fullScreen} disableEscapeKeyDown={disableEscapeKeyDown} onClose={onCloseAction}>
           <this.RenderDialogContent />
         </Dialog>
       )} />
