@@ -154,7 +154,7 @@ const SampleFormView = React.memo(({ form }: { form: typeof sampleModel.form }) 
 const getTitle = (_dialog: Modal): JSX.Element => <span>Dialog Title</span>;
 
 export const SampleDialog = () => (
-  <DraggableResizableDialog defaultWidth='lg' DialogProps={{dialog: sampleModel, title: getTitle}}>
+  <DraggableResizableDialog defaultWidth='lg' DialogProps={{id: 'sample-dialog', dialog: sampleModel, title: getTitle}}>
     <SampleFormView form={sampleModel.form} />
   </DraggableResizableDialog>
 );

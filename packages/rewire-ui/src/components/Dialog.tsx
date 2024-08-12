@@ -200,7 +200,10 @@ class DialogInternal extends React.Component<IDialogProps> {
         {hasActions &&
           <div className={classes.buttons}>
             <Observe render={() => (
-              actions.map(label => ((ButtonRenderer && <ButtonRenderer key={label} id={`${id}-${label}`} classes={buttonClasses} label={label} action={dialog.actions[label]} isDisabled={dialog.isDisabled} variant={buttonVariant} />) || <DefaultActionRenderer key={label} id={`${id}-${label}`} classes={buttonClasses} label={label} action={dialog.actions[label]} isDisabled={dialog.isDisabled} variant={buttonVariant} />))
+              actions.map(label => {
+                const buttonId = id ? `${id}-${label}` : undefined;
+                return ((ButtonRenderer && <ButtonRenderer key={label} id={buttonId} classes={buttonClasses} label={label} action={dialog.actions[label]} isDisabled={dialog.isDisabled} variant={buttonVariant} />) || <DefaultActionRenderer key={label} id={buttonId} classes={buttonClasses} label={label} action={dialog.actions[label]} isDisabled={dialog.isDisabled} variant={buttonVariant} />);
+              })
             )} />
           </div>
         }
@@ -216,10 +219,11 @@ class DialogInternal extends React.Component<IDialogProps> {
     const transitionDurationToUse = !isNullOrUndefined(transitionDuration) ? transitionDuration : TRANSITION_TIMEOUT;
     const transitionAction        = (disableTransition ? undefined : transitionToUse) as TransitionPropsType;
     const transitionTime          = disableTransition ? 0 : transitionDurationToUse;
+    const backdropId              = id ? `${id}-backdrop` : undefined;
 
     return (
       <Observe render={() => (
-        <Dialog id={id} classes={{container: classes.container, paper: classes.root, paperScrollPaper: classes.scrollPaper, paperWidthFalse: classes.paperWidthFalse}} open={dialog.isOpen} disableEnforceFocus={disableEnforceFocus} maxWidth={maxWidth} hideBackdrop={hideBackdrop} transitionDuration={transitionTime} TransitionComponent={transitionAction} PaperComponent={PaperComponent} fullWidth={fullWidth} fullScreen={fullScreen} disableEscapeKeyDown={disableEscapeKeyDown} onClose={onCloseAction}>
+        <Dialog id={id} classes={{container: classes.container, paper: classes.root, paperScrollPaper: classes.scrollPaper, paperWidthFalse: classes.paperWidthFalse}} open={dialog.isOpen} disableEnforceFocus={disableEnforceFocus} maxWidth={maxWidth} hideBackdrop={hideBackdrop} transitionDuration={transitionTime} TransitionComponent={transitionAction} PaperComponent={PaperComponent} fullWidth={fullWidth} fullScreen={fullScreen} disableEscapeKeyDown={disableEscapeKeyDown} onClose={onCloseAction} BackdropProps={{id: backdropId}}>
           <this.RenderDialogContent />
         </Dialog>
       )} />
