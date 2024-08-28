@@ -1,12 +1,15 @@
+import isNullOrUndefined from './isNullOrUndefined';
+
 export type DateType = UTC | Date | string | number;
 export enum TimeSpan { years, months, days, weeks, hours, minutes, seconds, milliseconds }
+export enum eDayOfWeek { Sunday, Monday, Tuesday, Wednesday, Thursday, Friday, Saturday }
 
 export function getTimezoneOffset(date: Date) {
   return (date.getTimezoneOffset() * 60000);
 }
 
-const _maxValue = 253402214400000;
-const _minValue = -62135596800000;
+const _maxValue = Date.UTC(8888, 12 - 1, 31, 0, 0, 0, 0);
+const _minValue = Date.UTC(1, 1 - 1, 1, 0, 0, 0, 0);
 
 export class UTC {
   public static readonly MaxValue: UTC = utc(_maxValue);
@@ -26,6 +29,10 @@ export class UTC {
     return new UTC(Date.UTC(year, month - 1, day, hours, minutes, seconds, ms));
   }
 
+  roundToMinutes(): UTC {
+    return new UTC(Math.trunc(Math.trunc(this.utc + 0.5 * UTC.MillisecondsPerMinute) / UTC.MillisecondsPerMinute) * UTC.MillisecondsPerMinute);
+  }
+
   get isValid() {
     return !Number.isNaN(this.utc);
   }
@@ -43,8 +50,8 @@ export class UTC {
   }
 
   static toNumber(dt: DateType) {
-    if (dt instanceof UTC) {
-      return dt.utc;
+    if (typeof ((dt as any)?.utc) === 'number') {
+      return (dt as any).utc;
     }
 
     if (dt instanceof Date) {
@@ -55,13 +62,17 @@ export class UTC {
       return dt;
     }
 
-    let s = dt as string;
-    if (!s || (s.length === 0)) return UTC.now().utc;
-    if (s[s.length - 1].toLowerCase() !== 'z') {
-      if (s.length <= 10) s += 'T00:00Z';
-      else s += 'Z';
+    if (typeof(dt) === 'string') {
+      let s = dt as string;
+      if (!s || (s.length === 0)) return UTC.now().utc;
+      if (s[s.length - 1].toLowerCase() !== 'z') {
+        if (s.length <= 10) s += 'T00:00Z';
+        else s += 'Z';
+      }
+      return Date.parse(s);
     }
-    return Date.parse(s);
+
+    return UTC.now().utc;
   }
 
   get date(): number {
@@ -81,7 +92,7 @@ export class UTC {
   }
 
   get daysInMonth(): number {
-    let date = new Date(this.utc);
+    const date = new Date(this.utc);
     return new Date(Date.UTC(date.getUTCFullYear(), date.getUTCMonth() + 1, 0)).getUTCDate();
   }
 
@@ -91,7 +102,7 @@ export class UTC {
   }
 
   startOfMonth() {
-    let date = new Date(this.utc);
+    const date = new Date(this.utc);
     date.setUTCDate(1);
     this.utc = date.setUTCHours(0, 0, 0, 0);
     return this;
@@ -103,7 +114,7 @@ export class UTC {
   }
 
   endOfMonth() {
-    let date = new Date(this.utc);
+    const date = new Date(this.utc);
     this.utc = new Date(Date.UTC(date.getUTCFullYear(), date.getUTCMonth() + 1, 0)).setUTCHours(23, 59, 59, 999);
     return this;
   }
@@ -114,10 +125,10 @@ export class UTC {
 
   toDateString() {
     if ((this.utc === UTC.MaxValue.utc) || (this.utc === UTC.MinValue.utc)) return '';
-    let d     = new Date(this.utc);
-    let year  = d.getUTCFullYear();
-    let month = d.getUTCMonth() + 1;
-    let day   = d.getUTCDate();
+    const d     = new Date(this.utc);
+    const year  = d.getUTCFullYear();
+    const month = d.getUTCMonth() + 1;
+    const day   = d.getUTCDate();
     return `${year}-${this.pad(month)}-${this.pad(day)}`;
   }
 
@@ -126,42 +137,87 @@ export class UTC {
   }
 
   toTimeString() {
-    let d       = new Date(this.utc);
-    let hours   = d.getUTCHours();
-    let minutes = d.getUTCMinutes();
-    return `${this.pad(hours)}:${this.pad(minutes)}`;
+    const d       = new Date(this.utc);
+    const hours   = d.getUTCHours();
+    const minutes = d.getUTCMinutes();
+    const seconds = d.getUTCSeconds();
+    return `${this.pad(hours)}:${this.pad(minutes)}:${this.pad(seconds)}`;
   }
 
   round(amount: number, decimals: number) {
     return +amount.toFixed(decimals);
   }
 
-  add(amount: number, ts: TimeSpan = TimeSpan.days) {
-    switch (ts) {
-      case TimeSpan.years:
-        const d = new Date(this.utc);
-        return new UTC(d.setUTCFullYear(d.getUTCFullYear() + amount));
+  get dayOfWeek() {
+    return (this.toUTCDate().getDay()) as eDayOfWeek;
+  }
 
-      case TimeSpan.months:
-        const d2 = new Date(this.utc);
-        return new UTC(d2.setUTCFullYear(d2.getUTCFullYear(), (d2.getUTCMonth() + amount)));
+  add(amount: number, ts: TimeSpan = TimeSpan.days, roundTo?: number) {
+    let newAmount: number;
+    switch (ts) {
+      case TimeSpan.years: {
+        const d   = new Date(this.utc);
+        newAmount = d.setUTCFullYear(d.getUTCFullYear() + amount);
+        break;
+      }
+
+      case TimeSpan.months: {
+        const d2  = new Date(this.utc);
+        newAmount = d2.setUTCFullYear(d2.getUTCFullYear(), (d2.getUTCMonth() + amount));
+        break;
+      }
 
       default:
-        return new UTC(this.utc + (amount * UTC.TimeSpanToMillis[ts]));
+        newAmount = this.utc + (amount * UTC.TimeSpanToMillis[ts]);
     }
+
+    if (!isNullOrUndefined(roundTo)) {
+      newAmount = this.round(newAmount / UTC.TimeSpanToMillis[ts], roundTo) * UTC.TimeSpanToMillis[ts];
+    }
+
+    return new UTC(newAmount);
+  }
+
+  subtract(dt: DateType, ts: TimeSpan = TimeSpan.days, roundTo?: number) {
+    const right  = UTC.toNumber(dt);
+    const left   = this.utc;
+    let result = (left - right) / UTC.TimeSpanToMillis[ts];
+    if (!isNullOrUndefined(roundTo)) {
+      result = this.round(result, roundTo);
+    }
+    return result;
+  }
+
+  subtractDate(dt: DateType, ts: TimeSpan = TimeSpan.days) {
+    return Math.trunc(this.subtract(dt, ts));
+  }
+
+  static today() {
+    return UTC.now().startOfDay();
   }
 
   static now() {
-    let date = new Date();
+    const date = new Date();
     return new UTC(date.getTime());
+  }
+
+  static nowtz(timeZone: string) {
+    const options = {
+      year: 'numeric', month: 'numeric', day: 'numeric',
+      hour: 'numeric', minute: 'numeric', second: 'numeric',
+      hourCycle: 'h23',
+      timeZone: timeZone ?? 'Canada/Pacific'
+    } as Intl.DateTimeFormatOptions;
+    const d = new Date(Date.parse(new Intl.DateTimeFormat('en-US', options).format(Date.now())));
+    return new UTC(d.getTime() - getTimezoneOffset(d));
   }
 
   toDate() {
     return new Date(this.utc);
   }
 
-  toLocalDate() {
-    let date = new Date(this.utc);
+  toUTCDate() {
+    const date = new Date(this.utc);
     return new Date(this.utc + getTimezoneOffset(date));
   }
 
@@ -171,16 +227,6 @@ export class UTC {
 
   toJSON(): any {
     return this.toString();
-  }
-
-  subtract(dt: DateType, ts: TimeSpan = TimeSpan.days, roundTo: number = 0) {
-    let right  = UTC.toNumber(dt);
-    let left   = this.utc;
-    let result = (left - right) / UTC.TimeSpanToMillis[ts];
-    if (roundTo > 0) {
-      return this.round(result, roundTo);
-    }
-    return Math.trunc(result);
   }
 
   private static MillisecondsPerYear   = 365 * 24 * 60 * 60 * 1000;
@@ -201,6 +247,8 @@ export class UTC {
     [TimeSpan.seconds]:      UTC.MillisecondsPerSecond,
     [TimeSpan.milliseconds]: 1
   };
+
+  static get ZoneOffset() { return new Date().getTimezoneOffset() * 60000; }
 }
 
 export default function utc(dt?: DateType) {

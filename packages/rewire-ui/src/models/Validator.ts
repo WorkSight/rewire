@@ -1,6 +1,7 @@
+/* eslint-disable no-prototype-builtins */
 import {isNullOrUndefined} from 'rewire-common';
 import {defaultEquals} from 'rewire-core';
-import * as is from 'is';
+import is from 'is';
 
 export function isGreaterThan(v1: any, v2: any): boolean {
   if (isNullOrUndefined(v1) || isNullOrUndefined(v2)) {
@@ -59,12 +60,19 @@ export function isNull(value?: any): boolean {
 export const isRequired = (value: any): boolean => !(isNull(value) || (is.array(value) && value.length <= 0));
 export const isRegEx    = (value: string, re: RegExp): boolean => re.test(String(!isNullOrUndefined(value) ? value : ''));
 export const isEmail    = (value: any): boolean  => {
+  // eslint-disable-next-line no-useless-escape
   const re = /(^$|^(([^<>()\[\]\\.,;:\s@"]+(\.[^<>()\[\]\\.,;:\s@"]+)*)|(".+"))@((\[[0-9]{1,3}\.[0-9]{1,3}\.[0-9]{1,3}\.[0-9]{1,3}\])|(([a-zA-Z\-0-9]+\.)+[a-zA-Z]{2,}))$)/;
   return re.test(String(!isNullOrUndefined(value) ? value : ''));
 };
+
 export const requiredWhenOthersAreNotNull = (value: any, ...otherValues: any[]): boolean => {
   if (otherValues.some((v: any) => isNull(v))) return true;
   return isRequired(value);
+};
+
+export const requiredWhenAnyOthersAreNotNull = (value: any, ...otherValues: any[]): boolean => {
+  if (otherValues.some((v: any) => !isNull(v))) return isRequired(value);
+  return true;
 };
 
 export const requiredWhenOtherIsValue = (value: any, otherValue: any, requiredValue: any): boolean => {
@@ -74,13 +82,13 @@ export const requiredWhenOtherIsValue = (value: any, otherValue: any, requiredVa
 
 export const isDifferenceOfOthers = (value: number, ...otherValues: number[]): boolean => {
   if (otherValues.some((v: number | undefined) => isNullOrUndefined(v))) return true;
-  let difference = otherValues.reduce((totalValue: number, currValue: number) => totalValue - currValue);
+  const difference = otherValues.reduce((totalValue: number, currValue: number) => totalValue - currValue);
   return value === difference;
 };
 
 export const isSumOfOthers = (value: number, ...otherValues: number[]): boolean => {
   if (otherValues.some((v: number | undefined) => isNullOrUndefined(v))) return true;
-  let sum = otherValues.reduce((totalValue: number, currValue: number) => totalValue + currValue);
+  const sum = otherValues.reduce((totalValue: number, currValue: number) => totalValue + currValue);
   return value === sum;
 };
 
@@ -101,7 +109,7 @@ export interface IValidator {
 }
 
 export type SingleParameterBuiltInValidator = 'required' | 'email' | 'empty';
-export type BuiltInValidators = SingleParameterBuiltInValidator |  '<' | '>' | '<=' | '>=' | '==' | '!=' | 'regex' | 'sumOf' | 'differenceOf' | 'requiredWhenOthersAreNotNull' | 'requiredWhenOtherIsValue';
+export type BuiltInValidators = SingleParameterBuiltInValidator |  '<' | '>' | '<=' | '>=' | '==' | '!=' | 'regex' | 'sumOf' | 'differenceOf' | 'requiredWhenOthersAreNotNull' | 'requiredWhenAnyOthersAreNotNull' | 'requiredWhenOtherIsValue';
 export type IFormValidator = (IValidator | SingleParameterBuiltInValidator | IValidationFn) | (IValidator | SingleParameterBuiltInValidator | IValidationFn)[];
 
 export function validators(v: IFormValidator) {
@@ -141,13 +149,14 @@ const __builtInValidators: {[type: string]: IValidator} = {
   ...createBuiltIn('email', isEmail, 'must be a valid email address'),
   ...createBuiltIn('>', isGreaterThan, template`must be greater than ${1}`),
   ...createBuiltIn('>=', isGreaterThanOrEquals, template`must be greater than or equal to ${1}`),
-  ...createBuiltIn('<=', isLessThanOrEquals, template`must be greater less than or equal to ${1}`),
+  ...createBuiltIn('<=', isLessThanOrEquals, template`must be less than or equal to ${1}`),
   ...createBuiltIn('<', isLessThan, template`must be less than ${1}`),
   ...createBuiltIn('==', isEqual, template`must be the same as ${1}`),
   ...createBuiltIn('!=', isNotEqual, template`must be not the same as ${1}`),
   ...createBuiltIn('empty', isNull, 'must be empty'),
   ...createBuiltIn('required', isRequired, 'is required'),
   ...createBuiltIn('requiredWhenOthersAreNotNull', requiredWhenOthersAreNotNull, 'is required'),
+  ...createBuiltIn('requiredWhenAnyOthersAreNotNull', requiredWhenAnyOthersAreNotNull, 'is required'),
   ...createBuiltIn('requiredWhenOtherIsValue', requiredWhenOtherIsValue, 'is required'),
   ...createBuiltIn('sumOf', isSumOfOthers, template`must be the sum of ${'all'}`),
   ...createBuiltIn('differenceOf', isDifferenceOfOthers, template`must be the difference of ${'all'}`),
@@ -171,6 +180,7 @@ export function validator(fn: IValidationFn | BuiltInValidators, ...args: any[])
 }
 
 export interface IValidationContext {
+  shouldValidate(field: string): boolean;
   getField(field: string): {label: string, value: any} | undefined;
   setError(field: string, error?: IError): void;
 }
@@ -187,6 +197,16 @@ export default class Validator {
     existingValidators.push(...validator);
   }
 
+  removeRule(field: string) {
+    if (this.rules.hasOwnProperty(field)) {
+      delete this.rules[field];
+    }
+  }
+
+  reset() {
+    this.rules = {};
+  }
+
   setRule(field: string, validator: IValidator | IValidator[]) {
     if (!Array.isArray(validator)) validator = [validator];
     const validators = this.rules[field] = [] as IValidator[];
@@ -195,7 +215,7 @@ export default class Validator {
 
   private _get(context: IValidationContext, field: string, validator: IValidator, property: string) {
     const f    = context.getField(field);
-    let   args = [f && f[property]];
+    const   args = [f && f[property]];
     for (const f of validator.args!) {
       if (f.hasOwnProperty('field')) {
         const field = context.getField(f.field);
@@ -215,7 +235,8 @@ export default class Validator {
     return this._get(context, field, validator, 'label');
   }
 
-  private isValid(context: IValidationContext, field: string, validator: IValidator, setErrors: boolean): eValidationResult {
+  public isValid(context: IValidationContext, field: string, validator: IValidator, setErrors: boolean): eValidationResult {
+    if (!context.shouldValidate(field)) return eValidationResult.Success;
     const args        = this.extractArguments(context, field, validator);
     let   errorResult = validator.fn.apply(context, args);
     if (typeof errorResult === 'boolean') {
@@ -224,6 +245,7 @@ export default class Validator {
     }
     if (errorResult !== undefined) {
       if (setErrors) {
+        // eslint-disable-next-line prefer-const
         let {text, severity} = errorResult as IErrorDefn;
         text                 = (typeof text === 'function') ? text(...this.extractLabels(context, field, validator)) : text;
         context.setError(field, {text, severity});

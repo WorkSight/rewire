@@ -6,12 +6,13 @@ export interface ActionOptions {
   color?   : 'primary' | 'secondary';
   icon?    : string;
   variant? : ButtonProps['variant'];
+  tooltip? : string | (() => string);
   disabled?: () => boolean;
 }
 
 const disabled         = () => false;
 export type ActionFn   = () => (Promise<boolean> | boolean);
-export type ActionType = {action: () => (Promise<void> | void), type?: 'submit', icon?: string, color?: 'primary' | 'secondary', variant?: ButtonProps['variant'], disabled: () => boolean};
+export type ActionType = {action: () => (Promise<void> | void), type?: 'submit', icon?: string, color?: 'primary' | 'secondary', variant?: ButtonProps['variant'], tooltip?: string | (() => string), disabled: () => boolean};
 
 export interface IModalState {
   open: boolean;
@@ -19,12 +20,12 @@ export interface IModalState {
   enable: boolean;
 }
 
-export default class Modal {
-  protected state:  IModalState;
+export default class Modal<TState = unknown> {
+  protected state:  IModalState & TState;
   readonly actions: {[index: string]: ActionType};
 
   constructor(title?: string, open?: boolean) {
-    this.state   = observable({open: open || false, title, enable: true});
+    this.state   = observable({open: open || false, title, enable: true}) as IModalState & TState;
     this.actions = {};
   }
 
@@ -52,7 +53,7 @@ export default class Modal {
   action(label: string, options?: ActionOptions):                                    Modal; // the first two are the overloads the implementation does now show in intellisense!!
   action(label: string, action: ActionFn, options?: ActionOptions):                  Modal;
   action(label: string, action?: ActionFn | ActionOptions, options?: ActionOptions): Modal {
-    let disabledFn = options && options.disabled || disabled;
+    const disabledFn = options && options.disabled || disabled;
 
     if (action && typeof(action) === 'function') {
       this.actions[label] = {action: () => this.dispatch(disabledFn, action), disabled: disabledFn, ...options};
@@ -64,11 +65,11 @@ export default class Modal {
   }
 
   private async dispatch(disabled: () => boolean, action?: ActionFn) {
-    if (!this.state.enable || disabled()) return;
+    if (!this.state.enable || disabled.call(this)) return;
     let close         = true;
     this.state.enable = false;
     try {
-      if (action) close = await action();
+      if (action) close = await action.call(this);
     } catch (err) {
       close = false;
     } finally {
@@ -79,5 +80,5 @@ export default class Modal {
 
   close = () => {
     this.state.open = false;
-  }
+  };
 }

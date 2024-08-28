@@ -1,12 +1,12 @@
-import * as React                                from 'react';
-import * as nanoid                               from 'nanoid';
+import React                                from 'react';
 import { countries, employees }                  from './demo-data';
 import { sampleModel, SampleDialog }             from './SampleDialog';
 import { hotkeysModel, HotKeysDialog }           from './HotKeys';
+import classNames                                from 'classnames';
 import { YesNoModel, YesNoDialog }               from './YesNoDialog';
 import { ConfirmationModel, ConfirmationDialog } from './YesNoDialog';
-import { utc, UTC, TimeSpan, isNullOrUndefined } from 'rewire-common';
-import { Observe, observable, watch, root }      from 'rewire-core';
+import { utc, UTC, isNullOrUndefined, guid }     from 'rewire-common';
+import { Observe, observable, watch, root, property }      from 'rewire-core';
 import {
   ActionFn,
   WithStyle,
@@ -29,8 +29,8 @@ import {
   IRowData,
   ICell,
   IRow,
-  IToggleableColumnsOptions,
-  IColumn
+  IColumn,
+  createColumnsToggleMenuItems,
 }                            from 'rewire-grid';
 import {PopoverOrigin}       from '@material-ui/core/Popover';
 import Paper                 from '@material-ui/core/Paper';
@@ -39,7 +39,6 @@ import Typography            from '@material-ui/core/Typography';
 import DeleteIcon            from '@material-ui/icons/DeleteOutlined';
 import ArchiveIcon           from '@material-ui/icons/ArchiveOutlined';
 import UnarchiveIcon         from '@material-ui/icons/UnarchiveOutlined';
-import { uploadFile }        from './graphqltest';
 
 interface IDocument {
   id:    string;
@@ -104,7 +103,7 @@ class ComplexCellData {
   }
 }
 
-const ComplexCell: React.SFC<{cell: ICell}> = (props) => {
+const ComplexCell: React.FunctionComponent<{cell: ICell}> = (props: any) => {
   const {cell} = props;
   return (
     <div style={{width: '100%', textAlign: cell.align}}>
@@ -126,129 +125,17 @@ function handleRowClick(row: IRow) {
   console.log('row clicked', row);
 }
 
-function createTestGrid(nRows: number, nColumns: number) {
+function createTestGrid(rows: any, cols: any) {
   console.time('start tester');
-  // make sure we have enough columns passed.
-  if (nColumns < 10) throw new Error('add some more columns!');
 
-  // create some random sized columns!
-  let cols: IColumn[] = observable([]);
-  for (let col = 0; col < nColumns; col++) {
-    cols.push(createColumn('column' + col, 'Header# ' + col, { type: 'text', width: Math.trunc(Math.random() * 250 + 50) + 'px' }));
-  }
-  cols[5].title = 'Sales';
-  cols[6].title = 'Sales';
-
-  let timeOnValueChange = (cell: ICell, value: any) => {
-    if (!value) {
-      cell.value = undefined;
-      cell.row.cells.differenceColumn.value = undefined;
-      return;
-    }
-    // if (!(value instanceof UTC)) {
-    // cell.value = utc().startOfDay().add(value, TimeSpan.hours);
-    //   return;
-    // }
-    // const diff = cell.row.cells.timeInColumn.value.subtract(cell.row.cells.timeOutColumn.value, TimeSpan.hours, 2);
-    const diff = cell.row.cells.timeInColumn.value - cell.row.cells.timeOutColumn.value;
-    cell.row.cells.differenceColumn.value = diff;
-  };
-
-  const customNumberValidator = function(value: any): IError | undefined {
-    if (isNullOrUndefined(value)) {
-      return undefined;
-    }
-
-    let error: IError | undefined;
-    let errorMsg: string = '';
-    let errorSeverity: ErrorSeverity = ErrorSeverity.Error;
-    if (value < 2000) {
-      errorMsg = 'Less than 2000';
-      errorSeverity = ErrorSeverity.Warning;
-    } else if (value > 7000) {
-      errorMsg = 'Greater than 7000';
-      errorSeverity = ErrorSeverity.Critical;
-    } else if (value > 4000) {
-      errorMsg = 'Greater than 4000';
-      errorSeverity = ErrorSeverity.Error;
-    } else if (value >= 2000 && value <= 4000) {
-      errorMsg = 'Between 2000 and 4000';
-      errorSeverity = ErrorSeverity.Info;
-    }
-    error = errorMsg ? { text: errorMsg, severity: errorSeverity } : undefined;
-    return error;
-  };
-
-  cols.push(createColumn('maskColumn',              'Mask',                { type: { type: 'mask', options: { mask: ['(', /[1-9]/, /\d/, /\d/, ')', ' ', /\d/, /\d/, /\d/, '-', /\d/, /\d/, /\d/, /\d/] } }, width: Math.trunc(Math.random() * 250 + 50) + 'px' }));
-  cols.push(createColumn('phoneColumn',             'Phone',               { type: { type: 'phone' }, width: Math.trunc(Math.random() * 250 + 50) + 'px' }));
-  cols.push(createColumn('numberColumn',            'Number',              { type: { type: 'number', options: { decimals: 2, fixed: true, thousandSeparator: false } }, validators: ['required', customNumberValidator], width: Math.trunc(Math.random() * 250 + 50) + 'px' }));
-  cols.push(createColumn('dateColumn',              'Date',                { type: 'date', width: Math.trunc(Math.random() * 250 + 50) + 'px' }));
-  cols.push(createColumn('timeOutColumn',           'Time Out',            { type: { type: 'time', options: { disableErrors: false, map: formatTime } }, readOnly: true, onValueChange: timeOnValueChange, width: Math.trunc(Math.random() * 250 + 50) + 'px' }));
-  cols.push(createColumn('timeInColumn',            'Time In',             { type: { type: 'time', options: { disableErrors: false, map: formatTime } }, validators: validator('>', field('timeOutColumn')), onValueChange: timeOnValueChange, width: Math.trunc(Math.random() * 250 + 50) + 'px' }));
-  cols.push(createColumn('differenceColumn',        'Time Difference',     { type: { type: 'number', options: { decimals: 2 } }, validators: validator('differenceOf', field('timeInColumn'), field('timeOutColumn')), width: Math.trunc(Math.random() * 250 + 50) + 'px' }));
-  cols.push(createColumn('sumColumn',               'Time Sum',            { type: { type: 'number', options: { decimals: 2 } }, validators: validator('sumOf', field('timeOutColumn'), field('timeInColumn')), width: Math.trunc(Math.random() * 250 + 50) + 'px' }));
-  cols.push(createColumn('autoCompleteColumn',      'Auto Complete',       { type: { type: 'auto-complete', options: countries }, width: Math.trunc(Math.random() * 250 + 50) + 'px' }));
-  cols.push(createColumn('multiAutoCompleteColumn', 'Multi Auto Complete', { type: { type: 'multiselectautocomplete', options: countries}, width: '250px'}));
-  cols.push(createColumn('selectColumn',            'Select',              { type: { type: 'select', options: countries }, width: Math.trunc(Math.random() * 250 + 50) + 'px' }));
-  cols.push(createColumn('multiselectColumn',       'MultiSelect',         { type: { type: 'multiselect', options: countries }, width: Math.trunc(Math.random() * 250 + 50) + 'px' }));
-  cols.push(createColumn('checkedColumn',           'Checked',             { type: 'checked', width: Math.trunc(Math.random() * 250 + 50) + 'px' }));
-
-  let complexColumnValidator = (value: any): IError | undefined => {
-    if (isNullOrUndefined(value)) {
-      return undefined;
-    }
-    return (value.name === 'Homer') ? error('no homers allowed', ErrorSeverity.Critical) : undefined;
-  };
-
-  cols.push(createColumn('complexColumn', 'Complex', { type: 'none', renderer: ComplexCell, compare: ComplexCellData.compare, validators: complexColumnValidator, width: Math.trunc(Math.random() * 250 + 50) + 'px' }));
-  cols.push(createColumn('complexColumn2', 'Complex2', { type: 'none', renderer: ComplexCell, compare: ComplexCellData.compare, validators: complexColumnValidator, width: Math.trunc(Math.random() * 250 + 50) + 'px' }));
-  // Override and set some columns to be number!
-  cols[5].setEditor({ type: 'number', options: { decimals: 2, thousandSeparator: true } });
-  cols[6].setEditor({ type: 'number', options: { decimals: 3, thousandSeparator: true } });
-
-  // const timeIn:  UTC = utc().startOfDay().add(7.5, TimeSpan.hours);
-  // const timeOut: UTC = utc().startOfDay().add(11,  TimeSpan.hours);
-
-  // add some cell data!
-  let rows: IRowData[] = [];
-  for (let row = 0; row < nRows; row++) {
-    let r: IRowData = { id: `${row}`, data: {}, options: {onClick: handleRowClick}};
-    for (let column = 0; column < cols.length; column++) {
-      let v: any = `RC ${column}-${row % 5}`;
-      let colName = cols[column].name;
-      if ((column <= 1 || column >= 4) && row === 1) v = undefined;
-      else if (colName === 'autoCompleteColumn' || colName === 'selectColumn') v = { id: '14', name: 'Austria' };
-      else if (colName === 'multiAutoCompleteColumn' || colName === 'multiselectColumn') v = [{id: '18', name: 'Bangladesh'}, {id: '19', name: 'Barbados'}];
-      else if (colName === 'checkedColumn') v = true;
-      // else if (colName === 'timeOutColumn') v = timeIn;
-      // else if (colName === 'timeInColumn') v = timeOut;
-      else if (colName === 'timeOutColumn') v = 7.5;
-      else if (colName === 'timeInColumn') v = 11;
-      else if (colName === 'differenceColumn') v = 4;
-      else if (colName === 'sumColumn') v = 19;
-      else if (colName === 'maskColumn') v = undefined;
-      else if (colName === 'dateColumn') v = utc();
-      else if (colName === 'complexColumn') v = row > 3 ? new ComplexCellData(nanoid(10), 'Homer', 45) : undefined;
-      else if (colName === 'complexColumn2') v = row > 3 ? new ComplexCellData(nanoid(10), 'Smithers', 56) : undefined;
-      else if (colName === 'phoneColumn') v = Number.parseInt('1250' + Math.round(Math.random() * 100000000).toString());
-      else if (((column >= 5) && (column <= 6)) || colName === 'numberColumn') v = Math.random() * 10000;
-      r.data![colName] = v;
-    }
-    rows.push(r);
-  }
-  // Some fixed columns to the left
-  cols[0].fixed = true;
-  cols[0].width = '128px';
-  cols[0].align = 'center';
-  cols[1].fixed = true;
-  cols[1].width = '65px';
-  cols[1].align = 'right';
   // create the grid model and group by 'column2' and 'column3'
-  let grid = createGrid(rows, cols, { groupBy: ['column2', 'column3'], toggleableColumns: ['column8', 'column9'], multiSelect: true, allowMergeColumns: true });
+  // let grid = createGrid(rows, cols, { groupBy: ['column2', 'column3'], optionsMenuFn: () => ({ items: createColumnsToggleMenuItems(cols, ['column8', 'column9']) }), multiSelect: true, allowMergeColumns: true, verticalAlign: 'top' });
+  const grid = createGrid(rows, cols, { groupBy: ['column2', 'column3'], optionsMenuFn: () => ({ items: createColumnsToggleMenuItems(cols, ['column8', 'column9']) }), clearSelectionOnBlur: false, multiSelect: true, allowMergeColumns: true, isReorderable: true, verticalAlign: 'top' });
+  // let grid = createGrid(rows, cols, { optionsMenuFn: () => ({ items: createColumnsToggleMenuItems(cols, ['column8', 'column9']) }), clearSelectionOnBlur: false, multiSelect: true, allowMergeColumns: true, isReorderable: true, verticalAlign: 'top' });
 
   grid.addFixedRow({ data: { column5: '2017', column6: '2018' } });
-  // setTimeout(() => {cols[28].fixed = true; }, 3000);
-  // setTimeout(() => {cols[28].fixed = false; }, 6000);
+  // setTimeout(() => { grid.groupBy = [cols[5]]; }, 4000);
+  // setTimeout(() => { grid.groupBy = [cols[6]]; }, 7000);
   // sort first by  column7 then by column6
   // grid.addSort(cols[7], 'ascending')
   //     .addSort(cols[6], 'descending');
@@ -283,7 +170,136 @@ function createTestGrid(nRows: number, nColumns: number) {
   return grid;
 }
 
-let grid                     = createTestGrid(40, 14);
+function createTestGridCols(nCols: number) {
+  // make sure we have enough columns passed.
+  if (nCols < 10) throw new Error('add some more columns!');
+
+  // create some random sized columns!
+  const cols: IColumn[] = observable([]);
+  for (let col = 0; col < nCols; col++) {
+    cols.push(createColumn('column' + col, 'Header# ' + col, { type: 'text', width: Math.trunc(Math.random() * 250 + 50) + 'px' }));
+  }
+  cols[5].title = 'Sales';
+  cols[6].title = 'Sales';
+
+  const timeOnValueChange = (cell: ICell, value: any) => {
+    if (!value) {
+      cell.value = undefined;
+      cell.row.cells.differenceColumn.value = undefined;
+      return;
+    }
+    // if (!(value instanceof UTC)) {
+    // cell.value = utc().startOfDay().add(value, TimeSpan.hours);
+    //   return;
+    // }
+    // const diff = cell.row.cells.timeInColumn.value.subtract(cell.row.cells.timeOutColumn.value, TimeSpan.hours, 2);
+    const diff = cell.row.cells.timeInColumn.value - cell.row.cells.timeOutColumn.value;
+    cell.row.cells.differenceColumn.value = diff;
+  };
+
+  const customNumberValidator = function(value: any): IError | undefined {
+    if (isNullOrUndefined(value)) {
+      return undefined;
+    }
+
+    let errorMsg: string = '';
+    let errorSeverity: ErrorSeverity = ErrorSeverity.Error;
+    if (value < 2000) {
+      errorMsg = 'Less than 2000';
+      errorSeverity = ErrorSeverity.Warning;
+    } else if (value > 7000) {
+      errorMsg = 'Greater than 7000';
+      errorSeverity = ErrorSeverity.Critical;
+    } else if (value > 4000) {
+      errorMsg = 'Greater than 4000';
+      errorSeverity = ErrorSeverity.Error;
+    } else if (value >= 2000 && value <= 4000) {
+      errorMsg = 'Between 2000 and 4000';
+      errorSeverity = ErrorSeverity.Info;
+    }
+    const error = errorMsg ? { text: errorMsg, severity: errorSeverity } : undefined;
+    return error;
+  };
+
+  cols.push(createColumn(['nestedColumn', 'value'], 'Nested Column',       { type: 'text', width: Math.trunc(Math.random() * 250 + 50) + 'px' }));
+  cols.push(createColumn('maskColumn',              'Mask',                { type: { type: 'mask', options: { mask: ['(', /[1-9]/, /\d/, /\d/, ')', ' ', /\d/, /\d/, /\d/, '-', /\d/, /\d/, /\d/, /\d/] } }, width: Math.trunc(Math.random() * 250 + 50) + 'px' }));
+  cols.push(createColumn('phoneColumn',             'Phone',               { type: { type: 'phone' }, width: Math.trunc(Math.random() * 250 + 50) + 'px' }));
+  cols.push(createColumn('numberColumn',            'Number',              { type: { type: 'number', options: { decimals: 2, fixed: true, thousandSeparator: false } }, validators: ['required', customNumberValidator], width: Math.trunc(Math.random() * 250 + 50) + 'px' }));
+  cols.push(createColumn('dateColumn',              'Date',                { type: { type: 'date', options: {allowKeyboardInput: true}}, width: Math.trunc(Math.random() * 250 + 50) + 'px'}));
+  cols.push(createColumn('timeOutColumn',           'Time Out',            { type: { type: 'time', options: { disableErrors: false, map: formatTime } }, readOnly: true, onValueChange: timeOnValueChange, width: Math.trunc(Math.random() * 250 + 50) + 'px' }));
+  cols.push(createColumn('timeInColumn',            'Time In',             { type: { type: 'time', options: { disableErrors: false, map: formatTime } }, validators: validator('>', field('timeOutColumn')), onValueChange: timeOnValueChange, width: Math.trunc(Math.random() * 250 + 50) + 'px' }));
+  cols.push(createColumn('differenceColumn',        'Time Difference',     { type: { type: 'number', options: { decimals: 2 } }, validators: validator('differenceOf', field('timeInColumn'), field('timeOutColumn')), width: Math.trunc(Math.random() * 250 + 50) + 'px' }));
+  cols.push(createColumn('sumColumn',               'Time Sum',            { type: { type: 'number', options: { decimals: 2 } }, validators: validator('sumOf', field('timeOutColumn'), field('timeInColumn')), width: Math.trunc(Math.random() * 250 + 50) + 'px' }));
+  cols.push(createColumn('autoCompleteColumn',      'Auto Complete',       { type: { type: 'auto-complete', options: countries }, width: Math.trunc(Math.random() * 250 + 50) + 'px' }));
+  cols.push(createColumn('multiAutoCompleteColumn', 'Multi Auto Complete', { type: { type: 'multiselectautocomplete', options: countries}, width: '250px'}));
+  cols.push(createColumn('selectColumn',            'Select',              { type: { type: 'select', options: countries }, width: Math.trunc(Math.random() * 250 + 50) + 'px' }));
+  cols.push(createColumn('multiselectColumn',       'MultiSelect',         { type: { type: 'multiselect', options: countries }, width: Math.trunc(Math.random() * 250 + 50) + 'px' }));
+  cols.push(createColumn('checkedColumn',           'Checked',             { type: 'checked', width: Math.trunc(Math.random() * 250 + 50) + 'px' }));
+
+  const complexColumnValidator = (value: any): IError | undefined => {
+    if (isNullOrUndefined(value)) {
+      return undefined;
+    }
+    return (value.name === 'Homer') ? error('no homers allowed', ErrorSeverity.Critical) : undefined;
+  };
+
+  cols.push(createColumn('complexColumn', 'Complex', { type: 'none', renderer: ComplexCell, compare: ComplexCellData.compare, validators: complexColumnValidator, width: Math.trunc(Math.random() * 250 + 50) + 'px' }));
+  cols.push(createColumn('complexColumn2', 'Complex2', { type: 'none', renderer: ComplexCell, compare: ComplexCellData.compare, validators: complexColumnValidator, width: Math.trunc(Math.random() * 250 + 50) + 'px' }));
+  // Override and set some columns to be number!
+  cols[5].setEditor({ type: 'number', options: { decimals: 2, thousandSeparator: true } });
+  cols[6].setEditor({ type: 'number', options: { decimals: 3, thousandSeparator: true } });
+
+  // const timeIn:  UTC = utc().startOfDay().add(7.5, TimeSpan.hours);
+  // const timeOut: UTC = utc().startOfDay().add(11,  TimeSpan.hours);
+
+  // add some cell data!
+
+  // Some fixed columns to the left
+  cols[0].fixed = true;
+  cols[0].width = '128px';
+  cols[0].align = 'center';
+  cols[1].fixed = true;
+  cols[1].width = '65px';
+  cols[1].align = 'right';
+
+  return cols;
+}
+
+function createTestGridRows(nRows: number, cols: IColumn[]) {
+  const rows: IRowData[] = [];
+  for (let row = 0; row < nRows; row++) {
+    const r: IRowData = { id: `${row}`, data: {}, options: {onClick: handleRowClick}};
+    for (let column = 0; column < cols.length; column++) {
+      let v: any = `RC ${column}-${row % 5}`;
+      const colName = cols[column].name;
+      if ((column <= 1 || column >= 4) && row === 1) v = undefined;
+      else if (colName === 'autoCompleteColumn' || colName === 'selectColumn') v = { id: '14', name: 'Austria' };
+      else if (colName === 'multiAutoCompleteColumn' || colName === 'multiselectColumn') v = [{id: '18', name: 'Bangladesh'}, {id: '19', name: 'Barbados'}];
+      else if (colName === 'checkedColumn') v = true;
+      // else if (colName === 'timeOutColumn') v = timeIn;
+      // else if (colName === 'timeInColumn') v = timeOut;
+      else if (colName === 'timeOutColumn') v = 7.5;
+      else if (colName === 'timeInColumn') v = 11;
+      else if (colName === 'differenceColumn') v = 4;
+      else if (colName === 'sumColumn') v = 19;
+      else if (colName === 'nestedColumn.value') { r.data!['nestedColumn'] = {value: 'ooga ' + row}; continue; }
+      else if (colName === 'maskColumn') v = undefined;
+      else if (colName === 'dateColumn') v = utc();
+      else if (colName === 'complexColumn') v = row > 3 ? new ComplexCellData(guid(), 'Homer', 45) : undefined;
+      else if (colName === 'complexColumn2') v = row > 3 ? new ComplexCellData(guid(), 'Smithers', 56) : undefined;
+      else if (colName === 'phoneColumn') v = Number.parseInt('1250' + Math.round(Math.random() * 100000000).toString());
+      else if (((column >= 5) && (column <= 6)) || colName === 'numberColumn') v = Math.random() * 10000;
+      r.data![colName] = v;
+    }
+    rows.push(r);
+  }
+
+  return rows;
+}
+
+const gridCols                 = createTestGridCols(14);
+const gridRows                 = createTestGridRows(40, gridCols);
+const grid                     = createTestGrid(gridRows, gridCols);
 // let newRow                = {id: 'newRowxycdij', data: {}, options: {allowMergeColumns: false}};
 // newRow.data['column0']    = 'AHHH';
 // newRow.data['column2']    = 'RC 2-3';
@@ -303,15 +319,14 @@ let grid                     = createTestGrid(40, 14);
 // setTimeout(() => grid.columns[3].visible = false, 7000);
 // setTimeout(() => grid.columns[3].visible = true, 8000);
 
-function toggleMenuHandleItemClick(item: IToggleMenuItem) {
-  const column   = item as IColumn;
+function toggleMenuHandleItemClick(item: IToggleMenuItem, column: IColumn) {
   column.visible = !column.visible;
 
   if (column.name === 'email') {
-    let isActiveColumn      = column.grid.column('isActive');
+    const isActiveColumn      = column.grid.column('isActive');
     isActiveColumn!.visible = !isActiveColumn!.visible;
   } else if (column.name === 'isActive') {
-    let emailColumn      = column.grid.column('email');
+    const emailColumn      = column.grid.column('email');
     emailColumn!.visible = !emailColumn!.visible;
   }
 }
@@ -321,7 +336,7 @@ const clickHandler = (props: ISuggestionsContainerComponentProps) => () => {
   props.downShift.closeMenu();
 };
 
-const suggestionsContainerHeader = (props: ISuggestionsContainerComponentProps) => (
+const suggestionsContainerHeader = (_props: ISuggestionsContainerComponentProps) => (
   <div>
     <Typography variant='subtitle1' style={{fontSize: 'inherit'}}><strong>Items Title</strong></Typography>
   </div>
@@ -333,26 +348,13 @@ const suggestionsContainerFooter = (props: ISuggestionsContainerComponentProps) 
   </div>
 );
 
-function createEmployeesGrid1() {
-  let cols: IColumn[] = observable([]);
-
-  // add header columns
-  cols.push(createColumn('name',                       'Employee',               {type: 'text', width: '120px'}));
-  cols.push(createColumn('email',                      'Email',                  {type: 'text', width: '120px'}));
-  cols.push(createColumn('isActive',                   'IsActive',               {type: 'checked', width: '75px'}));
-  cols.push(createColumn('timeColumn',                 'Time',                   {type: {type: 'time'}, width: '150px'}));
-  cols.push(createColumn('selectColumn',               'Select',                 {type: {type: 'select', options: countries}, width: '150px'}));
-  cols.push(createColumn('multiselectColumn',          'Multiselect',            {type: {type: 'multiselect', options: countries}, width: '150px'}));
-  cols.push(createColumn('autoCompleteColumn',         'Auto Complete',          {type: {type: 'auto-complete', options: countries}, width: '150px'}));
-  cols.push(createColumn('advancedAutoCompleteColumn', 'Advanced Auto Complete', {type: {type: 'auto-complete', options: {search: countries.search, map: countries.map, openOnFocus: true, suggestionsContainerHeader: suggestionsContainerHeader, suggestionsContainerFooter: suggestionsContainerFooter}}, width: '150px'}));
-  cols.push(createColumn('multiAutoCompleteColumn',    'Multi Auto Complete',    {type: {type: 'multiselectautocomplete', options: countries}, width: '250px'}));
-
+function createEmployeesGrid1Rows(cols: IColumn[]) {
   // add employee rows
-  let rows: IRowData[] = [];
+  const rows: IRowData[] = [];
   for (let row = 0; row < employees.length; row++) {
-    let r: IRowData = { id: `${row}`, data: {}, options: { onClick: handleRowClick }};
+    const r: IRowData = { id: `${row}`, data: {}, options: { onClick: handleRowClick }};
     for (let column = 0; column < cols.length; column++) {
-      let fieldName: string = cols[column].name;
+      const fieldName: string = cols[column].name;
       let v: any;
       if (fieldName === 'name') {
         v = employees[row][fieldName]; // somehow make into a button that opens a dialog on click???
@@ -370,10 +372,33 @@ function createEmployeesGrid1() {
     rows.push(r);
   }
 
+  return rows;
+}
+
+function createEmployeesGrid1() {
+  const cols: IColumn[] = observable([]);
+
+  // add header columns
+  cols.push(createColumn('name',                       'Employee',               {type: 'text', width: '120px'}));
+  cols.push(createColumn('email',                      'Email',                  {type: 'text', width: '120px'}));
+  cols.push(createColumn('isActive',                   'IsActive',               {type: 'checked', width: '75px'}));
+  cols.push(createColumn('timeColumn',                 'Time',                   {type: {type: 'time'}, width: '150px'}));
+  cols.push(createColumn('selectColumn',               'Select',                 {type: {type: 'select', options: countries}, width: '150px'}));
+  cols.push(createColumn('multiselectColumn',          'Multiselect',            {type: {type: 'multiselect', options: countries}, width: '150px'}));
+  cols.push(createColumn('autoCompleteColumn',         'Auto Complete',          {type: {type: 'auto-complete', options: countries}, width: '150px'}));
+  cols.push(createColumn('advancedAutoCompleteColumn', 'Advanced Auto Complete', {type: {type: 'auto-complete', options: {search: countries.search, map: countries.map, suggestionsContainerHeader: suggestionsContainerHeader, suggestionsContainerFooter: suggestionsContainerFooter}}, width: '150px'}));
+  cols.push(createColumn('multiAutoCompleteColumn',    'Multi Auto Complete',    {type: {type: 'multiselectautocomplete', options: countries}, width: '250px'}));
+
+  const rows = createEmployeesGrid1Rows(cols);
+
   // create the grid model
-  let grid = createGrid(rows, cols, {multiSelect: true, allowMergeColumns: true, toggleableColumns: ['timeColumn', 'email', 'isActive', 'autoCompleteColumn'], toggleableColumnsOptions: {onItemClick: toggleMenuHandleItemClick} as IToggleableColumnsOptions });
+  const toggleItems: IToggleMenuItem[] = observable([
+    {name: 'delete',    title: 'Delete', subheader: 'Grid Toggles', icon: ArchiveIcon, active: true, onClick: (item: IToggleMenuItem) => { item.active = !item.active; } },
+    {name: 'archive',   title: 'Archive',                           icon: ArchiveIcon, disabled: true, active: true, visible: () => true, onClick: (item: IToggleMenuItem) => { item.active = !item.active; } },
+    {name: 'unarchive', title: 'Unarchive',                         icon: ArchiveIcon, active: true, onClick: (item: IToggleMenuItem) => { item.active = !item.active; } },
+  ]);
+  const grid = createGrid(rows, cols, { multiSelect: true, allowMergeColumns: true, isReorderable: false, optionsMenuFn: () => ({ items: [...createColumnsToggleMenuItems(cols, ['timeColumn', 'email', 'isActive', 'autoCompleteColumn'], {onItemClick: toggleMenuHandleItemClick}), ...toggleItems] }) });
   // sort by employee names
-  grid.addSort(cols[0], 'ascending');
   grid.headerRowHeight = 32;
   grid.rowHeight = 56;
 
@@ -381,7 +406,7 @@ function createEmployeesGrid1() {
 }
 
 function createEmployeesGrid2() {
-  let cols: IColumn[] = observable([]);
+  const cols: IColumn[] = observable([]);
 
   // add header columns
   cols.push(createColumn('name',                    'Employee',            {type: 'text', width: '120px'}));
@@ -397,11 +422,11 @@ function createEmployeesGrid2() {
   cols.push(createColumn('numberColumn3',           'Number Column 3',     {type: {type: 'number', options: {}}, width: '120px'}));
 
   // add employee rows
-  let rows: IRowData[] = [];
+  const rows: IRowData[] = [];
   for (let row = 0; row < employees.length; row++) {
-    let r: IRowData = {id: `${row}`, data: {}};
+    const r: IRowData = {id: `${row}`, data: {}};
     for (let column = 0; column < cols.length; column++) {
-      let fieldName: string = cols[column].name;
+      const fieldName: string = cols[column].name;
       let v: any;
       if (fieldName === 'name') {
         v = employees[row][fieldName]; // somehow make into a button that opens a dialog on click???
@@ -418,7 +443,7 @@ function createEmployeesGrid2() {
   }
 
   // create the grid model
-  let grid = createGrid(rows, cols, {multiSelect: true, allowMergeColumns: true});
+  const grid = createGrid(rows, cols, {multiSelect: true, allowMergeColumns: true});
   // sort by employee names
   grid.addSort(cols[0], 'ascending');
   grid.headerRowHeight = 56;
@@ -427,14 +452,14 @@ function createEmployeesGrid2() {
   return grid;
 }
 
-let employeesGrid1 = createEmployeesGrid1();
-let employeesGrid2 = createEmployeesGrid2();
+const employeesGrid1 = createEmployeesGrid1();
+const employeesGrid2 = createEmployeesGrid2();
 employeesGrid1.setChangeTracking(true);
 employeesGrid2.setChangeTracking(true);
 
 // observable dates don't work, but not sure if they ever need to.
 // let testDate = observable(new Date());
-let mode = observable({
+const mode = observable({
   gridMode: 'employees1',
 });
 
@@ -470,9 +495,9 @@ const HomeActionMenu = (props: any) => {
   const anchorOrigin: PopoverOrigin = {vertical: 'top', horizontal: 'left'};
   const transformOrigin             = anchorOrigin;
   const items: IActionMenuItem[]    = [
-    {name: 'delete',    title: 'Delete',    icon: DeleteIcon,    onClick: () => { console.log('Performing Delete Action...'); },    closeOnClick: true},
-    {name: 'archive',   title: 'Archive',   icon: ArchiveIcon,   onClick: () => { console.log('Performing Archive Action...'); },   closeOnClick: true},
-    {name: 'unarchive', title: 'Unarchive', icon: UnarchiveIcon, onClick: () => { console.log('Performing Unarchive Action...'); }, closeOnClick: true},
+    {className: 'item-1', name: 'delete',    title: 'Delete',    icon: DeleteIcon,    onClick: () => { console.log('Performing Delete Action...'); },    closeOnClick: true},
+    {className: 'item-2', name: 'archive',   title: 'Archive',   icon: ArchiveIcon,   onClick: () => { console.log('Performing Archive Action...'); },   closeOnClick: true},
+    {className: 'item-3', name: 'unarchive', title: 'Unarchive', icon: UnarchiveIcon, onClick: () => { console.log('Performing Unarchive Action...'); }, closeOnClick: true},
   ];
 
   return (
@@ -495,9 +520,9 @@ const HomeToggleMenu = (props: any) => {
   const anchorOrigin: PopoverOrigin = {vertical: 'top', horizontal: 'left'};
   const transformOrigin             = anchorOrigin;
   const items: IToggleMenuItem[]    = observable([
-    {name: 'toggle1', title: 'Toggle 1', visible: true},
-    {name: 'toggle2', title: 'Toggle 2', visible: true},
-    {name: 'toggle3', title: 'Toggle 3', visible: true},
+    {name: 'toggle1', icon: ArchiveIcon, title: 'Toggle 1', active: true, visible: false},
+    {name: 'toggle2', icon: ArchiveIcon, title: 'Toggle 2', active: true},
+    {name: 'toggle3', icon: ArchiveIcon, title: 'Toggle 3', active: true},
   ]);
   return (
     <ToggleMenu
@@ -513,7 +538,7 @@ const HomeToggleMenu = (props: any) => {
   );
 };
 
-const styles = () => ({
+const styles = (theme: any) => ({
   dialogButtonsContainer: {
     display: 'flex',
     alignItems: 'center',
@@ -531,6 +556,13 @@ const styles = () => ({
     alignItems: 'center',
     justifyContent: 'center',
     marginTop: '10px',
+    transition: theme.transitions.create(['width'], {
+      easing: theme.transitions.easing.sharp,
+      duration: theme.transitions.duration.short,
+    }),
+  },
+  gridSectionCollapsed: {
+    width: '50%',
   },
   gridActionButtonsContainer: {
     display: 'flex',
@@ -568,6 +600,23 @@ const styles = () => ({
   },
 });
 
+const toggle = property(true);
+
+function toggleWidth() {
+  toggle(!toggle());
+}
+
+function setRows() {
+  const rows = createEmployeesGrid1Rows(employeesGrid1.columns);
+  rows[0].data.name = 'CHANGED';
+  // rows[0].id = 'newid';
+  employeesGrid1.set(rows);
+  // const rows = gridRows.slice();
+  // rows[0].id = `${guid()}`;
+  // rows[0].data.column1 = 'CHANGED';
+  // grid.set(rows);
+}
+
 type HomeViewProps = WithStyle<ReturnType<typeof styles>>;
 function setValue(row: IRow, obj: any) {
   for (const [key, value] of Object.entries(obj)) {
@@ -596,8 +645,8 @@ export const HomeView = React.memo(withStyles(styles, (props: HomeViewProps) => 
           accept='image/*'
           id='contained-button-file'
           type='file'
-          onChange={({ target: { validity, files: [file] } }) => {
-            validity.valid && uploadFile(file);
+          onChange={({ target: { validity } }) => {
+            validity.valid;
           }}
         />
         <label htmlFor='contained-button-file'>
@@ -616,7 +665,7 @@ export const HomeView = React.memo(withStyles(styles, (props: HomeViewProps) => 
           <Typography variant='h6'>Please think before you answer</Typography>
         </YesNoDialog>
 
-        <div className={classes.gridsSection}>
+        <div className={classNames(classes.gridsSection, toggle() ? undefined : classes.gridSectionCollapsed)}>
           <div className={classes.gridActionButtonsContainer}>
             <Button className={classes.gridActionButton} variant='contained' onClick={() => grid.selectCellByPos(0, 4)}>Select Cell</Button>
             <Button className={classes.gridActionButton} variant='contained' onClick={() => grid.selectCellsByRange(1, 4, 3, 5)}>Select Cells</Button>
@@ -628,7 +677,7 @@ export const HomeView = React.memo(withStyles(styles, (props: HomeViewProps) => 
             </Button>
             <Button className={classes.gridActionButton} variant='contained' onClick={() => grid.removeRow(grid.rows[grid.rows.length - 1].id)}>Remove Row</Button>
             <Button className={classes.gridActionButton} variant='contained' onClick={() => grid.rows.forEach(row => row.cells['numberColumn'].value = 1337)}>Change Number Cell Value</Button>
-            <Button className={classes.gridActionButton} variant='contained' onClick={() => grid.rows.forEach(row => setValue(row, {'numberColumn': 2222, 'dateColumn': '1985-11-26'}))}>Change Number And Date Cells</Button>
+            <Button className={classes.gridActionButton} variant='contained' onClick={() => grid.rows.forEach(row => setValue(row, {'numberColumn': 2222, 'dateColumn': utc()}))}>Change Number And Date Cells</Button>
             <Button className={classes.gridActionButton} variant='contained' onClick={() => grid.rows.forEach(row => row.clear(['numberColumn', 'dateColumn']))}>Clear Number And Date</Button>
             <Button className={classes.gridActionButton} variant='contained' onClick={() => grid.rows.forEach(row => row.cells['complexColumn'].value = new ComplexCellData('smithers027', 'Smithers', 57))}>
               Change Complex Cell Value
@@ -638,10 +687,12 @@ export const HomeView = React.memo(withStyles(styles, (props: HomeViewProps) => 
             <Observe render={() => (<Button className={classes.gridActionButton} variant='contained' onClick={() => { grid.column('column1')!.visible = !grid.column('column1')!.visible; }}> Toggle Column</Button>)} />
             <Observe render={() => (<Button className={classes.gridActionButton} variant='contained' disabled={!grid.hasErrors()}>Enabled if has Errors</Button>)} />
             <Observe render={() => (<Button className={classes.gridActionButton} variant='contained' onClick={() => console.log(grid.get())}> Save All</Button>)} />
+            <Observe render={() => (<Button className={classes.gridActionButton} variant='contained' onClick={() => toggleWidth()}> Toggle Width</Button>)} />
+            <Observe render={() => (<Button className={classes.gridActionButton} variant='contained' onClick={() => setRows()}> Set Rows</Button>)} />
           </div>
 
           <Paper className={classes.gridContainer}>
-            <Observe render={() => (<Grid grid={grid} gridFontSizes={{header: '0.9rem', body: '0.85rem', groupRow: '0.8rem', toggleMenu: '0.9rem'}} className={classes.dataGrid} />)} />
+            <Observe render={() => (<Grid grid={grid} gridFontSizes={{header: '0.9rem', body: '0.9rem', groupRow: '0.9rem', toggleMenu: '0.9rem'}} className={classes.dataGrid} />)} />
           </Paper>
           <Observe render={() => (
             <Paper className={classes.gridContainer}>
@@ -649,7 +700,7 @@ export const HomeView = React.memo(withStyles(styles, (props: HomeViewProps) => 
                 <Button className={classes.employeesGridButton} onClick={() => mode.gridMode = 'employees1'} variant='outlined'>Grid 1</Button>
                 <Button className={classes.employeesGridButton} onClick={() => mode.gridMode = 'employees2'} variant='outlined'>Grid 2</Button>
               </div>
-              <Grid key={mode.gridMode} grid={mode.gridMode === 'employees1' ? employeesGrid1 : employeesGrid2} gridFontSizes={{header: '0.95rem', body: '0.9rem', groupRow: '0.8rem', toggleMenu: '0.95rem'}} className={classes.employeeGrid} />
+              <Grid key={mode.gridMode} virtual={true} grid={mode.gridMode === 'employees1' ? employeesGrid1 : employeesGrid2} gridFontSizes={{header: '0.95rem', body: '0.95rem', groupRow: '0.95rem', toggleMenu: '0.95rem'}} className={classes.employeeGrid} />
             </Paper>
           )} />
         </div>

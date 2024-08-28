@@ -1,5 +1,5 @@
-import * as React from 'react';
-import './flexgrid.css';
+import React from 'react';
+import './Row.css';
 
 export type TAlign = 'start' | 'center' | 'end' | 'around' | 'between';
 
@@ -16,7 +16,7 @@ function _gutter(gutter?: boolean) {
   return gutter === false ? ' grid-nogutter' : '';
 }
 
-const Row: React.SFC<IRowProps> = ({children, style, align, gutter}) => {
+const Row: React.FunctionComponent<IRowProps> = ({children, style, align, gutter}) => {
   const cls = `grid${_align(align)}${_gutter(gutter)}`;
   return (
     <div className={cls} style={style}>

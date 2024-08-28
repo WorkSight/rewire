@@ -1,6 +1,6 @@
 
-import * as React from 'react';
-import * as Konva from 'konva';
+import React from 'react';
+import Konva from 'konva';
 // import 'konva/src/shapes/Image';
 // import 'konva/src/shapes/Circle';
 // import 'konva/src/shapes/Rect';
@@ -51,6 +51,8 @@ const styles = () => ({
   },
 });
 
+export type AvatarCropperStyles = ReturnType<typeof styles>;
+
 export interface IAvatarCropperProps {
   classes?: React.CSSProperties;
   buttonSize?: 'small' | 'medium' | 'large';
@@ -74,6 +76,8 @@ export interface IAvatarCropperProps {
   onCancel?: () => void;
 }
 
+export type AvatarCropperProps = WithStyle<AvatarCropperStyles, IAvatarCropperProps>;
+
 interface IAvatarCropperState {
   imgWidth: number;
   imgHeight: number;
@@ -85,8 +89,6 @@ interface IAvatarCropperState {
   crop: Konva.Circle;
   cropRadius: number;
 }
-
-type AvatarCropperProps = WithStyle<ReturnType<typeof styles>, IAvatarCropperProps>;
 
 class AvatarCropper extends React.Component<AvatarCropperProps, IAvatarCropperState> {
   state: IAvatarCropperState;
@@ -109,7 +111,7 @@ class AvatarCropper extends React.Component<AvatarCropperProps, IAvatarCropperSt
     },
     onLoad: () => {
     },
-  };
+  } as unknown as AvatarCropperProps;
 
   constructor(props: AvatarCropperProps) {
     super(props);
@@ -122,7 +124,7 @@ class AvatarCropper extends React.Component<AvatarCropperProps, IAvatarCropperSt
       containerId,
       loaderId,
       lastMouseY: 0,
-      crop: undefined,
+      crop: undefined as any,
       cropRadius: 0,
       image: undefined,
     };
@@ -226,11 +228,11 @@ class AvatarCropper extends React.Component<AvatarCropperProps, IAvatarCropperSt
 
   onCancelClick = () => {
     this.onCancelCallback();
-  }
+  };
 
   onSaveClick = () => {
     this.onSaveCallback(this.getPreview());
-  }
+  };
 
   onKeyDown = (evt: React.KeyboardEvent<any>) => {
     if (evt.altKey || evt.ctrlKey) {
@@ -249,7 +251,7 @@ class AvatarCropper extends React.Component<AvatarCropperProps, IAvatarCropperSt
         evt.preventDefault();
         break;
     }
-  }
+  };
 
   getPreview() {
     const crop = this.state.crop;
@@ -294,7 +296,7 @@ class AvatarCropper extends React.Component<AvatarCropperProps, IAvatarCropperSt
 
     const scale = imgHeight / originalHeight;
 
-    let cRadius      = this.props.cropRadius ? Math.min(Math.abs(this.props.cropRadius), Math.min((imgWidth / 2), (imgHeight / 2))) : 0;
+    const cRadius      = this.props.cropRadius ? Math.min(Math.abs(this.props.cropRadius), Math.min((imgWidth / 2), (imgHeight / 2))) : 0;
     const cropRadius = cRadius || (imgWidth / 4);
 
     this.setState({
@@ -306,7 +308,7 @@ class AvatarCropper extends React.Component<AvatarCropperProps, IAvatarCropperSt
   }
 
   initCrop() {
-    let crop = new Konva.Circle({
+    const crop = new Konva.Circle({
       x: this.halfWidth,
       y: this.halfHeight,
       radius: this.cropRadius,
@@ -384,7 +386,7 @@ class AvatarCropper extends React.Component<AvatarCropperProps, IAvatarCropperSt
       const x = isLeftCorner() ? calcLeft() : (isRightCorner() ? calcRight() : crop.x());
       const y = isTopCorner() ? calcTop() : (isBottomCorner() ? calcBottom() : crop.y());
       moveResizer(x, y);
-      crop.setFillPatternOffset({ x: x / this.scale, y: y / this.scale });
+      crop.fillPatternOffset({ x: x / this.scale, y: y / this.scale });
       crop.x(x);
       cropStroke.x(x);
       crop.y(y);
@@ -506,7 +508,7 @@ class AvatarCropper extends React.Component<AvatarCropperProps, IAvatarCropperSt
 
     let cropperContainerWidth;
     let cropperContainerHeight;
-    let ratio = this.state.imgHeight / this.state.imgWidth;
+    const ratio = this.state.imgHeight / this.state.imgWidth;
     if (ratio > 1) {
       cropperContainerHeight = Math.min(height, this.state.imgHeight);
       cropperContainerWidth  = Math.min(width, this.state.imgWidth);

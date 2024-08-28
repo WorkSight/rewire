@@ -4,11 +4,11 @@ export default function nullToUndefined(value: any): any {
   } else if (typeof value !== 'object') {
     return value;
   } else if (value instanceof Array) {
-    for (let key of value) {
+    for (const key of value) {
       nullToUndefined(key);
     }
   } else {
-    for (let key in value) {
+    for (const key in value) {
       if (value[key] === null) {
         value[key] = undefined;
       } else if (typeof value[key] === 'object') {

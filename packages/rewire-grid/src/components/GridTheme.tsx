@@ -1,10 +1,10 @@
-import {createMuiTheme, Theme}       from '@material-ui/core/styles';
-import {ThemeOptions}                from '@material-ui/core/styles/createMuiTheme';
-import * as Color                    from 'color';
-import * as merge                    from 'deepmerge';
+import {createTheme, Theme}       from '@material-ui/core/styles';
+import {ThemeOptions}                from '@material-ui/core/styles';
+import Color                    from 'color';
+import merge                    from 'deepmerge';
 import {IGridColors, IGridFontSizes} from '../models/GridTypes';
 
-declare module '@material-ui/core/styles/createMuiTheme' {
+declare module '@material-ui/core/styles' {
   interface Theme {
     fontSizes: {
       header: string,
@@ -259,7 +259,7 @@ defaultGridColors.rowSelectedBorder      = Color(defaultGridColors.rowSelectedBa
 const defaultGridFontSizes: IGridFontSizes = {
   header: '1rem',
   body: '1rem',
-  groupRow: '0.9rem',
+  groupRow: '1rem',
   toggleMenu: '1rem',
 };
 
@@ -280,9 +280,9 @@ export default function createGridTheme(options: ThemeOptions = {}, outerTheme?:
     typography = merge(outerTheme.typography, typography);
   }
 
-  let defaultThemeOptions: ThemeOptions = {...outerTheme, palette: palette, fontSizes: fontSizes, typography: typography};
-  let gridThemeOptions: ThemeOptions    = merge(defaultThemeOptions, options);
-  let gridTheme = createMuiTheme(gridThemeOptions);
+  const defaultThemeOptions: ThemeOptions = {...outerTheme, palette: palette, fontSizes: fontSizes, typography: typography};
+  const gridThemeOptions: ThemeOptions    = merge(defaultThemeOptions, options);
+  const gridTheme = createTheme(gridThemeOptions);
 
   return gridTheme;
 }

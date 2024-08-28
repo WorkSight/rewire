@@ -14,23 +14,23 @@ import {
   DataSignal,
   computed
 }                                            from 'rewire-core';
-import Column                                from './Column';
+import ReorderableGridRows                   from './ReorderableGridRows';
+import ColumnCell                            from './ColumnCell';
 import classNames                            from 'classnames';
 import Cell                                  from './Cell';
 import Row, {GroupRow}                       from './Row';
-import GroupRowModel                         from '../models/GroupRowModel';
-import * as React                            from 'react';
-import * as Color                            from 'color';
-import {debounce}                            from 'rewire-common';
-import {WithStyle, withStyles, ToggleMenu}   from 'rewire-ui';
+import React                                 from 'react';
+import Color                                 from 'color';
+import {debounce, delay}                            from 'rewire-common';
+import {WithStyle, withStyles, MixedMenu}    from 'rewire-ui';
 import {PopoverOrigin}                       from '@material-ui/core/Popover';
 import {ButtonProps}                         from '@material-ui/core/Button';
-import {MuiThemeProvider, Theme}             from '@material-ui/core/styles';
+import {ThemeProvider, Theme}                from '@material-ui/core/styles';
 import SettingsIcon                          from '@material-ui/icons/Settings';
 import createGridTheme                       from './GridTheme';
 import {scrollBySmooth}                      from '../models/SmoothScroll';
 import ResizeObserver                        from 'resize-observer-polyfill';
-import * as fastdom                          from 'fastdom';
+import { loop }                              from 'dom-loop';
 import './data-grid.scss';
 
 interface IColumnProps {
@@ -45,7 +45,7 @@ class ColumnWidth extends React.PureComponent<IColumnProps> {
   render() {
     return <Observe render={() => {
       const column = this.props.column;
-      let style: React.CSSProperties = { width: column.width };
+      const style: React.CSSProperties = { width: column.width };
       if (!column.visible) {
         style.display    = 'none';
       }
@@ -63,7 +63,7 @@ interface IResizeWatcherResult {
 function verticalResizeWatcher(lifetime: React.Component<any>, element: HTMLElement): IResizeWatcherResult {
   const _previous                    = {scrollHeight: -1, clientHeight: -1};
   const _callbacks: ResizeCallback[] = [];
-  fastdom.measure(() => {
+  loop.read(() => {
     _previous.clientHeight = element.clientHeight;
     _previous.scrollHeight = element.scrollHeight;
     for (const callback of _callbacks) {
@@ -72,8 +72,7 @@ function verticalResizeWatcher(lifetime: React.Component<any>, element: HTMLElem
   });
 
   const observer = new ResizeObserver(function() {
-    fastdom.measure(() => {
-      const current = {scrollHeight: element.scrollHeight, clientHeight: element.clientHeight};
+    loop.read(() => {      const current = {scrollHeight: element.scrollHeight, clientHeight: element.clientHeight};
       if (current && _previous && (current.scrollHeight === _previous.scrollHeight) === (current.clientHeight === _previous.clientHeight)) return;
       for (const callback of _callbacks) {
         callback(current);
@@ -89,17 +88,8 @@ function verticalResizeWatcher(lifetime: React.Component<any>, element: HTMLElem
   return { watch(callback: ResizeCallback) { _callbacks.push(callback); } };
 }
 
-export interface IGridProps {
-  grid: IGrid;
-  virtual?: boolean;
-  className?: string;
-  style?: React.CSSProperties;
-  gridColors?: IGridColors;
-  gridFontSizes?: IGridFontSizes;
-}
-
-type BodyType = {grid: IGrid, columns: IColumn[], renderRows: (rows: IRow[], columns: IColumn[], fixed: boolean) => any, scrollY: DataSignal<number>, loadMoreRows?: (args: {start: number, end: number}) => Promise<any[]> };
-class Body extends React.PureComponent<BodyType, {offset: number}> {
+type BodyType = {grid: IGrid, columns: () => IColumn[], contentElement: any, renderRows: (rows: IRow[], columns: () => IColumn[], fixed: boolean) => any, scrollY: DataSignal<number>, rowClasses?: any, cellClasses?: any, loadMoreRows?: (args: {start: number, end: number}) => Promise<any[]> };
+class Body extends React.PureComponent<BodyType, {indexOffset: number}> {
   constructor(props: BodyType) {
     super(props);
   }
@@ -113,68 +103,92 @@ class Body extends React.PureComponent<BodyType, {offset: number}> {
   }
 }
 
-class VirtualBody extends React.PureComponent<BodyType, {offset: number, loading: boolean}> {
+class VirtualBody extends React.PureComponent<BodyType, {indexOffset: number, loading: boolean, scrollOffset: number, height: number}> {
   viewportCount = 0;
 
   constructor(props: BodyType) {
     super(props);
-    this.state    = {offset: 0, loading: false};
+    this.state    = {indexOffset: 0, loading: false, scrollOffset: 0, height: 0};
     this.onScroll = debounce(this.onScroll, 25, {leading: false});
   }
 
-  async loadMoreRows(offset: number) {
-    if (!this.props.loadMoreRows || this.rowCache[offset + this.viewportCount]) return;
+  async loadMoreRows(indexOffset: number) {
+    if (!this.props.loadMoreRows || this.rowCache[indexOffset + this.viewportCount]) return;
     this.setState({loading: true});
-    let rows    = await this.props.loadMoreRows({start: offset, end: offset + this.viewportCount});
-    let i       = 0;
-    for (let r of rows) {
-      let rowIdx = i + offset;
-      let rr     = this.props.grid.addRow(r);
-      this.rowCache[offset + i] = <Row key={rowIdx} columns={this.props.columns} height={this.props.grid.rowHeight} Cell={Cell} index={rowIdx} className={((rowIdx % 2) === 1) ? 'alt' : ''} row={rr} />;
+    await delay(500);
+    const rows    = await this.props.loadMoreRows({start: indexOffset, end: indexOffset + this.viewportCount});
+    const i       = 0;
+    for (const r of rows) {
+      const rowIdx = i + indexOffset;
+      const rr     = this.props.grid.addRow(r);
+      this.rowCache[indexOffset + i] = <Row key={rowIdx} classes={this.props.rowClasses} cellClasses={this.props.cellClasses} columns={this.props.columns} height={this.props.grid.rowHeight} Cell={Cell} index={rowIdx} className={((rowIdx % 2) === 1) ? 'alt' : ''} row={rr} />;
     }
   }
 
   onScroll = async () => {
-    let offset = Math.trunc(this.props.scrollY() / 30);
-    if (offset < 0 || this.state.offset === offset) {
-      return;
+    const rows: HTMLTableRowElement[] | undefined = this._body?.childNodes?.values() as HTMLTableRowElement[] | undefined;
+    if (!rows) return;
+    let idx       = 0;
+    let height    = 0;
+    const scrollY = this.props.scrollY();
+    for (const row of rows) {
+      const h = height + parseInt(row?.style?.height);
+      if (h > scrollY) {
+        return;
+      }
+      height = h;
+      idx++;
+      if (idx == 2) {
+        this.props.contentElement()!.scrollBy(0, -scrollY);
+        this.setState({loading: false, indexOffset: this.state.indexOffset + idx, height: this.state.height + height});
+        return;
+      }
     }
-    await this.loadMoreRows(offset);
-    this._body!.style.transform = 'translateY(' + (offset * 30) + 'px)';
-    this.setState({loading: false, offset});
-  }
+
+    // const row = this.props.grid.rows[this.state.indexOffset];
+    // if ( row. + (this.props.scrollY() - this.state.scrollOffset))
+    // const indexOffset = Math.trunc(this.props.scrollY() / 30);
+    // if (indexOffset < 0 || this.state.indexOffset === indexOffset) {
+    //   return;
+    // }
+    // await this.loadMoreRows(indexOffset);
+    // this._body!.style.transform = 'translateY(' + (indexOffset * 30) + 'px)';
+    // this.setState({loading: false, indexOffset});
+  };
 
   componentDidMount() {
-    // disposeOnUnmount(this, () => {
-    //   watch(() => this.contentElement, () => {
-    //     let gridContent = this.contentElement;
-    //     if (!gridContent) return;
-    //     let rows                 = this.props.grid.rows;
-    //     let totalSize            = Math.trunc(rows.length * 30);
-    //     gridContent.style.height = totalSize + 'px';
-    //     this.viewportCount       = Math.trunc(gridContent.parentElement!.clientHeight / 30) + 2;
-    //     this.forceUpdate();
-    //   });
+    setTimeout(() => {
+      disposeOnUnmount(this, () => {
+        watch(() => this.props.contentElement(), () => {
+          const gridContent = this.props.contentElement();
+          if (!gridContent) return;
+          // const rows               = this.props.grid.rows;
+          // const totalSize          = Math.trunc(rows.length * 30);
+          // gridContent.style.height = totalSize + 'px';
+          this.viewportCount       = Math.trunc(gridContent.parentElement!.clientHeight / 56) + 4;
+          this.forceUpdate();
+        }, undefined, true);
 
-    //   watch(this.props.scrollY, this.onScroll);
-    // });
+        watch(this.props.scrollY, this.onScroll);
+      });
+    }, 0);
   }
 
   setBodyRef = (element: HTMLTableSectionElement) => {
     this._body = element as HTMLTableSectionElement;
-  }
+  };
 
   rowCache: JSX.Element[] = [];
 
   _body: HTMLTableSectionElement | null;
   renderRows() {
     if (!this._body) return null;
-    let result: JSX.Element[] = [];
-    let rows    = this.props.grid.rows;
-    let offset  = this.state.offset;
+    const result: JSX.Element[] = [];
+    const rows    = this.props.grid.rows;
+    const indexOffset  = this.state.indexOffset;
 
     for (let index = 0; index < this.viewportCount; index++) {
-      let rowIdx = offset + index;
+      const rowIdx = indexOffset + index;
       if ((rowIdx < 0) || (rowIdx >= rows.length)) continue;
 
       let cachedRow = this.rowCache[rowIdx];
@@ -183,8 +197,8 @@ class VirtualBody extends React.PureComponent<BodyType, {offset: number, loading
         continue;
       }
 
-      let row   = rows[rowIdx];
-      cachedRow = <Row key={rowIdx} className={((rowIdx % 2) === 1) ? 'alt' : ''} height={this.props.grid.rowHeight} Cell={Cell} row={row} index={rowIdx} columns={this.props.columns} />;
+      const row   = rows[rowIdx];
+      cachedRow = <Row key={rowIdx} className={((rowIdx % 2) === 1) ? 'alt' : ''} classes={this.props.rowClasses} cellClasses={this.props.cellClasses} height={this.props.grid.rowHeight} Cell={Cell} row={row} index={rowIdx} columns={this.props.columns} />;
       this.rowCache[rowIdx] = cachedRow;
       result.push(cachedRow);
     }
@@ -200,7 +214,54 @@ class VirtualBody extends React.PureComponent<BodyType, {offset: number, loading
   }
 }
 
-export default class Grid extends React.PureComponent<IGridProps> {
+const gridStyles = () => ({
+  root: {
+  },
+  leftLabels: {
+  },
+  cornerLabels: {
+  },
+  topLabels: {
+  },
+  wsGrid: {
+  },
+  gridContent: {
+  },
+  gridScroll: {
+  },
+  optionsMenuContainer: {
+  },
+  optionsMenuButton: {
+  },
+  optionsMenuIcon: {
+  },
+  optionsMenuMenuItem: {
+  },
+  optionsMenuTitleContainer: {
+  },
+  optionsMenuListItemTypography: {
+  },
+  optionsMenuListItemIcon: {
+  },
+});
+
+export type GridStyles = ReturnType<typeof gridStyles>;
+
+export interface IGridProps {
+  grid: IGrid;
+  virtual?: boolean;
+  className?: string;
+  style?: React.CSSProperties;
+  classes?: any;
+  rowClasses?: any;
+  cellClasses?: any;
+  gridColors?: IGridColors;
+  gridFontSizes?: IGridFontSizes;
+}
+
+export type GridProps = WithStyle<GridStyles, IGridProps>;
+
+class Grid extends React.PureComponent<IGridProps> {
   private gridColors: IGridColors;
   private gridFontSizes: IGridFontSizes;
 
@@ -230,36 +291,36 @@ export default class Grid extends React.PureComponent<IGridProps> {
   render() {
     const gridColors    = this.gridColors;
     const gridFontSizes = this.gridFontSizes;
-    let paletteObj: any = {};
+    const paletteObj: any = {};
     Object.keys(gridColors).forEach(colorName => {
       paletteObj[colorName] = {main: gridColors[colorName]};
     });
 
     return (
-      <MuiThemeProvider theme={(outerTheme?: Theme) => createGridTheme({palette: paletteObj, fontSizes: gridFontSizes}, outerTheme)}>
+      <ThemeProvider theme={(outerTheme?: Theme) => createGridTheme({palette: paletteObj, fontSizes: gridFontSizes}, outerTheme)}>
         <GridInternal {...this.props} />
-      </MuiThemeProvider>
+      </ThemeProvider>
     );
   }
 }
 
-const styles = (theme: Theme) => {
+const internalGridStyles = (theme: Theme) => {
   // firefox consideration for fractional pixels issue
   let bodyFontSizeDigits = Number.parseFloat(theme.fontSizes.body.replace(/[^\d.-]/g, ''));
-  let bodyFontSizeUnit   = theme.fontSizes.body.replace(/[\d.-]/g, '');
+  const bodyFontSizeUnit   = theme.fontSizes.body.replace(/[\d.-]/g, '');
   if (bodyFontSizeUnit === 'rem') {
-    let rootElement = document.documentElement;
+    const rootElement = document.documentElement;
     if (rootElement) {
-      let rootElementFontSize = window.getComputedStyle(rootElement).getPropertyValue('font-size');
+      const rootElementFontSize = window.getComputedStyle(rootElement).getPropertyValue('font-size');
       bodyFontSizeDigits     *= Number.parseFloat(rootElementFontSize.replace(/[^\d.-]/g, ''));
     }
   } else if (bodyFontSizeUnit === 'em') {
     bodyFontSizeDigits *= theme.typography.fontSize;
   }
 
-  let cellContainerLineHeight = `${2 * Math.round(bodyFontSizeDigits)}px`;
+  const cellContainerLineHeight = `${2 * Math.round(bodyFontSizeDigits)}px`;
 
-  let styleObj = {
+  const styleObj = {
     root: {
       display: 'flex',
       flexDirection: 'column',
@@ -362,7 +423,7 @@ const styles = (theme: Theme) => {
     gridScroll: {
       fontSize: theme.fontSizes.body,
     },
-    toggleableColumnsContainer: {
+    optionsMenuContainer: {
       position: 'absolute',
       display: 'flex',
       height: '100%',
@@ -371,7 +432,7 @@ const styles = (theme: Theme) => {
       right: '0px',
       zIndex: 1,
     },
-    toggleableColumnsButton: {
+    optionsMenuButton: {
       minWidth: '0px',
       padding: '0px 2px 0px 0px',
       fontSize: 'inherit',
@@ -381,18 +442,22 @@ const styles = (theme: Theme) => {
         background: theme.palette.headerBackground.main,
       },
     },
-    toggleableColumnsIcon: {
+    optionsMenuIcon: {
       fontSize: '1.5em',
     },
-    toggleableColumnsMenuItem: {
+    optionsMenuMenuItem: {
       minWidth: '200px',
       paddingTop: `calc(${theme.fontSizes.toggleMenu} / 2.5)`,
       paddingBottom: `calc(${theme.fontSizes.toggleMenu} / 2.5)`,
+      fontSize: 'inherit',
     },
-    toggleColumnsListItemTypography: {
+    optionsMenuTitleContainer: {
       fontSize: theme.fontSizes.toggleMenu,
     },
-    toggleColumnsListItemIcon: {
+    optionsMenuListItemTypography: {
+      fontSize: theme.fontSizes.toggleMenu,
+    },
+    optionsMenuListItemIcon: {
       '& svg': {
         fontSize: `calc(${theme.fontSizes.toggleMenu} * 1.5)`,
       },
@@ -401,14 +466,12 @@ const styles = (theme: Theme) => {
   return styleObj;
 };
 
-type GridProps = WithStyle<ReturnType<typeof styles>, IGridProps>;
-
 function getScrollbarWidth() {
   // Creating invisible container
   const outer = document.createElement('div');
   outer.style.visibility = 'hidden';
   outer.style.overflow = 'scroll'; // forcing scrollbar to appear
-  outer.style.msOverflowStyle = 'scrollbar'; // needed for WinJS apps
+  // outer.style.msOverflowStyle = 'scrollbar'; // needed for WinJS apps
   document.body.appendChild(outer);
 
   // Creating inner element and placing it in the container
@@ -423,9 +486,9 @@ function getScrollbarWidth() {
   return scrollbarWidth;
 }
 
-let _scrollbarWidth: number = getScrollbarWidth();
+const _scrollbarWidth: number = getScrollbarWidth();
 
-const GridInternal = withStyles(styles, class extends React.PureComponent<GridProps> {
+const GridInternal = withStyles(internalGridStyles, class extends React.PureComponent<IGridProps> {
   private scrollX            : DataSignal<number>;
   private scrollY            : DataSignal<number>;
   private _columnTableWrapper: HTMLDivElement;
@@ -452,23 +515,24 @@ const GridInternal = withStyles(styles, class extends React.PureComponent<GridPr
     });
   }
 
-  handleExternalMouseUp = (evt: MouseEvent) => {
-    if (this.grid.clearSelectionOnBlur && !this.grid.isMouseDown) {
+  handleExternalMouseUp = (_evt: MouseEvent) => {
+    if (this.grid.clearSelectionOnBlur && !this.grid.isMouseDown && !this.grid.isReorderingMouseDown) {
       this.grid.clearSelection();
     }
 
-    this.grid.isMouseDown = false;
-  }
+    this.grid.isReorderingMouseDown = false;
+    this.grid.isMouseDown           = false;
+  };
 
   handleScroll = (evt: React.UIEvent<any>) => {
-    let target: Element = evt.target as Element;
+    const target: Element = evt.target as Element;
     if (target === this.contentElement) {
       this.scrollX(target.scrollLeft);
       this.scrollY(target.scrollTop);
     } else if (target === this._leftLabels && target.scrollTop !== this.scrollY()) {
       this.contentElement!.scrollTo(this.scrollX(), target.scrollTop);
     }
-  }
+  };
 
   handleFixedWheel = (evt: React.WheelEvent) => {
     evt.preventDefault();
@@ -502,7 +566,7 @@ const GridInternal = withStyles(styles, class extends React.PureComponent<GridPr
       // this.grid.contentElement!.scrollTo({left: this.grid.contentElement!.scrollLeft, top: variation, behavior: 'auto'});
       // this.grid.contentElement!.scroll(this.grid.contentElement!.scrollLeft, variation);
     }
-  }
+  };
 
   handleFixedKeyDown = (evt: React.KeyboardEvent<any>) => {
     switch (evt.key) {
@@ -520,7 +584,7 @@ const GridInternal = withStyles(styles, class extends React.PureComponent<GridPr
 
     evt.preventDefault();
     evt.stopPropagation();
-  }
+  };
 
   handleMouseDown = (evt: React.MouseEvent<any>) => {
     this.grid.isMouseDown = true;
@@ -531,12 +595,12 @@ const GridInternal = withStyles(styles, class extends React.PureComponent<GridPr
 
     evt.preventDefault();
     evt.stopPropagation();
-  }
+  };
 
   componentDidMount() {
     verticalResizeWatcher(this, this.contentElement!).watch((value) => {
       if (this._columnTableWrapper && this._columnTableWrapper.style) {
-        let node = this.contentElement as HTMLElement;
+        const node = this.contentElement as HTMLElement;
         if (node) {
           this._columnTableWrapper.style.paddingRight = value.clientHeight < value.scrollHeight ? _scrollbarWidth + 'px' : '0';
         }
@@ -548,8 +612,7 @@ const GridInternal = withStyles(styles, class extends React.PureComponent<GridPr
     }
   }
 
-  componentWillMount() {
-    disposeOnUnmount(this, () => this.buildGroups());
+  UNSAFE_componentWillMount() {
     disposeOnUnmount(this, () => this.buildColumnGroups());
   }
 
@@ -560,7 +623,7 @@ const GridInternal = withStyles(styles, class extends React.PureComponent<GridPr
     this.grid.isMouseDown = false;
   }
 
-  componentWillReceiveProps(nextProps: GridProps) {
+  UNSAFE_componentWillReceiveProps(nextProps: GridProps) {
     if (nextProps.grid !== this.grid) {
       this.grid = nextProps.grid;
     }
@@ -568,25 +631,25 @@ const GridInternal = withStyles(styles, class extends React.PureComponent<GridPr
 
   setLeftLabelsRef = (element: HTMLDivElement) => {
     this._leftLabels = element as HTMLDivElement;
-  }
+  };
 
   setColumnTableWrapperRef = (element: HTMLDivElement) => {
     this._columnTableWrapper = element as HTMLDivElement;
-  }
+  };
 
   setColumnTableRef = (element: HTMLTableElement) => {
     this._columnTable = element as HTMLTableElement;
-  }
+  };
 
   contentElement: HTMLDivElement;
   setGridContentRef = (element: HTMLDivElement) => {
     if (element && element !== this.contentElement) {
       this.contentElement = element;
     }
-  }
+  };
 
   renderFixedColumnHeaders(): JSX.Element | null {
-    if (this.props.grid.fixedColumns.length === 0) {
+    if (this.props.grid.fixedColumns.length === 0 && !this.props.grid.isReorderable) {
       return null;
     }
 
@@ -596,7 +659,7 @@ const GridInternal = withStyles(styles, class extends React.PureComponent<GridPr
           {this.renderColumnGroups(true)}
           <thead role='rowgroup'>
             <Observe render={() => (
-              this.props.grid.fixedRows.map((row, index) => <Row key={row.id} height={this.props.grid.headerRowHeight} Cell={Column} columns={this.props.grid.fixedColumns} index={index} row={row} />)
+              this.props.grid.fixedRows.map((row, index) => <Row key={row.keyId} classes={this.props.rowClasses} cellClasses={this.props.cellClasses} height={this.props.grid.headerRowHeight} Cell={ColumnCell} columns={() => this.props.grid.fixedColumns} index={index} row={row} isFixedColumnsRow={true} />)
             )} />
           </thead>
         </table>
@@ -604,74 +667,40 @@ const GridInternal = withStyles(styles, class extends React.PureComponent<GridPr
     );
   }
 
-  getGroupValue(row: IRow, column: IColumn) {
-    const v = row && row.data && column && row.data[column.name];
-    return (v === null || v === undefined || Number.isNaN(v)) ? '(none)' : (column.map && column.map(v)) || String(v);
-  }
-
-  getGroupKey(row: IRow, groupBy: IColumn[], level: number): string {
-    const key: string[] = [];
-    for (let index = 0; index < level; index++) {
-      const column        = groupBy[index];
-      const valueAsString = this.getGroupValue(row, column);
-      key.push(valueAsString);
+  renderGroups(columns: () => IColumn[], fixed: boolean) {
+    const grid   = this.grid;
+    const groups = grid.groupRows;
+    let numVisibleColumns: number;
+    if (!fixed) {
+      numVisibleColumns = grid.visibleStandardColumns.length;
+    } else {
+      numVisibleColumns = grid.isReorderable ? grid.visibleFixedColumns.length + 1 : grid.visibleFixedColumns.length;
     }
-    return key.join('->');
-  }
-
-  _groups: () => IGroupRow[] | undefined;
-  buildGroups() {
-    const computation = () => {
-      if (!this.grid.groupBy || (this.grid.groupBy.length === 0)) return undefined;
-      const groupMap = {};
-      const groups: IGroupRow[] = [];
-      for (const row of this.grid.rows) {
-        let parentGroup: IGroupRow | undefined;
-        for (let level = 0; level < this.grid.groupBy.length; level++) {
-          const key   = this.getGroupKey(row, this.grid.groupBy, level + 1);
-          let   group = groupMap[key];
-          if (!group) {
-            const value = this.getGroupValue(row, this.grid.groupBy[level]);
-            group = groupMap[key] = new GroupRowModel(value, level);
-            if (!parentGroup) groups.push(group);
-            else parentGroup.rows.push(group);
-          }
-
-          parentGroup = group;
-          if (level === this.grid.groupBy.length - 1) {
-            parentGroup!.rows.push(row);
-          }
-        }
-      }
-      return groups;
-    };
-
-    this._groups = computed<IGroupRow[] | undefined>(() => this.grid.rows.length, computation, undefined, true);
-  }
-
-  renderGroups(columns: IColumn[], visibleColumns: number, fixed: boolean) {
-    const groups = this._groups();
-    return groups && groups.map((group) => <GroupRow fixed={fixed} key={group.title} group={group} columns={columns} visibleColumns={visibleColumns} />);
+    return groups.map((group: IGroupRow) => <GroupRow key={group.keyId} classes={this.props.rowClasses} cellClasses={this.props.cellClasses} fixed={fixed} group={group} columns={columns} numVisibleColumns={numVisibleColumns} />);
   }
 
   _fixedColGroups: () => JSX.Element | undefined;
   _colGroups: () => JSX.Element | undefined;
   buildColumnGroups() {
     const fixedComputation = () => {
-      let fixedGroups = this.props.grid.fixedColumns.reduce((prev: JSX.Element[], column) => {
-        prev.push(<ColumnWidth key={'cg_' + column.id} column={column} />);
+      const fixedGroupsBase: JSX.Element[] = [];
+      if (this.grid.isReorderable) {
+        fixedGroupsBase.push(<ColumnWidth key={'cg_' + 'reorderable'} column={{visible: true, width: '40px'} as IColumn} />);
+      }
+      const fixedGroups = this.props.grid.fixedColumns.reduce((prev: JSX.Element[], column) => {
+        prev.push(<ColumnWidth key={'cg_' + column.keyId} column={column} />);
         return prev;
-      }, []);
+      }, fixedGroupsBase);
       return <colgroup>{fixedGroups}</colgroup>;
     };
     const standardComputation = () => {
-      let standardGroups = this.props.grid.standardColumns.reduce((prev: JSX.Element[], column) => {
-        prev.push(<ColumnWidth key={'cg_' + column.id} column={column} />);
+      const standardGroups = this.props.grid.standardColumns.reduce((prev: JSX.Element[], column) => {
+        prev.push(<ColumnWidth key={'cg_' + column.keyId} column={column} />);
         return prev;
       }, []);
       return <colgroup>{standardGroups}</colgroup>;
     };
-    this._fixedColGroups = computed(() => this.props.grid.fixedColumns.length, fixedComputation, undefined, true);
+    this._fixedColGroups = computed(() => { this.props.grid.fixedColumns.length; this.grid.isReorderable; }, fixedComputation, undefined, true);
     this._colGroups      = computed(() => this.props.grid.standardColumns.length, standardComputation, undefined, true);
   }
 
@@ -683,18 +712,17 @@ const GridInternal = withStyles(styles, class extends React.PureComponent<GridPr
     }
   }
 
-  renderRows = (rows: IRow[], columns: IColumn[], fixed: boolean) => {
+  renderRows = (rows: IRow[], columns: () => IColumn[], fixed: boolean) => {
     const grid = this.props.grid;
     if (!grid.groupBy || (grid.groupBy.length === 0)) {
-      return <Observe render={() => rows.map((row, index) => <Row key={row.id} height={this.props.grid.rowHeight} columns={columns} Cell={Cell} index={index} className={((index % 2) === 1) ? 'alt' : ''} row={row} />)} />;
+      return <Observe render={() => rows.map((row, index) => <Row key={row.keyId} classes={this.props.rowClasses} cellClasses={this.props.cellClasses} height={this.props.grid.rowHeight} columns={columns} Cell={Cell} index={index} className={((index % 2) === 1) ? 'alt' : ''} row={row} isFixedColumnsRow={fixed} />)} />;
     }
 
-    const visibleColumns: number = columns.reduce((previous, current) => previous + ((current.visible) ? 1 : 0), 0);
-    return <Observe render={() => this.renderGroups(columns, visibleColumns, fixed)} />;
-  }
+    return <Observe render={() => this.renderGroups(columns, fixed)} />;
+  };
 
   renderFixedColumnData(): JSX.Element | null {
-    if (this.props.grid.fixedColumns.length === 0) {
+    if (this.props.grid.fixedColumns.length === 0 && !this.grid.isReorderable) {
       return null;
     }
 
@@ -703,35 +731,41 @@ const GridInternal = withStyles(styles, class extends React.PureComponent<GridPr
         <table role='grid' style={{width: this.props.grid.fixedWidth, marginBottom: '17px'}}>
           {this.renderColumnGroups(true)}
           <tbody role='rowgroup'>
-            {this.renderRows(this.props.grid.rows, this.props.grid.fixedColumns, true)}
+            {this.renderRows(this.props.grid.rows, () => this.props.grid.fixedColumns, true)}
           </tbody>
         </table>
       </div>
     );
   }
 
-  renderToggleableColumnsMenu(): JSX.Element | null {
-    if (!this.grid.hasToggleableColumns) {
+  renderOptionsMenu(): JSX.Element | null {
+    if (!this.grid.optionsMenu) {
       return null;
     }
 
     const {classes}                   = this.props;
-    const toggleableColumns           = this.grid.toggleableColumns;
-    const toggleableColumnsOptions    = this.grid.toggleableColumnsOptions;
-    const buttonContent               = <SettingsIcon classes={{root: classes.toggleableColumnsIcon}}/>;
-    const buttonProps: ButtonProps    = {disableRipple: true};
-    const anchorOrigin: PopoverOrigin = {vertical: 'top', horizontal: 'right'};
-    const transformOrigin             = anchorOrigin;
-    const onItemClick                 = toggleableColumnsOptions && toggleableColumnsOptions.onItemClick;
+    const optionsMenu                 = this.grid.optionsMenu;
+    const items                       = optionsMenu.items;
+    const defaultTitle                = 'Grid Options';
+    const tooltip                     = optionsMenu.tooltip || defaultTitle;
+    const title                       = optionsMenu.title || (items && items[0] && items[0].subheader ? undefined : defaultTitle);
+    const menuId                      = optionsMenu.menuId || `grid${this.grid.id}-options-menu`;
+    const buttonContent               = optionsMenu.buttonContent || <SettingsIcon classes={{root: classes.optionsMenuIcon}}/>;
+    const buttonProps: ButtonProps    = {disableRipple: true, ...optionsMenu.buttonProps};
+    const anchorOrigin: PopoverOrigin = optionsMenu.anchorOrigin || {vertical: 'top', horizontal: 'right'};
+    const transformOrigin             = optionsMenu.transformOrigin || anchorOrigin;
+    const onItemClick                 = optionsMenu.onItemClick;
 
     return <Observe render={() => (
-      <div className={classes.toggleableColumnsContainer}>
-        <ToggleMenu
-          menuId={`grid${this.grid.id}-toggleable-columns`}
+      <div className={classes.optionsMenuContainer}>
+        <MixedMenu
+          title={title}
+          tooltip={tooltip}
+          menuId={menuId}
           buttonContent={buttonContent}
           buttonProps={buttonProps}
-          items={toggleableColumns}
-          classes={{menuButton: classes.toggleableColumnsButton, menuItem: classes.toggleableColumnsMenuItem, listItemTypography: classes.toggleColumnsListItemTypography, listItemIcon: classes.toggleColumnsListItemIcon} as any}
+          items={items}
+          classes={{menuButton: classes.optionsMenuButton, menuItem: classes.optionsMenuMenuItem, menuTitleContainer: classes.optionsMenuTitleContainer, listItemTypography: classes.optionsMenuListItemTypography, listItemIcon: classes.optionsMenuListItemIcon} as any}
           anchorOrigin={anchorOrigin}
           transformOrigin={transformOrigin}
           onItemClick={onItemClick}
@@ -744,20 +778,20 @@ const GridInternal = withStyles(styles, class extends React.PureComponent<GridPr
     return (
       <Observe render={() => (
         <div className={classNames('top-labels', this.props.classes.topLabels)}>
-          {this.renderToggleableColumnsMenu()}
+          {this.renderOptionsMenu()}
           {this.renderFixedColumnHeaders()}
           <div className='column-wrapper' ref={this.setColumnTableWrapperRef}>
             <table role='grid' ref={this.setColumnTableRef}>
               {this.renderColumnGroups(false)}
               <thead role='rowgroup'>
                 <Observe render={() => (
-                  this.props.grid.fixedRows.map((row, index) => <Row key={row.id} height={this.props.grid.headerRowHeight} Cell={Column} columns={this.props.grid.standardColumns} index={index} row={row} />)
+                  this.props.grid.fixedRows.map((row, index) => <Row key={row.keyId} classes={this.props.rowClasses} cellClasses={this.props.cellClasses} height={this.props.grid.headerRowHeight} Cell={ColumnCell} columns={() => this.props.grid.standardColumns} index={index} row={row} />)
                 )} />
               </thead>
             </table>
           </div>
         </div>
-      )} />
+    )} />
     );
   }
 
@@ -773,16 +807,26 @@ const GridInternal = withStyles(styles, class extends React.PureComponent<GridPr
 
   _body: HTMLTableSectionElement | null;
 
-  renderData(): JSX.Element {
-    let BodyRenderer     = (this.props.virtual) ? VirtualBody : Body;
+  renderDataReorderable(): JSX.Element {
     return (
       <Observe render={() => (
-        <div className={classNames('grid-scroll', this.props.classes.gridScroll)} onScroll={this.handleScroll}>
+        <ReorderableGridRows>
+          {this.renderData()}
+        </ReorderableGridRows>
+      )} />
+    );
+  }
+
+  renderData(): JSX.Element {
+    const BodyRenderer = (this.props.virtual) ? VirtualBody : Body;
+    return (
+      <Observe render={() => (
+        <div className={classNames('grid-scroll', this.props.classes.gridScroll)} onScrollCapture={this.handleScroll}>
           {this.renderFixedColumnData()}
           <div className={classNames('grid-content', this.props.classes.gridContent)} ref={this.setGridContentRef}>
             <table role='grid'>
               {this.renderColumnGroups(false)}
-              <BodyRenderer grid={this.props.grid} renderRows={this.renderRows} scrollY={this.scrollY} columns={this.props.grid.standardColumns} />
+              <BodyRenderer grid={this.props.grid} contentElement={() => this.contentElement} renderRows={this.renderRows} scrollY={this.scrollY} columns={() => this.props.grid.standardColumns} />
             </table>
           </div>
         </div>
@@ -796,9 +840,11 @@ const GridInternal = withStyles(styles, class extends React.PureComponent<GridPr
       <div className={classNames(classes.root, className)} style={{...style}}>
         <div className={classNames('ws-grid', classes.wsGrid)} onMouseDown={(this.grid.multiSelect || this.grid.clearSelectionOnBlur) ? this.handleMouseDown : undefined}>
           {this.renderHeaders()}
-          {this.renderData()}
+          {this.grid.isReorderable ? this.renderDataReorderable() : this.renderData()}
         </div>
       </div>
     )} />;
   }
 });
+
+export default withStyles(gridStyles, Grid);

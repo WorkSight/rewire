@@ -1,12 +1,14 @@
-import * as React              from 'react';
+import React              from 'react';
 import classNames              from 'classnames';
 import {isNullOrUndefined}     from 'rewire-common';
-import Switch, {SwitchProps}   from '@material-ui/core/Switch';
+import Switch, {
+  SwitchProps,
+}                              from '@material-ui/core/Switch';
 import FormControlLabel        from '@material-ui/core/FormControlLabel';
 import {Theme}                 from '@material-ui/core/styles';
 import {withStyles, WithStyle} from './styles';
 
-const styles = (theme: Theme) => ({
+const styles = (_theme: Theme) => ({
   inputRoot: {
   },
   switchRoot: {
@@ -42,29 +44,44 @@ const styles = (theme: Theme) => ({
   }
 });
 
-export interface ISwitchProps {
+export type SwitchFieldStyles = ReturnType<typeof styles>;
+
+export interface ISwitchFieldProps {
   visible? : boolean;
   disabled?: boolean;
   value?   : boolean;
+  tooltip? : string | ((value: any) => string);
   label?   : string;
 
   onValueChange: (value?: boolean) => void;
 }
 
-type SwitchPropsStyled = WithStyle<ReturnType<typeof styles>, SwitchProps & ISwitchProps>;
+export type SwitchFieldProps = WithStyle<SwitchFieldStyles, SwitchProps & ISwitchFieldProps>;
 
-class SwitchInternal extends React.Component<SwitchPropsStyled> {
-  constructor(props: SwitchPropsStyled) {
+class SwitchField extends React.Component<SwitchFieldProps> {
+  constructor(props: SwitchFieldProps) {
     super(props);
   }
 
-  shouldComponentUpdate(nextProps: SwitchPropsStyled) {
+  shouldComponentUpdate(nextProps: SwitchFieldProps) {
     return (
       (nextProps.value    !== this.props.value)    ||
       (nextProps.disabled !== this.props.disabled) ||
       (nextProps.visible  !== this.props.visible)  ||
-      (nextProps.label    !== this.props.label)
+      (nextProps.label    !== this.props.label)    ||
+      (nextProps.tooltip  !== this.props.tooltip)
     );
+  }
+
+  getTooltip(value: any): string | undefined {
+    let tooltip = this.props.tooltip;
+    if (isNullOrUndefined(tooltip)) {
+      return undefined;
+    }
+    if (is.function(tooltip))  {
+      tooltip = (tooltip as CallableFunction)(value);
+    }
+    return tooltip as string;
   }
 
   render() {
@@ -80,15 +97,16 @@ class SwitchInternal extends React.Component<SwitchPropsStyled> {
           className={this.props.className}
           control={
             <Switch
-              autoFocus={this.props.autoFocus}
-              disabled={this.props.disabled}
+              autoFocus={!!this.props.autoFocus}
+              disabled={!!this.props.disabled}
               inputProps={{}}
-              checked={this.props.value}
+              checked={!!this.props.value}
+              title={this.getTooltip(this.props.value)}
               onChange={(evt: React.ChangeEvent<HTMLInputElement>) => this.props.onValueChange(evt.target.checked)}
               classes={{root: classes.switchRoot, switchBase: classes.switchBase, track: classes.switchTrack, thumb: classes.switchThumb, checked: classes.switchChecked}}
             />
           }
-          disabled={this.props.disabled}
+          disabled={!!this.props.disabled}
           label={this.props.label}
           classes={{root: classes.formControlLabelRoot, label: classes.formControlLabelLabel}}
         />
@@ -98,10 +116,11 @@ class SwitchInternal extends React.Component<SwitchPropsStyled> {
     return (
       <div className={classNames(this.props.className, classes.switchContainerNoLabel)}>
         <Switch
-          autoFocus={this.props.autoFocus}
-          disabled={this.props.disabled}
+          autoFocus={!!this.props.autoFocus}
+          disabled={!!this.props.disabled}
           inputProps={{}}
-          checked={this.props.value}
+          checked={!!this.props.value}
+          title={this.getTooltip(this.props.value)}
           onChange={(evt: React.ChangeEvent<HTMLInputElement>) => this.props.onValueChange(evt.target.checked)}
           classes={{root: classes.switchRoot, switchBase: classes.switchBase, track: classes.switchTrack, thumb: classes.switchThumb, checked: classes.switchChecked}}
         />
@@ -110,4 +129,4 @@ class SwitchInternal extends React.Component<SwitchPropsStyled> {
   }
 }
 
-export default withStyles(styles, SwitchInternal);
+export default withStyles(styles, SwitchField);

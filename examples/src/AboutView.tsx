@@ -1,4 +1,4 @@
-import * as React              from 'react';
+import React              from 'react';
 import { delay }               from 'rewire-common';
 import { countries, searcher } from './demo-data';
 import { Observe }             from 'rewire-core';
@@ -15,8 +15,6 @@ import AccessibilityIcon from '@material-ui/icons/Accessibility';
 import AddIcon           from '@material-ui/icons/Add';
 import Button            from '@material-ui/core/Button';
 // import Slide             from '@material-ui/core/Slide';
-
-import './graphqltest';
 
 const confirmation = new Modal('Please confirm your request')
   .action('yes', () => (console.log('I beg to differ, but its your choice'), true), { color: 'primary' })
@@ -36,7 +34,7 @@ class TestDialog extends Modal {
     await delay(2000);
     setTimeout(() => confirmation.open(), 0);
     return true;
-  }
+  };
 
   form = Form.create((_) => ({
     date                 : _.date().label('Date').validators('required').autoFocus(),
@@ -118,7 +116,7 @@ const TestFormView = ({form}: {form: typeof testDialog.form}) => (
   )} />
 );
 
-export const AboutView = React.memo((props: any) => (
+export const AboutView = React.memo((_props: any) => (
   <TransitionWrapper>
     <div>
       <h2>About</h2>

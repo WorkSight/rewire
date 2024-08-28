@@ -11,13 +11,13 @@ export function dateCompare(d1: Date, d2: Date) {
 }
 
 function *map<T, R>(iterator: Iterable<T>, fn: (f: T) => R) {
-  for (let c of iterator) {
+  for (const c of iterator) {
     yield fn(c);
   }
 }
 
 function *mutate<T>(iterator: Iterable<T>, fn: (f: T) => void) {
-  for (let c of iterator) {
+  for (const c of iterator) {
     fn(c);
     yield c;
   }
@@ -25,8 +25,8 @@ function *mutate<T>(iterator: Iterable<T>, fn: (f: T) => void) {
 
 function *distinct<T, R>(iterator: Iterable<T>, fn?: (f: T) => R) {
   const s = new Set<T>();
-  for (let c of iterator) {
-    let v: any = fn ? fn(c) : c;
+  for (const c of iterator) {
+    const v: any = fn ? fn(c) : c;
     if (s.has(v)) continue;
     s.add(v);
     yield v;
@@ -34,15 +34,15 @@ function *distinct<T, R>(iterator: Iterable<T>, fn?: (f: T) => R) {
 }
 
 function *flatMap<T, R>(iterator: Iterable<T>, fn: (f: T) => Iterable<R>): Iterable<R> {
-  for (let c of iterator) {
-    for (let d of fn(c)) {
+  for (const c of iterator) {
+    for (const d of fn(c)) {
       yield d;
     }
   }
 }
 
 function *flatten<T>(iterator: Iterable<T>): Iterable<T> {
-  for (let c of iterator) {
+  for (const c of iterator) {
     if (c[Symbol.iterator]) {
       yield *flatten(c as any);
     } else {
@@ -52,7 +52,7 @@ function *flatten<T>(iterator: Iterable<T>): Iterable<T> {
 }
 
 function *filter<T>(iterator: Iterable<T>, fn: (current: T) => boolean) {
-  for (let c of iterator) {
+  for (const c of iterator) {
     if (fn(c)) {
       yield c;
     }
@@ -68,7 +68,7 @@ function *object<T>(obj: T) {
 }
 
 function contains<T>(iterator: Iterable<T>, fn: (current: T) => boolean) {
-  for (let c of iterator) {
+  for (const c of iterator) {
     if (fn(c)) {
       return true;
     }
@@ -82,8 +82,8 @@ function *concat<T>(iterator1: Iterable<T>, iterator2: Iterable<T>) {
 }
 
 function *merge<T>(iterator1: Iterable<T>, iterator2: Iterable<T>) {
-  let i1 = iterator1[Symbol.iterator]();
-  let i2 = iterator2[Symbol.iterator]();
+  const i1 = iterator1[Symbol.iterator]();
+  const i2 = iterator2[Symbol.iterator]();
 
   let v1 = i1.next();
   let v2 = i2.next();
@@ -102,7 +102,7 @@ function *merge<T>(iterator1: Iterable<T>, iterator2: Iterable<T>) {
 
 export function reduce<T, U>(iterator: Iterable<T>, fn: (prev: U, current: T) => U, initial: U): U {
   let prev = initial;
-  for (let current of iterator) {
+  for (const current of iterator) {
     prev = fn(prev, current);
   }
   return prev;
@@ -116,7 +116,7 @@ type IGrouping<T> = IGroup<T> & {LQ(): ILQ<{key: string, value: T[]}>};
 const __groupByResult = {LQ() { return new LQ2(object(this)); }};
 
 function groupBy<T>(iterator: Iterable<T>, by: keyof T): IGrouping<T> {
-  let result: any = Object.create(__groupByResult);
+  const result: any = Object.create(__groupByResult);
   return reduce<T, any>(iterator, function(prev: any, curr: T) {
     (prev[curr[by]] = (prev[curr[by]] || [])).push(curr);
     return prev;
@@ -124,11 +124,11 @@ function groupBy<T>(iterator: Iterable<T>, by: keyof T): IGrouping<T> {
 }
 
 export function *combine<T>(r1: Iterable<T>, fn: (p1: T, p2: T) => T | undefined, order: ISortField<T>[]): Iterable<T> {
-  let iter    = orderBy(r1, order);
+  const iter    = orderBy(r1, order);
   let current = iter.next().value;
   while (current) {
-    let next = iter.next().value;
-    let c    = fn(current, next);
+    const next = iter.next().value;
+    const c    = fn(current, next as T);
     if (!c) {
       yield current;
       current = next;
@@ -176,7 +176,7 @@ export function *orderBy<T>(iterator: Iterable<T>, fields?: ISortField<T>[]) {
 }
 
 function *take<T>(iterator: Iterable<T>, n: number) {
-  for (let c of iterator) {
+  for (const c of iterator) {
     if (n <= 0) break;
     yield c;
     n--;
@@ -184,18 +184,18 @@ function *take<T>(iterator: Iterable<T>, n: number) {
 }
 
 function *skip<T>(iterator: Iterable<T>, n: number) {
-  for (let c of iterator) {
+  for (const c of iterator) {
     if (n <= 0) { yield c; continue; }
     n--;
   }
 }
 
 function *intersects<T>(iterator: Iterable<T>, range2: Iterable<T>, compare: CompareFn<T> = defaultCompare) {
-  let i1 = iterator[Symbol.iterator]();
+  const i1 = iterator[Symbol.iterator]();
   let v1 = i1.next();
-  for (let v2 of range2) {
+  for (const v2 of range2) {
     while (!v1.done) {
-      let c = compare(v1.value, v2);
+      const c = compare(v1.value, v2);
       if (c === 0) {
         yield v2;
       }
@@ -208,7 +208,7 @@ export function *empty<T>(): Iterable<T> {}
 
 export function mergeMap<T, R>(iterator: Iterable<T>, iterator2: Iterable<R>, fn: (p1: T, p2: R) => Iterable<T>): Iterable<T> {
   let i = iterator;
-  for (let v2 of iterator2) {
+  for (const v2 of iterator2) {
     i = flatMap(i, (v1) => fn(v1, v2));
   }
   return i;
@@ -292,7 +292,7 @@ class LQ2<T> implements ILQ<T> {
   }
 
   first(): T | undefined {
-    return take(this.iterator, 1).next().value;
+    return take(this.iterator, 1).next().value as T;
   }
 
   last() {

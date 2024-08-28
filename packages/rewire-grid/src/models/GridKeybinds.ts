@@ -1,5 +1,6 @@
-    import * as React from 'react';
+    import React from 'react';
     import {
+      IRow,
       ICell,
       IGridStaticKeybinds,
       IGridVariableKeybinds
@@ -36,24 +37,28 @@
         // Select the first selectable cell above the currently selected and focused cell
         evt.preventDefault();
         evt.stopPropagation();
-        let upCell = cell.grid.adjacentTopCell(cell, true);
-        if (!upCell) {
-          return;
+        cell.grid.startCell = undefined;
+        let nextStartCell   = cell;
+        const upCell          = cell.grid.adjacentTopCell(cell, true);
+        if (upCell) {
+          cell.grid.selectCells([upCell]);
+          nextStartCell = upCell;
         }
-        cell.grid.startCell = upCell;
-        cell.grid.selectCells([upCell]);
+        cell.grid.startCell = nextStartCell;
       },
 
       'ArrowDown': (evt: React.KeyboardEvent<any>, cell: ICell) => {
         // Select the first selectable cell below the currently selected and focused cell
         evt.preventDefault();
         evt.stopPropagation();
-        let downCell = cell.grid.adjacentBottomCell(cell, true);
-        if (!downCell) {
-          return;
+        cell.grid.startCell = undefined;
+        let nextStartCell   = cell;
+        const downCell        = cell.grid.adjacentBottomCell(cell, true);
+        if (downCell) {
+          cell.grid.selectCells([downCell]);
+          nextStartCell = downCell;
         }
-        cell.grid.startCell = downCell;
-        cell.grid.selectCells([downCell]);
+        cell.grid.startCell = nextStartCell;
       },
 
       'ArrowLeft': (evt: React.KeyboardEvent<any>, cell: ICell) => {
@@ -67,13 +72,14 @@
         }
         evt.preventDefault();
         evt.stopPropagation();
-        let prevCell: ICell | undefined;
-        prevCell = cell.grid.previousCell(cell, true);
-        if (!prevCell) {
-          return;
+        cell.grid.startCell = undefined;
+        let nextStartCell   = cell;
+        const prevCell: ICell | undefined = cell.grid.previousCell(cell, true);
+        if (prevCell) {
+          cell.grid.selectCells([prevCell]);
+          nextStartCell = prevCell;
         }
-        cell.grid.startCell = prevCell;
-        cell.grid.selectCells([prevCell]);
+        cell.grid.startCell = nextStartCell;
       },
 
       'ArrowRight': (evt: React.KeyboardEvent<any>, cell: ICell) => {
@@ -87,23 +93,25 @@
         }
         evt.preventDefault();
         evt.stopPropagation();
-        let nextCell: ICell | undefined;
-        nextCell = cell.grid.nextCell(cell, true);
-        if (!nextCell) {
-          return;
+        cell.grid.startCell = undefined;
+        let nextStartCell   = cell;
+        const nextCell: ICell | undefined = cell.grid.nextCell(cell, true);
+        if (nextCell) {
+          cell.grid.selectCells([nextCell]);
+          nextStartCell = nextCell;
         }
-        cell.grid.startCell = nextCell;
-        cell.grid.selectCells([nextCell]);
+        cell.grid.startCell = nextStartCell;
       },
 
       'Shift+ArrowUp': (evt: React.KeyboardEvent<any>, cell: ICell) => {
-        // Select all selectable cells between the starting cell and the first selectable cell above the currently selected and focused cell
-        evt.preventDefault();
-        evt.stopPropagation();
+        // Select all selectable cells between the starting cell and the first selectable cell above the currently selected and focused cell if multiselect is enabled
         if (!cell.grid.multiSelect) {
+          gridStaticKeybinds['ArrowUp'](evt, cell);
           return;
         }
-        let upCell = cell.grid.adjacentTopCell(cell, true);
+        evt.preventDefault();
+        evt.stopPropagation();
+        const upCell = cell.grid.adjacentTopCell(cell, true);
         if (!upCell) {
           return;
         }
@@ -114,13 +122,14 @@
       },
 
       'Shift+ArrowDown': (evt: React.KeyboardEvent<any>, cell: ICell) => {
-        // Select all selectable cells between the starting cell and the first selectable cell below the currently selected and focused cell
-        evt.preventDefault();
-        evt.stopPropagation();
+        // Select all selectable cells between the starting cell and the first selectable cell below the currently selected and focused cell if multiselect is enabled
         if (!cell.grid.multiSelect) {
+          gridStaticKeybinds['ArrowDown'](evt, cell);
           return;
         }
-        let downCell = cell.grid.adjacentBottomCell(cell, true);
+        evt.preventDefault();
+        evt.stopPropagation();
+        const downCell = cell.grid.adjacentBottomCell(cell, true);
         if (!downCell) {
           return;
         }
@@ -131,7 +140,7 @@
       },
 
       'Shift+ArrowLeft': (evt: React.KeyboardEvent<any>, cell: ICell) => {
-        // Select all selectable cells between the starting cell and the first selectable cell that is to the left of the currently selected and focused cell
+        // Select all selectable cells between the starting cell and the first selectable cell that is to the left of the currently selected and focused cell if multiselect is enabled
         if (cell.editing) {
           evt.stopPropagation();
           if (cell.column.type === 'select' || cell.column.type === 'multiselect' || cell.column.type === 'checked') {
@@ -139,13 +148,13 @@
           }
           return;
         }
-        evt.preventDefault();
-        evt.stopPropagation();
         if (!cell.grid.multiSelect) {
+          gridStaticKeybinds['ArrowLeft'](evt, cell);
           return;
         }
-        let leftCell: ICell | undefined;
-        leftCell = cell.grid.adjacentLeftCell(cell, true);
+        evt.preventDefault();
+        evt.stopPropagation();
+        const leftCell: ICell | undefined = cell.grid.adjacentLeftCell(cell, true);
         if (!leftCell) {
           return;
         }
@@ -156,7 +165,7 @@
       },
 
       'Shift+ArrowRight': (evt: React.KeyboardEvent<any>, cell: ICell) => {
-        // Select all selectable cells between the starting cell and the first selectable cell that is to the right of the currently selected and focused cell
+        // Select all selectable cells between the starting cell and the first selectable cell that is to the right of the currently selected and focused cell if multiselect is enabled
         if (cell.editing) {
           evt.stopPropagation();
           if (cell.column.type === 'select' || cell.column.type === 'multiselect' || cell.column.type === 'checked') {
@@ -164,13 +173,13 @@
           }
           return;
         }
-        evt.preventDefault();
-        evt.stopPropagation();
         if (!cell.grid.multiSelect) {
+          gridStaticKeybinds['ArrowRight'](evt, cell);
           return;
         }
-        let rightCell: ICell | undefined;
-        rightCell = cell.grid.adjacentRightCell(cell, true);
+        evt.preventDefault();
+        evt.stopPropagation();
+        const rightCell: ICell | undefined  = cell.grid.adjacentRightCell(cell, true);
         if (!rightCell) {
           return;
         }
@@ -184,24 +193,28 @@
         // Select the first selectable cell to the right of the currently selected and focused cell. If there are none, move down a row and begin from the start (left)
         evt.preventDefault();
         evt.stopPropagation();
-        let nextCell = cell.grid.nextCell(cell, true);
-        if (!nextCell) {
-          return;
+        cell.grid.startCell = undefined;
+        let newStartCell    = cell;
+        const nextCell        = cell.grid.nextCell(cell, true);
+        if (nextCell) {
+          cell.grid.selectCells([nextCell]);
+          newStartCell = nextCell;
         }
-        cell.grid.startCell = nextCell;
-        cell.grid.selectCells([nextCell]);
+        cell.grid.startCell = newStartCell;
       },
 
       'Shift+Tab': (evt: React.KeyboardEvent<any>, cell: ICell) => {
         // Select the first selectable cell to the left of the currently selected and focused cell. If there are none, move up a row and start from the end (right)
         evt.preventDefault();
         evt.stopPropagation();
-        let prevCell = cell.grid.previousCell(cell, true);
-        if (!prevCell) {
-          return;
+        cell.grid.startCell = undefined;
+        let newStartCell    = cell;
+        const prevCell        = cell.grid.previousCell(cell, true);
+        if (prevCell) {
+          cell.grid.selectCells([prevCell]);
+          newStartCell = prevCell;
         }
-        cell.grid.startCell = prevCell;
-        cell.grid.selectCells([prevCell]);
+        cell.grid.startCell = newStartCell;
       },
 
       'Home': (evt: React.KeyboardEvent<any>, cell: ICell) => {
@@ -211,10 +224,14 @@
         }
         evt.preventDefault();
         evt.stopPropagation();
-        let firstCellInRow = cell.grid.firstCellInRow(cell.row, true);
+        cell.grid.startCell = undefined;
+        let newStartCell    = cell;
+        const firstCellInRow  = cell.grid.firstCellInRow(cell.row, true);
         if (firstCellInRow) {
           cell.grid.selectCells([firstCellInRow]);
+          newStartCell = firstCellInRow;
         }
+        cell.grid.startCell = newStartCell;
       },
 
       'End': (evt: React.KeyboardEvent<any>, cell: ICell) => {
@@ -224,10 +241,14 @@
         }
         evt.preventDefault();
         evt.stopPropagation();
-        let lastCellInRow = cell.grid.lastCellInRow(cell.row, true);
+        cell.grid.startCell = undefined;
+        let newStartCell    = cell;
+        const lastCellInRow   = cell.grid.lastCellInRow(cell.row, true);
         if (lastCellInRow) {
           cell.grid.selectCells([lastCellInRow]);
+          newStartCell = lastCellInRow;
         }
+        cell.grid.startCell = newStartCell;
       },
 
       'Ctrl+Home': (evt: React.KeyboardEvent<any>, cell: ICell) => {
@@ -237,10 +258,14 @@
         }
         evt.preventDefault();
         evt.stopPropagation();
-        let firstCell = cell.grid.firstCell(true);
+        cell.grid.startCell = undefined;
+        let newStartCell    = cell;
+        const firstCell       = cell.grid.firstCell(true);
         if (firstCell) {
           cell.grid.selectCells([firstCell]);
+          newStartCell = firstCell;
         }
+        cell.grid.startCell = newStartCell;
       },
 
       'Ctrl+End': (evt: React.KeyboardEvent<any>, cell: ICell) => {
@@ -250,10 +275,14 @@
         }
         evt.preventDefault();
         evt.stopPropagation();
-        let lastCell = cell.grid.lastCell(true);
+        cell.grid.startCell = undefined;
+        let newStartCell    = cell;
+        const lastCell        = cell.grid.lastCell(true);
         if (lastCell) {
           cell.grid.selectCells([lastCell]);
+          newStartCell = lastCell;
         }
+        cell.grid.startCell = newStartCell;
       },
 
       /******************************/
@@ -275,6 +304,7 @@
           }, 0);
         } else {
           cell.grid.selectCells([]);
+          cell.grid.startCell = undefined;
           cell.setFocus(false);
         }
       },
@@ -291,7 +321,7 @@
         // Enter editing mode on selected cell
         evt.preventDefault();
         evt.stopPropagation();
-        if (cell.enabled && !cell.readOnly && cell.editable && cell.column.editor) {
+        if (!cell.readOnly && cell.editable && cell.column.editor && cell.canSelect) {
           cell.keyForEdit = undefined;
           cell.grid.editCell(cell);
         }
@@ -340,7 +370,7 @@
        Ctrl+D:      Duplicate selected row(s) below them
        Ctrl+Delete: Delete selected row(s)
       ---------------------------------------------------*/
-      'Ctrl+Insert': (evt: React.KeyboardEvent<any>, cell: ICell) => { if (cell.editing) { return; } cell.grid.rowKeybindPermissions.insertRow && cell.grid.insertRowAtSelection();     evt.stopPropagation(); evt.preventDefault(); },
-      'Ctrl+D'     : (evt: React.KeyboardEvent<any>, cell: ICell) => { if (cell.editing) { return; } cell.grid.rowKeybindPermissions.duplicateRow && cell.grid.duplicateSelectedRows(); evt.stopPropagation(); evt.preventDefault(); },
-      'Ctrl+Delete': (evt: React.KeyboardEvent<any>, cell: ICell) => { if (cell.editing) { return; } cell.grid.rowKeybindPermissions.deleteRow && cell.grid.removeSelectedRows();       evt.stopPropagation(); evt.preventDefault(); },
+      'Ctrl+Insert': (evt: React.KeyboardEvent<any>, cell: ICell): IRow | undefined   => { if (cell.editing) { return; } const newRow = cell.grid.rowKeybindPermissions.insertRow && cell.grid.insertRowAtSelection() || undefined;     evt.stopPropagation(); evt.preventDefault(); return newRow; },
+      'Ctrl+D'     : (evt: React.KeyboardEvent<any>, cell: ICell): IRow[] | undefined => { if (cell.editing) { return; } const newRow = cell.grid.rowKeybindPermissions.duplicateRow && cell.grid.duplicateSelectedRows() || undefined; evt.stopPropagation(); evt.preventDefault(); return newRow; },
+      'Ctrl+Delete': (evt: React.KeyboardEvent<any>, cell: ICell)                     => { if (cell.editing) { return; } cell.grid.rowKeybindPermissions.deleteRow && cell.grid.removeSelectedRows();                                 evt.stopPropagation(); evt.preventDefault(); },
     };

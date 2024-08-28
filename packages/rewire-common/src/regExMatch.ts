@@ -1,4 +1,5 @@
 export function escapeRegExp(str: string) {
+  // eslint-disable-next-line no-useless-escape
   return str.replace(/[\-\[\]\/\{\}\(\)\*\+\?\.\\\^\$\|]/g, '\\$&');
 }
 

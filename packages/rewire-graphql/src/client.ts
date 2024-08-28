@@ -1,3 +1,4 @@
+/* eslint-disable no-async-promise-executor */
 import {
   IClientOptions,
   IMutation,
@@ -6,14 +7,62 @@ import {
   IClient,
   isGQL,
   GraphQLMiddleware,
-  GQL
+  GQL,
+  IObservable,
+  ISubscription,
+  IObserver
 }                             from './types';
 import { BSON }               from './bson';
 import { hashString }         from './hash';
-import { SubscriptionClient } from 'subscriptions-transport-ws';
-import { from, Stream }       from 'most';
+import {
+  createClient,
+  Client as SubscriptionClient,
+  SubscribePayload
+}                             from 'graphql-ws';
 import { extractFiles }       from 'extract-files';
 import { ExecutionResult }    from 'graphql';
+
+class QueryObservable<T> implements IObservable<T> {
+  _subscription: ISubscription | undefined;
+  _observers: IObserver<T>[] = [];
+  _disposeFn?: () => void;
+
+  constructor(private client: SubscriptionClient, private query: SubscribePayload) {}
+
+  subscribe(observer: IObserver<T>): ISubscription {
+    // eslint-disable-next-line @typescript-eslint/no-this-alias
+    const self = this;
+    self._observers.push(observer);
+    const _subscription = {
+      unsubscribe() {
+        self._observers.splice(self._observers.indexOf(observer), 1);
+        if ((self._observers.length === 0) && self._disposeFn) {
+          self._disposeFn();
+          self._disposeFn = undefined;
+        }
+      }
+    };
+    if (self._disposeFn) return _subscription;
+    (async () => {
+        try {
+          self._disposeFn = self.client.subscribe(self.query, {
+            next: (data: any) => self._observers.forEach(o => o.next(data)),
+            error: (err: Error) => {
+              console.error(err);
+            },
+            complete: () => self._observers.forEach(o => o.complete()),
+          });
+        }
+        catch(err) {
+          console.error(err);
+          self._observers.forEach(o => o.error(err));
+          return;
+      }
+    })();
+
+    return _subscription;
+  }
+}
 
 class Client implements IClient {
   url                : string; // Graphql API URL
@@ -47,7 +96,7 @@ class Client implements IClient {
     const queryId = hashString(body);
 
     if (!mutate) {
-      let running = this.running[queryId];
+      const running = this.running[queryId];
       if (running) {
         return running;
       }
@@ -60,7 +109,7 @@ class Client implements IClient {
         : this.fetchOptions;
 
       try {
-        let reqInit = {
+        const reqInit = {
           body: body,
           headers: {
             'content-type': 'application/json',
@@ -81,8 +130,8 @@ class Client implements IClient {
         }
 
         if (this.bearer) reqInit.headers.Authorization = 'Bearer ' + this.bearer;
-        let res      = await fetch(this.url, reqInit);
-        let response = BSON.parse(await res.text());
+        const res      = await fetch(this.url, reqInit);
+        const response = BSON.parse(await res.text());
         if (res.ok && !response.errors) {
           resolve({data: response.data});
         } else {
@@ -97,15 +146,20 @@ class Client implements IClient {
     return promise;
   }
 
-  subscribe<T>(query: GQL, variables?: object): Stream<ExecutionResult<T>> {
+  subscribe<T>(query: GQL, variables?: object): IObservable<ExecutionResult<T>> {
     if (!this.subscriptionClient) {
       const url = new URL(this.url);
-      this.subscriptionClient = new SubscriptionClient(`ws://${url.host}/subscriptions`, {reconnect: true, lazy: true});
+      const protocol = (url.protocol == 'https:') ? 'wss:' : 'ws:';
+      this.subscriptionClient = createClient({
+        url: `${protocol}//${url.host}${url.pathname}`,
+        lazy: true,
+        retryAttempts: 200,
+        shouldRetry: () => true,
+        connectionParams: () => ({token: this.bearer})
+      });
     }
 
-    return from(this.subscriptionClient!.request(
-      {query: (isGQL(query)) ? query.loc.source.body : query, variables}
-    )) as Stream<ExecutionResult<T>>;
+    return new QueryObservable<ExecutionResult<T>>(this.subscriptionClient!, {query: (isGQL(query)) ? query.loc.source.body : query, variables: variables as Record<string, unknown>});
   }
 
   query(query: GQL, variables?: object, headers?: object, mutate: boolean = false): Promise<IQueryResponse> {
@@ -142,13 +196,13 @@ export function uploadMiddleware(query: IQuery, request: RequestInit, next: () =
 
   const map = {};
   let i     = 0;
-  files.forEach((paths: string) => {
+  files.forEach((paths: string[]) => {
     map[++i] = paths;
   });
   form.append('map', JSON.stringify(map));
 
   i = 0;
-  files.forEach((paths: string, file: File) => {
+  files.forEach((paths: string[], file: File) => {
     form.append(String(++i), file, file.name);
   });
 

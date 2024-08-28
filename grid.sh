@@ -1,5 +1,6 @@
 #!/bin/bash
-modules=("rewire-grid");
+# modules=("rewire-grid");
+modules=("rewire-common" "rewire-core" "rewire-ui" "rewire-grid" "rewire-graphql");
 
 while getopts ":cp" arg "$@"; do
   case $arg in
@@ -58,7 +59,7 @@ do
   cd dist
   tsc
   rm tsconfig.json
-  cp -rf ./src ~/dev/client/node_modules/$module/
+  cp -rf ./src ~/dev/flow-client/node_modules/$module/
 
   if [ ! -z $PUBLISH ];
   then

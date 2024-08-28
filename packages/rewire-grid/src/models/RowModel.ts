@@ -8,58 +8,69 @@ import {
   IErrorData,
   IDisposable,
   cloneValue,
-  IRowData
+  IRowData,
+  IGroupRow,
 }                                     from './GridTypes';
-import {isNullOrUndefined}            from 'rewire-common';
+import { isNullOrUndefined, guid }    from 'rewire-common';
 import createCell                     from './CellModel';
-import * as nanoid                    from 'nanoid';
-import * as deepEqual                 from 'fast-deep-equal';
-import { observable }                 from 'rewire-core';
+import deepEqual                      from 'fast-deep-equal';
+import {
+  observable,
+  DataSignal,
+  property
+}                                     from 'rewire-core';
 import { IValidationContext, IError } from 'rewire-ui';
 
 const EmptyFn = () => {};
 
 export class RowModel implements IRow, IDisposable, IValidationContext {
-  private _allowMergeColumns?: boolean;
-  id                    : string;
-  grid                  : IGrid;
-  cells                 : ICellMap;
-  selected              : boolean;
-  cls?                  : string;
-  data                  : any;
-  visible               : boolean;
-  fixed                 : boolean;
-  position              : number;
-  dispose               : () => void = EmptyFn;
+  private _allowMergeColumns: DataSignal<boolean | undefined>;
+  id                        : string;
+  keyId                     : string;
+  grid                      : IGrid;
+  cells                     : ICellMap;
+  groupRow?                 : IGroupRow;
+  selected                  : boolean;
+  cls?                      : string;
+  data                      : any;
+  visible                   : boolean;
+  fixed                     : boolean;
+  position                  : number;
+  dispose                   : () => void = EmptyFn;
   onClick?(row: IRow): void;
 
   static positionCompare(a: IRow, b: IRow): number {
     return a.position < b.position ? -1 : a.position > b.position ? 1 : 0;
   }
 
-  protected constructor() { }
-  protected initialize(grid: IGrid, data?: IRowData, position: number = 0) {
-    this.grid               = grid;
-    this.cells              = {};
-    this.selected           = false;
-    this.position           = position;
-    this.data               = data && data.data;
+  protected constructor() {
+    // setup properties
+    this._allowMergeColumns = property(undefined);
+  }
 
-    let options             = data && data.options;
-    this._allowMergeColumns = options && options.allowMergeColumns;
-    this.cls                = options && options.cls;
-    this.visible            = options && !isNullOrUndefined(options.visible) ? options.visible! : true;
-    this.fixed              = options && !isNullOrUndefined(options.fixed) ? options.fixed! : false;
-    this.onClick            = options && options.onClick;
+  protected initialize(grid: IGrid, data?: IRowData, position: number = 0) {
+    this.grid              = grid;
+    this.cells             = {};
+    this.selected          = false;
+    this.position          = position;
+    this.data              = data && data.data;
+    const options          = data && data.options;
+    this.allowMergeColumns = options && options.allowMergeColumns;
+    this.cls               = options && options.cls;
+    this.visible           = options && !isNullOrUndefined(options.visible) ? options.visible! : true;
+    this.fixed             = options && !isNullOrUndefined(options.fixed) ? options.fixed! : false;
+    this.onClick           = options && options.onClick;
 
     if (data && data.id) {
       this.id = String(data.id);
     } else {
-      this.id = nanoid(10);
+      this.id = guid();
     }
 
+    this.keyId = `${this.id}-${this.grid.version}`; 
+
     for (const column of this.grid.columns) {
-      this.createCell(column, data && data.data && data.data[column.name]);
+      this.createCell(column, (column as any).__getter(data && data.data));
     }
 
     if (!this.grid.loading && !this.fixed) {
@@ -77,11 +88,12 @@ export class RowModel implements IRow, IDisposable, IValidationContext {
     if (!this.fixed && this.grid.isRowCompleteFn(this)) this.grid.validator.validate(this);
   }
 
-  set allowMergeColumns(value: boolean) {
-    this._allowMergeColumns = value;
+  set allowMergeColumns(value: boolean | undefined) {
+    this._allowMergeColumns(value);
   }
   get allowMergeColumns(): boolean {
-    return !isNullOrUndefined(this._allowMergeColumns) ? this._allowMergeColumns! : this.grid.allowMergeColumns;
+    const allowMergeColumns = this._allowMergeColumns();
+    return !isNullOrUndefined(allowMergeColumns) ? allowMergeColumns : this.grid.allowMergeColumns;
   }
 
   get options(): IRowOptions {
@@ -100,14 +112,18 @@ export class RowModel implements IRow, IDisposable, IValidationContext {
     return {label: cell.column.title, value: this.data[field]};
   }
 
+  shouldValidate(_field: string) {
+    return true;
+  }
+
   // IValidationContext
   setError(field: string, error?: IError): void {
     this.cells[field].error = error;
     if (this.grid.onError) this.grid.onError(this, field, error);
   }
 
-  createCell(column: IColumn, value: any): ICell {
-    return this.cells[column.name] = createCell(this, column, value);
+  createCell(column: IColumn, value: any, isTitle: boolean = false): ICell {
+    return this.cells[column.name] = createCell(this, column, value, isTitle);
   }
 
   mergeAllColumns() {
@@ -133,7 +149,7 @@ export class RowModel implements IRow, IDisposable, IValidationContext {
     let colSpan                        = 1;
     let isSelected                     = false;
     let isFocused                      = false;
-    let focusedCell: ICell | undefined = this.grid.focusedCell;
+    const focusedCell: ICell | undefined = this.grid.focusedCell;
     let cellToFocus: ICell | undefined = undefined;
     let cellsToSelect: ICell[]         = [];
     for (const column of columns) {
@@ -141,8 +157,8 @@ export class RowModel implements IRow, IDisposable, IValidationContext {
         continue;
       }
 
-      let cell = this.cells[column.name];
-      if (previousCell && cell && previousCell.enabled === cell.enabled && ((previousCell.row.fixed && cell.row.fixed) || (previousCell.readOnly === cell.readOnly && previousCell.editable === cell.editable &&
+      const cell = this.cells[column.name];
+      if (previousCell && cell && previousCell.enabled === cell.enabled && previousCell.canSelect === cell.canSelect && ((previousCell.row.fixed && cell.row.fixed) || (previousCell.readOnly === cell.readOnly && previousCell.editable === cell.editable &&
           !previousCell.error && !cell.error && previousCell.column.type === cell.column.type)) && deepEqual(previousValue, cell.value)) {
         colSpan++;
         cell.colSpan = 0;
@@ -181,7 +197,7 @@ export class RowModel implements IRow, IDisposable, IValidationContext {
       }
     }
 
-    if (!cellsToSelect.length && !this.grid.selectedCells.length) {
+    if (this.grid.editingCell || (!cellsToSelect.length && !this.grid.selectedCells.length)) {
       return;
     }
 
@@ -197,7 +213,7 @@ export class RowModel implements IRow, IDisposable, IValidationContext {
 
   hasErrors(): boolean {
     for (const column of this.grid.columns) {
-      let cell = this.cells[column.name];
+      const cell = this.cells[column.name];
       if (!cell) continue;
       if (cell.hasErrors()) return true;
     }
@@ -205,10 +221,10 @@ export class RowModel implements IRow, IDisposable, IValidationContext {
   }
 
   getErrors(): IErrorData[] {
-    let errors: IErrorData[] = [];
+    const errors: IErrorData[] = [];
 
     for (const column of this.grid.columns) {
-      let cell = this.cells[column.name];
+      const cell = this.cells[column.name];
       if (!cell) continue;
       errors.concat(cell.getErrors());
     }
@@ -216,24 +232,24 @@ export class RowModel implements IRow, IDisposable, IValidationContext {
   }
 
   clear(columnNames?: string[]) {
-    let columnsToClear     = columnNames ? this.grid.columns.filter((column: IColumn) => columnNames.includes(column.name)) : this.grid.columns;
+    const columnsToClear     = columnNames ? this.grid.columns.filter((column: IColumn) => columnNames.includes(column.name)) : this.grid.columns;
     columnsToClear.forEach(c => this.cells[c.name].clear());
   }
 
   clone(): IRow {
-    let newCellValues: ICellMap = {};
+    const newCellValues: ICellMap = {};
     for (const column of this.grid.columns) {
-      let cell = this.cells[column.name];
+      const cell = this.cells[column.name];
       if (!cell) continue;
       newCellValues[column.name] = cloneValue(cell.value);
     }
-    let options: IRowOptions = {
+    const options: IRowOptions = {
       cls: this.cls,
       visible: this.visible,
       fixed: this.fixed,
-      allowMergeColumns: this._allowMergeColumns,
+      allowMergeColumns: this._allowMergeColumns(),
     };
-    let newRow = RowModel.create(this.grid, {data: newCellValues, options: options}, this.position);
+    const newRow = RowModel.create(this.grid, {data: newCellValues, options: options}, this.position);
     return newRow;
   }
 
@@ -243,10 +259,10 @@ export class RowModel implements IRow, IDisposable, IValidationContext {
 }
 
 export default function create(grid: IGrid, rows: IRow[], data?: IRowData, position?: number): IRow {
-  let options = data && data.options;
-  let fixed   = options && !isNullOrUndefined(options.fixed) ? options.fixed! : false;
-  let rowPos  = !isNullOrUndefined(position) ? Math.max(Math.min(position!, grid.rows.length), 0) : (fixed ? rows.length : undefined);
-  let r       = RowModel.create(grid, data, !isNullOrUndefined(rowPos) ? rowPos : grid.rows.length);
+  const options = data && data.options;
+  const fixed   = options && !isNullOrUndefined(options.fixed) ? options.fixed! : false;
+  const rowPos  = !isNullOrUndefined(position) ? Math.max(Math.min(position!, grid.rows.length), 0) : (fixed ? rows.length : undefined);
+  const r       = RowModel.create(grid, data, !isNullOrUndefined(rowPos) ? rowPos : grid.rows.length);
   rows.splice(r.position, 0, r);
   if (fixed) {
     grid.mergeFixedRows();

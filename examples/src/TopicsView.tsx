@@ -1,4 +1,4 @@
-import * as React from 'react';
+import React from 'react';
 import {
   Route,
   Link,
@@ -26,7 +26,7 @@ class TItem implements IItem {
   }
 }
 
-let sortableItems: TItem[] = observable([
+const sortableItems: TItem[] = observable([
   { id: '1-item', name: 'First Item' },
   { id: '2-item', name: 'Second Item' },
   { id: '3-item', name: 'Third Item' },

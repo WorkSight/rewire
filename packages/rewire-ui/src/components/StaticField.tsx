@@ -1,4 +1,4 @@
-import * as React                    from 'react';
+import React                    from 'react';
 import {isNullOrUndefined}           from 'rewire-common';
 import {Theme}                       from '@material-ui/core/styles';
 import TextField, { TextFieldProps } from '@material-ui/core/TextField';
@@ -23,17 +23,20 @@ const styles = (theme: Theme) => ({
   },
 });
 
+export type StaticFieldStyles = ReturnType<typeof styles>;
+
 export interface IStaticFieldProps {
   visible?: boolean;
   classes?: React.CSSProperties;
   value?  : string;
+  tooltip?: string | ((value: any) => string);
   label?  : string;
   align?  : TextAlignment;
 
   onValueChange: (value?: string) => void;
 }
 
-type StaticFieldProps = WithStyle<ReturnType<typeof styles>, IStaticFieldProps & TextFieldProps>;
+export type StaticFieldProps = WithStyle<StaticFieldStyles, IStaticFieldProps & TextFieldProps>;
 
 class StaticFieldInternal extends React.Component<StaticFieldProps> {
   constructor(props: StaticFieldProps) {
@@ -45,8 +48,20 @@ class StaticFieldInternal extends React.Component<StaticFieldProps> {
       (nextProps.value   !== this.props.value)   ||
       (nextProps.visible !== this.props.visible) ||
       (nextProps.label   !== this.props.label)   ||
-      (nextProps.align   !== this.props.align)
+      (nextProps.align   !== this.props.align)   ||
+      (nextProps.tooltip !== this.props.tooltip)
     );
+  }
+
+  getTooltip(value: any): string | undefined {
+    let tooltip = this.props.tooltip;
+    if (isNullOrUndefined(tooltip)) {
+      return value;
+    }
+    if (is.function(tooltip))  {
+      tooltip = (tooltip as CallableFunction)(value);
+    }
+    return tooltip as string;
   }
 
   render() {
@@ -55,7 +70,7 @@ class StaticFieldInternal extends React.Component<StaticFieldProps> {
     }
 
     const {classes} = this.props;
-    let value       = !isNullOrUndefined(this.props.value) ? this.props.value : '';
+    const value       = !isNullOrUndefined(this.props.value) ? this.props.value : '';
 
     return (
       <TextField
@@ -63,6 +78,7 @@ class StaticFieldInternal extends React.Component<StaticFieldProps> {
         disabled={true}
         label={this.props.label}
         value={value}
+        title={this.getTooltip(value)}
         type={this.props.type}
         onChange={(evt: React.ChangeEvent<HTMLInputElement>) => this.props.onValueChange(evt.target.value)}
         InputLabelProps={{shrink: true, classes: {root: classes.inputLabelRoot, disabled: classes.inputLabelDisabled}}}

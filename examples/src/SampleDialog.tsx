@@ -1,6 +1,5 @@
-import * as React from 'react';
+import React from 'react';
 import {
-  Dialog,
   Form,
   FormView,
   Modal,
@@ -13,14 +12,15 @@ import { Observe }   from 'rewire-core';
 import { delay }     from 'rewire-common';
 import Typography    from '@material-ui/core/Typography';
 import Button        from '@material-ui/core/Button';
-import { countries } from './demo-data';
+import { countries, searcher }      from './demo-data';
+import { DraggableResizableDialog } from 'rewire-ui';
 
 const clickHandler = (props: ISuggestionsContainerComponentProps) => () => {
   console.log('Add Item!');
   props.downShift.closeMenu();
 };
 
-const suggestionsContainerHeader = (props: ISuggestionsContainerComponentProps) => (
+const suggestionsContainerHeader = (_props: ISuggestionsContainerComponentProps) => (
   <div>
     <Typography variant='subtitle1'><strong>Items Title</strong></Typography>
   </div>
@@ -32,14 +32,20 @@ const suggestionsContainerFooter = (props: ISuggestionsContainerComponentProps) 
   </div>
 );
 
+const CustomEditor = (props: any) => {
+  return <span>{props.value}</span>;
+};
+
 function createForm() {
   return Form.create((_) => ({
-    email:                   _.email().label('Email').validators('email').placeholder('enter a valid email').autoFocus(),
+    email:                   _.email().label('Email').validators('email').placeholder('enter a valid email').autoFocus().tooltip((value) => `Email: ${value}`),
+    custom2:                 _.custom(CustomEditor).label('OOGA').placeholder('enter a valid email'),
     password:                _.password().label('Password').validators('required', validator('==', field('password_confirmation'), error('passwords must be the same'))).placeholder('enter a password'),
     password_confirmation:   _.password().label('Confirm Password').validators('required').placeholder('confirm your password'),
     country:                 _.reference(countries).label('Country').validators('required').placeholder('type to lookup'),
-    time:                    _.time().label('Time').validators('required').onValueChange((form: Form, v: any) => form.setFieldValue('email', 'hi@hi.com')),
-    multiselectAutoComplete: _.multiselectautocomplete(countries, { chipLimit: 2 }).label('Multiselect AutoComplete Country').validators('required').placeholder('select all that apply'),
+    time:                    _.time().label('Time').validators('required').onValueChange((form: Form, _v: any) => form.setFieldValue('email', 'hi@hi.com')),
+    multiselectAutoComplete: _.multiselectautocomplete(countries, { chipLimit: 2, inputAdd: (v: string) => ({id: v, name: v}) }).label('Multiselect AutoComplete Country').validators('required').placeholder('select all that apply'),
+    searchers:               _.multiselectautocomplete(searcher, { chipLimit: 2, inputAdd: (v: string) => v}).label('Multiselect AutoComplete Searcher').validators('required').placeholder('select all that apply'),
     multiselectCountry:      _.multiselect(countries).label('Multiselect Country').validators('required').placeholder('select countries'),
     selectCountry:           _.select(countries).label('Select Country').validators('required').placeholder('click to select'),
     money:                   _.number().label('Show Me').validators('required').placeholder('The Money'),
@@ -49,12 +55,13 @@ function createForm() {
     custom:                  _.number().label('> 10').validators((a) => a ? a > 10 : true),
     multi:                   _.multistring({ rows: 1 }).label('Multiline').placeholder('enter multistring').validators('required'),
     color:                   _.color().label('Color'),
-    phone:                   _.phone().label('Phone'),
+    phone:                   _.phone().label('Phone').accessor(['phone', 'home']),
     mask:                    _.mask({mask: ['(', /[1-9]/, /\d/, /\d/, ')', ' ', /\d/, /\d/, /\d/, '-', /\d/, /\d/, /\d/, /\d/]}).label('MyMask').validators('required'),
-    trigger:                 _.string().label('Trigger').placeholder('Change me to trigger handler').onValueChange((form: Form, v: any) => {form.setFieldValue('email', 'Triggered!@hotmail.com'); form.setFieldValue('money', 1337); }),
+    trigger:                 _.string().label('Trigger').placeholder('Change me to trigger handler').onValueChange((form: Form, _v: any) => {form.setFieldValue('email', 'Triggered!@hotmail.com'); form.setFieldValue('money', 1337); }),
     advancedAutoComplete:    _.reference(countries, { suggestionsContainerHeader: suggestionsContainerHeader, suggestionsContainerFooter: suggestionsContainerFooter, openOnFocus: true }).label('Advanced AutoComplete').validators('required').placeholder('select a country'),
   }), {
     email:                 'my_email@gmail.com',
+    custom2:               'my_email@gmail.com',
     country:               {id: 2, name: 'Albania'},
     selectCountry:         {id: 0, name: 'Afghanistan'},
     time:                  '10:30',
@@ -62,12 +69,13 @@ function createForm() {
     // password_confirmation: '384lalxk#44', // not providing a matching value causes form validation to fail and Submit button to become disabled
     money:                 '100.50',
     date:                  '2018-03-05',
+    phone:                 {home: '123123233'},
     multi:                 `this is line 1\r\nthis is line 2\r\nand this is line 3`,
     color:                 '#ffeedd',
     multiselectAutoComplete: [{ id: '0', name: 'Afghanistan' }, { id: '23', name: 'Benin' }, { id: '24', name: 'Bermuda' }],
     advancedAutoComplete: {id: 0, name: 'Afghanistan'},
   }
-)
+);
 }
 
 export class SampleModel extends Modal {
@@ -84,16 +92,28 @@ export class SampleModel extends Modal {
     console.log(this.form.value);
     await delay(2000);
     return true;
-  }
+  };
 }
 
 export const sampleModel = new SampleModel();
+// setInterval(() => {
+//   if (sampleModel.form.fields.find(f => f.name === 'dynamic_field')) {
+//     sampleModel.form.removeFields(['dynamic_field']);
+//     return;
+//   }
+
+//   sampleModel.form.addFields((_) => ({
+//     dynamic_field: _.string().label('Dynamic Field').placeholder('dynamic field!')
+//   }), {dynamic_field: 'ooga'});
+// }, 5000);
+
 const SampleFormView = React.memo(({ form }: { form: typeof sampleModel.form }) => (
   <Observe render={() => (
     <div style={{ fontSize: '16px' }}>
       <FormView form={form} onSubmit={sampleModel.actionFn('login')}>
         <div className='content'>
           <form.field.email.Editor />
+          <form.field.custom2.Editor />
           <form.field.country.Editor />
           <form.field.selectCountry.Editor />
           <form.field.multiselectCountry.Editor className='span2' />
@@ -117,17 +137,24 @@ const SampleFormView = React.memo(({ form }: { form: typeof sampleModel.form }) 
         </div>
         <div className='content'>
           <form.field.multiselectAutoComplete.Editor />
-        </div>
+          <form.field.searchers.Editor />
+          {/* <Observe render={() => (
+            <>
+              {!form.field.dynamic_field ? null : <form.field.dynamic_field.Editor />}
+              {!form.field.dynamic_field ? null : <form.field.dynamic_field.Editor />}
+            </>
+          )} /> */}
+          </div>
       </FormView>
     </div>
   )} />
 ));
 
 // override title
-const getTitle = (dialog: Modal): JSX.Element => <span>Dialog Title</span>;
+const getTitle = (_dialog: Modal): JSX.Element => <span>Dialog Title</span>;
 
 export const SampleDialog = () => (
-  <Dialog dialog={sampleModel} title={getTitle} maxWidth='lg'>
+  <DraggableResizableDialog defaultWidth='lg' DialogProps={{id: 'sample-dialog', dialog: sampleModel, title: getTitle}}>
     <SampleFormView form={sampleModel.form} />
-  </Dialog>
+  </DraggableResizableDialog>
 );

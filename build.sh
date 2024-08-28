@@ -57,13 +57,13 @@ do
   cp ../../tsconfig-build.json dist/tsconfig.json
   cp ../../tslint.json dist/tslint.json
   cd dist
-  tsc
+  ../../../node_modules/typescript/bin/tsc
   rm tsconfig.json
   rm tslint.json
 
   if [ ! -z $PUBLISH ];
   then
-    npm publish --registry https://npm.worksight.services/ --force
+    npm publish --force
     sleep 3s
   fi
   cd ../..

@@ -1,12 +1,14 @@
-import * as React              from 'react';
-import {SketchPicker}          from 'react-color';
-import Popover                 from '@material-ui/core/Popover';
-import {Theme}                 from '@material-ui/core/styles';
-import {WithStyle, withStyles} from './styles';
+import React                     from 'react';
+import { SketchPicker }          from 'react-color';
+import Popover                   from '@material-ui/core/Popover';
+import { Theme }                 from '@material-ui/core/styles';
+import { withStyles }            from './styles';
 import './colorPickerDialog.css';
 
-const styles = (theme: Theme) => ({
+const styles = (_theme: Theme) => ({
 });
+
+export type ColorPickerDialogStyles = ReturnType<typeof styles>;
 
 export interface IColor {
   hex: string;
@@ -24,7 +26,7 @@ export interface IColor {
   };
 }
 
-interface IColorPickerDialogProps {
+export interface IColorPickerDialogProps {
   className?: string;
   isOpen: boolean;
   anchorEl?: HTMLElement | (() => HTMLElement);
@@ -38,7 +40,7 @@ interface IColorPickerDialogProps {
   onChangeComplete?(color: IColor, evt: React.ChangeEvent<any>): void;
 }
 
-type ColorPickerDialogProps = WithStyle<ReturnType<typeof styles>, IColorPickerDialogProps>;
+export type ColorPickerDialogProps = IColorPickerDialogProps;
 
 class ColorPickerDialog extends React.Component<ColorPickerDialogProps> {
   constructor(props: ColorPickerDialogProps) {
@@ -77,10 +79,10 @@ class ColorPickerDialog extends React.Component<ColorPickerDialogProps> {
       >
         <SketchPicker
           color={color}
-          onChange={onChange}
-          onChangeComplete={onChangeComplete}
+          onChange={onChange as any}
+          onChangeComplete={onChangeComplete as any}
           disableAlpha={disableAlpha}
-          width={width || 225}
+          width={String(width) || "225px"}
           styles={{default: defaultStyles, disableAlpha: disableAlphaStyles}}
         />
       </Popover>

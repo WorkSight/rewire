@@ -1,35 +1,36 @@
-import * as React              from 'react';
-import { ChangeEvent }         from 'react';
-import {disposeOnUnmount}      from 'rewire-core';
-import classNames              from 'classnames';
-import RootRef                 from '@material-ui/core/RootRef';
-import {Theme}                 from '@material-ui/core/styles';
-import TextField               from '@material-ui/core/TextField';
-import MenuItem                from '@material-ui/core/MenuItem';
-import {SelectProps}           from '@material-ui/core/Select';
-import InputAdornment          from '@material-ui/core/InputAdornment';
+import React                      from 'react';
+import classNames                      from 'classnames';
+import { ChangeEvent }                 from 'react';
+import { isNullOrUndefined }           from 'rewire-common';
+import {Theme}                         from '@material-ui/core/styles';
+import TextField                       from '@material-ui/core/TextField';
+import MenuItem                        from '@material-ui/core/MenuItem';
+import {SelectProps as MuiSelectProps} from '@material-ui/core/Select';
+import InputAdornment                  from '@material-ui/core/InputAdornment';
+import ErrorTooltip                    from './ErrorTooltip';
 import {
   ICustomProps,
   SearchFn,
   MapFn,
   defaultMap,
   IRenderSuggestionFnProps,
-}                              from '../models/search';
-import {withStyles, WithStyle} from './styles';
+}                                      from '../models/search';
+import {withStyles, WithStyle}         from './styles';
 
-const styles = (theme: Theme) => ({
+const styles = (_theme: Theme) => ({
   inputRoot: {
-    flex: '1',
     lineHeight: 'inherit',
     fontSize: 'inherit',
   },
   inputInput: {
-    paddingTop: '0.28125em',
-    paddingBottom: '0.34375em',
+    paddingTop: '0.375em',
+    paddingBottom: '0.4375em',
+  },
+  nativeInput: {
   },
   inputOutlinedInput: {
-    paddingTop: '0.65625em',
-    paddingBottom: '0.65625em',
+    paddingTop: '0.75em',
+    paddingBottom: '0.75em',
   },
   inputLabelRoot: {
     fontSize: 'inherit',
@@ -64,6 +65,9 @@ const styles = (theme: Theme) => ({
       backgroundColor: 'transparent',
     }
   },
+  selectMenu: {
+    height: '1.1875em',
+  },
   selectMenuPaper: {
     minWidth: '250px !important',
   },
@@ -90,45 +94,56 @@ const styles = (theme: Theme) => ({
     marginTop: '6px',
     fontSize: '0.8em',
   },
+  helperTextRootErrorIcon: {
+    fontSize: '1.2em',
+  },
   helperTextContained: {
     marginLeft: '14px',
     marginRight: '14px',
   },
   formControlRoot: {
-    flex: '1',
+    width: 'auto !important',
+  },
+  icon: {
+    fontSize: '1.5em',
+    top: 'calc(50% - 0.5em)',
+  },
+  errorIcon: {
   },
 });
+
+export type SelectStyles = ReturnType<typeof styles>;
 
 export interface ISelectRenderSuggestionFnProps<T> extends IRenderSuggestionFnProps<T> {
   displayName: string;
 }
 
-interface ISelectProps<T> {
+export interface ISelectProps<T> {
   renderSuggestion?: (props: ISelectRenderSuggestionFnProps<T>) => JSX.Element;
+  dynamic?: boolean;
 }
 
-export type ISelectInternalProps<T> = ICustomProps<T> & React.InputHTMLAttributes<any> & SelectProps & ISelectProps<T>;
-type SelectInternalProps<T>         = WithStyle<ReturnType<typeof styles>, ISelectInternalProps<T>>;
+export type SelectProps<T> = WithStyle<SelectStyles, ISelectProps<T> & ICustomProps<T> & React.InputHTMLAttributes<any> & MuiSelectProps>;
 
-class SelectInternal<T> extends React.Component<SelectInternalProps<T>, any> {
+class Select<T> extends React.Component<SelectProps<T>, any> {
   // private _isMounted: boolean;
-  private InputRef: React.RefObject<HTMLElement>;
-  state      : any;
-  search     : SearchFn<T>;
-  map        : MapFn<T>;
-  _fontSize? : (string | null);
+  inputRef  : React.RefObject<HTMLInputElement>;
+  state     : any;
+  search    : SearchFn<T>;
+  map       : MapFn<T>;
+  _fontSize?: string;
 
-  constructor(props: SelectInternalProps<T>) {
+  constructor(props: SelectProps<T>) {
     super(props);
     // this._isMounted    = false;
     this.state         = {suggestions: [], isOpen: false, labelWidth: 0};
     this.search        = props.search;
     this.map           = props.map || defaultMap;
-    this.InputRef      = React.createRef();
+    this.inputRef      = React.createRef();
   }
 
-  componentDidMount() {
-    disposeOnUnmount(this, () => this.performSearch());
+  async componentDidMount() {
+    await this.performSearch();
     // this._isMounted = true;
   }
 
@@ -137,9 +152,9 @@ class SelectInternal<T> extends React.Component<SelectInternalProps<T>, any> {
 
     const suggestions = await this.search('', this.props.options);
     this.setState({suggestions: suggestions});
-  }
+  };
 
-  componentWillReceiveProps (nextProps: ICustomProps<T>) {
+  UNSAFE_componentWillReceiveProps (nextProps: ICustomProps<T>) {
     if (nextProps.options) {
       if (nextProps.options.parentId !== (this.props.options && this.props.options.parentId)) {
         this.props.onSelectItem(undefined);
@@ -147,22 +162,70 @@ class SelectInternal<T> extends React.Component<SelectInternalProps<T>, any> {
     }
   }
 
-  handleOnClose = (event: object) => {
-    this.setState({isOpen: false});
+  shouldComponentUpdate(nextProps: SelectProps<T>, nextState: any, _nextContext: any) {
+    return (
+        (nextProps.selectedItem        !== this.props.selectedItem)        ||
+        (nextProps.error               !== this.props.error)               ||
+        (nextProps.disabled            !== this.props.disabled)            ||
+        (nextProps.readOnly            !== this.props.readOnly)            ||
+        (nextProps.visible             !== this.props.visible)             ||
+        (nextState.suggestions         !== this.state.suggestions)         ||
+        (nextState.isOpen              !== this.state.isOpen)              ||
+        (nextProps.label               !== this.props.label)               ||
+        (nextProps.placeholder         !== this.props.placeholder)         ||
+        (nextProps.align               !== this.props.align)               ||
+        (nextProps.variant             !== this.props.variant)             ||
+        (nextProps.multiple            !== this.props.multiple)            ||
+        (nextProps.dynamic             !== this.props.dynamic)             ||
+        (nextProps.disableErrors       !== this.props.disableErrors)       ||
+        (nextProps.useTooltipForErrors !== this.props.useTooltipForErrors) ||
+        (nextProps.startAdornment      !== this.props.startAdornment)      ||
+        (nextProps.endAdornment        !== this.props.endAdornment)        ||
+        (nextProps.tooltip             !== this.props.tooltip)
+      );
   }
 
-  handleOnOpen = (event: object) => {
-    this.setState({isOpen: true});
+  getTooltip(value: any): string | undefined {
+    let tooltip = this.props.tooltip;
+    if (isNullOrUndefined(tooltip)) {
+      if (isNullOrUndefined(value) || (this.props.multiple && value.length <= 0)) {
+        return undefined;
+      }
+      if (this.props.multiple) {
+        return value.join(', ');
+      } else {
+        return String(value);
+      }
+    }
+    if (is.function(tooltip))  {
+      tooltip = (tooltip as CallableFunction)(value);
+    }
+    return tooltip as string;
   }
+
+  handleOnClose = (_event: object) => {
+    this.setState({isOpen: false});
+  };
+
+  handleOnOpen = (_event: object) => {
+    this.openMenu();
+  };
+
+  openMenu = async () => {
+    if (this.props.dynamic) {
+      await this.performSearch();
+    }
+    this.setState({isOpen: true});
+  };
 
   handleMenuKeyDown = (event: React.KeyboardEvent<any>) => {
     switch (event.keyCode) {
-      case 9:
-        let valueToSelect = this.state.suggestions.find((v: any) => event.target.dataset.value === this.map(v));
+      case 9: {
+        const valueToSelect = this.state.suggestions.find((v: any) => (event.target as any).dataset.value === this.map(v));
         if (this.props.multiple) {
-          let values = this.props.selectedItem;
+          let values = this.props.selectedItem as unknown as (T[] | undefined);
           if (values) {
-            let valueToSelectMapped = this.map(valueToSelect);
+            const valueToSelectMapped = this.map(valueToSelect);
             if (values.findIndex((v: any) => this.map(v) === valueToSelectMapped) >= 0) {
               values = values.filter((v: any) => this.map(v) !== valueToSelectMapped);
               values = values.length <= 0 ? undefined : values;
@@ -170,7 +233,7 @@ class SelectInternal<T> extends React.Component<SelectInternalProps<T>, any> {
               values.push(valueToSelect);
             }
           }
-          this.props.onSelectItem && this.props.onSelectItem(values);
+          this.props.onSelectItem && this.props.onSelectItem(values as any);
         } else {
           this.props.onSelectItem && this.props.onSelectItem(valueToSelect);
         }
@@ -178,6 +241,8 @@ class SelectInternal<T> extends React.Component<SelectInternalProps<T>, any> {
         event.preventDefault();
         event.stopPropagation();
         event.nativeEvent.stopImmediatePropagation();
+        break;
+      }
       case 13:
       case 37:
       case 38:
@@ -187,53 +252,57 @@ class SelectInternal<T> extends React.Component<SelectInternalProps<T>, any> {
         event.nativeEvent.stopImmediatePropagation();
         break;
     }
-  }
+  };
 
   handleMenuKeyPress = (event: React.KeyboardEvent<any>) => {
     event.preventDefault();
     event.stopPropagation();
     event.nativeEvent.stopImmediatePropagation();
-  }
+  };
 
   handleMenuMouseEnter = (event: React.MouseEvent<any>) => {
     event.preventDefault();
     event.stopPropagation();
     event.nativeEvent.stopImmediatePropagation();
-  }
+  };
 
   handleMenuMouseDown = (event: React.MouseEvent<any>) => {
     event.preventDefault();
     event.stopPropagation();
     event.nativeEvent.stopImmediatePropagation();
-  }
+  };
 
   handleMenuMouseUp = (event: React.MouseEvent<any>) => {
     event.preventDefault();
     event.stopPropagation();
     event.nativeEvent.stopImmediatePropagation();
-  }
+  };
 
   handleMenuClick = (event: React.MouseEvent<any>) => {
     event.preventDefault();
     event.stopPropagation();
     event.nativeEvent.stopImmediatePropagation();
-  }
+  };
 
   handleMenuDoubleClick = (event: React.MouseEvent<any>) => {
     event.preventDefault();
     event.stopPropagation();
     event.nativeEvent.stopImmediatePropagation();
-  }
+  };
 
   handleKeyDown = (evt: React.KeyboardEvent<any>) => {
     this.props.onKeyDown && this.props.onKeyDown(evt);
+    if (this.props.disabled || this.props.readOnly) {
+      return;
+    }
 
     switch (evt.key) {
       case 'ArrowUp':
       case 'ArrowDown':
       case ' ':
         evt.preventDefault();
-        this.setState({isOpen: true});
+        this.openMenu();
+        break;
       case 'Enter':
         break;
       case 'Delete':
@@ -243,7 +312,7 @@ class SelectInternal<T> extends React.Component<SelectInternalProps<T>, any> {
       default:
         break;
     }
-  }
+  };
 
   handleChanged = (event: ChangeEvent<any>) => {
     if (this.props.onSelectItem) {
@@ -255,31 +324,16 @@ class SelectInternal<T> extends React.Component<SelectInternalProps<T>, any> {
         this.props.onSelectItem(this.state.suggestions.find((v: any) => event.target.value === this.map(v)));
       }
     }
-  }
+  };
 
-  shouldComponentUpdate(nextProps: ICustomProps<T> & React.InputHTMLAttributes<any>, nextState: any, nextContext: any) {
-    return (
-        (nextProps.selectedItem   !== this.props.selectedItem)   ||
-        (nextProps.error          !== this.props.error)          ||
-        (nextProps.disabled       !== this.props.disabled)       ||
-        (nextProps.visible        !== this.props.visible)        ||
-        (nextState.suggestions    !== this.state.suggestions)    ||
-        (nextState.isOpen         !== this.state.isOpen)         ||
-        (nextProps.label          !== this.props.label)          ||
-        (nextProps.placeholder    !== this.props.placeholder)    ||
-        (nextProps.align          !== this.props.align)          ||
-        (nextProps.variant        !== this.props.variant)        ||
-        (nextProps.multiple       !== this.props.multiple)       ||
-        (nextProps.disableErrors  !== this.props.disableErrors)  ||
-        (nextProps.startAdornment !== this.props.startAdornment) ||
-        (nextProps.endAdornment   !== this.props.endAdornment)
-      );
+  setFontSize() {
+    if (!this._fontSize) {
+      this._fontSize = (this.inputRef.current && window.getComputedStyle(this.inputRef.current).getPropertyValue('font-size')) ?? undefined; // needed to make the menu items font-size the same as the shown value
+    }
   }
 
   renderSuggestions(v: any, multiple?: boolean) {
-    if (!this._fontSize) {
-      this._fontSize = this.InputRef.current && window.getComputedStyle(this.InputRef.current).getPropertyValue('font-size'); // needed to make the menu items font-size the same as the shown value
-    }
+    this.setFontSize();
     return (
       this.state.suggestions.map((suggestion: any, index: number) => {
         const displayName = this.map(suggestion);
@@ -303,14 +357,31 @@ class SelectInternal<T> extends React.Component<SelectInternalProps<T>, any> {
         </MenuItem>
       );
     }
-    let s: any = {fontSize: fontSize};
+    const s: any = {fontSize: fontSize};
     if (isHighlighted) {
       s.fontWeight = '500';
     }
     return (
-      <MenuItem key={index} component='div' selected={isHighlighted} value={displayName} style={s} classes={{root: this.props.classes.selectMenuItem}}><span>{displayName}</span></MenuItem>
+      <MenuItem key={index} component={'div' as any} selected={isHighlighted} value={displayName} style={s} classes={{root: this.props.classes.selectMenuItem}}><span>{displayName}</span></MenuItem>
     );
-  }
+  };
+
+  renderError = React.memo((props: any) => {
+    const {classes, error, useTooltipForErrors} = props;
+
+    if (!useTooltipForErrors) {
+      return error;
+    }
+
+    return (
+      <ErrorTooltip
+        fontSize={this._fontSize}
+        inputRef={this.inputRef}
+        error={error}
+        classes={{errorIcon: classes.errorIcon}}
+      />
+    );
+  });
 
   renderValue(v: any, multiple?: boolean, placeholder?: string) {
     if (!v || (multiple && v.length <= 0)) {
@@ -331,7 +402,7 @@ class SelectInternal<T> extends React.Component<SelectInternalProps<T>, any> {
       return null;
     }
 
-    const v              = this.props.multiple ? this.props.selectedItem && this.props.selectedItem.map((val: any) => this.map(val)) || [] : this.map(this.props.selectedItem);
+    const v              = this.props.multiple ? this.props.selectedItem && (this.props.selectedItem as unknown as T[]).map((val: any) => this.map(val)) || [] : this.map(this.props.selectedItem);
     const startAdornment = this.props.startAdornment ? <InputAdornment position='start' classes={{root: this.props.classes.inputAdornmentRoot}}>{this.props.startAdornment}</InputAdornment> : undefined;
     const endAdornment   = this.props.endAdornment ? <InputAdornment position='end' classes={{root: this.props.classes.inputAdornmentRoot}}>{this.props.endAdornment}</InputAdornment> : undefined;
     const menuListProps  = {
@@ -356,50 +427,50 @@ class SelectInternal<T> extends React.Component<SelectInternalProps<T>, any> {
       inputFormControlClassName = classes.inputFormControlWithLabel;
     }
 
-    let cls = (this.props.className || '') + ' select';
+    const cls = (this.props.className || '') + ' select';
 
     return (
-      <RootRef rootRef={this.InputRef}>
-        <TextField
-          className={cls}
-          classes={{root: classes.formControlRoot}}
-          style={this.props.style}
-          select={true}
-          disabled={!!this.props.disabled}
-          label={this.props.label}
-          placeholder={this.props.placeholder}
-          variant={variant}
-          error={!this.props.disableErrors && !this.props.disabled && !!this.props.error}
-          helperText={!this.props.disableErrors && <span>{(!this.props.disabled && this.props.error) || ''}</span>}
-          value={v}
-          onChange={this.handleChanged}
-          autoFocus={this.props.autoFocus}
-          inputProps={{spellCheck: false, className: classes.nativeInput, style: {textAlign: this.props.align || 'left'}}}
-          InputProps={{startAdornment: startAdornment, endAdornment: endAdornment, classes: {root: classes.inputRoot, input: inputClassName, formControl: inputFormControlClassName}}}
-          InputLabelProps={{shrink: true, classes: {root: classes.inputLabelRoot, outlined: classes.inputLabelOutlined, shrink: classes.inputLabelShrink}}}
-          FormHelperTextProps={{classes: {root: classes.helperTextRoot, contained: classes.helperTextContained}}}
-          SelectProps={{
-            multiple: this.props.multiple,
-            open: this.state.isOpen,
-            onOpen: this.handleOnOpen,
-            onClose: this.handleOnClose,
-            value: v,
-            displayEmpty: true,
-            classes: {root: selectRootClasses, select: classes.select},
-            SelectDisplayProps: {onKeyDown: this.handleKeyDown},
-            MenuProps: {classes: {paper: classes.selectMenuPaper}, MenuListProps: menuListProps},
-            renderValue: (() => (
-              <span className={classes.valueRendererContainer} style={{textAlign: this.props.align || 'left'}}>
-                {this.renderValue(v, this.props.multiple, this.props.placeholder)}
-              </span>
-            ))
-          }}
-        >
-          {this.renderSuggestions(v, this.props.multiple)}
-        </TextField>
-      </RootRef>
+      <TextField
+        className={cls}
+        ref={this.inputRef}
+        classes={{root: classes.formControlRoot}}
+        style={this.props.style}
+        select={true}
+        disabled={!!this.props.disabled}
+        label={this.props.label}
+        placeholder={this.props.placeholder}
+        variant={variant as any}
+        error={!this.props.disableErrors && !this.props.disabled && !!this.props.error}
+        helperText={!this.props.disableErrors && <span>{(!this.props.disabled && this.props.error ? <this.renderError classes={this.props.classes} error={this.props.error} useTooltipForErrors={this.props.useTooltipForErrors} /> : '')}</span>}
+        value={v}
+        title={this.getTooltip(v)}
+        onChange={this.handleChanged}
+        autoFocus={!!this.props.autoFocus}
+        inputProps={{spellCheck: false, className: classes.nativeInput, style: {textAlign: this.props.align || 'left'}}}
+        InputProps={{readOnly: !!this.props.readOnly, startAdornment: startAdornment, endAdornment: endAdornment, classes: {root: classes.inputRoot, input: inputClassName, formControl: inputFormControlClassName}}}
+        InputLabelProps={{shrink: true, classes: {root: classes.inputLabelRoot, outlined: classes.inputLabelOutlined, shrink: classes.inputLabelShrink}}}
+        FormHelperTextProps={{classes: {root: classNames(classes.helperTextRoot, this.props.useTooltipForErrors ? classes.helperTextRootErrorIcon : undefined), contained: classes.helperTextContained}}}
+        SelectProps={{
+          multiple: this.props.multiple,
+          open: this.state.isOpen,
+          onOpen: this.handleOnOpen,
+          onClose: this.handleOnClose,
+          value: v,
+          displayEmpty: true,
+          classes: {root: selectRootClasses, select: classes.select, selectMenu: classes.selectMenu, icon: classes.icon},
+          SelectDisplayProps: {onKeyDown: this.handleKeyDown},
+          MenuProps: {classes: {paper: classes.selectMenuPaper}, MenuListProps: menuListProps},
+          renderValue: (() => (
+            <span className={classes.valueRendererContainer} style={{textAlign: this.props.align || 'left'}}>
+              {this.renderValue(v, this.props.multiple, this.props.placeholder)}
+            </span>
+          ))
+        }}
+      >
+        {this.renderSuggestions(v, this.props.multiple)}
+      </TextField>
     );
   }
 }
 
-export default withStyles(styles, SelectInternal);
+export default withStyles(styles, Select);

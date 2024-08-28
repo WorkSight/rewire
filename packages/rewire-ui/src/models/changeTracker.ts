@@ -1,5 +1,5 @@
-import { observable, DataSignal, property, sample, freeze, root } from 'rewire-core';
-import * as deepEqual                                 from 'fast-deep-equal';
+import { DataSignal, property, sample, freeze, root } from 'rewire-core';
+import deepEqual                                      from 'fast-deep-equal';
 
 export interface IRowData {
   id: string;
@@ -7,7 +7,8 @@ export interface IRowData {
 }
 
 export interface IChangeTrackerContext {
-  length: number;
+  length:     number;
+  depth:      number;
   getRow      (index: number): IRowData | undefined;
   setRow      (index: number, value: IRowData): void;
   onHasChanges(changes: boolean): void;
@@ -15,7 +16,7 @@ export interface IChangeTrackerContext {
 }
 
 export class ArrayChangeTrackerContext implements IChangeTrackerContext {
-  constructor(private _rows: IRowData[], public isComplete: (value: any) => boolean = () => true) {}
+  constructor(private _rows: IRowData[], public isComplete: (value: any) => boolean = () => true, public depth: number = 2) {}
 
   get length() {
     return this._rows.length;
@@ -25,7 +26,7 @@ export class ArrayChangeTrackerContext implements IChangeTrackerContext {
     this._rows.length = value;
   }
 
-  onHasChanges(value: boolean) {}
+  onHasChanges(_value: boolean) {}
 
   getRow(index: number) {
     if ((index < 0) || (index >= this._rows.length)) return undefined;
@@ -38,14 +39,14 @@ export class ArrayChangeTrackerContext implements IChangeTrackerContext {
 }
 
 function clone(source: any, depth: number = 1) {
-  if (!source || (depth === 0)) return source;
+  if (!source || (depth <= 0)) return source;
   const type = (typeof source);
   if (type !== 'object') return source;
 
   if (Array.isArray(source)) {
     const v: any[] = [];
     for (let index = 0; index < source.length; index++) {
-      v[index] = clone(source[index], 1);
+      v[index] = clone(source[index], depth - 1);
     }
     return v;
   }
@@ -86,8 +87,8 @@ export class ChangeTracker {
   private _original?      : IOriginalData;
   private _working?       : IRowData[];
   private _recalculating? : Promise<boolean>;
-  private _dispose        : () => void;
-  private _interval       : NodeJS.Timeout;
+  private _dispose?       : () => void;
+  private _interval?      : NodeJS.Timeout;
   constructor(private _context: IChangeTrackerContext) {
     root((dispose) => {
       this._dispose = dispose;
@@ -118,7 +119,7 @@ export class ChangeTracker {
         if (!id) throw new Error(`your data must have id's to use change tracking`);
         if (!this._context.isComplete(row)) continue; // skip incomplete rows
         original.size++;
-        original.data[id] = {index, data: clone(this.workingData(row), 2)};
+        original.data[id] = {index, data: clone(this.workingData(row), this._context.depth)};
       }
       this._original = original;
     });
@@ -134,11 +135,8 @@ export class ChangeTracker {
       this.setHasChanges(false);
       this._working!.length = this._original.size;
       for (const value of Object.values(this._original.data) as any[]) {
-        const original: any = this._context.getRow(value.index);
-        console.warn(original);
-        const theClone: any = clone(value.data, 2);
+        const theClone: any = clone(value.data, this._context.depth);
         this._context.setRow(value.index, theClone);
-        console.log(theClone, this._context.getRow(value.index));
       }
     });
   }
@@ -174,6 +172,10 @@ export class ChangeTracker {
 
   public setIsCompleteRowFn(completeFn: (value: any) => boolean) {
     this._context.isComplete = completeFn;
+  }
+
+  public setDepth(depth: number) {
+    this._context.depth = depth;
   }
 
   public get hasChanges() {
@@ -216,10 +218,32 @@ export class ChangeTracker {
     return !deepEqual(this.workingData(row)[field], original.data[field]);
   }
 
+  public getChangedRows() {
+    if (!this._original || !this._working) return [];
+    const changedRows = [];
+    for (let widx = 0; widx < this._working.length; widx++) {
+      const working = this._context.getRow(widx);
+      if (!working) {
+        if (this._context.isComplete(this._working[widx])) {
+          changedRows.push(clone(this.workingData(this._working[widx]), this._context.depth));
+        }
+      } else {
+        if (!this._context.isComplete(working)) continue;
+        if (!this.rowIsEqual(working)) {
+          changedRows.push(clone(this.workingData(working), this._context.depth));
+        }
+      }
+    }
+
+    const deletedRows = Object.keys(this._original.data).filter(id => !this._working!.some(r => r.id === id)).map(key => clone(this._original!.data[key].data, this._context.depth));
+    changedRows.push(...deletedRows);
+    return changedRows;
+  }
+
   public async recalculate() {
     if (!this._original || !this._working) return Promise.resolve(this._hasChanges());
     if (this._recalculating) return this._recalculating;
-    return this._recalculating = new Promise<boolean>((resolve, reject) => {
+    return this._recalculating = new Promise<boolean>((resolve, _reject) => {
       requestAnimationFrame(() => {
         const hasChanges = !this._equals();
         this.setHasChanges(hasChanges);
@@ -235,7 +259,7 @@ testing comment this out after every change to the tracker to make sure tests pa
 */
 /*
 function sample2() {
-  let rows: any[] = observable([]);
+  let rows: any[] = [];
   for (let index = 0; index < 1; index++) {
     const row = {id: String(index)};
     for (let c = 4; c < 5; c++) {

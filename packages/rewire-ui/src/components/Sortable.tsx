@@ -1,4 +1,4 @@
-import * as React          from 'react';
+import React          from 'react';
 import cc                  from 'classcat';
 import {
   Droppable,
@@ -31,7 +31,7 @@ import {omit}              from 'rewire-common';
 //   return '#' + (0x1000000 + (Math.round((t - R) * p) + R) * 0x10000 + (Math.round((t - G) * p) + G) * 0x100 + (Math.round((t - B) * p) + B)).toString(16).slice(1);
 // }
 
-const styles = {
+const sortableListStyles = {
   'item-container': {
     display:    'flex',
     flex:       '1',
@@ -77,11 +77,11 @@ const styles = {
   },
 };
 
+export type SortableListStyles = StyleProps<typeof sortableListStyles>;
+
 export interface IItem {
   id: string;
 }
-
-export type SortableStyles = StyleProps<typeof styles>;
 
 export type ListItemProps = {
   items          : IItem[];
@@ -90,7 +90,7 @@ export type ListItemProps = {
   itemRenderer?  : (item: IItem) => JSX.Element;
   autoFocusId?   : string;
   disableTabbing?: boolean;
-} & SortableStyles;
+} & SortableListStyles;
 
 export type ItemProps = {
   showDragHandle?: boolean;
@@ -100,7 +100,7 @@ export type ItemProps = {
   itemRenderer   : (item: IItem) => JSX.Element;
   item           : IItem;
   disableTabbing?: boolean;
-} & SortableStyles;
+} & SortableListStyles;
 
 export class Item extends React.Component<ItemProps> {
   node?: HTMLDivElement;
@@ -112,13 +112,13 @@ export class Item extends React.Component<ItemProps> {
   }
 
   setFocus = (evt: React.MouseEvent<any>) => {
-    let element = evt.target as any;
+    const element = evt.target as any;
     if (this.props.showDragHandle) {
       element.focus();
     } else {
       element.parentNode.focus();
     }
-  }
+  };
 
   render() {
     const {item, dragProvided, classes, showDragHandle, itemRenderer, disableTabbing} = this.props;
@@ -155,7 +155,7 @@ export class ListItems extends React.Component<ListItemProps> {
         < >
         {this.props.items.map((item: any, index: number) => (
             <Draggable key={item.id} draggableId={item.id} index={index}>
-              {(dragProvided: DraggableProvided, dragSnapshot: DraggableStateSnapshot) => (
+              {(dragProvided: DraggableProvided & {placeholder?: any}, _dragSnapshot: DraggableStateSnapshot) => (
                 <div>
                   <Item dragProvided={dragProvided} showDragHandle={this.props.showDragHandle} disableTabbing={this.props.disableTabbing} itemRenderer={itemRenderer} classes={this.props.classes} theme={this.props.theme} autoFocus={item.id === this.props.autoFocusId} item={item} />
                   {dragProvided.placeholder}
@@ -170,25 +170,28 @@ export class ListItems extends React.Component<ListItemProps> {
   }
 }
 
-export type SortableListProps = {
+export interface ISortableListProps {
   listId         : string;
   listType?      : string;
   autoFocusId?   : string;
   scrollable?    : boolean;
   isDropDisabled?: boolean;
-  listRenderer?  : React.SFC<any>;
+  listRenderer?  : (props: any) => JSX.Element | React.ComponentElement<any, any> | null;
   itemRenderer?  : (item: IItem) => JSX.Element;
-  style?         : Object;
+  style?         : Record<string, unknown>;
   classes?       : React.CSSProperties;
   showDragHandle?: boolean;
   disableTabbing?: boolean;
+  children?      : React.ReactNode;
   items          : IItem[];
-};
+}
 
 const manager: Record<string, any> = {};
 
-class SortableListInternal extends React.Component<SortableListProps & SortableStyles> {
-  componentWillMount () {
+export type SortableListProps = ISortableListProps & SortableListStyles;
+
+class SortableListInternal extends React.Component<ISortableListProps> {
+  UNSAFE_componentWillMount () {
     manager[(this.props.listType || 'DEFAULT') + this.props.listId] = this.props.items;
   }
 
@@ -197,7 +200,7 @@ class SortableListInternal extends React.Component<SortableListProps & SortableS
   }
 
   render() {
-    const {scrollable, listRenderer, itemRenderer, showDragHandle, isDropDisabled, listId, listType, style, items, classes, autoFocusId, disableTabbing} = this.props;
+    const {scrollable, theme, listRenderer, itemRenderer, showDragHandle, isDropDisabled, listId, listType, style, items, classes, autoFocusId, disableTabbing} = this.props as SortableListProps;
     const listProps = listRenderer ? {style: {display: 'flex', flexDirection: 'column', width: '100%'}} : undefined;
     const List      = listRenderer || React.Fragment;
     return (
@@ -205,7 +208,7 @@ class SortableListInternal extends React.Component<SortableListProps & SortableS
         {(dropProvided: DroppableProvided, dropSnapshot: DroppableStateSnapshot) => (
           <List {...listProps}>
           <div
-            className={cc({[classes['droppable-container']]: true, [classes['scroll-container']]: (scrollable || isNullOrUndefined(scrollable)), 'is-dragging-over': dropSnapshot.isDraggingOver, 'is-drop-disabled': isDropDisabled})}
+            className={cc({[classes['droppable-container']!]: true, [classes['scroll-container']!]: (scrollable || isNullOrUndefined(scrollable)), 'is-dragging-over': dropSnapshot.isDraggingOver, 'is-drop-disabled': isDropDisabled})}
             style={style}
             {...(dropProvided as any).droppableProps}
           >
@@ -216,7 +219,7 @@ class SortableListInternal extends React.Component<SortableListProps & SortableS
                 autoFocusId={autoFocusId}
                 disableTabbing={disableTabbing}
                 classes={classes}
-                theme={this.props.theme}
+                theme={theme}
                 itemRenderer={itemRenderer}
               />
               {dropProvided.placeholder}
@@ -229,16 +232,17 @@ class SortableListInternal extends React.Component<SortableListProps & SortableS
   }
 }
 
-export const SortableList = withStyles(styles, SortableListInternal);
+export const SortableList = withStyles(sortableListStyles, SortableListInternal);
 
-export interface Props {
+export interface ISortableProps {
   direction?: 'row' | 'column';
-  classes?: React.CSSProperties;
+  classes?:   any;
+  children?:  React.ReactNode;
   onDragStart?(initial: DragStart): void;
   onDragEnd?(result: DropResult): void;
 }
 
-const containerStyles = {
+const sortableStyles = {
   root: {
     display: 'flex',
     margin : 0,
@@ -252,14 +256,17 @@ const containerStyles = {
   },
 };
 
-class Sortable extends React.PureComponent<WithStyle<typeof containerStyles, Props>> {
+export type SortableStyles = typeof sortableStyles;
+export type SortableProps  = WithStyle<SortableStyles, ISortableProps>;
+
+class Sortable extends React.PureComponent<ISortableProps> {
   onDragEnd = (result: DropResult) => {
     if (!result.destination || !this.props.children) {
       return;
     }
 
-    let source      = manager[result.type + result.source.droppableId];
-    let destination = manager[result.type + result.destination.droppableId];
+    const source      = manager[result.type + result.source.droppableId];
+    const destination = manager[result.type + result.destination.droppableId];
 
     if (!source || !destination) {
       return;
@@ -269,20 +276,21 @@ class Sortable extends React.PureComponent<WithStyle<typeof containerStyles, Pro
     if (this.props.onDragEnd) {
       this.props.onDragEnd.call(this, result);
     }
-  }
+  };
 
   render() {
+    const props = this.props as SortableProps;
     return (
       <DragDropContext
         onDragStart={this.props.onDragStart}
         onDragEnd={this.onDragEnd}
       >
-        <div style={this.props.style} className={cc({[this.props.classes.root]: true, row: this.props.direction === 'row'})}>
-          {this.props.children}
+        <div style={props.style} className={cc({[props.classes.root!]: true, row: props.direction === 'row'})}>
+          {props.children}
         </div>
       </DragDropContext>
     );
   }
 }
 
-export default withStyles(containerStyles, Sortable);
+export default (withStyles(sortableStyles, Sortable) as unknown as (typeof Sortable));

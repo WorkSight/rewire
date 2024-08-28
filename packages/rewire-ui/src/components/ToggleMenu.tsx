@@ -1,165 +1,114 @@
-import * as React              from 'react';
-import {isNullOrUndefined}     from 'rewire-common';
+import React              from 'react';
+import is                 from 'is';
 import {Observe}               from 'rewire-core';
-import classNames              from 'classnames';
 import {Theme}                 from '@material-ui/core/styles';
-import Button, {ButtonProps}   from '@material-ui/core/Button';
-import Menu, {MenuProps}       from '@material-ui/core/Menu';
 import MenuItem                from '@material-ui/core/MenuItem';
 import ListItemText            from '@material-ui/core/ListItemText';
 import ListItemIcon            from '@material-ui/core/ListItemIcon';
-import ListSubheader           from '@material-ui/core/ListSubheader';
 import {SvgIconProps}          from '@material-ui/core/SvgIcon';
 import CheckIcon               from '@material-ui/icons/Check';
+import MenuBase, {
+  IMenuBaseItem,
+  MenuBaseProps,
+  IMenuBaseItemRendererProps,
+  MenuBaseStyles,
+}                              from './MenuBase';
 import {WithStyle, withStyles} from './styles';
 
-export interface IToggleMenuItem {
-  name:    string;
-  title:   string;
-  visible: boolean;
-  icon?:   React.ComponentType<SvgIconProps>;
+export interface IToggleMenuItem extends IMenuBaseItem {
+  active: boolean | (() => boolean);
+  toggleIcon?: (props: SvgIconProps) => JSX.Element | React.ComponentElement<SvgIconProps, any> | null;
 
-  disabled?(): boolean;
+  onClick?(item: IToggleMenuItem): void;
 }
 
-const styles = (theme: Theme) => ({
+export interface IToggleMenuItemRendererProps extends IMenuBaseItemRendererProps {
+  item: IToggleMenuItem;
+}
+
+const toggleItemRendererStyles = (_theme: Theme) => ({
   menuButton: {
-    minWidth: '0px',
   },
   menu: {
   },
   menuTitleContainer: {
-    paddingTop: '8px',
-    paddingBottom: '8px',
-    lineHeight: '1.75',
-    color: 'inherit',
   },
   listItemText: {
+    marginRight: '16px',
   },
   listItemTypography: {
   },
   listItemIcon: {
-    marginRight: '0px',
     minWidth: '0px',
+    marginRight: '16px',
+  },
+  listItemToggleIcon: {
+    minWidth: '0px',
+    marginLeft: '16px',
     color: '#669639',
   },
   menuItem: {
-    minWidth: '150px',
   },
   menuItemSelected: {
   },
   menuItemDisabled: {
-    opacity: '0.5',
-    cursor: 'default',
   },
 });
 
-interface IToggleMenuProps {
-  title:         string | JSX.Element | (() => JSX.Element);
-  menuId:        string;
-  buttonContent: JSX.Element | string;
-  buttonProps:   ButtonProps;
-  items:         IToggleMenuItem[];
+export type ToggleMenuItemRendererProps = WithStyle<MenuBaseStyles, IToggleMenuItemRendererProps>;
+
+export const ToggleItemRenderer = React.memo(withStyles(toggleItemRendererStyles, React.forwardRef((props: ToggleMenuItemRendererProps, _ref: any): JSX.Element => {
+  return <Observe render={() => {
+    const item         = props.item;
+    const visible      = props.visible;
+    const disabled     = props.disabled;
+    const classes      = props.classes;
+    const rootClasses  = props.rootClasses;
+    const clickHandler = props.clickHandler;
+    return (
+      visible &&
+        <MenuItem key={item.name} className={item.className} divider={item.divider} classes={{root: rootClasses, selected: classes.menuItemSelected}} disableRipple={disabled} onClick={clickHandler}>
+          {item.icon &&
+            <ListItemIcon className={classes.listItemIcon}>
+              {<item.icon />}
+            </ListItemIcon>
+          }
+          <ListItemText className={classes.listItemText} primary={item.title} primaryTypographyProps={{classes: {root: classes.listItemTypography}}} />
+          <Observe render={() => (
+            (is.function(item.active) ? (item.active as CallableFunction)() : item.active) &&
+              <ListItemIcon className={classes.listItemToggleIcon}>
+                {item.toggleIcon ? <item.toggleIcon /> : <CheckIcon />}
+              </ListItemIcon>
+            || null
+          )} />
+        </MenuItem>
+    );
+  }} />;
+})));
+
+export interface IToggleMenuProps extends MenuBaseProps {
+  items: IToggleMenuItem[];
 
   onItemClick?(item: IToggleMenuItem): void;
 }
 
-interface IToggleMenuState {
-  anchorEl?: HTMLElement;
-}
-
-export type ToggleMenuProps = WithStyle<ReturnType<typeof styles>, Partial<MenuProps> & IToggleMenuProps>;
-
-class ToggleMenu extends React.Component<ToggleMenuProps, IToggleMenuState> {
-  state: IToggleMenuState = {
-    anchorEl: undefined,
-  };
-
-  constructor(props: ToggleMenuProps) {
+class ToggleMenu extends React.Component<IToggleMenuProps> {
+  constructor(props: IToggleMenuProps) {
     super(props);
   }
 
-  handleItemClick = (item: IToggleMenuItem) => {
-    item.visible = !item.visible;
-  }
-
-  handleMenuClick = (evt: React.MouseEvent<HTMLElement>) => {
-    this.setState({anchorEl: evt.currentTarget});
-  }
-
-  handleMenuClose = () => {
-    this.setState({anchorEl: undefined});
-  }
-
-  renderTitle = React.memo((): JSX.Element | null => {
-    return <Observe render={() => {
-      const {title, classes} = this.props;
-      const titleDisplay = typeof title === 'function' ? title() : title;
-      return (
-        <ListSubheader component='div' className={classes.menuTitleContainer}>
-          {titleDisplay}
-        </ListSubheader>
-      );
-    }} />;
-  });
-
-  renderMenuContent = React.memo(React.forwardRef((): JSX.Element => {
-    return <Observe render={() => {
-      const {classes, items, onItemClick} = this.props;
-      return (
-        < >
-        {items.map((item: IToggleMenuItem) => {
-          let disabled     = !!(item.disabled && item.disabled());
-          let rootClasses  = classNames(classes.menuItem, disabled ? classes.menuItemDisabled : undefined);
-          let clickHandler = !disabled ? ( onItemClick ? () => onItemClick(item) : () => this.handleItemClick(item) ) : undefined;
-          return (
-            <MenuItem key={item.name} classes={{root: rootClasses, selected: classes.menuItemSelected}} disableRipple={disabled} onClick={clickHandler}>
-              <ListItemText className={classes.listItemText} primary={item.title} primaryTypographyProps={{classes: {root: classes.listItemTypography}}} />
-              <Observe render={() => (
-                item.visible
-                  ? <ListItemIcon className={classes.listItemIcon}>
-                      {item.icon ? <item.icon /> : <CheckIcon />}
-                    </ListItemIcon>
-                  : null
-              )} />
-            </MenuItem>
-          );
-        })}
-        </>
-      );
-    }} />;
-  }));
+  defaultOnItemClick = (item: IToggleMenuItem) => {
+    if (!is.function(item.active)) {
+      item.active = !item.active;
+    }
+  };
 
   render() {
-    const {classes, menuId, buttonContent, buttonProps, items, onItemClick, marginThreshold, MenuListProps, title, ...restProps} = this.props;
-    const {anchorEl} = this.state;
-
+    const {onItemClick, ...restProps} = this.props;
     return <Observe render={() => (
-      < >
-        <Button
-          className={classes.menuButton}
-          aria-owns={anchorEl ? menuId : undefined}
-          aria-haspopup='true'
-          onClick={this.handleMenuClick}
-          {...buttonProps}
-        >
-          {buttonContent}
-        </Button>
-        <Menu
-          id={menuId}
-          className={classes.menu}
-          anchorEl={anchorEl}
-          open={Boolean(anchorEl)}
-          onClose={this.handleMenuClose}
-          marginThreshold={!isNullOrUndefined(marginThreshold) ? marginThreshold : 8}
-          MenuListProps={{dense: true, disablePadding: true, subheader: title ? <this.renderTitle /> : undefined, ...MenuListProps}}
-          {...restProps}
-        >
-          <this.renderMenuContent />
-        </Menu>
-      </>
+      <MenuBase itemRenderer={ToggleItemRenderer} onItemClick={onItemClick ? onItemClick : this.defaultOnItemClick} {...restProps} />
     )} />;
   }
 }
 
-export default withStyles(styles, ToggleMenu);
+export default ToggleMenu;

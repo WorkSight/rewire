@@ -1,4 +1,4 @@
-import * as React from 'react';
+import React from 'react';
 const focusedElementSelector = '[tabindex="0"]:not([style*="display: none"]),input:not([type="hidden"]):not([disabled]):not([style*="display: none"])';
 const rowsSelector           = '.tabrow:not([type="hidden"]):not([disabled])';
 
@@ -27,7 +27,7 @@ export default class KeyboardNavigation {
   onDOMChanged = () => {
     this._rows   = undefined;
     this._fields = undefined;
-  }
+  };
 
   get fields(): HTMLElement[] {
     if (!this._fields) {
@@ -38,7 +38,7 @@ export default class KeyboardNavigation {
 
   innerRef = (ref: HTMLElement) => {
     this.element = ref;
-  }
+  };
 
   get rows(): HTMLElement[] {
     if (!this._rows) {
@@ -53,9 +53,9 @@ export default class KeyboardNavigation {
   }
 
   canMove(ctrl: HTMLElement | HTMLInputElement, direction: number) {
-    let input = (ctrl as HTMLInputElement);
-    if (input.setSelectionRange) {
-      let caretPosition = input.selectionStart! + direction;
+    const input = (ctrl as HTMLInputElement);
+    if ((ctrl as any).setSelectionRnage) {
+      const caretPosition = input.selectionStart! + direction;
       return (caretPosition < 0) || (caretPosition > input.value.length);
     }
 
@@ -124,8 +124,8 @@ export default class KeyboardNavigation {
       return {row: -1, column: -1};
     }
 
-    let currentRowIdx = this.rows.indexOf(row);
-    let currentColIdx = this.indexOf(row.querySelectorAll(focusedElementSelector), ctl);
+    const currentRowIdx = this.rows.indexOf(row);
+    const currentColIdx = this.indexOf(row.querySelectorAll(focusedElementSelector), ctl);
 
     if (currentColIdx < 0) {
       return {row: -1, column: -1};
@@ -137,7 +137,7 @@ export default class KeyboardNavigation {
   }
 
   moveToStartOfLine(ctl: HTMLElement) {
-    let {row, column} = this.getPosition(ctl);
+    const {row, column} = this.getPosition(ctl);
     if ((row === -1) || (column === 0)) return true;
 
     const rowFields = this.getRowFields(this.rows[row]);
@@ -155,7 +155,7 @@ export default class KeyboardNavigation {
   }
 
   moveToEndOfLine(ctl: HTMLElement) {
-    let {row} = this.getPosition(ctl);
+    const {row} = this.getPosition(ctl);
     if (row === -1) return true;
 
     const nextRowFields = this.getRowFields(this.rows[row]);
@@ -219,7 +219,7 @@ export default class KeyboardNavigation {
       default:
         return;
     }
-  }
+  };
 
   handleDialogKeyDown = (evt: React.KeyboardEvent<HTMLElement>) => {
     if (!this._element) return;
@@ -265,7 +265,7 @@ export default class KeyboardNavigation {
       default:
         return;
     }
-  }
+  };
 
   handleKeyDown2 = (evt: React.KeyboardEvent<HTMLElement>) => {
     if (!this._element) return;
@@ -333,7 +333,7 @@ export default class KeyboardNavigation {
       default:
         return;
     }
-  }
+  };
 }
 
 export class KeyHandler extends React.Component<{children: (keyboard: KeyboardNavigation) => JSX.Element}> {

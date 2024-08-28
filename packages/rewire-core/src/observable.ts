@@ -1,3 +1,5 @@
+/* eslint-disable no-prototype-builtins */
+/* eslint-disable prefer-rest-params */
 import S, {DataSignal}                               from 's-js';
 import {isNullOrUndefined, isNullOrUndefinedOrEmpty} from 'rewire-common';
 
@@ -6,7 +8,7 @@ export type EQType = (v1: any, v2: any) => boolean;
 const proxyProperty   = '___isProxy___';
 const versionProperty = '___version___';
 
-export {DataSignal};
+export type {DataSignal};
 
 export const observe: O = S;
 export const root       = S.root;
@@ -28,9 +30,8 @@ export function version(value: ObjectType) {
 }
 
 function wrap(fn: any) {
-  let f: any = function(this: any) {
+  const f: any = function(this: any, ...args: any[]) {
     let result: any = undefined;
-    let args = arguments;
     freeze(() => {
       result = fn.apply(this, args);
     });
@@ -63,13 +64,13 @@ const arrayPrototype = Object.create(Array.prototype);
 
 function observable_array(value: ObjectType, eq: EQType, parent?: () => void) {
   Object.setPrototypeOf(value, arrayPrototype);
-  let version = S.data(0);
+  const version = S.data(0);
   function incrementVersion() {
     if (parent) parent();
   }
 
   const arrayHandler = {
-    get(target: ObjectType, property: string, receiver: Object) {
+    get(target: ObjectType, property: string, _receiver: unknown) {
       if (property === proxyProperty) {
         return true; // add a isProxy flag dynamically
       }
@@ -87,8 +88,8 @@ function observable_array(value: ObjectType, eq: EQType, parent?: () => void) {
       return v;
     },
 
-    set(target: ObjectType, property: string, v: any, receiver: Object) {
-      let val = target[property];
+    set(target: ObjectType, property: string, v: any, _receiver: unknown) {
+      const val = target[property];
       if (eq(val, v)) {
         return true;
       }
@@ -99,7 +100,7 @@ function observable_array(value: ObjectType, eq: EQType, parent?: () => void) {
     }
   };
 
-  return new Proxy(value as Object, arrayHandler);
+  return new Proxy(value as Record<string, unknown>, arrayHandler);
 }
 
 const _invalidProperties = {
@@ -109,8 +110,8 @@ const _invalidProperties = {
 const _objectProto = Object.getPrototypeOf(new Object());
 
 function createHandler(eq: EQType, parent?: () => void) {
-  let dependencyCache: ObjectType = {};
-  let version = S.data(0);
+  const dependencyCache: ObjectType = {};
+  const version = S.data(0);
 
   function incrementVersion() {
     version(S.sample(version) + 1);
@@ -118,7 +119,24 @@ function createHandler(eq: EQType, parent?: () => void) {
   }
 
   return {
-    get(target: ObjectType, property: string, receiver: Object) {
+    // this may cause problems... however if we don't do this when you delete an observable property is will retain it's current value and
+    // the eq() test in set will not work correctly if you set the property back (especially to the same value, i.e. you will not recieve the notification).
+    deleteProperty(target: ObjectType, property: string) {
+      if (property in target) {
+        delete target[property];
+        const v = dependencyCache[property];
+        if (v) {
+          v(undefined);
+        }
+      }
+      return true;
+    },
+
+    getPrototypeOf(target: ObjectType) {
+      return Object.getPrototypeOf(target);
+    },
+
+    get(target: ObjectType, property: string, _receiver: unknown) {
       if (property === proxyProperty) { // dynamically add a is_proxy property
         return true;
       }
@@ -138,7 +156,7 @@ function createHandler(eq: EQType, parent?: () => void) {
         // for getters
         let proto = Object.getPrototypeOf(target);
         while (proto !== _objectProto) {
-          let propDesc = Object.getOwnPropertyDescriptor(proto, property);
+          const propDesc = Object.getOwnPropertyDescriptor(proto, property);
           if (propDesc && propDesc.get && typeof propDesc.get === 'function') {
             return value;
           }
@@ -154,12 +172,12 @@ function createHandler(eq: EQType, parent?: () => void) {
       return v();
     },
 
-    set(target: ObjectType, property: string, value: any, receiver: Object) {
+    set(target: ObjectType, property: string, value: any, receiver: Record<string, unknown>) {
       if (!target.hasOwnProperty(property)) {
-        // for getters
+        // for setters
         let proto = Object.getPrototypeOf(target);
         while (proto !== _objectProto) {
-          let propDesc = Object.getOwnPropertyDescriptor(proto, property);
+          const propDesc = Object.getOwnPropertyDescriptor(proto, property);
           if (propDesc && propDesc.set && typeof propDesc.set === 'function') {
             propDesc.set.call(receiver, value);
             return true;
@@ -198,21 +216,29 @@ function createHandler(eq: EQType, parent?: () => void) {
 
 export function defaultEquals(v1: any, v2: any) {
   if (v1 === v2) return true;
-  if (v1 && !isNullOrUndefinedOrEmpty(v1.id) && v2 && !isNullOrUndefinedOrEmpty(v2.id)) {
-    if (v1.id === v2.id)          return true;
-    // if (v1.valueOf && v2.valueOf) return v1.valueOf() === v2.valueOf();
+  if (v1 && v2) {
+    if (!isNullOrUndefinedOrEmpty(v1.id) && !isNullOrUndefinedOrEmpty(v2.id)) {
+      return v1.id === v2.id;
+    } else if (Array.isArray(v1) && Array.isArray(v2)) { // had to move this here as array implements valueOf who knew? ¯\_(ツ)_/¯
+      if (v1.length !== v2.length) return false;
+      for (let i = 0; i < v1.length; i++) {
+        if (!defaultEquals(v1[i], v2[i])) return false;
+      }
+      return true;
+    } else {
+      if (v1.equals && v2.equals) {
+        const p1 = Object.getPrototypeOf(v1);
+        const p2 = Object.getPrototypeOf(v2);
+        if (p1 && p2 && p1.constructor === p2.constructor) return v1.equals(v2);
+      } else if (v1.valueOf && v2.valueOf) {
+        return v1.valueOf() === v2.valueOf();
+      }
+    }
   }
 
   const undefinedOrNullOrEmpty1 = isNullOrUndefinedOrEmpty(v1);
   const undefinedOrNullOrEmpty2 = isNullOrUndefinedOrEmpty(v2);
   if (undefinedOrNullOrEmpty1 && undefinedOrNullOrEmpty2) return true;
-  if (Array.isArray(v1) && Array.isArray(v2)) {
-    if (v1.length !== v2.length) return false;
-    for (let i = 0; i < v1.length; i++) {
-      if (!defaultEquals(v1[i], v2[i])) return false;
-    }
-    return true;
-  }
   return false;
 }
 
@@ -241,15 +267,16 @@ export function watch<T = any>(fn: (prevResult?: T) => T, action: (result?: T) =
   S.on(fn, action, seed, !doAction);
 }
 
-export function replace(obs: any, ...obj: any[]) {
+export function replace(obs: any, ...objs: any[]) {
   freeze(() => {
-    Object.keys(obs).forEach((prop) => {
-      delete obs[prop];
-    });
-
-    if (obj) {
-      Object.assign(obs, ...obj);
+    const keys: string[] = [];
+    for (const o of objs) {
+      for (const [k, v] of Object.entries(o)) {
+        obs[k] = v;
+        keys.push(k);
+      }
     }
+    Object.keys(obs).forEach((prop) => !keys.includes(prop) && delete obs[prop]);
   });
 }
 

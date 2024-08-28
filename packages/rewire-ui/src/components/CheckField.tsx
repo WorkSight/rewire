@@ -1,12 +1,15 @@
-import * as React                from 'react';
+import React                     from 'react';
 import classNames                from 'classnames';
-import Checkbox, {CheckboxProps} from '@material-ui/core/Checkbox';
+import Checkbox, {
+  CheckboxProps,
+}                                from '@material-ui/core/Checkbox';
 import FormControlLabel          from '@material-ui/core/FormControlLabel';
 import {Theme}                   from '@material-ui/core/styles';
 import {isNullOrUndefined}       from 'rewire-common';
+import is                        from 'is';
 import {withStyles, WithStyle}   from './styles';
 
-const styles = (theme: Theme) => ({
+const styles = (_theme: Theme) => ({
   inputRoot: {
   },
   checkboxRoot: {
@@ -32,29 +35,45 @@ const styles = (theme: Theme) => ({
   }
 });
 
-export interface ICheckboxProps {
-  visible? : boolean;
-  disabled?: boolean;
-  value?   : boolean;
-  label?   : string;
+export type CheckFieldStyles = ReturnType<typeof styles>;
+
+export interface ICheckFieldProps {
+  visible?  : boolean;
+  disabled? : boolean;
+  value?    : boolean;
+  tooltip?  : string |((value: any) => string);
+  label?    : string;
+  classes?  : Record<string, string>;
 
   onValueChange: (value?: boolean) => void;
 }
 
-type CheckboxPropsStyled = WithStyle<ReturnType<typeof styles>, CheckboxProps & ICheckboxProps>;
+export type CheckFieldProps = WithStyle<CheckFieldStyles, CheckboxProps & ICheckFieldProps>;
 
-class CheckboxInternal extends React.Component<CheckboxPropsStyled> {
-  constructor(props: CheckboxPropsStyled) {
+class CheckField extends React.Component<CheckFieldProps> {
+  constructor(props: CheckFieldProps) {
     super(props);
   }
 
-  shouldComponentUpdate(nextProps: CheckboxPropsStyled) {
+  shouldComponentUpdate(nextProps: CheckFieldProps) {
     return (
       (nextProps.value    !== this.props.value)    ||
       (nextProps.disabled !== this.props.disabled) ||
       (nextProps.visible  !== this.props.visible)  ||
-      (nextProps.label    !== this.props.label)
+      (nextProps.label    !== this.props.label)    ||
+      (nextProps.tooltip  !== this.props.tooltip)
     );
+  }
+
+  getTooltip(value: any): string | undefined {
+    let tooltip = this.props.tooltip;
+    if (isNullOrUndefined(tooltip)) {
+      return undefined;
+    }
+    if (is.function(tooltip))  {
+      tooltip = (tooltip as CallableFunction)(value);
+    }
+    return tooltip as string;
   }
 
   render() {
@@ -68,10 +87,11 @@ class CheckboxInternal extends React.Component<CheckboxPropsStyled> {
           className={this.props.className}
           control={
             <Checkbox
-              autoFocus={this.props.autoFocus}
-              disabled={this.props.disabled}
+              autoFocus={!!this.props.autoFocus}
+              disabled={!!this.props.disabled}
               inputProps={{}}
               checked={!!this.props.value}
+              title={this.getTooltip(!!this.props.value)}
               onChange={(evt: React.ChangeEvent<HTMLInputElement>) => this.props.onValueChange(evt.target.checked)}
               classes={{root: this.props.classes.checkboxRoot}}
             />
@@ -86,10 +106,11 @@ class CheckboxInternal extends React.Component<CheckboxPropsStyled> {
     return (
       <div className={classNames(this.props.className, this.props.classes.checkboxContainerNoLabel)}>
         <Checkbox
-          autoFocus={this.props.autoFocus}
-          disabled={this.props.disabled}
+          autoFocus={!!this.props.autoFocus}
+          disabled={!!this.props.disabled}
           inputProps={{}}
           checked={!!this.props.value}
+          title={this.getTooltip(!!this.props.value)}
           onChange={(evt: React.ChangeEvent<HTMLInputElement>) => this.props.onValueChange(evt.target.checked)}
           classes={{root: this.props.classes.checkboxRoot}}
         />
@@ -98,4 +119,4 @@ class CheckboxInternal extends React.Component<CheckboxPropsStyled> {
   }
 }
 
-export default withStyles(styles, CheckboxInternal);
+export default withStyles<CheckboxProps & ICheckFieldProps, unknown>(styles, CheckField);

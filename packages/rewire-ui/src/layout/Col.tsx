@@ -1,4 +1,4 @@
-import * as React from 'react';
+import React from 'react';
 
 export type TPercentage = '8.33%' | '16.67%' | '25%' | '33.33%' | '41.67%' | '50%' | '58.33%' | '66.67%' | '75%' | '83.33%' | '91.67%' | '100%';
 export type TColumns = '1' | '2' | '3' | '4' | '5' | '6' | '7' | '8' | '9' | '10' | '11' | '12';
@@ -52,7 +52,7 @@ function _fixed(style: React.CSSProperties, fixed?: string, ) {
   return '';
 }
 
-const Col: React.SFC<IColProps> = ({children, pct, grow, fixed, contentAlignment, align, style}) => {
+const Col: React.FunctionComponent<IColProps> = ({children, pct, grow, fixed, contentAlignment, align, style}) => {
   style = style || {};
   const cls = `col${_percentage(pct)}${_grow(grow)}${_contentAlignment(contentAlignment)}${_align(align)}${_fixed(style, fixed)}`;
 

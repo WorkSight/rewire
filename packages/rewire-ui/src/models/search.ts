@@ -1,5 +1,4 @@
 import {fetch, match}               from 'rewire-common';
-import {Theme}                      from '@material-ui/core/styles';
 import {TextAlignment, TextVariant} from '../components/editors';
 
 export interface ISearchOptions {
@@ -8,17 +7,18 @@ export interface ISearchOptions {
 
 export type MapFn<T>    = (item?: T) => string;
 export type SearchFn<T> = (searchText: string, options?: ISearchOptions) => Promise<T[]>;
+export type EqualsFn<T> = (item1: T, item2: T) => boolean;
 
 export function defaultMap<T extends string>(item?: T): string {
   return item || '(empty)';
 }
 
-export function arraySearch<T>(suggestions: T[], map?: (item?: T) => string, value?: T) {
-  let _map = map || defaultMap;
+export function arraySearch<T>(suggestions: T[], map?: (item?: T) => string, _value?: T) {
+  const _map = map || defaultMap;
 
   function getSuggestions(value: string): T[] {
     let   count       = 0;
-    let   regex       = match(value, 'i');
+    const   regex       = match(value, 'i');
 
     return value.length === 0
       ? suggestions
@@ -33,7 +33,7 @@ export function arraySearch<T>(suggestions: T[], map?: (item?: T) => string, val
         });
   }
 
-  function search(searchText: string, options?: ISearchOptions): Promise<T[]> {
+  function search(searchText: string, _options?: ISearchOptions): Promise<T[]> {
     return Promise.resolve(getSuggestions(searchText));
   }
 
@@ -43,7 +43,7 @@ export function arraySearch<T>(suggestions: T[], map?: (item?: T) => string, val
 export function documentSearch(documentType: string) {
   return {
     async search(text: string, options: ISearchOptions) {
-      let searchParams: any = {search: text};
+      const searchParams: any = {search: text};
 
       if (options && options.parentId) {
         searchParams.parentOrganizationKey = options.parentId;
@@ -76,12 +76,18 @@ export type RenderSuggestionFn<T> = (props: IRenderSuggestionFnProps<T>) => JSX.
 
 export interface ICustomProps<T> {
   readonly selectedItem?: T;
+  disabled?             : boolean;
+  readOnly?             : boolean;
   visible?              : boolean;
   error?                : string;
   align?                : TextAlignment;
   variant?              : TextVariant;
   label?                : string;
+  tooltip?              : string | ((value: any) => string);
+  placeholder?          : string;
+  autoFocus?            : boolean;
   disableErrors?        : boolean;
+  useTooltipForErrors?  : boolean;
   startAdornment?       : JSX.Element;
   endAdornment?         : JSX.Element;
   onSelectItem          : (value?: T) => void;

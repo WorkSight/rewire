@@ -1,8 +1,8 @@
 {
   "name": "rewire",
-  "version": "1.0.116",
+  "version": "1.0.323",
   "description": "WorkSight .NEXT core",
-  "main": "src/index.js",
+  "main": "examples/src/main.ts",
   "private": true,
   "repository": {
     "type": "git",
@@ -12,8 +12,12 @@
     "worksight",
     "client"
   ],
+  "type": "module",
   "scripts": {
-    "start": "parcel examples/src/index.html --port 3001"
+    "build": "yarn vite build ./examples/ ",
+    "preview": "yarn vite preview ./examples/ --port 3002",
+    "start": "yarn vite ./examples/ --port 3001",
+    "lint": " yarn eslint packages/*/src"
   },
   "author": "Sandy Place",
   "license": "MIT",
@@ -22,34 +26,31 @@
   },
   "homepage": "https://github.com/worksight/rewire",
   "devDependencies": {
-    "@babel/core": "7.3.4",
-    "@types/chai": "^4.1.7",
-    "@types/chai-as-promised": "^7.1.0",
-    "@types/compression": "0.0.36",
-    "@types/graphql": "^14.0.7",
+    "@types/chai": "^4.2.15",
+    "@types/chai-as-promised": "^7.1.3",
+    "@types/compression": "1.7.0",
+    "@types/graphql": "^14.5.0",
     "@types/is": "^0.0.21",
-    "@types/minimist": "^1.2.0",
-    "@types/mocha": "^5.2.6",
-    "@types/node": "^11.11.3",
-    "@types/react": "^16.8.21",
-    "@types/react-beautiful-dnd": "^10.1.0",
-    "@types/react-dom": "^16.8.4",
-    "@types/react-router-dom": "^4.3.1",
-    "@types/rimraf": "^2.0.2",
+    "@types/minimist": "^1.2.1",
+    "@types/node": "^14.14.28",
+    "@types/react-beautiful-dnd": "^13.0.0",
+    "@types/react-router-dom": "^5.1.7",
     "@types/sass": "^1.16.0",
-    "chai": "^4.2.0",
+    "@typescript-eslint/eslint-plugin": "^5.30.0",
+    "@typescript-eslint/parser": "^5.30.0",
+    "@vitejs/plugin-react": "^1.3.2",
+    "chai": "^4.3.0",
     "chai-as-promised": "^7.1.1",
-    "compression": "^1.7.3",
-    "graphql-tag": "^2.10.1",
-    "lerna": "^3.13.1",
-    "minimist": "^1.2.0",
-    "mocha": "^6.0.2",
-    "rimraf": "^2.6.3",
-    "sass": "^1.17.3",
-    "tslib": "^1.9.3",
-    "tslint": "^5.18.0",
-    "typescript": "^3.5.2",
-    "uglify-es": "^3.3.9"
+    "compression": "^1.7.4",
+    "eslint": "^8.18.0",
+    "eslint-plugin-react": "^7.30.1",
+    "minimist": "^1.2.5",
+    "sass": "^1.32.7",
+    "tslib": "^2.1.0",
+    "tslint": "^6.1.3",
+    "typescript": "^4.7.4",
+    "uglify-es": "^3.3.9",
+    "vite": "^2.9.12"
   },
   "alias": {
     "rewire-core": "./packages/rewire-core",
@@ -62,10 +63,14 @@
     "packages/*"
   ],
   "dependencies": {
-    "@material-ui/styles": "^4.1.2",
-    "graphql": "^14.1.1",
-    "react": "^16.8.6",
-    "react-dom": "^16.8.6",
-    "react-router-dom": "^5.0.1"
+    "@material-ui/core": "^4.12.4",
+    "@material-ui/icons": "^4.11.3",
+    "@material-ui/styles": "^4.11.5",
+    "@types/react": "^17.0.2",
+    "@types/react-dom": "^17.0.2",
+    "graphql": "^15.5.0",
+    "react": "^17.0.2",
+    "react-dom": "^17.0.2",
+    "react-router-dom": "^5.2.0"
   }
 }
